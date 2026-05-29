@@ -2,6 +2,7 @@ package roomescape.integration;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -40,24 +41,28 @@ public class UserReservationTest {
 
         List<ReservationTime> beforeReservationResults = getAvailableTimes(LocalDate.of(2026, 5, 5), 1L);
 
-        assertThat(beforeReservationResults).hasSize(4);
-        assertThat(beforeReservationResults.stream().map(ReservationTime::getId).toList())
-                .containsExactly(1L, 2L, 3L, 4L);
-        assertThat(beforeReservationResults.stream().map(ReservationTime::getStartAt).toList())
-                .containsExactly(
-                LocalTime.of(10, 0),
-                LocalTime.of(11, 0),
-                LocalTime.of(12, 0),
-                LocalTime.of(13, 0)
+        assertAll(
+                () -> assertThat(beforeReservationResults).hasSize(4),
+                () -> assertThat(beforeReservationResults.stream().map(ReservationTime::getId).toList())
+                        .containsExactly(1L, 2L, 3L, 4L),
+                () -> assertThat(beforeReservationResults.stream().map(ReservationTime::getStartAt).toList())
+                        .containsExactly(
+                                LocalTime.of(10, 0),
+                                LocalTime.of(11, 0),
+                                LocalTime.of(12, 0),
+                                LocalTime.of(13, 0)
+                        )
         );
 
         createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
         createReservation("포비", LocalDate.of(2026, 5, 6), 2L, 2L);
 
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 1L)).hasSize(3);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 1L)).hasSize(4);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 2L)).hasSize(4);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 2L)).hasSize(3);
+        assertAll(
+                () -> assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 1L)).hasSize(3),
+                () -> assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 1L)).hasSize(4),
+                () -> assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 2L)).hasSize(4),
+                () -> assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 2L)).hasSize(3)
+        );
     }
 
     private void createReservationTime(String startAt) {

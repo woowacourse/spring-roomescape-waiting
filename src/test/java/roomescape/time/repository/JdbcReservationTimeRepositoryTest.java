@@ -2,6 +2,7 @@ package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,8 +40,10 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime savedTime = reservationTimeRepository.save(time);
 
         //then
-        assertThat(savedTime.getId()).isNotNull();
-        assertThat(savedTime.getStartAt()).isEqualTo(startTime);
+        assertAll(
+                () -> assertThat(savedTime.getId()).isNotNull(),
+                () -> assertThat(savedTime.getStartAt()).isEqualTo(startTime)
+        );
     }
 
     @Test
@@ -107,11 +110,12 @@ class JdbcReservationTimeRepositoryTest {
         createTime(LocalTime.of(11, 0));
 
         //when & then
-        assertThat(reservationTimeRepository.existByStartAt(LocalTime.of(11, 0)))
-                .isTrue();
-
-        assertThat(reservationTimeRepository.existByStartAt(LocalTime.of(12, 0)))
-                .isFalse();
+        assertAll(
+                () -> assertThat(reservationTimeRepository.existByStartAt(LocalTime.of(11, 0)))
+                        .isTrue(),
+                () -> assertThat(reservationTimeRepository.existByStartAt(LocalTime.of(12, 0)))
+                        .isFalse()
+        );
     }
 
     @Test

@@ -2,6 +2,7 @@ package roomescape.reservationWaiting.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.sql.Time;
 import java.time.LocalDate;
@@ -58,8 +59,10 @@ class JdbcReservationWaitingRepositoryTest {
         );
 
         // then
-        assertThat(saved1.getId()).isNotNull();
-        assertThat(saved2.getId()).isNotNull();
+        assertAll(
+                () -> assertThat(saved1.getId()).isNotNull(),
+                () -> assertThat(saved2.getId()).isNotNull()
+        );
     }
 
     private ReservationTime createTime(LocalTime time) {
@@ -153,10 +156,10 @@ class JdbcReservationWaitingRepositoryTest {
         );
 
         // then
-        assertThat(result).isPresent();
-
-        ReservationWaiting waiting = result.get();
-        assertThat(waiting.getName()).isEqualTo("브라운");
+        assertAll(
+                () -> assertThat(result).isPresent(),
+                () -> assertThat(result.get().getName()).isEqualTo("브라운")
+        );
     }
 
     @Test
@@ -186,19 +189,20 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
-        assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                saved.getTheme().getId(),
-                "브라운"
-        )).isTrue();
-
-        assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                saved.getTheme().getId(),
-                "포비"
-        )).isFalse();
+        assertAll(
+                () -> assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
+                        saved.getDate(),
+                        saved.getTime().getId(),
+                        saved.getTheme().getId(),
+                        "브라운"
+                )).isTrue(),
+                () -> assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
+                        saved.getDate(),
+                        saved.getTime().getId(),
+                        saved.getTheme().getId(),
+                        "포비"
+                )).isFalse()
+        );
     }
 
     @DisplayName("날짜, 시간, 테마에 해당하는 예약 대기가 존재하는지 조회한다.")
@@ -210,17 +214,18 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
-                saved.getDate(),
-                saved.getTime().getId(),
-                saved.getTheme().getId()
-        )).isTrue();
-
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
-                LocalDate.of(2026, 5, 20),
-                saved.getTime().getId(),
-                saved.getTheme().getId()
-        )).isFalse();
+        assertAll(
+                () -> assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+                        saved.getDate(),
+                        saved.getTime().getId(),
+                        saved.getTheme().getId()
+                )).isTrue(),
+                () -> assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+                        LocalDate.of(2026, 5, 20),
+                        saved.getTime().getId(),
+                        saved.getTheme().getId()
+                )).isFalse()
+        );
     }
 
     @Test
@@ -250,16 +255,16 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting pobi = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
-        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), brown.getId()
-        )).isEqualTo(0);
-
-        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), gump.getId()
-        )).isEqualTo(1);
-
-        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), pobi.getId()
-        )).isEqualTo(2);
+        assertAll(
+                () -> assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                        LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), brown.getId()
+                )).isEqualTo(0),
+                () -> assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                        LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), gump.getId()
+                )).isEqualTo(1),
+                () -> assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                        LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), pobi.getId()
+                )).isEqualTo(2)
+        );
     }
 }

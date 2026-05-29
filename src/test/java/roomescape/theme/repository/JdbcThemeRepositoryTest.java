@@ -2,6 +2,7 @@ package roomescape.theme.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.sql.Time;
 import java.time.LocalDate;
@@ -38,8 +39,10 @@ class JdbcThemeRepositoryTest {
         Theme saved = themeRepository.save(theme);
 
         //then
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getName()).isEqualTo(theme.getName());
+        assertAll(
+                () -> assertThat(saved.getId()).isNotNull(),
+                () -> assertThat(saved.getName()).isEqualTo(theme.getName())
+        );
     }
 
     @Test
@@ -99,11 +102,12 @@ class JdbcThemeRepositoryTest {
         );
 
         //when & then
-        assertThat(themeRepository.existByName("테마"))
-                .isTrue();
-
-        assertThat(themeRepository.existByName("없는_것"))
-                .isFalse();
+        assertAll(
+                () -> assertThat(themeRepository.existByName("테마"))
+                        .isTrue(),
+                () -> assertThat(themeRepository.existByName("없는_것"))
+                        .isFalse()
+        );
     }
 
     @Test
@@ -117,9 +121,11 @@ class JdbcThemeRepositoryTest {
                 .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + saved.getId()));
 
         // then
-        assertThat(found.getName()).isEqualTo(saved.getName());
-        assertThat(found.getDescription()).isEqualTo(saved.getDescription());
-        assertThat(found.getThumbnailUrl()).isEqualTo(saved.getThumbnailUrl());
+        assertAll(
+                () -> assertThat(found.getName()).isEqualTo(saved.getName()),
+                () -> assertThat(found.getDescription()).isEqualTo(saved.getDescription()),
+                () -> assertThat(found.getThumbnailUrl()).isEqualTo(saved.getThumbnailUrl())
+        );
     }
 
     @Test

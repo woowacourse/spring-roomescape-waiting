@@ -1,6 +1,7 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -82,9 +83,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     private void createReservationTime(String startAt) {
@@ -164,9 +167,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @DisplayName("동일한 테마를 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
@@ -182,9 +187,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
@@ -204,9 +211,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
@@ -223,9 +232,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @DisplayName("예약 시간 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
@@ -242,9 +253,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @DisplayName("서로 다른 본인 예약을 같은 슬롯으로 동시에 수정하면 하나만 성공하고 하나는 중복 예외가 발생한다")
@@ -303,9 +316,11 @@ class ConcurrencyTest {
         executorService.shutdown();
 
         //then
-        assertThat(successCount.get()).isEqualTo(1);
-        assertThat(duplicateCount.get()).isEqualTo(1);
-        assertThat(unexpectedErrorCount.get()).isEqualTo(0);
+        assertAll(
+                () -> assertThat(successCount.get()).isEqualTo(1),
+                () -> assertThat(duplicateCount.get()).isEqualTo(1),
+                () -> assertThat(unexpectedErrorCount.get()).isEqualTo(0)
+        );
     }
 
     private Long createReservation(String name, LocalDate date, Long timeId, Long themeId) {
@@ -347,9 +362,11 @@ class ConcurrencyTest {
         );
 
         //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 
     @Test
@@ -374,8 +391,10 @@ class ConcurrencyTest {
         );
 
         // then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
     }
 }

@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
@@ -213,25 +214,26 @@ class ReservationServiceTest {
         List<ReservationWithStatusResult> result = reservationService.findReservationsByName("브라운");
 
         //then
-        assertThat(result.size()).isEqualTo(2);
-
-        assertThat(result).containsExactly(
-                new ReservationWithStatusResult(
-                        1L,
-                        "브라운",
-                        LocalDate.of(2026, 5, 15),
-                        new ReservationTime(1L, LocalTime.of(10, 0)),
-                        new Theme(1L, "이름", "설명", "thumbnailUrl"),
-                        "reserved",
-                        0L
-                ), new ReservationWithStatusResult(
-                        1L,
-                        "브라운",
-                        LocalDate.of(2026, 5, 15),
-                        new ReservationTime(2L, LocalTime.of(11, 0)),
-                        new Theme(1L, "이름", "설명", "thumbnailUrl"),
-                        "waiting",
-                        1L
+        assertAll(
+                () -> assertThat(result.size()).isEqualTo(2),
+                () -> assertThat(result).containsExactly(
+                        new ReservationWithStatusResult(
+                                1L,
+                                "브라운",
+                                LocalDate.of(2026, 5, 15),
+                                new ReservationTime(1L, LocalTime.of(10, 0)),
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "reserved",
+                                0L
+                        ), new ReservationWithStatusResult(
+                                1L,
+                                "브라운",
+                                LocalDate.of(2026, 5, 15),
+                                new ReservationTime(2L, LocalTime.of(11, 0)),
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "waiting",
+                                1L
+                        )
                 )
         );
     }
@@ -264,18 +266,19 @@ class ReservationServiceTest {
         PopularThemesResult result = reservationService.findPopularThemes(7, 10);
 
         //then
-        assertThat(result.popularThemes()).containsExactly(
-                new PopularThemeQueryResult(
-                        1L,
-                        "테마",
-                        "설명",
-                        "url")
-        );
-
-        verify(reservationRepository).findPopularThemes(
-                LocalDate.of(2026, 5, 1),
-                LocalDate.of(2026, 5, 7),
-                10
+        assertAll(
+                () -> assertThat(result.popularThemes()).containsExactly(
+                        new PopularThemeQueryResult(
+                                1L,
+                                "테마",
+                                "설명",
+                                "url")
+                ),
+                () -> verify(reservationRepository).findPopularThemes(
+                        LocalDate.of(2026, 5, 1),
+                        LocalDate.of(2026, 5, 7),
+                        10
+                )
         );
     }
 
@@ -336,21 +339,24 @@ class ReservationServiceTest {
         );
 
         //then
-        verify(reservationRepository).update(argThat(reservation ->
-                reservation.getId().equals(1L)
-                        && reservation.getName().equals("브라운")
-                        && reservation.getDate().equals(updatedDate)
-                        && reservation.getReservationTime().equals(updatedTime)
-                        && reservation.getTheme().equals(theme)
-        ));
-        verify(reservationWaitingRepository).findFirstByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L);
-        verify(reservationWaitingRepository).deleteById(1L);
-        verify(reservationRepository).save(argThat(reservation ->
-                reservation.getName().equals("포비")
-                        && reservation.getDate().equals(originalDate)
-                        && reservation.getReservationTime().equals(originalTime)
-                        && reservation.getTheme().equals(theme)
-        ));
+        assertAll(
+                () -> verify(reservationRepository).update(argThat(reservation ->
+                        reservation.getId().equals(1L)
+                                && reservation.getName().equals("브라운")
+                                && reservation.getDate().equals(updatedDate)
+                                && reservation.getReservationTime().equals(updatedTime)
+                                && reservation.getTheme().equals(theme)
+                )),
+                () -> verify(reservationWaitingRepository)
+                        .findFirstByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L),
+                () -> verify(reservationWaitingRepository).deleteById(1L),
+                () -> verify(reservationRepository).save(argThat(reservation ->
+                        reservation.getName().equals("포비")
+                                && reservation.getDate().equals(originalDate)
+                                && reservation.getReservationTime().equals(originalTime)
+                                && reservation.getTheme().equals(theme)
+                ))
+        );
     }
 
     @DisplayName("예약 변경 시, id에 해당하는 예약이 없으면 예외가 발생한다.")
@@ -481,12 +487,14 @@ class ReservationServiceTest {
         );
 
         //then
-        verify(reservationRepository, never())
-                .existByDateAndTimeIdAndThemeIdExceptId(any(), any(), any(), any());
-        verify(reservationWaitingRepository, never())
-                .existsByDateAndTimeIdAndThemeId(any(), any(), any());
-        verify(reservationRepository, never())
-                .update(any());
+        assertAll(
+                () -> verify(reservationRepository, never())
+                        .existByDateAndTimeIdAndThemeIdExceptId(any(), any(), any(), any()),
+                () -> verify(reservationWaitingRepository, never())
+                        .existsByDateAndTimeIdAndThemeId(any(), any(), any()),
+                () -> verify(reservationRepository, never())
+                        .update(any())
+        );
 
     }
 
@@ -652,15 +660,18 @@ class ReservationServiceTest {
         reservationService.deleteReservationById(1L);
 
         //then
-        verify(reservationRepository).deleteById(1L);
-        verify(reservationWaitingRepository).findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L);
-        verify(reservationWaitingRepository).deleteById(1L);
-        verify(reservationRepository).save(argThat(reservation ->
-                reservation.getName().equals("포비")
-                        && reservation.getDate().equals(date)
-                        && reservation.getReservationTime().equals(time)
-                        && reservation.getTheme().equals(theme)
-        ));
+        assertAll(
+                () -> verify(reservationRepository).deleteById(1L),
+                () -> verify(reservationWaitingRepository)
+                        .findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L),
+                () -> verify(reservationWaitingRepository).deleteById(1L),
+                () -> verify(reservationRepository).save(argThat(reservation ->
+                        reservation.getName().equals("포비")
+                                && reservation.getDate().equals(date)
+                                && reservation.getReservationTime().equals(time)
+                                && reservation.getTheme().equals(theme)
+                ))
+        );
     }
 
     @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
@@ -698,9 +709,11 @@ class ReservationServiceTest {
         reservationService.deleteReservationById(1L);
 
         //then
-        verify(reservationRepository).deleteById(1L);
-        verify(reservationWaitingRepository, never()).deleteById(any());
-        verify(reservationRepository, never()).save(any());
+        assertAll(
+                () -> verify(reservationRepository).deleteById(1L),
+                () -> verify(reservationWaitingRepository, never()).deleteById(any()),
+                () -> verify(reservationRepository, never()).save(any())
+        );
     }
 
     @DisplayName("현재 시간을 기준으로 예약의 유효성을 검증한다.")

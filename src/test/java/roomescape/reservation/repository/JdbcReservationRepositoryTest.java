@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.sql.Time;
 import java.time.Clock;
@@ -55,8 +56,10 @@ class JdbcReservationRepositoryTest {
         );
 
         // then
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getName()).isEqualTo("브라운");
+        assertAll(
+                () -> assertThat(saved.getId()).isNotNull(),
+                () -> assertThat(saved.getName()).isEqualTo("브라운")
+        );
     }
 
     @Test
@@ -133,9 +136,11 @@ class JdbcReservationRepositoryTest {
                 theme.getId()
         );
 
-        assertThat(reservationCount).isEqualTo(0);
-        assertThat(timeCount).isEqualTo(1);
-        assertThat(themeCount).isEqualTo(1);
+        assertAll(
+                () -> assertThat(reservationCount).isEqualTo(0),
+                () -> assertThat(timeCount).isEqualTo(1),
+                () -> assertThat(themeCount).isEqualTo(1)
+        );
     }
 
     @Test
@@ -161,8 +166,10 @@ class JdbcReservationRepositoryTest {
         reservationRepository.update(updated);
 
         // then
-        assertThat(updated.getId()).isNotNull();
-        assertThat(updated.getDate()).isEqualTo(LocalDate.of(2024, 5, 5));
+        assertAll(
+                () -> assertThat(updated.getId()).isNotNull(),
+                () -> assertThat(updated.getDate()).isEqualTo(LocalDate.of(2024, 5, 5))
+        );
     }
 
     @Test
@@ -231,8 +238,10 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when & then
-        assertThat(reservationRepository.findById(saved.getId())).isPresent();
-        assertThat(reservationRepository.findById(999L)).isEmpty();
+        assertAll(
+                () -> assertThat(reservationRepository.findById(saved.getId())).isPresent(),
+                () -> assertThat(reservationRepository.findById(999L)).isEmpty()
+        );
     }
 
     @Test
@@ -250,8 +259,10 @@ class JdbcReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAll();
 
         // then
-        assertThat(reservations).hasSize(3);
-        assertThat(reservations).containsExactly(saved1, saved2, saved3);
+        assertAll(
+                () -> assertThat(reservations).hasSize(3),
+                () -> assertThat(reservations).containsExactly(saved1, saved2, saved3)
+        );
     }
 
     @Test
@@ -269,8 +280,10 @@ class JdbcReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAllByName("브라운");
 
         // then
-        assertThat(reservations).hasSize(2);
-        assertThat(reservations).containsExactly(saved1, saved2);
+        assertAll(
+                () -> assertThat(reservations).hasSize(2),
+                () -> assertThat(reservations).containsExactly(saved1, saved2)
+        );
     }
 
 
@@ -323,19 +336,20 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
-        assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
-                saved.getDate(),
-                saved.getReservationTime().getId(),
-                saved.getTheme().getId(),
-                saved.getId() + 1
-        )).isTrue();
-
-        assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
-                saved.getDate(),
-                saved.getReservationTime().getId(),
-                saved.getTheme().getId(),
-                saved.getId()
-        )).isFalse();
+        assertAll(
+                () -> assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
+                        saved.getDate(),
+                        saved.getReservationTime().getId(),
+                        saved.getTheme().getId(),
+                        saved.getId() + 1
+                )).isTrue(),
+                () -> assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
+                        saved.getDate(),
+                        saved.getReservationTime().getId(),
+                        saved.getTheme().getId(),
+                        saved.getId()
+                )).isFalse()
+        );
     }
 
     private ReservationTime createTime(LocalTime time) {
