@@ -61,15 +61,10 @@ class ReservationConcurrencyTest {
                 new ReservationCreateCommand(루드비코, 예약_날짜, time2Id, themeId)).id();
     }
 
-    @DisplayName("동시에 동일한 예약을 생성하려고 할 때 데이터베이스 Unique 제약 조건에 의해 단 하나만 성공해야 한다")
+    @DisplayName("동시에 동일한 사용자가 예약을 생성할 때 중복 생성이 차단된다")
     @Test
     void 동일한_예약_동시_생성시_하나만_성공한다() throws InterruptedException {
-        ReservationCreateCommand command = new ReservationCreateCommand(
-                매트,
-                예약_날짜,
-                time3Id,
-                themeId
-        );
+        ReservationCreateCommand command = new ReservationCreateCommand(매트, 예약_날짜, time3Id, themeId);
 
         ConcurrencyResult result = 동시_실행(10, () -> adminReservationService.create(command));
 
@@ -78,13 +73,31 @@ class ReservationConcurrencyTest {
         assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(1);
     }
 
-    @DisplayName("비관적 락 도입으로 인한 동시성 상태에서 정합성 보장 확인")
+    @DisplayName("동시에 서로 다른 사용자가 같은 시간에 예약하면 모두 성공하고 대기 순번이 부여된다")
     @Test
-    void 동일한_시간으로_동시_업데이트시_하나만_성공한다() throws InterruptedException {
-        ReservationUpdateCommand mattCommand = new ReservationUpdateCommand(
-                mattReservationId, 매트, 예약_날짜, time3Id);
-        ReservationUpdateCommand rudevicoCommand = new ReservationUpdateCommand(
-                rudevicoReservationId, 루드비코, 예약_날짜, time3Id);
+    void 서로_다른_사용자가_동시_예약시_모두_성공하고_대기순번이_부여된다() throws InterruptedException {
+        int threadCount = 10;
+        Runnable[] actions = new Runnable[threadCount];
+        for (int i = 0; i < threadCount; i++) {
+            String userName = "사용자" + i;
+            ReservationCreateCommand command = new ReservationCreateCommand(userName, 예약_날짜, time3Id, themeId);
+            actions[i] = () -> adminReservationService.create(command);
+        }
+
+        ConcurrencyResult result = 동시_실행(actions);
+
+        assertThat(result.successCount()).isEqualTo(threadCount);
+        assertThat(result.failCount()).isZero();
+        assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(threadCount);
+    }
+
+    @DisplayName("동시에 동일한 시간 슬롯으로 업데이트를 시도할 때 정합성이 보장된다")
+    @Test
+    void 동일한_시간_슬롯으로_동시_업데이트시_하나만_성공한다() throws InterruptedException {
+        ReservationUpdateCommand mattCommand =
+                new ReservationUpdateCommand(mattReservationId, 매트, 예약_날짜, time3Id);
+        ReservationUpdateCommand rudevicoCommand =
+                new ReservationUpdateCommand(rudevicoReservationId, 루드비코, 예약_날짜, time3Id);
 
         ConcurrencyResult result = 동시_실행(
                 () -> userReservationService.update(mattCommand),
@@ -96,28 +109,35 @@ class ReservationConcurrencyTest {
         assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(1);
     }
 
+    @DisplayName("동일한 예약을 동시에 취소하려고 할 때 하나만 성공한다")
+    @Test
+    void 동일한_예약을_동시에_취소하려고_할_때_하나만_성공한다() throws InterruptedException {
+        ConcurrencyResult result = 동시_실행(5, () -> userReservationService.cancel(mattReservationId, 매트));
+
+        assertThat(result.successCount()).isEqualTo(1);
+        assertThat(result.failCount()).isEqualTo(4);
+    }
+
+    @DisplayName("예약 생성과 해당 시간 삭제가 동시에 일어날 때 락에 의해 정합성이 보장된다")
+    @Test
+    void 예약_생성과_해당_시간_삭제가_동시에_일어날_때_정합성이_보장된다() throws InterruptedException {
+        ReservationCreateCommand command = new ReservationCreateCommand("새로운사용자", 예약_날짜, time3Id, themeId);
+
+        ConcurrencyResult result = 동시_실행(
+                () -> adminReservationService.create(command),
+                () -> reservationTimeService.delete(time3Id)
+        );
+
+        assertThat(result.successCount()).isEqualTo(1);
+        assertThat(result.failCount()).isEqualTo(1);
+    }
+
     private ConcurrencyResult 동시_실행(int threadCount, Runnable action) throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
-        AtomicInteger successCount = new AtomicInteger();
-        AtomicInteger failCount = new AtomicInteger();
-
+        Runnable[] actions = new Runnable[threadCount];
         for (int i = 0; i < threadCount; i++) {
-            executorService.submit(() -> {
-                try {
-                    action.run();
-                    successCount.incrementAndGet();
-                } catch (Exception e) {
-                    failCount.incrementAndGet();
-                } finally {
-                    latch.countDown();
-                }
-            });
+            actions[i] = action;
         }
-
-        latch.await();
-        executorService.shutdown();
-        return new ConcurrencyResult(successCount.get(), failCount.get());
+        return 동시_실행(actions);
     }
 
     private ConcurrencyResult 동시_실행(Runnable... actions) throws InterruptedException {
