@@ -13,7 +13,7 @@
     - `AvailableReservationTimeResponse.java` — 필드 `LocalTime startAt`
     - `ReservationWaitingResponse.java` — 생성자 파라미터 `LocalTime time`
 
-- [ ] **2. `ReservationDao` → `service.exception` 역방향 의존 제거**
+- [x] **2. `ReservationDao` → `service.exception` 역방향 의존 제거**
   - `ReservationDao`의 `save`, `saveWaiting`에서 `DuplicateKeyException` catch 제거 — 예외 그대로 전파
   - `ReservationService`에서 `DuplicateKeyException`을 잡아 `ReservationConflictException`으로 변환
   - 비즈니스 예외 변환 책임을 service 레이어로 이동

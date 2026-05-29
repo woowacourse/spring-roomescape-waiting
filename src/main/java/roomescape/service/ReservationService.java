@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
@@ -42,7 +43,11 @@ public class ReservationService {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
         Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
-        return reservationDao.save(reservation);
+        try {
+            return reservationDao.save(reservation);
+        } catch (DuplicateKeyException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
     }
 
     @Transactional
@@ -92,7 +97,11 @@ public class ReservationService {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
         Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
-        return reservationDao.saveWaiting(reservation);
+        try {
+            return reservationDao.saveWaiting(reservation);
+        } catch (DuplicateKeyException e) {
+            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
+        }
     }
 
     private ReservationTime validateReservationTime(long timeId) {

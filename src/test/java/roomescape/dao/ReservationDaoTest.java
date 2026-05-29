@@ -17,7 +17,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.service.exception.ReservationConflictException;
+import org.springframework.dao.DuplicateKeyException;
 
 class ReservationDaoTest {
 
@@ -82,7 +82,7 @@ class ReservationDaoTest {
 
         reservationDao.save(reservation);
         assertThatThrownBy(() -> reservationDao.save(reservation))
-                .isInstanceOf(ReservationConflictException.class);
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
@@ -144,7 +144,7 @@ class ReservationDaoTest {
         reservationDao.saveWaiting(reservation);
 
         assertThatThrownBy(() -> reservationDao.saveWaiting(reservation))
-                .isInstanceOf(ReservationConflictException.class);
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
