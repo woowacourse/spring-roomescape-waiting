@@ -42,7 +42,9 @@ public class ReservationCommandService {
 
     public Reservation create(ReservationCommand command) {
         Slot slot = Slot.from(
-                Schedule.from(command.date(), findTimeReference(command.timeId())),
+                Schedule.from(
+                        command.date(),
+                        findTimeReference(command.timeId())),
                 findThemeReference(command.themeId())
         );
 
