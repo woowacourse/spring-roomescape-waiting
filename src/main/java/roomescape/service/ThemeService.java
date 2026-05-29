@@ -6,18 +6,18 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.ReferencedDataException;
-import roomescape.repository.ThemeQueryingDao;
-import roomescape.repository.ThemeUpdatingDao;
+import roomescape.repository.ThemeQueryDao;
+import roomescape.repository.ThemeUpdateDao;
 
 import java.util.List;
 
 @Service
 public class ThemeService {
 
-    private final ThemeQueryingDao themeQueryingDao;
-    private final ThemeUpdatingDao themeUpdatingDao;
+    private final ThemeQueryDao themeQueryingDao;
+    private final ThemeUpdateDao themeUpdatingDao;
 
-    public ThemeService(ThemeQueryingDao themeQueryingDao, ThemeUpdatingDao themeUpdatingDao) {
+    public ThemeService(ThemeQueryDao themeQueryingDao, ThemeUpdateDao themeUpdatingDao) {
         this.themeQueryingDao = themeQueryingDao;
         this.themeUpdatingDao = themeUpdatingDao;
     }

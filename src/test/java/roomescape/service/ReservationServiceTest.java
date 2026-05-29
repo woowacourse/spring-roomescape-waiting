@@ -13,12 +13,12 @@ import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationTimeUpdatingDao;
-import roomescape.repository.ReservationUpdatingDao;
-import roomescape.repository.ThemeQueryingDao;
-import roomescape.repository.ThemeUpdatingDao;
+import roomescape.repository.ReservationQueryDao;
+import roomescape.repository.ReservationTimeQueryDao;
+import roomescape.repository.ReservationTimeUpdateDao;
+import roomescape.repository.ReservationUpdateDao;
+import roomescape.repository.ThemeQueryDao;
+import roomescape.repository.ThemeUpdateDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,19 +29,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Import({ReservationService.class,
-        ReservationQueryingDao.class, ReservationUpdatingDao.class,
-        ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ThemeQueryingDao.class, ThemeUpdatingDao.class})
+        ReservationQueryDao.class, ReservationUpdateDao.class,
+        ReservationTimeQueryDao.class, ReservationTimeUpdateDao.class,
+        ThemeQueryDao.class, ThemeUpdateDao.class})
 class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
 
     @Autowired
-    private ReservationTimeUpdatingDao reservationTimeUpdatingDao;
+    private ReservationTimeUpdateDao reservationTimeUpdatingDao;
 
     @Autowired
-    private ThemeUpdatingDao themeUpdatingDao;
+    private ThemeUpdateDao themeUpdatingDao;
 
     @Test
     void 예약_생성_성공() {

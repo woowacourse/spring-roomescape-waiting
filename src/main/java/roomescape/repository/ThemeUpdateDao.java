@@ -9,11 +9,11 @@ import roomescape.dto.theme.ThemeRequest;
 import java.sql.PreparedStatement;
 
 @Repository
-public class ThemeUpdatingDao {
+public class ThemeUpdateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ThemeUpdatingDao(JdbcTemplate jdbcTemplate) {
+    public ThemeUpdateDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

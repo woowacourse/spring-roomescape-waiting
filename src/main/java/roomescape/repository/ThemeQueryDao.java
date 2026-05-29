@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ThemeQueryingDao {
+public class ThemeQueryDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ThemeQueryingDao(JdbcTemplate jdbcTemplate) {
+    public ThemeQueryDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

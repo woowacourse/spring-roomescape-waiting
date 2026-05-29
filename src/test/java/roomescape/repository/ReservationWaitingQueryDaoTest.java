@@ -11,15 +11,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @JdbcTest
-public class ReservationWaitingQueryingDaoTest {
+public class ReservationWaitingQueryDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationWaitingQueryingDao reservationWaitingQueryingDao;
+    private ReservationWaitingQueryDao reservationWaitingQueryingDao;
 
     @BeforeEach
     void setUp() {
-        this.reservationWaitingQueryingDao = new ReservationWaitingQueryingDao(jdbcTemplate);
+        this.reservationWaitingQueryingDao = new ReservationWaitingQueryDao(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation_time");

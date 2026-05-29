@@ -9,11 +9,11 @@ import roomescape.domain.reservation.Reservation;
 import java.sql.PreparedStatement;
 
 @Repository
-public class ReservationUpdatingDao {
+public class ReservationUpdateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationUpdatingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationUpdateDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

@@ -25,29 +25,29 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationWaitingQueryingDao;
-import roomescape.repository.ReservationWaitingUpdatingDao;
-import roomescape.repository.ThemeQueryingDao;
+import roomescape.repository.ReservationQueryDao;
+import roomescape.repository.ReservationTimeQueryDao;
+import roomescape.repository.ReservationWaitingQueryDao;
+import roomescape.repository.ReservationWaitingUpdateDao;
+import roomescape.repository.ThemeQueryDao;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationWaitingServiceTest {
 
     @Mock
-    private ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
+    private ReservationWaitingUpdateDao reservationWaitingUpdatingDao;
 
     @Mock
-    private ReservationWaitingQueryingDao reservationWaitingQueryingDao;
+    private ReservationWaitingQueryDao reservationWaitingQueryingDao;
 
     @Mock
-    private ReservationQueryingDao reservationQueryingDao;
+    private ReservationQueryDao reservationQueryingDao;
 
     @Mock
-    private ReservationTimeQueryingDao reservationTimeQueryingDao;
+    private ReservationTimeQueryDao reservationTimeQueryingDao;
 
     @Mock
-    private ThemeQueryingDao themeQueryingDao;
+    private ThemeQueryDao themeQueryingDao;
 
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;

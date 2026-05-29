@@ -10,10 +10,10 @@ import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationUpdatingDao;
-import roomescape.repository.ThemeQueryingDao;
+import roomescape.repository.ReservationQueryDao;
+import roomescape.repository.ReservationTimeQueryDao;
+import roomescape.repository.ReservationUpdateDao;
+import roomescape.repository.ThemeQueryDao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,12 +22,12 @@ import java.util.Optional;
 @Service
 public class ReservationService {
 
-    private final ReservationQueryingDao reservationQueryingDao;
-    private final ReservationUpdatingDao reservationUpdatingDao;
-    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
-    private final ThemeQueryingDao themeQueryingDao;
+    private final ReservationQueryDao reservationQueryingDao;
+    private final ReservationUpdateDao reservationUpdatingDao;
+    private final ReservationTimeQueryDao reservationTimeQueryingDao;
+    private final ThemeQueryDao themeQueryingDao;
 
-    public ReservationService(ReservationQueryingDao reservationQueryingDao, ReservationUpdatingDao reservationUpdatingDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
+    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;

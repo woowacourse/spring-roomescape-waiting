@@ -13,22 +13,22 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationWaitingQueryingDao;
-import roomescape.repository.ReservationWaitingUpdatingDao;
-import roomescape.repository.ThemeQueryingDao;
+import roomescape.repository.ReservationQueryDao;
+import roomescape.repository.ReservationTimeQueryDao;
+import roomescape.repository.ReservationWaitingQueryDao;
+import roomescape.repository.ReservationWaitingUpdateDao;
+import roomescape.repository.ThemeQueryDao;
 
 @Service
 public class ReservationWaitingService {
 
-    private final ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
-    private final ReservationWaitingQueryingDao reservationWaitingQueryingDao;
-    private final ReservationQueryingDao reservationQueryingDao;
-    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
-    private final ThemeQueryingDao themeQueryingDao;
+    private final ReservationWaitingUpdateDao reservationWaitingUpdatingDao;
+    private final ReservationWaitingQueryDao reservationWaitingQueryingDao;
+    private final ReservationQueryDao reservationQueryingDao;
+    private final ReservationTimeQueryDao reservationTimeQueryingDao;
+    private final ThemeQueryDao themeQueryingDao;
 
-    public ReservationWaitingService(ReservationWaitingUpdatingDao reservationWaitingUpdatingDao, ReservationWaitingQueryingDao reservationWaitingQueryingDao, ReservationQueryingDao reservationQueryingDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
+    public ReservationWaitingService(ReservationWaitingUpdateDao reservationWaitingUpdatingDao, ReservationWaitingQueryDao reservationWaitingQueryingDao, ReservationQueryDao reservationQueryingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao) {
         this.reservationWaitingUpdatingDao = reservationWaitingUpdatingDao;
         this.reservationWaitingQueryingDao = reservationWaitingQueryingDao;
         this.reservationQueryingDao = reservationQueryingDao;

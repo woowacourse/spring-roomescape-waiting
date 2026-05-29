@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ReservationQueryingDao {
+public class ReservationQueryDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationQueryingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationQueryDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

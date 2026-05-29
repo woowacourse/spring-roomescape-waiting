@@ -7,8 +7,8 @@ import roomescape.dto.reservationtime.AvailableReservationTimeResponse;
 import roomescape.exception.ReferencedDataException;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
-import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationTimeUpdatingDao;
+import roomescape.repository.ReservationTimeQueryDao;
+import roomescape.repository.ReservationTimeUpdateDao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,10 +16,10 @@ import java.util.List;
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
-    private final ReservationTimeUpdatingDao reservationTimeUpdatingDao;
+    private final ReservationTimeQueryDao reservationTimeQueryingDao;
+    private final ReservationTimeUpdateDao reservationTimeUpdatingDao;
 
-    public ReservationTimeService(ReservationTimeQueryingDao reservationTimeQueryingDao, ReservationTimeUpdatingDao reservationTimeUpdatingDao) {
+    public ReservationTimeService(ReservationTimeQueryDao reservationTimeQueryingDao, ReservationTimeUpdateDao reservationTimeUpdatingDao) {
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.reservationTimeUpdatingDao = reservationTimeUpdatingDao;
     }

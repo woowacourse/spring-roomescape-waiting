@@ -17,7 +17,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @JdbcTest
-public class ReservationWaitingUpdatingDaoTest {
+public class ReservationWaitingUpdateDaoTest {
 
     private final static ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
     private final static Theme theme = new Theme(1L, "테스트", "설명", "url");
@@ -76,11 +76,11 @@ public class ReservationWaitingUpdatingDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
+    private ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
     @BeforeEach
     void setUp() {
-        this.reservationWaitingUpdatingDao = new ReservationWaitingUpdatingDao(jdbcTemplate);
+        this.reservationWaitingUpdateDao = new ReservationWaitingUpdateDao(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation_time");
@@ -97,7 +97,7 @@ public class ReservationWaitingUpdatingDaoTest {
     void 예약_대기를_제대로_생성한다() {
         ReservationWaiting reservationWaiting = new ReservationWaiting("테스트", LocalDate.parse("2027-05-27"), reservationTime, theme);
 
-        reservationWaitingUpdatingDao.create(reservationWaiting);
+        reservationWaitingUpdateDao.create(reservationWaiting);
 
         Optional<ReservationWaiting> reservationWaitingOptional = jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL + "where w.name = ?", reservationWaitingRowMapper, "테스트")
                                                                                                                 .stream()
@@ -120,7 +120,7 @@ public class ReservationWaitingUpdatingDaoTest {
 
         assertThat(Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, 1L))).isTrue();
 
-        reservationWaitingUpdatingDao.delete(1L);
+        reservationWaitingUpdateDao.delete(1L);
 
          assertThat(Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, 1L))).isFalse();
     }

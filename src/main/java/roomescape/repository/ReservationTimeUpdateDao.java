@@ -8,11 +8,11 @@ import roomescape.dto.reservationtime.ReservationTimeRequest;
 import java.sql.PreparedStatement;
 
 @Repository
-public class ReservationTimeUpdatingDao {
+public class ReservationTimeUpdateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationTimeUpdatingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationTimeUpdateDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

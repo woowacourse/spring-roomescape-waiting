@@ -13,11 +13,11 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class ReservationWaitingQueryingDao {
+public class ReservationWaitingQueryDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationWaitingQueryingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingQueryDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.dto.theme.ThemeRequest;
-import roomescape.repository.ThemeQueryingDao;
-import roomescape.repository.ThemeUpdatingDao;
+import roomescape.repository.ThemeQueryDao;
+import roomescape.repository.ThemeUpdateDao;
 import roomescape.dto.theme.ThemeResponse;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import({ThemeService.class, ThemeQueryingDao.class, ThemeUpdatingDao.class})
+@Import({ThemeService.class, ThemeQueryDao.class, ThemeUpdateDao.class})
 class ThemeServiceTest {
 
     @Autowired

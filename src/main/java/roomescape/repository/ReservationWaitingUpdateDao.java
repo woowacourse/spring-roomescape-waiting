@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 
 @Repository
-public class ReservationWaitingUpdatingDao {
+public class ReservationWaitingUpdateDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationWaitingUpdatingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingUpdateDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
