@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.EntityNotFoundException;
@@ -28,20 +28,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationSlotResult reserve(ReservationCommand command) {
-        ReservationSlot slot = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
-                .orElseGet(() -> {
-                    Theme theme = findThemeWithThrow(command.themeId());
-                    ReservationTime time = findTimeWithThrow(command.timeId());
-                    return ReservationSlot.createSlot(command.date(), theme, time);
-                });
-        slot.reserve(command.name());
-        return ReservationSlotResult.from(reservationRepository.save(slot));
+        ReservationSlot slot = findOrCreateSlot(command);
+        Reservation reservation = slot.reserve(command.name());
+        return saveAndCreateResult(slot, reservation);
     }
 
     @Transactional
     public ReservationSlotResult change(long reservationId, ReservationChangeCommand command) {
-        ReservationSlot current = reservationRepository.findByReservationIdForUpdate(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
+        ReservationSlot current = findReservationSlot(reservationId);
         Reservation reservation = current.findReservedReservation(reservationId);
 
         ReservationTime newTime = findTimeWithThrow(command.timeId());
@@ -49,47 +43,61 @@ public class ReservationService {
             return ReservationSlotResult.from(current, reservation);
         }
 
-        return moveReservation(reservation, current, command.date(), newTime);
+        ReservationSlot target = findOrCreateSlot(command.date(), current.getTheme(), newTime);
+        return moveReservation(reservation, current, target);
     }
 
-    private ReservationSlotResult moveReservation(Reservation reservation, ReservationSlot current,
-                                        LocalDate date, ReservationTime newTime) {
-        ReservationSlot target = findOrCreateSlot(date, current.getTheme(), newTime);
+    @Transactional
+    public ReservationSlotResult addWaiting(ReservationCommand command) {
+        ReservationSlot slot = findOrCreateSlot(command);
+        Reservation added = slot.joinWaitingList(command.name());
+        return saveAndCreateResult(slot, added);
+    }
+
+    private ReservationSlotResult saveAndCreateResult(ReservationSlot slot, Reservation reservation) {
+        ReservationSlot saved = reservationRepository.save(slot);
+        return ReservationSlotResult.from(
+                saved,
+                saved.findReservationByNameAndStatus(reservation.getName(), reservation.getStatus())
+        );
+    }
+
+    @Transactional
+    public void cancelReservation(long reservationId) {
+        ReservationSlot slot = findReservationSlot(reservationId);
+        slot.cancelReservation(reservationId);
+        reservationRepository.save(slot);
+    }
+
+    public ReservationSlotResult getReservation(long reservationId) {
+        ReservationSlot slot = findReservationSlot(reservationId);
+        Reservation reservationReservation = slot.findReservedReservation(reservationId);
+        return ReservationSlotResult.from(slot, reservationReservation);
+    }
+
+    private ReservationSlotResult moveReservation(
+            Reservation reservation,
+            ReservationSlot current,
+            ReservationSlot target
+    ) {
         Reservation moved = target.reserve(reservation.getName());
 
         current.cancelReservation(reservation.getId());
         reservationRepository.save(current);
 
-        ReservationSlot saved = reservationRepository.save(target);
-        return ReservationSlotResult.from(saved, saved.findReservationByNameAndStatus(reservation.getName(), moved.getStatus()));
+        return saveAndCreateResult(target, moved);
+    }
+
+    private ReservationSlot findOrCreateSlot(ReservationCommand command) {
+        Theme theme = findThemeWithThrow(command.themeId());
+        ReservationTime time = findTimeWithThrow(command.timeId());
+        return findOrCreateSlot(command.date(), theme, time);
     }
 
     private ReservationSlot findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {
         ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
         return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
                 .orElseGet(() -> ReservationSlot.createSlot(date, theme, time));
-    }
-
-    @Transactional
-    public ReservationSlotResult addWaiting(ReservationCommand command) {
-        ReservationSlot slot = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
-                .orElseGet(() -> {
-                    Theme theme = findThemeWithThrow(command.themeId());
-                    ReservationTime time = findTimeWithThrow(command.timeId());
-                    return ReservationSlot.createSlot(command.date(), theme, time);
-                });
-        Reservation added = slot.joinWaitingList(command.name());
-        ReservationSlot saved = reservationRepository.save(slot);
-        return ReservationSlotResult.from(saved, saved.findReservationByNameAndStatus(command.name(), added.getStatus()));
-    }
-
-    @Transactional
-    public void cancelReservation(long reservationId) {
-        ReservationSlot slot = reservationRepository.findByReservationIdForUpdate(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
-
-        slot.cancelReservation(reservationId);
-        reservationRepository.save(slot);
     }
 
     private Theme findThemeWithThrow(Long themeId) {
@@ -104,13 +112,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간 정보입니다."));
     }
 
-    public ReservationSlotResult getReservation(long reservationId) {
-        ReservationSlot slot = findReservationByReservationIdWithThrow(reservationId);
-        Reservation reservationReservation = slot.findReservedReservation(reservationId);
-        return ReservationSlotResult.from(slot, reservationReservation);
-    }
-
-    private ReservationSlot findReservationByReservationIdWithThrow(long reservationId) {
+    private ReservationSlot findReservationSlot(long reservationId) {
         return reservationRepository.findByReservationIdForUpdate(reservationId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
     }
