@@ -4,81 +4,77 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.service.dto.Page;
 import roomescape.service.exception.ReservationConflictException;
-import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 
 @Service
-public class ReservationService {
+public class ReservationWaitingService {
+    private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationDao reservationDao;
+    private final ReservationService reservationService;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final Clock clock;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, Clock clock) {
+    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao,
+                                     ReservationDao reservationDao,
+                                     ReservationService reservationService,
+                                     ReservationTimeDao reservationTimeDao,
+                                     ThemeDao themeDao,
+                                     Clock clock) {
+        this.reservationWaitingDao = reservationWaitingDao;
         this.reservationDao = reservationDao;
+        this.reservationService = reservationService;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.clock = clock;
     }
 
     @Transactional
-    public Reservation save(String name, LocalDate date, long timeId, long themeId) {
+    public Reservation saveWaiting(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = validateReservationTime(timeId);
         Theme theme = validateTheme(themeId);
-        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (!reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            return reservationService.save(name, date, timeId, themeId);
+        }
+        if (reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+        if (reservationWaitingDao.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
+            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
         Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
         try {
-            return reservationDao.save(reservation);
+            ReservationWaiting waiting = reservationWaitingDao.saveWaiting(reservation);
+            return waiting.reservation();
         } catch (DuplicateKeyException e) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
+            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
     }
 
     @Transactional
-    public Reservation update(long id, LocalDate date, long timeId) {
-        Reservation reservation = reservationDao.findById(id)
-                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
-        ReservationTime time = validateReservationTime(timeId);
-        Reservation updated = reservation.withUpdated(date, time, LocalDateTime.now(clock));
-        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, reservation.getTheme().getId())) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
-        }
-        return reservationDao.update(updated);
-    }
-
-    @Transactional
-    public void delete(long id) {
-        reservationDao.findById(id).ifPresent(reservation -> {
-            reservation.validateCancellable(LocalDateTime.now(clock));
-            reservationDao.delete(id);
+    public void deleteWaiting(long id) {
+        reservationWaitingDao.findByWaitingId(id).ifPresent(waiting -> {
+            waiting.reservation().validateCancellable(LocalDateTime.now(clock));
+            reservationWaitingDao.deleteWaiting(id);
         });
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByName(String username) {
-        return reservationDao.findByName(username);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<Reservation> findAllWithCount(int page, int size) {
-        List<Reservation> reservations = reservationDao.findAll(page, size);
-        long totalCount = reservationDao.count();
-        return new Page<>(reservations, totalCount);
+    public List<ReservationWaiting> findAllWaitingByName(String username) {
+        return reservationWaitingDao.findAllWaitingByName(username);
     }
 
     private ReservationTime validateReservationTime(long timeId) {
@@ -90,5 +86,4 @@ public class ReservationService {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
     }
-
 }

@@ -18,7 +18,7 @@
   - `ReservationService`에서 `DuplicateKeyException`을 잡아 `ReservationConflictException`으로 변환
   - 비즈니스 예외 변환 책임을 service 레이어로 이동
 
-- [ ] **3. Reservation / ReservationWaiting 도메인 완전 분리**
+- [x] **3. Reservation / ReservationWaiting 도메인 완전 분리**
   - **Domain**: `ReservationWaiting`에 자체 `id` 필드 추가 (`reservation_waiting` PK)
   - **DAO**: `ReservationWaitingDao` 신규 생성 — waiting 관련 메서드 5개 이전
     - `saveWaiting` → 반환 타입 `ReservationWaiting`으로 변경
@@ -31,7 +31,7 @@
   - **Controller**: `ReservationWaitingController` 신규 생성 — `/reservations/waiting` 엔드포인트 3개 이전
     - `ReservationController`에서 waiting 엔드포인트 제거
 
-- [ ] **4. `ReservationService.saveWaiting` 검증 순서 재정렬**
+- [x] **4. `ReservationService.saveWaiting` 검증 순서 재정렬**
   - 자원 존재 확인(`validateReservationTime`, `validateTheme`)을 비즈니스 검사보다 먼저 수행
   - 올바른 순서: 자원 검사 → 예약 존재 여부 → 사용자 예약 중복 → 대기 중복
 

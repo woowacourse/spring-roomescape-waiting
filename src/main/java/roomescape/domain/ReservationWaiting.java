@@ -1,4 +1,4 @@
 package roomescape.domain;
 
-public record ReservationWaiting(Reservation reservation, long waitingNumber) {
+public record ReservationWaiting(long id, Reservation reservation, long waitingNumber) {
 }

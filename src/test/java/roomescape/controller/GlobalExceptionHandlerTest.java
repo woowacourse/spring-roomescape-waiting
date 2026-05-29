@@ -29,6 +29,7 @@ import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.ReservationWaitingService;
 import roomescape.service.ThemeService;
 
 @WebMvcTest
@@ -37,6 +38,7 @@ class GlobalExceptionHandlerTest {
 
     @MockitoBean ReservationService reservationService;
     @MockitoBean ReservationTimeService reservationTimeService;
+    @MockitoBean ReservationWaitingService reservationWaitingService;
     @MockitoBean ThemeService themeService;
 
     @Autowired
