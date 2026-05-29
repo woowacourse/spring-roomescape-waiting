@@ -13,11 +13,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import roomescape.dao.exception.DataConflictException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.service.exception.ReservationConflictException;
 
 class ReservationDaoTest {
 
@@ -82,7 +82,7 @@ class ReservationDaoTest {
 
         reservationDao.save(reservation);
         assertThatThrownBy(() -> reservationDao.save(reservation))
-                .isInstanceOf(ReservationConflictException.class);
+                .isInstanceOf(DataConflictException.class);
     }
 
     @Test
@@ -144,7 +144,7 @@ class ReservationDaoTest {
         reservationDao.saveWaiting(reservation);
 
         assertThatThrownBy(() -> reservationDao.saveWaiting(reservation))
-                .isInstanceOf(ReservationConflictException.class);
+                .isInstanceOf(DataConflictException.class);
     }
 
     @Test

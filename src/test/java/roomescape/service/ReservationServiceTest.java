@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.exception.DataConflictException;
 import roomescape.domain.MyReservation;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -99,6 +100,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    void save_저장_충돌이면_예약_충돌_예외() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+        given(reservationDao.save(any(Reservation.class)))
+                .willThrow(new DataConflictException(new RuntimeException()));
+
+        assertThatThrownBy(() -> reservationService.save("브라운", futureDate, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 예약된 시간입니다.");
+    }
+
+    @Test
     void delete_정상_삭제() {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
@@ -164,6 +180,25 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.saveWaiting("브라운", futureDate, 1L, 1L))
                 .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("예약 가능한 시간입니다. 일반 예약 API를 이용해주세요.");
+    }
+
+    @Test
+    void saveWaiting_저장_충돌이면_대기_충돌_예외() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+        given(reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운"))
+                .willReturn(false);
+        given(reservationDao.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운"))
+                .willReturn(false);
+        given(reservationDao.saveWaiting(any(Reservation.class)))
+                .willThrow(new DataConflictException(new RuntimeException()));
+
+        assertThatThrownBy(() -> reservationService.saveWaiting("브라운", futureDate, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 대기 신청한 시간입니다.");
     }
 
     @Test
