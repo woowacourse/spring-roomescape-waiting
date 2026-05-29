@@ -19,6 +19,9 @@ import roomescape.dto.response.ReservationTimeStatusResponse;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
+    public static final int DEFALUT_TIME_COUNT = 9;
+    public static final Long AVAILABLE_TIME_ID = 1L;
+
     @Autowired
     private ReservationTimeService reservationTimeService;
 
@@ -26,7 +29,7 @@ class ReservationTimeServiceTest {
     void 전체_예약_시간_목록_조회() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
-        assertThat(result).hasSize(9);
+        assertThat(result).hasSize(DEFALUT_TIME_COUNT);
     }
 
     @Test
@@ -35,8 +38,15 @@ class ReservationTimeServiceTest {
 
         List<LocalTime> startTimes = result.stream().map(ReservationTimeResponse::startAt).toList();
 
-        assertThat(startTimes).containsExactly(LocalTime.of(10, 0), LocalTime.of(11, 0), LocalTime.of(12, 0),
-                LocalTime.of(13, 0), LocalTime.of(14, 0), LocalTime.of(15, 0), LocalTime.of(16, 0), LocalTime.of(17, 0),
+        assertThat(startTimes).containsExactly(
+                LocalTime.of(10, 0),
+                LocalTime.of(11, 0),
+                LocalTime.of(12, 0),
+                LocalTime.of(13, 0),
+                LocalTime.of(14, 0),
+                LocalTime.of(15, 0),
+                LocalTime.of(16, 0),
+                LocalTime.of(17, 0),
                 LocalTime.of(18, 0));
     }
 
@@ -47,7 +57,7 @@ class ReservationTimeServiceTest {
         ReservationTimeResponse result = reservationTimeService.save(request);
 
         assertThat(result.startAt()).isEqualTo(LocalTime.of(19, 0));
-        assertThat(reservationTimeService.findAll()).hasSize(10);
+        assertThat(reservationTimeService.findAll()).hasSize(DEFALUT_TIME_COUNT + 1);
     }
 
     @Test
@@ -64,7 +74,7 @@ class ReservationTimeServiceTest {
 
         reservationTimeService.delete(timeIdWithNoReservation);
 
-        assertThat(reservationTimeService.findAll()).hasSize(8);
+        assertThat(reservationTimeService.findAll()).hasSize(DEFALUT_TIME_COUNT - 1);
     }
 
     @Test
@@ -79,9 +89,10 @@ class ReservationTimeServiceTest {
     void 예약된_시간_제외_가용_시간_조회() {
         String date = LocalDate.now().minusDays(6).toString();
 
-        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(AVAILABLE_TIME_ID, date);
 
-        long availableCount = result.stream().filter(r -> r.status() == ReservationStatus.AVAILABLE).count();
+        long availableCount = result.stream()
+                .filter(r -> r.status() == ReservationStatus.AVAILABLE).count();
 
         assertThat(availableCount).isEqualTo(4);
     }
@@ -90,8 +101,8 @@ class ReservationTimeServiceTest {
     void 예약_없는_날짜의_전체_가용_시간_조회() {
         String date = LocalDate.now().plusDays(30).toString();
 
-        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(AVAILABLE_TIME_ID, date);
 
-        assertThat(result).hasSize(9);
+        assertThat(result).hasSize(DEFALUT_TIME_COUNT);
     }
 }

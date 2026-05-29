@@ -15,6 +15,9 @@ import roomescape.domain.Theme;
 @Import(ThemeDao.class)
 class ThemeDaoTest {
 
+    public static final int DEFALUT_THEME_COUNT = 15;
+    public static final Long AVAILABLE_THEME_ID = 1L;
+
     @Autowired
     private ThemeDao themeDao;
 
@@ -22,12 +25,12 @@ class ThemeDaoTest {
     void 전체_테마_조회() {
         List<Theme> themes = themeDao.findAllThemes();
 
-        assertThat(themes).hasSize(15);
+        assertThat(themes).hasSize(DEFALUT_THEME_COUNT);
     }
 
     @Test
     void ID로_테마_조회() {
-        Theme theme = themeDao.findThemeById(1L);
+        Theme theme = themeDao.findThemeById(AVAILABLE_THEME_ID);
 
         assertThat(theme).isNotNull();
         assertThat(theme.getId()).isEqualTo(1L);
@@ -52,7 +55,7 @@ class ThemeDaoTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("새 테마");
-        assertThat(themeDao.findAllThemes()).hasSize(16);
+        assertThat(themeDao.findAllThemes()).hasSize(DEFALUT_THEME_COUNT + 1);
     }
 
     @Test

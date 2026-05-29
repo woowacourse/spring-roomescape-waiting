@@ -20,13 +20,14 @@ import roomescape.exception.IdNotFoundException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
+    public static final Long UNAVAILABLE_ID = 999L;
+
     @Autowired
     private ReservationService reservationService;
 
     @Test
     void 존재하지_않는_시간_ID로_예약_시_예외() {
-        Long timeId = 999L;
-        ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), timeId, 1L);
+        ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), UNAVAILABLE_ID, 1L);
 
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)
@@ -35,8 +36,7 @@ class ReservationServiceTest {
 
     @Test
     void 존재하지_않는_테마_ID로_예약_시_예외() {
-        Long themeId = 999L;
-        ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), 1L, themeId);
+        ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), 1L, UNAVAILABLE_ID);
 
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)

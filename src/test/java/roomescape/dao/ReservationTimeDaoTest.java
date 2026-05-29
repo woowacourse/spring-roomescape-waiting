@@ -16,6 +16,9 @@ import roomescape.domain.ReservationTime;
 @Import(ReservationTimeDao.class)
 class ReservationTimeDaoTest {
 
+    public static final int DEFALUT_TIME_COUNT = 9;
+    public static final Long AVAILABLE_TIME_ID = 1L;
+
     @Autowired
     private ReservationTimeDao reservationTimeDao;
 
@@ -23,12 +26,12 @@ class ReservationTimeDaoTest {
     void 전체_시간_조회() {
         List<ReservationTime> times = reservationTimeDao.findAll();
 
-        assertThat(times).hasSize(9);
+        assertThat(times).hasSize(DEFALUT_TIME_COUNT);
     }
 
     @Test
     void ID로_시간_조회() {
-        ReservationTime time = reservationTimeDao.findTimeById(1L);
+        ReservationTime time = reservationTimeDao.findTimeById(AVAILABLE_TIME_ID);
 
         assertThat(time).isNotNull();
         assertThat(time.getId()).isEqualTo(1L);
@@ -47,7 +50,7 @@ class ReservationTimeDaoTest {
 
     @Test
     void 예약에_사용중인_시간_존재하는_경우() {
-        boolean exists = reservationTimeDao.existsByTimeId(1L);
+        boolean exists = reservationTimeDao.existsByTimeId(AVAILABLE_TIME_ID);
 
         assertThat(exists).isTrue();
     }

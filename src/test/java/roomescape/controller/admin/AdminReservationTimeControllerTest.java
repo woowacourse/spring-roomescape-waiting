@@ -18,6 +18,8 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AdminReservationTimeControllerTest {
 
+    public static final int DEFALUT_TIME_COUNT = 9;
+
     @LocalServerPort
     int port;
 
@@ -41,7 +43,7 @@ public class AdminReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(10));
+                .body("size()", is(DEFALUT_TIME_COUNT + 1));
 
         RestAssured.given().log().all()
                 .when().delete("/admin/times/10")

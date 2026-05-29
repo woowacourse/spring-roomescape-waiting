@@ -15,6 +15,8 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeControllerTest {
 
+    public static final int DEFALUT_THEME_COUNT = 10;
+
     @LocalServerPort
     int port;
 
@@ -32,6 +34,6 @@ class ThemeControllerTest {
                 .when().get("/themes/popular?limit=10")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(10));
+                .body("size()", is(DEFALUT_THEME_COUNT));
     }
 }
