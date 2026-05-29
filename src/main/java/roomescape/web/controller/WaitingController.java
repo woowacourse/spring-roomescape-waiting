@@ -13,7 +13,6 @@ import roomescape.web.dto.response.WaitingResponse;
 
 import java.net.URI;
 
-
 @RestController
 @RequestMapping("/reservations/waitings")
 @RequiredArgsConstructor
@@ -22,9 +21,10 @@ public class WaitingController {
     private final WaitingCommandService waitingCommandService;
     private final WaitingQueryService waitingQueryService;
 
-
     @PostMapping
-    ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
+    ResponseEntity<WaitingResponse> createWaiting(
+            @Valid @RequestBody WaitingRequest request
+    ) {
         Waiting waiting = waitingCommandService.create(WaitingRequest.toCommand(request));
 
         WaitingResponse waitingResponse = WaitingResponse.from(waiting);
@@ -41,7 +41,10 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelWaiting(@PathVariable("id") long id, @RequestParam String name) {
+    public ResponseEntity<Void> cancelWaiting(
+            @PathVariable("id") long id,
+            @RequestParam String name
+    ) {
         waitingCommandService.cancel(id, name);
         return ResponseEntity.noContent().build();
     }

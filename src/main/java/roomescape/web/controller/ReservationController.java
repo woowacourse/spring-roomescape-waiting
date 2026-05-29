@@ -53,19 +53,21 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelReservation(
-            @PathVariable long id
+            @PathVariable long id,
+            @RequestParam String name
     ) {
-        reservationCommandService.cancelByUser(id);
+        reservationCommandService.cancelByUser(id, name);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable long id,
+            @RequestParam String name,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.update(id, ReservationUpdateRequest.toCommand(request)));
+                reservationCommandService.updateByUser(id, name, ReservationUpdateRequest.toCommand(request)));
         return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.exception.ForbiddenException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -26,6 +28,12 @@ public class Reservation {
 
     public boolean isOwnedBy(String name) {
         return this.username.equals(name);
+    }
+
+    public void validateOwnedBy(String name) {
+        if (!this.isOwnedBy(name)) {
+            throw new ForbiddenException("타인에 접근할 수 없습니다.");
+        }
     }
 
     public Reservation withSlot(Slot slot, LocalDateTime now) {

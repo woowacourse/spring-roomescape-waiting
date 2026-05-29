@@ -58,19 +58,23 @@ public class ReservationCommandService {
         reservationDao.delete(reservation);
     }
 
-    public void cancelByUser(long reservationId) {
+    public void cancelByUser(long reservationId, String name) {
         Reservation reservation = reservationDao.findById(reservationId);
+        reservation.validateOwnedBy(name);
         reservation.validateCancelable(LocalDateTime.now(clock));
         reservationDao.delete(reservation);
     }
 
-    public Reservation update(long reservationId, ReservationUpdateCommand command) {
-        ReservationTime newTime = findTimeReference(command.timeId());
+    public Reservation updateByUser(long reservationId, String name, ReservationUpdateCommand command) {
         Reservation current = reservationDao.findById(reservationId);
+        current.validateOwnedBy(name);
 
         Slot slot = Slot.from(
-                Schedule.from(command.date(), newTime),
-                current.reservationTheme());
+                Schedule.from(
+                        command.date(),
+                        findTimeReference(command.timeId())),
+                current.reservationTheme()
+        );
 
         boolean isDuplicate = reservationDao.findBySlot(slot)
                 .filter(existing -> existing.id() != reservationId)
