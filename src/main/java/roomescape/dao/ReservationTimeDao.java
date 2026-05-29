@@ -97,12 +97,13 @@ public class ReservationTimeDao {
     public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {
         return jdbcTemplate.query("""
                                SELECT t.id AS time_id, t.start_at,
-                                      CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
+                                      CASE WHEN EXISTS (
+                                          SELECT 1 FROM reservation r
+                                          WHERE r.time_id = t.id
+                                            AND r.theme_id = ?
+                                            AND r.date = ?
+                                      ) THEN 'CONFIRMED' ELSE 'AVAILABLE' END AS status
                                FROM reservation_time t
-                               LEFT JOIN reservation r ON t.id = r.time_id
-                                   AND r.theme_id = ?
-                                   AND r.date = ?
-                                   AND r.status = 'CONFIRMED'
                                ORDER BY t.start_at
                         """,
                 (rs, rowNum) -> {

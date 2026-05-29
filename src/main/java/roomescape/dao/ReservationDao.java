@@ -36,7 +36,7 @@ public class ReservationDao {
                             r.status
                             FROM reservation r
                             INNER JOIN reservation_time rt ON r.time_id = rt.id
-                            INNER JOIN theme t ON r.theme_id = t.id;
+                            INNER JOIN theme t ON r.theme_id = t.id
                         """,
                 (rs, rowNum) -> {
                     ReservationTime time = new ReservationTime(
@@ -62,7 +62,7 @@ public class ReservationDao {
     }
 
     public Optional<Reservation> findById(Long id) {
-        List<Reservation> reservations =  jdbcTemplate.query(
+        List<Reservation> reservations = jdbcTemplate.query(
                 """
                             SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
                             t.id AS theme_id, t.name AS theme_name, t.description, t.url,

@@ -62,9 +62,9 @@ public class ThemeDao {
                            FROM theme t
                            INNER JOIN reservation r ON t.id = r.theme_id
                            WHERE r.date BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND DATEADD('DAY',-1,CURRENT_DATE)
-                           GROUP BY t.id, t.name
+                           GROUP BY t.id, t.name, t.description, t.url
                            ORDER BY reservation_count DESC
-                           LIMIT ?;
+                           LIMIT ?
                         """, (rs, rowNum) -> new Theme(
                         rs.getLong("id"),
                         rs.getString("name"),

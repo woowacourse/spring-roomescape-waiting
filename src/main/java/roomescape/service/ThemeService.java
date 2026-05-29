@@ -67,7 +67,7 @@ public class ThemeService {
     }
 
     public void delete(Long id) {
-        if(themeDao.existsByThemeId(id)){
+        if (themeDao.existsByThemeId(id)) {
             throw new AlreadyInUseException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         themeDao.delete(id);
