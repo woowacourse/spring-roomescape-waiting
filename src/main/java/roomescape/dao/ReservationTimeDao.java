@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -80,8 +81,8 @@ public class ReservationTimeDao {
         jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
     }
 
-    public ReservationTime findTimeById(Long timeId) {
-        return jdbcTemplate.queryForObject(
+    public Optional<ReservationTime> findTimeById(Long timeId) {
+        List<ReservationTime> reservationTimes = jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time WHERE id = ?",
                 (rs, rowNum) -> new ReservationTime(
                         rs.getLong("id"),
@@ -89,6 +90,8 @@ public class ReservationTimeDao {
                 ),
                 timeId
         );
+
+        return reservationTimes.stream().findFirst();
     }
 
     public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {

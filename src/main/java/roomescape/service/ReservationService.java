@@ -17,7 +17,8 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.exception.IdNotFoundException;
+import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.NotFoundException;
 
 @Service
 public class ReservationService {
@@ -46,11 +47,10 @@ public class ReservationService {
     }
 
     public ReservationResponse save(ReservationRequest request) {
-        ReservationTime time = getValidReservationTime(request.timeId());
-        Theme theme = getValidTheme(request.themeId());
+        ReservationTime time = getReservationTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
-
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
         Reservation reservation = new Reservation(
@@ -61,24 +61,36 @@ public class ReservationService {
                 status
         );
 
+        validateDuplicate(reservation);
+
         Reservation saved = reservationDao.save(reservation);
         return ReservationResponse.from(saved);
     }
 
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
-        ReservationTime time = getValidReservationTime(request.timeId());
-        Theme theme = getValidTheme(request.themeId());
+        Reservation reservation = getReservation(id);
+
+        ReservationTime time = getReservationTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
         if (status == ReservationStatus.WAITING) {
-            throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
+            throw new AlreadyExistsException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
         }
 
-        reservationDao.update(id, request.date(), request.timeId());
+        Reservation newReservation = new Reservation(
+                id,
+                reservation.getName(),
+                request.date(),
+                time,
+                theme,
+                status
+        );
 
-        Reservation newReservation = reservationDao.findById(id);
+        validateDuplicate(newReservation);
+        reservationDao.update(id, request.date(), request.timeId());
 
         return ReservationResponse.from(newReservation);
     }
@@ -87,19 +99,21 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
-    private ReservationTime getValidReservationTime(Long timeId) {
-        ReservationTime time = reservationTimeDao.findTimeById(timeId);
-        if (time == null) {
-            throw new IdNotFoundException("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
-        }
+    private Reservation getReservation(long id) {
+        Reservation reservation = reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("요청하신 예약을 찾을 수 없습니다."));
+        return reservation;
+    }
+
+    private ReservationTime getReservationTime(Long timeId) {
+        ReservationTime time = reservationTimeDao.findTimeById(timeId)
+                .orElseThrow(() -> new NotFoundException("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요."));
         return time;
     }
 
-    private Theme getValidTheme(Long themeId) {
-        Theme theme = themeDao.findThemeById(themeId);
-        if (theme == null) {
-            throw new IdNotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요.");
-        }
+    private Theme getTheme(Long themeId) {
+        Theme theme = themeDao.findThemeById(themeId)
+                .orElseThrow(() -> new NotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요."));
         return theme;
     }
 
@@ -110,8 +124,19 @@ public class ReservationService {
         }
     }
 
+    private void validateDuplicate(Reservation reservation) {
+        if (reservationDao.existsByDateAndThemeAndTimeAndName(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getTime().getId(),
+                reservation.getName())
+        ) {
+            throw new AlreadyExistsException("이미 예약되었습니다.");
+        }
+    }
+
     private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {
-        if (reservationDao.existsBy(date, theme, time)) {
+        if (reservationDao.existsByDateAndThemeAndTime(date, theme, time)) {
             return ReservationStatus.WAITING;
         }
 

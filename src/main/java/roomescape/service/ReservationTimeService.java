@@ -8,6 +8,8 @@ import roomescape.domain.ReservationTimeStatus;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
+import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.AlreadyInUseException;
 
 @Service
 public class ReservationTimeService {
@@ -34,7 +36,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse save(ReservationTimeRequest request) {
         if (reservationTimeDao.existsByStartAt(request.startAt())) {
-            throw new IllegalArgumentException("이미 존재하는 시간대이므로 추가할 수 없습니다.");
+            throw new AlreadyExistsException("이미 존재하는 시간대이므로 추가할 수 없습니다.");
         }
 
         ReservationTime saved = new ReservationTime(request.startAt());
@@ -46,7 +48,7 @@ public class ReservationTimeService {
 
     public void delete(Long id) {
         if (reservationTimeDao.existsByTimeId(id)) {
-            throw new IllegalArgumentException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new AlreadyInUseException("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeDao.delete(id);
     }

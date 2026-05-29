@@ -1,15 +1,14 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.domain.ReservationTime;
 
 @JdbcTest
@@ -28,11 +27,11 @@ class ReservationTimeDaoTest {
 
     @Test
     void ID로_시간_조회() {
-        ReservationTime time = reservationTimeDao.findTimeById(1L);
+        Optional<ReservationTime> time = reservationTimeDao.findTimeById(1L);
 
         assertThat(time).isNotNull();
-        assertThat(time.getId()).isEqualTo(1L);
-        assertThat(time.getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(time.get().getId()).isEqualTo(1L);
+        assertThat(time.get().getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
     @Test
@@ -63,7 +62,6 @@ class ReservationTimeDaoTest {
     void 시간_삭제() {
         reservationTimeDao.delete(9L);
 
-        assertThatThrownBy(() -> reservationTimeDao.findTimeById(9L))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+        assertThat(reservationTimeDao.findTimeById(9L)).isEmpty();
     }
 }

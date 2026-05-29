@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -27,11 +28,11 @@ class ThemeDaoTest {
 
     @Test
     void ID로_테마_조회() {
-        Theme theme = themeDao.findThemeById(1L);
+        Optional<Theme> theme = themeDao.findThemeById(1L);
 
         assertThat(theme).isNotNull();
-        assertThat(theme.getId()).isEqualTo(1L);
-        assertThat(theme.getName()).isEqualTo("우테코 공포물");
+        assertThat(theme.get().getId()).isEqualTo(1L);
+        assertThat(theme.get().getName()).isEqualTo("우테코 공포물");
     }
 
     @Test
@@ -61,7 +62,6 @@ class ThemeDaoTest {
 
         themeDao.delete(themeId);
 
-        assertThatThrownBy(() -> themeDao.findThemeById(themeId))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+        assertThat(themeDao.findThemeById(themeId)).isEmpty();
     }
 }

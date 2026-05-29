@@ -3,6 +3,7 @@ package roomescape.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -22,8 +23,8 @@ public class ThemeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Theme findThemeById(Long id) {
-        return jdbcTemplate.queryForObject(
+    public Optional<Theme> findThemeById(Long id) {
+        List<Theme> themes = jdbcTemplate.query(
                 "SELECT id, name, description, url FROM theme WHERE id = ?",
                 (rs, rowNum) -> new Theme(
                         rs.getLong("id"),
@@ -33,6 +34,8 @@ public class ThemeDao {
                 ),
                 id
         );
+
+        return themes.stream().findFirst();
     }
 
     public List<Theme> findAllThemes() {

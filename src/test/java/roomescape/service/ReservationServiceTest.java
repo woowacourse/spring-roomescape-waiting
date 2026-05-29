@@ -15,6 +15,8 @@ import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.NotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -29,7 +31,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), timeId, 1L);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -38,7 +40,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), 1L, themeId);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -79,7 +81,7 @@ class ReservationServiceTest {
         UserReservationUpdateRequest updateRequest = new UserReservationUpdateRequest(LocalDate.of(2026, 6, 1), 2L, 1L);
 
         assertThatThrownBy(() -> reservationService.update(id, updateRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(AlreadyExistsException.class);
     }
 
     @Test
@@ -90,6 +92,6 @@ class ReservationServiceTest {
         ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.of(2026, 6, 1), 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.save(secondRequest))
-                .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(AlreadyExistsException.class);
     }
 }

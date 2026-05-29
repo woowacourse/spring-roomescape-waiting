@@ -14,6 +14,8 @@ import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
+import roomescape.exception.AlreadyExistsException;
+import roomescape.exception.AlreadyInUseException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -65,8 +67,7 @@ class ReservationTimeServiceTest {
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 0));
 
         assertThatThrownBy(() -> reservationTimeService.save(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 시간대이므로 추가할 수 없습니다.");
+                .isInstanceOf(AlreadyExistsException.class);
     }
 
     @Test
@@ -83,8 +84,7 @@ class ReservationTimeServiceTest {
         Long timeIdWithReservation = 1L;
 
         assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+                .isInstanceOf(AlreadyInUseException.class);
     }
 
     @Test
