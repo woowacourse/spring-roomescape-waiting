@@ -3,10 +3,6 @@ let editingThemeId = null;
 let datePicker = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('search-btn').addEventListener('click', search);
-  document.getElementById('search-name').addEventListener('keydown', e => {
-    if (e.key === 'Enter') search();
-  });
   document.getElementById('edit-confirm').addEventListener('click', submitEdit);
   document.getElementById('edit-cancel').addEventListener('click', closeModal);
   document.getElementById('modal-overlay').addEventListener('click', e => {
@@ -21,15 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (dateStr && editingThemeId) loadAvailableTimes(dateStr, editingThemeId);
     }
   });
+
+  loadMyReservations();
 });
 
-function search() {
-  const name = document.getElementById('search-name').value.trim();
-  if (!name) { showToast('이름을 입력해주세요.'); return; }
-
+function loadMyReservations() {
   Promise.all([
-    fetch(`/reservations?name=${encodeURIComponent(name)}`).then(r => r.json()),
-    fetch(`/waitings?name=${encodeURIComponent(name)}`).then(r => r.json())
+    fetch('/reservations').then(r => {
+      if (r.status === 401) {
+        showToast('로그인이 필요합니다.');
+        setTimeout(() => { window.location.href = '/login'; }, 1000);
+        return [];
+      }
+      return r.json();
+    }),
+    fetch('/waitings').then(r => {
+      if (r.status === 401) return [];
+      return r.json();
+    })
   ])
     .then(([reservations, waitings]) => renderAll(reservations, waitings))
     .catch(() => showToast('조회에 실패했습니다.'));
@@ -46,9 +51,12 @@ function renderAll(reservations, waitings) {
   ];
 
   rows.sort((a, b) => {
-    const dateA = a.type === 'reservation' ? a.data.date : a.data.date;
-    const dateB = b.type === 'reservation' ? b.data.date : b.data.date;
-    return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+    const dateA = a.data.date;
+    const dateB = b.data.date;
+    if (dateA !== dateB) return dateB > dateA ? 1 : -1;
+    const timeA = a.type === 'reservation' ? a.data.time.startAt : a.data.startAt;
+    const timeB = b.type === 'reservation' ? b.data.time.startAt : b.data.startAt;
+    return timeB > timeA ? 1 : -1;
   });
 
   if (rows.length === 0) {
@@ -174,7 +182,7 @@ function submitEdit() {
     .then(() => {
       showToast('예약이 변경되었습니다.', 'success');
       closeModal();
-      search();
+      loadMyReservations();
     })
     .catch(err => showToast(err.message));
 }

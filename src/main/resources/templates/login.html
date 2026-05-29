@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로그인 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+  </div>
+</header>
+
+<main class="container" style="max-width:400px;margin-top:60px;">
+  <h1 class="page-title"><i class="fas fa-sign-in-alt" style="color:var(--accent);margin-right:10px;"></i>로그인</h1>
+
+  <div class="filter-card">
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <label class="form-label">이메일</label>
+        <input id="email" type="email" class="form-control" placeholder="이메일을 입력하세요">
+      </div>
+      <div>
+        <label class="form-label">비밀번호</label>
+        <input id="password" type="password" class="form-control" placeholder="비밀번호를 입력하세요">
+      </div>
+      <button id="login-btn" class="btn btn-primary" style="width:100%;">로그인</button>
+      <p style="text-align:center;color:var(--text-muted);font-size:0.9rem;">
+        계정이 없으신가요? <a href="/signup" style="color:var(--accent);">회원가입</a>
+      </p>
+    </div>
+  </div>
+</main>
+
+<script src="/js/scripts.js"></script>
+<script>
+  document.getElementById('login-btn').addEventListener('click', login);
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) { showToast('이메일과 비밀번호를 입력해주세요.'); return; }
+
+    fetch('/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password})
+    })
+      .then(res => {
+        if (res.ok) return res.json();
+        return res.json().then(b => { throw new Error(b.message || '로그인에 실패했습니다.'); });
+      })
+      .then(() => {
+        document.cookie = 'auth=1; path=/';
+        window.location.href = '/';
+      })
+      .catch(err => showToast(err.message));
+  }
+</script>
+</body>
+</html>
