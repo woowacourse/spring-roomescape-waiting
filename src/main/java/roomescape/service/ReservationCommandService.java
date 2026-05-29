@@ -44,8 +44,8 @@ public class ReservationCommandService {
     public void cancel(long reservationId, String name) {
         Reservation reservation = findReservation(reservationId);
 
-        reservation.validateNotStarted(LocalDateTime.now(clock));
         reservation.validateOwnedBy(name);
+        reservation.validateNotStarted(LocalDateTime.now(clock));
 
         reservationDao.deleteById(reservationId);
     }
@@ -55,8 +55,8 @@ public class ReservationCommandService {
         Reservation oldReservation = findReservation(reservationId);
         Slot newSlot = new Slot(newDate, findTimeReference(newTimeId), oldReservation.slot().theme());
 
-        oldReservation.validateNotStarted(now);
         oldReservation.validateOwnedBy(name);
+        oldReservation.validateNotStarted(now);
         newSlot.validateNotPast(now);
         validateNoDuplicateExcluding(newSlot, reservationId);
 

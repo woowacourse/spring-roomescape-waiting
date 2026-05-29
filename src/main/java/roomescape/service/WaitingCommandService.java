@@ -66,8 +66,8 @@ public class WaitingCommandService {
     public void cancel(long waitingId, String name) {
         Waiting waiting = findWaitingReference(waitingId);
 
-        waiting.validateNotStarted(LocalDateTime.now(clock));
         waiting.validateOwnedBy(name);
+        waiting.validateNotStarted(LocalDateTime.now(clock));
 
         waitingDao.deleteById(waitingId);
     }
