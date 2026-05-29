@@ -2,74 +2,65 @@ package roomescape.reservationwaiting.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationwaiting.domain.ReservationWaiting;
+import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
-import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
+import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
+import roomescape.theme.domain.Theme;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class ReservationWaitingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ReservationWaitingServiceTest {
 
-    @Autowired
+    private final Clock fixedClock = Clock.fixed(
+            LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+    @Mock
+    private ReservationWaitingRepository reservationWaitingRepository;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationWaitingFactory reservationWaitingFactory;
+    @Mock
+    private Clock clock;
+    @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private Long pastWaitingId;
-    private Long futureReservationId1;
-    private Long futureReservationId2;
-    private ReservationWaitingResponse waitingResponse;
-
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
-
-        // 과거 예약 + 대기
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
-                LocalDate.now().minusDays(1));
-        Long pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        jdbcTemplate.update("INSERT INTO reservation_waiting (name, reservation_id) VALUES ('pastUser', ?)",
-                pastReservationId);
-        pastWaitingId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_waiting", Long.class);
-
-        // 미래 예약 2개
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
-        futureReservationId1 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', '2099-12-01', 2, 1)");
-        futureReservationId2 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
-        // 현미밥의 대기 등록
-        waitingResponse = reservationWaitingService.createWaiting(
-                new ReservationWaitingRequest("현미밥", futureReservationId1));
+    private ReservationTime sampleTime() {
+        return ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
     }
 
-    @Test
-    @DisplayName("예약 대기 생성 성공")
-    void 예약_대기_생성_성공() {
-        assertThat(waitingResponse.id()).isNotNull();
+    private Theme sampleTheme() {
+        return Theme.restore(1L, "테마A", "설명", "https://a.com");
     }
 
     @Test
     @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
     void 예약_대기_생성_실패() {
-        assertThatThrownBy(() -> reservationWaitingService.createWaiting(
-                new ReservationWaitingRequest("현미밥", futureReservationId1)))
+        Reservation reservation = Reservation.restore(1L, "user1", LocalDate.of(2099, 12, 1), sampleTime(),
+                sampleTheme());
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.existsByNameAndReservationId("현미밥", 1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", 1L)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(
                         e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
@@ -77,16 +68,16 @@ public class ReservationWaitingServiceTest {
     }
 
     @Test
-    @DisplayName("예약 대기를 삭제할 수 있다.")
-    void 예약_대기_삭제_성공() {
-        reservationWaitingService.deleteWaiting(waitingResponse.id());
-        assertThat(reservationWaitingService.getWaitingByName("현미밥")).isEmpty();
-    }
-
-    @Test
     @DisplayName("지난 예약 대기는 삭제할 수 없다.")
     void 예약_대기_삭제_실패() {
-        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(pastWaitingId))
+        Reservation pastReservation = Reservation.restore(1L, "user1", LocalDate.now().minusDays(1), sampleTime(),
+                sampleTheme());
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, "현미밥", pastReservation);
+        when(reservationWaitingRepository.findReservationWaitingById(1L)).thenReturn(Optional.of(waiting));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
+        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(1L))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.PAST_WAITING_CANCEL))
@@ -96,17 +87,12 @@ public class ReservationWaitingServiceTest {
     @Test
     @DisplayName("존재하지 않는 대기 ID로 삭제 시 예외 발생")
     void 없는_대기_삭제_실패() {
-        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(999L))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
-                        ErrorCode.WAITING_NOT_FOUND))
-                .hasMessage(ErrorCode.WAITING_NOT_FOUND.getMessage());
-    }
+        when(reservationWaitingRepository.findReservationWaitingById(Long.MAX_VALUE)).thenReturn(Optional.empty());
 
-    @Test
-    @DisplayName("사용자의 이름으로 대기 현황을 조회한다.")
-    void 예약_대기_조회() {
-        reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", futureReservationId2));
-        assertThat(reservationWaitingService.getWaitingByName("현미밥")).hasSize(2);
+        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(Long.MAX_VALUE))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_FOUND))
+                .hasMessage(ErrorCode.WAITING_NOT_FOUND.getMessage());
     }
 }

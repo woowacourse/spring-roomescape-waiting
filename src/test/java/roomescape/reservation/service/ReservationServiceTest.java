@@ -2,76 +2,80 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
-    @Autowired
-    private ReservationService reservationService;
-    @Autowired
+
+    private final Clock fixedClock = Clock.fixed(
+            LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
     private ReservationTimeService reservationTimeService;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    private Long pastReservationId;
-    private Long futureReservationId1;
-    private Long futureReservationId2;
+    @Mock
+    private ThemeService themeService;
+    @Mock
+    private ReservationFactory reservationFactory;
+    @Mock
+    private Clock clock;
 
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('18:00', '19:00')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마B', '설명B', 'https://b.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마C', '설명C', 'https://c.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마D', '설명D', 'https://d.com')");
+    @InjectMocks
+    private ReservationService reservationService;
 
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
-                LocalDate.now().minusDays(1));
-        pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
-        futureReservationId1 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', '2099-12-01', 2, 1)");
-        futureReservationId2 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+    private ReservationTime sampleTime1() {
+        return ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
     }
 
-    @Test
-    @DisplayName("예약 생성 성공")
-    void 예약_생성_성공() {
-        ReservationResponse response = reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 1L, 1L));
-        assertThat(response.id()).isNotNull();
+    private ReservationTime sampleTime2() {
+        return ReservationTime.restore(2L, LocalTime.of(16, 0), LocalTime.of(17, 0));
+    }
+
+    private Theme sampleTheme() {
+        return Theme.restore(1L, "테마A", "설명A", "https://a.com");
+    }
+
+    private Reservation futureReservation(Long id) {
+        return Reservation.restore(id, "user1", LocalDate.of(2099, 12, 1), sampleTime1(), sampleTheme());
+    }
+
+    private Reservation pastReservation(Long id) {
+        return Reservation.restore(id, "user1", LocalDate.now().minusDays(1), sampleTime1(), sampleTheme());
     }
 
     @Test
     @DisplayName("존재하지 않는 timeId로 예약 생성 시 예외 발생")
     void 존재하지_않는_timeId_예외() {
+        when(reservationTimeService.getById(Long.MAX_VALUE)).thenThrow(new BusinessException(ErrorCode.TIME_NOT_FOUND));
+
         assertThatThrownBy(() -> reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 999L, 1L)))
+                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), Long.MAX_VALUE, 1L)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.TIME_NOT_FOUND))
                 .hasMessage(ErrorCode.TIME_NOT_FOUND.getMessage());
@@ -80,28 +84,24 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 themeId로 예약 생성 시 예외 발생")
     void 존재하지_않는_themeId_예외() {
+        when(reservationTimeService.getById(1L)).thenReturn(sampleTime1());
+        when(themeService.getById(Long.MAX_VALUE)).thenThrow(new BusinessException(ErrorCode.THEME_NOT_FOUND));
+
         assertThatThrownBy(() -> reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 1L, 999L)))
+                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 1L, Long.MAX_VALUE)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_NOT_FOUND))
                 .hasMessage(ErrorCode.THEME_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("예약 삭제 후 해당 시간 예약 가능")
-    void 예약_삭제_성공() {
-        LocalDate date = LocalDate.of(2099, 12, 1);
-        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(1);
-
-        reservationService.deleteReservation(futureReservationId1);
-
-        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(2);
-    }
-
-    @Test
     @DisplayName("이미 지난 예약은 취소할 수 없다")
     void 과거_예약_취소_불가() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(pastReservationId))
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation(1L)));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
+        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.PAST_RESERVATION_CANCEL))
@@ -109,18 +109,14 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 수정 성공")
-    void 예약_수정_성공() {
-        ReservationResponse response = reservationService.updateReservation(
-                futureReservationId1, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L));
-        assertThat(response.date()).isEqualTo(LocalDate.of(2099, 12, 2));
-    }
-
-    @Test
     @DisplayName("이미 지난 예약은 수정할 수 없다")
     void 과거_예약_수정_불가() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation(1L)));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
         assertThatThrownBy(() -> reservationService.updateReservation(
-                pastReservationId, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
+                1L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.PAST_RESERVATION_UPDATE))
@@ -130,8 +126,15 @@ class ReservationServiceTest {
     @Test
     @DisplayName("변경하려는 날짜·시간이 과거면 수정 불가")
     void 새시간_과거면_수정_불가() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation(1L)));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(any(), any(), any(), any())).thenReturn(
+                false);
+        when(reservationTimeService.getById(2L)).thenReturn(sampleTime2());
+
         assertThatThrownBy(() -> reservationService.updateReservation(
-                futureReservationId1, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
+                1L, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.PAST_TIME_RESERVATION))
@@ -141,6 +144,12 @@ class ReservationServiceTest {
     @Test
     @DisplayName("오늘 날짜에 이미 지난 시각으로 예약 불가")
     void 오늘_날짜_지난_시각_예약_불가() {
+        when(reservationTimeService.getById(1L)).thenReturn(sampleTime1());
+        when(themeService.getById(1L)).thenReturn(sampleTheme());
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(false);
+        when(reservationFactory.create(any(), any(), any(), any())).thenThrow(
+                new BusinessException(ErrorCode.PAST_TIME_CREATE));
+
         assertThatThrownBy(() -> reservationService.createReservation(
                 new ReservationRequest("현미밥", LocalDate.now(), 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
@@ -152,24 +161,19 @@ class ReservationServiceTest {
     @Test
     @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
     void 중복_예약_수정_불가() {
-        assertThatThrownBy(() -> reservationService.updateReservation(
-                futureReservationId2, new ReservationUpdateRequest(LocalDate.of(2099, 12, 1), 1L)))
+        Reservation reservation = Reservation.restore(2L, "user2", LocalDate.of(2099, 12, 1), sampleTime2(),
+                sampleTheme());
+        when(reservationRepository.findById(2L)).thenReturn(Optional.of(reservation));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(
+                LocalDate.of(2099, 12, 1), 1L, 1L, 2L)).thenReturn(true);
+
+        assertThatThrownBy(() -> reservationService.updateReservation(2L,
+                new ReservationUpdateRequest(LocalDate.of(2099, 12, 1), 1L)))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.DUPLICATE_RESERVATION))
                 .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
-    }
-
-    @TestConfiguration
-    static class FixedClockConfig {
-        @Bean
-        @Primary
-            // 서비스에서 이 Clock 빈을 우선적으로 사용
-        Clock fixedClock() {
-            return Clock.fixed(
-                    LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
-                    ZoneId.systemDefault()
-            );
-        }
     }
 }

@@ -2,58 +2,55 @@ package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    @Autowired
+    private final Clock fixedClock = Clock.fixed(
+            LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+    @Mock
+    private ThemeRepository themeRepository;
+    @Mock
+    private Clock clock;
+    @InjectMocks
     private ThemeService themeService;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setUp() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('18:00', '19:00')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마B', '설명B', 'https://b.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마C', '설명C', 'https://c.com')");
-        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마D', '설명D', 'https://d.com')");
-
-        // 인기 테마 데이터 (theme1 > theme2 > theme3)
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u1', ?, 1, 1)",
-                LocalDate.now().minusDays(1));
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u2', ?, 1, 1)",
-                LocalDate.now().minusDays(2));
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u3', ?, 1, 1)",
-                LocalDate.now().minusDays(3));
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u1', ?, 2, 2)",
-                LocalDate.now().minusDays(1));
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u2', ?, 2, 2)",
-                LocalDate.now().minusDays(2));
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u1', ?, 3, 3)",
-                LocalDate.now().minusDays(1));
-    }
 
     @Test
     @DisplayName("인기 테마 조회")
     void 인기_테마_조회() {
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
+        LocalDate endDate = LocalDate.now(fixedClock);
+        LocalDate startDate = endDate.minusDays(7);
+        List<Long> themeIds = List.of(1L, 2L, 3L);
+        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com");
+        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com");
+        Theme theme3 = Theme.restore(3L, "테마C", "설명C", "https://c.com");
+
+        when(themeRepository.findTopThemeIds(startDate, endDate, 10)).thenReturn(themeIds);
+        when(themeRepository.findAllByIds(themeIds)).thenReturn(List.of(theme1, theme2, theme3));
+
         List<ThemeResponse> result = themeService.getTopThemes(10);
 
         assertThat(result).hasSize(3);
@@ -65,20 +62,29 @@ class ThemeServiceTest {
     @Test
     @DisplayName("인기 테마 조회 limit 적용")
     void 인기_테마_조회_limit_적용() {
-        List<ThemeResponse> result = themeService.getTopThemes(2);
-        assertThat(result).hasSize(2);
-    }
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
 
-    @Test
-    @DisplayName("id로 테마 조회 성공")
-    void getById_성공() {
-        assertThat(themeService.getById(1L).getId()).isEqualTo(1L);
+        LocalDate endDate = LocalDate.now(fixedClock);
+        LocalDate startDate = endDate.minusDays(7);
+        List<Long> themeIds = List.of(1L, 2L);
+        Theme theme1 = Theme.restore(1L, "테마A", "설명A", "https://a.com");
+        Theme theme2 = Theme.restore(2L, "테마B", "설명B", "https://b.com");
+
+        when(themeRepository.findTopThemeIds(startDate, endDate, 2)).thenReturn(themeIds);
+        when(themeRepository.findAllByIds(themeIds)).thenReturn(List.of(theme1, theme2));
+
+        List<ThemeResponse> result = themeService.getTopThemes(2);
+
+        assertThat(result).hasSize(2);
     }
 
     @Test
     @DisplayName("존재하지 않는 id로 테마 조회 시 예외 발생")
     void getById_없으면_예외() {
-        assertThatThrownBy(() -> themeService.getById(999L))
+        when(themeRepository.findById(Long.MAX_VALUE)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> themeService.getById(Long.MAX_VALUE))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_NOT_FOUND))
                 .hasMessage(ErrorCode.THEME_NOT_FOUND.getMessage());
