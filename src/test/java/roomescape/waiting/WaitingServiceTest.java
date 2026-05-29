@@ -54,7 +54,7 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
@@ -84,7 +84,7 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
@@ -121,7 +121,7 @@ class WaitingServiceTest {
                 .thenReturn(scheduleId);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
         when(reservationRepository.existsByScheduleId(scheduleId))
                 .thenReturn(false);
@@ -187,7 +187,7 @@ class WaitingServiceTest {
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
         when(reservationRepository.existsByScheduleId(scheduleId))
                 .thenReturn(true);
@@ -240,7 +240,7 @@ class WaitingServiceTest {
                 .thenReturn(scheduleId);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
         when(reservationRepository.existsByScheduleId(scheduleId))
                 .thenReturn(true);

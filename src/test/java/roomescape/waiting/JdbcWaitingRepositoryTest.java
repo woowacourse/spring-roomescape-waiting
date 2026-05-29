@@ -40,7 +40,7 @@ class JdbcWaitingRepositoryTest {
     void existsByScheduleIdAndMemberId_true_테스트() {
         waitingRepository.save(new Waiting(null, MEMBER_ID, SCHEDULE_ID));
 
-        boolean result = waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, SCHEDULE_ID);
+        boolean result = waitingRepository.existsByScheduleIdAndMemberId(SCHEDULE_ID, MEMBER_ID);
 
         assertThat(result).isTrue();
     }

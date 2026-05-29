@@ -76,7 +76,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId) {
+    public boolean existsByScheduleIdAndMemberId(long scheduleId, long memberId) {
         String sql = """
                 SELECT EXISTS (SELECT 1 FROM waiting WHERE member_id = :memberId AND schedule_id = :scheduleId)
                 """;

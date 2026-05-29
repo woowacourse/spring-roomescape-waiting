@@ -12,13 +12,11 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long waitingId);
 
-    boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId);
+    boolean existsByScheduleIdAndMemberId(long scheduleId, long memberId);
 
     boolean existsByScheduleId(long scheduleId);
 
     long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId);
-
-//    List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 
     void deleteById(long waitingId);
 

@@ -63,7 +63,7 @@ public class WaitingService {
     }
 
     private void validateMemberNotAlreadyWaiting(long memberId, long scheduleId) {
-        if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)) {
+        if (waitingRepository.existsByScheduleIdAndMemberId(scheduleId, memberId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
         }
     }

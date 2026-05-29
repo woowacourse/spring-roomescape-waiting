@@ -16,8 +16,6 @@ public interface ReservationRepository {
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
-//    List<ReservationDetailProjection> findAllReservationDetailsByMemberId(long memberId);
-
     void deleteById(long reservationId);
 
     Optional<ReservationDetailProjection> findDetailById(long reservationId);
