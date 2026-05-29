@@ -73,7 +73,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
-        Reservation reservation = createReservation(command);
+        Reservation reservation = createReservation(command, ReservationStatus.ACTIVE);
 
         if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(reservation.getDate(),
             reservation.getTime(),
@@ -88,7 +88,7 @@ public class ReservationService {
         }
     }
 
-    private Reservation createReservation(ReservationCreateCommand command) {
+    private Reservation createReservation(ReservationCreateCommand command, ReservationStatus status) {
         List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
 
         Time time = timeRepository.findTimeByIdAndDeletedAtIsNull(command.timeId()).orElse(null);
@@ -106,7 +106,7 @@ public class ReservationService {
                 parameterErrorResponses);
         }
 
-        return Reservation.create(command.name(), command.date(), time, theme);
+        return Reservation.create(command.name(), command.date(), time, theme, status);
     }
 
     @Transactional
@@ -219,10 +219,9 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
-        Reservation reservation = createReservation(command);
-        Reservation waitingReservation = reservation.toWaiting();
+        Reservation reservation = createReservation(command, ReservationStatus.WAITING);
 
-        if (reservationRepository.existsReservationAndStatus(waitingReservation, ReservationStatus.WAITING)) {
+        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.WAITING)) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }
 
@@ -231,7 +230,7 @@ public class ReservationService {
         }
 
         try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
+            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }

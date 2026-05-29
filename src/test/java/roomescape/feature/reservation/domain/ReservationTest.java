@@ -1,6 +1,7 @@
 package roomescape.feature.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -23,20 +24,21 @@ class ReservationTest {
     class 생성한다 {
 
         @Test
-        void 미래_일정으로_생성하면_ACTIVE_상태로_생성된다() {
+        void 미래_일정으로_생성하면_정상_생성된다() {
             LocalDate futureDate = LocalDate.now().plusYears(1);
 
-            Reservation reservation = Reservation.create(DEFAULT_RESERVER_NAME, futureDate, DEFAULT_TIME, DEFAULT_THEME);
-
-            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.ACTIVE);
+            assertThatNoException().isThrownBy(() ->
+                    Reservation.create(DEFAULT_RESERVER_NAME, futureDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE)
+            );
         }
 
         @Test
         void 과거_일정으로_생성하면_예외를_던진다() {
             LocalDate pastDate = LocalDate.now().minusYears(1);
 
-            assertThatThrownBy(() -> Reservation.create(DEFAULT_RESERVER_NAME, pastDate, DEFAULT_TIME, DEFAULT_THEME))
-                .isInstanceOf(GeneralException.class)
+            assertThatThrownBy(() ->
+                    Reservation.create(DEFAULT_RESERVER_NAME, pastDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE)
+            ).isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 생성할 수 없습니다");
         }
     }
@@ -49,9 +51,11 @@ class ReservationTest {
     }
 
     @Test
-    void 대기로_전환하면_WAITING_상태의_예약이_반환된다() {
-        Reservation reservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+    void WAITING_상태로_생성하면_WAITING_상태의_예약이_반환된다() {
+        LocalDate futureDate = LocalDate.now().plusYears(1);
 
-        assertThat(reservation.toWaiting().getStatus()).isEqualTo(ReservationStatus.WAITING);
+        Reservation reservation = Reservation.create(DEFAULT_RESERVER_NAME, futureDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 }

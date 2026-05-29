@@ -2,6 +2,7 @@ package roomescape.fixture;
 
 import java.time.LocalDate;
 import roomescape.feature.reservation.domain.Reservation;
+import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
@@ -19,7 +20,7 @@ public enum ReservationFixture {
     }
 
     public Reservation createInstance(Time time, Theme theme) {
-        return Reservation.create(new ReserverName(name), date, time, theme);
+        return Reservation.create(new ReserverName(name), date, time, theme, ReservationStatus.ACTIVE);
     }
 
     public String getName() {

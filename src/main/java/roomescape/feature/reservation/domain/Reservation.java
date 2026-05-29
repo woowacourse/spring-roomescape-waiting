@@ -22,11 +22,11 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme) {
+    public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
         Schedule schedule = new Schedule(date, time);
         validateFuture(schedule);
 
-        return new Reservation(null, name, schedule, theme, ReservationStatus.ACTIVE);
+        return new Reservation(null, name, schedule, theme, status);
     }
 
     public static Reservation reconstruct(
@@ -37,10 +37,6 @@ public class Reservation {
 
     public Reservation cancel() {
         return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
-    }
-
-    public Reservation toWaiting() {
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.WAITING);
     }
 
     private static void validateFuture(Schedule schedule) {
