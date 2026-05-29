@@ -70,20 +70,20 @@ public class ReservationDao {
     public Reservation save(Reservation reservation) {
         Slot slot = reservation.slot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.username())
+                .addValue("name", reservation.name())
                 .addValue("date", slot.date())
                 .addValue("time_id", slot.time().id())
                 .addValue("theme_id", slot.theme().id());
 
         long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return Reservation.create(id, reservation.username(), slot);
+        return Reservation.create(id, reservation.name(), slot);
     }
 
     public Reservation update(Reservation reservation) {
         Slot slot = reservation.slot();
         String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, reservation.username(), slot.date(), slot.time().id(), slot.theme().id(), reservation.id());
+        int affected = jdbcTemplate.update(sql, reservation.name(), slot.date(), slot.time().id(), slot.theme().id(), reservation.id());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");

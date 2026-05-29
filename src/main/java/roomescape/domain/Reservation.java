@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import lombok.RequiredArgsConstructor;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.PastReservationException;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.time.LocalDateTime;
 public class Reservation {
 
     private final Long id;
-    private final String username;
+    private final String name;
     private final Slot slot;
 
     public static Reservation create(long id, String username, Slot slot) {
@@ -21,7 +22,7 @@ public class Reservation {
     }
 
     public boolean isOwnedBy(String name) {
-        return this.username.equals(name);
+        return this.name.equals(name);
     }
 
     public void validateCancelable(LocalDateTime now) {
@@ -30,12 +31,18 @@ public class Reservation {
         }
     }
 
-    public Reservation withSlot(Slot newSlot) {
-        return new Reservation(id, username, newSlot);
+    public void validateOwnedBy(String name) {
+        if (!this.name.equals(name)) {
+            throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
+        }
     }
 
-    public String username() {
-        return username;
+    public Reservation withSlot(Slot newSlot) {
+        return new Reservation(id, name, newSlot);
+    }
+
+    public String name() {
+        return name;
     }
 
     public Slot slot() {

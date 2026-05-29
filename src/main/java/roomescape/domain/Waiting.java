@@ -11,7 +11,7 @@ public class Waiting {
     private final Long id;
     private final String name;
     private final Slot slot;
-    private final LocalDateTime createAt;
+    private final LocalDateTime createdAt;
 
     public static Waiting create(long id, String name, Slot slot, LocalDateTime createdAt) {
         return new Waiting(id, name, slot, createdAt);
@@ -46,6 +46,6 @@ public class Waiting {
     }
 
     public LocalDateTime createAt() {
-        return createAt;
+        return createdAt;
     }
 }
