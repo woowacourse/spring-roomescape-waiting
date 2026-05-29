@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class ReservationControllerTest {
     void 예약과_시간_연결() {
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
-        reservation.put("date", "2026-05-30");
+        reservation.put("date", LocalDate.now().plusDays(1));
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
