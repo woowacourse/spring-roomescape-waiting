@@ -168,6 +168,27 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("확정 예약이 다른 슬롯으로 변경되면 기존 슬롯의 첫 번째 대기 예약이 확정된다.")
+    void promoteFirstPendingReservationWhenConfirmedReservationIsModified(){
+        Reservation confirmReservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        Reservation firstPendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+        Reservation secondPendingReservation = reservationService.saveReservation("나대기", savedThemeSlot1.getId());
+
+        reservationService.modifyReservation(confirmReservation.getId(), savedThemeSlot2.getId());
+
+        Reservation modifiedReservation = reservationService.findReservation(confirmReservation.getId());
+        Reservation promotedReservation = reservationService.findReservation(firstPendingReservation.getId());
+        Reservation waitingReservation = reservationService.findReservation(secondPendingReservation.getId());
+        ThemeSlot previousThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
+        ThemeSlot modifiedThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot2.getId()).orElseThrow();
+        assertThat(modifiedReservation.getThemeSlot().getId()).isEqualTo(savedThemeSlot2.getId());
+        assertThat(promotedReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+        assertThat(waitingReservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(previousThemeSlot.isReserved()).isTrue();
+        assertThat(modifiedThemeSlot.isReserved()).isTrue();
+    }
+
+    @Test
     @DisplayName("이미 CANCELLED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCancelledReservation(){
         Reservation cancelledReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());

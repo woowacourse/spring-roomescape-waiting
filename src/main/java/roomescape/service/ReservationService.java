@@ -108,16 +108,7 @@ public class ReservationService {
         reservationRepository.updateStatus(reservation);
 
         if (wasConfirmed) {
-            Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
-
-            if (waitingReservation.isPresent()) {
-                waitingReservation.ifPresent(Reservation::confirm);
-                reservationRepository.updateStatus(waitingReservation.get());
-            }
-
-            if (waitingReservation.isEmpty()) {
-                themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
-            }
+            promoteWaitingReservationOrReleaseSlot(reservation);
         }
     }
 
@@ -136,8 +127,14 @@ public class ReservationService {
         validateDateTime(themeSlot);
         if (!reservation.getThemeSlot().getId().equals(themeSlotId)) {
             validateIsExistBy(themeSlotId);
-            themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
             themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
+            if (reservation.isConfirmedStatus()) {
+                themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
+                        .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+                promoteWaitingReservationOrReleaseSlot(reservation);
+            } else {
+                themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+            }
         }
 
         Reservation updateReservation = new Reservation(
@@ -148,6 +145,19 @@ public class ReservationService {
         );
         reservationRepository.updateThemeSlot(updateReservation);
         return updateReservation;
+    }
+
+    private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
+        Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
+
+        if (waitingReservation.isPresent()) {
+            waitingReservation.ifPresent(Reservation::confirm);
+            reservationRepository.updateStatus(waitingReservation.get());
+        }
+
+        if (waitingReservation.isEmpty()) {
+            themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+        }
     }
 
     @Transactional(readOnly = true)
