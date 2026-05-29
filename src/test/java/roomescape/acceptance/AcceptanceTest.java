@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,134 +21,164 @@ class AcceptanceTest {
 
     @LocalServerPort
     private int port;
+    private long themeId;
+    private long timeId;
+    private final String date = "2099-12-31";
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        themeId = 테마_생성("테스트 테마");
+        timeId = 시간_슬롯_생성("10:00");
     }
 
     @Test
-    @DisplayName("동일한 슬롯에 대해 여러 명이 예약할 경우 대기 순번이 부여되고 앞선 예약(대기) 취소 시 뒷 순번의 예약 대기가 앞당겨진다")
-    void 예약_대기_시나리오() {
-        // Step 1: 어드민 데이터 세팅 (테마, 시간)
+    @DisplayName("이미 예약된 슬롯에 예약하면 대기 번호가 순차적으로 부여된다")
+    void 예약_대기_번호_부여_테스트() {
+        예약_생성("사용자A", date, timeId, themeId, 0); // 예약 확정
+        예약_생성("사용자B", date, timeId, themeId, 1);
+        예약_생성("사용자C", date, timeId, themeId, 2);
+    }
+
+    @Test
+    @DisplayName("확정된 예약이 취소되면 대기 순번이 자동으로 앞당겨진다")
+    void 예약_취소_시_대기_순번_갱신_테스트() {
+        long idA = 예약_생성("사용자A", date, timeId, themeId, 0);
+        예약_생성("사용자B", date, timeId, themeId, 1);
+        예약_생성("사용자C", date, timeId, themeId, 2);
+
+        예약_취소("사용자A", idA);
+
+        내_예약_대기순번_확인("사용자B", 0);
+        내_예약_대기순번_확인("사용자C", 1);
+    }
+
+    @Test
+    @DisplayName("대기 중인 예약을 취소하면 목록에서 정상적으로 제거된다")
+    void 대기_예약_취소_테스트() {
+        예약_생성("사용자A", date, timeId, themeId, 0);
+        long idB = 예약_생성("사용자B", date, timeId, themeId, 1);
+
+        예약_취소("사용자B", idB);
+
+        내_예약_개수_확인("사용자B", 0);
+    }
+
+    @Test
+    @DisplayName("본인이 이미 예약 또는 대기 중인 슬롯에 다시 예약하면 실패한다")
+    void 중복_예약_대기_실패_테스트() {
+        예약_생성("사용자A", date, timeId, themeId, 0);
+
+        예약_생성_실패("사용자A", date, timeId, themeId, 409);
+    }
+
+    @Test
+    @DisplayName("본인의 예약이 아닌 예약을 취소하려 하면 실패한다")
+    void 타인_예약_취소_실패_테스트() {
+        long idA = 예약_생성("사용자A", date, timeId, themeId, 0);
+
+        예약_취소_실패("사용자B", idA, 403);
+    }
+
+    private static long 테마_생성(String themeName) {
         Map<String, String> themeRequest = Map.of(
-                "name", "테스트 테마",
+                "name", themeName,
                 "description", "테스트 설명",
                 "thumbnailUrl", "https://example.com/thumb.jpg"
         );
-        long themeId = RestAssured.given().log().all()
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(themeRequest)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath().getLong("id");
+    }
 
-        Map<String, String> timeRequest = Map.of("startAt", "10:00");
-        long timeId = RestAssured.given().log().all()
+    private static long 시간_슬롯_생성(String time) {
+        Map<String, String> timeRequest = Map.of("startAt", time);
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(timeRequest)
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath().getLong("id");
+    }
 
-        String date = "2099-12-31";
-
-        // Step 2: 사용자 A가 예약 (waitingOrder: 0)
-        Map<String, Object> reservationA = Map.of(
-                "name", "사용자A",
+    private static long 예약_생성(String username, String date, long timeId, long themeId, int expectedWaitingOrder) {
+        Map<String, Object> reservationRequest = Map.of(
+                "name", username,
                 "date", date,
                 "timeId", timeId,
                 "themeId", themeId
         );
-        long idA = RestAssured.given().log().all()
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationA)
+                .body(reservationRequest)
                 .when().post("/user/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("waitingOrder", is(0))
+                .body("waitingOrder", is(expectedWaitingOrder))
                 .extract().jsonPath().getLong("id");
+    }
 
-        // Step 3: 사용자 B가 대기 (waitingOrder: 1)
-        Map<String, Object> reservationB = Map.of(
-                "name", "사용자B",
+    private static void 예약_생성_실패(String username, String date, long timeId, long themeId, int expectedStatusCode) {
+        Map<String, Object> reservationRequest = Map.of(
+                "name", username,
                 "date", date,
                 "timeId", timeId,
                 "themeId", themeId
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationB)
+                .body(reservationRequest)
                 .when().post("/user/reservations")
                 .then().log().all()
-                .statusCode(200)
-                .body("waitingOrder", is(1))
-                .extract().jsonPath().getLong("id");
+                .statusCode(expectedStatusCode);
+    }
 
-        // Step 4: 사용자 C가 대기 (waitingOrder: 2)
-        Map<String, Object> reservationC = Map.of(
-                "name", "사용자C",
-                "date", date,
-                "timeId", timeId,
-                "themeId", themeId
-        );
-        long idC = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationC)
-                .when().post("/user/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("waitingOrder", is(2))
-                .extract().jsonPath().getLong("id");
-
-        // Step 5: 사용자 B 조회 시 본인의 대기 순번(1) 확인
+    private static void 내_예약_대기순번_확인(String username, int expectedWaitingOrder) {
         RestAssured.given().log().all()
-                .param("name", "사용자B")
+                .param("name", username)
                 .when().get("/user/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("", hasSize(1))
-                .body("[0].waitingOrder", is(1));
+                .body("[0].waitingOrder", is(expectedWaitingOrder));
+    }
 
-        // Step 6: 사용자 A(예약자)가 예약 취소
+    private static void 예약_취소(String username, long reservationId) {
         RestAssured.given().log().all()
-                .param("name", "사용자A")
-                .when().delete("/user/reservations/" + idA)
+                .param("name", username)
+                .when().delete("/user/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
+    }
 
-        // Step 7: 순번 앞당겨짐 확인
-        // 사용자 B: 1 -> 0
+    private static void 예약_취소_실패(String username, long reservationId, int expectedStatusCode) {
         RestAssured.given().log().all()
-                .param("name", "사용자B")
+                .param("name", username)
+                .when().delete("/user/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(expectedStatusCode);
+    }
+
+    private static ExtractableResponse<Response> 내_예약_목록_조회(String username) {
+        return RestAssured.given().log().all()
+                .param("name", username)
                 .when().get("/user/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].waitingOrder", is(0));
+                .extract();
+    }
 
-        // 사용자 C: 2 -> 1
+    private static void 내_예약_개수_확인(String username, int expectedSize) {
         RestAssured.given().log().all()
-                .param("name", "사용자C")
+                .param("name", username)
                 .when().get("/user/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].waitingOrder", is(1));
-
-        // Step 8: 사용자 C(대기자)가 대기 취소
-        RestAssured.given().log().all()
-                .param("name", "사용자C")
-                .when().delete("/user/reservations/" + idC)
-                .then().log().all()
-                .statusCode(204);
-
-        // 최종 확인: 사용자 C 예약 목록 비어있음
-        RestAssured.given().log().all()
-                .param("name", "사용자C")
-                .when().get("/user/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+                .body("size()", is(expectedSize));
     }
 }
