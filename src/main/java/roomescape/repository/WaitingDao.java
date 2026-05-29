@@ -113,28 +113,16 @@ public class WaitingDao {
                 .findFirst();
     }
 
-    public List<Waiting> findAllBySlot(Slot slot) {
+    public boolean existsBySlotAndName(Slot slot, String name) {
         String sql = """
-                SELECT
-                    waiting.id as waiting_id,
-                    waiting.name,
-                    waiting.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description,
-                    waiting.created_at as created_at
-                FROM waiting as waiting
-                INNER JOIN reservation_time as time
-                ON waiting.time_id = time.id
-                INNER JOIN theme as theme
-                ON waiting.theme_id = theme.id
-                WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
-                ORDER BY created_at;
+                SELECT EXISTS (
+                    SELECT 1 FROM waiting
+                    WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
+                )
                 """;
-        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id());
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, slot.date(), slot.time().id(), slot.theme().id(), name)
+        );
     }
 
     public List<WaitingWithRank> findAllByName(String name) {
