@@ -38,8 +38,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         return slot.getId();
     }
 
-    @Override
-    public Optional<ReservationSlot> findById(long id) {
+    private Optional<ReservationSlot> findById(long id) {
         return reservationSlotDao.findById(id)
                 .map(this::withReservations);
     }
@@ -54,11 +53,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public Optional<ReservationSlot> findByReservationIdForUpdate(long reservationId) {
         return reservationSlotDao.findByReservationIdForUpdate(reservationId)
                 .map(this::withReservations);
-    }
-
-    @Override
-    public void update(ReservationSlot slot) {
-        save(slot);
     }
 
     private ReservationSlot withReservations(ReservationSlot slot) {

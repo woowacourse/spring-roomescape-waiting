@@ -70,32 +70,6 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    void 존재하는_ID로_예약을_조회하면_엔트리와_함께_반환된다() {
-        // given
-        ReservationSlot slot = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        ReservationSlot saved = reservationRepository.save(slot);
-
-        // when:
-        Optional<ReservationSlot> find = reservationRepository.findById(saved.getId());
-
-        // then
-        assertThat(find).isPresent();
-        assertThat(find.get().getReservations())
-                .singleElement()
-                .extracting(Reservation::getId, Reservation::getName, Reservation::getStatus)
-                .containsExactly(1L, "이프", ReservationStatus.RESERVED);
-    }
-
-    @Test
-    void 존재하지_않는_ID로_예약을_조회하면_빈_Optional이_반환된다() {
-        // when:
-        Optional<ReservationSlot> find = reservationRepository.findById(1L);
-
-        // then
-        assertThat(find).isEmpty();
-    }
-
-    @Test
     void 예약_슬롯을_수정한다() {
         // given
         ReservationSlot saved = reservationRepository.save(
@@ -111,10 +85,11 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
         );
 
         // when
-        reservationRepository.update(updated);
+        reservationRepository.save(updated);
 
         // then
-        Optional<ReservationSlot> find = reservationRepository.findById(saved.getId());
+        ReservationCondition condition = new ReservationCondition(updated.getDate(), theme.getId(), reservationTime.getId());
+        Optional<ReservationSlot> find = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition);
 
         assertThat(find).isPresent();
         assertThat(find.get().getDate()).isEqualTo(LocalDate.now().plusDays(2));
@@ -130,13 +105,14 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
         ReservationSlot saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
+        long reservationId = reservedReservationId(saved);
 
         // when
-        saved.cancelReservation(reservedReservationId(saved));
+        saved.cancelReservation(reservationId);
         reservationRepository.save(saved);
 
         // then
-        ReservationSlot find = reservationRepository.findById(saved.getId()).orElseThrow();
+        ReservationSlot find = reservationRepository.findByReservationIdForUpdate(reservationId).orElseThrow();
         assertThat(find.getReservations())
                 .singleElement()
                 .extracting(Reservation::getStatus)

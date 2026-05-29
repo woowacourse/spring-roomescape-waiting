@@ -1,7 +1,6 @@
 package roomescape.service.command;
 
 import java.time.LocalDate;
-import roomescape.repository.dto.ReservationCondition;
 
 public record ReservationCommand(
         String name,
@@ -9,12 +8,4 @@ public record ReservationCommand(
         Long themeId,
         Long timeId
 ) {
-
-    public ReservationCondition toCondition() {
-        return new ReservationCondition(date, themeId, timeId);
-    }
-
-    public ReservationCondition toCondition(long themeId) {
-        return new ReservationCondition(date, themeId, timeId);
-    }
 }

@@ -8,11 +8,7 @@ public interface ReservationSlotRepository {
 
     ReservationSlot save(ReservationSlot slot);
 
-    Optional<ReservationSlot> findById(long id);
-
     Optional<ReservationSlot> findByDateAndThemeAndTimeForUpdate(ReservationCondition condition);
 
     Optional<ReservationSlot> findByReservationIdForUpdate(long reservationId);
-
-    void update(ReservationSlot slot);
 }

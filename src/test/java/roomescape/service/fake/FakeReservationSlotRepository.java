@@ -44,11 +44,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findById(long id) {
-        return Optional.ofNullable(storage.get(id));
-    }
-
-    @Override
     public Optional<ReservationSlot> findByDateAndThemeAndTimeForUpdate(ReservationCondition condition) {
         return storage.values()
                 .stream()
@@ -56,11 +51,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                         value.getTheme().getId().equals(condition.themeId()) &&
                         value.getTime().getId().equals(condition.timeId()))
                 .findFirst();
-    }
-
-    @Override
-    public void update(ReservationSlot slot) {
-        storage.put(slot.getId(), slot);
     }
 
     @Override

@@ -250,12 +250,14 @@ class ReservationServiceTest {
     void 식별자를_이용해_예약을_취소한다() {
         // given: 취소할 예약이 저장되어 있음
         ReservationSlot saved = reservationRepository.save(createDefaultReservationWithName("웨지"));
+        long reservationId = reservedReservationId(saved);
 
         // when: 삭제 요청
-        reservationService.cancelReservation(reservedReservationId(saved));
+        reservationService.cancelReservation(reservationId);
 
         // then: 예약 엔트리가 취소 상태로 변경됨
-        assertThat(reservationRepository.findById(saved.getId()).orElseThrow().getReservations())
+        assertThat(reservationRepository.findByReservationIdForUpdate(reservationId).orElseThrow()
+                .getReservations())
                 .singleElement()
                 .extracting(Reservation::getStatus)
                 .isEqualTo(ReservationStatus.DELETED);

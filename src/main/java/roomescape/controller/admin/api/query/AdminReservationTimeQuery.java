@@ -21,7 +21,7 @@ public class AdminReservationTimeQuery {
     private final JdbcTemplate jdbcTemplate;
 
     public List<AdminReservationTimeResponse> getAllReservationTimes() {
-        String sql = "SELECT id, start_at, status FROM reservation_time";
+        String sql = "SELECT id, start_at, status FROM reservation_time ORDER BY id ASC";
         return jdbcTemplate.query(sql, RESERVATION_TIME_RESPONSE_MAPPER);
     }
 }

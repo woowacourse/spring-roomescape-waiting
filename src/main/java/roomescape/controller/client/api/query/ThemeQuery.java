@@ -23,7 +23,7 @@ public class ThemeQuery {
     private final JdbcTemplate jdbcTemplate;
 
     public List<ThemeResponse> getAllActiveThemes() {
-        String sql = "SELECT id, name, description, thumbnail_image_url FROM theme WHERE is_active = 1";
+        String sql = "SELECT id, name, description, thumbnail_image_url FROM theme WHERE is_active = 1 ORDER BY id ASC";
         return jdbcTemplate.query(sql, THEME_RESPONSE_MAPPER);
     }
 
