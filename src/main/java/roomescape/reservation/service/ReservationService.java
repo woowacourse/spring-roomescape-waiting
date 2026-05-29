@@ -28,9 +28,9 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.wating.domain.Waiting;
-import roomescape.wating.repository.WaitingRepository;
-import roomescape.wating.service.dto.response.WaitingResponse;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.dto.response.WaitingResponse;
 
 @Service
 @RequiredArgsConstructor

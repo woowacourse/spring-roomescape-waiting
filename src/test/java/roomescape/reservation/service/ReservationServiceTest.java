@@ -18,8 +18,8 @@ import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
 import roomescape.theme.service.support.FakeThemeRepository;
-import roomescape.wating.domain.Waiting;
-import roomescape.wating.service.support.FakeWaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.service.support.FakeWaitingRepository;
 
 import java.sql.Date;
 import java.time.*;

@@ -2,7 +2,7 @@ package roomescape.reservation.service.dto.response;
 
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
-import roomescape.wating.service.dto.response.WaitingResponse;
+import roomescape.waiting.service.dto.response.WaitingResponse;
 
 public record ReservationsAndWaitingsResponse(
     List<ReservationResponse> reservations,
