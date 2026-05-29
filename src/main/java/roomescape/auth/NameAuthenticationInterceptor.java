@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.auth.annotation.Authorized;
+import roomescape.auth.annotation.Authenticated;
 import roomescape.auth.exception.MissingAuthorizationHeaderException;
 
 public class NameAuthenticationInterceptor implements HandlerInterceptor {
@@ -19,7 +19,7 @@ public class NameAuthenticationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        if (!hm.hasMethodAnnotation(Authorized.class)) {
+        if (!hm.hasMethodAnnotation(Authenticated.class)) {
             return true;
         }
 

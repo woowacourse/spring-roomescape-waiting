@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.annotation.Authorized;
+import roomescape.auth.annotation.Authenticated;
 import roomescape.auth.annotation.LoginName;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingResponse;
@@ -36,7 +36,7 @@ public class ReservationWaitingController {
                 .body(response);
     }
 
-    @Authorized
+    @Authenticated
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMyReservationWaiting(
             @LoginName String name, @PathVariable Long id) {

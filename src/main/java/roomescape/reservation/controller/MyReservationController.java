@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.annotation.Authorized;
+import roomescape.auth.annotation.Authenticated;
 import roomescape.auth.annotation.LoginName;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.reservation.service.ReservationService;
@@ -22,7 +22,7 @@ public class MyReservationController {
         this.reservationService = reservationService;
     }
 
-    @Authorized
+    @Authenticated
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateMyReservation(
             @LoginName String name,
@@ -34,7 +34,7 @@ public class MyReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @Authorized
+    @Authenticated
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMyReservation(
             @LoginName String name,
