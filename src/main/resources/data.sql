@@ -30,94 +30,97 @@ INSERT INTO theme (name, description, image_url) VALUES ('괴록', '기괴한 �
 INSERT INTO theme (name, description, image_url) VALUES ('투투 어드벤쳐', '활기찬 어드벤처 테마.', 'https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/%ED%88%AC%ED%88%AC%20%EC%96%B4%EB%93%9C%EB%B2%A4%EC%B3%90_size%20down.png');
 INSERT INTO theme (name, description, image_url) VALUES ('NOSTALGIA', '추억을 자극하는 감성 테마.', 'https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/nostalgia_sizedown.png');
 
+-- 회원 데이터
+INSERT INTO member (name, email, password) VALUES ('user1', 'user1@test.com', '1234');
+INSERT INTO member (name, email, password) VALUES ('user2', 'user2@test.com', '1234');
+INSERT INTO member (name, email, password) VALUES ('user3', 'user3@test.com', '1234');
+INSERT INTO member (name, email, password) VALUES ('user4', 'user4@test.com', '1234');
+INSERT INTO member (name, email, password) VALUES ('user5', 'user5@test.com', '1234');
+
 -- 예약 데이터
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -1, CURRENT_DATE), 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -2, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, -3, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user5', DATEADD(DAY, -4, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user6', DATEADD(DAY, -5, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -1, CURRENT_DATE), 2, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -2, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, -3, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (5, DATEADD(DAY, -4, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -5, CURRENT_DATE), 1, 1);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 3, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 3, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -3, CURRENT_DATE), 3, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, -4, CURRENT_DATE), 3, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user5', DATEADD(DAY, -5, CURRENT_DATE), 3, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 3, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 3, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -3, CURRENT_DATE), 3, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, -4, CURRENT_DATE), 3, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (5, DATEADD(DAY, -5, CURRENT_DATE), 3, 6);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 4, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 4, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -3, CURRENT_DATE), 4, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, -4, CURRENT_DATE), 4, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 4, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 4, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -3, CURRENT_DATE), 4, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, -4, CURRENT_DATE), 4, 4);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 5, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 5, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -3, CURRENT_DATE), 5, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, -4, CURRENT_DATE), 5, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 5, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 5, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -3, CURRENT_DATE), 5, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, -4, CURRENT_DATE), 5, 5);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 6, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 6, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -3, CURRENT_DATE), 6, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 6, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 6, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -3, CURRENT_DATE), 6, 2);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 7, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 7, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, -3, CURRENT_DATE), 7, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 7, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 7, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, -3, CURRENT_DATE), 7, 8);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 8, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 8, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 8, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 8, 3);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 1, 10);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 1, 10);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 1, 10);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 1, 10);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -1, CURRENT_DATE), 2, 17);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, -2, CURRENT_DATE), 2, 17);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 2, 17);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, -2, CURRENT_DATE), 2, 17);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -3, CURRENT_DATE), 3, 7);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -3, CURRENT_DATE), 3, 7);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -4, CURRENT_DATE), 4, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -5, CURRENT_DATE), 5, 20);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -6, CURRENT_DATE), 8, 15);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -4, CURRENT_DATE), 4, 11);
+-- 오늘 예약 데이터
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE, 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, CURRENT_DATE, 2, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, CURRENT_DATE, 1, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE, 3, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, CURRENT_DATE, 4, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, CURRENT_DATE, 5, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (5, CURRENT_DATE, 2, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE, 6, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, CURRENT_DATE, 1, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, CURRENT_DATE, 3, 5);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -5, CURRENT_DATE), 5, 20);
+-- 내일 예약 데이터
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, 1, CURRENT_DATE), 1, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, 1, CURRENT_DATE), 3, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, 1, CURRENT_DATE), 4, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (5, DATEADD(DAY, 1, CURRENT_DATE), 5, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, 1, CURRENT_DATE), 2, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, 1, CURRENT_DATE), 6, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, 1, CURRENT_DATE), 1, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, 1, CURRENT_DATE), 3, 5);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, -6, CURRENT_DATE), 8, 15);
-
--- 오늘 예약 데이터 (ID: 36~45)
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', CURRENT_DATE, 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', CURRENT_DATE, 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', CURRENT_DATE, 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', CURRENT_DATE, 3, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', CURRENT_DATE, 4, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', CURRENT_DATE, 5, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user5', CURRENT_DATE, 2, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', CURRENT_DATE, 6, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', CURRENT_DATE, 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', CURRENT_DATE, 3, 5);
-
--- 내일 예약 데이터 (ID: 46~55)
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, 1, CURRENT_DATE), 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, 1, CURRENT_DATE), 3, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, 1, CURRENT_DATE), 4, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user5', DATEADD(DAY, 1, CURRENT_DATE), 5, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, 1, CURRENT_DATE), 2, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, 1, CURRENT_DATE), 6, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, 1, CURRENT_DATE), 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, 1, CURRENT_DATE), 3, 5);
-
--- 예약 대기 데이터
--- ID 37 (user2/오늘/time2/theme1) 대기: user1(1번), user3(2번), user5(3번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 37);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user3', 37);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user5', 37);
--- ID 36 (user1/오늘/time1/theme1) 대기: user2(1번), user4(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 36);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user4', 36);
--- ID 47 (user2/내일/time2/theme1) 대기: user1(1번), user4(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 47);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user4', 47);
--- ID 46 (user1/내일/time1/theme1) 대기: user2(1번), user3(2번), user5(3번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 46);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user3', 46);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user5', 46);
--- ID 44 (user3/오늘/time1/theme4) 대기: user1(1번), user2(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 44);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 44);
+-- 예약 대기 데이터 (오늘/time2/theme1 대기: user1, user3, user5)
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE, 2, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (3, CURRENT_DATE, 2, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (5, CURRENT_DATE, 2, 1);
+-- 오늘/time1/theme1 대기: user2, user4
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (2, CURRENT_DATE, 1, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (4, CURRENT_DATE, 1, 1);
+-- 내일/time2/theme1 대기: user1, user4
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (4, DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
+-- 내일/time1/theme1 대기: user2, user3, user5
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (2, DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (3, DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (5, DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+-- 오늘/time1/theme4 대기: user1, user2
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (1, CURRENT_DATE, 1, 4);
+INSERT INTO reservation_waiting (member_id, date, time_id, theme_id) VALUES (2, CURRENT_DATE, 1, 4);
