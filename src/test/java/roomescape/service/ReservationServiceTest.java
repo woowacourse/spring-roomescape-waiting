@@ -61,7 +61,21 @@ class ReservationServiceTest {
     void removeReservation() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
         reservationService.removeReservation(reservation.getId());
+        ThemeSlot themeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
         assertThat(reservationService.allReservations()).isEmpty();
+        assertThat(themeSlot.isReserved()).isFalse();
+    }
+
+    @Test
+    @DisplayName("대기 예약을 삭제해도 같은 슬롯에 확정 예약이 남아 있으면 예약 상태를 유지한다.")
+    void keepThemeSlotReservedWhenRemovePendingReservationWithConfirmedReservation() {
+        reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+
+        reservationService.removeReservation(pendingReservation.getId());
+
+        ThemeSlot themeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
+        assertThat(themeSlot.isReserved()).isTrue();
     }
 
     @Test

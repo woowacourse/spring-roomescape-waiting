@@ -62,8 +62,10 @@ public class ReservationService {
     @Transactional
     public void removeReservation(long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        Long themeSlotId = reservation.getThemeSlot().getId();
         reservationRepository.deleteById(reservationId);
-        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+        boolean hasActiveReservation = reservationRepository.existsByThemeSlotId(themeSlotId);
+        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), hasActiveReservation));
     }
 
     public Reservation findReservation(long reservationId) {
