@@ -76,7 +76,7 @@ class ReservationServiceTest {
         long id = reservationService.save(firstRequest).id();
         reservationService.save(secondRequest);
 
-        UserReservationUpdateRequest updateRequest = new UserReservationUpdateRequest(LocalDate.now().plusDays(1), 2L, 1L);
+        UserReservationUpdateRequest updateRequest = new UserReservationUpdateRequest(LocalDate.now().plusDays(1), 2L);
 
         assertThatThrownBy(() -> reservationService.update(id, updateRequest))
                 .isInstanceOf(AlreadyExistsException.class);

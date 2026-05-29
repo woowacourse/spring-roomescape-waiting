@@ -69,12 +69,10 @@ public class ReservationService {
 
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
         Reservation reservation = getReservation(id);
-
         ReservationTime time = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
-        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
+        ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
 
         if (status == ReservationStatus.WAITING) {
             throw new AlreadyExistsException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
@@ -85,7 +83,7 @@ public class ReservationService {
                 reservation.getName(),
                 request.date(),
                 time,
-                theme,
+                reservation.getTheme(),
                 status
         );
 

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public record UserReservationUpdateRequest(
         @NotNull @FutureOrPresent(message = "예약일은 현재 이후여야 합니다.") LocalDate date,
-        @NotNull Long timeId,
-        @NotNull Long themeId) {
+        @NotNull Long timeId
+) {
 
 }
