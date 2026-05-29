@@ -10,12 +10,11 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.theme.ThemeRepository;
-import roomescape.service.theme.ThemeService;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 
 class ThemeServiceTest {
 

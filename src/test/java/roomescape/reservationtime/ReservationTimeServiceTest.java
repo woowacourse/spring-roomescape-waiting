@@ -14,14 +14,13 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservationtime.ReservationTimeRepository;
-import roomescape.service.reservationtime.ReservationTimeService;
-import roomescape.service.theme.ThemeService;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.theme.Theme;
+import roomescape.theme.service.ThemeService;
 
 class ReservationTimeServiceTest {
 
