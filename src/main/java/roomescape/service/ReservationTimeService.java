@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -17,6 +18,7 @@ import roomescape.service.exception.ReservationTimeInUseException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 
+@Transactional(readOnly = true)
 @Service
 public class ReservationTimeService {
 
@@ -42,10 +44,10 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResult create(ReservationTimeCreateCommand command) {
         if (reservationTimeRepository.existsByStartAt(command.startAt())) {
-            throw new ReservationTimeConflictException(
-                    "이미 등록된 시간입니다: " + command.startAt());
+            throw new ReservationTimeConflictException("이미 등록된 시간입니다: " + command.startAt());
         }
         ReservationTime saved = reservationTimeRepository.save(new ReservationTime(null, command.startAt()));
         return ReservationTimeResult.from(saved);
@@ -58,8 +60,7 @@ public class ReservationTimeService {
         }
         if (reservationRepository.existsByTimeId(id)) {
             log.warn("예약이 존재하는 시간 삭제 시도: timeId={}", id);
-            throw new ReservationTimeInUseException(
-                    "예약이 존재하는 시간은 삭제할 수 없습니다: timeId=" + id);
+            throw new ReservationTimeInUseException("예약이 존재하는 시간은 삭제할 수 없습니다: timeId=" + id);
         }
         reservationTimeRepository.deleteById(id);
     }

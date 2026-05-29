@@ -62,7 +62,7 @@ class UserReservationServiceTest {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
         ReservationResult expected = new ReservationResult(
                 1L, OWNER, FUTURE_DATE, null, null, 0L);
-        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationService.create(command)).willReturn(expected);
 
         ReservationResult actual = userReservationService.create(command);
@@ -74,7 +74,7 @@ class UserReservationServiceTest {
     @DisplayName("과거 날짜로 예약하면 PastReservationException이 발생한다")
     void 과거_날짜_예약시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, PAST_DATE, 1L, 1L);
-        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
 
         assertThrows(
                 PastReservationException.class,
@@ -86,7 +86,7 @@ class UserReservationServiceTest {
     @DisplayName("존재하지 않는 timeId로 예약하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_timeId로_예약시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
-        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
@@ -98,7 +98,7 @@ class UserReservationServiceTest {
     @DisplayName("중복 예약을 시도하면 ReservationConflictException이 발생한다")
     void 중복_예약_시_예외가_발생한다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
-        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationService.create(command)).willThrow(new ReservationConflictException("중복 예약"));
 
         assertThrows(

@@ -4,6 +4,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -18,6 +19,7 @@ import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 
+@Transactional(readOnly = true)
 @Service
 public class AdminReservationService {
 
@@ -44,19 +46,18 @@ public class AdminReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
-        ReservationTime time = reservationTimeRepository.findById(command.timeId())
+        ReservationTime time = reservationTimeRepository.findByIdWithLock(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
-                    return new ReservationTimeNotFoundException(
-                            "존재하지 않는 시간입니다: timeId=" + command.timeId());
+                    return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
 
-        Theme theme = themeRepository.findById(command.themeId())
+        Theme theme = themeRepository.findByIdWithLock(command.themeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
-                    return new ThemeNotFoundException(
-                            "존재하지 않는 테마입니다: themeId=" + command.themeId());
+                    return new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + command.themeId());
                 });
 
         validateNoConflict(command);

@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
@@ -20,6 +21,7 @@ import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.UnauthorizedReservationException;
 
+@Transactional(readOnly = true)
 @Service
 public class UserReservationService {
 
@@ -39,12 +41,12 @@ public class UserReservationService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
-        ReservationTime time = reservationTimeRepository.findById(command.timeId())
+        ReservationTime time = reservationTimeRepository.findByIdWithLock(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
-                    return new ReservationTimeNotFoundException(
-                            "존재하지 않는 시간입니다: timeId=" + command.timeId());
+                    return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
         validateNotPast(command.date(), time.getStartAt(), "과거 시점에는 예약할 수 없습니다");
         return reservationService.create(command);
@@ -55,6 +57,7 @@ public class UserReservationService {
                 .map(ReservationResult::from)
                 .toList();
     }
+
     public void cancel(Long id, String name) {
         Reservation reservation = findReservation(id);
         validateOwner(reservation, name);
@@ -78,9 +81,9 @@ public class UserReservationService {
         ReservationTime newTime = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 변경 시도: timeId={}", command.timeId());
-                    return new ReservationTimeNotFoundException(
-                            "존재하지 않는 시간입니다: timeId=" + command.timeId());
+                    return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
+
         validateNotPast(command.date(), newTime.getStartAt(), "과거 시점으로 변경할 수 없습니다");
         validateNoConflict(command, reservation.getTheme().getId());
 

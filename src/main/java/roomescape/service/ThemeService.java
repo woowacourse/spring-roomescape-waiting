@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -12,16 +13,14 @@ import roomescape.service.exception.ThemeConflictException;
 import roomescape.service.exception.ThemeInUseException;
 import roomescape.service.exception.ThemeNotFoundException;
 
+@Transactional(readOnly = true)
 @Service
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(
-            ThemeRepository themeRepository,
-            ReservationRepository reservationRepository
-    ) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -32,13 +31,12 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResult create(ThemeCreateCommand command) {
         if (themeRepository.existsByName(command.name())) {
-            throw new ThemeConflictException("이미 등록된 테마 이름입니다: " + command.name());
+            throw new ThemeConflictException("이미 등록된 테마입니다: " + command.name());
         }
-        Theme saved = themeRepository.save(
-                new Theme(null, command.name(), command.description(), command.thumbnailUrl())
-        );
+        Theme saved = themeRepository.save(new Theme(null, command.name(), command.description(), command.thumbnailUrl()));
         return ThemeResult.from(saved);
     }
 
@@ -47,14 +45,13 @@ public class ThemeService {
             throw new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + id);
         }
         if (reservationRepository.existsByThemeId(id)) {
-            throw new ThemeInUseException(
-                    "예약이 존재하는 테마는 삭제할 수 없습니다: themeId=" + id);
+            throw new ThemeInUseException("예약이 존재하는 테마는 삭제할 수 없습니다: themeId=" + id);
         }
         themeRepository.deleteById(id);
     }
 
     public List<PopularThemeResult> findPopular() {
-        return themeRepository.findPopular().stream()
+       return themeRepository.findPopular().stream()
                 .map(p -> new PopularThemeResult(
                         ThemeResult.from(p.theme()),
                         p.reservationCount()))
