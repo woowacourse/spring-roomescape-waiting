@@ -30,6 +30,7 @@ public class WaitlistServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private WaitlistService waitlistService;
 
@@ -72,19 +73,26 @@ public class WaitlistServiceTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        ReservationRequest request = new ReservationRequest(
+        ReservationRequest reservationRequest = new ReservationRequest(
                 "브라운",
                 FUTURE_SECOND_DATE,
                 reservationTime.getId(),
                 theme.getId()
         );
 
-        ReservationWithStatus savedWaitlist = reservationService.reserveOrWait(request);
+        ReservationRequest waitlistRequest = new ReservationRequest(
+                "브리",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
 
-        assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(savedWaitlist.getId(), "브리"))
+        reservationService.reserveOrWait(reservationRequest);
+        ReservationWithStatus waitingReservation = reservationService.reserveOrWait(waitlistRequest);
+
+        assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(waitingReservation.getId(), "브라운"))
                 .isInstanceOf(RoomEscapeException.class);
     }
-
 
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
