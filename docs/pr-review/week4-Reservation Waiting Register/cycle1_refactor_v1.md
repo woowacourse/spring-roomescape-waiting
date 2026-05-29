@@ -42,8 +42,8 @@
   - `ReservationTimeControllerTest.java:75` — `이미_존재하는_시간이면_400` → `409`로 수정
   - `ReservationTimeControllerTest.java:90` — `예약에_사용중인_시간_삭제하면_400` → `409`로 수정
 
-- [ ] **6. 대기(waiting) 관련 API 명세 문서 추가**
+- [x] **6. 대기(waiting) 관련 API 명세 문서 추가**
   - 대기 신청 / 대기 취소 / 대기 목록 조회 엔드포인트 명세 작성
   - 요청/응답 형식, 상태코드, 예외 케이스 포함
 
-- [ ] **7. gitignore에 .DS_Store파일 추가하기.**
+- [x] **7. gitignore에 .DS_Store파일 추가하기.**

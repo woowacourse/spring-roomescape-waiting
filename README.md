@@ -191,9 +191,12 @@
 
 ### 추가 API 명세
 
-| 기능 | 메서드 / URL | 요청 본문 | 응답 |
+| 기능 | 메서드 / URL | 요청 본문 / 쿼리 파라미터 | 응답 |
 |------|------------|---------|------|
 | **예약 변경** | `PATCH /reservations/{id}` | `{date, timeId}` | `200 {id, date, themeName, time}` |
+| **대기 신청** | `POST /reservations/waiting` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **대기 취소** | `DELETE /reservations/waiting/{id}` | — | `204` |
+| **대기 목록 조회** | `GET /reservations/waiting?username={name}` | — | `200 [{id, date, themeName, ..., time, waitingNumber}]` |
 
 ---
 
@@ -217,14 +220,25 @@
 
 ### 사용자 API
 
-| 기능                  | 메서드 / URL                          | 요청 본문 / 쿼리 파라미터                     | 응답                                                                       |
-|:--------------------|:------------------------------------|:---------------------------------------|:-------------------------------------------------------------------------|
-| **테마 전체 조회**        | `GET /themes`                       | —                                      | `200 [{id, name, description, thumbnailUrl}]`                            |
-| **인기 테마 조회**        | `GET /themes?condition=popular&size={n}` | —                                 | `200 [{id, name, description, thumbnailUrl}]`                            |
-| **테마별 예약 가능 시간 조회** | `GET /themes/{id}/times?date={date}` | —                                     | `200 [{id, startAt, isAvailable}]`                                       |
-| **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time}]` |
-| **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}`   |
-| **예약 삭제**           | `DELETE /reservations/{id}`         | —                                      | `204`                                                                    |
+| 기능 | 메서드 / URL | 요청 본문 / 쿼리 파라미터 | 응답 |
+|:----|:-----------|:--------------------|:----|
+| **테마 전체 조회** | `GET /themes` | — | `200 [{id, name, description, thumbnailUrl}]` |
+| **인기 테마 조회** | `GET /themes?condition=popular&size={n}` | — | `200 [{id, name, description, thumbnailUrl}]` |
+| **테마별 예약 가능 시간 조회** | `GET /themes/{id}/times?date={date}` | — | `200 [{id, startAt, isAvailable}]` |
+| **예약 조회** | `GET /reservations?username={name}` | — | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time}]` |
+| **예약 추가** | `POST /reservations` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **예약 변경** | `PATCH /reservations/{id}` | `{date, timeId}` | `200 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **예약 삭제** | `DELETE /reservations/{id}` | — | `204` |
+
+### 대기 API
+
+| 기능 | 메서드 / URL | 요청 본문 / 쿼리 파라미터 | 응답 |
+|:----|:-----------|:--------------------|:----|
+| **대기 신청** | `POST /reservations/waiting` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **대기 취소** | `DELETE /reservations/waiting/{id}` | — | `204` |
+| **대기 목록 조회** | `GET /reservations/waiting?username={name}` | — | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber}]` |
+
+> 빈 슬롯에 대기 신청하면 일반 예약으로 자동 전환된다. `waitingNumber`는 해당 슬롯의 대기 순번(1부터 시작)이다.
 
 ---
 

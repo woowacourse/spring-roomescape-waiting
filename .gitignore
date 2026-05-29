@@ -42,5 +42,7 @@ _bmad
 _bmad-output
 design-artifacts
 
+.DS_Store
+
 # iterative-refactor progress files
 progression/
