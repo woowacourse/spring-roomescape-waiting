@@ -16,7 +16,7 @@ public record WaitingResponse(
         TimeInfo time,
         ThemeInfo theme
 ) {
-    public static WaitingResponse of(Waiting waiting, int waitingPosition) {
+    public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.id(),
                 waiting.name(),
@@ -28,10 +28,6 @@ public record WaitingResponse(
                         waiting.waitingTheme().thumbnailUrl(),
                         waiting.waitingTheme().description())
         );
-    }
-
-    public static WaitingResponse from(Waiting waiting) {
-        return of(waiting, 0);
     }
 
     private record TimeInfo(
