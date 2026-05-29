@@ -15,22 +15,19 @@ import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
 import roomescape.repository.ReservationTimeQueryingDao;
-import roomescape.repository.ReservationWaitingQueryingDao;
-import roomescape.repository.ReservationWaitingUpdatingDao;
+import roomescape.repository.ReservationWaitingDao;
 import roomescape.repository.ThemeQueryingDao;
 
 @Service
 public class ReservationWaitingService {
 
-    private final ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
-    private final ReservationWaitingQueryingDao reservationWaitingQueryingDao;
+    private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationQueryingDao reservationQueryingDao;
     private final ReservationTimeQueryingDao reservationTimeQueryingDao;
     private final ThemeQueryingDao themeQueryingDao;
 
-    public ReservationWaitingService(ReservationWaitingUpdatingDao reservationWaitingUpdatingDao, ReservationWaitingQueryingDao reservationWaitingQueryingDao, ReservationQueryingDao reservationQueryingDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
-        this.reservationWaitingUpdatingDao = reservationWaitingUpdatingDao;
-        this.reservationWaitingQueryingDao = reservationWaitingQueryingDao;
+    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, ReservationQueryingDao reservationQueryingDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
+        this.reservationWaitingDao = reservationWaitingDao;
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.themeQueryingDao = themeQueryingDao;
@@ -50,40 +47,40 @@ public class ReservationWaitingService {
             throw new InvalidInputException("이미 등록된 예약이 있습니다.");
         }
 
-        if(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingReq.name(), reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())) {
+        if(reservationWaitingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingReq.name(), reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())) {
             throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
         }
 
         ReservationWaiting reservationWaiting = reservationWaitingReq.to(reservationTimeById, themeById);
-        Long id = reservationWaitingUpdatingDao.create(reservationWaiting);
+        Long id = reservationWaitingDao.create(reservationWaiting);
 
-        return ReservationWaitingResponse.from(reservationWaitingQueryingDao.findReservationWaitingById(id).get());
+        return ReservationWaitingResponse.from(reservationWaitingDao.findReservationWaitingById(id).get());
     }
 
     public void delete(Long id) {
-        ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
+        ReservationWaiting reservationWaiting = reservationWaitingDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
 
-        reservationWaitingUpdatingDao.delete(id);
+        reservationWaiting.validateDeletable();
+        reservationWaitingDao.delete(id);
     }
 
     public List<ReservationWaitingResponse> readAll() {
-        return reservationWaitingQueryingDao.findAllReservationWaiting()
+        return reservationWaitingDao.findAllReservationWaiting()
                 .stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
     }
 
     public List<ReservationWaitingResponse> readByName(String name) {
-        return reservationWaitingQueryingDao.findAllByName(name)
+        return reservationWaitingDao.findAllByName(name)
                 .stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
     }
 
     private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
-        return reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId).stream()
-                .findFirst()
+        return reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
     }
 }
