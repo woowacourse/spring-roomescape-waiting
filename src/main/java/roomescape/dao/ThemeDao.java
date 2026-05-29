@@ -18,7 +18,7 @@ public class ThemeDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
-    private final RowMapper<Theme> rowMapper = (rs, rowNum) -> Theme.create(
+    private final RowMapper<Theme> rowMapper = (rs, rowNum) -> Theme.from(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("thumbnail_url"),
@@ -32,11 +32,11 @@ public class ThemeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Theme save(String name, String thumbnailUrl, String description) {
+    public Theme save(Theme theme) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("thumbnail_url", thumbnailUrl)
-                .addValue("description", description);
+                .addValue("name", theme.name())
+                .addValue("thumbnail_url", theme.thumbnailUrl())
+                .addValue("description", theme.description());
 
         Number themeId = insertExecutor.executeAndReturnKey(params);
 
@@ -47,11 +47,11 @@ public class ThemeDao {
         return jdbcTemplate.queryForObject(sql, rowMapper, themeId.longValue());
     }
 
-    public void delete(long themeId) {
+    public void delete(Theme theme) {
         String sql = """
                 DELETE FROM theme WHERE id = ?
                 """;
-        int affected = jdbcTemplate.update(sql, themeId);
+        int affected = jdbcTemplate.update(sql, theme.id());
 
         if(affected == 0) {
             throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");

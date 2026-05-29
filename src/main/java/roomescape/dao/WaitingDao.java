@@ -8,10 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
+import roomescape.domain.*;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
@@ -25,7 +22,7 @@ public class WaitingDao {
     private final SimpleJdbcInsert insertExecutor;
 
     private final RowMapper<Waiting> rowMapper = (rs, rowNum) -> {
-        Theme theme = Theme.create(
+        Theme theme = Theme.from(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("thumbnail_url"),
@@ -37,18 +34,22 @@ public class WaitingDao {
                 rs.getObject("time_value", LocalTime.class)
         );
 
-        return Waiting.create(
+        return Waiting.from(
                 rs.getLong("waiting_id"),
                 rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
+                Slot.from(
+                        Schedule.from(
+                                rs.getObject("date", LocalDate.class),
+                                reservationTime
+                        ),
+                        theme
+                ),
                 rs.getObject("created_at", LocalDateTime.class)
         );
     };
 
     private final RowMapper<WaitingWithRank> withRankRowMapper = (rs, rowNum) -> {
-        Theme theme = Theme.create(
+        Theme theme = Theme.from(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("thumbnail_url"),
@@ -77,24 +78,24 @@ public class WaitingDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Waiting save(String name, LocalDate date, long timeId, long themeId, LocalDateTime createAt) {
+    public Waiting save(Waiting waiting) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("date", date)
-                .addValue("time_id", timeId)
-                .addValue("theme_id", themeId)
-                .addValue("created_at", createAt);
+                .addValue("name", waiting.name())
+                .addValue("date", waiting.waitingDate())
+                .addValue("time_id", waiting.waitingTime().id())
+                .addValue("theme_id", waiting.waitingTheme().id())
+                .addValue("created_at", waiting.createAt());
 
         Number waitingId = insertExecutor.executeAndReturnKey(params);
 
         return findById(waitingId.longValue());
     }
 
-    public void delete(long waitingId) {
+    public void delete(Waiting waiting) {
         String sql = """
                 DELETE FROM waiting WHERE id = ?
                 """;
-        int affected = jdbcTemplate.update(sql, waitingId);
+        int affected = jdbcTemplate.update(sql, waiting.id());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다.");
@@ -127,7 +128,7 @@ public class WaitingDao {
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
     }
 
-    public List<Waiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public List<Waiting> findAllBySlot(Slot slot) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -148,7 +149,7 @@ public class WaitingDao {
                 WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
                 ORDER BY created_at;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId);
+        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id());
     }
 
     public List<WaitingWithRank> findAllByName(String name) {

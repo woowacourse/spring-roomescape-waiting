@@ -9,8 +9,12 @@ public class Theme {
     private final String thumbnailUrl;
     private final String description;
 
-    public static Theme create(long id, String name, String thumbnailUrl, String description) {
+    public static Theme from(long id, String name, String thumbnailUrl, String description) {
         return new Theme(id, name, thumbnailUrl, description);
+    }
+
+    public static Theme create(String name, String thumbnailUrl, String description) {
+        return new Theme(null, name, thumbnailUrl, description);
     }
 
     public long id() {

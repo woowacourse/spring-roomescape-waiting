@@ -45,7 +45,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
         ReservationResponse reservationResponse = ReservationResponse.from(
-                reservationCommandService.create(ReservationRequest.toReservationCommand(request)));
+                reservationCommandService.create(ReservationRequest.toCommand(request)));
 
         Long savedId = reservationResponse.id();
 
@@ -59,17 +59,20 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable long id) {
-        reservationCommandService.cancel(id);
+    public ResponseEntity<Void> cancelReservation(
+            @PathVariable long id
+    ) {
+        reservationCommandService.cancelByUser(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable long id,
-            @Valid @RequestBody ReservationUpdateRequest request) {
+            @Valid @RequestBody ReservationUpdateRequest request
+    ) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.update(id, request.date(), request.timeId()));
+                reservationCommandService.update(id, ReservationUpdateRequest.toCommand(request)));
         return ResponseEntity.ok(response);
     }
 }

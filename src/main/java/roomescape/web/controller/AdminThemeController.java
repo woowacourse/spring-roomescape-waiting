@@ -39,7 +39,7 @@ public class AdminThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeRequest request) {
-        Theme theme = themeCommandService.create(request.name(), request.thumbnailUrl(), request.description());
+        Theme theme = themeCommandService.create(ThemeRequest.toCommand(request));
         Long savedId = theme.id();
 
         URI location = ServletUriComponentsBuilder

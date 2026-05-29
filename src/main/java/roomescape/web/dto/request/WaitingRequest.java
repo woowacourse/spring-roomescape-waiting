@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import roomescape.service.command.WaitingCommand;
 
 import java.time.LocalDate;
 
@@ -21,4 +22,12 @@ public record WaitingRequest(
         @Min(value = 1, message = "유효한 테마 ID가 필요합니다.")
         long themeId
 ) {
+        public static WaitingCommand toCommand(WaitingRequest request) {
+                return new WaitingCommand(
+                        request.name,
+                        request.date,
+                        request.timeId,
+                        request.themeId
+                );
+        }
 }

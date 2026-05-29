@@ -41,7 +41,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
-        Reservation reservation = reservationCommandService.create(request.name(), request.date(), request.timeId(), request.themeId());
+        Reservation reservation = reservationCommandService.create(ReservationRequest.toCommand(request));
 
         Long savedId = reservation.id();
         URI location = ServletUriComponentsBuilder
@@ -55,7 +55,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        reservationCommandService.delete(id);
+        reservationCommandService.deleteByAdmin(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -6,9 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
@@ -22,7 +20,7 @@ public class ReservationDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
     private final RowMapper<Reservation> rowMapper = (rs, rowNum) -> {
-        Theme theme = Theme.create(
+        Theme theme = Theme.from(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("thumbnail_url"),
@@ -34,12 +32,16 @@ public class ReservationDao {
                 rs.getObject("time_value", LocalTime.class)
         );
 
-        return Reservation.create(
+        return Reservation.from(
                 rs.getLong("reservation_id"),
                 rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                reservationTime,
-                theme
+                Slot.from(
+                        Schedule.from(
+                                rs.getObject("date", LocalDate.class),
+                                reservationTime
+                        ),
+                        theme
+                )
         );
     };
 
@@ -50,13 +52,12 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Reservation save(String name, LocalDate date, long timeId, long themeId) {
-
+    public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("date", date)
-                .addValue("time_id", timeId)
-                .addValue("theme_id", themeId);
+                .addValue("name", reservation.username())
+                .addValue("date", reservation.reservationDate())
+                .addValue("time_id", reservation.reservationTime().id())
+                .addValue("theme_id", reservation.reservationTheme().id());
 
         Number reservationId = insertExecutor.executeAndReturnKey(params);
 
@@ -82,9 +83,9 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, rowMapper, reservationId.longValue());
     }
 
-    public void delete(long reservationId) {
+    public void delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, reservationId);
+        int affected = jdbcTemplate.update(sql, reservation.id());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
@@ -156,13 +157,13 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper, name);
     }
 
-    public Reservation updateDateAndTime(long reservationId, LocalDate date, long timeId) {
+    public Reservation updateDateAndTime(Reservation reservation) {
         String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, date, timeId, reservationId);
-        return findById(reservationId);
+        jdbcTemplate.update(sql, reservation.reservationDate(), reservation.reservationTime().id(), reservation.id());
+        return findById(reservation.id());
     }
 
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findBySlot(Slot slot) {
         String sql = """
                 SELECT
                             reservation.id as reservation_id,
@@ -179,7 +180,6 @@ public class ReservationDao {
                         INNER JOIN theme as theme ON reservation.theme_id = theme.id
                         WHERE date = ? AND time_id = ? AND theme_id = ?;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId).stream().findFirst();
+        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id()).stream().findFirst();
     }
-
 }

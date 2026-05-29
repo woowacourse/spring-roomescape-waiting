@@ -22,7 +22,7 @@ public record ReservationRequest(
         @Min(value = 1, message = "유효한 테마 ID가 필요합니다.")
         long themeId
 ) {
-        public static ReservationCommand toReservationCommand(ReservationRequest request) {
+        public static ReservationCommand toCommand(ReservationRequest request) {
                 return new ReservationCommand(
                         request.name,
                         request.date,

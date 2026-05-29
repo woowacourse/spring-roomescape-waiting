@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.exception.ForbiddenException;
-import roomescape.exception.PastReservationException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,23 +10,20 @@ import java.time.LocalDateTime;
 public class Waiting {
     private final Long id;
     private final String name;
-    private final LocalDate reservationDate;
-    private final ReservationTime reservationTime;
-    private final Theme reservationTheme;
+    private final Slot slot;
     private final LocalDateTime createAt;
 
-    public static Waiting create(long id, String name, LocalDate reservationDate, ReservationTime reservationTime, Theme reservationTheme, LocalDateTime createdAt) {
-        return new Waiting(id, name, reservationDate, reservationTime, reservationTheme, createdAt);
+    public static Waiting from(long id, String name, Slot slot, LocalDateTime createdAt) {
+        return new Waiting(id, name, slot, createdAt);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return reservationTime.isPast(reservationDate, now);
+    public static Waiting create(String name, Slot slot, LocalDateTime createdAt) {
+
+        return new Waiting(null, name, slot, createdAt);
     }
 
     public void validateCancelable(LocalDateTime now) {
-        if (isPast(now)) {
-            throw new PastReservationException("이미 시작된 게임의 예약대기는 취소할 수 없습니다.");
-        }
+        slot.validateAvailableTime(now);
     }
 
     public void validateOwnedBy(String name) {
@@ -44,16 +40,16 @@ public class Waiting {
         return name;
     }
 
-    public LocalDate reservationDate() {
-        return reservationDate;
+    public LocalDate waitingDate() {
+        return slot.date();
     }
 
-    public ReservationTime reservationTime() {
-        return reservationTime;
+    public ReservationTime waitingTime() {
+        return slot.time();
     }
 
-    public Theme reservationTheme() {
-        return reservationTheme;
+    public Theme waitingTheme() {
+        return slot.theme();
     }
 
     public LocalDateTime createAt() {

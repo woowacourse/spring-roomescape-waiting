@@ -2,17 +2,17 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.*;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ReservationTimeDao;
-import roomescape.repository.ThemeDao;
+import roomescape.service.command.ReservationCommand;
+import roomescape.service.command.ReservationUpdateCommand;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -32,45 +32,54 @@ public class ReservationCommandService {
         }
     }
 
-    private void findThemeReference(long themeId) {
+    private Theme findThemeReference(long themeId) {
         try {
-            themeDao.findById(themeId);
+            return themeDao.findById(themeId);
         } catch (ResourceNotFoundException e) {
             throw new InvalidReferenceException("존재하지 않는 테마입니다.");
         }
     }
 
-    public Reservation create(String name, LocalDate date, long timeId, long themeId) {
-        ReservationTime time = findTimeReference(timeId);
-        findThemeReference(themeId);
-        time.validateNotPast(date, LocalDateTime.now(clock));
-        if (reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isPresent()) {
+    public Reservation create(ReservationCommand command) {
+        Slot slot = Slot.from(
+                Schedule.from(command.date(), findTimeReference(command.timeId())),
+                findThemeReference(command.themeId())
+        );
+
+        if (reservationDao.findBySlot(slot).isPresent()) {
             throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
         }
-        return reservationDao.save(name, date, timeId, themeId);
+
+        return reservationDao.save(Reservation.create(command.name(), slot, LocalDateTime.now(clock)));
     }
 
-    public void delete(long reservationId) {
-        reservationDao.delete(reservationId);
+    public void deleteByAdmin(long reservationId) {
+        Reservation reservation = reservationDao.findById(reservationId);
+        reservationDao.delete(reservation);
     }
 
-    public void cancel(long reservationId) {
+    public void cancelByUser(long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         reservation.validateCancelable(LocalDateTime.now(clock));
-        reservationDao.delete(reservationId);
+        reservationDao.delete(reservation);
     }
 
-    public Reservation update(long reservationId, LocalDate newDate, long newTimeId) {
-        ReservationTime newTime = findTimeReference(newTimeId);
-        newTime.validateNotPast(newDate, LocalDateTime.now(clock));
+    public Reservation update(long reservationId, ReservationUpdateCommand command) {
+        ReservationTime newTime = findTimeReference(command.timeId());
         Reservation current = reservationDao.findById(reservationId);
-        long themeId = current.reservationTheme().id();
-        boolean isDuplicate = reservationDao.findByDateAndTimeIdAndThemeId(newDate, newTimeId, themeId)
+
+        Slot slot = Slot.from(
+                Schedule.from(command.date(), newTime),
+                current.reservationTheme());
+
+        boolean isDuplicate = reservationDao.findBySlot(slot)
                 .filter(existing -> existing.id() != reservationId)
                 .isPresent();
+
         if (isDuplicate) {
             throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
         }
-        return reservationDao.updateDateAndTime(reservationId, newDate, newTimeId);
+
+        return reservationDao.updateDateAndTime(current.withSlot(slot));
     }
 }

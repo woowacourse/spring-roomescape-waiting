@@ -20,13 +20,13 @@ public record WaitingResponse(
         return new WaitingResponse(
                 waiting.id(),
                 waiting.name(),
-                waiting.reservationDate(),
-                new TimeInfo(waiting.reservationTime().id(), waiting.reservationTime().startAt()),
+                waiting.waitingDate(),
+                new TimeInfo(waiting.waitingTime().id(), waiting.waitingTime().startAt()),
                 new ThemeInfo(
-                        waiting.reservationTheme().id(),
-                        waiting.reservationTheme().name(),
-                        waiting.reservationTheme().thumbnailUrl(),
-                        waiting.reservationTheme().description())
+                        waiting.waitingTheme().id(),
+                        waiting.waitingTheme().name(),
+                        waiting.waitingTheme().thumbnailUrl(),
+                        waiting.waitingTheme().description())
         );
     }
 
