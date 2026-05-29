@@ -11,6 +11,8 @@ import roomescape.reservation.infrastructure.JdbcReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
@@ -76,16 +78,6 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 회원의 모든 예약 상세를 조회할 수 있다.")
-    void findAllReservationDetailsByMemberId_테스트() {
-        List<ReservationDetailProjection> result = reservationRepository.findAllReservationDetailsByMemberId(MEMBER_ID);
-
-        assertThat(result).hasSize(4);
-        assertThat(result).extracting(ReservationDetailProjection::memberId)
-                .containsOnly(MEMBER_ID);
-    }
-
-    @Test
     @DisplayName("예약 id와 회원 id가 일치하면 예약을 삭제할 수 있다.")
     void deleteByIdAndMemberId_테스트() {
         reservationRepository.deleteByIdAndMemberId(1L, MEMBER_ID);
@@ -131,5 +123,35 @@ class JdbcReservationRepositoryTest {
                 .get()
                 .extracting(Reservation::getScheduleId)
                 .isEqualTo(4L);
+    }
+
+    @Test
+    @DisplayName("특정 회원의 다가오는 예약 상세를 조회할 수 있다.")
+    void findUpcomingReservationDetailsByMemberId_테스트() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 11, 0);
+
+        List<ReservationDetailProjection> result =
+                reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now);
+
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(ReservationDetailProjection::id)
+                .containsExactly(2L, 3L, 4L);
+        assertThat(result).extracting(ReservationDetailProjection::date)
+                .isSorted();
+        assertThat(result.get(0).getTime()).isEqualTo(LocalTime.of(11, 0));
+    }
+
+    @Test
+    @DisplayName("특정 회원의 지난 예약 상세를 조회할 수 있다.")
+    void findPastReservationDetailsByMemberId_테스트() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 11, 0);
+
+        List<ReservationDetailProjection> result =
+                reservationRepository.findPastReservationDetailsByMemberId(MEMBER_ID, now);
+
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(ReservationDetailProjection::id)
+                .containsExactly(1L);
+        assertThat(result.get(0).getTime()).isEqualTo(LocalTime.of(10, 0));
     }
 }

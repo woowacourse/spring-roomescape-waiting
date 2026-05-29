@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -118,7 +119,17 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId) {
+    public void deleteById(long waitingId) {
+        String sql = "DELETE FROM waiting WHERE id = :waitingId";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        jdbcTemplate.update(sql, params);
+    }
+
+    @Override
+    public List<WaitingDetailProjection> findUpcomingWaitingDetailsByMemberId(long memberId, LocalDateTime now) {
         String sql = """
                 SELECT
                     w.id AS waiting_id,
@@ -142,22 +153,58 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON w.member_id = m.id
                 WHERE m.id = :memberId
-                ORDER BY w.id
+                  AND (
+                    s.date > :currentDate
+                    OR (s.date = :currentDate AND rt.start_at >= :currentTime)
+                  )
+                ORDER BY s.date ASC, rt.start_at ASC, w.id ASC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("memberId", memberId);
+                .addValue("memberId", memberId)
+                .addValue("currentDate", now.toLocalDate())
+                .addValue("currentTime", now.toLocalTime());
 
         return jdbcTemplate.query(sql, params, waitingDetailRowMapper);
     }
 
     @Override
-    public void deleteById(long waitingId) {
-        String sql = "DELETE FROM waiting WHERE id = :waitingId";
+    public List<WaitingDetailProjection> findPastWaitingDetailsByMemberId(long memberId, LocalDateTime now) {
+        String sql = """
+                SELECT
+                    w.id AS waiting_id,
+                    m.name AS member_name,
+                    s.date,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    (
+                        SELECT COUNT(*)
+                        FROM waiting previous_waiting
+                        WHERE previous_waiting.schedule_id = w.schedule_id
+                        AND previous_waiting.id <= w.id
+                    ) AS waiting_order
+                FROM waiting w
+                JOIN schedule s ON w.schedule_id = s.id
+                JOIN theme t ON s.theme_id = t.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN member m ON w.member_id = m.id
+                WHERE m.id = :memberId
+                  AND (
+                    s.date < :currentDate
+                    OR (s.date = :currentDate AND rt.start_at < :currentTime)
+                  )
+                ORDER BY s.date DESC, rt.start_at DESC, w.id DESC
+                """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("waitingId", waitingId);
+                .addValue("memberId", memberId)
+                .addValue("currentDate", now.toLocalDate())
+                .addValue("currentTime", now.toLocalTime());
 
-        jdbcTemplate.update(sql, params);
+        return jdbcTemplate.query(sql, params, waitingDetailRowMapper);
     }
 }

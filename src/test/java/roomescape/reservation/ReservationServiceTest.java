@@ -9,18 +9,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -39,6 +47,12 @@ class ReservationServiceTest {
 
     @Mock
     private ScheduleService scheduleService;
+
+    @Mock
+    private WaitingRepository waitingRepository;
+
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -185,5 +199,167 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
                 .isInstanceOf(IllegalStateException.class);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("UPCOMING 기간으로 내 예약/대기 조회 시 UPCOMING 조회 메서드를 호출한다.")
+    void findMyReservationsAndWaitingsByPeriod_upcoming() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 10, 0);
+        when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        ReservationDetailProjection reservation = reservationDetail(
+                1L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
+        );
+        WaitingDetailProjection waiting = new WaitingDetailProjection(
+                10L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(11, 0), 1L
+        );
+
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of(reservation));
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of(waiting));
+
+        List<ReservationDetailFindResponse> result =
+                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+
+        assertThat(result).hasSize(2);
+        verify(reservationRepository).findUpcomingReservationDetailsByMemberId(MEMBER_ID, now);
+        verify(waitingRepository).findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now);
+        verify(reservationRepository, never()).findPastReservationDetailsByMemberId(anyLong(), any());
+        verify(waitingRepository, never()).findPastWaitingDetailsByMemberId(anyLong(), any());
+    }
+
+    @Test
+    @DisplayName("HISTORY 기간으로 내 예약/대기 조회 시 HISTORY 조회 메서드를 호출한다.")
+    void findMyReservationsAndWaitingsByPeriod_history() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 10, 0);
+        when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of());
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of());
+
+        ReservationDetailProjection reservation = reservationDetail(
+                2L, MEMBER_ID, LocalDate.of(2026, 5, 4), 1L, 1L, LocalTime.of(10, 0)
+        );
+        WaitingDetailProjection waiting = new WaitingDetailProjection(
+                20L, "member", LocalDate.of(2026, 5, 4), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(9, 0), 2L
+        );
+
+        when(reservationRepository.findPastReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of(reservation));
+        when(waitingRepository.findPastWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(java.util.List.of(waiting));
+
+        List<ReservationDetailFindResponse> result =
+                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.HISTORY);
+
+        assertThat(result).hasSize(2);
+        verify(reservationRepository).findPastReservationDetailsByMemberId(MEMBER_ID, now);
+        verify(waitingRepository).findPastWaitingDetailsByMemberId(MEMBER_ID, now);
+    }
+
+    @Test
+    @DisplayName("동일한 날짜와 시간에서는 예약(RESERVED)이 대기(WAITING)보다 먼저 조회된다.")
+    void findMyReservationsAndWaitingsByPeriod_sameDateTime_reservedFirst() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 9, 0);
+        when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        ReservationDetailProjection reservation = reservationDetail(
+                100L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
+        );
+        WaitingDetailProjection waiting = new WaitingDetailProjection(
+                200L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(10, 0), 1L
+        );
+
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(reservation));
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(waiting));
+
+        List<ReservationDetailFindResponse> result =
+                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+
+        assertThat(result).extracting(ReservationDetailFindResponse::status)
+                .containsExactly(ReservationStatus.RESERVED, ReservationStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("UPCOMING 조회는 날짜/시간 오름차순이며, 동률이면 예약을 우선한다.")
+    void findMyReservationsAndWaitingsByPeriod_upcoming_sortedByDateAndTime() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 5, 9, 0);
+        when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        ReservationDetailProjection reservation1 = reservationDetail(
+                101L, MEMBER_ID, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
+        );
+        ReservationDetailProjection reservation2 = reservationDetail(
+                102L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
+        );
+        WaitingDetailProjection waiting1 = new WaitingDetailProjection(
+                201L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(10, 0), 1L
+        );
+        WaitingDetailProjection waiting2 = new WaitingDetailProjection(
+                202L, "member", LocalDate.of(2026, 5, 6), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(9, 0), 2L
+        );
+
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(reservation1, reservation2));
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(waiting1, waiting2));
+
+        List<ReservationDetailFindResponse> result =
+                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+
+        assertThat(result).extracting(ReservationDetailFindResponse::id)
+                .containsExactly(201L, 102L, 202L, 101L);
+    }
+
+    @Test
+    @DisplayName("HISTORY 조회는 날짜/시간 내림차순이며, 동률이면 예약을 우선한다.")
+    void findMyReservationsAndWaitingsByPeriod_history_sortedByDateAndTime() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 7, 10, 0);
+        when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        ReservationDetailProjection reservation1 = reservationDetail(
+                301L, MEMBER_ID, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
+        );
+        ReservationDetailProjection reservation2 = reservationDetail(
+                302L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
+        );
+        WaitingDetailProjection waiting1 = new WaitingDetailProjection(
+                401L, "member", LocalDate.of(2026, 5, 6), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(12, 0), 1L
+        );
+        WaitingDetailProjection waiting2 = new WaitingDetailProjection(
+                402L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
+                "thumbnail", 1L, LocalTime.of(9, 0), 2L
+        );
+
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of());
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of());
+        when(reservationRepository.findPastReservationDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(reservation1, reservation2));
+        when(waitingRepository.findPastWaitingDetailsByMemberId(MEMBER_ID, now))
+                .thenReturn(List.of(waiting1, waiting2));
+
+        List<ReservationDetailFindResponse> result =
+                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.HISTORY);
+
+        assertThat(result).extracting(ReservationDetailFindResponse::id)
+                .containsExactly(401L, 301L, 302L, 402L);
     }
 }

@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationPeriod;
+import roomescape.reservation.ReservationStatus;
+import roomescape.reservation.application.readmodel.ReservationReadModel;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationDetailFindResponse;
@@ -12,12 +15,18 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.application.readmodel.WaitingReadModel;
 import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +34,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final ScheduleService scheduleService;
+    private final Clock clock;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
@@ -36,11 +46,13 @@ public class ReservationService {
     }
 
     public List<ReservationDetailFindResponse> findReservationDetails() {
-        return ReservationDetailFindResponse.from(reservationRepository.findAll());
+        List<ReservationReadModel> reservationReadModels = ReservationReadModel.from(reservationRepository.findAll());
+
+        return ReservationDetailFindResponse.from(reservationReadModels);
     }
 
     public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> {});
+        deleteInternal(reservationId, oldReservation -> { });
     }
 
     public void deleteByIdForUser(long reservationId, long memberId) {
@@ -50,11 +62,25 @@ public class ReservationService {
         );
     }
 
-    public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
-        return ReservationDetailFindResponse.merge(
-                reservationRepository.findAllReservationDetailsByMemberId(memberId),
-                waitingRepository.findAllWaitingDetailsByMemberId(memberId)
-        );
+    public List<ReservationDetailFindResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
+        if (period == null) {
+            period = ReservationPeriod.UPCOMING;
+        }
+
+        LocalDateTime now = LocalDateTime.now(clock);
+        List<ReservationReadModel> reservations = ReservationReadModel.from(reservationRepository.findUpcomingReservationDetailsByMemberId(memberId, now));
+        List<WaitingReadModel> waitings = WaitingReadModel.from(waitingRepository.findUpcomingWaitingDetailsByMemberId(memberId, now));
+
+        if (period == ReservationPeriod.HISTORY) {
+            reservations = ReservationReadModel.from(reservationRepository.findPastReservationDetailsByMemberId(memberId, now));
+            waitings = WaitingReadModel.from(waitingRepository.findPastWaitingDetailsByMemberId(memberId, now));
+        }
+
+        return Stream.concat(
+                        reservations.stream().map(ReservationDetailFindResponse::from),
+                        waitings.stream().map(ReservationDetailFindResponse::from)
+                ).sorted(reservationOrderComparator(period))
+                .toList();
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
@@ -66,7 +92,8 @@ public class ReservationService {
     }
 
     public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {});
+        return updateInternal(body, reservationId, oldReservation -> {
+        });
     }
 
     private static void validateReservationOwner(
@@ -89,6 +116,20 @@ public class ReservationService {
         if (body.date() == null && body.timeId() == null) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
         }
+    }
+
+    private Comparator<ReservationDetailFindResponse> reservationOrderComparator(ReservationPeriod period) {
+        Comparator<ReservationDetailFindResponse> comparator =
+                Comparator.comparing(ReservationDetailFindResponse::date)
+                        .thenComparing(response -> response.time().time());
+
+        if (period == ReservationPeriod.HISTORY) {
+            comparator = Comparator.comparing(ReservationDetailFindResponse::date, Comparator.reverseOrder())
+                    .thenComparing((a, b) -> b.time().time().compareTo(a.time().time()));
+        }
+
+        return comparator.thenComparingInt(response ->
+                response.status() == ReservationStatus.RESERVED ? 0 : 1);
     }
 
     private void deleteInternal(

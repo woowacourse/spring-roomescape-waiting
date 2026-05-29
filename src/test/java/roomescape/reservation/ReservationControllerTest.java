@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 @Import(TestTimeConfig.class)
 @ActiveProfiles("test")
@@ -57,15 +56,6 @@ public class ReservationControllerTest {
         reservation.put("timeId", 4);
         reservation.put("themeId", 4);
         return reservation;
-    }
-
-    private Map<String, Object> waitingRequest() {
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("date", "2026-05-05");
-        waiting.put("timeId", 1);
-        waiting.put("themeId", 1);
-        waiting.put("reservationId", null);
-        return waiting;
     }
 
     @Test
@@ -114,31 +104,31 @@ public class ReservationControllerTest {
     }
 
     @Test
-    void 나의_예약_목록에서_대기도_함께_조회한다() {
-        String accessToken = login("b", "test2");
-
-        Integer waitingId = RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(waitingRequest())
-                .when().post("/api/user/waitings")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", notNullValue())
-                .extract()
-                .path("data.id");
+    void 나의_예약_조회시_period가_upcoming이면_다가오는_예약과_대기를_조회한다() {
+        String accessToken = loginUser();
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
+                .queryParam("period", "UPCOMING")
                 .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
-                .body("data.size()", is(2))
-                .body("data[1].id", is(waitingId))
-                .body("data[1].status", is("WAITING"))
-                .body("data[1].waitingOrder", is(1));
+                .body("data.size()", is(4));
+    }
+
+    @Test
+    void 나의_예약_조회시_period가_history이면_지난_예약과_대기를_조회한다() {
+        String accessToken = loginUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .queryParam("period", "HISTORY")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(0));
     }
 
     @Test

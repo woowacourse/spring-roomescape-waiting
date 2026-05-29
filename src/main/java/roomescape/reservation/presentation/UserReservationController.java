@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.member.AuthenticatedMember;
 import roomescape.member.LoginMember;
+import roomescape.reservation.ReservationPeriod;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
@@ -53,9 +55,10 @@ public class UserReservationController {
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findMyReservations(
-            @LoginMember AuthenticatedMember member
+            @LoginMember AuthenticatedMember member,
+            @RequestParam(defaultValue = "UPCOMING") ReservationPeriod period
     ) {
-        List<ReservationDetailFindResponse> response = reservationService.findMyReservations(member.id());
+        List<ReservationDetailFindResponse> response = reservationService.findMyReservationsAndWaitingsByPeriod(member.id(), period);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 

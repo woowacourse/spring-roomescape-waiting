@@ -4,6 +4,7 @@ import roomescape.reservation.Reservation;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,7 +16,7 @@ public interface ReservationRepository {
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
-    List<ReservationDetailProjection> findAllReservationDetailsByMemberId(long memberId);
+//    List<ReservationDetailProjection> findAllReservationDetailsByMemberId(long memberId);
 
     void deleteById(long reservationId);
 
@@ -30,4 +31,8 @@ public interface ReservationRepository {
     boolean existsByScheduleId(long scheduleId);
 
     boolean existsByMemberIdAndScheduleId(long memberId, long scheduleId);
+
+    List<ReservationDetailProjection> findUpcomingReservationDetailsByMemberId(long memberId, LocalDateTime now);
+
+    List<ReservationDetailProjection> findPastReservationDetailsByMemberId(long memberId, LocalDateTime now);
 }

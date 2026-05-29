@@ -7,11 +7,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.member.Role;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -104,33 +104,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 (rs, rowNum) -> rs.getLong("time_id")));
     }
 
-    @Override
-    public List<ReservationDetailProjection> findAllReservationDetailsByMemberId(long memberId) {
-        String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    m.id AS member_id,
-                    m.name AS member_name,
-                    s.date,
-                    t.id AS theme_id,
-                    t.name AS theme_name,
-                    t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url,
-                    rt.id AS time_id,
-                    rt.start_at
-                FROM reservation r
-                JOIN schedule s ON r.schedule_id = s.id
-                JOIN theme t ON s.theme_id = t.id
-                JOIN reservation_time rt ON s.time_id = rt.id
-                JOIN member m ON r.member_id = m.id
-                WHERE m.id = :memberId
-                """;
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("memberId", memberId);
-
-        return template.query(sql, params, reservationDetailFindRowMapper);
-    }
-
     public void deleteByIdAndMemberId(long reservationId, long memberId) {
         String sql = "DELETE FROM reservation WHERE id = :reservationId AND member_id = :memberId";
 
@@ -168,7 +141,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON r.member_id = m.id
-                 WHERE r.id = :id
+                WHERE r.id = :id
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -239,5 +212,73 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("scheduleId", scheduleId);
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
+    }
+
+    @Override
+    public List<ReservationDetailProjection> findUpcomingReservationDetailsByMemberId(long memberId, LocalDateTime now) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    m.id AS member_id,
+                    m.name AS member_name,
+                    s.date,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    rt.id AS time_id,
+                    rt.start_at
+                FROM reservation r
+                JOIN schedule s ON r.schedule_id = s.id
+                JOIN theme t ON s.theme_id = t.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN member m ON r.member_id = m.id
+                WHERE r.member_id = :memberId AND
+                ( s.date > :currentDate 
+                      OR (s.date = :currentDate AND rt.start_at >= :currentTime)
+                )
+                ORDER BY s.date ASC, rt.start_at ASC, r.id ASC
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("currentDate", now.toLocalDate())
+                .addValue("currentTime", now.toLocalTime());
+
+        return template.query(sql, params, reservationDetailFindRowMapper);
+    }
+
+    @Override
+    public List<ReservationDetailProjection> findPastReservationDetailsByMemberId(long memberId, LocalDateTime now) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    m.id AS member_id,
+                    m.name AS member_name,
+                    s.date,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    rt.id AS time_id,
+                    rt.start_at
+                FROM reservation r
+                JOIN schedule s ON r.schedule_id = s.id
+                JOIN theme t ON s.theme_id = t.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN member m ON r.member_id = m.id
+                WHERE r.member_id = :memberId AND
+                ( s.date < :currentDate 
+                      OR (s.date = :currentDate AND rt.start_at < :currentTime)
+                )
+                ORDER BY s.date DESC, rt.start_at DESC, r.id DESC
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("currentDate", now.toLocalDate())
+                .addValue("currentTime", now.toLocalTime());
+
+        return template.query(sql, params, reservationDetailFindRowMapper);
     }
 }

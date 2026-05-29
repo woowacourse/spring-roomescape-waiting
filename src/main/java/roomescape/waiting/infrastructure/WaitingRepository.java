@@ -3,6 +3,7 @@ package roomescape.waiting.infrastructure;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,11 @@ public interface WaitingRepository {
 
     long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId);
 
-    List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
+//    List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 
     void deleteById(long waitingId);
+
+    List<WaitingDetailProjection> findUpcomingWaitingDetailsByMemberId(long memberId, LocalDateTime now);
+
+    List<WaitingDetailProjection> findPastWaitingDetailsByMemberId(long memberId, LocalDateTime now);
 }
