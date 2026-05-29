@@ -11,9 +11,6 @@ public record AdminReservationResponse(
 ) {
 
     public static AdminReservationResponse from(ReservationResult result) {
-        if (result == null) {
-            return null;
-        }
         return new AdminReservationResponse(
                 result.id(),
                 result.name(),

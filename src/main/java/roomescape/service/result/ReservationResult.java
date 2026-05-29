@@ -1,6 +1,7 @@
 package roomescape.service.result;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.Reservation;
 
 public record ReservationResult(
@@ -11,9 +12,7 @@ public record ReservationResult(
 ) {
 
     public static ReservationResult from(Reservation reservation) {
-        if (reservation == null) {
-            return null;
-        }
+        Objects.requireNonNull(reservation);
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getName(),

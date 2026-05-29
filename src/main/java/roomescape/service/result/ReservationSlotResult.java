@@ -1,8 +1,8 @@
 package roomescape.service.result;
 
 import java.time.LocalDate;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 
 public record ReservationSlotResult(
         long slotId,
@@ -11,17 +11,6 @@ public record ReservationSlotResult(
         ReservationTimeResult time,
         ReservationResult reservation
 ) {
-
-    public static ReservationSlotResult from(ReservationSlot slot) {
-        Reservation reservation = slot.getReservations()
-                .stream()
-                .filter(Reservation::isReserved)
-                .findFirst()
-                .orElse(null);
-
-        return from(slot, reservation);
-    }
-
     public static ReservationSlotResult from(ReservationSlot slot, Reservation reservation) {
         return new ReservationSlotResult(
                 slot.getId(),

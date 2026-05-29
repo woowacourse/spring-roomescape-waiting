@@ -11,9 +11,6 @@ public record ReservationResponse(
 ) {
 
     public static ReservationResponse from(ReservationResult result) {
-        if (result == null) {
-            return null;
-        }
         return new ReservationResponse(
                 result.id(),
                 result.name(),
