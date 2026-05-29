@@ -41,13 +41,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                             .startAt(rs.getObject("start_at", LocalTime.class))
                             .build();
 
+                    User user = User.builder()
+                            .name(rs.getString("name"))
+                            .build();
+
                     return Reservation.builder()
                             .id(rs.getLong("id"))
-                            .user(User
-                                    .builder()
-                                    .name(rs.getString("name"))
-                                    .build()
-                            )
+                            .user(user)
                             .slot(slot)
                             .build();
                 }

@@ -53,16 +53,17 @@ public class JdbcWaitingRepository implements WaitingRepository {
                                 ORDER BY w.id ASC
                                 LIMIT 1
                                 """,
-                        (rs, rowNum) ->
-                                Waiting.builder()
-                                        .id(rs.getLong("id"))
-                                        .user(User
-                                                .builder()
-                                                .name(rs.getString("name"))
-                                                .build()
-                                        )
-                                        .slot(slot)
-                                        .build(),
+                        (rs, rowNum) -> {
+                            User user = User.builder()
+                                    .name(rs.getString("name"))
+                                    .build();
+
+                            return Waiting.builder()
+                                    .id(rs.getLong("id"))
+                                    .user(user)
+                                    .slot(slot)
+                                    .build();
+                        },
                         slot.date(),
                         slot.themeId(),
                         slot.timeId())
