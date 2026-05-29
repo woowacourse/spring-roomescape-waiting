@@ -4,20 +4,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import integration.BaseIntegrationTest;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
+import roomescape.controller.client.api.query.ReservationQuery;
 
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
 class ReservationQueryTest extends BaseIntegrationTest {
 
     @Autowired
     private ReservationQuery reservationQuery;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void 검색_필터가_없을_때_전체_카운트를_계산하고_페이징과_정렬이_적용된_데이터를_반환한다() {
@@ -59,5 +65,35 @@ class ReservationQueryTest extends BaseIntegrationTest {
         boolean allMatch = result.content().stream()
                 .allMatch(res -> res.name().equals("이프"));
         assertThat(allMatch).isTrue();
+    }
+
+    @Test
+    void 먼저_생성된_대기_예약이_더_낮은_대기_순번을_가진다() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        jdbcTemplate.update("""
+                INSERT INTO reservation (name, slot_id, status, created_at)
+                VALUES (?, ?, ?, ?)
+                """, "라텔", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(2)));
+        jdbcTemplate.update("""
+                INSERT INTO reservation (name, slot_id, status, created_at)
+                VALUES (?, ?, ?, ?)
+                """, "찰리", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(1)));
+
+        // when
+        ReservationSearchResponse firstWaiting = reservationQuery.search(
+                new ReservationSearchCondition("라텔"),
+                new Pageable(1, 10)
+        ).content().getFirst();
+        ReservationSearchResponse secondWaiting = reservationQuery.search(
+                new ReservationSearchCondition("찰리"),
+                new Pageable(1, 10)
+        ).content().getFirst();
+
+        // then
+        assertAll(
+                () -> assertThat(firstWaiting.waitingRank()).isEqualTo(1),
+                () -> assertThat(secondWaiting.waitingRank()).isEqualTo(2)
+        );
     }
 }
