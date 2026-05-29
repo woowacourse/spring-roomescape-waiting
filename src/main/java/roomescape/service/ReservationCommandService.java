@@ -27,12 +27,14 @@ public class ReservationCommandService {
     private final Clock clock;
 
     public Reservation create(String name, LocalDate date, long timeId, long themeId) {
+        LocalDateTime now = LocalDateTime.now(clock);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
-        slot.validateNotPast(LocalDateTime.now(clock));
-        if (reservationDao.findBySlot(slot).isPresent()) {
-            throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
-        }
-        return reservationDao.save(new Reservation(null, name, slot));
+        Reservation reservation = new Reservation(null, name, slot);
+
+        slot.validateNotPast(now);
+        validateNoDuplicate(slot);
+
+        return reservationDao.save(reservation);
     }
 
     public void delete(long reservationId) {
@@ -49,22 +51,30 @@ public class ReservationCommandService {
     }
 
     public Reservation update(long reservationId, String name, LocalDate newDate, long newTimeId) {
-        ReservationTime newTime = findTimeReference(newTimeId);
+        LocalDateTime now = LocalDateTime.now(clock);
         Reservation oldReservation = findReservation(reservationId);
+        Slot newSlot = new Slot(newDate, findTimeReference(newTimeId), oldReservation.slot().theme());
 
-        oldReservation.validateNotStarted(LocalDateTime.now(clock));
+        oldReservation.validateNotStarted(now);
         oldReservation.validateOwnedBy(name);
-
-        Slot newSlot = new Slot(newDate, newTime, oldReservation.slot().theme());
-        newSlot.validateNotPast(LocalDateTime.now(clock));
-        boolean isDuplicate = reservationDao.findBySlot(newSlot)
-                .filter(existing -> existing.id() != reservationId)
-                .isPresent();
-        if (isDuplicate) {
-            throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
-        }
+        newSlot.validateNotPast(now);
+        validateNoDuplicateExcluding(newSlot, reservationId);
 
         return reservationDao.update(oldReservation.withSlot(newSlot));
+    }
+
+    private void validateNoDuplicate(Slot slot) {
+        if (reservationDao.existsBySlot(slot)) {
+            throw new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
+        }
+    }
+
+    private void validateNoDuplicateExcluding(Slot slot, long excludedId) {
+        reservationDao.findBySlot(slot)
+                .filter(existing -> existing.id() != excludedId)
+                .ifPresent(existing -> {
+                    throw new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
+                });
     }
 
     private ReservationTime findTimeReference(long timeId) {

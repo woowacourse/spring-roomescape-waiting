@@ -122,4 +122,17 @@ public class ReservationDao {
                 .stream()
                 .findFirst();
     }
+
+    public boolean existsBySlot(Slot slot) {
+        String sql = """
+        SELECT EXISTS (
+            SELECT 1 FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ?
+        )
+        """;
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, slot.date(), slot.time().id(), slot.theme().id())
+        );
+    }
+
 }
