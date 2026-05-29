@@ -1,8 +1,5 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
-
 public class Rank {
     private final int value;
 
@@ -10,12 +7,12 @@ public class Rank {
         this.value = value;
     }
 
-    public boolean isFirst(){
+    private boolean isFirst() {
         return value == 1;
     }
 
     public Status decideStatus() {
-        if(isFirst()) {
+        if (isFirst()) {
             return Status.APPROVED;
         }
 
