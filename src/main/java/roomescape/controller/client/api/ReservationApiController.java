@@ -71,8 +71,7 @@ public class ReservationApiController {
     public ResponseEntity<ReservationSlotDetailResponse> getReservation(
             @PathVariable @Positive(message = "예약 식별자는 양수입니다.") Long reservationId
     ) {
-        ReservationSlotResult result = reservationService.getReservation(reservationId);
-        return ResponseEntity.ok(ReservationSlotDetailResponse.from(result));
+        return ResponseEntity.ok(reservationQuery.findByReservationId(reservationId));
     }
 
     @GetMapping

@@ -69,12 +69,6 @@ public class ReservationService {
         reservationRepository.save(slot);
     }
 
-    public ReservationSlotResult getReservation(long reservationId) {
-        ReservationSlot slot = findReservationSlot(reservationId);
-        Reservation reservationReservation = slot.findReservedReservation(reservationId);
-        return ReservationSlotResult.from(slot, reservationReservation);
-    }
-
     private ReservationSlotResult moveReservation(
             Reservation reservation,
             ReservationSlot current,

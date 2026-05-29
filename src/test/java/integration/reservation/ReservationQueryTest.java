@@ -14,6 +14,7 @@ import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
+import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
@@ -65,6 +66,21 @@ class ReservationQueryTest extends BaseIntegrationTest {
         boolean allMatch = result.content().stream()
                 .allMatch(res -> res.name().equals("이프"));
         assertThat(allMatch).isTrue();
+    }
+
+    @Test
+    void 예약_식별자로_예약_상세_정보를_조회한다() {
+        // when
+        ReservationSlotDetailResponse result = reservationQuery.findByReservationId(1L);
+
+        // then
+        assertAll(
+                () -> assertThat(result.slotId()).isEqualTo(1L),
+                () -> assertThat(result.theme().name()).isEqualTo("화이트노이즈"),
+                () -> assertThat(result.time().startAt()).isNotNull(),
+                () -> assertThat(result.reservation().id()).isEqualTo(1L),
+                () -> assertThat(result.reservation().status()).isEqualTo("RESERVED")
+        );
     }
 
     @Test

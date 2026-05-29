@@ -28,7 +28,11 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ReservationApiController;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
+import roomescape.controller.client.api.dto.response.ReservationResponse;
+import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
 import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
+import roomescape.controller.client.api.dto.response.ReservationTimeResponse;
+import roomescape.controller.client.api.dto.response.ThemeResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
@@ -96,6 +100,30 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         Page<ReservationSearchResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .params("name", "이프")
                 .when().get("/api/reservations")
+                .then().log().all()
+                .status(HttpStatus.OK)
+                .extract().as(new TypeRef<>() {
+                });
+
+        // then
+        assertThat(response).isEqualTo(result);
+    }
+
+    @Test
+    void 예약_식별자로_예약_정보를_조회할_수_있다() {
+        // given
+        ReservationSlotDetailResponse result = new ReservationSlotDetailResponse(
+                1L,
+                LocalDate.now(),
+                new ThemeResponse(1L, "테마명", "설명", "https://image.com/theme.png"),
+                new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
+                new ReservationResponse(1L, "이프", "RESERVED", LocalDate.now().atStartOfDay())
+        );
+        when(reservationQuery.findByReservationId(anyLong())).thenReturn(result);
+
+        // when
+        ReservationSlotDetailResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .when().get("/api/reservations/{reservationId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.OK)
                 .extract().as(new TypeRef<>() {
