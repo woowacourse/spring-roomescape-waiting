@@ -3,24 +3,31 @@ package roomescape.reservationwaiting.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@JdbcTest
+@Import({JdbcReservationWaitingRepository.class, JdbcReservationRepository.class, ReservationWaitingFactory.class})
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationWaitingRepositoryTest {
 
@@ -110,5 +117,16 @@ public class ReservationWaitingRepositoryTest {
 
         Map<Long, Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
         assertThat(turns.get(waiting2.getId())).isEqualTo(2L);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        Clock clock() {
+            return Clock.fixed(
+                    LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+                    ZoneId.systemDefault()
+            );
+        }
     }
 }

@@ -1,23 +1,29 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
+import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@JdbcTest
+@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class, ReservationFactory.class})
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationRepositoryTest {
 
@@ -64,5 +70,16 @@ class ReservationRepositoryTest {
         reservationRepository.deleteById(futureReservationId);
         LocalDate date = LocalDate.of(2099, 12, 1);
         assertThat(timeRepository.findAvailableByDateAndThemeId(date, 1L)).hasSize(3);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        Clock clock() {
+            return Clock.fixed(
+                    LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+                    ZoneId.systemDefault()
+            );
+        }
     }
 }

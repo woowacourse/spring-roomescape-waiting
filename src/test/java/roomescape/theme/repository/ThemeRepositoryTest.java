@@ -8,14 +8,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeFactory;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@JdbcTest
+@Import({JdbcThemeRepository.class, ThemeFactory.class})
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ThemeRepositoryTest {
 
@@ -38,7 +39,6 @@ class ThemeRepositoryTest {
         jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마C', '설명C', 'https://c.com')");
         jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마D', '설명D', 'https://d.com')");
 
-        // 인기 테마 데이터 (theme1 > theme2 > theme3)
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u1', ?, 1, 1)", LocalDate.now().minusDays(1));
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u2', ?, 1, 1)", LocalDate.now().minusDays(2));
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u3', ?, 1, 1)", LocalDate.now().minusDays(3));
