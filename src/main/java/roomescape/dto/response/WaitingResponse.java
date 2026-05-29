@@ -5,7 +5,6 @@ import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 public record WaitingResponse(
         Long id,
@@ -23,26 +22,8 @@ public record WaitingResponse(
                 waiting.id(),
                 waiting.name(),
                 slot.date(),
-                new TimeInfo(slot.time().id(), slot.time().startAt()),
-                new ThemeInfo(
-                        slot.theme().id(),
-                        slot.theme().name(),
-                        slot.theme().thumbnailUrl(),
-                        slot.theme().description())
+                TimeInfo.from(slot.time()),
+                ThemeInfo.from(slot.theme())
         );
-    }
-
-    private record TimeInfo(
-            Long id,
-
-            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "Asia/Seoul")
-            LocalTime startAt) {
-    }
-
-    private record ThemeInfo(Long id,
-                             String name,
-                             String thumbnailUrl,
-                             String description
-    ) {
     }
 }
