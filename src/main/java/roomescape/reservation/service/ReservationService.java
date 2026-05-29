@@ -85,6 +85,8 @@ public class ReservationService {
                 reservation.getTheme().getId(), id)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
+
+        reservation.reschedule(request.date(), reservationTimeService.getById(request.timeId()), clock);
         reservationRepository.update(id, request.date(), request.timeId());
         return ReservationResponse.from(getById(id));
     }
