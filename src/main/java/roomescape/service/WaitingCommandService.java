@@ -54,7 +54,7 @@ public class WaitingCommandService {
         }
 
         if (waitingDao.findAllBySlot(slot).stream()
-                .anyMatch(waiting -> command.name().equals(waiting.name()))) {
+                .anyMatch(waiting -> command.name().equals(waiting.getName()))) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
 

@@ -1,21 +1,18 @@
 package roomescape.domain;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import roomescape.exception.ForbiddenException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Reservation {
-
     private final Long id;
     private final String username;
     private final Slot slot;
-
-    private Reservation(Long id, String username, Slot slot) {
-        this.id = id;
-        this.username = username;
-        this.slot = slot;
-    }
 
     public static Reservation from(long id, String username, Slot slot) {
         return new Reservation(id, username, slot);
@@ -45,23 +42,36 @@ public class Reservation {
         slot.validateAvailableTime(now);
     }
 
-    public String username() {
+    public String getUsername() {
         return username;
     }
 
-    public LocalDate reservationDate() {
-        return slot.date();
+    public LocalDate getReservationDate() {
+        return slot.getDate();
     }
 
-    public ReservationTime reservationTime() {
-        return slot.time();
+    public ReservationTime getReservationTime() {
+        return slot.getTime();
     }
 
-    public Theme reservationTheme() {
-        return slot.theme();
+    public Theme getReservationTheme() {
+        return slot.getTheme();
     }
 
-    public long id() {
+    public Long getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

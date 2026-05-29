@@ -33,9 +33,9 @@ public class ThemeDao {
 
     public Theme save(Theme theme) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", theme.name())
-                .addValue("thumbnail_url", theme.thumbnailUrl())
-                .addValue("description", theme.description());
+                .addValue("name", theme.getName())
+                .addValue("thumbnail_url", theme.getThumbnailUrl())
+                .addValue("description", theme.getDescription());
 
         Number themeId = insertExecutor.executeAndReturnKey(params);
 
@@ -50,7 +50,7 @@ public class ThemeDao {
         String sql = """
                 DELETE FROM theme WHERE id = ?
                 """;
-        int affected = jdbcTemplate.update(sql, theme.id());
+        int affected = jdbcTemplate.update(sql, theme.getId());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");

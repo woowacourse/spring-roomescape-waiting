@@ -19,7 +19,7 @@ public class ReservationTimeDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
     private final RowMapper<ReservationTime> rowMapper = (rs, rowNum) ->
-            ReservationTime.create(
+            ReservationTime.from(
                     rs.getLong("id"),
                     rs.getObject("start_at", LocalTime.class)
             );
@@ -38,7 +38,7 @@ public class ReservationTimeDao {
 
         Number newId = insertExecutor.executeAndReturnKey(params);
 
-        return ReservationTime.create(
+        return ReservationTime.from(
                 newId.longValue(),
                 startAt
         );

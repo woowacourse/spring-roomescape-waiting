@@ -22,15 +22,15 @@ public record ReservationResponse(
 ) {
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
-                reservation.id(),
-                reservation.username(),
-                reservation.reservationDate(),
-                new TimeInfo(reservation.reservationTime().id(), reservation.reservationTime().startAt()),
+                reservation.getId(),
+                reservation.getUsername(),
+                reservation.getReservationDate(),
+                new TimeInfo(reservation.getReservationTime().getId(), reservation.getReservationTime().getStartAt()),
                 new ThemeInfo(
-                        reservation.reservationTheme().id(),
-                        reservation.reservationTheme().name(),
-                        reservation.reservationTheme().thumbnailUrl(),
-                        reservation.reservationTheme().description()),
+                        reservation.getReservationTheme().getId(),
+                        reservation.getReservationTheme().getName(),
+                        reservation.getReservationTheme().getThumbnailUrl(),
+                        reservation.getReservationTheme().getDescription()),
                 "예약",
                 null
         );
@@ -41,12 +41,12 @@ public record ReservationResponse(
                 waiting.id(),
                 waiting.name(),
                 waiting.reservationDate(),
-                new TimeInfo(waiting.reservationTime().id(), waiting.reservationTime().startAt()),
+                new TimeInfo(waiting.reservationTime().getId(), waiting.reservationTime().getStartAt()),
                 new ThemeInfo(
-                        waiting.reservationTheme().id(),
-                        waiting.reservationTheme().name(),
-                        waiting.reservationTheme().thumbnailUrl(),
-                        waiting.reservationTheme().description()),
+                        waiting.reservationTheme().getId(),
+                        waiting.reservationTheme().getName(),
+                        waiting.reservationTheme().getThumbnailUrl(),
+                        waiting.reservationTheme().getDescription()),
                 "예약대기",
                 waiting.rank()
         );

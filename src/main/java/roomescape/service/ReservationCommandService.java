@@ -75,11 +75,11 @@ public class ReservationCommandService {
                 Schedule.from(
                         command.date(),
                         findTimeReference(command.timeId())),
-                current.reservationTheme()
+                current.getReservationTheme()
         );
 
         boolean isDuplicate = reservationDao.findBySlot(slot)
-                .filter(existing -> existing.id() != reservationId)
+                .filter(existing -> existing.getId() != reservationId)
                 .isPresent();
 
         if (isDuplicate) {

@@ -27,7 +27,7 @@ public class ReservationDao {
                 rs.getString("theme_description")
         );
 
-        ReservationTime reservationTime = ReservationTime.create(
+        ReservationTime reservationTime = ReservationTime.from(
                 rs.getLong("time_id"),
                 rs.getObject("time_value", LocalTime.class)
         );
@@ -54,10 +54,10 @@ public class ReservationDao {
 
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.username())
-                .addValue("date", reservation.reservationDate())
-                .addValue("time_id", reservation.reservationTime().id())
-                .addValue("theme_id", reservation.reservationTheme().id());
+                .addValue("name", reservation.getUsername())
+                .addValue("date", reservation.getReservationDate())
+                .addValue("time_id", reservation.getReservationTime().getId())
+                .addValue("theme_id", reservation.getReservationTheme().getId());
 
         Number reservationId = insertExecutor.executeAndReturnKey(params);
 
@@ -85,7 +85,7 @@ public class ReservationDao {
 
     public void delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, reservation.id());
+        int affected = jdbcTemplate.update(sql, reservation.getId());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
@@ -159,8 +159,8 @@ public class ReservationDao {
 
     public Reservation updateDateAndTime(Reservation reservation) {
         String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, reservation.reservationDate(), reservation.reservationTime().id(), reservation.id());
-        return findById(reservation.id());
+        jdbcTemplate.update(sql, reservation.getReservationDate(), reservation.getReservationTime().getId(), reservation.getId());
+        return findById(reservation.getId());
     }
 
     public Optional<Reservation> findBySlot(Slot slot) {
@@ -180,6 +180,6 @@ public class ReservationDao {
                         INNER JOIN theme as theme ON reservation.theme_id = theme.id
                         WHERE date = ? AND time_id = ? AND theme_id = ?;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id()).stream().findFirst();
+        return jdbcTemplate.query(sql, rowMapper, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()).stream().findFirst();
     }
 }

@@ -36,7 +36,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = reservationCommandService.create(ReservationRequest.toCommand(request));
 
-        Long savedId = reservation.id();
+        Long savedId = reservation.getId();
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")

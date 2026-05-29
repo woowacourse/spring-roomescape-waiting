@@ -34,7 +34,7 @@ public class AdminTimeController {
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createReservationTime(@Valid @RequestBody ReservationTimeRequest request) {
         ReservationTime reservationTime = reservationTimeCommandService.create(request.startAt());
-        Long savedId = reservationTime.id();
+        Long savedId = reservationTime.getId();
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

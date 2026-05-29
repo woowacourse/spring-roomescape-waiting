@@ -29,7 +29,7 @@ public class WaitingDao {
                 rs.getString("theme_description")
         );
 
-        ReservationTime reservationTime = ReservationTime.create(
+        ReservationTime reservationTime = ReservationTime.from(
                 rs.getLong("time_id"),
                 rs.getObject("time_value", LocalTime.class)
         );
@@ -56,7 +56,7 @@ public class WaitingDao {
                 rs.getString("theme_description")
         );
 
-        ReservationTime reservationTime = ReservationTime.create(
+        ReservationTime reservationTime = ReservationTime.from(
                 rs.getLong("time_id"),
                 rs.getObject("time_value", LocalTime.class)
         );
@@ -80,10 +80,10 @@ public class WaitingDao {
 
     public Waiting save(Waiting waiting) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", waiting.name())
-                .addValue("date", waiting.waitingDate())
-                .addValue("time_id", waiting.waitingTime().id())
-                .addValue("theme_id", waiting.waitingTheme().id())
+                .addValue("name", waiting.getName())
+                .addValue("date", waiting.getWaitingDate())
+                .addValue("time_id", waiting.getWaitingTime().getId())
+                .addValue("theme_id", waiting.getWaitingTheme().getId())
                 .addValue("created_at", waiting.createAt());
 
         Number waitingId = insertExecutor.executeAndReturnKey(params);
@@ -95,7 +95,7 @@ public class WaitingDao {
         String sql = """
                 DELETE FROM reservation_waiting WHERE id = ?
                 """;
-        int affected = jdbcTemplate.update(sql, waiting.id());
+        int affected = jdbcTemplate.update(sql, waiting.getId());
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다.");
@@ -149,7 +149,7 @@ public class WaitingDao {
                 WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
                 ORDER BY created_at;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id());
+        return jdbcTemplate.query(sql, rowMapper, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
     public List<WaitingWithRank> findAllByName(String name) {

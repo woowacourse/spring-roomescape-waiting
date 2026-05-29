@@ -1,12 +1,14 @@
 package roomescape.domain;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import roomescape.exception.ForbiddenException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Waiting {
     private final Long id;
     private final String name;
@@ -32,27 +34,40 @@ public class Waiting {
         }
     }
 
-    public Long id() {
+    public Long getId() {
         return id;
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 
-    public LocalDate waitingDate() {
-        return slot.date();
+    public LocalDate getWaitingDate() {
+        return slot.getDate();
     }
 
-    public ReservationTime waitingTime() {
-        return slot.time();
+    public ReservationTime getWaitingTime() {
+        return slot.getTime();
     }
 
-    public Theme waitingTheme() {
-        return slot.theme();
+    public Theme getWaitingTheme() {
+        return slot.getTheme();
     }
 
     public LocalDateTime createAt() {
         return createAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

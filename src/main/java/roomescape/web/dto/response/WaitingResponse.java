@@ -18,15 +18,15 @@ public record WaitingResponse(
 ) {
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
-                waiting.id(),
-                waiting.name(),
-                waiting.waitingDate(),
-                new TimeInfo(waiting.waitingTime().id(), waiting.waitingTime().startAt()),
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getWaitingDate(),
+                new TimeInfo(waiting.getWaitingTime().getId(), waiting.getWaitingTime().getStartAt()),
                 new ThemeInfo(
-                        waiting.waitingTheme().id(),
-                        waiting.waitingTheme().name(),
-                        waiting.waitingTheme().thumbnailUrl(),
-                        waiting.waitingTheme().description())
+                        waiting.getWaitingTheme().getId(),
+                        waiting.getWaitingTheme().getName(),
+                        waiting.getWaitingTheme().getThumbnailUrl(),
+                        waiting.getWaitingTheme().getDescription())
         );
     }
 
