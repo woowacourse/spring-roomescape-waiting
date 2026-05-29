@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
@@ -26,21 +27,28 @@ public class ReservationWaitingService {
     private final ReservationWaitingFactory reservationWaitingFactory;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final ReservationRepository reservationRepository;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
                                      ReservationWaitingFactory reservationWaitingFactory,
                                      ReservationTimeService reservationTimeService,
-                                     ThemeService themeService) {
+                                     ThemeService themeService,
+                                     ReservationRepository reservationRepository) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
     public ReservationWaitingResponse createWaiting(Member member, ReservationWaitingRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
+
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
+            throw new BusinessException(ErrorCode.NO_RESERVATION_FOR_WAITING);
+        }
 
         if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(), request.date(), request.timeId(), request.themeId())) {
