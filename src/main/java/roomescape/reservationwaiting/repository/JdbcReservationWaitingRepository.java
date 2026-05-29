@@ -1,17 +1,18 @@
 package roomescape.reservationwaiting.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.Reservation;
+import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
-
-import java.util.List;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -19,104 +20,108 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private final RowMapper<ReservationWaiting> rowMapper = (resultSet, rowNum) ->
-            ReservationWaiting.restore(resultSet.getLong("reservation_waiting_id"),
-                    resultSet.getString("name"),
-                    Reservation.restore(
-                            resultSet.getLong("reservation_id"),
-                            resultSet.getString("reservation_name"),
-                            resultSet.getDate("reservation_date").toLocalDate(),
-                            ReservationTime.restore(
-                                    resultSet.getLong("time_id"),
-                                    resultSet.getTime("time_start_at").toLocalTime(),
-                                    resultSet.getTime("time_finish_at").toLocalTime()
-                            ),
-                            Theme.restore(
-                                    resultSet.getLong("theme_id"),
-                                    resultSet.getString("theme_name"),
-                                    resultSet.getString("theme_description"),
-                                    resultSet.getString("theme_image_url")
-                            )
-                    )
-            );
-
-    private final RowMapper<Long> turnMapper = (resultSet, rowNum) ->
-            resultSet.getLong("turn");
+    private final RowMapper<ReservationWaiting> rowMapper = (resultSet, rowNum) -> ReservationWaiting.restore(
+            resultSet.getLong("waiting_id"),
+            Member.restore(
+                    resultSet.getLong("member_id"),
+                    resultSet.getString("member_name"),
+                    resultSet.getString("member_email"),
+                    resultSet.getString("member_password")
+            ),
+            resultSet.getDate("date").toLocalDate(),
+            ReservationTime.restore(
+                    resultSet.getLong("time_id"),
+                    resultSet.getTime("time_start_at").toLocalTime(),
+                    resultSet.getTime("time_finish_at").toLocalTime()
+            ),
+            Theme.restore(
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_image_url")
+            )
+    );
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("member_id", "date", "time_id", "theme_id");
     }
 
     @Override
-    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+    public ReservationWaiting save(ReservationWaiting waiting) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("name", reservationWaiting.getName())
-                .addValue("reservation_id", reservationWaiting.getReservation().getId());
+                .addValue("member_id", waiting.getMember().getId())
+                .addValue("date", waiting.getDate())
+                .addValue("time_id", waiting.getTime().getId())
+                .addValue("theme_id", waiting.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getReservation());
+        return ReservationWaiting.restore(id, waiting.getMember(), waiting.getDate(), waiting.getTime(),
+                waiting.getTheme());
     }
 
     @Override
     public void deleteById(Long id) {
-        String query = "delete from reservation_waiting where id = ?";
+        String query = "DELETE FROM reservation_waiting WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 
     @Override
-    public List<Long> calculateTurn(String name) {
+    public List<ReservationWaiting> findByMemberId(Long memberId) {
         String query = """
-                SELECT * FROM (
-                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
-                FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id) sub
-                WHERE sub.name = ?
-                ORDER BY sub.id;
-                """;
-        return jdbcTemplate.query(query, turnMapper, name);
-    }
-
-    @Override
-    public List<ReservationWaiting> findByName(String name) {
-        String query = """
-                SELECT * FROM (
-                SELECT rw.id as reservation_waiting_id, rw.name,
-                       r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
+                SELECT rw.id as waiting_id, rw.date,
+                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                        t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
                 FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id) sub
-                WHERE sub.name = ?
-                ORDER BY reservation_waiting_id;
+                JOIN member m ON rw.member_id = m.id
+                JOIN reservation_time rt ON rw.time_id = rt.id
+                JOIN theme t ON rw.theme_id = t.id
+                WHERE rw.member_id = ?
+                ORDER BY rw.id
                 """;
-        return jdbcTemplate.query(query, rowMapper, name);
+        return jdbcTemplate.query(query, rowMapper, memberId);
     }
 
     @Override
-    public boolean existsByNameAndReservationId(String name, Long reservationId) {
-        String query = "select count(*) from reservation_waiting where name = ? and reservation_id = ?";
-        return jdbcTemplate.queryForObject(query, Integer.class, name, reservationId) >= 1;
-    }
-
-    @Override
-    public ReservationWaiting findReservationWaitingById(Long reservationWaitingId) {
+    public Optional<ReservationWaiting> findById(Long id) {
         String query = """
-                SELECT * FROM (
-                SELECT rw.id as reservation_waiting_id, rw.name,
-                       r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
+                SELECT rw.id as waiting_id, rw.date,
+                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                        t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
                 FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id) sub
-                WHERE sub.reservation_waiting_id = ? 
-                ORDER BY reservation_waiting_id;
+                JOIN member m ON rw.member_id = m.id
+                JOIN reservation_time rt ON rw.time_id = rt.id
+                JOIN theme t ON rw.theme_id = t.id
+                WHERE rw.id = ?
                 """;
-        return jdbcTemplate.queryForObject(query, rowMapper, reservationWaitingId);
+        return jdbcTemplate.query(query, rowMapper, id).stream().findFirst();
+    }
+
+    @Override
+    public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId,
+                                                              Long themeId) {
+        String query = """
+                SELECT count(*) FROM reservation_waiting
+                WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ?
+                """;
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, memberId, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public Long calculateTurn(Long waitingId, LocalDate date, Long timeId, Long themeId) {
+        String query = """
+                SELECT turn FROM (
+                    SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at) as turn
+                    FROM reservation_waiting
+                    WHERE date = ? AND time_id = ? AND theme_id = ?
+                ) sub
+                WHERE id = ?
+                """;
+        return jdbcTemplate.queryForObject(query, Long.class, date, timeId, themeId, waitingId);
     }
 }

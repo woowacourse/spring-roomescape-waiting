@@ -1,72 +1,76 @@
 package roomescape.reservationwaiting.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.member.domain.Member;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
-
-import java.util.List;
-import java.util.stream.IntStream;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationRepository reservationRepository;
     private final ReservationWaitingFactory reservationWaitingFactory;
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
-                                     ReservationRepository reservationRepository,
-                                     ReservationWaitingFactory reservationWaitingFactory) {
+                                     ReservationWaitingFactory reservationWaitingFactory,
+                                     ReservationTimeService reservationTimeService,
+                                     ThemeService themeService) {
         this.reservationWaitingRepository = reservationWaitingRepository;
-        this.reservationRepository = reservationRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
     }
 
     @Transactional
-    public ReservationWaitingResponse createWaiting(ReservationWaitingRequest request) {
-        Reservation reservation = reservationRepository.findById(request.reservationId())
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservationWaitingRepository.existsByNameAndReservationId(request.name(), reservation.getId())) {
+    public ReservationWaitingResponse createWaiting(Member member, ReservationWaitingRequest request) {
+        ReservationTime time = reservationTimeService.getById(request.timeId());
+        Theme theme = themeService.getById(request.themeId());
+
+        if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+                member.getId(), request.date(), request.timeId(), request.themeId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
-                reservationWaitingFactory.create(request.name(), reservation));
-        return ReservationWaitingResponse.from(reservationWaiting);
+
+        ReservationWaiting saved = reservationWaitingRepository.save(
+                reservationWaitingFactory.create(member, request.date(), time, theme));
+        return ReservationWaitingResponse.from(saved);
     }
 
     @Transactional
-    public void deleteWaiting(Long id) {
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.findReservationWaitingById(id);
-        Reservation reservation = reservationRepository.findById(reservationWaiting.getReservation().getId())
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservation.isPast()) {
+    public void deleteWaiting(Long id, Long memberId) {
+        ReservationWaiting waiting = reservationWaitingRepository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+        if (!waiting.isOwnedBy(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        if (waiting.isPast()) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
         }
         reservationWaitingRepository.deleteById(id);
     }
 
-    public List<ReservationWaitingTurnResponse> getWaitingByName(String name) {
-        List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findByName(name);
-        List<Long> turns = getTurnByName(name);
-
-        return IntStream.range(0, turns.size())
-                .mapToObj(i -> ReservationWaitingTurnResponse.from(reservationWaitings.get(i), turns.get(i)))
-                .toList();
-    }
-
-    private List<Long> getTurnByName(String name) {
-        return reservationWaitingRepository.calculateTurn(name);
+    public List<ReservationWaitingTurnResponse> getWaitingByMemberId(Long memberId) {
+        return reservationWaitingRepository.findByMemberId(memberId).stream()
+                .map(waiting -> ReservationWaitingTurnResponse.from(waiting,
+                        reservationWaitingRepository.calculateTurn(
+                                waiting.getId(), waiting.getDate(), waiting.getTime().getId(),
+                                waiting.getTheme().getId())))
+                .collect(Collectors.toList());
     }
 }

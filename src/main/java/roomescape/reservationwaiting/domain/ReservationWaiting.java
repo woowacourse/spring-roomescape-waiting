@@ -1,37 +1,51 @@
 package roomescape.reservationwaiting.domain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Builder;
-import roomescape.reservation.domain.Reservation;
+import roomescape.member.domain.Member;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 public class ReservationWaiting {
+
     private final Long id;
-    private final String name;
-    private final Reservation reservation;
+    private final Member member;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Theme theme;
 
     @Builder(access = lombok.AccessLevel.PRIVATE)
-    private ReservationWaiting(Long id, String name, Reservation reservation) {
+    private ReservationWaiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        this.name = name;
-        this.reservation = reservation;
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
-    public static ReservationWaiting restore(Long id, String name, Reservation reservation) {
+    public static ReservationWaiting restore(Long id, Member member, LocalDate date, ReservationTime time,
+                                             Theme theme) {
         return ReservationWaiting.builder()
                 .id(id)
-                .name(name)
-                .reservation(reservation)
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
                 .build();
     }
 
-    public Long getId() {
-        return id;
+    public boolean isPast() {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now());
     }
 
-    public String getName() {
-        return name;
+    public boolean isOwnedBy(Long memberId) {
+        return this.member.getId().equals(memberId);
     }
 
-    public Reservation getReservation() {
-        return reservation;
-    }
+    public Long getId() { return id; }
+    public Member getMember() { return member; }
+    public LocalDate getDate() { return date; }
+    public ReservationTime getTime() { return time; }
+    public Theme getTheme() { return theme; }
 }
