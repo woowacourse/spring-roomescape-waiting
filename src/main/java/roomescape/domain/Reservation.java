@@ -29,7 +29,7 @@ public class Reservation {
 
     public void validateOwnedBy(String name) {
         if (!this.isOwnedBy(name)) {
-            throw new ForbiddenException("타인에 접근할 수 없습니다.");
+            throw new ForbiddenException("타인의 예약에 접근할 수 없습니다.");
         }
     }
 
