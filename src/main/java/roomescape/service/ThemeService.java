@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Description;
@@ -25,10 +26,12 @@ public class ThemeService {
     private static final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
     private final ThemeDao themeDao;
+    private final ReservationDao reservationDao;
     private final Clock clock;
 
-    public ThemeService(ThemeDao themeDao, Clock clock) {
+    public ThemeService(ThemeDao themeDao, ReservationDao reservationDao, Clock clock) {
         this.themeDao = themeDao;
+        this.reservationDao = reservationDao;
         this.clock = clock;
     }
 
@@ -84,6 +87,11 @@ public class ThemeService {
     public void deleteTheme(Long id) {
         themeDao.findThemeById(id).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 테마입니다."));
+
+        if (reservationDao.existsByThemeId(id)) {
+            throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다.");
+        }
+
         themeDao.delete(id);
     }
 

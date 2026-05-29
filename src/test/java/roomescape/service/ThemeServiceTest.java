@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.common.exception.ConflictException;
 import roomescape.config.FixedClockConfig;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.reservation.theme.Description;
 import roomescape.domain.reservation.theme.Theme;
@@ -42,11 +43,13 @@ class ThemeServiceTest {
     @Mock
     private ThemeDao themeDao;
     @Mock
+    private ReservationDao reservationDao;
+    @Mock
     private MultipartFile file;
 
     @BeforeEach
     public void setUp() {
-        themeService = new ThemeService(themeDao, fixedClock);
+        themeService = new ThemeService(themeDao, reservationDao, fixedClock);
     }
 
     @Test
@@ -108,9 +111,28 @@ class ThemeServiceTest {
                 ThumbnailUrl.parse("/images/cursed.jpg")
         );
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(existing));
+        given(reservationDao.existsByThemeId(themeId)).willReturn(false);
 
         themeService.deleteTheme(themeId);
 
         verify(themeDao).delete(themeId);
+    }
+
+    @Test
+    public void 예약이_존재하는_테마_삭제_시_예외_테스트() {
+        Theme existing = new Theme(
+                themeId,
+                ThemeName.parse(themeNameValue),
+                Description.parse(descriptionValue),
+                ThumbnailUrl.parse("/images/cursed.jpg")
+        );
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(existing));
+        given(reservationDao.existsByThemeId(themeId)).willReturn(true);
+
+        assertThatThrownBy(() -> themeService.deleteTheme(themeId))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
+
+        verify(themeDao, never()).delete(themeId);
     }
 }

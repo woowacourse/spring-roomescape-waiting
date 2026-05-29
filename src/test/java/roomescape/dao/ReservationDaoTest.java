@@ -138,6 +138,18 @@ class ReservationDaoTest {
     }
 
     @Test
+    @DisplayName("해당 테마를 사용하는 예약이 있으면 existsByThemeId는 true를 반환한다.")
+    void existsByThemeIdResultTrue() {
+        assertThat(reservationDao.existsByThemeId(11L)).isTrue();
+    }
+
+    @Test
+    @DisplayName("해당 테마를 사용하는 예약이 없으면 existsByThemeId는 false를 반환한다.")
+    void existsByThemeIdResultFalse() {
+        assertThat(reservationDao.existsByThemeId(15L)).isFalse();
+    }
+
+    @Test
     @DisplayName("예약을 수정할 수 있다.")
     void updateReservation() {
         Reservation updated = new Reservation(
