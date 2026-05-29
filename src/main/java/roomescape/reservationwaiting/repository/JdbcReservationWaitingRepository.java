@@ -1,5 +1,6 @@
 package roomescape.reservationwaiting.repository;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
@@ -20,37 +20,32 @@ import roomescape.theme.domain.Theme;
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private static final String BASE_QUERY = """
-            SELECT rw.id as reservation_waiting_id, rw.name,
-                   r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
+            SELECT rw.id as reservation_waiting_id, rw.name, rw.date as reservation_date,
                    rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                    t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
             FROM reservation_waiting rw
-            JOIN reservation r ON rw.reservation_id = r.id
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
+            JOIN reservation_time rt ON rw.time_id = rt.id
+            JOIN theme t ON rw.theme_id = t.id
             """;
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     private final RowMapper<ReservationWaiting> rowMapper = (resultSet, rowNum) ->
-            ReservationWaiting.restore(resultSet.getLong("reservation_waiting_id"),
+            ReservationWaiting.restore(
+                    resultSet.getLong("reservation_waiting_id"),
                     resultSet.getString("name"),
-                    Reservation.restore(
-                            resultSet.getLong("reservation_id"),
-                            resultSet.getString("reservation_name"),
-                            resultSet.getDate("reservation_date").toLocalDate(),
-                            ReservationTime.restore(
-                                    resultSet.getLong("time_id"),
-                                    resultSet.getTime("time_start_at").toLocalTime(),
-                                    resultSet.getTime("time_finish_at").toLocalTime()
-                            ),
-                            Theme.restore(
-                                    resultSet.getLong("theme_id"),
-                                    resultSet.getString("theme_name"),
-                                    resultSet.getString("theme_description"),
-                                    resultSet.getString("theme_image_url")
-                            )
+                    resultSet.getDate("reservation_date").toLocalDate(),
+                    ReservationTime.restore(
+                            resultSet.getLong("time_id"),
+                            resultSet.getTime("time_start_at").toLocalTime(),
+                            resultSet.getTime("time_finish_at").toLocalTime()
+                    ),
+                    Theme.restore(
+                            resultSet.getLong("theme_id"),
+                            resultSet.getString("theme_name"),
+                            resultSet.getString("theme_description"),
+                            resultSet.getString("theme_image_url")
                     )
             );
 
@@ -73,9 +68,12 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("name", reservationWaiting.getName())
-                .addValue("reservation_id", reservationWaiting.getReservation().getId());
+                .addValue("date", reservationWaiting.getDate())
+                .addValue("time_id", reservationWaiting.getTime().getId())
+                .addValue("theme_id", reservationWaiting.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getReservation());
+        return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getDate(),
+                reservationWaiting.getTime(), reservationWaiting.getTheme());
     }
 
     @Override
@@ -88,9 +86,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public Map<Long, Long> calculateTurn(String name) {
         String query = """
                 SELECT * FROM (
-                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
-                FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id) sub
+                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY rw.date, rw.time_id, rw.theme_id ORDER BY rw.id) as turn
+                FROM reservation_waiting rw) sub
                 WHERE sub.name = ?
                 ORDER BY sub.id;
                 """;
@@ -111,8 +108,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public boolean existsByNameAndReservationId(String name, Long reservationId) {
-        String query = "select count(*) from reservation_waiting where name = ? and reservation_id = ?";
-        return jdbcTemplate.queryForObject(query, Integer.class, name, reservationId) >= 1;
+    public boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId) {
+        String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
+        return jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId) >= 1;
     }
 }

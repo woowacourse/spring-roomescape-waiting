@@ -58,7 +58,7 @@ public class ReservationWaitingControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("name", equalTo("현미밥"))
-                .body("reservationId", equalTo(futureReservationId.intValue()));
+                .body("date", equalTo("2099-12-01"));
     }
 
     @Test

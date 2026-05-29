@@ -17,7 +17,7 @@ public class ReservationWaitingFactory {
 
     public ReservationWaiting create(String name, Reservation reservation) {
         validate(name, reservation);
-        return ReservationWaiting.restore(null, name, reservation);
+        return ReservationWaiting.restore(null, name, reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     private void validate(String name, Reservation reservation) {

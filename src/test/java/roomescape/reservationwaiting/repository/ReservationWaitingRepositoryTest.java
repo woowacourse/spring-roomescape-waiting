@@ -102,7 +102,7 @@ public class ReservationWaitingRepositoryTest {
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getName()).isEqualTo("현미밥");
-        assertThat(result.get(0).getReservation().getId()).isEqualTo(futureReservationId);
+        assertThat(result.get(0).getDate()).isEqualTo(LocalDate.of(2099, 12, 1));
     }
 
     @Test

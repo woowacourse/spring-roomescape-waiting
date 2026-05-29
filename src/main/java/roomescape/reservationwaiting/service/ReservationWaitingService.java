@@ -41,7 +41,7 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(request.reservationId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservationWaitingRepository.existsByNameAndReservationId(request.name(), reservation.getId())) {
+        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         }
         ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
@@ -52,8 +52,7 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteWaiting(Long id) {
         ReservationWaiting reservationWaiting = getById(id);
-        Reservation reservation = reservationWaiting.getReservation();
-        if (reservation.isPast(clock)) {
+        if (reservationWaiting.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
         }
         reservationWaitingRepository.deleteById(id);

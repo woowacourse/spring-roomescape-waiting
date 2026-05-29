@@ -58,7 +58,7 @@ class ReservationWaitingServiceTest {
         Reservation reservation = Reservation.restore(1L, "user1", LocalDate.of(2099, 12, 1), sampleTime(),
                 sampleTheme());
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(reservationWaitingRepository.existsByNameAndReservationId("현미밥", 1L)).thenReturn(true);
+        when(reservationWaitingRepository.existsByNameAndSlot("현미밥", LocalDate.of(2099, 12, 1), 1L, 1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", 1L)))
                 .isInstanceOf(BusinessException.class)
@@ -70,9 +70,8 @@ class ReservationWaitingServiceTest {
     @Test
     @DisplayName("지난 예약 대기는 삭제할 수 없다.")
     void 예약_대기_삭제_실패() {
-        Reservation pastReservation = Reservation.restore(1L, "user1", LocalDate.now().minusDays(1), sampleTime(),
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, "현미밥", LocalDate.now().minusDays(1), sampleTime(),
                 sampleTheme());
-        ReservationWaiting waiting = ReservationWaiting.restore(1L, "현미밥", pastReservation);
         when(reservationWaitingRepository.findReservationWaitingById(1L)).thenReturn(Optional.of(waiting));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());

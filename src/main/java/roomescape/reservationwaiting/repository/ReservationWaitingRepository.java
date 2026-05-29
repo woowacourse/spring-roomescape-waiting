@@ -1,5 +1,6 @@
 package roomescape.reservationwaiting.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findByName(String name);
 
-    boolean existsByNameAndReservationId(String name, Long reservationId);
+    boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId);
 
     Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId);
 }
