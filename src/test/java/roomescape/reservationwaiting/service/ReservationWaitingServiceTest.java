@@ -1,5 +1,9 @@
 package roomescape.reservationwaiting.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,16 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
-
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -43,14 +41,17 @@ public class ReservationWaitingServiceTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
                 LocalDate.now().minusDays(1));
         Long pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        jdbcTemplate.update("INSERT INTO reservation_waiting (name, reservation_id) VALUES ('pastUser', ?)", pastReservationId);
+        jdbcTemplate.update("INSERT INTO reservation_waiting (name, reservation_id) VALUES ('pastUser', ?)",
+                pastReservationId);
         pastWaitingId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_waiting", Long.class);
 
         // 미래 예약 2개
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
         futureReservationId1 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
 
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', '2099-12-01', 2, 1)");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', '2099-12-01', 2, 1)");
         futureReservationId2 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
 
         // 현미밥의 대기 등록
@@ -70,7 +71,8 @@ public class ReservationWaitingServiceTest {
         assertThatThrownBy(() -> reservationWaitingService.createWaiting(
                 new ReservationWaitingRequest("현미밥", futureReservationId1)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
                 .hasMessage(ErrorCode.DUPLICATE_WAITING.getMessage());
     }
 
@@ -86,7 +88,8 @@ public class ReservationWaitingServiceTest {
     void 예약_대기_삭제_실패() {
         assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(pastWaitingId))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_WAITING_CANCEL))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_WAITING_CANCEL))
                 .hasMessage(ErrorCode.PAST_WAITING_CANCEL.getMessage());
     }
 

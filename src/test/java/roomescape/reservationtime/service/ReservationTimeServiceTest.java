@@ -13,9 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.reservationtime.dto.TimeRequest;
 import roomescape.reservationtime.dto.TimeResponse;
 
@@ -90,7 +89,8 @@ class ReservationTimeServiceTest {
     void 예약_있는_시간_삭제_불가() {
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.TIME_HAS_RESERVATION))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.TIME_HAS_RESERVATION))
                 .hasMessage(ErrorCode.TIME_HAS_RESERVATION.getMessage());
     }
 }

@@ -12,9 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.theme.dto.AdminThemeRequest;
 import roomescape.theme.dto.AdminThemeResponse;
 
@@ -70,7 +69,8 @@ class AdminThemeServiceTest {
     void 예약_있는_테마_삭제_불가() {
         assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_HAS_RESERVATION))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.THEME_HAS_RESERVATION))
                 .hasMessage(ErrorCode.THEME_HAS_RESERVATION.getMessage());
     }
 }

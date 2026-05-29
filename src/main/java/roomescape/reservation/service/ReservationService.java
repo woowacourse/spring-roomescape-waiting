@@ -7,10 +7,8 @@ import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
-import roomescape.exception.business.DuplicateReservationException;
-import roomescape.exception.business.PastTimeCancelException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationIdResponse;
@@ -54,7 +52,7 @@ public class ReservationService {
 
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
                 request.themeId())) {
-            throw new DuplicateReservationException();
+            throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
 
         Reservation saved = reservationRepository.save(
@@ -72,7 +70,7 @@ public class ReservationService {
     public void deleteReservation(Long id) {
         Reservation reservation = getById(id);
         if (reservation.isPast(clock)) {
-            throw new PastTimeCancelException();
+            throw new BusinessException(ErrorCode.PAST_RESERVATION_CANCEL);
         }
         reservationRepository.deleteById(id);
     }
@@ -90,7 +88,7 @@ public class ReservationService {
         Reservation changed = reservation.reschedule(newDate, newTime, clock);
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(),
                 reservation.getTheme().getId())) {
-            throw new DuplicateReservationException();
+            throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
 
         reservationRepository.update(id, newDate, request.timeId());

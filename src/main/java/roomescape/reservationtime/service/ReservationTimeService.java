@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.ReservationTimeFactory;
 import roomescape.reservationtime.dto.TimeRequest;
@@ -20,7 +20,8 @@ public class ReservationTimeService {
     private final ReservationTimeRepository timeRepository;
     private final ReservationTimeFactory reservationTimeFactory;
 
-    public ReservationTimeService(ReservationTimeRepository timeRepository, ReservationTimeFactory reservationTimeFactory) {
+    public ReservationTimeService(ReservationTimeRepository timeRepository,
+                                  ReservationTimeFactory reservationTimeFactory) {
         this.timeRepository = timeRepository;
         this.reservationTimeFactory = reservationTimeFactory;
     }

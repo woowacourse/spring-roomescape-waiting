@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
@@ -104,7 +104,8 @@ public class ReservationWaitingRepositoryTest {
         Reservation reservation = reservationRepository.findById(futureReservationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", reservation));
-        ReservationWaiting waiting2 = jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
+        ReservationWaiting waiting2 = jdbcReservationWaitingRepository.save(
+                reservationWaitingFactory.create("현미밥2", reservation));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
 
         Map<Long, Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");

@@ -16,9 +16,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
-import roomescape.exception.business.PastTimeCancelException;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
@@ -103,7 +102,7 @@ class ReservationServiceTest {
     @DisplayName("이미 지난 예약은 취소할 수 없다")
     void 과거_예약_취소_불가() {
         assertThatThrownBy(() -> reservationService.deleteReservation(pastReservationId))
-                .isInstanceOf(PastTimeCancelException.class)
+                .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.PAST_RESERVATION_CANCEL))
                 .hasMessage(ErrorCode.PAST_RESERVATION_CANCEL.getMessage());

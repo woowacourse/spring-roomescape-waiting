@@ -1,7 +1,6 @@
-package roomescape.exception.business;
+package roomescape.exception;
 
 import org.springframework.http.HttpStatus;
-import roomescape.exception.ErrorCode;
 
 public class BusinessException extends RuntimeException {
 

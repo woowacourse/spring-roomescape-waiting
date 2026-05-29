@@ -4,8 +4,8 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -50,9 +50,23 @@ public class Reservation {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public LocalDate getDate() { return date; }
-    public ReservationTime getTime() { return time; }
-    public Theme getTheme() { return theme; }
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
 }

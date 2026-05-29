@@ -10,7 +10,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.business.BusinessException;
+import roomescape.exception.BusinessException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 

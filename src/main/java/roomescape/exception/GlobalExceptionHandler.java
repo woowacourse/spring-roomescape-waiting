@@ -3,14 +3,14 @@ package roomescape.exception;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.validation.FieldError;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import roomescape.exception.business.BusinessException;
 
 @Slf4j
 @RestControllerAdvice
@@ -62,7 +61,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         log.warn("필수 파라미터 누락: {}", e.getParameterName());
-        return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_INPUT", e.getParameterName() + " 파라미터가 누락됐습니다."));
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse("INVALID_INPUT", e.getParameterName() + " 파라미터가 누락됐습니다."));
     }
 
     @Override
@@ -83,7 +83,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception e, Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         log.warn("Spring MVC 예외: {}", e.getMessage());
-        return ResponseEntity.status(status).body(new ErrorResponse(HttpStatus.valueOf(status.value()).name(), "잘못된 요청입니다."));
+        return ResponseEntity.status(status)
+                .body(new ErrorResponse(HttpStatus.valueOf(status.value()).name(), "잘못된 요청입니다."));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
