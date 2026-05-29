@@ -1,9 +1,11 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -92,6 +94,44 @@ public class WaitlistServiceTest {
 
         assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(waitingReservation.getId(), "브라운"))
                 .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 대기_취소_후_내_예약_조회_시_대기_순번이_재계산된다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest reservationRequest = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest brieWaitlistRequest = new ReservationRequest(
+                "브리",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest neoWaitlistRequest = new ReservationRequest(
+                "네오",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        reservationService.reserveOrWait(reservationRequest);
+        ReservationWithStatus brieWaitingReservation = reservationService.reserveOrWait(brieWaitlistRequest);
+        reservationService.reserveOrWait(neoWaitlistRequest);
+        List<ReservationWithStatus> neoCancelBeforeReservations = reservationService.getMyReservations("네오");
+
+        waitlistService.cancelMyWaitlist(brieWaitingReservation.getId(), "브리");
+        List<ReservationWithStatus> neoCancelAfterReservation = reservationService.getMyReservations("네오");
+
+        assertThat(neoCancelBeforeReservations.getFirst().getWaitingOrder()).isEqualTo(2);
+        assertThat(neoCancelAfterReservation.getFirst().getWaitingOrder()).isEqualTo(1);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
