@@ -29,12 +29,12 @@ class ThemeServiceTest {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        when(themeRepository.existByName("브라운"))
+        when(themeRepository.existByName("brown"))
                 .thenReturn(true);
 
         //when & then
         assertThatThrownBy(() -> themeService.registerTheme(
-            new ThemeCommand("브라운", "설명", "url")
+            new ThemeCommand("brown", "설명", "url")
         )).isInstanceOf(DuplicateThemeException.class);
     }
 

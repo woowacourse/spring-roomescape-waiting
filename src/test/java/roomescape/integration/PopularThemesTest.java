@@ -45,12 +45,12 @@ public class PopularThemesTest {
         createTheme("페어 테마", "페어 전용 테마입니다.", "https://example.com/pair.png");
         createTheme("당근 테마", "당근 전용 테마입니다.", "https://example.com/carrot.png");
 
-        createReservation("브라운", LocalDate.of(2026, 4, 29), 1L, 1L);
-        createReservation("포비", LocalDate.of(2026, 4, 30), 1L, 1L);
-        createReservation("이든", LocalDate.of(2026, 4, 30), 1L, 2L);
-        createReservation("경계포함예약", LocalDate.of(2026, 4, 24), 1L, 2L);
-        createReservation("오늘예약", LocalDate.of(2026, 5, 1), 1L, 3L);
-        createReservation("범위밖예약", LocalDate.of(2026, 4, 23), 1L, 3L);
+        createReservation("brown", LocalDate.of(2026, 4, 29), 1L, 1L);
+        createReservation("pobi", LocalDate.of(2026, 4, 30), 1L, 1L);
+        createReservation("eden", LocalDate.of(2026, 4, 30), 1L, 2L);
+        createReservation("boundaryReservation", LocalDate.of(2026, 4, 24), 1L, 2L);
+        createReservation("todayReservation", LocalDate.of(2026, 5, 1), 1L, 3L);
+        createReservation("outOfRangeReservation", LocalDate.of(2026, 4, 23), 1L, 3L);
 
         // when & then
         RestAssured.given().log().all()

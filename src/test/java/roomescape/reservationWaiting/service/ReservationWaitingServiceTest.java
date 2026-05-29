@@ -83,15 +83,15 @@ class ReservationWaitingServiceTest {
 
         when(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).thenReturn(Optional.of(new Reservation(1L, "포비", LocalDate.of(2026, 5, 15), time, theme)));
+        ).thenReturn(Optional.of(new Reservation(1L, "pobi", LocalDate.of(2026, 5, 15), time, theme)));
 
         when(reservationWaitingRepository.save(any()))
-                .thenReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
+                .thenReturn(new ReservationWaiting(1L, "brown", LocalDate.of(2026, 5, 15), time, theme));
 
         //when
         ReservationWaiting reservationWaiting = reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         );
 
@@ -109,7 +109,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         )).isInstanceOf(DuplicateReservationWaitingException.class);
     }
@@ -127,7 +127,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         )).isInstanceOf(TimeNotFoundException.class);
     }
@@ -155,7 +155,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         )).isInstanceOf(ThemeNotFoundException.class);
     }
@@ -187,7 +187,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         )).isInstanceOf(ReservationWaitingTargetNotFoundException.class);
     }
@@ -218,12 +218,12 @@ class ReservationWaitingServiceTest {
 
         when(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).thenReturn(Optional.of(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme)));
+        ).thenReturn(Optional.of(new Reservation(1L, "brown", LocalDate.of(2026, 5, 15), time, theme)));
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "brown", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
         )).isInstanceOf(AlreadyReservedSameSlotException.class);
     }
@@ -237,7 +237,7 @@ class ReservationWaitingServiceTest {
 
         when(reservationWaitingRepository.findById(any())).thenReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
+                        1L, "brown", LocalDate.of(2026, 5, 1), time, theme
                 )));
         when(reservationWaitingRepository.deleteById(any())).thenReturn(1);
         when(clock.instant()).thenReturn(
@@ -275,7 +275,7 @@ class ReservationWaitingServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         when(reservationWaitingRepository.findById(any())).thenReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
+                        1L, "brown", LocalDate.of(2026, 5, 1), time, theme
                 )));
 
         when(clock.instant()).thenReturn(
@@ -298,7 +298,7 @@ class ReservationWaitingServiceTest {
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         when(reservationWaitingRepository.findById(any())).thenReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
+                        1L, "brown", LocalDate.of(2026, 5, 14), time, theme
                 )));
 
         when(clock.instant()).thenReturn(

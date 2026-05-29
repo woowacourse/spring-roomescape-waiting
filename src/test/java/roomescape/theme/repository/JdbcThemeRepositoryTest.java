@@ -84,7 +84,7 @@ class JdbcThemeRepositoryTest {
         jdbcTemplate.update("""
             insert into reservation(name, reservation_date, time_id, theme_id)
             values (?, ?, ?, ?)
-        """, "브라운", LocalDate.of(2026, 5, 6),timeId, themeId
+        """, "brown", LocalDate.of(2026, 5, 6),timeId, themeId
         );
 
         //when & then

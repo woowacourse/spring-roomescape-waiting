@@ -42,7 +42,7 @@ class JdbcReservationWaitingRepositoryTest {
         // when
         ReservationWaiting saved1 = reservationWaitingRepository.save(
                 ReservationWaiting.of(
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -51,7 +51,7 @@ class JdbcReservationWaitingRepositoryTest {
 
         ReservationWaiting saved2 = reservationWaitingRepository.save(
                 ReservationWaiting.of(
-                        "포비",
+                        "pobi",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -104,7 +104,7 @@ class JdbcReservationWaitingRepositoryTest {
 
         reservationWaitingRepository.save(
                 ReservationWaiting.of(
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -114,7 +114,7 @@ class JdbcReservationWaitingRepositoryTest {
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
                 ReservationWaiting.of(
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -128,7 +128,7 @@ class JdbcReservationWaitingRepositoryTest {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         // when & then
         assertThat(reservationWaitingRepository.findById(saved.getId())
@@ -147,8 +147,8 @@ class JdbcReservationWaitingRepositoryTest {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("pobi", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         Optional<ReservationWaiting> result = reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
@@ -158,7 +158,7 @@ class JdbcReservationWaitingRepositoryTest {
         // then
         assertAll(
                 () -> assertThat(result).isPresent(),
-                () -> assertThat(result.get().getName()).isEqualTo("브라운")
+                () -> assertThat(result.get().getName()).isEqualTo("brown")
         );
     }
 
@@ -169,12 +169,12 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        ReservationWaiting brown = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
-        saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting brown = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("gump", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("pobi", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
-        List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("브라운");
+        List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("brown");
 
         // then
         assertThat(result).containsExactly(brown);
@@ -186,7 +186,7 @@ class JdbcReservationWaitingRepositoryTest {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
         assertAll(
@@ -194,13 +194,13 @@ class JdbcReservationWaitingRepositoryTest {
                         saved.getDate(),
                         saved.getTime().getId(),
                         saved.getTheme().getId(),
-                        "브라운"
+                        "brown"
                 )).isTrue(),
                 () -> assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
                         saved.getDate(),
                         saved.getTime().getId(),
                         saved.getTheme().getId(),
-                        "포비"
+                        "pobi"
                 )).isFalse()
         );
     }
@@ -211,7 +211,7 @@ class JdbcReservationWaitingRepositoryTest {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
         assertAll(
@@ -234,7 +234,7 @@ class JdbcReservationWaitingRepositoryTest {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         int deletedCount = reservationWaitingRepository.deleteById(saved.getId());
@@ -250,9 +250,9 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        ReservationWaiting brown = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting gump = saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting pobi = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting brown = saveReservationWaiting("brown", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting gump = saveReservationWaiting("gump", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting pobi = saveReservationWaiting("pobi", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
         assertAll(

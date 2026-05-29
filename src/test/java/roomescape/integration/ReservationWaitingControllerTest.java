@@ -29,10 +29,10 @@ class ReservationWaitingControllerTest {
         //given
         createReservationTime("10:00");
         createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
-        createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
+        createReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "포비");
+        body.put("name", "pobi");
         body.put("date", LocalDate.of(2026, 5, 5));
         body.put("timeId", 1L);
         body.put("themeId", 1L);

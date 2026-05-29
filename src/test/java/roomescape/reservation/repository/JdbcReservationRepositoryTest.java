@@ -48,7 +48,7 @@ class JdbcReservationRepositoryTest {
         Reservation saved = reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -58,7 +58,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertAll(
                 () -> assertThat(saved.getId()).isNotNull(),
-                () -> assertThat(saved.getName()).isEqualTo("브라운")
+                () -> assertThat(saved.getName()).isEqualTo("brown")
         );
     }
 
@@ -72,7 +72,7 @@ class JdbcReservationRepositoryTest {
         reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -83,7 +83,7 @@ class JdbcReservationRepositoryTest {
         assertThatThrownBy(() -> reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -98,7 +98,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved = saveReservation("브라운",  LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("brown",  LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         reservationRepository.deleteById(saved.getId());
@@ -114,7 +114,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         reservationRepository.deleteById(saved.getId());
@@ -153,7 +153,7 @@ class JdbcReservationRepositoryTest {
         Reservation saved = reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -184,7 +184,7 @@ class JdbcReservationRepositoryTest {
                 () -> reservationRepository.update(
                         new Reservation(
                                 999L,
-                                "브라운",
+                                "brown",
                                 LocalDate.of(2024, 5, 1),
                                 time,
                                 theme
@@ -203,7 +203,7 @@ class JdbcReservationRepositoryTest {
         reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 5),
                         time,
                         theme
@@ -213,7 +213,7 @@ class JdbcReservationRepositoryTest {
         Reservation saved = reservationRepository.save(
                 new Reservation(
                         null,
-                        "브라운",
+                        "brown",
                         LocalDate.of(2024, 5, 1),
                         time,
                         theme
@@ -235,7 +235,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         // when & then
         assertAll(
@@ -251,9 +251,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved1 = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        Reservation saved2 = saveReservation("브라운", LocalDate.of(2024, 5, 2), time, theme);
-        Reservation saved3 = saveReservation("포피", LocalDate.of(2024, 5, 3), time, theme);
+        Reservation saved1 = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved2 = saveReservation("brown", LocalDate.of(2024, 5, 2), time, theme);
+        Reservation saved3 = saveReservation("poppy", LocalDate.of(2024, 5, 3), time, theme);
 
         // when
         List<Reservation> reservations = reservationRepository.findAll();
@@ -272,12 +272,12 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved1 = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        Reservation saved2 = saveReservation("브라운", LocalDate.of(2024, 5, 2), time, theme);
-        saveReservation("포피", LocalDate.of(2024, 5, 3), time, theme);
+        Reservation saved1 = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved2 = saveReservation("brown", LocalDate.of(2024, 5, 2), time, theme);
+        saveReservation("poppy", LocalDate.of(2024, 5, 3), time, theme);
 
         // when
-        List<Reservation> reservations = reservationRepository.findAllByName("브라운");
+        List<Reservation> reservations = reservationRepository.findAllByName("brown");
 
         // then
         assertAll(
@@ -304,14 +304,14 @@ class JdbcReservationRepositoryTest {
                 )
         );
 
-        saveReservation("브라운",today.minusDays(1), time, woowaTheme);
-        saveReservation("포비",today.minusDays(2), time, woowaTheme);
-        saveReservation("제이슨",today.minusDays(3), time, woowaTheme);
-        saveReservation("이든", today.minusDays(1), time, pairTheme);
-        saveReservation("레아", today.minusDays(2), time, pairTheme);
-        saveReservation("웨지", today.minusDays(1), time, carrotTheme);
-        saveReservation("오늘예약", today, time, carrotTheme);
-        saveReservation("범위밖예약", today.minusDays(8), time, carrotTheme);
+        saveReservation("brown",today.minusDays(1), time, woowaTheme);
+        saveReservation("pobi",today.minusDays(2), time, woowaTheme);
+        saveReservation("jason",today.minusDays(3), time, woowaTheme);
+        saveReservation("eden", today.minusDays(1), time, pairTheme);
+        saveReservation("lea", today.minusDays(2), time, pairTheme);
+        saveReservation("wedge", today.minusDays(1), time, carrotTheme);
+        saveReservation("todayReservation", today, time, carrotTheme);
+        saveReservation("outOfRangeReservation", today.minusDays(8), time, carrotTheme);
 
         // when
         List<PopularThemeQueryResult> popularThemes = reservationRepository.findPopularThemes(
@@ -333,7 +333,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
         assertAll(
@@ -395,7 +395,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("brown", LocalDate.of(2024, 5, 1), time, theme);
 
         //when
         Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeId(

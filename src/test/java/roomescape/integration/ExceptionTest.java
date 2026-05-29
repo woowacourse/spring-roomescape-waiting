@@ -45,7 +45,7 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
+        body.put("name", "brown");
         body.put("date", "2026-04-30");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
@@ -75,7 +75,7 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
+        body.put("name", "brown");
         body.put("date", "2026-05-01");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
@@ -105,8 +105,8 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
-        body.put("date", "2026-05-01");
+        body.put("name", "brown");
+        body.put("date", "2026-05-02");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
@@ -142,8 +142,8 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
-        body.put("date", "2026-05-01");
+        body.put("name", "brown");
+        body.put("date", "2026-05-02");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
@@ -164,13 +164,13 @@ public class ExceptionTest {
                 .body("message", equalTo("해당 예약 시간에 예약 또는 예약 대기가 존재합니다."));
     }
 
-    @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
+    @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오거나 알파벳이 아닌 문자가 포함되면 예외가 발생한다.")
     @Test
     void  makeReservation_invalid_name_form() {
         //given
         Map<String, Object> valid = Map.of(
-                "name", "브라운",
-                "date", "2026-05-01",
+                "name", "brown",
+                "date", "2026-05-02",
                 "timeId", 1L,
                 "themeId", 1L
         );
@@ -184,6 +184,9 @@ public class ExceptionTest {
         Map<String, Object> WithWhiteSpace = new HashMap<>(valid);
         WithWhiteSpace.put("name", " ");
 
+        Map<String, Object> withKoreanName = new HashMap<>(valid);
+        withKoreanName.put("name", "브라운");
+
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -191,7 +194,7 @@ public class ExceptionTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약자 이름 영문자로만 구성된 한 자 이상의 문자열이여야 합니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -199,7 +202,7 @@ public class ExceptionTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약자 이름 영문자로만 구성된 한 자 이상의 문자열이여야 합니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -207,7 +210,15 @@ public class ExceptionTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약자 이름 영문자로만 구성된 한 자 이상의 문자열이여야 합니다."));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(withKoreanName)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", equalTo("예약자 이름 영문자로만 구성된 한 자 이상의 문자열이여야 합니다."));
     }
 
     @DisplayName("예약 시, date에 null이나 날짜 형식 아닌 값이 들어오면 예외가 발생한다.")
@@ -215,8 +226,8 @@ public class ExceptionTest {
     void makeReservation_invalid_date_form() {
         //given
         Map<String, Object> valid = Map.of(
-                "name", "브라운",
-                "date", "2026-04-29",
+                "name", "brown",
+                "date", "2026-05-02",
                 "timeId", 1L,
                 "themeId", 1L
         );
@@ -250,8 +261,8 @@ public class ExceptionTest {
     void makeReservation_invalid_timeId_And_themeId_form() {
         //given
         Map<String, Object> valid = Map.of(
-                "name", "브라운",
-                "date", "2026-04-29",
+                "name", "brown",
+                "date", "2026-05-02",
                 "timeId", 1L,
                 "themeId", 1L
         );
@@ -392,7 +403,7 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
+        body.put("name", "brown");
         body.put("date", "2026-04-30");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
@@ -422,7 +433,7 @@ public class ExceptionTest {
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "브라운");
+        body.put("name", "brown");
         body.put("date", "2026-05-01");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
@@ -453,12 +464,12 @@ public class ExceptionTest {
 
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "브라운", "2026-05-01", 1L, 1L
+                "brown", "2026-05-03", 1L, 1L
         );
 
         Map<String, Object> body = new HashMap<>();
-        body.put("name", "포비");
-        body.put("date", "2026-05-01");
+        body.put("name", "pobi");
+        body.put("date", "2026-05-03");
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 

@@ -54,8 +54,8 @@ public class UserReservationTest {
                         )
         );
 
-        createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
-        createReservation("포비", LocalDate.of(2026, 5, 6), 2L, 2L);
+        createReservation("brown", LocalDate.of(2026, 5, 5), 1L, 1L);
+        createReservation("pobi", LocalDate.of(2026, 5, 6), 2L, 2L);
 
         assertAll(
                 () -> assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 1L)).hasSize(3),

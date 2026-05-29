@@ -50,7 +50,7 @@ public class ThirdMissionStepTest {
     @Test
     void 예약과_시간_연결() {
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
+        reservation.put("name", "brown");
         reservation.put("date", "2026-05-05");
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
@@ -119,7 +119,7 @@ public class ThirdMissionStepTest {
     @Test
     void 날짜가_없으면_예약_생성_실패() {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "홍길동");
+        params.put("name", "gildong");
         params.put("timeId", 1L);
 
         RestAssured.given().log().all()
@@ -146,7 +146,7 @@ public class ThirdMissionStepTest {
     @Test
     void 존재하지_않는_시간_ID로_예약_생성_실패() {
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
+        reservation.put("name", "brown");
         reservation.put("date", "2023-08-05");
         reservation.put("timeId", 999);
 
@@ -178,7 +178,7 @@ public class ThirdMissionStepTest {
                 .then().statusCode(201);
 
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
+        reservation.put("name", "brown");
         reservation.put("date", "2026-05-05");
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);

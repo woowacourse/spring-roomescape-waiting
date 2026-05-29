@@ -205,7 +205,7 @@ class JdbcReservationTimeRepositoryTest {
         jdbcTemplate.update("""
             insert into reservation(name, reservation_date, time_id, theme_id)
             values (?, ?, ?, ?)
-        """, "브라운", date, time.getId(), themeId
+        """, "brown", date, time.getId(), themeId
         );
     }
 
@@ -213,7 +213,7 @@ class JdbcReservationTimeRepositoryTest {
         jdbcTemplate.update("""
             insert into reservation_waiting(name, reservation_date, time_id, theme_id)
             values (?, ?, ?, ?)
-        """, "브라운", date, time.getId(), themeId
+        """, "brown", date, time.getId(), themeId
         );
     }
 }

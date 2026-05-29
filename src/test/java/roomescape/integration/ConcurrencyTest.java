@@ -201,7 +201,7 @@ class ConcurrencyTest {
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
 
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -269,8 +269,8 @@ class ConcurrencyTest {
         createReservationTime("12:00");
         createTheme("테마", "설명", "thumbnailUrl");
 
-        Long reservationId1 = createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
-        Long reservationId2 = createReservation("코니", LocalDate.of(2026, 5, 15), 2L, 1L);
+        Long reservationId1 = createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+        Long reservationId2 = createReservation("coney", LocalDate.of(2026, 5, 15), 2L, 1L);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         CountDownLatch readyLatch = new CountDownLatch(2);
@@ -346,7 +346,7 @@ class ConcurrencyTest {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -374,10 +374,10 @@ class ConcurrencyTest {
         // given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
 
         reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
-                "포비",
+                "pobi",
                 LocalDate.of(2026, 5, 15),
                 1L,
                 1L
