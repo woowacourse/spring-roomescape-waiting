@@ -3,6 +3,7 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
@@ -18,6 +19,7 @@ import roomescape.repository.WaitingListRepository;
 
 import java.util.List;
 
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
@@ -36,6 +38,7 @@ public class WaitingListService {
                 ).toList();
     }
 
+    @Transactional
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         Theme findTheme = themeRepository.findById(createCommand.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
@@ -68,6 +71,7 @@ public class WaitingListService {
         }
     }
 
+    @Transactional
     public void delete(final WaitingListDeleteCommand deleteCommand) {
         WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
