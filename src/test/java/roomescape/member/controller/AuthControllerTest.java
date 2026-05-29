@@ -1,44 +1,56 @@
 package roomescape.member.controller;
 
-import static roomescape.member.fixture.MemberApiFixture.registerMember;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.common.AcceptanceTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.common.annotation.ControllerSliceTest;
+import roomescape.member.service.AuthService;
 
-class AuthControllerTest extends AcceptanceTest {
+@ControllerSliceTest(controllers = AuthController.class)
+class AuthControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private AuthService authService;
 
     @Nested
     @DisplayName("login 메서드는")
     class LoginTest {
 
-
         @Test
-        @DisplayName("로그인을 수행한다")
-        void 성공() {
-            String name = "송송송";
-            String password = "1234";
-            registerMember(name, password);
+        @DisplayName("로그인에 성공하면 200을 반환한다")
+        void loginSuccess() throws Exception {
+            String name = "name";
+            String password = "password";
+            String token = "token";
 
-            Map<String, Object> params = new HashMap<>();
-            params.put("name", name);
-            params.put("password", password);
+            when(authService.login(any()))
+                .thenReturn(token);
+            String request = """
+                {
+                    "name": "%s",
+                    "password": "%s"
+                }
+                """.formatted(name, password);
 
-            RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200)
-                .header("Authorization", Matchers.notNullValue())
-                .body(Matchers.emptyOrNullString());
+            mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(request))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value(token));
         }
     }
+
 }
