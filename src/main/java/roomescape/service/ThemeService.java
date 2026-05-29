@@ -1,13 +1,9 @@
 package roomescape.service;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.dto.TimeQueryResult;
@@ -21,16 +17,18 @@ import roomescape.service.dto.result.ThemeResult;
 
 @Service
 public class ThemeService {
-    private static final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
 
     private final ThemeDao themeDao;
-    private final Clock clock;
     private final ReservationTimeDao reservationTimeDao;
+    private final FileUploader fileUploader;
+    private final Clock clock;
 
-    public ThemeService(ThemeDao themeDao, Clock clock, ReservationTimeDao reservationTimeDao) {
+    public ThemeService(ThemeDao themeDao, ReservationTimeDao reservationTimeDao, FileUploader fileUploader,
+                        Clock clock) {
         this.themeDao = themeDao;
-        this.clock = clock;
         this.reservationTimeDao = reservationTimeDao;
+        this.fileUploader = fileUploader;
+        this.clock = clock;
     }
 
     public List<ThemeResult> findThemes() {
@@ -49,23 +47,7 @@ public class ThemeService {
     }
 
     public ThemeResult registerTheme(ThemeCommand command) {
-        MultipartFile file = command.file();
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        String filePath = uploadDir + fileName;
-
-        try {
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            file.transferTo(new File(filePath));
-
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 저장에 실패했습니다.", e);
-        }
-
-        String imageUrl = "/images/" + fileName;
+        String imageUrl = fileUploader.upload(command.file());
 
         Theme theme = new Theme(
                 null,
