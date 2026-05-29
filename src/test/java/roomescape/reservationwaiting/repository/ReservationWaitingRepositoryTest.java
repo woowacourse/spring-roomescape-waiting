@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservation.domain.Reservation;
@@ -48,7 +48,8 @@ public class ReservationWaitingRepositoryTest {
                 LocalDate.now().minusDays(1));
         pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
 
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
         futureReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
     }
 
@@ -103,10 +104,10 @@ public class ReservationWaitingRepositoryTest {
         Reservation reservation = reservationRepository.findById(futureReservationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", reservation));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
+        ReservationWaiting waiting2 = jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
 
-        List<Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
-        assertThat(turns.getFirst()).isEqualTo(2L);
+        Map<Long, Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
+        assertThat(turns.get(waiting2.getId())).isEqualTo(2L);
     }
 }

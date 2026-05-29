@@ -2,7 +2,7 @@ package roomescape.reservationwaiting.service;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -58,12 +58,13 @@ public class ReservationWaitingService {
         reservationWaitingRepository.deleteById(id);
     }
 
+    @Transactional
     public List<ReservationWaitingTurnResponse> getWaitingByName(String name) {
         List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findByName(name);
-        List<Long> turns = reservationWaitingRepository.calculateTurn(name);
+        Map<Long, Long> turns = reservationWaitingRepository.calculateTurn(name);
 
-        return IntStream.range(0, turns.size())
-                .mapToObj(i -> ReservationWaitingTurnResponse.from(reservationWaitings.get(i), turns.get(i)))
+        return reservationWaitings.stream()
+                .map(waiting -> ReservationWaitingTurnResponse.from(waiting, turns.get(waiting.getId())))
                 .toList();
     }
 }

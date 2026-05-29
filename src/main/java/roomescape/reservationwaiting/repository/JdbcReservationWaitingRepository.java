@@ -1,6 +1,10 @@
 package roomescape.reservationwaiting.repository;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -10,8 +14,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
-
-import java.util.List;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -40,8 +42,13 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                     )
             );
 
-    private final RowMapper<Long> turnMapper = (resultSet, rowNum) ->
-            resultSet.getLong("turn");
+    private final ResultSetExtractor<Map<Long, Long>> turnExtractor = resultSet -> {
+        Map<Long, Long> turnMap = new HashMap<>();
+        while (resultSet.next()) {
+            turnMap.put(resultSet.getLong("id"), resultSet.getLong("turn"));
+        }
+        return turnMap;
+    };
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -66,7 +73,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public List<Long> calculateTurn(String name) {
+    public Map<Long, Long> calculateTurn(String name) {
         String query = """
                 SELECT * FROM (
                 SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
@@ -75,7 +82,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 WHERE sub.name = ?
                 ORDER BY sub.id;
                 """;
-        return jdbcTemplate.query(query, turnMapper, name);
+        return jdbcTemplate.query(query, turnExtractor, name);
     }
 
     @Override

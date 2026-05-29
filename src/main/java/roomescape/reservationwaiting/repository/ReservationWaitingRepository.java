@@ -1,15 +1,15 @@
 package roomescape.reservationwaiting.repository;
 
-import roomescape.reservationwaiting.domain.ReservationWaiting;
-
 import java.util.List;
+import java.util.Map;
+import roomescape.reservationwaiting.domain.ReservationWaiting;
 
 public interface ReservationWaitingRepository {
     ReservationWaiting save(ReservationWaiting reservationWaiting);
 
     void deleteById(Long id);
 
-    List<Long> calculateTurn(String name);
+    Map<Long, Long> calculateTurn(String name);
 
     List<ReservationWaiting> findByName(String name);
 
