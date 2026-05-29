@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.exception.DomainValidationException;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ResourceConflictException;
@@ -98,6 +99,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleDomainValidation(DomainValidationException e) {
         log.error("도메인 검증 실패 — 잘못된 값이 도메인 계층에 도달했습니다: {}", e.getMessage(), e);
         return new ErrorResponse(ErrorCode.DOMAIN_VALIDATION_FAILED.name(), INTERNAL_ERROR_MESSAGE);
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleDuplicateKey(DuplicateKeyException e) {
+        log.warn("중복 키 예외 발생 (동시성/중복 생성): {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.INVALID_INPUT.name(), "이미 사용 중이거나 중복된 데이터입니다.");
     }
 
     @ExceptionHandler(RuntimeException.class)

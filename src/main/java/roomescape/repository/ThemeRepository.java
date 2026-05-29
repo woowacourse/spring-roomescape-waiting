@@ -11,6 +11,8 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(Long id);
 
+    Optional<Theme> findByIdWithLock(Long id);
+
     Theme save(Theme theme);
 
     void deleteById(Long id);

@@ -121,6 +121,17 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdWithLock(Long id) {
+        String sql = SELECT_BASE + " WHERE r.id = ? FOR UPDATE";
+        try {
+            Reservation reservation = jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
+            return Optional.ofNullable(reservation);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public ReservationWithWaitingOrder save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();

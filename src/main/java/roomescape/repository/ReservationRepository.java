@@ -14,6 +14,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByIdWithLock(Long id);
+
     ReservationWithWaitingOrder save(Reservation reservation);
 
     ReservationWithWaitingOrder update(Reservation reservation);
