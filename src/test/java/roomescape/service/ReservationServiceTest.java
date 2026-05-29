@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +22,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.domain.MyReservation;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationType;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -172,5 +176,25 @@ class ReservationServiceTest {
         reservationService.deleteWaiting(1L);
 
         then(reservationDao).should().deleteWaiting(1L);
+    }
+
+    @Test
+    void getMyReservations_예약과_대기를_함께_조회한다() {
+        Reservation laterReservation = new Reservation(
+                1L, "브라운", LocalDate.of(2026, 5, 16), fixedNow, sampleTime, sampleTheme);
+        Reservation earlierWaiting = new Reservation(
+                2L, "브라운", LocalDate.of(2026, 5, 15), fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findByName("브라운")).willReturn(List.of(laterReservation));
+        given(reservationDao.findAllWaitingByName("브라운"))
+                .willReturn(List.of(new ReservationWaiting(earlierWaiting, 1)));
+
+        List<MyReservation> myReservations = reservationService.getMyReservations("브라운");
+
+        assertThat(myReservations).hasSize(2);
+        assertThat(myReservations)
+                .extracting(MyReservation::reservationType)
+                .containsExactly(ReservationType.WAITING, ReservationType.RESERVED);
+        assertThat(myReservations.getFirst().waitingNumber()).isEqualTo(1);
+        assertThat(myReservations.getLast().waitingNumber()).isNull();
     }
 }

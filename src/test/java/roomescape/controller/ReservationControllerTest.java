@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -272,6 +273,25 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200)
                 .body("reservations[0].waitingNumber", equalTo(1))
                 .body("reservations[0].reservationStatus", equalTo("WAITING"));
+    }
+
+    @DisplayName("예약과 대기 목록 통합 조회 성공")
+    @Test
+    void 예약과_대기_목록_조회() {
+        String futureDate = LocalDate.now().plusDays(4).toString();
+        createReservation("김철수", futureDate, 6, 4);
+        createReservation("이든", futureDate, 7, 4);
+        createReservationWaiting("이든", futureDate, 6, 4);
+
+        RestAssured.given().log().all()
+                .queryParam("username", "이든")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].reservationStatus", equalTo("WAITING"))
+                .body("reservations[0].waitingNumber", equalTo(1))
+                .body("reservations[1].reservationStatus", equalTo("RESERVED"))
+                .body("reservations[1].waitingNumber", nullValue());
     }
 
     private long createReservation(String name, String date, long timeId, long themeId) {
