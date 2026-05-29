@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -167,7 +166,9 @@ class ReservationServiceTest {
         @DisplayName("같은 슬롯에 예약이 있으면 대기 상태로 예약된다")
         void 성공1() {
             // given
-            Reservation reservation = reservation(name, reservationDate1, reservationTime1, theme1);
+            String otherName = "다른 이용자";
+            Reservation reservation = reservation(otherName, reservationDate1, reservationTime1,
+                theme1);
             ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
                 reservationTime1, theme1);
             save(reservation);
@@ -320,15 +321,48 @@ class ReservationServiceTest {
         void 성공() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 name, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeSchedule(changeCommand);
+            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
-            Assertions.assertThat(reservationRepository.findById(saved.getId()))
-                .contains(saved);
+            Reservation actual = reservationRepository.findById(saved.getId()).get();
+            assertThat(actual.getDate()).isEqualTo(reservationDate2);
+            assertThat(actual.getTime()).isEqualTo(reservationTime2);
+            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+            assertThat(actual.getReservedAt())
+                .isAfterOrEqualTo(beforeChange)
+                .isBeforeOrEqualTo(afterChange);
+        }
+
+
+        @Test
+        @DisplayName("변경하려는 날짜 및 시간에 다른 예약이 있으면 대기로 변경한다")
+        void 성공2() {
+            // given
+            String otherName = "다른 이용자";
+            Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+            save(reservation(otherName, reservationDate2, reservationTime2, theme1));
+            LocalDateTime beforeChange = LocalDateTime.now();
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when
+            reservationService.changeSchedule(changeCommand);
+            LocalDateTime afterChange = LocalDateTime.now();
+
+            // then
+            Reservation actual = reservationRepository.findById(saved.getId()).get();
+            assertThat(actual.getDate()).isEqualTo(reservationDate2);
+            assertThat(actual.getTime()).isEqualTo(reservationTime2);
+            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(actual.getReservedAt())
+                .isAfterOrEqualTo(beforeChange)
+                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -405,7 +439,6 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("변경하려는 날짜에 예약이 존재하면 예외가 발생한다")
-        @Disabled
         void 실패5() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
@@ -428,18 +461,50 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("날짜 및 시간을 변경한다")
-        void 성공() {
+        void 성공1() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeScheduleByManager(changeCommand);
+            LocalDateTime afterChange = LocalDateTime.now();
 
             // then
-            Assertions.assertThat(reservationRepository.findById(saved.getId()))
-                .contains(saved);
+            Reservation actual = reservationRepository.findById(saved.getId()).get();
+            assertThat(actual.getDate()).isEqualTo(reservationDate2);
+            assertThat(actual.getTime()).isEqualTo(reservationTime2);
+            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+            assertThat(actual.getReservedAt())
+                .isAfterOrEqualTo(beforeChange)
+                .isBeforeOrEqualTo(afterChange);
+        }
+
+        @Test
+        @DisplayName("변경하려는 날짜 및 시간에 다른 예약이 있으면 대기로 변경한다")
+        void 성공2() {
+            // given
+            String otherName = "다른 이용자";
+            Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+            save(reservation(otherName, reservationDate2, reservationTime2, theme1));
+            LocalDateTime beforeChange = LocalDateTime.now();
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                null, reservationDate2.getId(), reservationTime2.getId());
+
+            // when
+            reservationService.changeScheduleByManager(changeCommand);
+            LocalDateTime afterChange = LocalDateTime.now();
+
+            // then
+            Reservation actual = reservationRepository.findById(saved.getId()).get();
+            assertThat(actual.getDate()).isEqualTo(reservationDate2);
+            assertThat(actual.getTime()).isEqualTo(reservationTime2);
+            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(actual.getReservedAt())
+                .isAfterOrEqualTo(beforeChange)
+                .isBeforeOrEqualTo(afterChange);
         }
 
 
@@ -479,10 +544,8 @@ class ReservationServiceTest {
                 .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
         }
 
-
         @Test
-        @DisplayName("변경하려는 날짜 및 시간에 예약이 있으면 예외가 발생한다")
-        @Disabled
+        @DisplayName("변경하려는 날짜 및 시간에 변경을 요청한 사용자의 예약이 있으면 예외가 발생한다")
         void 실패3() {
             // given
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));

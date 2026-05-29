@@ -285,12 +285,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
             UPDATE reservation
             SET date_id = :dateId,
-                time_id = :timeId
+                time_id = :timeId,
+                reserved_at = :reservedAt
             WHERE id = :id
             """;
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("dateId", reservation.getDate().getId())
             .addValue("timeId", reservation.getTime().getId())
+            .addValue("reservedAt", reservation.getReservedAt())
             .addValue("id", reservation.getId());
 
         int updatedCount = jdbcTemplate.update(sql, params);

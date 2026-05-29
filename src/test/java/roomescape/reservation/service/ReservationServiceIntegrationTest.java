@@ -14,13 +14,11 @@ import org.springframework.context.annotation.Import;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
-import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
@@ -151,33 +149,4 @@ class ReservationServiceIntegrationTest {
         }
     }
 
-    @Nested
-    @DisplayName("changeSchedule 메서드는")
-    class ChangeScheduleTest {
-
-
-        @Test
-        @DisplayName("대기중인 예약이면 예외가 발생한다.")
-        void 실패() {
-            // given
-            String themeName = "테마1";
-            String name1 = "사람1";
-
-            ReservationTime time = saveTime();
-            ReservationDate date = saveDate();
-            Theme theme = saveTheme(themeName);
-
-            Reservation savedReservation = reservationRepository.save(
-                ReservationFixture.waitReservation(name1, date, time, theme));
-            ReservationChangeCommand command = new ReservationChangeCommand(
-                savedReservation.getId(),
-                savedReservation.getName(), savedReservation.getDate().getId(),
-                savedReservation.getTime().getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.changeSchedule(command))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_WAITING.getMessage());
-        }
-    }
 }

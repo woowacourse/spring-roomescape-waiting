@@ -25,7 +25,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -121,7 +120,6 @@ class ReservationControllerTest extends AcceptanceTest {
 
         @Test
         @DisplayName("이미 예약한 적이 있으면 409을 반환한다")
-        @Disabled
         void 실패1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);

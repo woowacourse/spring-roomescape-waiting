@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
@@ -61,8 +62,8 @@ public class ReservationService {
 
         validateAlreadyBookedByMyself(name, reservationDate.getId(), reservationTime.getId(),
             theme.getId());
-        boolean isAlreadyBooked = checkAlreadyBookedByOthers(reservationDate.getId(),
-            reservationTime.getId(), theme.getId());
+        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
+            reservationDate.getId(), reservationTime.getId(), theme.getId());
         if (isAlreadyBooked) {
             return reservationRepository.save(
                 Reservation.wait(name, reservationDate, reservationTime, theme, now));
@@ -92,14 +93,17 @@ public class ReservationService {
         Reservation reservation = getReservation(command.id());
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
-
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        checkAlreadyBookedByOthers(command.dateId(), command.timeId(),
+        validateAlreadyBookedByMyself(reservation.getName(), command.dateId(), command.timeId(),
             reservation.getTheme().getId());
 
+        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
+            command.dateId(), command.timeId(), reservation.getTheme().getId());
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
+        decideStatus(reservation, isAlreadyBooked);
+        reservation.changeReservedAt(LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }
@@ -109,16 +113,26 @@ public class ReservationService {
         Reservation reservation = getReservation(command.id());
         ReservationTime newTime = getReservationTime(command.timeId());
         newTime.validateIsInactive();
-
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        checkAlreadyBookedByOthers(command.dateId(), command.timeId(),
+        validateAlreadyBookedByMyself(reservation.getName(), command.dateId(), command.timeId(),
             reservation.getTheme().getId());
 
+        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
+            command.dateId(), command.timeId(), reservation.getTheme().getId());
         reservation.changeScheduleByManager(newDate, newTime);
+        decideStatus(reservation, isAlreadyBooked);
+        reservation.changeReservedAt(LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
+    }
+
+    private void decideStatus(Reservation reservation, boolean isAlreadyBooked) {
+        if (isAlreadyBooked) {
+            reservation.updateStatus(WAITING);
+            reservationRepository.updateStatus(reservation);
+        }
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -139,10 +153,6 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
-    }
-
-    private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId);
     }
 
     private void validateAlreadyBookedByMyself(String name, Long dateId, Long timeId,

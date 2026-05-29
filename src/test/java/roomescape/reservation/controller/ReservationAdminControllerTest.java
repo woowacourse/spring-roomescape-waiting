@@ -239,42 +239,13 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("변경하려는 날짜 및 시간이면 예외가 발생한다")
-        void 실패2() {
-            Integer dateId = createReservationDate(managerToken, date);
-            Integer alreadyReservedDateId = createReservationDate(managerToken,
-                LocalDate.now().plusDays(1).toString());
-            Integer timeId = createReservationTime(managerToken, startAt);
-            Integer alreadyReservedTimeId = createReservationTime(managerToken,
-                LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-            Integer themeId = createTheme(managerToken, themeName);
-            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
-                themeId);
-            createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId,
-                themeId);
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("dateId", alreadyReservedDateId);
-            params.put("timeId", alreadyReservedTimeId);
-
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/admin/reservations/" + reservationId + "/schedule")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value());
-        }
-
-
-        @Test
         @DisplayName("과거로 변경하려고 하면 예외가 발생한다")
         @Sql(
             scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
                 "classpath:past-reservation-date.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
         )
-        void 실패3() {
+        void 실패2() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer pastSqlDateId = 1;
             Integer timeId = createReservationTime(managerToken, startAt);
