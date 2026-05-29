@@ -17,26 +17,23 @@ public class Reservation {
         return new Reservation(id, username, slot);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return slot.isPast(now);
-    }
-
-    public boolean isOwnedBy(String name) {
-        return this.name.equals(name);
-    }
-
-    public void validateCancelable(LocalDateTime now) {
+    public void validateCancelable(String name, LocalDateTime now) {
         if (isPast(now)) {
             throw new PastReservationException("이미 시작된 예약은 취소할 수 없습니다.");
         }
-    }
-
-    public void validateOwnedBy(String name) {
-        if (!this.name.equals(name)) {
-            throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
+        if (!isOwnedBy(name)) {
+            throw new ForbiddenException("본인의 예약만 변경할 수 있습니다.");
         }
     }
 
+    public void validateUpdatable(String name, LocalDateTime now) {
+        if (isPast(now)) {
+            throw new PastReservationException("이미 시작된 예약은 취소할 수 없습니다.");
+        }
+        if (!isOwnedBy(name)) {
+            throw new ForbiddenException("본인의 예약만 변경할 수 있습니다.");
+        }
+    }
     public Reservation withSlot(Slot newSlot) {
         return new Reservation(id, name, newSlot);
     }
@@ -51,5 +48,13 @@ public class Reservation {
 
     public Long id() {
         return id;
+    }
+
+    private boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
+    }
+
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
     }
 }

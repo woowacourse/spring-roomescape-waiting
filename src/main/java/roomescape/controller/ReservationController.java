@@ -34,7 +34,7 @@ public class ReservationController {
     private final WaitingQueryService waitingQueryService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getMyReservations(@RequestParam String name) {
+    public ResponseEntity<List<ReservationResponse>> getMyReservations(@Valid @RequestParam String name) {
         List<ReservationResponse> responses = Stream.concat(
                 reservationQueryService.getByName(name).stream().map(ReservationResponse::from),
                 waitingQueryService.getByName(name).stream().map(ReservationResponse::from)
@@ -60,17 +60,18 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable long id) {
-        reservationCommandService.cancel(id);
+    public ResponseEntity<Void> cancelReservation(@PathVariable long id, @RequestParam String name) {
+        reservationCommandService.cancel(id, name);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable long id,
+            @RequestParam String name,
             @Valid @RequestBody ReservationUpdateRequest request) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.update(id, request.date(), request.timeId()));
+                reservationCommandService.update(id, name, request.date(), request.timeId()));
         return ResponseEntity.ok(response);
     }
 }
