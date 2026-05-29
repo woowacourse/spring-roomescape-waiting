@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.fixture.ReservationFixture;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.support.TestDataHelper;
 
@@ -46,13 +48,14 @@ class JdbcReservationRepositoryTest {
                 themeId,
                 timeId
         );
+        User stark = ReservationFixture.userNameStark();
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservation.getId()).isEqualTo(reservationId);
-            softly.assertThat(reservation.getName()).isEqualTo("스타크");
+            softly.assertThat(reservation.getUser()).isEqualTo(stark);
             softly.assertThat(reservation.getSlot().date()).isEqualTo(date);
             softly.assertThat(reservation.getSlot().themeId()).isEqualTo(themeId);
             softly.assertThat(reservation.getSlot().timeId()).isEqualTo(timeId);
@@ -70,9 +73,10 @@ class JdbcReservationRepositoryTest {
     void save_user_reservation() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        User stark = ReservationFixture.userNameStark();
 
         Reservation reservation = Reservation.builder()
-                .name("name")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(LocalDate.of(2026, 5, 4))
                         .themeId(themeId)
@@ -84,7 +88,7 @@ class JdbcReservationRepositoryTest {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(savedReservation.getName()).isEqualTo("name");
+            assertSoftly.assertThat(savedReservation.getUser()).isEqualTo(stark);
             assertSoftly.assertThat(savedReservation.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 4));
             assertSoftly.assertThat(savedReservation.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedReservation.getSlot().timeId()).isEqualTo(timeId);
@@ -120,10 +124,11 @@ class JdbcReservationRepositoryTest {
                 themeId,
                 nineTimeId
         );
+        User stark = ReservationFixture.userNameStark();
 
         Reservation reservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -134,7 +139,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation differentIdReservation = Reservation.builder()
                 .id(100L)
-                .name("스타크")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -145,7 +150,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation differentTimeReservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -173,13 +178,14 @@ class JdbcReservationRepositoryTest {
                 themeId,
                 timeId
         );
+        User stark = ReservationFixture.userNameStark();
 
         LocalDate newDate = LocalDate.of(2026, 5, 8);
         Long newTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
 
         Reservation updateReservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(newDate)
                         .themeId(themeId)

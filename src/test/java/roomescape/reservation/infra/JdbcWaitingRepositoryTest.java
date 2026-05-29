@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.fixture.ReservationFixture;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.support.TestDataHelper;
@@ -62,9 +64,10 @@ class JdbcWaitingRepositoryTest {
     void save_user_reservation() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        User stark = ReservationFixture.userNameStark();
 
         Waiting waiting = Waiting.builder()
-                .name("name")
+                .user(stark)
                 .slot(ReservationSlot.builder()
                         .date(LocalDate.of(2026, 5, 4))
                         .themeId(themeId)
@@ -76,7 +79,7 @@ class JdbcWaitingRepositoryTest {
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(savedWaiting.getName()).isEqualTo("name");
+            assertSoftly.assertThat(savedWaiting.getUser()).isEqualTo(stark);
             assertSoftly.assertThat(savedWaiting.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 4));
             assertSoftly.assertThat(savedWaiting.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedWaiting.getSlot().timeId()).isEqualTo(timeId);
@@ -123,13 +126,14 @@ class JdbcWaitingRepositoryTest {
                 themeId,
                 timeId
         );
+        User neo = ReservationFixture.userNameNeo();
 
         ReservationSlot slot = waitingRepository.findSlotById(thirdWaitingId)
                 .orElseThrow();
 
         Waiting waiting = Waiting.builder()
                 .id(thirdWaitingId)
-                .name("네오")
+                .user(neo)
                 .slot(slot)
                 .build();
 

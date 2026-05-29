@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.domain.User;
 
 public class ReservationFixture {
 
     private static final String STARK = "스타크";
     private static final String KAYA = "카야";
+    private static final String PINO = "피노";
+    private static final String NEO = "네오";
     private static final LocalDate PAST_RESERVATION_DATE = LocalDate.of(2000, 5, 6);
     private static final LocalDate FUTURE_RESERVATION_DATE = LocalDate.of(2099, 12, 31);
     private static final String PAST_RESERVATION_DATE_TEXT = "2000-05-06";
@@ -44,6 +47,24 @@ public class ReservationFixture {
 
     public static LocalDate futureReservationDate() {
         return FUTURE_RESERVATION_DATE;
+    }
+
+    public static User userNameStark() {
+        return User.builder()
+                .name(STARK)
+                .build();
+    }
+
+    public static User userNamePino() {
+        return User.builder()
+                .name(PINO)
+                .build();
+    }
+
+    public static User userNameNeo() {
+        return User.builder()
+                .name(NEO)
+                .build();
     }
 
     public static Map<String, String> futureReservationParams(Long themeId, Long timeId) {

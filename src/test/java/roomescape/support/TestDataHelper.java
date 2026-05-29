@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.User;
 import roomescape.theme.application.dto.ThemeCreateCommand;
 
 @TestComponent
@@ -80,7 +81,9 @@ public class TestDataHelper {
                         """,
                 (rs, rowNum) -> Reservation.builder()
                         .id(rs.getLong("id"))
-                        .name(rs.getString("name"))
+                        .user(User.builder()
+                                .name(rs.getString("name"))
+                                .build())
                         .slot(ReservationSlot.builder()
                                 .date(rs.getDate("date").toLocalDate())
                                 .themeId(rs.getLong("theme_id"))

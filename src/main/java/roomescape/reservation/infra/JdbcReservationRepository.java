@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
 @Repository
@@ -27,11 +28,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return jdbcTemplate.query("""
-                    SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
-                    FROM reservation r
-                    JOIN reservation_time rt ON r.time_id = rt.id
-                    WHERE r.id = ?
-                """,
+                            SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
+                            FROM reservation r
+                            JOIN reservation_time rt ON r.time_id = rt.id
+                            WHERE r.id = ?
+                        """,
                 (rs, rowNum) -> {
                     ReservationSlot slot = ReservationSlot.builder()
                             .date(rs.getDate("date").toLocalDate())
@@ -42,7 +43,11 @@ public class JdbcReservationRepository implements ReservationRepository {
 
                     return Reservation.builder()
                             .id(rs.getLong("id"))
-                            .name(rs.getString("name"))
+                            .user(User
+                                    .builder()
+                                    .name(rs.getString("name"))
+                                    .build()
+                            )
                             .slot(slot)
                             .build();
                 }
@@ -71,7 +76,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.getName())
+                .addValue("name", reservation.getUser().name())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());

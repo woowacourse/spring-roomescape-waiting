@@ -22,6 +22,7 @@ import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.User;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -250,6 +251,7 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
+        User stark = ReservationFixture.userNameStark();
 
         reservationCommandService.delete(reservationId, NOW);
 
@@ -262,7 +264,7 @@ class ReservationCommandServiceTest {
         Reservation promoteReservation = testHelper.findReservationBySlot(slot);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(promoteReservation.getUser()).isEqualTo(stark);
             softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });
@@ -285,6 +287,8 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
+        User stark = ReservationFixture.userNameStark();
+        User pino = ReservationFixture.userNamePino();
 
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         reservationCommandService.update(
@@ -309,8 +313,8 @@ class ReservationCommandServiceTest {
         Reservation changeReservation = testHelper.findReservationBySlot(updatedSlot);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(changeReservation.getName()).isEqualTo("피노");
-            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(changeReservation.getUser()).isEqualTo(pino);
+            softly.assertThat(promoteReservation.getUser()).isEqualTo(stark);
         });
     }
 }

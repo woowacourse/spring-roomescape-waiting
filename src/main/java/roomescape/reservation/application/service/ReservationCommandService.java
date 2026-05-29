@@ -112,7 +112,7 @@ public class ReservationCommandService {
             waitingRepository.delete(waiting.getId());
 
             saveReservation(Reservation.builder()
-                    .name(waiting.getName())
+                    .user(waiting.getUser())
                     .slot(waiting.getSlot())
                     .build());
         });

@@ -9,34 +9,13 @@ import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.global.exception.RoomEscapeException;
 
 class ReservationTest {
 
-    @DisplayName("예약자 이름이 비어있을 때 예외 발생을 테스트합니다.")
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" "})
-    void validate_name(String name) {
-        assertThatThrownBy(() -> {
-            ReservationSlot slot = ReservationSlot.builder()
-                    .date(LocalDate.of(2026, 5, 6))
-                    .themeId(1L)
-                    .timeId(1L)
-                    .startAt(LocalTime.of(9, 0))
-                    .build();
-
-            Reservation.builder()
-                    .name(name)
-                    .slot(slot)
-                    .build();
-        })
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage("이름은 비어있을 수 없습니다.");
-    }
+    private static final User STARK = User.builder()
+            .name("스타크")
+            .build();
 
     @DisplayName("ID가 없는 예약은 같은 이름과 슬롯이어도 동등하지 않는 것을 테스트 합니다.")
     @Test
@@ -48,11 +27,11 @@ class ReservationTest {
                 .startAt(LocalTime.of(9, 0))
                 .build();
         Reservation reservation = Reservation.builder()
-                .name("스타크")
+                .user(STARK)
                 .slot(slot)
                 .build();
         Reservation other = Reservation.builder()
-                .name("스타크")
+                .user(STARK)
                 .slot(slot)
                 .build();
 
@@ -70,7 +49,7 @@ class ReservationTest {
                 .build();
         Reservation reservation = Reservation.builder()
                 .id(1L)
-                .name("스타크")
+                .user(STARK)
                 .slot(slot)
                 .build();
         Reservation updatedReservation = reservation.updateDateAndTime(
@@ -94,7 +73,7 @@ class ReservationTest {
                 .build();
         Reservation reservation = Reservation.builder()
                 .id(1L)
-                .name("스타크")
+                .user(STARK)
                 .slot(slot)
                 .build();
 
@@ -107,7 +86,6 @@ class ReservationTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(updatedReservation.getId()).isEqualTo(1L);
-            softly.assertThat(updatedReservation.getName()).isEqualTo("스타크");
             softly.assertThat(updatedReservation.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 7));
             softly.assertThat(updatedReservation.getSlot().themeId()).isEqualTo(1L);
             softly.assertThat(updatedReservation.getSlot().timeId()).isEqualTo(2L);
@@ -126,7 +104,7 @@ class ReservationTest {
                 .build();
         Reservation reservation = Reservation.builder()
                 .id(1L)
-                .name("스타크")
+                .user(STARK)
                 .slot(slot)
                 .build();
 

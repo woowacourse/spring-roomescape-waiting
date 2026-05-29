@@ -3,28 +3,28 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
-import roomescape.global.exception.RoomEscapeException;
 
 @Getter
 public class Reservation {
 
     private final Long id;
-    private final String name;
+    private final User user;
     private final ReservationSlot slot;
 
     @Builder
-    public Reservation(Long id, String name, ReservationSlot slot) {
+    public Reservation(Long id, User user, ReservationSlot slot) {
         this.id = id;
-        this.name = requireName(name);
-        this.slot = slot;
+        this.user = Objects.requireNonNull(user);
+        this.slot = Objects.requireNonNull(slot);
     }
 
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
                 .id(generatedId)
-                .name(this.name)
+                .user(this.user)
                 .slot(this.slot)
                 .build();
     }
@@ -35,7 +35,7 @@ public class Reservation {
 
         return Reservation.builder()
                 .id(this.id)
-                .name(this.name)
+                .user(this.user)
                 .slot(updatedSlot)
                 .build();
     }
@@ -54,12 +54,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    private static String requireName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new RoomEscapeException("이름은 비어있을 수 없습니다.");
-        }
-        return name;
     }
 }
