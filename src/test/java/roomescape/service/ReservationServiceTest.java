@@ -9,8 +9,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -18,27 +18,27 @@ import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationSlotRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
-import roomescape.service.fake.FakeReservationRepository;
+import roomescape.service.fake.FakeReservationSlotRepository;
 import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.fake.FakeThemeRepository;
 import roomescape.service.fixture.ReservationServiceFixture;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSlotResult;
 import roomescape.service.result.ReservationTimeResult;
 
 class ReservationServiceTest {
 
-    private ReservationRepository reservationRepository;
+    private ReservationSlotRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private FakeThemeRepository themeRepository;
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
-        this.reservationRepository = new FakeReservationRepository();
+        this.reservationRepository = new FakeReservationSlotRepository();
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
         this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository);
@@ -53,18 +53,18 @@ class ReservationServiceTest {
         ReservationCommand command = new ReservationCommand("이프", reservationDate, theme.getId(), time.getId());
 
         // when: 예약 진행
-        ReservationResult result = reservationService.reserve(command);
+        ReservationSlotResult result = reservationService.reserve(command);
 
         // then: 등록된 예약 정보가 입력값과 일치함
         ReservationTimeResult timeResult = ReservationTimeResult.from(time);
         assertThat(result)
                 .extracting(
-                        ReservationResult::reservationId,
-                        ReservationResult::date,
-                        ReservationResult::time
+                        ReservationSlotResult::slotId,
+                        ReservationSlotResult::date,
+                        ReservationSlotResult::time
                 )
                 .containsExactly(1L, reservationDate, timeResult);
-        assertThat(result.entry())
+        assertThat(result.reservation())
                 .extracting("id", "name", "status")
                 .containsExactly(1L, "이프", "RESERVED");
     }
@@ -80,11 +80,11 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_시간_정보로_예약_변경_시_예외가_발생한다() {
         // given
-        Reservation saved = reservationRepository.save(createDefaultReservationWithName("이프"));
+        ReservationSlot saved = reservationRepository.save(createDefaultReservationWithName("이프"));
         ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(LocalDate.now(), 1L);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.change(reservedEntryId(saved), command))
+        assertThatThrownBy(() -> reservationService.change(reservedReservationId(saved), command))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("존재하지 않는 시간 정보입니다.");
     }
@@ -92,20 +92,20 @@ class ReservationServiceTest {
     @Test
     void 동일한_예약_정보로_변경하면_기존_예약을_반환한다() {
         // given
-        Reservation reservation = createDefaultReservationWithName("이프");
-        reservationTimeRepository.save(reservation.getTime());
-        Reservation saved = reservationRepository.save(reservation);
+        ReservationSlot slot = createDefaultReservationWithName("이프");
+        reservationTimeRepository.save(slot.getTime());
+        ReservationSlot saved = reservationRepository.save(slot);
 
-        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(reservation.getDate(), 1L);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(slot.getDate(), 1L);
 
         // when
-        ReservationResult result = reservationService.change(reservedEntryId(saved), command);
+        ReservationSlotResult result = reservationService.change(reservedReservationId(saved), command);
 
         // then
-        assertThat(result.reservationId()).isEqualTo(saved.getId());
+        assertThat(result.slotId()).isEqualTo(saved.getId());
         assertThat(result.date()).isEqualTo(saved.getDate());
         assertThat(result.time().id()).isEqualTo(saved.getTime().getId());
-        assertThat(result.entry().id()).isEqualTo(reservedEntryId(saved));
+        assertThat(result.reservation().id()).isEqualTo(reservedReservationId(saved));
     }
 
     @Test
@@ -114,13 +114,13 @@ class ReservationServiceTest {
         ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.createDefault());
         themeRepository.save(ThemeFixture.createDefaultTheme());
 
-        Reservation first = reservationRepository.save(createDefaultReservationWithName("이프"));
-        Reservation second = reservationRepository.save(createWithNameAndDate("두둠", first.getDate().plusDays(1)));
+        ReservationSlot first = reservationRepository.save(createDefaultReservationWithName("이프"));
+        ReservationSlot second = reservationRepository.save(createWithNameAndDate("두둠", first.getDate().plusDays(1)));
 
         ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(second.getDate(), time.getId());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.change(reservedEntryId(first), command))
+        assertThatThrownBy(() -> reservationService.change(reservedReservationId(first), command))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 된 날짜입니다.");
     }
@@ -128,15 +128,15 @@ class ReservationServiceTest {
     @Test
     void 기존_예약_정보에서_예약_시간을_변경할_수_있다() {
         // given
-        Reservation reservation = createDefaultReservationWithName("이프");
-        reservationTimeRepository.save(reservation.getTime());
-        Reservation saved = reservationRepository.save(reservation);
+        ReservationSlot slot = createDefaultReservationWithName("이프");
+        reservationTimeRepository.save(slot.getTime());
+        ReservationSlot saved = reservationRepository.save(slot);
 
-        LocalDate nextDate = reservation.getDate().plusDays(1);
+        LocalDate nextDate = slot.getDate().plusDays(1);
         ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(nextDate, 1L);
 
         // when
-        ReservationResult result = reservationService.change(reservedEntryId(saved), command);
+        ReservationSlotResult result = reservationService.change(reservedReservationId(saved), command);
 
         // then
         assertThat(result.date()).isEqualTo(nextDate);
@@ -197,7 +197,7 @@ class ReservationServiceTest {
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createDefault());
 
-        Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
+        ReservationSlot existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
@@ -215,18 +215,18 @@ class ReservationServiceTest {
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createDefault());
 
-        Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
+        ReservationSlot existingReservation = createDefaultReservationWithName("기존 예약자");
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
         ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
 
         // when
-        ReservationResult result = reservationService.addWaiting(command);
+        ReservationSlotResult result = reservationService.addWaiting(command);
 
         // then
-        assertThat(result.entry().name()).isEqualTo("새예약자");
-        assertThat(result.entry().status()).isEqualTo("WAITING");
+        assertThat(result.reservation().name()).isEqualTo("새예약자");
+        assertThat(result.reservation().status()).isEqualTo("WAITING");
     }
 
     @Test
@@ -239,32 +239,32 @@ class ReservationServiceTest {
         ReservationCommand command = new ReservationCommand("이프", date, 1L, 1L);
 
         // when
-        ReservationResult result = reservationService.addWaiting(command);
+        ReservationSlotResult result = reservationService.addWaiting(command);
 
         // then: 슬롯이 비어있으므로 RESERVED로 승격
-        assertThat(result.entry().name()).isEqualTo("이프");
-        assertThat(result.entry().status()).isEqualTo("RESERVED");
+        assertThat(result.reservation().name()).isEqualTo("이프");
+        assertThat(result.reservation().status()).isEqualTo("RESERVED");
     }
 
     @Test
     void 식별자를_이용해_예약을_취소한다() {
         // given: 취소할 예약이 저장되어 있음
-        Reservation saved = reservationRepository.save(createDefaultReservationWithName("웨지"));
+        ReservationSlot saved = reservationRepository.save(createDefaultReservationWithName("웨지"));
 
         // when: 삭제 요청
-        reservationService.cancelReservation(reservedEntryId(saved));
+        reservationService.cancelReservation(reservedReservationId(saved));
 
         // then: 예약 엔트리가 취소 상태로 변경됨
-        assertThat(reservationRepository.findById(saved.getId()).orElseThrow().getEntries())
+        assertThat(reservationRepository.findById(saved.getId()).orElseThrow().getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getStatus)
+                .extracting(Reservation::getStatus)
                 .isEqualTo(ReservationStatus.DELETED);
     }
 
-    private long reservedEntryId(Reservation reservation) {
-        return reservation.getEntries()
+    private long reservedReservationId(ReservationSlot slot) {
+        return slot.getReservations()
                 .stream()
-                .filter(ReservationEntry::isReserved)
+                .filter(Reservation::isReserved)
                 .findFirst()
                 .orElseThrow()
                 .getId();

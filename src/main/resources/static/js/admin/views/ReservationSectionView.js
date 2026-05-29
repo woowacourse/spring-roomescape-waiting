@@ -79,15 +79,15 @@ export default class ReservationSectionView extends View {
       return;
     }
 
-    reservations.forEach((reservation) => {
-      const entry = reservation.entry;
+    reservations.forEach((slot) => {
+      const reservation = slot.reservation;
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td><span class="badge badge-blue">${entry.id}</span></td>
-        <td class="td-name">${entry.name}</td>
-        <td>${reservation.date}</td>
-        <td>${formatTime(reservation.time.startAt)}</td>
-        <td><button class="btn-delete" type="button" data-id="${entry.id}">취소</button></td>
+        <td><span class="badge badge-blue">${reservation.id}</span></td>
+        <td class="td-name">${reservation.name}</td>
+        <td>${slot.date}</td>
+        <td>${formatTime(slot.time.startAt)}</td>
+        <td><button class="btn-delete" type="button" data-id="${reservation.id}">취소</button></td>
       `;
       this.tableBody.appendChild(row);
     });

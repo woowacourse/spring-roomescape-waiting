@@ -1,34 +1,24 @@
 package roomescape.service.result;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationEntry;
 
 public record ReservationResult(
-        long reservationId,
-        LocalDate date,
-        ThemeRegisterResult theme,
-        ReservationTimeResult time,
-        ReservationEntryResult entry
+        long id,
+        String name,
+        String status,
+        LocalDateTime createdAt
 ) {
 
     public static ReservationResult from(Reservation reservation) {
-        ReservationEntry entry = reservation.getEntries()
-                .stream()
-                .filter(ReservationEntry::isReserved)
-                .findFirst()
-                .orElse(null);
-
-        return from(reservation, entry);
-    }
-
-    public static ReservationResult from(Reservation reservation, ReservationEntry entry) {
+        if (reservation == null) {
+            return null;
+        }
         return new ReservationResult(
                 reservation.getId(),
-                reservation.getDate(),
-                ThemeRegisterResult.from(reservation.getTheme()),
-                ReservationTimeResult.from(reservation.getTime()),
-                ReservationEntryResult.from(entry)
+                reservation.getName(),
+                reservation.getStatus().name(),
+                reservation.getCreatedAt()
         );
     }
 }

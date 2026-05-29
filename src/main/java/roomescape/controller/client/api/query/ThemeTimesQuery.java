@@ -22,8 +22,8 @@ public class ThemeTimesQuery {
                     rt.start_at AS time_start_at,
                     NOT EXISTS (
                         SELECT 1
-                        FROM reservation r
-                        JOIN reservation_entry re ON re.reservation_id = r.id
+                        FROM reservation_slot r
+                        JOIN reservation re ON re.slot_id = r.id
                         WHERE r.time_id = rt.id
                           AND r.theme_id = ?
                           AND r.date = ?

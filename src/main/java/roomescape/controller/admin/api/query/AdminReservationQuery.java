@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import roomescape.controller.admin.api.dto.response.AdminReservationEntryResponse;
 import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
+import roomescape.controller.admin.api.dto.response.AdminReservationSlotResponse;
 import roomescape.controller.admin.api.dto.response.AdminReservationTimeResponse;
 import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
 
@@ -14,9 +14,9 @@ import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
 @RequiredArgsConstructor
 public class AdminReservationQuery {
 
-    private static final RowMapper<AdminReservationResponse> ADMIN_RESERVATION_RESPONSE_MAPPER = (rs, rowNum) ->
-            new AdminReservationResponse(
-                    rs.getLong("reservation_id"),
+    private static final RowMapper<AdminReservationSlotResponse> ADMIN_RESERVATION_RESPONSE_MAPPER = (rs, rowNum) ->
+            new AdminReservationSlotResponse(
+                    rs.getLong("slot_id"),
                     rs.getDate("reservation_date").toLocalDate(),
                     new AdminThemeResponse(
                             rs.getLong("theme_id"),
@@ -30,20 +30,20 @@ public class AdminReservationQuery {
                             rs.getTime("time_start_at").toLocalTime(),
                             rs.getString("time_status")
                     ),
-                    new AdminReservationEntryResponse(
-                            rs.getLong("entry_id"),
-                            rs.getString("entry_name"),
-                            rs.getString("entry_status"),
-                            rs.getTimestamp("entry_created_at").toLocalDateTime()
+                    new AdminReservationResponse(
+                            rs.getLong("reservation_id"),
+                            rs.getString("reservation_name"),
+                            rs.getString("reservation_status"),
+                            rs.getTimestamp("reservation_created_at").toLocalDateTime()
                     )
             );
 
     private final JdbcTemplate jdbcTemplate;
 
-    public List<AdminReservationResponse> getAllReservations() {
+    public List<AdminReservationSlotResponse> getAllReservations() {
         String sql = """
                 SELECT
-                    r.id AS reservation_id,
+                    r.id AS slot_id,
                     r.date AS reservation_date,
                     t.id AS theme_id,
                     t.name AS theme_name,
@@ -53,14 +53,14 @@ public class AdminReservationQuery {
                     rt.id AS time_id,
                     rt.start_at AS time_start_at,
                     rt.status AS time_status,
-                    re.id AS entry_id,
-                    re.name AS entry_name,
-                    re.status AS entry_status,
-                    re.created_at AS entry_created_at
-                FROM reservation r
+                    re.id AS reservation_id,
+                    re.name AS reservation_name,
+                    re.status AS reservation_status,
+                    re.created_at AS reservation_created_at
+                FROM reservation_slot r
                 JOIN theme t ON r.theme_id = t.id
                 JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN reservation_entry re ON re.reservation_id = r.id
+                JOIN reservation re ON re.slot_id = r.id
                 WHERE re.status = 'RESERVED'
                 ORDER BY r.date DESC, rt.start_at DESC, re.id DESC
                 """;

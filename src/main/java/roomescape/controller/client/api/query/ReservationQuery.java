@@ -38,8 +38,8 @@ public class ReservationQuery {
         }
 
         String joinClause = """
-            FROM reservation r
-            JOIN reservation_entry re ON re.reservation_id = r.id AND re.status != 'DELETED'
+            FROM reservation_slot r
+            JOIN reservation re ON re.slot_id = r.id AND re.status != 'DELETED'
             JOIN theme t ON r.theme_id = t.id
             JOIN reservation_time rt ON r.time_id = rt.id
             """;
@@ -56,8 +56,8 @@ public class ReservationQuery {
                        re.status AS res_status,
                        CASE WHEN re.status = 'WAITING'
                             THEN (SELECT COUNT(*) + 1
-                                  FROM reservation_entry re2
-                                  WHERE re2.reservation_id = re.reservation_id
+                                  FROM reservation re2
+                                  WHERE re2.slot_id = re.slot_id
                                     AND re2.status = 'WAITING'
                                     AND re2.created_at < re.created_at)
                             ELSE NULL

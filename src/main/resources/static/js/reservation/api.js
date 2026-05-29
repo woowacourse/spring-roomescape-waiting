@@ -25,11 +25,11 @@ export function createWaitingReservation(payload) {
 }
 
 export function fetchReservation(id) {
-  return requestJson(`/api/reservations/entries/${id}`);
+  return requestJson(`/api/reservations/${id}`);
 }
 
 export function changeReservation(id, payload) {
-  return requestJson(`/api/reservations/entries/${id}`, {
+  return requestJson(`/api/reservations/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -37,7 +37,7 @@ export function changeReservation(id, payload) {
 }
 
 export function cancelReservation(id) {
-  return requestJson(`/api/reservations/entries/${id}`, {
+  return requestJson(`/api/reservations/${id}`, {
     method: "DELETE"
   });
 }

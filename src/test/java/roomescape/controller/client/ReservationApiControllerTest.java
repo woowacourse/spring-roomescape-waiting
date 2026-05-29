@@ -28,7 +28,7 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ReservationApiController;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
-import roomescape.controller.client.api.dto.response.ReservationResponse;
+import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
@@ -37,7 +37,7 @@ import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSlotResult;
 
 @WebMvcTest(ReservationApiController.class)
 class ReservationApiControllerTest extends BaseControllerUnitTest {
@@ -69,11 +69,11 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 예약_요청에_성공하면_201_Created_상태와_정상_응답이_반환된다() {
         // given
         ReservationRequest body = ReservationApiRequestFixture.reserveSuccessRequestFixture();
-        ReservationResult result = ReservationServiceFixture.createReservationResult();
+        ReservationSlotResult result = ReservationServiceFixture.createReservationSlotResult();
         when(reservationService.reserve(any(ReservationCommand.class))).thenReturn(result);
 
         // when & then
-        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+        ReservationSlotResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .body(body)
                 .when().post("/api/reservations")
                 .then().log().all()
@@ -81,7 +81,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).isEqualTo(ReservationResponse.from(result));
+        assertThat(response).isEqualTo(ReservationSlotResponse.from(result));
     }
 
     @Test
@@ -119,7 +119,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 사용자가_예약_취소에_성공하면_삭제_로직_수행_후_204_noContent를_반환한다() {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/reservations/entries/{entryId}", 1L)
+                .when().delete("/api/reservations/{reservationId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.NO_CONTENT);
         verify(reservationService, times(1)).cancelReservation(anyLong());
@@ -130,21 +130,21 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 사용자가_예약_취소시_식별자가_양수가_아니라면_400_Bad_Request를_반환한다(int invalidId) {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/reservations/entries/{entryId}", invalidId)
+                .when().delete("/api/reservations/{reservationId}", invalidId)
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body(containsString("예약 엔트리 식별자는 양수입니다."));
+                .body(containsString("예약 식별자는 양수입니다."));
     }
 
     @Test
     void 대기_신청_요청에_성공하면_201_Created_상태와_WAITING_응답이_반환된다() {
         // given
         ReservationRequest body = ReservationApiRequestFixture.reserveSuccessRequestFixture();
-        ReservationResult result = ReservationServiceFixture.createWaitingResult();
+        ReservationSlotResult result = ReservationServiceFixture.createWaitingResult();
         when(reservationService.addWaiting(any(ReservationCommand.class))).thenReturn(result);
 
         // when & then
-        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+        ReservationSlotResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .body(body)
                 .when().post("/api/reservations/waiting")
                 .then().log().all()
@@ -152,26 +152,26 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).isEqualTo(ReservationResponse.from(result));
+        assertThat(response).isEqualTo(ReservationSlotResponse.from(result));
     }
 
     @Test
     void 예약_변경_식별자와_변경할_시간으로_예약_변경_요청시_변경_로직_실행_후_200OK() {
         // given
         ReservationChangeRequest request = new ReservationChangeRequest(LocalDate.now(), 1L);
-        ReservationResult result = ReservationServiceFixture.createReservationResult();
+        ReservationSlotResult result = ReservationServiceFixture.createReservationSlotResult();
         when(reservationService.change(anyLong(), any(ReservationChangeCommand.class))).thenReturn(result);
 
         // when
-        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+        ReservationSlotResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .body(request)
-                .when().patch("/api/reservations/entries/{entryId}", 1L)
+                .when().patch("/api/reservations/{reservationId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.OK)
                 .extract().as(new TypeRef<>() {
                 });
 
         // then
-        assertThat(response).isEqualTo(ReservationResponse.from(result));
+        assertThat(response).isEqualTo(ReservationSlotResponse.from(result));
     }
 }

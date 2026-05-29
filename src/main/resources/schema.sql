@@ -17,7 +17,7 @@ CREATE TABLE reservation_time (
     CONSTRAINT uk_reservation_time_start_at UNIQUE (start_at)
 );
 
-CREATE TABLE reservation (
+CREATE TABLE reservation_slot (
     id      BIGINT       NOT NULL AUTO_INCREMENT,
     date    DATE         NOT NULL,
     theme_id BIGINT,
@@ -28,12 +28,12 @@ CREATE TABLE reservation (
     CONSTRAINT uk_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
 );
 
-CREATE TABLE reservation_entry (
+CREATE TABLE reservation (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
     name           VARCHAR(20)  NOT NULL,
-    reservation_id BIGINT       NOT NULL,
+    slot_id BIGINT       NOT NULL,
     status         VARCHAR(20)  NOT NULL,
     created_at     TIMESTAMP    NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+    FOREIGN KEY (slot_id) REFERENCES reservation_slot (id)
 );

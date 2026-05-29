@@ -1,23 +1,24 @@
 package roomescape.controller.admin.api.dto.response;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.service.result.ReservationResult;
 
 public record AdminReservationResponse(
-        long reservationId,
-        LocalDate date,
-        AdminThemeResponse theme,
-        AdminReservationTimeResponse time,
-        AdminReservationEntryResponse entry
+        long id,
+        String name,
+        String status,
+        LocalDateTime createdAt
 ) {
 
     public static AdminReservationResponse from(ReservationResult result) {
+        if (result == null) {
+            return null;
+        }
         return new AdminReservationResponse(
-                result.reservationId(),
-                result.date(),
-                AdminThemeResponse.from(result.theme()),
-                AdminReservationTimeResponse.from(result.time()),
-                AdminReservationEntryResponse.from(result.entry())
+                result.id(),
+                result.name(),
+                result.status(),
+                result.createdAt()
         );
     }
 }

@@ -26,14 +26,14 @@ export default class Store {
     await this.loadThemes();
 
     if (this.reservationId) {
-      const reservation = await fetchReservation(this.reservationId);
+      const slot = await fetchReservation(this.reservationId);
 
-      this.selectedThemeId = reservation.theme.id;
-      this.selectedDate = reservation.date;
-      this.selectedTimeId = reservation.time.id;
-      this.name = reservation.entry.name;
+      this.selectedThemeId = slot.theme.id;
+      this.selectedDate = slot.date;
+      this.selectedTimeId = slot.time.id;
+      this.name = slot.reservation.name;
       this.readonly = true;
-      this.originalReservation = reservation;
+      this.originalReservation = slot;
 
       await this.loadSlots();
     }

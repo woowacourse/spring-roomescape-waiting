@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
-import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
-import roomescape.controller.client.api.dto.response.ReservationResponse;
+import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.service.ReservationService;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSlotResult;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,42 +37,42 @@ public class ReservationApiController {
     private final ReservationQuery reservationQuery;
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> reserve(@Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.reserve(request.toCommand());
-        return ResponseEntity.created(URI.create("/api/reservations/entries/" + result.entry().id()))
-                .body(ReservationResponse.from(result));
+    public ResponseEntity<ReservationSlotResponse> reserve(@Valid @RequestBody ReservationRequest request) {
+        ReservationSlotResult result = reservationService.reserve(request.toCommand());
+        return ResponseEntity.created(URI.create("/api/reservations/" + result.reservation().id()))
+                .body(ReservationSlotResponse.from(result));
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> joinWaitingList(@Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.addWaiting(request.toCommand());
-        return ResponseEntity.created(URI.create("/api/reservations/entries/" + result.entry().id()))
-                .body(ReservationResponse.from(result));
+    public ResponseEntity<ReservationSlotResponse> joinWaitingList(@Valid @RequestBody ReservationRequest request) {
+        ReservationSlotResult result = reservationService.addWaiting(request.toCommand());
+        return ResponseEntity.created(URI.create("/api/reservations/" + result.reservation().id()))
+                .body(ReservationSlotResponse.from(result));
     }
 
-    @PatchMapping("/entries/{entryId}")
-    public ResponseEntity<ReservationResponse> changeReservation(
-            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId,
+    @PatchMapping("/{reservationId}")
+    public ResponseEntity<ReservationSlotResponse> changeReservation(
+            @PathVariable @Positive(message = "예약 식별자는 양수입니다.") Long reservationId,
             @Valid @RequestBody ReservationChangeRequest request
     ) {
-        ReservationResult result = reservationService.change(entryId, request.toCommand());
-        return ResponseEntity.ok(ReservationResponse.from(result));
+        ReservationSlotResult result = reservationService.change(reservationId, request.toCommand());
+        return ResponseEntity.ok(ReservationSlotResponse.from(result));
     }
 
-    @DeleteMapping("/entries/{entryId}")
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> cancel(
-            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId
+            @PathVariable @Positive(message = "예약 식별자는 양수입니다.") Long reservationId
     ) {
-        reservationService.cancelReservation(entryId);
+        reservationService.cancelReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/entries/{entryId}")
-    public ResponseEntity<ReservationDetailResponse> getReservationEntry(
-            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ReservationSlotDetailResponse> getReservation(
+            @PathVariable @Positive(message = "예약 식별자는 양수입니다.") Long reservationId
     ) {
-        ReservationResult result = reservationService.getReservationEntry(entryId);
-        return ResponseEntity.ok(ReservationDetailResponse.from(result));
+        ReservationSlotResult result = reservationService.getReservation(reservationId);
+        return ResponseEntity.ok(ReservationSlotDetailResponse.from(result));
     }
 
     @GetMapping

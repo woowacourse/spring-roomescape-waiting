@@ -13,6 +13,6 @@ export default class Store {
 
     async cancel(id) {
         await cancelReservation(id);
-        this.page.content = this.page.content.filter((reservation) => reservation.id !== Number(id));
+        this.page.content = this.page.content.filter((slot) => slot.id !== Number(id));
     }
 }

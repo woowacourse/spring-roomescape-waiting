@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
-import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
+import roomescape.controller.admin.api.dto.response.AdminReservationSlotResponse;
 import roomescape.controller.admin.api.query.AdminReservationQuery;
 import roomescape.service.ReservationService;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSlotResult;
 
 @RestController
 @RequestMapping("/api/admin/reservations")
@@ -31,22 +31,22 @@ public class AdminReservationApiController {
     private final AdminReservationQuery reservationQuery;
 
     @PostMapping
-    public ResponseEntity<AdminReservationResponse> reserve(@Valid @RequestBody AdminReservationRequest request) {
-        ReservationResult result = reservationService.reserve(request.toCommand());
-        return ResponseEntity.status(CREATED).body(AdminReservationResponse.from(result));
+    public ResponseEntity<AdminReservationSlotResponse> reserve(@Valid @RequestBody AdminReservationRequest request) {
+        ReservationSlotResult result = reservationService.reserve(request.toCommand());
+        return ResponseEntity.status(CREATED).body(AdminReservationSlotResponse.from(result));
     }
 
-    @DeleteMapping("/entries/{entryId}")
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> cancelReservation(
             @PathVariable
-            @Positive(message = "예약 엔트리 식별자는 양수여야 합니다.") Long entryId
+            @Positive(message = "예약 식별자는 양수여야 합니다.") Long reservationId
     ) {
-        reservationService.cancelReservation(entryId);
+        reservationService.cancelReservation(reservationId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<AdminReservationResponse>> getAllReservations() {
+    public ResponseEntity<List<AdminReservationSlotResponse>> getAllReservations() {
         return ResponseEntity.ok(reservationQuery.getAllReservations());
     }
 }

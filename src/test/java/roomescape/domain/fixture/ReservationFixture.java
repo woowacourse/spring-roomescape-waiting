@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -50,26 +50,26 @@ public class ReservationFixture {
         );
     }
 
-    public static Reservation createDefaultReservationWithName(String name) {
+    public static ReservationSlot createDefaultReservationWithName(String name) {
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
-        return reservation;
+        ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);
+        slot.reserve(name);
+        return slot;
     }
 
-    public static Reservation createWithNameAndDate(String name, LocalDate date) {
+    public static ReservationSlot createWithNameAndDate(String name, LocalDate date) {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
-        return reservation;
+        ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);
+        slot.reserve(name);
+        return slot;
     }
 
-    public static Reservation createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
-        Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
-        return reservation;
+    public static ReservationSlot createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
+        ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);
+        slot.reserve(name);
+        return slot;
     }
 }

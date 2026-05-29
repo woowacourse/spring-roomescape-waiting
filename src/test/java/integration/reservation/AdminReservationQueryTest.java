@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
+import roomescape.controller.admin.api.dto.response.AdminReservationSlotResponse;
 import roomescape.controller.admin.api.query.AdminReservationQuery;
 
 class AdminReservationQueryTest extends BaseIntegrationTest {
@@ -34,16 +34,16 @@ class AdminReservationQueryTest extends BaseIntegrationTest {
         dataSource.insertReservation("이프", date, 1L, 1L);
 
         // when
-        List<AdminReservationResponse> result = adminReservationQuery.getAllReservations();
+        List<AdminReservationSlotResponse> result = adminReservationQuery.getAllReservations();
 
         // then
         assertThat(result).hasSize(1);
-        AdminReservationResponse reservation = result.getFirst();
-        assertThat(reservation.reservationId()).isEqualTo(1L);
-        assertThat(reservation.date()).isEqualTo(date);
-        assertThat(reservation.theme().name()).isEqualTo("공포");
-        assertThat(reservation.time().startAt()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(reservation.entry().name()).isEqualTo("이프");
-        assertThat(reservation.entry().status()).isEqualTo("RESERVED");
+        AdminReservationSlotResponse slot = result.getFirst();
+        assertThat(slot.slotId()).isEqualTo(1L);
+        assertThat(slot.date()).isEqualTo(date);
+        assertThat(slot.theme().name()).isEqualTo("공포");
+        assertThat(slot.time().startAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(slot.reservation().name()).isEqualTo("이프");
+        assertThat(slot.reservation().status()).isEqualTo("RESERVED");
     }
 }

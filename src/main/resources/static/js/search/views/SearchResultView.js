@@ -39,31 +39,31 @@ export default class SearchResultView extends View {
             return;
         }
 
-        page.content.forEach((reservation) => {
+        page.content.forEach((slot) => {
             const item = createElement("div", "reservation-item");
-            const isWaiting = reservation.status === "WAITING";
+            const isWaiting = slot.status === "WAITING";
             const expired = this.isPastReservation(
-                reservation.date,
-                reservation.startAt
+                slot.date,
+                slot.startAt
             );
 
-            item.dataset.id = reservation.id;
+            item.dataset.id = slot.id;
 
             item.innerHTML = `
                 <div>
                     <div class="res-title-row">
-                        <div class="res-theme">${reservation.theme}</div>
+                        <div class="res-theme">${slot.theme}</div>
                         <span class="res-status ${isWaiting ? "waiting" : "reserved"}">
-                            ${isWaiting ? `대기 ${reservation.waitingRank}번` : "예약"}
+                            ${isWaiting ? `대기 ${slot.waitingRank}번` : "예약"}
                         </span>
                     </div>
 
                     <div class="res-details">
-                        ${reservation.date}
+                        ${slot.date}
                         ·
-                        ${reservation.startAt.slice(0, 5)}
+                        ${slot.startAt.slice(0, 5)}
                         ·
-                        ${reservation.name}
+                        ${slot.name}
                     </div>
                 </div>
 

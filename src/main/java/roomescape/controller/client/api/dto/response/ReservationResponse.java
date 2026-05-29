@@ -1,23 +1,24 @@
 package roomescape.controller.client.api.dto.response;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.service.result.ReservationResult;
 
 public record ReservationResponse(
-        long reservationId,
-        LocalDate date,
-        ThemeResponse theme,
-        ReservationTimeResponse time,
-        ReservationEntryResponse entry
+        long id,
+        String name,
+        String status,
+        LocalDateTime createdAt
 ) {
 
     public static ReservationResponse from(ReservationResult result) {
+        if (result == null) {
+            return null;
+        }
         return new ReservationResponse(
-                result.reservationId(),
-                result.date(),
-                ThemeResponse.from(result.theme()),
-                ReservationTimeResponse.from(result.time()),
-                ReservationEntryResponse.from(result.entry())
+                result.id(),
+                result.name(),
+                result.status(),
+                result.createdAt()
         );
     }
 }

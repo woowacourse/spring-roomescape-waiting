@@ -1,7 +1,7 @@
 SET REFERENTIAL_INTEGRITY FALSE;
 
-TRUNCATE TABLE reservation_entry RESTART IDENTITY;
 TRUNCATE TABLE reservation RESTART IDENTITY;
+TRUNCATE TABLE reservation_slot RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 
@@ -23,7 +23,7 @@ VALUES ('10:00:00', 'ACTIVE'),
        ('18:00:00', 'ACTIVE'),
        ('19:30:00', 'ACTIVE');
 
-INSERT INTO reservation (date, theme_id, time_id)
+INSERT INTO reservation_slot (date, theme_id, time_id)
 VALUES
     -- 동일한 날짜(어제)에 시간이 다른 데이터 배치
     -- 예상 정렬 순서: 이프(19:30) -> 두둠(10:00)
@@ -53,7 +53,7 @@ VALUES
     (DATEADD('DAY', -11, CURRENT_DATE), 3, 6),
     (DATEADD('DAY', -11, CURRENT_DATE), 1, 7);
 
-INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+INSERT INTO reservation (name, slot_id, status, created_at)
 VALUES ('두둠', 1, 'RESERVED', CURRENT_TIMESTAMP),
        ('이프', 2, 'RESERVED', CURRENT_TIMESTAMP),
        ('이프', 3, 'RESERVED', CURRENT_TIMESTAMP),

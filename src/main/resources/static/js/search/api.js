@@ -7,7 +7,7 @@ export function searchReservations(name, page = 1, size = 20) {
 }
 
 export function cancelReservation(id) {
-    return requestJson(`/api/reservations/entries/${id}`, {
+    return requestJson(`/api/reservations/${id}`, {
         method: "DELETE"
     });
 }

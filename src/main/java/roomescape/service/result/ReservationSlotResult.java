@@ -1,0 +1,34 @@
+package roomescape.service.result;
+
+import java.time.LocalDate;
+import roomescape.domain.ReservationSlot;
+import roomescape.domain.Reservation;
+
+public record ReservationSlotResult(
+        long slotId,
+        LocalDate date,
+        ThemeRegisterResult theme,
+        ReservationTimeResult time,
+        ReservationResult reservation
+) {
+
+    public static ReservationSlotResult from(ReservationSlot slot) {
+        Reservation reservation = slot.getReservations()
+                .stream()
+                .filter(Reservation::isReserved)
+                .findFirst()
+                .orElse(null);
+
+        return from(slot, reservation);
+    }
+
+    public static ReservationSlotResult from(ReservationSlot slot, Reservation reservation) {
+        return new ReservationSlotResult(
+                slot.getId(),
+                slot.getDate(),
+                ThemeRegisterResult.from(slot.getTheme()),
+                ReservationTimeResult.from(slot.getTime()),
+                ReservationResult.from(reservation)
+        );
+    }
+}

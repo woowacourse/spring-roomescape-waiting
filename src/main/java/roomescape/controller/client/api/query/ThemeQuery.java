@@ -35,7 +35,7 @@ public class ThemeQuery {
                     t.description AS description,
                     t.thumbnail_image_url AS thumbnail_image_url
                 FROM theme t
-                LEFT JOIN reservation r
+                LEFT JOIN reservation_slot r
                        ON t.id = r.theme_id
                       AND r.date BETWEEN ? AND ?
                 WHERE t.is_active = 1

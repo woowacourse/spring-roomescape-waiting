@@ -29,7 +29,7 @@ VALUES ('10:00:00', 'ACTIVE'),
        ('18:00:00', 'ACTIVE'),
        ('19:30:00', 'ACTIVE');
 
-INSERT INTO reservation (date, theme_id, time_id)
+INSERT INTO reservation_slot (date, theme_id, time_id)
 VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1),
        (DATEADD('DAY', -1, CURRENT_DATE), 2, 2),
        (DATEADD('DAY', -1, CURRENT_DATE), 3, 3),
@@ -62,7 +62,7 @@ VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1),
        (DATEADD('DAY', -13, CURRENT_DATE), 5, 1),
        (DATEADD('DAY', 1, CURRENT_DATE), 1, 1);
 
-INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+INSERT INTO reservation (name, slot_id, status, created_at)
 VALUES ('이프', 1, 'RESERVED', CURRENT_TIMESTAMP),
        ('도윤', 2, 'RESERVED', CURRENT_TIMESTAMP),
        ('서윤', 3, 'RESERVED', CURRENT_TIMESTAMP),

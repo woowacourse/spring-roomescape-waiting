@@ -11,20 +11,20 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationSlotRepository;
 import roomescape.repository.dto.ReservationCondition;
 
-class ReservationRepositoryTest extends BaseIntegrationTest {
+class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationSlotRepository reservationRepository;
     @Autowired
     private ReservationDataSource dataSource;
 
@@ -42,25 +42,25 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Test
     void 예약을_저장하면_예약_슬롯과_엔트리를_함께_저장한다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
+        ReservationSlot slot = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
 
         // when
-        Reservation saved = reservationRepository.save(reservation);
+        ReservationSlot saved = reservationRepository.save(slot);
 
         // then
         assertThat(saved.getId()).isEqualTo(1L);
         assertThat(dataSource.hasReservationById(saved.getId())).isTrue();
-        assertThat(saved.getEntries())
+        assertThat(saved.getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getId, ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(Reservation::getId, Reservation::getName, Reservation::getStatus)
                 .containsExactly(1L, "이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 동일한_날짜와_시간으로_저장하면_DB_제약조건_에러가_발생한다() {
         // given
-        Reservation first = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        Reservation second = ReservationFixture.createWithAll("아루", LocalDate.now().plusDays(1), theme, reservationTime);
+        ReservationSlot first = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
+        ReservationSlot second = ReservationFixture.createWithAll("아루", LocalDate.now().plusDays(1), theme, reservationTime);
         reservationRepository.save(first);
 
         // when & then: DB의 UK Constraint 발생 후 비즈니스 예외로 변환
@@ -72,24 +72,24 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Test
     void 존재하는_ID로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        Reservation saved = reservationRepository.save(reservation);
+        ReservationSlot slot = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
+        ReservationSlot saved = reservationRepository.save(slot);
 
         // when:
-        Optional<Reservation> find = reservationRepository.findById(saved.getId());
+        Optional<ReservationSlot> find = reservationRepository.findById(saved.getId());
 
         // then
         assertThat(find).isPresent();
-        assertThat(find.get().getEntries())
+        assertThat(find.get().getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getId, ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(Reservation::getId, Reservation::getName, Reservation::getStatus)
                 .containsExactly(1L, "이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 존재하지_않는_ID로_예약을_조회하면_빈_Optional이_반환된다() {
         // when:
-        Optional<Reservation> find = reservationRepository.findById(1L);
+        Optional<ReservationSlot> find = reservationRepository.findById(1L);
 
         // then
         assertThat(find).isEmpty();
@@ -98,11 +98,11 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Test
     void 예약_슬롯을_수정한다() {
         // given
-        Reservation saved = reservationRepository.save(
+        ReservationSlot saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
 
-        Reservation updated = new Reservation(
+        ReservationSlot updated = new ReservationSlot(
                 saved.getId(),
                 LocalDate.now().plusDays(2),
                 theme,
@@ -114,77 +114,77 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
         reservationRepository.update(updated);
 
         // then
-        Optional<Reservation> find = reservationRepository.findById(saved.getId());
+        Optional<ReservationSlot> find = reservationRepository.findById(saved.getId());
 
         assertThat(find).isPresent();
         assertThat(find.get().getDate()).isEqualTo(LocalDate.now().plusDays(2));
-        assertThat(find.get().getEntries())
+        assertThat(find.get().getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(Reservation::getName, Reservation::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 예약_엔트리_상태를_수정한다() {
         // given
-        Reservation saved = reservationRepository.save(
+        ReservationSlot saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
 
         // when
-        saved.cancelEntry(reservedEntryId(saved));
+        saved.cancelReservation(reservedReservationId(saved));
         reservationRepository.save(saved);
 
         // then
-        Reservation find = reservationRepository.findById(saved.getId()).orElseThrow();
-        assertThat(find.getEntries())
+        ReservationSlot find = reservationRepository.findById(saved.getId()).orElseThrow();
+        assertThat(find.getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getStatus)
+                .extracting(Reservation::getStatus)
                 .isEqualTo(ReservationStatus.DELETED);
     }
 
     @Test
     void 날짜_테마_시간으로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
-        Reservation saved = reservationRepository.save(
+        ReservationSlot saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
         ReservationCondition condition = new ReservationCondition(saved.getDate(), theme.getId(), reservationTime.getId());
 
         // when
-        Optional<Reservation> find = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition);
+        Optional<ReservationSlot> find = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition);
 
         // then
         assertThat(find).isPresent();
-        assertThat(find.get().getEntries())
+        assertThat(find.get().getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(Reservation::getName, Reservation::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 예약_엔트리_ID로_예약을_조회하면_해당_예약의_모든_엔트리를_반환한다() {
         // given
-        Reservation saved = reservationRepository.save(
+        ReservationSlot saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
 
         // when
-        Optional<Reservation> find = reservationRepository.findByEntryIdForUpdate(reservedEntryId(saved));
+        Optional<ReservationSlot> find = reservationRepository.findByReservationIdForUpdate(reservedReservationId(saved));
 
         // then
         assertThat(find).isPresent();
         assertThat(find.get().getId()).isEqualTo(saved.getId());
-        assertThat(find.get().getEntries())
+        assertThat(find.get().getReservations())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(Reservation::getName, Reservation::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
-    private long reservedEntryId(Reservation reservation) {
-        return reservation.getEntries()
+    private long reservedReservationId(ReservationSlot slot) {
+        return slot.getReservations()
                 .stream()
-                .filter(ReservationEntry::isReserved)
+                .filter(Reservation::isReserved)
                 .findFirst()
                 .orElseThrow()
                 .getId();

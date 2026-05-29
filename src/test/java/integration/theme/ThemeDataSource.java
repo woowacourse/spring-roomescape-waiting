@@ -14,8 +14,8 @@ public class ThemeDataSource {
 
     public void clearTable() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        jdbcTemplate.execute("TRUNCATE TABLE reservation_entry");
         jdbcTemplate.execute("TRUNCATE TABLE reservation");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation_slot");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time");
         jdbcTemplate.execute("TRUNCATE TABLE theme");
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
@@ -24,15 +24,15 @@ public class ThemeDataSource {
     public void clearId() {
         jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE reservation_slot ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE reservation_entry ALTER COLUMN id RESTART WITH 1");
     }
 
     public void insertReservation(String name, LocalDate date, Long themeId, Long timeId) {
-        jdbcTemplate.update("INSERT INTO reservation (date, theme_id, time_id) VALUES (?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation_slot (date, theme_id, time_id) VALUES (?, ?, ?)",
                 date, themeId, timeId);
-        Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-        insertReservationEntry(name, reservationId);
+        Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_slot", Long.class);
+        insertReservation(name, reservationId);
     }
 
     public void insertThemesByCount(int count) {
@@ -51,16 +51,16 @@ public class ThemeDataSource {
 
     public void insertReservationByTheme(long themeId, int reservationCount) {
         for (long timeId = 1L; timeId <= reservationCount; timeId++) {
-            jdbcTemplate.update("INSERT INTO reservation (date, theme_id, time_id) VALUES (?, ?, ?)",
+            jdbcTemplate.update("INSERT INTO reservation_slot (date, theme_id, time_id) VALUES (?, ?, ?)",
                     LocalDate.now(), themeId, timeId);
-            Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
-            insertReservationEntry("바니", reservationId);
+            Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_slot", Long.class);
+            insertReservation("바니", reservationId);
         }
     }
 
-    private void insertReservationEntry(String name, Long reservationId) {
+    private void insertReservation(String name, Long reservationId) {
         jdbcTemplate.update("""
-                        INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+                        INSERT INTO reservation (name, slot_id, status, created_at)
                         VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
                         """,
                 name, reservationId);
