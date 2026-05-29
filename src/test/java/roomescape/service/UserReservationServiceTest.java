@@ -171,7 +171,7 @@ class UserReservationServiceTest {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        given(reservationTimeRepository.findByIdWithLock(2L)).willReturn(Optional.of(ANOTHER_TIME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
@@ -205,7 +205,7 @@ class UserReservationServiceTest {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 99L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeRepository.findById(99L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findByIdWithLock(99L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
@@ -219,7 +219,7 @@ class UserReservationServiceTest {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, PAST_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        given(reservationTimeRepository.findByIdWithLock(2L)).willReturn(Optional.of(ANOTHER_TIME));
 
         assertThrows(
                 PastReservationException.class,
@@ -246,7 +246,7 @@ class UserReservationServiceTest {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
+        given(reservationTimeRepository.findByIdWithLock(2L)).willReturn(Optional.of(ANOTHER_TIME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(true);
 

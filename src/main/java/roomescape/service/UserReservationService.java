@@ -69,6 +69,7 @@ public class UserReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional
     public ReservationResult update(ReservationUpdateCommand command) {
         Reservation reservation = findReservation(command.id());
         validateOwner(reservation, command.name());
@@ -78,7 +79,7 @@ public class UserReservationService {
                 "이미 지난 예약은 변경할 수 없습니다"
         );
 
-        ReservationTime newTime = reservationTimeRepository.findById(command.timeId())
+        ReservationTime newTime = reservationTimeRepository.findByIdWithLock(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 변경 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
