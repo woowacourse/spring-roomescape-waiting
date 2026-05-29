@@ -10,11 +10,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.dao.exception.DataConflictException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.service.exception.ReservationConflictException;
 
 @Repository
 public class ReservationDao {
@@ -103,8 +103,8 @@ public class ReservationDao {
             )).longValue();
             return new Reservation(id, reservation.getName(), reservation.getDate(),
                     reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
-        } catch (DuplicateKeyException duplicateKeyException) {
-            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        } catch (DuplicateKeyException e) {
+            throw new DataConflictException(e);
         }
     }
 
@@ -158,8 +158,8 @@ public class ReservationDao {
             )).longValue();
             return new Reservation(id, reservation.getName(), reservation.getDate(),
                     reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
-        } catch (DuplicateKeyException duplicateKeyException) {
-            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
+        } catch (DuplicateKeyException e) {
+            throw new DataConflictException(e);
         }
     }
 
