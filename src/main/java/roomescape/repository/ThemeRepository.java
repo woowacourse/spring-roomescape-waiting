@@ -15,8 +15,9 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import roomescape.exception.DatabaseException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.KeyGenerationException;
 
 @Repository
 @RequiredArgsConstructor
@@ -129,7 +130,7 @@ public class ThemeRepository {
         final Number generatedKey = keyHolder.getKey();
 
         if (generatedKey == null) {
-            throw new KeyGenerationException(ErrorCode.INTERNAL_SERVER_ERROR);
+            throw new DatabaseException(ErrorCode.DATA_CREATION_FAILURE);
         }
 
         return generatedKey.longValue();

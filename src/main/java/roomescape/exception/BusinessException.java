@@ -1,12 +1,8 @@
 package roomescape.exception;
 
-import lombok.Getter;
-
-@Getter
-public class BusinessException extends RuntimeException {
-    private final ErrorCode errorCode;
+public class BusinessException extends RoomEscapeException {
 
     public BusinessException(final ErrorCode errorCode) {
-        this.errorCode = errorCode;
+        super(errorCode);
     }
 }

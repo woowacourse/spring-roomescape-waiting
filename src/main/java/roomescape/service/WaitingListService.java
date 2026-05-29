@@ -10,6 +10,7 @@ import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
+import roomescape.exception.DatabaseException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -64,7 +65,7 @@ public class WaitingListService {
             int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
         } catch (DataAccessException e) {
-            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+            throw new DatabaseException(ErrorCode.UNIQUE_CONSTRAINT_VIOLATION);
         }
     }
 

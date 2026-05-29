@@ -26,6 +26,10 @@ public enum ErrorCode {
     TIME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 시간대에 잔여 예약이 존재합니다."),
     THEME_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 테마에 잔여 예약이 존재합니다."),
 
+    // DB 에러
+    DATA_CREATION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 생성에 실패했습니다."),
+    UNIQUE_CONSTRAINT_VIOLATION(HttpStatus.CONFLICT, "중복된 데이터가 존재합니다."),
+
     // 검증 에러
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다."),
 

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(BusinessException e) {
+    @ExceptionHandler(RoomEscapeException.class)
+    public ResponseEntity<ErrorResponse> handleRoomEscapeException(RoomEscapeException e) {
         final ErrorCode errorCode = e.getErrorCode();
         final ErrorResponse response = ErrorResponse.from(errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
