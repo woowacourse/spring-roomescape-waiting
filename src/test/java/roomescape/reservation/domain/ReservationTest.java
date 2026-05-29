@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,7 +27,7 @@ class ReservationTest {
         // then
         assertThat(reservation.getName()).isEqualTo(name);
         assertThat(reservation.getDate()).isEqualTo(date);
-        assertThat(reservation.getTime()).isEqualTo(reservationTime);
+        assertThat(reservation.getReservationTime()).isEqualTo(reservationTime);
     }
 
     @Test
@@ -44,6 +43,6 @@ class ReservationTest {
         assertThat(reservation.getId()).isEqualTo(1L);
         assertThat(reservation.getName()).isEqualTo("제임스");
         assertThat(reservation.getDate()).isEqualTo(date);
-        assertThat(reservation.getTime()).isEqualTo(reservationTime);
+        assertThat(reservation.getReservationTime()).isEqualTo(reservationTime);
     }
 }

@@ -325,14 +325,14 @@ class JdbcReservationRepositoryTest {
         //when & then
         assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
                 saved.getDate(),
-                saved.getTime().getId(),
+                saved.getReservationTime().getId(),
                 saved.getTheme().getId(),
                 saved.getId() + 1
         )).isTrue();
 
         assertThat(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
                 saved.getDate(),
-                saved.getTime().getId(),
+                saved.getReservationTime().getId(),
                 saved.getTheme().getId(),
                 saved.getId()
         )).isFalse();
@@ -386,7 +386,7 @@ class JdbcReservationRepositoryTest {
         //when
         Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeId(
                 saved.getDate(),
-                saved.getTime().getId(),
+                saved.getReservationTime().getId(),
                 saved.getTheme().getId()
         );
 

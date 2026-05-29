@@ -60,7 +60,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
             ps.setDate(2, Date.valueOf(reservation.getDate()));
-            ps.setLong(3, reservation.getTime().getId());
+            ps.setLong(3, reservation.getReservationTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
             return ps;
         }, keyHolder);
@@ -239,7 +239,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 sql,
                 reservation.getName(),
                 reservation.getDate(),
-                reservation.getTime().getId(),
+                reservation.getReservationTime().getId(),
                 reservation.getTheme().getId(),
                 reservation.getId()
         );

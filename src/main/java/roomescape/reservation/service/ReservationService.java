@@ -111,7 +111,7 @@ public class ReservationService {
                                 reservation.getId(),
                                 reservation.getName(),
                                 reservation.getDate(),
-                                reservation.getTime(),
+                                reservation.getReservationTime(),
                                 reservation.getTheme(),
                                 "reserved",
                                 0L
@@ -170,24 +170,24 @@ public class ReservationService {
 
         validateExpiry(
                 original.getDate(),
-                original.getTime().getStartAt()
+                original.getReservationTime().getStartAt()
         );
 
         Reservation updated = updateField(command, original);
 
         validateExpiry(
                 updated.getDate(),
-                updated.getTime().getStartAt()
+                updated.getReservationTime().getStartAt()
         );
 
         if (original.getDate().equals(updated.getDate())
-                && original.getTime().equals(updated.getTime())) {
+                && original.getReservationTime().equals(updated.getReservationTime())) {
             return;
         }
 
         if (reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
                 updated.getDate(),
-                updated.getTime().getId(),
+                updated.getReservationTime().getId(),
                 updated.getTheme().getId(),
                 updated.getId()
         )) {
@@ -196,7 +196,7 @@ public class ReservationService {
 
         if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
                 updated.getDate(),
-                updated.getTime().getId(),
+                updated.getReservationTime().getId(),
                 updated.getTheme().getId()
         )) {
             throw new ReservationSlotHasWaitingException();
@@ -206,7 +206,7 @@ public class ReservationService {
             reservationRepository.update(updated);
 
             reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
-                    original.getDate(), original.getTime().getId(), original.getTheme().getId()
+                    original.getDate(), original.getReservationTime().getId(), original.getTheme().getId()
             ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateReservationException();
@@ -264,7 +264,7 @@ public class ReservationService {
         }
 
         reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+                reservation.getDate(), reservation.getReservationTime().getId(), reservation.getTheme().getId()
         ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
     }
 
@@ -273,7 +273,7 @@ public class ReservationService {
 
         validateExpiry(
                 reservation.getDate(),
-                reservation.getTime().getStartAt()
+                reservation.getReservationTime().getStartAt()
         );
     }
 

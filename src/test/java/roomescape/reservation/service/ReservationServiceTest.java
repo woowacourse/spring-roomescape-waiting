@@ -340,7 +340,7 @@ class ReservationServiceTest {
                 reservation.getId().equals(1L)
                         && reservation.getName().equals("브라운")
                         && reservation.getDate().equals(updatedDate)
-                        && reservation.getTime().equals(updatedTime)
+                        && reservation.getReservationTime().equals(updatedTime)
                         && reservation.getTheme().equals(theme)
         ));
         verify(reservationWaitingRepository).findFirstByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L);
@@ -348,7 +348,7 @@ class ReservationServiceTest {
         verify(reservationRepository).save(argThat(reservation ->
                 reservation.getName().equals("포비")
                         && reservation.getDate().equals(originalDate)
-                        && reservation.getTime().equals(originalTime)
+                        && reservation.getReservationTime().equals(originalTime)
                         && reservation.getTheme().equals(theme)
         ));
     }
@@ -658,7 +658,7 @@ class ReservationServiceTest {
         verify(reservationRepository).save(argThat(reservation ->
                 reservation.getName().equals("포비")
                         && reservation.getDate().equals(date)
-                        && reservation.getTime().equals(time)
+                        && reservation.getReservationTime().equals(time)
                         && reservation.getTheme().equals(theme)
         ));
     }
