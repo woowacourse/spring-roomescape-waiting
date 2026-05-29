@@ -1,5 +1,8 @@
 package roomescape.reservation.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,10 +13,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -100,6 +99,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeIdExcludingId(LocalDate date, Long timeId, Long themeId, Long id) {
+        String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ? and id != ?";
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId, id);
         return count != null && count > 0;
     }
 

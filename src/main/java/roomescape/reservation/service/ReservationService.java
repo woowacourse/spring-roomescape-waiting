@@ -81,8 +81,8 @@ public class ReservationService {
         if (reservation.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
         }
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
-                reservation.getTheme().getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(request.date(), request.timeId(),
+                reservation.getTheme().getId(), id)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
         reservationRepository.update(id, request.date(), request.timeId());
