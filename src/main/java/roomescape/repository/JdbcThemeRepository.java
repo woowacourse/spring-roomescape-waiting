@@ -78,22 +78,22 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public boolean existsById(Long id) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM theme WHERE id = ?",
-                Integer.class,
+        Boolean exists = jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE id = ?)",
+                Boolean.class,
                 id
         );
-        return count != null && count > 0;
+        return Boolean.TRUE.equals(exists);
     }
 
     @Override
     public boolean existsByName(String name) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM theme WHERE name = ?",
-                Integer.class,
+        Boolean exists = jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM theme WHERE name = ?)",
+                Boolean.class,
                 name
         );
-        return count != null && count > 0;
+        return Boolean.TRUE.equals(exists);
     }
 
     @Override
