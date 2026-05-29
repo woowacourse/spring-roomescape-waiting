@@ -17,7 +17,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @JdbcTest
-public class ReservationWaitingUpdatingDaoTest {
+public class ReservationWaitingDaoTest {
 
     private final static ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
     private final static Theme theme = new Theme(1L, "테스트", "설명", "url");
@@ -76,11 +76,11 @@ public class ReservationWaitingUpdatingDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
+    private ReservationWaitingDao reservationWaitingDao;
 
     @BeforeEach
     void setUp() {
-        this.reservationWaitingUpdatingDao = new ReservationWaitingUpdatingDao(jdbcTemplate);
+        this.reservationWaitingDao = new ReservationWaitingDao(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation_time");
@@ -91,24 +91,49 @@ public class ReservationWaitingUpdatingDaoTest {
 
         jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
         jdbcTemplate.update("insert into theme (name, description, url) values ('테스트', '설명', 'url')");
+        jdbcTemplate.update("insert into waiting (name, date, time_id, theme_id, created_at) values ('테스트', '2027-05-27', 1, 1, '2026-05-15 10:30:00')");
+    }
+
+    @Test
+    void 예약_대기가_제대로_존재하는_지_조회한다() {
+        assertThat(reservationWaitingDao.isExistByNameAndDateAndTimeIdAndThemeId("테스트", LocalDate.parse("2027-05-27"), 1L, 1L)).isTrue();
+        assertThat(reservationWaitingDao.isExistByNameAndDateAndTimeIdAndThemeId("테스트", LocalDate.parse("2027-05-26"), 1L, 1L)).isFalse();
+    }
+
+    @Test
+    void 예약_대기가_id로_정상_조회한다() {
+        assertThat(reservationWaitingDao.findReservationWaitingById(1).isPresent()).isTrue();
+        assertThat(reservationWaitingDao.findReservationWaitingById(1).get().getName()).isEqualTo("테스트");
+    }
+
+    @Test
+    void 예약_대기_전체_조회가_정상_조회한다() {
+        assertThat(reservationWaitingDao.findAllReservationWaiting().size()).isEqualTo(1);
+    }
+
+    @Test
+    void 예약_대기가_이름으로_정상_조회한다() {
+        assertThat(reservationWaitingDao.findAllByName("테스트").size()).isEqualTo(1);
+        assertThat(reservationWaitingDao.findAllByName("테스트").getFirst().getCreatedAt())
+                .isEqualTo(LocalDateTime.parse("2026-05-15T10:30:00"));
     }
 
     @Test
     void 예약_대기를_제대로_생성한다() {
-        ReservationWaiting reservationWaiting = ReservationWaiting.create("테스트", LocalDate.parse("2027-05-27"), reservationTime, theme);
+        ReservationWaiting reservationWaiting = ReservationWaiting.create("새사람", LocalDate.parse("2027-05-28"), reservationTime, theme);
 
-        reservationWaitingUpdatingDao.create(reservationWaiting);
+        reservationWaitingDao.create(reservationWaiting);
 
-        Optional<ReservationWaiting> reservationWaitingOptional = jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL + "where w.name = ?", reservationWaitingRowMapper, "테스트")
-                                                                                                                .stream()
-                                                                                                                .findFirst();
+        Optional<ReservationWaiting> reservationWaitingOptional = jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL + "where w.name = ?", reservationWaitingRowMapper, "새사람")
+                .stream()
+                .findFirst();
         assertThat(reservationWaitingOptional.isPresent()).isTrue();
-        assertThat(reservationWaitingOptional.get().getDate()).isEqualTo(LocalDate.parse("2027-05-27"));
+        assertThat(reservationWaitingOptional.get().getDate()).isEqualTo(LocalDate.parse("2027-05-28"));
     }
 
     @Test
     void 예약_대기를_제대로_삭제한다() {
-        jdbcTemplate.update("insert into waiting (name, date, time_id, theme_id, created_at) values ('테스트', '2027-05-27', 1, 1, '2026-05-15 10:30:00')");
+        // @BeforeEach에서 이미 id=1 행이 삽입되어 있음
 
         String sql = """
             SELECT EXISTS (
@@ -120,8 +145,8 @@ public class ReservationWaitingUpdatingDaoTest {
 
         assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isTrue();
 
-        reservationWaitingUpdatingDao.delete(1L);
+        reservationWaitingDao.delete(1L);
 
-         assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isFalse();
+        assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isFalse();
     }
 }

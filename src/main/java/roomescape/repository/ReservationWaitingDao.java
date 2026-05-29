@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -7,17 +8,18 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class ReservationWaitingQueryingDao {
-
+public class ReservationWaitingDao {
     private final JdbcTemplate jdbcTemplate;
 
-    public ReservationWaitingQueryingDao(JdbcTemplate jdbcTemplate) {
+    public ReservationWaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -51,7 +53,7 @@ public class ReservationWaitingQueryingDao {
     private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
-                resultSet.getObject("start_at", LocalTime.class)
+                resultSet.getObject("time_start_at", LocalTime.class)
         );
 
         Theme theme = new Theme(
@@ -100,5 +102,27 @@ public class ReservationWaitingQueryingDao {
     public List<ReservationWaiting> findAllByName(String name) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.name = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, name);
+    }
+
+    public Long create(ReservationWaiting reservationWaiting) {
+        String sql = "insert into waiting(name, date, time_id, theme_id, created_at) values(?, ?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, reservationWaiting.getName());
+            ps.setObject(2, reservationWaiting.getDate());
+            ps.setLong(3, reservationWaiting.getTime().getId());
+            ps.setLong(4, reservationWaiting.getTheme().getId());
+            ps.setObject(5, reservationWaiting.getCreatedAt());
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().longValue();
+    }
+
+    public void delete(Long id) {
+        String sql = "delete from waiting where id = ?";
+        jdbcTemplate.update(sql, id);
     }
 }
