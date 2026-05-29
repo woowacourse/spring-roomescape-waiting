@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
@@ -35,6 +36,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         MultipartFile file = request.file();
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -66,6 +68,7 @@ public class ThemeService {
         return ThemeResponse.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
         if (themeDao.existsByThemeId(id)) {
             throw new AlreadyInUseException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");

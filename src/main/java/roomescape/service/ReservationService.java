@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -46,6 +47,7 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ReservationResponse save(ReservationRequest request) {
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
@@ -67,16 +69,15 @@ public class ReservationService {
         return ReservationResponse.from(saved);
     }
 
+    @Transactional
     public ReservationResponse update(Long id, UserReservationUpdateRequest request) {
         Reservation reservation = getReservation(id);
         ReservationTime time = getReservationTime(request.timeId());
 
+        reservationDao.delete(id);
+
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
-
-        if (status == ReservationStatus.WAITING) {
-            throw new AlreadyExistsException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
-        }
 
         Reservation newReservation = new Reservation(
                 id,
@@ -88,11 +89,12 @@ public class ReservationService {
         );
 
         validateDuplicate(newReservation);
-        reservationDao.update(id, request.date(), request.timeId());
+        reservationDao.save(newReservation);
 
         return ReservationResponse.from(newReservation);
     }
 
+    @Transactional
     public void delete(Long id) {
         reservationDao.delete(id);
     }
