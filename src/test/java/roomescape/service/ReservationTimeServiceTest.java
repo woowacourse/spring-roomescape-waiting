@@ -45,7 +45,7 @@ class ReservationTimeServiceTest {
         ReservationTimeCommand command = new ReservationTimeCommand(startAt);
         given(reservationTimeDao.save(any())).willReturn(saved);
 
-        ReservationTimeResult result = reservationTimeService.save(command);
+        ReservationTimeResult result = reservationTimeService.createReservationTime(command);
 
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.startAt()).isEqualTo(saved.getStartAt());
@@ -56,7 +56,7 @@ class ReservationTimeServiceTest {
         given(reservationTimeDao.existsById(timeId)).willReturn(true);
         given(reservationDao.existsByTimeId(timeId)).willReturn(false);
 
-        reservationTimeService.delete(timeId);
+        reservationTimeService.deleteReservationTime(timeId);
 
         verify(reservationTimeDao).delete(timeId);
     }
@@ -65,7 +65,7 @@ class ReservationTimeServiceTest {
     public void 존재하지_않는_시간을_삭제하면_예외가_발생한다() {
         given(reservationTimeDao.existsById(timeId)).willReturn(false);
 
-        assertThatThrownBy(() -> reservationTimeService.delete(timeId))
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 시간입니다.");
 
@@ -77,7 +77,7 @@ class ReservationTimeServiceTest {
         given(reservationTimeDao.existsById(timeId)).willReturn(true);
         given(reservationDao.existsByTimeId(timeId)).willReturn(true);
 
-        assertThatThrownBy(() -> reservationTimeService.delete(timeId))
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeId))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
 

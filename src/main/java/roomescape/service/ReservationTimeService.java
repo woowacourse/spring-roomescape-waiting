@@ -20,7 +20,7 @@ public class ReservationTimeService {
         this.reservationDao = reservationDao;
     }
 
-    public List<ReservationTimeResult> findAll() {
+    public List<ReservationTimeResult> findReservationTimes() {
         List<ReservationTime> times = reservationTimeDao.findAll();
 
         return times.stream()
@@ -28,7 +28,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public ReservationTimeResult save(ReservationTimeCommand command) {
+    public ReservationTimeResult createReservationTime(ReservationTimeCommand command) {
         ReservationTime time = new ReservationTime(
                 command.startAt()
         );
@@ -38,7 +38,7 @@ public class ReservationTimeService {
         return ReservationTimeResult.from(saved);
     }
 
-    public void delete(Long id) {
+    public void deleteReservationTime(Long id) {
         if (!reservationTimeDao.existsById(id)) {
             throw new NotFoundException("존재하지 않는 시간입니다.");
         }
