@@ -6,9 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -68,22 +66,41 @@ public class ReservationService {
     }
 
     public ReservationResult registerReservation(ReservationCommand command) {
-        Reservation reservation = convertToReservation(null, command);
+        ReservationTime time = reservationTimeDao.findById(command.timeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+
+        Theme theme = themeDao.findThemeById(command.themeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+
+        Reservation reservation = new Reservation(UserName.parse(command.name()), command.date(), time, theme);
+
+        reservation.verifyBookable(LocalDateTime.now(clock));
+        validateDuplicate(command.date(), time, theme);
 
         Reservation saved = reservationDao.save(reservation);
 
         return ReservationResult.from(saved);
     }
 
+    private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
+        if (reservationDao.existsBy(date, theme, time)) {
+            throw new ConflictException("이미 존재하는 예약 건입니다.");
+        }
+    }
+
     public ReservationResult changeDateTime(Long id, ReservationCommand command) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
 
-        if (!command.name().equals(origin.getName().value())) {
-            throw new ForbiddenException("다른 사람의 예약은 변경할 수 없습니다.");
-        }
+        ReservationTime newTime = reservationTimeDao.findById(command.timeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        Reservation modified = convertToReservation(id, command);
+        Reservation modified = origin.change(
+                UserName.parse(command.name()),
+                command.date(),
+                newTime,
+                LocalDateTime.now(clock)
+        );
 
         boolean isSuccessful = reservationDao.update(modified);
 
@@ -94,43 +111,6 @@ public class ReservationService {
         return ReservationResult.from(modified);
     }
 
-    private Reservation convertToReservation(Long id, ReservationCommand command) {
-        ReservationTime time = reservationTimeDao.findById(command.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
-
-        Theme theme = themeDao.findThemeById(command.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-
-        validateAvailability(command.date(), time, theme);
-
-        return new Reservation(
-                id,
-                UserName.parse(command.name()),
-                command.date(),
-                time,
-                theme
-        );
-    }
-
-    private void validateAvailability(LocalDate date, ReservationTime time, Theme theme) {
-        validatePastTime(date, time);
-        validateDuplicate(date, time, theme);
-    }
-
-    private void validatePastTime(LocalDate date, ReservationTime time) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime requestDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (requestDateTime.isBefore(now)) {
-            throw new UnprocessableEntityException("이미 지난 시간입니다.");
-        }
-    }
-
-    private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationDao.existsBy(date, theme, time)) {
-            throw new ConflictException("이미 존재하는 예약 건입니다.");
-        }
-    }
-
     public void deleteReservation(Long id) {
         reservationDao.delete(id);
     }
@@ -139,11 +119,7 @@ public class ReservationService {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
-        if (!userName.equals(origin.getName().value())) {
-            throw new ForbiddenException("다른 사람의 예약은 삭제할 수 없습니다.");
-        }
-
-        validatePastTime(origin.getDate(), origin.getTime());
+        origin.cancel(UserName.parse(userName), LocalDateTime.now(clock));
 
         reservationDao.delete(id);
     }

@@ -39,7 +39,8 @@ public class ReservationDao {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getTheme());
+                reservation.getTheme()
+        );
     }
 
     public Optional<Reservation> findById(Long id) {

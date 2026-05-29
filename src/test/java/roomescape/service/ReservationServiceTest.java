@@ -75,7 +75,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("과거의 시점으로 예약을 하면 예외가 발생한다.")
-    void 과거_예약_생성_예외_테스트() {
+    void 지난_시간_예약_생성_예외_테스트() {
         LocalDate date = LocalDate.parse(TODAY);
         Long timeId = 1L;
         ReservationCommand command = new ReservationCommand(
@@ -87,7 +87,24 @@ public class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("이미 지난 시간입니다.");
+                .hasMessageContaining("이미 지난 시간으로 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("과거의 시점으로 예약을 하면 예외가 발생한다.")
+    void 과거_예약_생성_예외_테스트() {
+        LocalDate date = LocalDate.parse(TODAY).minusDays(1);
+        Long timeId = 1L;
+        ReservationCommand command = new ReservationCommand(
+                name,
+                date,
+                timeId,
+                themeId
+        );
+
+        assertThatThrownBy(() -> reservationService.registerReservation(command))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("과거 날짜로는 예약할 수 없습니다.");
     }
 
     @Test
