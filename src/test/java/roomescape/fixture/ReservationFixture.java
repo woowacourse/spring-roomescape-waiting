@@ -1,10 +1,10 @@
 package roomescape.fixture;
 
 import java.time.LocalDate;
-import roomescape.domain.reservation.entity.Reservation;
-import roomescape.domain.reservation.vo.ReserverName;
-import roomescape.domain.theme.entity.Theme;
-import roomescape.domain.time.entity.Time;
+import roomescape.feature.reservation.domain.Reservation;
+import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.time.domain.Time;
 
 public enum ReservationFixture {
     FUTURE("예약자", LocalDate.of(2099, 5, 1)),

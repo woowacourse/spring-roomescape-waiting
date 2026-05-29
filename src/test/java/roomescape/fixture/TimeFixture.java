@@ -1,7 +1,7 @@
 package roomescape.fixture;
 
 import java.time.LocalTime;
-import roomescape.domain.time.entity.Time;
+import roomescape.feature.time.domain.Time;
 
 public enum TimeFixture {
     VALID_10_00(LocalTime.of(10, 0)),

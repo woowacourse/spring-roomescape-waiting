@@ -1,6 +1,6 @@
 package roomescape.fixture;
 
-import roomescape.domain.theme.entity.Theme;
+import roomescape.feature.theme.domain.Theme;
 
 public enum ThemeFixture {
     VALID("테마 이름", "테마 설명", "https://example.com/theme.png"),

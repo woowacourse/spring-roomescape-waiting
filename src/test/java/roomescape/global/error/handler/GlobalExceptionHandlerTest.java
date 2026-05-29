@@ -19,7 +19,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import roomescape.domain.reservation.error.type.ReservationErrorType;
+import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
