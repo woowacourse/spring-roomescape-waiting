@@ -43,12 +43,25 @@ class ReservationTimeServiceTest {
     @Test
     public void 예약_시간_생성_정상_테스트() {
         ReservationTimeCommand command = new ReservationTimeCommand(startAt);
+        given(reservationTimeDao.existsByStartAt(startAt)).willReturn(false);
         given(reservationTimeDao.save(any())).willReturn(saved);
 
         ReservationTimeResult result = reservationTimeService.createReservationTime(command);
 
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.startAt()).isEqualTo(saved.getStartAt());
+    }
+
+    @Test
+    public void 중복된_시간_생성_시_예외_테스트() {
+        ReservationTimeCommand command = new ReservationTimeCommand(startAt);
+        given(reservationTimeDao.existsByStartAt(startAt)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationTimeService.createReservationTime(command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 존재하는 예약 시간입니다.");
+
+        verify(reservationTimeDao, never()).save(any());
     }
 
     @Test

@@ -29,6 +29,10 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResult createReservationTime(ReservationTimeCommand command) {
+        if (reservationTimeDao.existsByStartAt(command.startAt())) {
+            throw new ConflictException("이미 존재하는 예약 시간입니다.");
+        }
+
         ReservationTime time = new ReservationTime(
                 command.startAt()
         );
