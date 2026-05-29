@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.dto.TimeQueryResult;
@@ -47,6 +48,10 @@ public class ThemeService {
     }
 
     public ThemeResult createTheme(ThemeCommand command) {
+        if (themeDao.existsByName(command.name())) {
+            throw new ConflictException("이미 존재하는 테마입니다.");
+        }
+
         MultipartFile file = command.file();
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         String filePath = uploadDir + fileName;

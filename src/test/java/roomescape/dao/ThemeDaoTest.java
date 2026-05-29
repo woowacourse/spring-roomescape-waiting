@@ -38,6 +38,22 @@ class ThemeDaoTest {
     }
 
     @Test
+    @DisplayName("이미 존재하는 테마 이름이면 true를 반환한다.")
+    void 이미_존재하는_테마_이름_확인_테스트() {
+        boolean result = themeDao.existsByName("우테코 공포물");
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 이름이면 false를 반환한다.")
+    void 존재하지_않는_테마_이름_확인_테스트() {
+        boolean result = themeDao.existsByName("존재하지 않는 테마");
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
     @DisplayName("최근 7일간 예약이 많은 순서대로 테마를 조회한다.")
     void 최근_7일간_예약이_많은_테마_조회_테스트() {
         List<String> expectedNames = List.of(

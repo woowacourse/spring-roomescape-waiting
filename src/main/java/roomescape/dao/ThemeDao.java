@@ -91,6 +91,20 @@ public class ThemeDao {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }
 
+    public boolean existsByName(String name) {
+        Boolean result = jdbcTemplate.queryForObject("""
+                        SELECT EXISTS(
+                            SELECT 1
+                            FROM theme
+                            WHERE name = ?
+                        )
+                        """,
+                Boolean.class,
+                name
+        );
+        return Boolean.TRUE.equals(result);
+    }
+
     public List<TimeQueryResult> findTimeStatusBy(Long id, LocalDate date) {
         return jdbcTemplate.query(
                 """
