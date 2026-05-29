@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = "/reservation-waiting-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class AdminTimeTest {
     @Test
-    @DisplayName("테마를 생성하는지에 대한 테스트")
+    @DisplayName("예약 시간을 생성하는지에 대한 테스트")
     void createTheme() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "11:00");
