@@ -171,7 +171,7 @@ public class ReservationDao {
     }
 
     @Transactional
-    public Reservation update(Long id, LocalDate date, Long timeId) {
+    public void update(Long id, LocalDate date, Long timeId) {
         jdbcTemplate.update(
                 """
                             UPDATE reservation
@@ -182,7 +182,6 @@ public class ReservationDao {
                 timeId,
                 id
         );
-        return findById(id);
     }
 
     @Transactional

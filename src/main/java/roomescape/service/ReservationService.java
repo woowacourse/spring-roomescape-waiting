@@ -76,7 +76,10 @@ public class ReservationService {
             throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
         }
 
-        Reservation newReservation = reservationDao.update(id, request.date(), request.timeId());
+        reservationDao.update(id, request.date(), request.timeId());
+
+        Reservation newReservation = reservationDao.findById(id);
+
         return ReservationResponse.from(newReservation);
     }
 

@@ -124,7 +124,9 @@ class ReservationDaoTest {
         LocalDate newDate = LocalDate.now().plusDays(5);
         Long newTimeId = 2L;
 
-        Reservation updated = reservationDao.update(1L, newDate, newTimeId);
+        reservationDao.update(1L, newDate, newTimeId);
+
+        Reservation updated = reservationDao.findById(1L);
 
         assertThat(updated.getDate()).isEqualTo(newDate);
         assertThat(updated.getTime().getId()).isEqualTo(newTimeId);
