@@ -17,9 +17,9 @@ public class Waiting {
         return new Waiting(id, name, slot, createdAt);
     }
 
-    public static Waiting create(String name, Slot slot, LocalDateTime createdAt) {
-
-        return new Waiting(null, name, slot, createdAt);
+    public static Waiting create(String name, Slot slot, LocalDateTime now) {
+        slot.validateAvailableTime(now);
+        return new Waiting(null, name, slot, now);
     }
 
     public void validateCancelable(LocalDateTime now) {

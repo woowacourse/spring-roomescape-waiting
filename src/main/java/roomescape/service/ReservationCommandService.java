@@ -80,6 +80,6 @@ public class ReservationCommandService {
             throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
         }
 
-        return reservationDao.updateDateAndTime(current.withSlot(slot));
+        return reservationDao.updateDateAndTime(current.withSlot(slot, LocalDateTime.now(clock)));
     }
 }

@@ -28,7 +28,8 @@ public class Reservation {
         return this.username.equals(name);
     }
 
-    public Reservation withSlot(Slot slot) {
+    public Reservation withSlot(Slot slot, LocalDateTime now) {
+        slot.validateAvailableTime(now);
         return new Reservation(this.id, this.username, slot);
     }
 
