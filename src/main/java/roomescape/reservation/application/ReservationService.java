@@ -1,5 +1,9 @@
 package roomescape.reservation.application;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
@@ -14,11 +18,6 @@ import roomescape.reservation.infrastructure.projection.ReservationDetailProject
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -28,8 +27,9 @@ public class ReservationService {
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
-        validateReservationAlreadyExistsNot(scheduleId);
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(),
+                body.themeId());
+        validateScheduleAvailableForReservation(scheduleId);
         Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
 
         return ReservationSaveResponse.from(reservation);
@@ -40,7 +40,8 @@ public class ReservationService {
     }
 
     public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> {});
+        deleteInternal(reservationId, oldReservation -> {
+        });
     }
 
     public void deleteByIdForUser(long reservationId, long memberId) {
@@ -66,7 +67,8 @@ public class ReservationService {
     }
 
     public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {});
+        return updateInternal(body, reservationId, oldReservation -> {
+        });
     }
 
     private static void validateReservationOwner(
@@ -117,7 +119,8 @@ public class ReservationService {
 
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId, oldReservation.getThemeId());
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId,
+                oldReservation.getThemeId());
         scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
         validateDuplicatedReservationNot(reservationId, scheduleId);
 
@@ -129,7 +132,8 @@ public class ReservationService {
 
     private Reservation getNewReservationOrThrow(long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
+                .orElseThrow(
+                        () -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
     }
 
     private ReservationDetailProjection getOldReservationDetailOrThrow(long reservationId) {
@@ -143,9 +147,10 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationAlreadyExistsNot(long scheduleId) {
-        if (reservationRepository.existsByScheduleId(scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+    private void validateScheduleAvailableForReservation(long scheduleId) {
+        if (reservationRepository.existsByScheduleId(scheduleId)
+                || waitingRepository.existsByScheduleId(scheduleId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, scheduleId);
         }
     }
 
