@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -30,6 +32,8 @@ import roomescape.service.exception.ThemeNotFoundException;
 class ReservationTimeServiceTest {
 
     private static final LocalTime VALID_START_AT = LocalTime.of(10, 0);
+    private static final ReservationTime VALID_TIME = new ReservationTime(1L, VALID_START_AT);
+    private static final Theme VALID_THEME = new Theme(1L, "테마", "설명", "url");
 
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
@@ -68,7 +72,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("존재하지 않는 시간을 삭제하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_시간_삭제시_예외가_발생한다() {
-        given(reservationTimeRepository.existsById(1L)).willReturn(false);
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
@@ -79,7 +83,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제하면 ReservationTimeInUseException이 발생한다")
     void 예약이_존재하는_시간_삭제시_예외가_발생한다() {
-        given(reservationTimeRepository.existsById(1L)).willReturn(true);
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByTimeId(1L)).willReturn(true);
 
         assertThrows(
@@ -91,7 +95,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 없는 시간은 정상적으로 삭제된다")
     void 예약이_없는_시간은_정상_삭제된다() {
-        given(reservationTimeRepository.existsById(1L)).willReturn(true);
+        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByTimeId(1L)).willReturn(false);
 
         assertDoesNotThrow(() -> reservationTimeService.delete(1L));

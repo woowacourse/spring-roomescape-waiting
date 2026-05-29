@@ -80,8 +80,9 @@ public class AdminReservationService {
         }
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!reservationRepository.existsById(id)) {
+        if (reservationRepository.findByIdWithLock(id).isEmpty()) {
             log.warn("존재하지 않는 예약 삭제 시도: reservationId={}", id);
             throw new ReservationNotFoundException("존재하지 않는 예약입니다: reservationId=" + id);
         }

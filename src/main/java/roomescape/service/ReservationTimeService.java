@@ -53,8 +53,9 @@ public class ReservationTimeService {
         return ReservationTimeResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!reservationTimeRepository.existsById(id)) {
+        if (reservationTimeRepository.findByIdWithLock(id).isEmpty()) {
             log.warn("존재하지 않는 시간 삭제 시도: timeId={}", id);
             throw new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + id);
         }

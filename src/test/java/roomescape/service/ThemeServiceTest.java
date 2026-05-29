@@ -6,12 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -24,11 +28,8 @@ import roomescape.service.exception.ThemeNotFoundException;
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    private static final ThemeCreateCommand VALID_COMMAND = new ThemeCreateCommand(
-            "무인도 탈출",
-            "갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!",
-            "https://picsum.photos/seed/roomescape1/800/600.jpg"
-    );
+    private static final ReservationTime VALID_TIME = new ReservationTime(1L, LocalTime.of(10, 0));
+    private static final Theme VALID_THEME = new Theme(1L, "테마", "설명", "url");
 
     @Mock
     private ThemeRepository themeRepository;
@@ -38,33 +39,34 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Test
-    @DisplayName("같은 이름의 테마가 이미 있으면 ThemeConflictException이 발생한다")
-    void 같은_이름_테마가_있으면_예외가_발생한다() {
-        given(themeRepository.existsByName(VALID_COMMAND.name())).willReturn(true);
+    @DisplayName("같은 이름의 테마가 이미 등록되어 있으면 ThemeConflictException이 발생한다")
+    void 같은_이름의_테마가_이미_있으면_예외가_발생한다() {
+        ThemeCreateCommand command = new ThemeCreateCommand("테마", "설명", "url");
+        given(themeRepository.existsByName("테마")).willReturn(true);
 
         assertThrows(
                 ThemeConflictException.class,
-                () -> themeService.create(VALID_COMMAND)
+                () -> themeService.create(command)
         );
     }
 
     @Test
     @DisplayName("같은 이름의 테마가 없으면 정상적으로 테마를 생성한다")
-    void 같은_이름_테마가_없으면_정상_생성한다() {
-        Theme saved = new Theme(
-                1L, VALID_COMMAND.name(), VALID_COMMAND.description(), VALID_COMMAND.thumbnailUrl());
-        given(themeRepository.existsByName(VALID_COMMAND.name())).willReturn(false);
-        given(themeRepository.save(any(Theme.class))).willReturn(saved);
+    void 같은_이름의_테마가_없으면_정상_생성한다() {
+        ThemeCreateCommand command = new ThemeCreateCommand("테마", "설명", "url");
+        given(themeRepository.existsByName("테마")).willReturn(false);
+        given(themeRepository.save(any(Theme.class)))
+                .willReturn(new Theme(1L, "테마", "설명", "url"));
 
-        ThemeResult created = themeService.create(VALID_COMMAND);
+        ThemeResult created = themeService.create(command);
 
-        assertThat(created).isEqualTo(ThemeResult.from(saved));
+        assertThat(created).isEqualTo(new ThemeResult(1L, "테마", "설명", "url"));
     }
 
     @Test
     @DisplayName("존재하지 않는 테마를 삭제하면 ThemeNotFoundException이 발생한다")
     void 존재하지_않는_테마_삭제시_예외가_발생한다() {
-        given(themeRepository.existsById(1L)).willReturn(false);
+        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ThemeNotFoundException.class,
@@ -75,7 +77,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 테마를 삭제하면 ThemeInUseException이 발생한다")
     void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
-        given(themeRepository.existsById(1L)).willReturn(true);
+        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByThemeId(1L)).willReturn(true);
 
         assertThrows(
@@ -87,7 +89,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("예약이 없는 테마는 정상적으로 삭제된다")
     void 예약이_없는_테마는_정상_삭제된다() {
-        given(themeRepository.existsById(1L)).willReturn(true);
+        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByThemeId(1L)).willReturn(false);
 
         assertDoesNotThrow(() -> themeService.delete(1L));

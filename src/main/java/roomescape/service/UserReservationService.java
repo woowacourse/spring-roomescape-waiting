@@ -58,6 +58,7 @@ public class UserReservationService {
                 .toList();
     }
 
+    @Transactional
     public void cancel(Long id, String name) {
         Reservation reservation = findReservation(id);
         validateOwner(reservation, name);
@@ -99,7 +100,7 @@ public class UserReservationService {
     }
 
     private Reservation findReservation(Long id) {
-        return reservationRepository.findById(id)
+        return reservationRepository.findByIdWithLock(id)
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 예약 접근 시도: reservationId={}", id);
                     return new ReservationNotFoundException(

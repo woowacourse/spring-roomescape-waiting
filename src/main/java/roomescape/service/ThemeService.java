@@ -40,8 +40,9 @@ public class ThemeService {
         return ThemeResult.from(saved);
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!themeRepository.existsById(id)) {
+        if (themeRepository.findByIdWithLock(id).isEmpty()) {
             throw new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + id);
         }
         if (reservationRepository.existsByThemeId(id)) {

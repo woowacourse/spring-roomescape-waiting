@@ -112,7 +112,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하는 예약은 정상적으로 삭제된다")
     void 존재하는_예약은_정상적으로_삭제된다() {
-        given(reservationRepository.existsById(1L)).willReturn(true);
+        Reservation reservation = new Reservation(1L, "모아", LocalDate.now(), VALID_TIME, VALID_THEME);
+        given(reservationRepository.findByIdWithLock(1L)).willReturn(Optional.of(reservation));
 
         assertDoesNotThrow(() -> reservationService.delete(1L));
     }
@@ -120,7 +121,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하면 ReservationNotFoundException이 발생한다")
     void 존재하지_않는_예약_삭제시_예외가_발생한다() {
-        given(reservationRepository.existsById(1L)).willReturn(false);
+        given(reservationRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationNotFoundException.class,
