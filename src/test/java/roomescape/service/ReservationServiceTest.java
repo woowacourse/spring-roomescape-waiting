@@ -87,7 +87,7 @@ class ReservationServiceTest {
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.save(any())).willReturn(saved);
 
-        ReservationResult result = reservationService.save(command);
+        ReservationResult result = reservationService.reserve(command);
 
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.name()).isEqualTo(saved.getName().value());
@@ -101,7 +101,7 @@ class ReservationServiceTest {
         ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 시간입니다.");
 
@@ -114,7 +114,7 @@ class ReservationServiceTest {
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
 
@@ -127,7 +127,7 @@ class ReservationServiceTest {
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessage("이미 지난 시간입니다.");
 
@@ -141,7 +141,7 @@ class ReservationServiceTest {
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.existsBy(futureDate, theme, time)).willReturn(true);
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 존재하는 예약 건입니다.");
 
@@ -158,7 +158,7 @@ class ReservationServiceTest {
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.update(any())).willReturn(true);
 
-        ReservationResult result = reservationService.updateDateTime(reservationId, command);
+        ReservationResult result = reservationService.changeReservationSlot(reservationId, command);
 
         assertThat(result.id()).isEqualTo(reservationId);
         assertThat(result.name()).isEqualTo(userName);
@@ -171,7 +171,7 @@ class ReservationServiceTest {
         ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
         given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("삭제하려는 예약이 존재하지 않습니다.");
 
@@ -186,7 +186,7 @@ class ReservationServiceTest {
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("다른 사람의 예약은 취소/변경할 수 없습니다.");
 
@@ -199,7 +199,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessage("이미 지난 시간입니다.");
 
@@ -216,7 +216,7 @@ class ReservationServiceTest {
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.update(any())).willReturn(false);
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("다른 사용자가 예약했습니다. 다시 시도해주세요.");
     }
@@ -226,7 +226,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        reservationService.delete(reservationId, userName);
+        reservationService.cancelReservation(reservationId, userName);
 
         verify(reservationDao).delete(reservationId);
     }
@@ -235,7 +235,7 @@ class ReservationServiceTest {
     public void 존재하지_않는_예약을_취소하면_예외가_발생한다() {
         given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("삭제하려는 예약이 존재하지 않습니다.");
 
@@ -248,7 +248,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(otherUser), futureDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("다른 사람의 예약은 취소/변경할 수 없습니다.");
 
@@ -260,7 +260,7 @@ class ReservationServiceTest {
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessage("이미 지난 시간입니다.");
 
@@ -269,7 +269,7 @@ class ReservationServiceTest {
 
     @Test
     public void 관리자_예약_삭제_정상_테스트() {
-        reservationService.delete(reservationId);
+        reservationService.removeReservation(reservationId);
 
         verify(reservationDao).delete(reservationId);
     }

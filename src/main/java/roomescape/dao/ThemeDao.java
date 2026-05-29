@@ -74,8 +74,8 @@ public class ThemeDao {
     public Theme save(Theme theme) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", theme.getName().value());
-        params.put("description", theme.getDescription());
-        params.put("url", theme.getUrl());
+        params.put("description", theme.getDescription().value());
+        params.put("url", theme.getUrl().value());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 

@@ -45,7 +45,7 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    public List<ReservationResult> findAll() {
+    public List<ReservationResult> findReservations() {
         List<Reservation> reservations = reservationDao.findAll();
 
         return reservations.stream()
@@ -53,7 +53,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationDetailResults findAllByUserName(String userName) {
+    public ReservationDetailResults findReservationDetailsByUserName(String userName) {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
 
@@ -65,15 +65,14 @@ public class ReservationService {
         return new ReservationDetailResults(details);
     }
 
-    public ReservationResult save(ReservationCommand command) {
+    public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
-        Reservation saved = reservationDao.save(reservation);
-
-        return ReservationResult.from(saved);
+        Reservation reserved = reservationDao.save(reservation);
+        return ReservationResult.from(reserved);
     }
 
-    public ReservationResult updateDateTime(Long id, ReservationCommand command) {
-        Reservation origin = getReservation(id);
+    public ReservationResult changeReservationSlot(Long id, ReservationCommand command) {
+        Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(command.name());
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
@@ -88,12 +87,8 @@ public class ReservationService {
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
-        ReservationTime time = reservationTimeDao.findTimeById(command.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
-
-        Theme theme = themeDao.findThemeById(command.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-
+        ReservationTime time = getReservationTimeOrThrow(command);
+        Theme theme = getThemeOrThrow(command);
         validateAvailability(command.date(), time, theme);
 
         return new Reservation(
@@ -124,19 +119,29 @@ public class ReservationService {
         }
     }
 
-    public void delete(Long id) {
+    public void removeReservation(Long id) {
         reservationDao.delete(id);
     }
 
-    public void delete(Long id, String userName) {
-        Reservation origin = getReservation(id);
+    public void cancelReservation(Long id, String userName) {
+        Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(userName);
         validatePastTime(origin.getDate(), origin.getTime());
         reservationDao.delete(id);
     }
 
-    private Reservation getReservation(Long id) {
+    private Reservation getReservationOrThrow(Long id) {
         return reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
+    }
+
+    private Theme getThemeOrThrow(ReservationCommand command) {
+        return themeDao.findThemeById(command.themeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private ReservationTime getReservationTimeOrThrow(ReservationCommand command) {
+        return reservationTimeDao.findTimeById(command.timeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
     }
 }
