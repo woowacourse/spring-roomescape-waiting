@@ -16,8 +16,10 @@ public class ReservationWaiting {
     }
 
     public static ReservationWaiting restore(Long id, String name, Reservation reservation) {
-        return ReservationWaiting.builder().
-                id(id).name(name).reservation(reservation)
+        return ReservationWaiting.builder()
+                .id(id)
+                .name(name)
+                .reservation(reservation)
                 .build();
     }
 
