@@ -60,4 +60,3 @@ public class ReservationWaitingControllerTest {
                 .body("[0].turn", equalTo(2));
     }
 }
-
