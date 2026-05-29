@@ -11,6 +11,11 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.Map;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
+
 /**
  * 서비스 정책 검증 인수 테스트
  *
@@ -184,6 +189,88 @@ public class PolicyAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409);
+    }
+
+    // ── 대기 규칙: 대기 신청/취소/조회 ───────────────────────────────────────────
+
+    @Test
+    @DisplayName("[대기] 예약된 슬롯에 새 사용자가 예약하면 대기 예약으로 생성된다.")
+    void 예약된_슬롯에_예약_등록시_대기_예약으로_생성된다() {
+        // theme_slot_id=83 은 Theme 4의 2026-05-30 14:00 슬롯이며 포비가 확정 예약함
+        Map<String, Object> body = Map.of(
+                "name", "새대기",
+                "themeSlotId", 83
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("name", equalTo("새대기"))
+                .body("status", equalTo("PENDING"));
+    }
+
+    @Test
+    @DisplayName("[대기] 같은 사용자가 같은 슬롯에 중복 대기하면 409를 반환한다.")
+    void 같은_사용자가_중복_대기_등록시_409() {
+        // theme_slot_id=83 에 브라운이 이미 PENDING 상태로 대기 중
+        Map<String, Object> body = Map.of(
+                "name", "브라운",
+                "themeSlotId", 83
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(409);
+    }
+
+    @Test
+    @DisplayName("[대기] 대기 예약을 취소하면 내 예약 조회에서 취소 예약으로 조회된다.")
+    void 대기_예약_취소시_내_예약_조회에서_취소_예약으로_조회된다() {
+        Map<String, Object> body = Map.of(
+                "name", "취소대기",
+                "themeSlotId", 83
+        );
+
+        Number reservationId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("PENDING"))
+                .extract()
+                .path("id");
+
+        RestAssured.given().log().all()
+                .when().patch("/reservations/{reservationId}/cancel", reservationId.longValue())
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "취소대기")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservationResponses[0].status", equalTo("CANCELLED"))
+                .body("waitingReservationResponses", empty());
+    }
+
+    @Test
+    @DisplayName("[내 예약] 대기 예약은 대기 순번과 함께 조회된다.")
+    void 내_예약_조회시_대기_예약은_대기_순번과_함께_조회된다() {
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservationResponses.status", everyItem(equalTo("PENDING")))
+                .body("waitingReservationResponses.waitingOrder", containsInAnyOrder(1, 1));
     }
 
     // ── 예약 규칙: 예약이 존재하는 시간 삭제(422) ──────────────────────────────────
