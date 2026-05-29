@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.config.TestTimeConfig;
+import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.domain.Status;
@@ -133,5 +134,45 @@ class ReservationServiceTest {
 
         Assertions.assertThat(reservationService.getReservationsByName(pendingFirstCommand.name()).getFirst().status())
                 .isEqualTo(Status.ACTIVE);
+    }
+
+    @Test
+    @DisplayName("대기 예약을 다른 시간으로 확정 예약 변경할 수 있다.")
+    void changePendingReservationToActive() {
+        reservationService.addReservation(new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        ));
+        ReservationInfo pendingReservation = reservationService.addReservation(new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        ));
+        ReservationTime anotherTime = timeRepository.save(
+                ReservationTime.builder()
+                        .startAt(LocalTime.of(15, 0))
+                        .build()
+        );
+
+        ReservationInfo changedReservation = reservationService.changeReservation(
+                pendingReservation.id(),
+                new ReservationChangeCommand("리사", anotherTime.getId(), savedTheme.getId(), targetDate)
+        );
+
+        assertThat(changedReservation.status()).isEqualTo(Status.ACTIVE);
+        assertThat(changedReservation.time().id()).isEqualTo(anotherTime.getId());
+    }
+
+    @Test
+    @DisplayName("대기 예약도 예약자 본인이 취소할 수 있다.")
+    void cancelPendingReservation() {
+        reservationService.addReservation(new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        ));
+        ReservationInfo pendingReservation = reservationService.addReservation(new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        ));
+
+        reservationService.cancelReservation(pendingReservation.id(), "리사");
+
+        Assertions.assertThat(reservationService.getReservationsByName("리사").size())
+                .isZero();
     }
 }

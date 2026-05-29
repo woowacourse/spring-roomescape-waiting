@@ -289,34 +289,24 @@ select {
     color: var(--ink);
 }
 
+.time-chip span {
+    margin-left: 6px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.time-chip.waiting {
+    border-color: rgba(180, 79, 44, 0.26);
+    background: rgba(180, 79, 44, 0.08);
+}
+
 .time-chip.selected {
     background: var(--accent);
     color: #f3fff9;
     border-color: var(--accent);
 }
 
-.mode-toggle {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    padding: 4px;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(70, 48, 33, 0.12);
-    background: rgba(255, 255, 255, 0.54);
-}
-
-.mode-btn {
-    min-height: 40px;
-    border: 0;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    font-weight: 700;
-}
-
-.mode-btn.active {
-    background: var(--accent);
+.time-chip.selected span {
     color: #f3fff9;
 }
 
@@ -463,14 +453,9 @@ select {
     }
 
     .list-row,
-    .theme-card-head,
-    .mode-toggle {
+    .theme-card-head {
         flex-direction: column;
         align-items: flex-start;
-    }
-
-    .mode-toggle {
-        grid-template-columns: 1fr;
     }
 
     .button,

@@ -121,7 +121,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.id = :id AND r.status='ACTIVE' AND r.is_deleted = 0 ";
+                + "WHERE r.id = :id AND r.status IN ('ACTIVE', 'PENDING') AND r.is_deleted = 0 ";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
     }
 
@@ -213,7 +213,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByIdAndUsernameAndActiveOrPending(final Long reservationId, final String username) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status='ACTIVE' OR status='PENDING' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status IN ('ACTIVE', 'PENDING') AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("reservationId", reservationId, "username", username),
                         Boolean.class));

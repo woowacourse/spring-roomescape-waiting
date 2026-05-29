@@ -13,8 +13,8 @@
             <p class="eyebrow">Roomescape Club</p>
             <h1>테마를 고르고, 시간을 고르고, 바로 예약하세요.</h1>
             <p class="hero-text">
-                날짜와 테마를 선택하면 예약 가능한 시간만 골라서 보여줍니다.
-                같은 시간이라도 테마가 다르면 별도로 예약할 수 있습니다.
+                날짜와 테마를 선택하면 확정 예약과 대기 예약이 가능한 시간을 함께 보여줍니다.
+                이미 예약된 시간도 대기 예약으로 신청할 수 있습니다.
             </p>
             <div class="hero-actions">
                 <a class="button ghost" href="#popular-themes">인기 테마 보기</a>
@@ -66,14 +66,14 @@
                 </label>
 
                 <div class="field">
-                    <span>예약 가능 시간</span>
-                    <div id="availability-summary" class="hint">날짜와 테마를 선택하면 예약 가능한 시간이 표시됩니다.</div>
+                    <span>예약 시간</span>
+                    <div id="availability-summary" class="hint">날짜와 테마를 선택하면 확정/대기 가능 시간이 표시됩니다.</div>
                     <div id="available-times" class="time-grid empty-state">
                         아직 조회된 시간이 없습니다.
                     </div>
                 </div>
 
-                <button id="reservation-submit" class="button primary" type="submit" disabled>예약 확정</button>
+                <button id="reservation-submit" class="button primary" type="submit" disabled>예약 신청</button>
             </form>
             <hr style="margin: 2.5rem 0 1.5rem; border: none; border-top: 1px solid #e2e8f0;">
             <div class="panel-header">
