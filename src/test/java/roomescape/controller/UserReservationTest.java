@@ -46,6 +46,7 @@ class UserReservationTest {
     @DisplayName("미래 예약을 취소한다.")
     void cancelFutureReservation() {
         RestAssured.given().log().all()
+                .queryParam("name", "user_b")
                 .when().delete("/reservations/2")
                 .then().log().all()
                 .statusCode(204);
@@ -64,6 +65,7 @@ class UserReservationTest {
     @DisplayName("존재하지 않는 예약 취소 시 404를 반환한다.")
     void cancelNonExistentReservation() {
         RestAssured.given().log().all()
+                .queryParam("name", "user_b")
                 .when().delete("/reservations/999")
                 .then().log().all()
                 .statusCode(404);
@@ -78,6 +80,7 @@ class UserReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
@@ -110,6 +113,7 @@ class UserReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
@@ -125,6 +129,7 @@ class UserReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/999")
                 .then().log().all()

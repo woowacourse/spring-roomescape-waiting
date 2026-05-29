@@ -27,6 +27,7 @@ class UserReservationValidationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
@@ -43,6 +44,7 @@ class UserReservationValidationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
@@ -59,6 +61,7 @@ class UserReservationValidationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
