@@ -75,6 +75,21 @@ public class ThemeDao {
         );
     }
 
+    public boolean existsByThemeId(Long themeId) {
+        Boolean result = jdbcTemplate.queryForObject("""
+                        SELECT EXISTS(
+                            SELECT *
+                            FROM theme t
+                            JOIN reservation r ON r.theme_id = t.id
+                            WHERE t.id = ?
+                        )
+                        """,
+                Boolean.class,
+                themeId
+        );
+        return Boolean.TRUE.equals(result);
+    }
+
     @Transactional
     public Theme save(Theme theme) {
         Map<String, Object> params = new HashMap<>();

@@ -27,6 +27,6 @@ public class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9)); // data.sql에 9개 삽입
+                .body("size()", is(9));
     }
 }

@@ -10,6 +10,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.AlreadyInUseException;
 
 @Service
 public class ThemeService {
@@ -66,6 +67,9 @@ public class ThemeService {
     }
 
     public void delete(Long id) {
+        if(themeDao.existsByThemeId(id)){
+            throw new AlreadyInUseException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
+        }
         themeDao.delete(id);
     }
 }

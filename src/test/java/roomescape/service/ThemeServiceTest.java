@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.AlreadyInUseException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Transactional
@@ -52,5 +54,13 @@ class ThemeServiceTest {
         themeService.delete(11L);
 
         assertThat(themeService.findAllThemes()).hasSize(14);
+    }
+
+    @Test
+    void 예약_존재하는_테마_삭제_시_예외() {
+        Long themeIdWithReservation = 1L;
+
+        assertThatThrownBy(() -> themeService.delete(themeIdWithReservation))
+                .isInstanceOf(AlreadyInUseException.class);
     }
 }

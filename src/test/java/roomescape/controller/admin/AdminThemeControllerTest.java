@@ -1,5 +1,7 @@
 package roomescape.controller.admin;
 
+import static org.hamcrest.Matchers.equalTo;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,5 +40,14 @@ class AdminThemeControllerTest {
                 .when().delete("/admin/themes/16")
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 예약이_존재하는_테마_삭제_불가() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/themes/1")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("해당 테마에 예약이 존재하여 삭제할 수 없습니다."));
     }
 }
