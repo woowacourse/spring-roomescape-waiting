@@ -7,8 +7,8 @@ import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 
 public enum ReservationFixture {
-    FUTURE("예약자", LocalDate.of(2099, 5, 1)),
-    PAST("예약자", LocalDate.of(2000, 1, 1));
+    FUTURE("예약자", LocalDate.now().plusYears(1)),
+    PAST("예약자", LocalDate.now().minusYears(1));
 
     private final String name;
     private final LocalDate date;

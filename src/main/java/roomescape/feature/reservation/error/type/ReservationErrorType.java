@@ -11,6 +11,7 @@ public enum ReservationErrorType implements ErrorType {
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
     RESERVATION_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "예약을 변경할 권한이 없습니다."),
     RESERVATION_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "예약을 취소할 권한이 없습니다."),
+    PAST_RESERVATION_CREATE(HttpStatus.CONFLICT, "지난 예약은 생성할 수 없습니다"),
     PAST_RESERVATION_UPDATE(HttpStatus.CONFLICT, "지난 예약은 변경할 수 없습니다."),
     PAST_RESERVATION_CANCEL(HttpStatus.CONFLICT, "지난 예약은 취소할 수 없습니다."),
     NOT_ACTIVE_RESERVATION(HttpStatus.CONFLICT, "활성된 예약이 아닙니다."),

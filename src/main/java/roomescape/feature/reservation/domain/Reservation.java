@@ -1,43 +1,52 @@
 package roomescape.feature.reservation.domain;
 
 import java.time.LocalDate;
+import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
+import roomescape.global.error.exception.GeneralException;
 
 public class Reservation {
 
     private final Long id;
     private final ReserverName name;
-    private final LocalDate date;
-    private final Time time;
+    private final Schedule schedule;
     private final Theme theme;
     private final ReservationStatus status;
 
-    private Reservation(Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
+    private Reservation(Long id, ReserverName name, Schedule schedule, Theme theme, ReservationStatus status) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
+        this.schedule = schedule;
         this.theme = theme;
         this.status = status;
     }
 
     public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme) {
-        return new Reservation(null, name, date, time, theme, ReservationStatus.ACTIVE);
+        Schedule schedule = new Schedule(date, time);
+        validateFuture(schedule);
+
+        return new Reservation(null, name, schedule, theme, ReservationStatus.ACTIVE);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, date, time, theme, status);
+        return new Reservation(id, name, new Schedule(date, time), theme, status);
     }
 
     public Reservation cancel() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
     }
 
     public Reservation toWaiting() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.WAITING);
+    }
+
+    private static void validateFuture(Schedule schedule) {
+        if (schedule.isPast()) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CREATE);
+        }
     }
 
     public Long getId() {
@@ -49,11 +58,11 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return schedule.date();
     }
 
     public Time getTime() {
-        return time;
+        return schedule.time();
     }
 
     public Theme getTheme() {

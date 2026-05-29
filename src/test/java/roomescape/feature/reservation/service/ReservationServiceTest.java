@@ -194,7 +194,7 @@ class ReservationServiceTest {
             // given
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
-            LocalDate date = LocalDate.of(2026, 5, 20);
+            LocalDate date = LocalDate.now().plusYears(1);
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             Reservation saved = Reservation.reconstruct(
@@ -257,7 +257,7 @@ class ReservationServiceTest {
             // given
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
-            LocalDate date = LocalDate.of(2026, 5, 20);
+            LocalDate date = LocalDate.now().plusDays(1);
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
@@ -280,7 +280,7 @@ class ReservationServiceTest {
             // given
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
-            LocalDate date = LocalDate.of(2026, 5, 20);
+            LocalDate date = LocalDate.now().plusYears(1);
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             Reservation saved = Reservation.reconstruct(
@@ -304,7 +304,7 @@ class ReservationServiceTest {
             // given
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
-            LocalDate date = LocalDate.of(2026, 5, 20);
+            LocalDate date = LocalDate.now().plusYears(1);
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));

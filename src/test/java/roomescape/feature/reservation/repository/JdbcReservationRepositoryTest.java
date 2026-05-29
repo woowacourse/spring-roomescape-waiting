@@ -29,6 +29,7 @@ import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
 import roomescape.feature.time.repository.JdbcTimeRepository;
+import roomescape.fixture.ReservationFixture;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -71,7 +72,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             ReserverName name = new ReserverName("예약자");
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Reservation reservation = Reservation.create(name, date, time, theme);
 
             // when
@@ -108,7 +109,7 @@ class JdbcReservationRepositoryTest {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Reservation deleted = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자1"), date, time, theme));
             reservationRepository.deleteReservationById(deleted.getId());
@@ -131,7 +132,7 @@ class JdbcReservationRepositoryTest {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme));
 
             // when & then
@@ -159,10 +160,12 @@ class JdbcReservationRepositoryTest {
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            LocalDate date1 = LocalDate.now().plusYears(1);
+            LocalDate date2 = LocalDate.now().plusYears(1).plusDays(1);
             Reservation reservation1 = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time1, theme1));
+                Reservation.create(new ReserverName("예약자1"), date1, time1, theme1));
             Reservation reservation2 = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자2"), LocalDate.of(2026, 5, 2), time2, theme2));
+                Reservation.create(new ReserverName("예약자2"), date2, time2, theme2));
 
             // when
             List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
@@ -177,8 +180,8 @@ class JdbcReservationRepositoryTest {
                     r -> r.getTheme().getName()
                 )
                 .containsExactly(
-                    tuple(reservation1.getId(), "예약자1", LocalDate.of(2026, 5, 1), LocalTime.of(10, 0), "테마1"),
-                    tuple(reservation2.getId(), "예약자2", LocalDate.of(2026, 5, 2), LocalTime.of(11, 0), "테마2")
+                    tuple(reservation1.getId(), "예약자1", date1, LocalTime.of(10, 0), "테마1"),
+                    tuple(reservation2.getId(), "예약자2", date2, LocalTime.of(11, 0), "테마2")
                 );
             findSucceeded = true;
         }
@@ -190,7 +193,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("예약자1"), LocalDate.now().plusYears(1), time, theme));
             timeRepository.deleteTimeById(time.getId());
             themeRepository.deleteThemeById(theme.getId());
 
@@ -224,12 +227,13 @@ class JdbcReservationRepositoryTest {
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Time time3 = timeRepository.save(Time.create(LocalTime.of(12, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            LocalDate date1 = LocalDate.now().plusYears(1);
             Reservation reservation1 = reservationRepository.save(
-                Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time1, theme));
+                Reservation.create(new ReserverName("브라운"), date1, time1, theme));
             Reservation deletedReservation = reservationRepository.save(
-                Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 2), time2, theme));
+                Reservation.create(new ReserverName("브라운"), date1.plusDays(1), time2, theme));
             reservationRepository.save(
-                Reservation.create(new ReserverName("제이슨"), LocalDate.of(2026, 5, 3), time3, theme));
+                Reservation.create(new ReserverName("제이슨"), date1.plusDays(2), time3, theme));
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
@@ -238,7 +242,7 @@ class JdbcReservationRepositoryTest {
             // then
             assertThat(actual)
                 .extracting(Reservation::getId, r -> r.getName().value(), Reservation::getDate)
-                .containsExactly(tuple(reservation1.getId(), "브라운", LocalDate.of(2026, 5, 1)));
+                .containsExactly(tuple(reservation1.getId(), "브라운", date1));
         }
 
         @Test
@@ -247,7 +251,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(
-                Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("브라운"), LocalDate.now().plusYears(1), time, theme));
 
             // when
             List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("제이슨"));
@@ -262,7 +266,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(
-                Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("브라운"), LocalDate.now().plusYears(1), time, theme));
             timeRepository.deleteTimeById(time.getId());
             themeRepository.deleteThemeById(theme.getId());
 
@@ -278,7 +282,7 @@ class JdbcReservationRepositoryTest {
         @Test
         void 날짜순_시간순으로_조회한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Time time3 = timeRepository.save(Time.create(LocalTime.of(12, 0)));
@@ -311,7 +315,7 @@ class JdbcReservationRepositoryTest {
         @Test
         void 같은_날짜와_테마에_활성_예약된_시간_ID만_조회한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Time time3 = timeRepository.save(Time.create(LocalTime.of(12, 0)));
@@ -351,15 +355,14 @@ class JdbcReservationRepositoryTest {
         @Test
         void 대기가_하나일_때_1을_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Reservation waiting = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme).toWaiting());
+                ReservationFixture.FUTURE.createInstance(time, theme).toWaiting());
 
             // when
             int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                waiting.getId(), date, time, theme);
+                waiting.getId(), waiting.getDate(), time, theme);
 
             // then
             assertThat(actual).isEqualTo(1);
@@ -368,7 +371,7 @@ class JdbcReservationRepositoryTest {
         @Test
         void 자신보다_이전에_등록된_대기를_포함하여_카운트한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme).toWaiting());
@@ -387,7 +390,7 @@ class JdbcReservationRepositoryTest {
         @Test
         void WAITING이_아닌_상태의_예약은_카운트하지_않는다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme));
@@ -417,14 +420,13 @@ class JdbcReservationRepositoryTest {
         @Test
         void 같은_날짜_시간_테마의_활성_예약이_있으면_true를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            reservationRepository.save(Reservation.create(new ReserverName("예약자"), date, time, theme));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
-                date, time, theme);
+                reservation.getDate(), time, theme);
 
             // then
             assertThat(actual).isTrue();
@@ -433,16 +435,14 @@ class JdbcReservationRepositoryTest {
         @Test
         void 취소되거나_삭제된_예약이면_false를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
             reservationRepository.update(reservation.cancel());
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
-                date, time, theme);
+                reservation.getDate(), time, theme);
 
             // then
             assertThat(actual).isFalse();
@@ -464,10 +464,12 @@ class JdbcReservationRepositoryTest {
             Time updateTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Theme updateTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            LocalDate updateDate = date.plusDays(1);
             Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("예약자1"), date, time, theme));
             Reservation updateReservation = Reservation.reconstruct(reservation.getId(), new ReserverName("예약자2"),
-                LocalDate.of(2026, 5, 2), updateTime, updateTheme, ReservationStatus.ACTIVE);
+                updateDate, updateTime, updateTheme, ReservationStatus.ACTIVE);
 
             // when
             Reservation actual = reservationRepository.update(updateReservation);
@@ -482,7 +484,7 @@ class JdbcReservationRepositoryTest {
                     r -> r.getTime().getId(),
                     r -> r.getTheme().getId()
                 )
-                .containsExactly("예약자2", LocalDate.of(2026, 5, 2), updateTime.getId(), updateTheme.getId());
+                .containsExactly("예약자2", updateDate, updateTime.getId(), updateTheme.getId());
         }
     }
 
@@ -497,11 +499,9 @@ class JdbcReservationRepositoryTest {
         @Test
         void 예약_속성과_상태가_일치하는_예약이_있으면_true를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
             boolean actual = reservationRepository.existsReservationAndStatus(reservation, reservation.getStatus());
@@ -513,11 +513,9 @@ class JdbcReservationRepositoryTest {
         @Test
         void 상태가_다르면_false를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation activeReservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme));
+            Reservation activeReservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
             boolean actual = reservationRepository.existsReservationAndStatus(
@@ -539,15 +537,13 @@ class JdbcReservationRepositoryTest {
         @Test
         void 자기_자신_예약은_false를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                date, time, theme, reservation.getId());
+                reservation.getDate(), time, theme, reservation.getId());
 
             // then
             assertThat(actual).isFalse();
@@ -556,7 +552,7 @@ class JdbcReservationRepositoryTest {
         @Test
         void 다른_예약이_있으면_true를_반환한다() {
             // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
+            LocalDate date = LocalDate.now().plusYears(1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme));
@@ -585,10 +581,11 @@ class JdbcReservationRepositoryTest {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
             Reservation reservation1 = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("예약자1"), date, time, theme));
             Reservation reservation2 = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자2"), LocalDate.of(2026, 5, 2), time, theme));
+                Reservation.create(new ReserverName("예약자2"), date.plusDays(1), time, theme));
 
             // when
             reservationRepository.deleteReservationById(reservation1.getId());
@@ -607,7 +604,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.of(2026, 5, 1), time, theme));
+                Reservation.create(new ReserverName("예약자1"), LocalDate.now().plusYears(1), time, theme));
             reservationRepository.deleteReservationById(reservation.getId());
 
             // when & then
