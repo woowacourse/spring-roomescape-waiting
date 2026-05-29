@@ -36,7 +36,7 @@ public class WaitingService {
     public Waiting create(WaitingRequestDto waitingRequestDto, Member member) {
         Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(waitingRequestDto.themeId(),
                         waitingRequestDto.timeId(), waitingRequestDto.date(), waitingRequestDto.storeId())
-                .orElseThrow(() -> new EntityNotFoundException("예약이 존재하지 않아 대기가 불가능합니다."));
+                .orElseThrow(() -> new BusinessRuleViolationException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         if (reservation.isSameMember(member)) {
             throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");

@@ -82,7 +82,7 @@ class WaitingControllerE2ETest extends BaseE2ETest {
         }
 
         @Test
-        @DisplayName("예약이 없는 슬롯에 대기를 신청하면 404를 반환한다")
+        @DisplayName("예약이 없는 슬롯에 대기를 신청하면 400를 반환한다")
         void rejectsWhenNoReservation() {
             HashMap<String, Object> body = new HashMap<>();
             body.put("memberId", userId);
@@ -96,7 +96,7 @@ class WaitingControllerE2ETest extends BaseE2ETest {
                     .contentType(ContentType.JSON)
                     .body(body)
                     .when().post("/waitings")
-                    .then().statusCode(HttpStatus.NOT_FOUND.value());
+                    .then().statusCode(HttpStatus.BAD_REQUEST.value());
         }
 
         @Test

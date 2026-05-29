@@ -145,7 +145,7 @@ class WaitingServiceTest {
             WaitingRequestDto dto = new WaitingRequestDto(emptyDate, timeId, themeId, storeId);
 
             assertThatThrownBy(() -> waitingService.create(dto, member))
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .isInstanceOf(BusinessRuleViolationException.class);
         }
 
         @Test
