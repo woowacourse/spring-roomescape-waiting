@@ -81,18 +81,12 @@ public class ReservationService {
         if (reservation.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
         }
-
-        ReservationTime newTime = reservationTimeService.getById(request.timeId());
-        LocalDate newDate = request.date();
-
-        Reservation changed = reservation.reschedule(newDate, newTime, clock);
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(),
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
                 reservation.getTheme().getId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
-
-        reservationRepository.update(id, newDate, request.timeId());
-        return ReservationResponse.from(changed);
+        reservationRepository.update(id, request.date(), request.timeId());
+        return ReservationResponse.from(getById(id));
     }
 
     @NonNull
