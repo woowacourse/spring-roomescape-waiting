@@ -9,7 +9,8 @@ CREATE TABLE reservation_time
     id        BIGINT NOT NULL AUTO_INCREMENT,
     start_at  TIME   NOT NULL,
     finish_at TIME   NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT unique_reservation_time UNIQUE (start_at, finish_at)
 );
 
 CREATE TABLE theme
@@ -18,7 +19,8 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(500) NOT NULL,
     image_url   VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT unique_theme_name UNIQUE (name)
 );
 
 CREATE TABLE member
