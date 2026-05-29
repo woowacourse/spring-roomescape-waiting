@@ -12,10 +12,20 @@ public enum ErrorCode {
     PAST_TIME_WAITING(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다."),
     PAST_WAITING_CANCEL(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기를 취소할 수 없습니다."),
 
+    // 400 - BAD_REQUEST (auth)
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
+
+    // 401 - UNAUTHORIZED
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
+
+    // 403 - FORBIDDEN
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
     // 404 - NOT_FOUND
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
     TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 시간대입니다."),
     THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."),
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
 
     // 409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 예약된 시간입니다."),
