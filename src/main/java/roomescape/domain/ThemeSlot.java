@@ -50,7 +50,7 @@ public class ThemeSlot {
         return isReserved;
     }
 
-    public void swtichIsReserved() {
-        this.isReserved = !isReserved;
+    public void reserve() {
+        this.isReserved = true;
     }
 }

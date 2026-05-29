@@ -50,7 +50,7 @@ public class ReservationService {
 
         // RESERVATION 테이블에 ThemeSlot id가 없다면, 바로 themeSlot은 true로, reservation을 confirm로 변경 후 저장
         if (!reservationRepository.existsByThemeSlotId(themeSlotId)) {
-            themeSlot.swtichIsReserved();
+            themeSlot.reserve();
             themeSlotRepository.update(themeSlot);
             reservation.confirm();
         }
