@@ -504,7 +504,7 @@ GET /themes?topCount={topCount}&during={during}
 | topCount     | Long | O    | 조회할 테마 수                   |
 | during       | Long | O    | 최근 N일 기준 (오늘 포함 N일 전) |
 
-최근 `during`일 동안 예약 수가 가장 많은 테마를 `topCount`개 순서대로 반환한다.
+최근 `during`일 동안 확정 또는 완료된 예약 수가 가장 많은 테마를 `topCount`개 순서대로 반환한다.
 
 **응답 200 OK** — ThemeResponse 배열 (예약 수 내림차순)
 

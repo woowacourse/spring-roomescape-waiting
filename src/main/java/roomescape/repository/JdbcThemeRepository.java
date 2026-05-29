@@ -67,6 +67,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     FROM reservation r
                         INNER JOIN theme_slot ts ON r.theme_slot_id = ts.id
                     WHERE ts.date BETWEEN ? AND ?
+                    AND r.status IN ('CONFIRMED', 'COMPLETED')
                 ) as r
                 
                 INNER JOIN theme t
