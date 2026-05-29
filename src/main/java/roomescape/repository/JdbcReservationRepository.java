@@ -51,7 +51,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   WHERE r2.date = r.date
                     AND r2.time_id = r.time_id
                     AND r2.theme_id = r.theme_id
-                    AND r2.created_at < r.created_at) AS waiting_order
+                    AND r2.id < r.id) AS waiting_order
             FROM reservation r
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
