@@ -140,7 +140,9 @@ public class FakeReservationDao implements ReservationRepository {
     public boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
-                        reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
+                        reservation.getName().equals(name)
+                                && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
+                                && !"CANCELLED".equals(reservation.getReservationStatusName())
                 );
     }
 

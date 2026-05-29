@@ -133,6 +133,18 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("취소된 대기 예약은 같은 사용자의 같은 슬롯 중복 대기 검사에서 제외된다.")
+    void allowSameUserToWaitAgainAfterCancelWaitingReservation() {
+        reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+        reservationService.cancelReservation(pendingReservation.getId());
+
+        Reservation reservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+
+        assertThat(reservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+    }
+
+    @Test
     @DisplayName("취소 대상 상태가 PENDING인 경우, 대상 reservation의 status가 CANCEL된다.")
     void reservationStatusCancelWhenReservationIsPending(){
         // given

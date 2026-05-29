@@ -341,6 +341,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                                 ON r.theme_slot_id = ts.id
                             WHERE r.name = ?
                             AND ts.id = ?
+                            AND r.status != 'CANCELLED'
                         )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, themeSlotId));
