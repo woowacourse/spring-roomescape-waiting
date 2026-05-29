@@ -27,6 +27,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -77,17 +78,17 @@ class JdbcThemeRepositoryTest {
             // when
             Long savedThemeId = themeRepository.save(theme).getId();
 
-            Theme expectedSavedTheme = Theme.reconstruct(savedThemeId, name, description, imageUrl, null);
+            Theme expectedSavedTheme = Theme.reconstruct(savedThemeId, name, description, imageUrl, ThemeStatus.ACTIVE);
 
             // then
             Theme actualSavedTheme = jdbcTemplate.queryForObject(
-                "SELECT id, name, description, image_url, deleted_at FROM theme WHERE id = ?",
+                "SELECT id, name, description, image_url, status FROM theme WHERE id = ?",
                 (rs, rowNum) -> Theme.reconstruct(
                     rs.getLong("id"),
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getString("image_url"),
-                    rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                    ThemeStatus.valueOf(rs.getString("status"))
                 ),
                 savedThemeId
             );
@@ -130,7 +131,7 @@ class JdbcThemeRepositoryTest {
             Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
 
             // when
-            List<Theme> actual = themeRepository.findAllByDeletedAtIsNull();
+            List<Theme> actual = themeRepository.findAllByNotDeleted();
 
             // then
             assertThat(actual)
@@ -151,7 +152,7 @@ class JdbcThemeRepositoryTest {
             themeRepository.deleteThemeById(deletedTheme.getId());
 
             // when
-            List<Theme> actual = themeRepository.findAllByDeletedAtIsNull();
+            List<Theme> actual = themeRepository.findAllByNotDeleted();
 
             // then
             assertThat(actual)
@@ -174,7 +175,7 @@ class JdbcThemeRepositoryTest {
             Theme savedTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
 
             // when
-            Optional<Theme> actual = themeRepository.findThemeByIdAndDeletedAtIsNull(savedTheme.getId());
+            Optional<Theme> actual = themeRepository.findThemeByIdAndNotDeleted(savedTheme.getId());
 
             // then
             assertThat(actual).isPresent();
@@ -185,7 +186,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 존재하지_않으면_빈_값을_반환한다() {
             // when
-            Optional<Theme> actual = themeRepository.findThemeByIdAndDeletedAtIsNull(1L);
+            Optional<Theme> actual = themeRepository.findThemeByIdAndNotDeleted(1L);
 
             // then
             assertThat(actual).isEmpty();
@@ -210,12 +211,12 @@ class JdbcThemeRepositoryTest {
             themeRepository.deleteThemeById(theme1.getId());
 
             // then
-            assertThat(themeRepository.findAllByDeletedAtIsNull())
+            assertThat(themeRepository.findAllByNotDeleted())
                 .extracting(Theme::getId)
                 .containsExactly(theme2.getId());
             assertThat(countDeletedThemeById(theme1.getId())).isEqualTo(1);
-            assertThat(themeRepository.findThemeByIdAndDeletedAtIsNull(theme1.getId())).isEmpty();
-            assertThat(themeRepository.existsThemeByIdAndDeletedAtIsNull(theme1.getId())).isFalse();
+            assertThat(themeRepository.findThemeByIdAndNotDeleted(theme1.getId())).isEmpty();
+            assertThat(themeRepository.existsThemeByIdAndNotDeleted(theme1.getId())).isFalse();
         }
 
         @Test
@@ -245,7 +246,7 @@ class JdbcThemeRepositoryTest {
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
 
             // when
-            boolean actual = themeRepository.existsThemeByIdAndDeletedAtIsNull(theme.getId());
+            boolean actual = themeRepository.existsThemeByIdAndNotDeleted(theme.getId());
 
             // then
             assertThat(actual).isTrue();
@@ -254,7 +255,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 존재하지_않으면_false를_반환한다() {
             // when
-            boolean actual = themeRepository.existsThemeByIdAndDeletedAtIsNull(1L);
+            boolean actual = themeRepository.existsThemeByIdAndNotDeleted(1L);
 
             // then
             assertThat(actual).isFalse();
@@ -275,7 +276,7 @@ class JdbcThemeRepositoryTest {
             themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
 
             // when
-            boolean actual = themeRepository.existsThemeByNameAndDeletedAtIsNull("테마1");
+            boolean actual = themeRepository.existsThemeByNameAndNotDeleted("테마1");
 
             // then
             assertThat(actual).isTrue();
@@ -284,7 +285,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 해당_이름의_테마가_존재하지_않으면_false를_반환한다() {
             // when
-            boolean actual = themeRepository.existsThemeByNameAndDeletedAtIsNull("테마1");
+            boolean actual = themeRepository.existsThemeByNameAndNotDeleted("테마1");
 
             // then
             assertThat(actual).isFalse();
@@ -297,7 +298,7 @@ class JdbcThemeRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            boolean actual = themeRepository.existsThemeByNameAndDeletedAtIsNull("테마1");
+            boolean actual = themeRepository.existsThemeByNameAndNotDeleted("테마1");
 
             // then
             assertThat(actual).isFalse();
@@ -457,7 +458,7 @@ class JdbcThemeRepositoryTest {
 
     private Integer countDeletedThemeById(Long id) {
         return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM theme WHERE id = ? AND deleted_at IS NOT NULL",
+            "SELECT COUNT(*) FROM theme WHERE id = ? AND status = 'DELETED'",
             Integer.class,
             id
         );

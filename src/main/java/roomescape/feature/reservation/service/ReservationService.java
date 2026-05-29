@@ -19,6 +19,7 @@ import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.feature.time.domain.Time;
 import roomescape.feature.time.repository.TimeRepository;
@@ -96,7 +97,7 @@ public class ReservationService {
             parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
         }
 
-        Theme theme = themeRepository.findThemeByIdAndDeletedAtIsNull(command.themeId()).orElse(null);
+        Theme theme = themeRepository.findThemeByIdAndNotDeleted(command.themeId()).orElse(null);
         if (theme == null) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
         }
@@ -168,7 +169,7 @@ public class ReservationService {
         if (command.themeId() == null) {
             return existingReservation.getTheme();
         }
-        return themeRepository.findThemeByIdAndDeletedAtIsNull(command.themeId()).orElse(null);
+        return themeRepository.findThemeByIdAndNotDeleted(command.themeId()).orElse(null);
     }
 
     private void validateUpdateResources(Time time, Theme theme) {
@@ -178,7 +179,7 @@ public class ReservationService {
             parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
         }
 
-        if (theme == null || theme.getDeletedAt() != null) {
+        if (theme == null || theme.getStatus() == ThemeStatus.DELETED) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
         }
 

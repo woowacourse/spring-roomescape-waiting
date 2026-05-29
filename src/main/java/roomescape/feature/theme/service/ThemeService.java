@@ -28,7 +28,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponseDto> getThemes() {
-        return convertThemesToDto(themeRepository.findAllByDeletedAtIsNull());
+        return convertThemesToDto(themeRepository.findAllByNotDeleted());
     }
 
     private List<ThemeResponseDto> convertThemesToDto(List<Theme> themes) {
@@ -48,7 +48,7 @@ public class ThemeService {
 
     @Transactional
     public ThemeResponseDto saveTheme(ThemeCreateCommand command) {
-        if (themeRepository.existsThemeByNameAndDeletedAtIsNull(command.name())) {
+        if (themeRepository.existsThemeByNameAndNotDeleted(command.name())) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);
         }
 
@@ -62,7 +62,7 @@ public class ThemeService {
 
     @Transactional
     public void deleteThemeById(Long id) {
-        if (!themeRepository.existsThemeByIdAndDeletedAtIsNull(id)) {
+        if (!themeRepository.existsThemeByIdAndNotDeleted(id)) {
             throw new GeneralException(ThemeErrorType.THEME_NOT_FOUND);
         }
 

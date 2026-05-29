@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.error.type.ThemeErrorType;
 import roomescape.global.error.exception.GeneralException;
 
@@ -25,13 +26,13 @@ public class JdbcThemeRepository implements ThemeRepository {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
             .withTableName("theme")
-            .usingColumns("name", "description", "image_url")
+            .usingColumns("name", "description", "image_url", "status")
             .usingGeneratedKeyColumns("id");
     }
 
     @Override
-    public List<Theme> findAllByDeletedAtIsNull() {
-        String sql = "SELECT id, name, description, image_url FROM theme WHERE deleted_at IS NULL";
+    public List<Theme> findAllByNotDeleted() {
+        String sql = "SELECT id, name, description, image_url, status FROM theme WHERE status = 'ACTIVE'";
         return jdbcTemplate.query(
             sql,
             (resultSet, rowNum) -> Theme.reconstruct(
@@ -39,7 +40,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getString("image_url"),
-                null
+                ThemeStatus.valueOf(resultSet.getString("status"))
             ));
     }
 
@@ -48,15 +49,17 @@ public class JdbcThemeRepository implements ThemeRepository {
         Map<String, Object> args = Map.of(
             "name", theme.getName(),
             "description", theme.getDescription(),
-            "image_url", theme.getImageUrl()
+            "image_url", theme.getImageUrl(),
+            "status", theme.getStatus().name()
         );
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(args).longValue();
-        return Theme.reconstruct(generatedKey, theme.getName(), theme.getDescription(), theme.getImageUrl(), null);
+        return Theme.reconstruct(generatedKey, theme.getName(), theme.getDescription(), theme.getImageUrl(),
+            theme.getStatus());
     }
 
     @Override
     public void deleteThemeById(Long id) {
-        final String sql = "UPDATE theme SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND deleted_at IS NULL";
+        final String sql = "UPDATE theme SET status = 'DELETED' WHERE id = :id AND status = 'ACTIVE'";
         final SqlParameterSource parameters = new MapSqlParameterSource("id", id);
 
         int updatedRowCount = jdbcTemplate.update(sql, parameters);
@@ -66,8 +69,8 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findThemeByIdAndDeletedAtIsNull(Long id) {
-        final String sql = "SELECT id, name, description, image_url FROM theme WHERE id = :id AND deleted_at IS NULL";
+    public Optional<Theme> findThemeByIdAndNotDeleted(Long id) {
+        final String sql = "SELECT id, name, description, image_url, status FROM theme WHERE id = :id AND status = 'ACTIVE'";
         final SqlParameterSource parameters = new MapSqlParameterSource("id", id);
         try {
             Theme theme = jdbcTemplate.queryForObject(
@@ -78,7 +81,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     resultSet.getString("name"),
                     resultSet.getString("description"),
                     resultSet.getString("image_url"),
-                    null
+                    ThemeStatus.valueOf(resultSet.getString("status"))
                 )
             );
             return Optional.ofNullable(theme);
@@ -88,13 +91,13 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existsThemeByIdAndDeletedAtIsNull(Long id) {
+    public boolean existsThemeByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
                 FROM theme
                 WHERE id = :id
-                  AND deleted_at IS NULL
+                  AND status = 'ACTIVE'
             )
             """;
 
@@ -104,13 +107,13 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existsThemeByNameAndDeletedAtIsNull(String name) {
+    public boolean existsThemeByNameAndNotDeleted(String name) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
                 FROM theme
                 WHERE name = :name
-                  AND deleted_at IS NULL
+                  AND status = 'ACTIVE'
             )
             """;
 
@@ -122,15 +125,15 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findPopularThemesDateBetween(LocalDate startDate, LocalDate endDate, Integer limit) {
         String sql = """
-            SELECT t.id, t.name, t.description, t.image_url
+            SELECT t.id, t.name, t.description, t.image_url, t.status
             FROM theme t
             JOIN reservation r ON t.id = r.theme_id
             JOIN reservation_time rt ON r.time_id = rt.id
             WHERE r.date BETWEEN :startDate AND :endDate
-              AND t.deleted_at IS NULL
+              AND t.status = 'ACTIVE'
               AND r.status = 'ACTIVE'
               AND rt.deleted_at IS NULL
-            GROUP BY t.id, t.name, t.description, t.image_url
+            GROUP BY t.id, t.name, t.description, t.image_url, t.status
             ORDER BY COUNT(r.id) DESC, t.id ASC
             LIMIT :limit
             """;
@@ -148,7 +151,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getString("image_url"),
-                null
+                ThemeStatus.valueOf(resultSet.getString("status"))
             ));
     }
 }

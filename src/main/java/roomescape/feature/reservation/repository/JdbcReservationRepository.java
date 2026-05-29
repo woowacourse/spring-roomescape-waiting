@@ -18,6 +18,7 @@ import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.error.exception.GeneralException;
 
@@ -42,7 +43,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT r.id, r.name, r.date, r.status,
                        rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                       t.deleted_at AS theme_deleted_at
+                       t.status AS theme_status
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
@@ -68,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("image_url"),
-                getNullableLocalDateTime(rs, "theme_deleted_at")
+                ThemeStatus.valueOf(rs.getString("theme_status"))
             ),
             ReservationStatus.valueOf(rs.getString("status"))
         );
@@ -89,7 +90,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT r.id, r.name, r.date, r.status,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
+                   t.status AS theme_status
             FROM reservation r
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
@@ -112,7 +113,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT r.id, r.name, r.date, r.status,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
+                   t.status AS theme_status
             FROM reservation r
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
@@ -140,7 +141,7 @@ public class JdbcReservationRepository implements ReservationRepository {
               AND r.theme_id = :themeId
               AND r.status = 'ACTIVE'
               AND rt.deleted_at IS NULL
-              AND t.deleted_at IS NULL
+              AND t.status = 'ACTIVE'
             """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
             "date", date,

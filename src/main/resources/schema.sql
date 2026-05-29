@@ -13,9 +13,9 @@ CREATE TABLE theme (
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     image_url VARCHAR(2000) NOT NULL,
-    deleted_at DATETIME DEFAULT NULL,
+    status ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
     active_name VARCHAR(255) GENERATED ALWAYS AS (
-        CASE WHEN deleted_at IS NULL THEN name ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN name ELSE NULL END
     ),
     PRIMARY KEY (id)
 );

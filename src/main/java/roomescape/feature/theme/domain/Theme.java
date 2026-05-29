@@ -1,30 +1,27 @@
 package roomescape.feature.theme.domain;
 
-import java.time.LocalDateTime;
-
 public class Theme {
 
     private final Long id;
     private final String name;
     private final String description;
     private final String imageUrl;
-    private final LocalDateTime deletedAt;
+    private final ThemeStatus status;
 
-    private Theme(Long id, String name, String description, String imageUrl, LocalDateTime deletedAt) {
+    private Theme(Long id, String name, String description, String imageUrl, ThemeStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.deletedAt = deletedAt;
+        this.status = status;
     }
 
     public static Theme create(String name, String description, String imageUrl) {
-        return new Theme(null, name, description, imageUrl, null);
+        return new Theme(null, name, description, imageUrl, ThemeStatus.ACTIVE);
     }
 
-    public static Theme reconstruct(Long id, String name, String description, String imageUrl,
-        LocalDateTime deletedAt) {
-        return new Theme(id, name, description, imageUrl, deletedAt);
+    public static Theme reconstruct(Long id, String name, String description, String imageUrl, ThemeStatus status) {
+        return new Theme(id, name, description, imageUrl, status);
     }
 
     public Long getId() {
@@ -43,7 +40,7 @@ public class Theme {
         return imageUrl;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public ThemeStatus getStatus() {
+        return status;
     }
 }

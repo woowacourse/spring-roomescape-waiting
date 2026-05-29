@@ -42,7 +42,7 @@ public class TimeService {
     }
 
     public List<TimeAvailabilityResponseDto> getTimeAvailabilities(LocalDate date, Long themeId) {
-        if (!themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)) {
+        if (!themeRepository.existsThemeByIdAndNotDeleted(themeId)) {
             throw new GeneralParametersException(TimeErrorType.FIELD_RESOURCE_NOT_FOUND,
                 List.of(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다.")));
         }

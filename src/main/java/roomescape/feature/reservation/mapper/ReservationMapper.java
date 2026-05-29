@@ -14,6 +14,7 @@ import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.time.mapper.TimeMapper;
 
@@ -61,7 +62,7 @@ public final class ReservationMapper {
             return ReservationEditableStatus.WAITING;
         }
 
-        if (reservation.getTime().getDeletedAt() != null || reservation.getTheme().getDeletedAt() != null) {
+        if (reservation.getTime().getDeletedAt() != null || reservation.getTheme().getStatus() == ThemeStatus.DELETED) {
             return ReservationEditableStatus.EDIT_RECOMMENDED;
         }
 

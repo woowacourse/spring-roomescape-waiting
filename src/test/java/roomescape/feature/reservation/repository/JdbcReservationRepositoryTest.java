@@ -26,6 +26,7 @@ import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
 import roomescape.feature.time.repository.JdbcTimeRepository;
@@ -89,7 +90,7 @@ class JdbcReservationRepositoryTest {
                     new ReserverName(rs.getString("name")),
                     rs.getDate("date").toLocalDate(),
                     Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), null),
-                    Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), null),
+                    Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), ThemeStatus.ACTIVE),
                     ReservationStatus.valueOf(rs.getString("status"))
                 ),
                 savedReservationId
@@ -261,7 +262,7 @@ class JdbcReservationRepositoryTest {
         }
 
         @Test
-        void 삭제된_시간과_테마에_연결된_예약의_삭제_시각도_조회한다() {
+        void 삭제된_시간과_테마에_연결된_예약의_삭제_상태도_조회한다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
@@ -276,7 +277,7 @@ class JdbcReservationRepositoryTest {
             // then
             assertThat(actual).hasSize(1);
             assertThat(actual.getFirst().getTime().getDeletedAt()).isNotNull();
-            assertThat(actual.getFirst().getTheme().getDeletedAt()).isNotNull();
+            assertThat(actual.getFirst().getTheme().getStatus()).isEqualTo(ThemeStatus.DELETED);
         }
 
         @Test

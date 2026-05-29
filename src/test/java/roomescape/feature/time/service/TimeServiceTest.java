@@ -81,7 +81,7 @@ class TimeServiceTest {
             Long themeId = 1L;
             Time reservedTime = Time.reconstruct(1L, LocalTime.of(10, 0), null);
             Time availableTime = Time.reconstruct(2L, LocalTime.of(11, 0), null);
-            when(themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)).thenReturn(true);
+            when(themeRepository.existsThemeByIdAndNotDeleted(themeId)).thenReturn(true);
             when(reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(date, themeId))
                 .thenReturn(List.of(1L));
             when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(reservedTime, availableTime));
@@ -98,7 +98,7 @@ class TimeServiceTest {
         @Test
         void 존재하지_않는_themeId이면_파라미터_에러가_발생한다() {
             // given
-            when(themeRepository.existsThemeByIdAndDeletedAtIsNull(999L)).thenReturn(false);
+            when(themeRepository.existsThemeByIdAndNotDeleted(999L)).thenReturn(false);
 
             // when & then
             assertThatThrownBy(() -> timeService.getTimeAvailabilities(LocalDate.of(2026, 5, 10), 999L))

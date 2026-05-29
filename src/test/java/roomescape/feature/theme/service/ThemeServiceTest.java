@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.feature.theme.dto.command.ThemeCreateCommand;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.fixture.ThemeFixture;
@@ -45,7 +46,7 @@ class ThemeServiceTest {
 
         @Test
         void 테마가_없으면_빈_목록을_반환한다() {
-            when(themeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+            when(themeRepository.findAllByNotDeleted()).thenReturn(List.of());
 
             assertThat(themeService.getThemes()).isEmpty();
         }
@@ -53,9 +54,9 @@ class ThemeServiceTest {
         @Test
         void 활성_테마_목록을_조회한다() {
             // given
-            Theme theme1 = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", null);
-            Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", null);
-            when(themeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(theme1, theme2));
+            Theme theme1 = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", ThemeStatus.ACTIVE);
+            Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", ThemeStatus.ACTIVE);
+            when(themeRepository.findAllByNotDeleted()).thenReturn(List.of(theme1, theme2));
 
             // when
             List<ThemeResponseDto> result = themeService.getThemes();
@@ -75,7 +76,7 @@ class ThemeServiceTest {
             LocalDate today = LocalDate.now(fixedClock);
             LocalDate startDate = today.minusDays(7);
             LocalDate endDate = today.minusDays(1);
-            Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", null);
+            Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", ThemeStatus.ACTIVE);
             when(themeRepository.findPopularThemesDateBetween(startDate, endDate, 10))
                 .thenReturn(List.of(popular));
 
@@ -113,8 +114,8 @@ class ThemeServiceTest {
             Theme saved = Theme.reconstruct(1L,
                 ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl(), null);
-            when(themeRepository.existsThemeByNameAndDeletedAtIsNull(ThemeFixture.VALID.getName()))
+                ThemeFixture.VALID.getImageUrl(), ThemeStatus.ACTIVE);
+            when(themeRepository.existsThemeByNameAndNotDeleted(ThemeFixture.VALID.getName()))
                 .thenReturn(false);
             when(themeRepository.save(any(Theme.class))).thenReturn(saved);
 
@@ -134,7 +135,7 @@ class ThemeServiceTest {
                 ThemeFixture.VALID.getDescription(),
                 ThemeFixture.VALID.getImageUrl()
             );
-            when(themeRepository.existsThemeByNameAndDeletedAtIsNull(ThemeFixture.VALID.getName()))
+            when(themeRepository.existsThemeByNameAndNotDeleted(ThemeFixture.VALID.getName()))
                 .thenReturn(true);
 
             // when & then
@@ -149,7 +150,7 @@ class ThemeServiceTest {
 
         @Test
         void 테마를_삭제한다() {
-            when(themeRepository.existsThemeByIdAndDeletedAtIsNull(1L)).thenReturn(true);
+            when(themeRepository.existsThemeByIdAndNotDeleted(1L)).thenReturn(true);
 
             themeService.deleteThemeById(1L);
         }
@@ -157,7 +158,7 @@ class ThemeServiceTest {
         @Test
         void 존재하지_않는_테마_ID이면_예외가_발생한다() {
             // given
-            when(themeRepository.existsThemeByIdAndDeletedAtIsNull(999L)).thenReturn(false);
+            when(themeRepository.existsThemeByIdAndNotDeleted(999L)).thenReturn(false);
 
             // when & then
             assertThatThrownBy(() -> themeService.deleteThemeById(999L))

@@ -31,6 +31,7 @@ import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
+import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.feature.time.domain.Time;
@@ -69,7 +70,7 @@ class ReservationServiceTest {
     }
 
     private Theme themeWithId(Long id) {
-        return Theme.reconstruct(id, "테마 이름", "테마 설명", "https://example.com/theme.png", null);
+        return Theme.reconstruct(id, "테마 이름", "테마 설명", "https://example.com/theme.png", ThemeStatus.ACTIVE);
     }
 
     @Nested
@@ -200,7 +201,7 @@ class ReservationServiceTest {
             Reservation saved = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
                 .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
@@ -223,7 +224,7 @@ class ReservationServiceTest {
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveReservation(command))
@@ -241,7 +242,7 @@ class ReservationServiceTest {
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 999L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
+            when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveReservation(command))
@@ -261,7 +262,7 @@ class ReservationServiceTest {
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
                 .thenReturn(true);
 
@@ -286,7 +287,7 @@ class ReservationServiceTest {
             Reservation saved = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
@@ -308,7 +309,7 @@ class ReservationServiceTest {
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
                 .thenAnswer(invocation -> {
@@ -328,7 +329,7 @@ class ReservationServiceTest {
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 999L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
+            when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
@@ -350,7 +351,7 @@ class ReservationServiceTest {
             Time existingTime = timeWithId(1L);
             Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), null);
             Theme existingTheme = themeWithId(1L);
-            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", null);
+            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", ThemeStatus.ACTIVE);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
             LocalDate newDate = futureDate.plusDays(1);
@@ -361,7 +362,7 @@ class ReservationServiceTest {
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTime));
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTheme));
+            when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
             when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
                 newDate, newTime, newTheme, 1L)).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
@@ -486,7 +487,7 @@ class ReservationServiceTest {
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
-            when(themeRepository.findThemeByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
+            when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
