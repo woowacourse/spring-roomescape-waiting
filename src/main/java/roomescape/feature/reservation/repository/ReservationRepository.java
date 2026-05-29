@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
+import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 
@@ -12,7 +13,7 @@ public interface ReservationRepository {
 
     List<Reservation> findReservationsByNotDeleted();
 
-    List<Reservation> findReservationsByNameAndNotDeleted(String name);
+    List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);
 

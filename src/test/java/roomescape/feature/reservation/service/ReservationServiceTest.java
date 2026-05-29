@@ -123,9 +123,9 @@ class ReservationServiceTest {
 
         @Test
         void 이름에_해당하는_예약이_없으면_빈_목록을_반환한다() {
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자")).thenReturn(List.of());
+            when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자"))).thenReturn(List.of());
 
-            assertThat(reservationService.getReservationsByName("예약자")).isEmpty();
+            assertThat(reservationService.getReservationsByName(new ReserverName("예약자"))).isEmpty();
         }
 
         @Test
@@ -136,13 +136,13 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 2L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
+            when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
                 .thenReturn(List.of(waiting));
             when(reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(2L, date, time, theme))
                 .thenReturn(2);
 
             // when
-            List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");
+            List<ReservationResponseDto> result = reservationService.getReservationsByName(new ReserverName("예약자"));
 
             // then
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.WAITING);
@@ -157,11 +157,11 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
+            when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
                 .thenReturn(List.of(past));
 
             // when
-            List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");
+            List<ReservationResponseDto> result = reservationService.getReservationsByName(new ReserverName("예약자"));
 
             // then
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.LOCKED);
@@ -175,11 +175,11 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, deletedTime, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
+            when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
                 .thenReturn(List.of(reservation));
 
             // when
-            List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");
+            List<ReservationResponseDto> result = reservationService.getReservationsByName(new ReserverName("예약자"));
 
             // then
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.EDIT_RECOMMENDED);
@@ -538,7 +538,7 @@ class ReservationServiceTest {
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceled);
 
             // when
-            ReservationCancelResponseDto result = reservationService.cancelReservation(1L, "예약자");
+            ReservationCancelResponseDto result = reservationService.cancelReservation(1L, new ReserverName("예약자"));
 
             // then
             assertThat(result.id()).isEqualTo(1L);
@@ -552,7 +552,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelReservation(999L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelReservation(999L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
         }
@@ -569,7 +569,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelReservation(1L, "다른사람"))
+            assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("다른사람")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 취소할 권한이 없습니다.");
         }
@@ -586,7 +586,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(canceled));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelReservation(1L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("활성된 예약이 아닙니다.");
         }
@@ -603,7 +603,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(past));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelReservation(1L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
         }
@@ -627,7 +627,7 @@ class ReservationServiceTest {
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
 
             // when
-            ReservationCancelResponseDto result = reservationService.cancelWaitingReservation(1L, "예약자");
+            ReservationCancelResponseDto result = reservationService.cancelWaitingReservation(1L, new ReserverName("예약자"));
 
             // then
             assertThat(result.id()).isEqualTo(1L);
@@ -640,7 +640,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(999L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(999L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
         }
@@ -657,7 +657,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(waiting));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, "다른사람"))
+            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, new ReserverName("다른사람")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 취소할 권한이 없습니다.");
         }
@@ -674,7 +674,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(active));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("대기중인 예약이 아닙니다.");
         }
@@ -691,7 +691,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(pastWaiting));
 
             // when & then
-            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, "예약자"))
+            assertThatThrownBy(() -> reservationService.cancelWaitingReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
         }

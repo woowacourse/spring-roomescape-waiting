@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.feature.reservation.dto.request.ReservationUpdateRequestDto;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
@@ -44,7 +45,7 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.getReservationsByName(name));
+        return ResponseEntity.ok(reservationService.getReservationsByName(new ReserverName(name)));
     }
 
     @PostMapping
@@ -70,7 +71,7 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelReservation(id, name));
+        return ResponseEntity.ok(reservationService.cancelReservation(id, new ReserverName(name)));
     }
 
     @PostMapping("/waitings")
@@ -88,6 +89,6 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, name));
+        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, new ReserverName(name)));
     }
 }

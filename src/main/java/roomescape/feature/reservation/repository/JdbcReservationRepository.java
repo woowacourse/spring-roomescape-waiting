@@ -84,7 +84,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByNameAndNotDeleted(String name) {
+    public List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
@@ -97,7 +97,7 @@ public class JdbcReservationRepository implements ReservationRepository {
               AND r.status <> 'DELETED'
             ORDER BY r.date ASC, rt.start_at ASC
             """;
-        SqlParameterSource parameters = new MapSqlParameterSource("name", name);
+        SqlParameterSource parameters = new MapSqlParameterSource("name", name.value());
 
         return jdbcTemplate.query(
             sql,

@@ -233,7 +233,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("브라운"));
 
             // then
             assertThat(actual)
@@ -250,7 +250,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("제이슨");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("제이슨"));
 
             // then
             assertThat(actual).isEmpty();
@@ -267,7 +267,7 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("브라운"));
 
             // then
             assertThat(actual).hasSize(1);
@@ -291,7 +291,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), date.minusDays(1), time3, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("브라운"));
 
             // then
             assertThat(actual)

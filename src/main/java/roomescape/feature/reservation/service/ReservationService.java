@@ -14,6 +14,7 @@ import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
+import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
@@ -63,7 +64,7 @@ public class ReservationService {
             reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
-    public List<ReservationResponseDto> getReservationsByName(String name) {
+    public List<ReservationResponseDto> getReservationsByName(ReserverName name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
         return reservations.stream()
             .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
@@ -188,11 +189,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelReservation(Long id, String name) {
+    public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().value().equals(name)) {
+        if (!reservation.getName().equals(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
@@ -237,11 +238,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelWaitingReservation(Long id, String name) {
+    public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().value().equals(name)) {
+        if (!reservation.getName().equals(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
