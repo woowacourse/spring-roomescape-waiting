@@ -2,7 +2,7 @@ package roomescape.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
-import roomescape.domain.WaitingWithRank;
+import roomescape.dao.dto.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

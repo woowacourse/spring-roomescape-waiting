@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
+import roomescape.dao.dto.WaitingWithRank;
 import roomescape.dao.WaitingDao;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
