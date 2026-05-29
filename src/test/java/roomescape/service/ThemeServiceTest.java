@@ -57,7 +57,7 @@ class ThemeServiceTest {
         given(themeDao.save(any())).willReturn(saved);
 
         ThemeCommand command = new ThemeCommand(themeNameValue, descriptionValue, file);
-        ThemeResult result = themeService.create(command);
+        ThemeResult result = themeService.createTheme(command);
 
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.name()).isEqualTo(saved.getName().value());
@@ -83,7 +83,7 @@ class ThemeServiceTest {
 
     @Test
     public void 테마_삭제_정상_테스트() {
-        themeService.delete(themeId);
+        themeService.deleteTheme(themeId);
 
         verify(themeDao).delete(themeId);
     }
