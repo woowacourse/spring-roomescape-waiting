@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +49,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting waiting = ReservationWaiting.createNew(
                 reservation,
                 "아루",
-                LocalTime.parse("12:00")
+                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
 
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(waiting);
@@ -76,11 +78,11 @@ class JdbcReservationWaitingRepositoryTest {
         jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
                 "아루",
-                LocalTime.parse("12:00")
+                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         ));
 
         assertThrows(DataIntegrityViolationException.class, () -> jdbcReservationWaitingRepository.save(
-                ReservationWaiting.createNew(reservation, "아루", LocalTime.parse("12:01"))
+                ReservationWaiting.createNew(reservation, "아루", LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
         ));
     }
 
@@ -91,7 +93,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
                 "아루",
-                LocalTime.parse("12:00")
+                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
@@ -113,7 +115,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
                 "아루",
-                LocalTime.parse("12:00")
+                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
@@ -135,7 +137,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
                 "아루",
-                LocalTime.parse("12:00")
+                LocalDateTime.parse("2026-08-29 12:00:00",  DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         ));
 
         int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(999L, "아루");

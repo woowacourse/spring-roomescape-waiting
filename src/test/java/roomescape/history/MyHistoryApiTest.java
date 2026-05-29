@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,8 +33,8 @@ class MyHistoryApiTest {
         createReservationTime(2L, "11:00:00");
         createReservation(1L, "아루", LocalDate.parse("2026-08-06"), 1L, 1L);
         createReservation(2L, "쿠다", LocalDate.parse("2026-08-07"), 1L, 2L);
-        createReservationWaiting(1L, 2L, "다른이름", "11:59:00");
-        createReservationWaiting(2L, 2L, "아루", "12:00:00");
+        createReservationWaiting(1L, 1L, "다른이름", "2026-05-29 10:00:00");
+        createReservationWaiting(2L, 1L, "아루", "2026-05-30 09:00:00");
     }
 
     @Test
@@ -49,10 +50,27 @@ class MyHistoryApiTest {
                 .andExpect(jsonPath("$[0].sequence").value(0))
                 .andExpect(jsonPath("$[1].status").value("WAITING"))
                 .andExpect(jsonPath("$[1].name").value("아루"))
-                .andExpect(jsonPath("$[1].date").value("2026-08-07"))
+                .andExpect(jsonPath("$[1].date").value("2026-08-06"))
                 .andExpect(jsonPath("$[1].theme.name").value("미술관의 밤"))
-                .andExpect(jsonPath("$[1].time.startAt").value("11:00:00"))
+                .andExpect(jsonPath("$[1].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[1].sequence").value(2));
+    }
+
+    @Test
+    @DisplayName("등록 날짜가 다르면 날짜 + 시간 기준으로 순번이 결정된다")
+    void sequenceIsOrderedByRegistrationDateTime() throws Exception {
+        // 어제 10:00 등록
+        createReservationWaiting(3L, 2L, "먼저등록",
+                String.valueOf(LocalDateTime.now().minusDays(1).withHour(10)));
+        // 오늘 09:00 등록
+        createReservationWaiting(4L, 2L, "나중등록",
+                String.valueOf(LocalDateTime.now().withHour(9)));
+
+        mockMvc.perform(get("/historys/먼저등록"))
+                .andExpect(jsonPath("$[0].sequence").value(1));
+
+        mockMvc.perform(get("/historys/나중등록"))
+                .andExpect(jsonPath("$[0].sequence").value(2));
     }
 
     private void clearTables() {
