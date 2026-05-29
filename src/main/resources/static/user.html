@@ -1001,16 +1001,13 @@
     document.getElementById('my-empty').style.display = 'none';
 
     try {
-      const [resData, waitData] = await Promise.all([
-        fetch(`${API}/reservations?username=${encodeURIComponent(username)}`).then(r => r.json()),
-        fetch(`${API}/reservations/waiting?username=${encodeURIComponent(username)}`).then(r => r.json())
-      ]);
+      const res = await fetch(`${API}/reservations/me?username=${encodeURIComponent(username)}`);
+      if (!res.ok) {
+        throw new Error('Failed to load reservations');
+      }
+      const { reservations: all = [] } = await res.json();
 
       document.getElementById('my-loading').style.display = 'none';
-
-      const reservations = (resData.reservations || []).map(r => ({ ...r, type: 'reservation' }));
-      const waitings = (waitData.reservations || []).map(w => ({ ...w, type: 'waiting' }));
-      const all = [...reservations, ...waitings].sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
 
       if (!all.length) {
         document.getElementById('my-empty').style.display = 'block';
@@ -1019,7 +1016,8 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = all.map(item => {
-        const isWaiting = item.type === 'waiting';
+        const isWaiting = item.reservationStatus === 'WAITING';
+        const type = isWaiting ? 'waiting' : 'reservation';
         const badge = isWaiting
           ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
           : `<span class="status-badge badge-reserved">예약</span>`;
@@ -1030,7 +1028,7 @@
             <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
           `;
         return `
-          <div class="reservation-item" id="item-${item.type}-${item.id}">
+          <div class="reservation-item" id="item-${type}-${item.id}">
             <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
             <div class="reservation-info">
               <div class="reservation-theme">${item.themeName}</div>
@@ -1061,14 +1059,8 @@
         showToast(message || '취소에 실패했습니다.', 'error');
         return;
       }
-      document.getElementById(`item-${type}-${id}`)?.remove();
       showToast(`${label}가 취소되었습니다.`);
-
-      const remaining = document.querySelectorAll('.reservation-item');
-      if (!remaining.length) {
-        document.getElementById('my-list').style.display = 'none';
-        document.getElementById('my-empty').style.display = 'block';
-      }
+      await loadMyReservations();
     } catch (e) {
       showToast('취소에 실패했습니다.', 'error');
     }
