@@ -41,3 +41,6 @@ out/
 _bmad
 _bmad-output
 design-artifacts
+
+# iterative-refactor progress files
+progression/

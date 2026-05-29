@@ -4,7 +4,7 @@
 
 ## ✅ 리팩토링 할 것 목록
 
-- [ ] **1. `ObjectMapper` Bean 전역 설정으로 `@JsonFormat(pattern = "HH:mm")` 중복 제거**
+- [x] **1. `ObjectMapper` Bean 전역 설정으로 `@JsonFormat(pattern = "HH:mm")` 중복 제거**
   - `JacksonConfig` 설정 클래스 생성 — `LocalTime` 기본 포맷을 `HH:mm`으로 전역 등록
   - 대상:
     - `AdminReservationResponse.java` — 생성자 파라미터 `LocalTime time`

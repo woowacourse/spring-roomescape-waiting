@@ -1,6 +1,5 @@
 package roomescape.controller.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
@@ -10,7 +9,7 @@ public record AdminReservationResponse(long id,
                                        String name,
                                        LocalDate date,
                                        String themeName,
-                                       @JsonFormat(pattern = "HH:mm") LocalTime time) {
+                                       LocalTime time) {
     public static AdminReservationResponse from(Reservation reservation, Theme theme) {
         return new AdminReservationResponse(
                 reservation.getId(),

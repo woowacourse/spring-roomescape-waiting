@@ -1,6 +1,5 @@
 package roomescape.controller.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 
@@ -13,7 +12,7 @@ public record ReservationWaitingResponse(
         String themeName,
         String themeDescription,
         String themeThumbnailUrl,
-        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        LocalTime time,
         long waitingNumber
 ) {
     public static ReservationWaitingResponse from(Reservation reservation, Theme theme, long waitingNumber) {
