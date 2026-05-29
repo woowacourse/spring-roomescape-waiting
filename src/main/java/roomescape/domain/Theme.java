@@ -13,7 +13,7 @@ public class Theme {
         return new Theme(id, name, thumbnailUrl, description);
     }
 
-    public long id() {
+    public Long id() {
         return id;
     }
 

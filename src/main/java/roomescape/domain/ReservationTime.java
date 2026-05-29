@@ -31,7 +31,7 @@ public class ReservationTime {
         return startAt;
     }
 
-    public long id() {
+    public Long id() {
         return id;
     }
 }
