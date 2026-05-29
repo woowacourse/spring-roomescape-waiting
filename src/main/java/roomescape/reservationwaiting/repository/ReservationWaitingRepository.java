@@ -2,6 +2,7 @@ package roomescape.reservationwaiting.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 
 public interface ReservationWaitingRepository {
@@ -15,5 +16,5 @@ public interface ReservationWaitingRepository {
 
     boolean existsByNameAndReservationId(String name, Long reservationId);
 
-    ReservationWaiting findReservationWaitingById(Long reservationWaitingId);
+    Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId);
 }

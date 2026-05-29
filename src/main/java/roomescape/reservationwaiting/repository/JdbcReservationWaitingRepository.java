@@ -3,6 +3,7 @@ package roomescape.reservationwaiting.repository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -110,7 +111,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public ReservationWaiting findReservationWaitingById(Long reservationWaitingId) {
+    public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
         String query = """
                 SELECT * FROM (
                 SELECT rw.id as reservation_waiting_id, rw.name,
@@ -124,6 +125,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 WHERE sub.reservation_waiting_id = ? 
                 ORDER BY reservation_waiting_id;
                 """;
-        return jdbcTemplate.queryForObject(query, rowMapper, reservationWaitingId);
+        return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 }

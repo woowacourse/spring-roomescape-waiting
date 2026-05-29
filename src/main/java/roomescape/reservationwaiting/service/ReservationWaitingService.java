@@ -3,6 +3,7 @@ package roomescape.reservationwaiting.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BusinessException;
@@ -50,7 +51,7 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteWaiting(Long id) {
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.findReservationWaitingById(id);
+        ReservationWaiting reservationWaiting = getById(id);
         Reservation reservation = reservationWaiting.getReservation();
         if (reservation.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
@@ -66,5 +67,11 @@ public class ReservationWaitingService {
         return reservationWaitings.stream()
                 .map(waiting -> ReservationWaitingTurnResponse.from(waiting, turns.get(waiting.getId())))
                 .toList();
+    }
+
+    @NonNull
+    private ReservationWaiting getById(Long id) {
+        return reservationWaitingRepository.findReservationWaitingById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_NOT_FOUND));
     }
 }

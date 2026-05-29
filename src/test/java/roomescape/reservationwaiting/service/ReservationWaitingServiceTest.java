@@ -94,6 +94,16 @@ public class ReservationWaitingServiceTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 대기 ID로 삭제 시 예외 발생")
+    void 없는_대기_삭제_실패() {
+        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(999L))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.WAITING_NOT_FOUND))
+                .hasMessage(ErrorCode.WAITING_NOT_FOUND.getMessage());
+    }
+
+    @Test
     @DisplayName("사용자의 이름으로 대기 현황을 조회한다.")
     void 예약_대기_조회() {
         reservationWaitingService.createWaiting(new ReservationWaitingRequest("현미밥", futureReservationId2));

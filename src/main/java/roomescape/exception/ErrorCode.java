@@ -14,6 +14,7 @@ public enum ErrorCode {
 
     // 404 - NOT_FOUND
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
+    WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대기입니다."),
     TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 시간대입니다."),
     THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."),
 
