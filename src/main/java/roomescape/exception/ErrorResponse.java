@@ -1,9 +1,9 @@
 package roomescape.exception;
 
-public class GlobalErrorResponse {
+public class ErrorResponse {
     private final String message;
 
-    public GlobalErrorResponse(String message) {
+    public ErrorResponse(String message) {
         this.message = message;
     }
 

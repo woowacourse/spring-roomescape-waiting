@@ -1,46 +1,64 @@
 package roomescape.exception;
 
-import org.springframework.dao.DuplicateKeyException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<GlobalErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         return ResponseEntity
-                .badRequest()
-                .body(new GlobalErrorResponse(e.getMessage()));
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<GlobalErrorResponse> handleDuplicateKeyException(DuplicateKeyException e) {
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("잘못된 입력 형식입니다."));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyExistsException(AlreadyExistsException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new GlobalErrorResponse("중복된 요청입니다. 다시 시도 해주세요"));
+                .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(IdNotFoundException.class)
-    public ResponseEntity<GlobalErrorResponse> handleIdNotFoundException(IdNotFoundException e) {
+    @ExceptionHandler(AlreadyInUseException.class)
+    public ResponseEntity<ErrorResponse> handleAlreadyInUseException(AlreadyInUseException e) {
         return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new GlobalErrorResponse(e.getMessage()));
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(e.getMessage()));
     }
 
-    @ExceptionHandler(NameNotFoundException.class)
-    public ResponseEntity<GlobalErrorResponse> handleNameNotFoundException(NameNotFoundException e) {
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(new GlobalErrorResponse(e.getMessage()));
+                .body(new ErrorResponse(e.getMessage()));
     }
+
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<GlobalErrorResponse> handleUnhandledException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleUnhandledException(Exception e) {
+        log.error("Exception", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new GlobalErrorResponse("서버 내부에서 예상치 못한 오류가 발생했습니다. 다시 시도 해주세요."));
+                .body(new ErrorResponse("서버 내부에서 예상치 못한 오류가 발생했습니다. 다시 시도 해주세요."));
     }
 }
