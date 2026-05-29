@@ -140,4 +140,47 @@ class JdbcWaitingRepositoryTest {
         Long rank = waitingRepository.getRank(waiting);
         assertThat(rank).isEqualTo(3L);
     }
+
+    @DisplayName("대기가 여러개 있을 때 첫번째 대기만 조회해오는 것을 테스트합니다.")
+    @Test
+    void find_first_waiting() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long firstWaitingId = testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피노",
+                date,
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                date,
+                themeId,
+                timeId
+        );
+        User stark = ReservationFixture.userNameStark();
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        Waiting waiting = waitingRepository.findFirstBySlot(slot)
+                .orElseThrow();
+
+        SoftAssertions.assertSoftly(assertSoftly -> {
+            assertSoftly.assertThat(waiting.getId()).isEqualTo(firstWaitingId);
+            assertSoftly.assertThat(waiting.getUser()).isEqualTo(stark);
+            assertSoftly.assertThat(waiting.getSlot()).isEqualTo(slot);
+        });
+
+    }
 }
