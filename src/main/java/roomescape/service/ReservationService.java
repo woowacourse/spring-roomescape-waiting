@@ -75,6 +75,7 @@ public class ReservationService {
     public ReservationResult updateDateTime(Long id, ReservationCommand command) {
         Reservation origin = getReservation(id);
         origin.validateOwner(command.name());
+        validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
 
         boolean isSuccessful = reservationDao.update(modified);

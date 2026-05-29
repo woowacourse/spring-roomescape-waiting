@@ -109,7 +109,7 @@ class ReservationApiTest {
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + id + "?userName=" + userName)
                 .then().log().all()
-                .statusCode(422)
+                .statusCode(403)
                 .body("message", is("다른 사람의 예약은 취소/변경할 수 없습니다."));
     }
 
@@ -157,10 +157,18 @@ class ReservationApiTest {
 
     @Test
     void 예약과_예약_대기_조회_API() {
-        RestAssured.given().log().all()
-                .when().get("/reservations?userName=" + "토리")
-                .then().log().all()
-                .statusCode(200);
+        JsonPath body = getReservationsByUserName("토리");
+        List<Map<String, Object>> details = body.getList("reservationDetailResponses");
+
+        long reservedCount = details.stream()
+                .filter(r -> r.get("status").equals("RESERVED"))
+                .count();
+        long waitingCount = details.stream()
+                .filter(r -> r.get("status").equals("WAITING"))
+                .count();
+
+        assertThat(reservedCount).isEqualTo(5);
+        assertThat(waitingCount).isEqualTo(1);
     }
 
     @Test

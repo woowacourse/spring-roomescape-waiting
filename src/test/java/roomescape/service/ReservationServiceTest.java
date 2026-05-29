@@ -1,124 +1,276 @@
 package roomescape.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
-import static roomescape.config.FixedClockConfig.TODAY;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import org.junit.jupiter.api.DisplayName;
+import java.time.LocalTime;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
+import roomescape.config.FixedClockConfig;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.UserName;
+import roomescape.domain.reservation.theme.Description;
+import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.reservation.theme.ThemeName;
+import roomescape.domain.reservation.theme.ThumbnailUrl;
+import roomescape.domain.reservation.time.ReservationTime;
 import roomescape.service.dto.command.ReservationCommand;
+import roomescape.service.dto.result.ReservationResult;
+import roomescape.service.dto.result.ReservationTimeResult;
+import roomescape.service.dto.result.ThemeResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationServiceTest {
-    private final String name = "브라운";
+@ExtendWith(MockitoExtension.class)
+class ReservationServiceTest {
+    private final String userName = "로운";
     private final LocalDate futureDate = LocalDate.parse(FUTURE_DATE);
-    private final Long timeId = 1L;
-    private final Long themeId = 1L;
+    private final LocalDate pastDate = LocalDate.parse("2026-05-09");
 
-    @Autowired
+    private final Long timeId = 1L;
+    private final ReservationTime time = new ReservationTime(timeId, LocalTime.parse("10:00"));
+
+    private final Long themeId = 11L;
+    private final Theme theme = new Theme(
+            themeId,
+            ThemeName.parse("저주받은 저택"),
+            Description.parse("100년 전 사라진 가문의 비밀을 파헤쳐라"),
+            ThumbnailUrl.parse("/images/cursed-mansion")
+    );
+
+    private final Long reservationId = 1L;
+
+    private final Clock fixedClock = new FixedClockConfig().testClock();
+
     private ReservationService reservationService;
 
-    @Test
-    @DisplayName("정상 예약을 생성하면 통과한다.")
-    void 정상_예약_생성_테스트() {
-        ReservationCommand command = new ReservationCommand(
-                name,
-                futureDate,
-                timeId,
-                themeId
-        );
+    @Mock
+    private ReservationDao reservationDao;
+    @Mock
+    private ReservationTimeDao reservationTimeDao;
+    @Mock
+    private ThemeDao themeDao;
+    @Mock
+    private WaitingDao waitingDao;
 
-        assertDoesNotThrow(() -> reservationService.save(command));
+    @BeforeEach
+    public void setUp() {
+        reservationService = new ReservationService(
+                reservationDao, reservationTimeDao, themeDao, waitingDao, fixedClock
+        );
     }
 
     @Test
-    @DisplayName("존재하지 않는 시간 식별자로 예약하면 예외가 발생한다")
-    void 없는_시간_식별자_예외_테스트() {
-        Long invalidTimeId = 999L;
-        ReservationCommand command = new ReservationCommand(
-                name,
-                futureDate,
-                invalidTimeId,
-                themeId
-        );
+    public void 예약_생성_정상_테스트() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation saved = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.save(any())).willReturn(saved);
+
+        ReservationResult result = reservationService.save(command);
+
+        assertThat(result.id()).isEqualTo(saved.getId());
+        assertThat(result.name()).isEqualTo(saved.getName().value());
+        assertThat(result.date()).isEqualTo(saved.getDate());
+        assertThat(result.timeResult()).isEqualTo(ReservationTimeResult.from(saved.getTime()));
+        assertThat(result.themeResult()).isEqualTo(ThemeResult.from(saved.getTheme()));
+    }
+
+    @Test
+    public void 존재하지_않는_시간으로_예약하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("존재하지 않는 시간입니다.");
+                .hasMessage("존재하지 않는 시간입니다.");
+
+        verify(reservationDao, never()).save(any());
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마 식별자로 예약하면 예외가 발생한다")
-    void 없는_테마_식별자_예외_테스트() {
-        Long invalidThemeId = 999L;
-        ReservationCommand command = new ReservationCommand(
-                name,
-                futureDate,
-                timeId,
-                invalidThemeId
-        );
+    public void 존재하지_않는_테마로_예약하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("존재하지 않는 테마입니다.");
+                .hasMessage("존재하지 않는 테마입니다.");
+
+        verify(reservationDao, never()).save(any());
     }
 
     @Test
-    @DisplayName("과거의 시점으로 예약을 하면 예외가 발생한다.")
-    void 과거_예약_생성_예외_테스트() {
-        LocalDate date = LocalDate.parse(TODAY);
-        Long timeId = 1L;
-        ReservationCommand command = new ReservationCommand(
-                name,
-                date,
-                timeId,
-                themeId
-        );
+    public void 과거_시간으로_예약하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, pastDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
 
         assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("이미 지난 시간입니다.");
+                .hasMessage("이미 지난 시간입니다.");
+
+        verify(reservationDao, never()).save(any());
     }
 
     @Test
-    @DisplayName("이미 존재하는 예약 건과 중복으로 예약하면 예외가 발생한다.")
-    void 중복_예약_예외_테스트() {
-        Long timeId = 5L;
-        ReservationCommand command = new ReservationCommand(
-                name,
-                futureDate,
-                timeId,
-                themeId
-        );
+    public void 중복된_슬롯에_예약하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.existsBy(futureDate, theme, time)).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("이미 존재하는 예약 건입니다.");
+                .hasMessage("이미 존재하는 예약 건입니다.");
+
+        verify(reservationDao, never()).save(any());
     }
 
     @Test
-    @DisplayName("다른 사람의 예약을 변경하려하면 예외가 발생한다.")
-    void 타인_예약_변경_예외_테스트() {
-        Long id = 24L;
-        String otherName = "브리";
-        ReservationCommand command = new ReservationCommand(
-                otherName,
-                futureDate,
-                timeId,
-                themeId
-        );
+    public void 예약_변경_정상_테스트() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(id, command))
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.update(any())).willReturn(true);
+
+        ReservationResult result = reservationService.updateDateTime(reservationId, command);
+
+        assertThat(result.id()).isEqualTo(reservationId);
+        assertThat(result.name()).isEqualTo(userName);
+        assertThat(result.date()).isEqualTo(futureDate);
+        verify(reservationDao).update(any());
+    }
+
+    @Test
+    public void 존재하지_않는_예약을_변경하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("삭제하려는 예약이 존재하지 않습니다.");
+
+        verify(reservationDao, never()).update(any());
+    }
+
+    @Test
+    public void 타인의_예약을_변경하면_예외가_발생한다() {
+        String otherUser = "다른사람";
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(otherUser), futureDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약은 취소/변경할 수 없습니다.");
+
+        verify(reservationDao, never()).update(any());
+    }
+
+    @Test
+    public void 지나간_예약을_변경하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
                 .isInstanceOf(UnprocessableEntityException.class)
-                .hasMessageContaining("다른 사람의 예약은 취소/변경할 수 없습니다.");
+                .hasMessage("이미 지난 시간입니다.");
+
+        verify(reservationDao, never()).update(any());
+    }
+
+    @Test
+    public void 예약_변경_저장에_실패하면_충돌_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.update(any())).willReturn(false);
+
+        assertThatThrownBy(() -> reservationService.updateDateTime(reservationId, command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+    }
+
+    @Test
+    public void 예약_취소_정상_테스트() {
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        reservationService.delete(reservationId, userName);
+
+        verify(reservationDao).delete(reservationId);
+    }
+
+    @Test
+    public void 존재하지_않는_예약을_취소하면_예외가_발생한다() {
+        given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("삭제하려는 예약이 존재하지 않습니다.");
+
+        verify(reservationDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 타인의_예약을_취소하면_예외가_발생한다() {
+        String otherUser = "다른사람";
+        Reservation origin = new Reservation(reservationId, UserName.parse(otherUser), futureDate, time, theme);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약은 취소/변경할 수 없습니다.");
+
+        verify(reservationDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 과거_예약을_취소하면_예외가_발생한다() {
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        assertThatThrownBy(() -> reservationService.delete(reservationId, userName))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("이미 지난 시간입니다.");
+
+        verify(reservationDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 관리자_예약_삭제_정상_테스트() {
+        reservationService.delete(reservationId);
+
+        verify(reservationDao).delete(reservationId);
     }
 }
