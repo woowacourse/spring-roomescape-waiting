@@ -2,10 +2,12 @@ package roomescape.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import roomescape.config.UploadProperties;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
@@ -13,11 +15,12 @@ import roomescape.dto.response.ThemeResponse;
 
 @Service
 public class ThemeService {
-    private final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
+    private final String uploadDir;
     private final ThemeDao themeDao;
 
-    public ThemeService(ThemeDao themeDao) {
+    public ThemeService(ThemeDao themeDao, UploadProperties uploadProperties) {
         this.themeDao = themeDao;
+        this.uploadDir = uploadProperties.imagesDir();
     }
 
     public List<ThemeResponse> findAllThemes() {
@@ -37,16 +40,14 @@ public class ThemeService {
     public ThemeResponse create(ThemeRequest request) {
         MultipartFile file = request.file();
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String filePath = uploadDir + fileName;
+        File directory = new File(uploadDir);
+        File target = Path.of(uploadDir, fileName).toFile();
 
         try {
-            File directory = new File(uploadDir);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-
-            file.transferTo(new File(filePath));
-
+            file.transferTo(target);
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장에 실패했습니다.", e);
         }
