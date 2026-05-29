@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS waiting;
+DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
@@ -32,7 +32,7 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );
 
-CREATE TABLE waiting
+CREATE TABLE reservation_waiting
 (
     id         BIGINT       NOT NULL AUTO_INCREMENT,
     name       VARCHAR(255) NOT NULL,

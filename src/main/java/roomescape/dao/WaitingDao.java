@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.dao.dto.WaitingWithRank;
 import roomescape.domain.*;
 import roomescape.exception.ResourceNotFoundException;
 
@@ -74,7 +75,7 @@ public class WaitingDao {
     public WaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insertExecutor = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("waiting")
+                .withTableName("reservation_waiting")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -93,7 +94,7 @@ public class WaitingDao {
 
     public void delete(Waiting waiting) {
         String sql = """
-                DELETE FROM waiting WHERE id = ?
+                DELETE FROM reservation_waiting WHERE id = ?
                 """;
         int affected = jdbcTemplate.update(sql, waiting.id());
 
@@ -115,7 +116,7 @@ public class WaitingDao {
                     theme.thumbnail_url as thumbnail_url,
                     theme.description as theme_description,
                     waiting.created_at as created_at
-                FROM waiting as waiting
+                FROM reservation_waiting as waiting
                 INNER JOIN reservation_time as time
                 ON waiting.time_id = time.id
                 INNER JOIN theme as theme
@@ -141,7 +142,7 @@ public class WaitingDao {
                     theme.thumbnail_url as thumbnail_url,
                     theme.description as theme_description,
                     waiting.created_at as created_at
-                FROM waiting as waiting
+                FROM reservation_waiting as waiting
                 INNER JOIN reservation_time as time
                 ON waiting.time_id = time.id
                 INNER JOIN theme as theme
@@ -168,7 +169,7 @@ public class WaitingDao {
                 FROM (
                     SELECT *,
                            RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC) AS waiting_rank
-                    FROM waiting
+                    FROM reservation_waiting
                 ) AS ranked_waiting
                 INNER JOIN reservation_time AS time ON ranked_waiting.time_id = time.id
                 INNER JOIN theme ON ranked_waiting.theme_id = theme.id

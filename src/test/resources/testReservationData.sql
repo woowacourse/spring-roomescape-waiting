@@ -1,6 +1,6 @@
 SET REFERENTIAL_INTEGRITY FALSE;
 TRUNCATE TABLE reservation RESTART IDENTITY;
-TRUNCATE TABLE waiting RESTART IDENTITY;
+TRUNCATE TABLE reservation_waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 SET REFERENTIAL_INTEGRITY TRUE;
@@ -28,18 +28,18 @@ INSERT INTO reservation (name, date, time_id, theme_id)
 VALUES ('user_c', '2026-06-05', 1, 1);
 
 -- 과거 예약 대기 (id=1: 취소 불가 테스트용)
-INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
 VALUES ('user_d', '2026-04-28', 1, 1, '2026-04-27 10:30:00');
 
 -- 미래 예약 대기 (id=2: user_d, 2026-06-05/time2/theme1 → 취소 가능 테스트용)
-INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
 VALUES ('user_d', '2026-06-05', 2, 1, '2026-06-05 10:30:00');
 
 -- 내 예약 & 대기 조회 테스트용
 -- user_e: 2026-06-05/time1/theme1 대기 1번 (id=3)
-INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
 VALUES ('user_e', '2026-06-05', 1, 1, '2026-06-01 09:00:00');
 
 -- user_b: 2026-06-05/time1/theme1 대기 2번 (id=4) → 예약(id=2) + 대기 동시 보유
-INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+INSERT INTO reservation_waiting (name, date, time_id, theme_id, created_at)
 VALUES ('user_b', '2026-06-05', 1, 1, '2026-06-01 10:00:00');
