@@ -2,10 +2,10 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.dao.WaitingDao;
+import roomescape.dao.dto.WaitingWithRank;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
-import roomescape.dao.dto.WaitingWithRank;
-import roomescape.dao.WaitingDao;
 
 import java.util.List;
 

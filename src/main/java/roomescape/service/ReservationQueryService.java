@@ -2,8 +2,8 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
 import roomescape.dao.ReservationDao;
+import roomescape.domain.Reservation;
 
 import java.util.List;
 
@@ -14,9 +14,7 @@ public class ReservationQueryService {
     private final ReservationDao reservationDao;
 
     public List<Reservation> getAllReservations() {
-        return reservationDao.findAllReservations()
-                .stream()
-                .toList();
+        return reservationDao.findAllReservations();
     }
 
     public List<Reservation> getByName(String name) {

@@ -30,7 +30,7 @@ public class ReservationTimeDao {
                 .withTableName("reservation_time")
                 .usingGeneratedKeyColumns("id");
     }
-    
+
 
     public ReservationTime save(LocalTime startAt) {
         SqlParameterSource params = new MapSqlParameterSource()
@@ -48,7 +48,7 @@ public class ReservationTimeDao {
         String sql = "DELETE FROM reservation_time WHERE id = ?";
         int affected = jdbcTemplate.update(sql, timeId);
 
-        if(affected == 0) {
+        if (affected == 0) {
             throw new ResourceNotFoundException("요청한 시간을 찾을 수 없습니다.");
         }
     }

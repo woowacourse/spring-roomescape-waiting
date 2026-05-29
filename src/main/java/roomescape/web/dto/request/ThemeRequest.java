@@ -9,11 +9,11 @@ public record ThemeRequest(
         String thumbnailUrl,
         String description
 ) {
-        public static ThemeCommand toCommand(ThemeRequest request) {
-                return new ThemeCommand(
-                        request.name(),
-                        request.thumbnailUrl(),
-                        request.description()
-                );
-        }
+    public static ThemeCommand toCommand(ThemeRequest request) {
+        return new ThemeCommand(
+                request.name(),
+                request.thumbnailUrl(),
+                request.description()
+        );
+    }
 }

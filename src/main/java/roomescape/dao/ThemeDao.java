@@ -1,7 +1,5 @@
 package roomescape.dao;
 
-import java.time.LocalDate;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -53,7 +52,7 @@ public class ThemeDao {
                 """;
         int affected = jdbcTemplate.update(sql, theme.id());
 
-        if(affected == 0) {
+        if (affected == 0) {
             throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");
         }
     }

@@ -1,11 +1,11 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Theme;
 import roomescape.dao.ThemeDao;
+import roomescape.domain.Theme;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -21,6 +21,6 @@ public class ThemeQueryService {
 
     public List<Theme> findPopularThemesBy(LocalDate startAt, LocalDate endAt, int limit) {
         return themeDao.findSortedPopularThemesBy(startAt, endAt, limit).stream()
-                .toList() ;
+                .toList();
     }
 }

@@ -21,7 +21,7 @@ public class Reservation {
 
     public static Reservation create(String username, Slot slot, LocalDateTime now) {
         slot.validateAvailableTime(now);
-        return new Reservation (null, username, slot);
+        return new Reservation(null, username, slot);
     }
 
     public boolean isOwnedBy(String name) {

@@ -1,8 +1,8 @@
 package roomescape.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.Reservation;
 import roomescape.dao.dto.WaitingWithRank;
+import roomescape.domain.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

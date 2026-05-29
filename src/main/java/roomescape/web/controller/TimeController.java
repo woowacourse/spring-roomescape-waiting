@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationTime;
-import roomescape.web.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeQueryService;
+import roomescape.web.dto.response.ReservationTimeResponse;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -22,12 +22,12 @@ public record WaitingRequest(
         @Min(value = 1, message = "유효한 테마 ID가 필요합니다.")
         long themeId
 ) {
-        public static WaitingCommand toCommand(WaitingRequest request) {
-                return new WaitingCommand(
-                        request.name,
-                        request.date,
-                        request.timeId,
-                        request.themeId
-                );
-        }
+    public static WaitingCommand toCommand(WaitingRequest request) {
+        return new WaitingCommand(
+                request.name,
+                request.date,
+                request.timeId,
+                request.themeId
+        );
+    }
 }

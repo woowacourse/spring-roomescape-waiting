@@ -3,9 +3,9 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.dao.ReservationTimeDao;
 
 import java.time.LocalTime;
 

@@ -6,10 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.Waiting;
-import roomescape.web.dto.request.WaitingRequest;
-import roomescape.web.dto.response.WaitingResponse;
 import roomescape.service.WaitingCommandService;
 import roomescape.service.WaitingQueryService;
+import roomescape.web.dto.request.WaitingRequest;
+import roomescape.web.dto.response.WaitingResponse;
 
 import java.net.URI;
 
