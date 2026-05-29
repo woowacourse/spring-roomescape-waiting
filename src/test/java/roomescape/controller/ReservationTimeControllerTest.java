@@ -72,7 +72,7 @@ class ReservationTimeControllerTest extends ControllerTest {
 
     @DisplayName("이미 존재하는 시간이면 409")
     @Test
-    void 이미_존재하는_시간이면_400() {
+    void 이미_존재하는_시간이면_409() {
         Map<String, Object> params = new HashMap<>();
         params.put("startAt", "10:00");
 
@@ -87,7 +87,7 @@ class ReservationTimeControllerTest extends ControllerTest {
 
     @DisplayName("예약에 사용 중인 시간 삭제하면 409")
     @Test
-    void 예약에_사용중인_시간_삭제하면_400() {
+    void 예약에_사용중인_시간_삭제하면_409() {
         RestAssured.given().log().all()
                 .when().delete("/times/3")
                 .then().log().all()

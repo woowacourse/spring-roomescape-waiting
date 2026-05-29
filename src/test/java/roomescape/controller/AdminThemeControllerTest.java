@@ -55,7 +55,7 @@ class AdminThemeControllerTest extends ControllerTest {
 
     @DisplayName("예약에 사용 중인 테마 삭제하면 409")
     @Test
-    void 예약에_사용중인_테마_삭제하면_400() {
+    void 예약에_사용중인_테마_삭제하면_409() {
         RestAssured.given().log().all()
                 .pathParam("id", 1)
                 .when().delete("/admin/themes/{id}")

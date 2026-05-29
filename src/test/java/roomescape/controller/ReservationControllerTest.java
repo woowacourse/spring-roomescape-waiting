@@ -64,7 +64,7 @@ class ReservationControllerTest extends ControllerTest {
 
     @DisplayName("존재하지 않는 시간으로 예약하면 404")
     @Test
-    void 존재하지_않는_시간으로_예약하면_400() {
+    void 존재하지_않는_시간으로_예약하면_404() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", LocalDate.now().plusDays(1).toString());
@@ -82,7 +82,7 @@ class ReservationControllerTest extends ControllerTest {
 
     @DisplayName("존재하지 않는 테마로 예약하면 404")
     @Test
-    void 존재하지_않는_테마로_예약하면_400() {
+    void 존재하지_않는_테마로_예약하면_404() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", LocalDate.now().plusDays(1).toString());
