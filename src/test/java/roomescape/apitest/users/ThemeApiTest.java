@@ -19,7 +19,7 @@ class ThemeApiTest {
         LocalDate now = LocalDate.parse(TODAY);
 
         RestAssured.given().log().all()
-                .when().get("/themes/1/schedule?date=" + now)
+                .when().get("/themes/1/schedules?date=" + now)
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(9));

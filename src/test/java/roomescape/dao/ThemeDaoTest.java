@@ -10,17 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Theme;
 
 @JdbcTest
-@Import(ThemeDao.class)
+@Import({ThemeDao.class, ReservationTimeDao.class})
 class ThemeDaoTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+
     @Autowired
     private ThemeDao themeDao;
+
     @Autowired
     private ReservationTimeDao reservationTimeDao;
 
