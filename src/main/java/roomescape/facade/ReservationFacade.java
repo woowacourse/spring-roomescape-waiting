@@ -25,7 +25,6 @@ public class ReservationFacade {
 
     private static final String CANNOT_DELETE_TIME_IN_USE = "ID %d번 시간을 사용 중인 예약이 존재하여 시간을 삭제할 수 없습니다.";
     private static final String CANNOT_DELETE_THEME_IN_USE = "ID %d번 테마를 사용 중인 예약이 존재하여 테마를 삭제할 수 없습니다.";
-    private static final String PAST_RESERVATION_REJECTED = "지난 시각에는 예약할 수 없습니다.";
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
@@ -50,19 +49,14 @@ public class ReservationFacade {
     @Transactional
     public Reservation addReservation(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeService.getById(request.timeId());
-        Theme theme = themeService.findById(request.themeId());
-
-        Reservation reservation = new Reservation(
+        Theme theme = themeService.getById(request.themeId());
+        Reservation reservation = Reservation.createWith(
                 request.name(),
                 request.date(),
                 reservationTime,
-                theme
+                theme,
+                LocalDateTime.now()
         );
-
-        if (reservation.isPast(LocalDateTime.now())) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_REJECTED);
-        }
-        reservationService.validateConflict(request.date(), reservationTime.getId(), theme.getId());
 
         return reservationService.addReservation(reservation);
     }
@@ -71,20 +65,14 @@ public class ReservationFacade {
     public Reservation updateMyReservation(Long id, String name, ReservationUpdateRequest request) {
         Reservation existing = reservationService.getById(id);
         ReservationTime newTime = reservationTimeService.getById(request.timeId());
-
-        LocalDateTime now = LocalDateTime.now();
         Reservation updated = existing.updateWith(
                 name,
                 request.date(),
                 newTime,
-                now
+                LocalDateTime.now()
         );
 
-        if (!existing.isSameSlot(request.date(), newTime)) {
-            reservationService.validateConflict(request.date(), newTime.getId(), existing.getTheme().getId());
-        }
-
-        return reservationService.updateReservation(updated);
+        return reservationService.updateReservation(existing, updated);
     }
 
     public List<TimeWithStatusResponse> getTimesWithAvailability(LocalDate date, Long themeId) {

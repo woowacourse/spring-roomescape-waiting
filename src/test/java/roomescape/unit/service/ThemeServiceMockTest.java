@@ -1,5 +1,13 @@
 package roomescape.unit.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,15 +17,6 @@ import roomescape.domain.Theme;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ThemeService;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceMockTest {
@@ -29,19 +28,19 @@ class ThemeServiceMockTest {
     private ThemeService themeService;
 
     @Test
-    void findById는_존재하지_않으면_NotFoundException을_던진다() {
+    void getById는_존재하지_않으면_NotFoundException을_던진다() {
         given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> themeService.findById(1L))
+        assertThatThrownBy(() -> themeService.getById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void findById는_존재하면_테마를_반환한다() {
+    void getById는_존재하면_테마를_반환한다() {
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
 
-        assertThat(themeService.findById(1L)).isEqualTo(theme);
+        assertThat(themeService.getById(1L)).isEqualTo(theme);
     }
 
     @Test

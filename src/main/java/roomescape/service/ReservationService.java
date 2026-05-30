@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.dto.ReservationResponses;
-import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
@@ -21,7 +20,6 @@ public class ReservationService {
 
     private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
     private static final String ALREADY_EXISTS_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
-    private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
     private final ReservationRepository reservationRepository;
@@ -55,12 +53,25 @@ public class ReservationService {
 
     @Transactional
     public Reservation addReservation(Reservation reservation) {
+        validateConflict(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+
         return reservationRepository.save(reservation);
     }
 
     @Transactional
-    public Reservation updateReservation(Reservation reservation) {
-        return reservationRepository.update(reservation);
+    public Reservation updateReservation(Reservation existing, Reservation updated) {
+        if (!existing.isSameSlot(updated.getDate(), updated.getTime())) {
+            validateConflict(
+                    updated.getDate(),
+                    updated.getTime().getId(),
+                    updated.getTheme().getId()
+            );
+        }
+        return reservationRepository.update(updated);
     }
 
     @Transactional
@@ -68,15 +79,10 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    // TODO: Validate 로직 파편화
-    //  isOwnedBy가 문제인듯. 바꿀때는 도메인에서 검사하도록하면 됨.
     @Transactional
     public void cancelMyReservation(Long id, String name) {
-        Reservation reservation = findMyReservation(id, name);
-
-        if (reservation.isPast(LocalDateTime.now())) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
-        }
+        Reservation reservation = getById(id);
+        reservation.cancelBy(name, LocalDateTime.now());
 
         reservationRepository.deleteById(id);
     }
