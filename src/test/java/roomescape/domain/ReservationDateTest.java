@@ -2,10 +2,35 @@ package roomescape.domain;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 
 class ReservationDateTest {
+
+    @Test
+    void 생성_성공() {
+        // given
+        LocalDate date = LocalDate.now();
+
+        // when
+        ReservationDate reservationDate = new ReservationDate(date);
+
+        // then
+        Assertions.assertThat(reservationDate.getDate()).isEqualTo(date);
+    }
+
+    @Test
+    void 생성_null인_경우_실패() {
+        // given
+        LocalDate date = null;
+
+        // when && then
+        Assertions.assertThatThrownBy(() -> new ReservationDate(date))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_NULL);
+    }
 
     @Test
     void isPast_과거인_경우_성공() {
