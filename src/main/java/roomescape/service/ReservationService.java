@@ -130,7 +130,7 @@ public class ReservationService {
 
     private void validatePastDatetime(LocalDate date, LocalDateTime now, ReservationTime reservationTime) {
         if (reservationTime.isPast(date, now)) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
+            throw new RoomEscapeException(ReservationErrorCode.PAST_DATETIME);
         }
     }
 
