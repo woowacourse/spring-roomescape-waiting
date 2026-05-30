@@ -30,11 +30,12 @@ class AdminReservationIntegrationTest {
     @DisplayName("전체 예약 목록을 조회한다.")
     @Test
     void getAll() {
-        createThemeAndTime();
+        Long themeId = createTheme();
+        Long timeId = createTime();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationBody("라이"))
+                .body(reservationBody("라이", themeId, timeId))
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -51,11 +52,12 @@ class AdminReservationIntegrationTest {
     @DisplayName("예약을 생성한다.")
     @Test
     void create() {
-        createThemeAndTime();
+        Long themeId = createTheme();
+        Long timeId = createTime();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationBody("라이"))
+                .body(reservationBody("라이", themeId, timeId))
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201)
@@ -66,11 +68,12 @@ class AdminReservationIntegrationTest {
     @DisplayName("예약을 취소한다.")
     @Test
     void delete() {
-        createThemeAndTime();
+        Long themeId = createTheme();
+        Long timeId = createTime();
 
         long createdReservationId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationBody("라이"))
+                .body(reservationBody("라이", themeId, timeId))
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201)
@@ -99,25 +102,29 @@ class AdminReservationIntegrationTest {
                 .body("message", is("예약을 찾을 수 없습니다."));
     }
 
-    private void createThemeAndTime() {
-        RestAssured.given()
+    private Long createTheme() {
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(themeBody())
                 .when().post("/themes")
-                .then().statusCode(201);
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
 
-        RestAssured.given()
+    private Long createTime() {
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(timeBody())
                 .when().post("/times")
-                .then().statusCode(201);
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
     }
 
-    private static Map<String, Object> reservationBody(String name) {
+    private static Map<String, Object> reservationBody(String name, Long themeId, Long timeId) {
         Map<String, Object> body = new HashMap<>();
         body.put("name", name);
-        body.put("themeId", 1);
-        body.put("timeId", 1);
+        body.put("themeId", themeId);
+        body.put("timeId", timeId);
         return body;
     }
 
