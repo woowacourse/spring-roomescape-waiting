@@ -11,11 +11,11 @@ public class ReservationUpdateRequest {
     @NotNull(message = "날짜는 필수로 입력해야 합니다")
     private final LocalDate date;
 
-    @NotNull
+    @NotNull(message = "Time ID는 필수로 입력해야 합니다.")
     @Positive(message = "Time ID는 양수여야 합니다.")
     private final Long timeId;
 
-    @NotNull
+    @NotNull(message = "Theme ID는 필수로 입력해야 합니다.")
     @Positive(message = "Theme ID는 양수여야 합니다.")
     private final Long themeId;
 
