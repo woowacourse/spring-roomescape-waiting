@@ -23,34 +23,34 @@ ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 3;
 
 INSERT INTO reservation (id, name, date, theme_id, time_id)
 VALUES
-    (1, '브라운', DATE '2026-05-05', 1, 1),
-    (2, '코니', DATE '2026-05-04', 1, 1),
-    (3, '샐리', DATE '2026-05-03', 1, 2),
-    (4, '문', DATE '2026-05-02', 1, 2),
-    (5, '제시카', DATE '2026-05-01', 1, 1),
+    (1, '브라운', DATEADD('DAY', -1, CURRENT_DATE), 1, 1),
+    (2, '코니', DATEADD('DAY', -2, CURRENT_DATE), 1, 1),
+    (3, '샐리', DATEADD('DAY', -3, CURRENT_DATE), 1, 2),
+    (4, '문', DATEADD('DAY', -4, CURRENT_DATE), 1, 2),
+    (5, '제시카', DATEADD('DAY', -5, CURRENT_DATE), 1, 1),
 
-    (6, '제임스', DATE '2026-05-05', 2, 1),
-    (7, '레오', DATE '2026-05-04', 2, 1),
-    (8, '루카', DATE '2026-05-03', 2, 2),
-    (9, '앤디', DATE '2026-05-02', 2, 2),
+    (6, '제임스', DATEADD('DAY', -6, CURRENT_DATE), 2, 1),
+    (7, '레오', DATEADD('DAY', -7, CURRENT_DATE), 2, 1),
+    (8, '루카', DATEADD('DAY', -1, CURRENT_DATE), 2, 2),
+    (9, '앤디', DATEADD('DAY', -2, CURRENT_DATE), 2, 2),
 
-    (10, '레너드', DATE '2026-05-05', 3, 1),
-    (11, '초코', DATE '2026-05-04', 3, 1),
-    (12, '브이', DATE '2026-05-03', 3, 2),
+    (10, '레너드', DATEADD('DAY', -3, CURRENT_DATE), 3, 1),
+    (11, '초코', DATEADD('DAY', -4, CURRENT_DATE), 3, 1),
+    (12, '브이', DATEADD('DAY', -5, CURRENT_DATE), 3, 2),
 
-    (13, '에디', DATE '2026-05-05', 4, 1),
-    (14, '리아', DATE '2026-05-04', 4, 2),
+    (13, '에디', DATEADD('DAY', -6, CURRENT_DATE), 4, 1),
+    (14, '리아', DATEADD('DAY', -7, CURRENT_DATE), 4, 2),
 
-    (15, '마크', DATE '2026-05-05', 5, 1),
-    (16, '니나', DATE '2026-05-04', 5, 2),
+    (15, '마크', DATEADD('DAY', -1, CURRENT_DATE), 5, 1),
+    (16, '니나', DATEADD('DAY', -2, CURRENT_DATE), 5, 2),
 
-    (17, '제이', DATE '2026-05-05', 6, 1),
-    (18, '하나', DATE '2026-05-05', 7, 1),
-    (19, '오웬', DATE '2026-05-05', 8, 1),
-    (20, '소라', DATE '2026-05-05', 9, 1),
-    (21, '태오', DATE '2026-05-05', 10, 1),
+    (17, '제이', DATEADD('DAY', -3, CURRENT_DATE), 6, 1),
+    (18, '하나', DATEADD('DAY', -4, CURRENT_DATE), 7, 1),
+    (19, '오웬', DATEADD('DAY', -5, CURRENT_DATE), 8, 1),
+    (20, '소라', DATEADD('DAY', -6, CURRENT_DATE), 9, 1),
+    (21, '태오', DATEADD('DAY', -7, CURRENT_DATE), 10, 1),
 
-    (22, '미래예약1', DATE '2026-05-12', 1, 1),
-    (23, '미래예약2', DATE '2026-05-12', 2, 1);
+    (22, '미래예약1', DATEADD('DAY', +1, CURRENT_DATE), 1, 1),
+    (23, '미래예약2', DATEADD('DAY', +1, CURRENT_DATE), 2, 1);
 
 ALTER TABLE reservation ALTER COLUMN id RESTART WITH 24;
