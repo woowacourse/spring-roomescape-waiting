@@ -1,5 +1,6 @@
 package roomescape.reservationtime.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -35,11 +36,8 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTime create(LocalTime startAt) {
         ReservationTime reservationTime = new ReservationTime(startAt);
-        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
-            throw new ConflictException("이미 등록된 예약 시간입니다. 다른 시간을 입력해주세요.");
-        }
 
-        return reservationTimeRepository.save(reservationTime);
+        return save(reservationTime);
     }
 
     @Transactional(readOnly = true)
@@ -74,5 +72,13 @@ public class ReservationTimeService {
                         !reservedTimes.contains(reservationTime)
                 ))
                 .toList();
+    }
+
+    private ReservationTime save(ReservationTime reservationTime) {
+        try {
+            return reservationTimeRepository.save(reservationTime);
+        } catch (DuplicateKeyException exception) {
+            throw new ConflictException("이미 등록된 예약 시간입니다. 다른 시간을 입력해주세요.");
+        }
     }
 }

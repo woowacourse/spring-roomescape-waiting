@@ -146,19 +146,6 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existsByName(String name) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM theme
-                    WHERE name = ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name));
-    }
-
-    @Override
     public void deleteById(Long id) {
         String sql = """
                 DELETE FROM theme

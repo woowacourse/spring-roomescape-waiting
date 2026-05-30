@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -41,18 +42,9 @@ public class ReservationService {
         ReservationTime time = findTime(timeId);
         Theme theme = findTheme(themeId);
 
-        if (reservationRepository.existsConflict(
-                name,
-                date,
-                time.getId(),
-                theme.getId()
-        )) {
-            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
-        }
-
         Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
 
-        return reservationRepository.save(reservation);
+        return save(reservation);
     }
 
     @Transactional
@@ -88,7 +80,7 @@ public class ReservationService {
 
         reservationRepository.update(reservation.cancel());
 
-        return reservationRepository.save(newReservation);
+        return save(newReservation);
     }
 
     @Transactional(readOnly = true)
@@ -128,5 +120,13 @@ public class ReservationService {
     private Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("선택한 테마가 존재하지 않습니다. 다른 테마를 선택해주세요."));
+    }
+
+    private Reservation save(Reservation reservation) {
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+        }
     }
 }
