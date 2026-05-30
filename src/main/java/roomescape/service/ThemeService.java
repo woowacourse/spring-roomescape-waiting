@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
+import roomescape.domain.theme.FamousThemeCondition;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -44,20 +45,10 @@ public class ThemeService {
     }
 
     public List<Theme> findFamous(ThemeFamousFindRequest request, LocalDate now) {
-        Long days = request.getDays();
-        LocalDate date = request.getDate();
-        Long limit = request.getLimit();
+        FamousThemeCondition condition = new FamousThemeCondition(request.getDays(), request.getDate(),
+                request.getLimit(), now);
 
-        if (days == null) {
-            days = DEFAULT_DAYS;
-        }
-        if (limit == null) {
-            limit = DEFAULT_LIMIT;
-        }
-        if (date == null) {
-            date = now;
-        }
-        return themeRepository.findFamous(days, date, limit);
+        return themeRepository.findFamous(condition);
     }
 
     @Transactional

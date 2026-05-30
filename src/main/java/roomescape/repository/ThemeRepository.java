@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.theme.FamousThemeCondition;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -50,10 +50,7 @@ public class ThemeRepository {
         return jdbcTemplate.query(sql, THEME_ROW_MAPPER);
     }
 
-    public List<Theme> findFamous(long days, LocalDate date, long limit) {
-        LocalDate startDate = date.minusDays(days);
-        LocalDate endDate = date.minusDays(1);
-
+    public List<Theme> findFamous(FamousThemeCondition condition) {
         String sql = """
                 SELECT t.id, t.name, t.description, t.thumbnail_url
                 FROM THEME AS t
@@ -68,7 +65,8 @@ public class ThemeRepository {
                 ORDER BY topN.cnt DESC, topN.theme_id DESC
                 """;
 
-        return jdbcTemplate.query(sql, THEME_ROW_MAPPER, startDate, endDate, limit);
+        return jdbcTemplate.query(sql, THEME_ROW_MAPPER, condition.startDate(), condition.endDate(),
+                condition.getLimit());
     }
 
     public void deleteById(long themeId) {

@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
@@ -28,5 +29,7 @@ public class RoomEscapeFixture {
         return Reservation.reserve(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK));
     }
 
-
+    public static ThemeFamousFindRequest themeFamousFindRequest() {
+        return new ThemeFamousFindRequest(7L, LocalDate.of(2026, 5, 30), 10L);
+    }
 }

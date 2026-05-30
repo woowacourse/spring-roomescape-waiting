@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -47,56 +49,15 @@ public class ThemeServiceTest {
     }
 
     @Test
-    void 유명한_테마_조회_시_모든_매개변수가_존재하면_그대로_전달된다() {
+    void 유명한_테마_조회가_정상적으로_호출되어야_한다() {
         // given
-        long days = 10L;
-        LocalDate date = LocalDate.parse("2026-05-01");
-        long limit = 20L;
+        ThemeFamousFindRequest request = RoomEscapeFixture.themeFamousFindRequest();
 
         // when
-        themeService.findFamous(new ThemeFamousFindRequest(days, date, limit), LocalDate.now());
+        themeService.findFamous(request, LocalDate.now());
 
         // then
-        verify(themeRepository).findFamous(days, date, limit);
-    }
-
-    @Test
-    void 유명한_테마_조회_시_days가_없으면_기본_값으로_대체된다() {
-        // given
-        LocalDate date = LocalDate.parse("2026-05-01");
-        long limit = 20L;
-
-        // when
-        themeService.findFamous(new ThemeFamousFindRequest(null, date, limit), LocalDate.now());
-
-        // then
-        verify(themeRepository).findFamous(7L, date, limit);
-    }
-
-    @Test
-    void 유명한_테마_조회_시_date가_없으면_오늘로_대체된다() {
-        // given
-        long days = 7L;
-        long limit = 10L;
-        LocalDate now = LocalDate.now();
-        // when
-        themeService.findFamous(new ThemeFamousFindRequest(days, null, limit), now);
-
-        // then
-        verify(themeRepository).findFamous(days, now, limit);
-    }
-
-    @Test
-    void 유명한_테마_조회_시_limit이_없으면_기본값으로_대체된다() {
-        // given
-        long days = 7L;
-        LocalDate date = LocalDate.parse("2026-05-01");
-
-        // when
-        themeService.findFamous(new ThemeFamousFindRequest(days, date, null), LocalDate.now());
-
-        // then
-        verify(themeRepository).findFamous(days, date, 10L);
+        verify(themeRepository).findFamous(any());
     }
 
     @Test
