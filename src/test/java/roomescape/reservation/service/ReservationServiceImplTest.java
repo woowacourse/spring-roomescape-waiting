@@ -1,17 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +25,14 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceImplTest {
@@ -182,6 +178,25 @@ class ReservationServiceImplTest {
         assertThatThrownBy(() -> reservationService.create(dto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("휴일은 예약이 불가합니다.");
+    }
+
+    @DisplayName("같은 사용자가 같은 슬롯에 이미 예약/대기를 가지고 있으면 같은 슬롯에 중복 신청할 수 없다.")
+    @Test
+    void create_같은_사용자가_같은_슬롯에_중복_신청하면_예외() {
+        // given
+        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        when(timeService.findById(1L)).thenReturn(time);
+        when(themeRepository.existsById(1L)).thenReturn(true);
+        when(themeRepository.findById(1L)).thenReturn(theme);
+        when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
+
+        when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(true);
+        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(dto))
+                .isInstanceOf(DuplicateReservationException.class);
     }
 
     @DisplayName("같은 슬롯/테마에 중복 예약을 시도하는 경우, 대기로 넘어가기 때문에 예외가 발생하지 않는다.")
