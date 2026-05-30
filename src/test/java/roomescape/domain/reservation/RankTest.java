@@ -22,7 +22,7 @@ class RankTest {
 
     @ValueSource(ints = {0, 2})
     @ParameterizedTest
-    void 값이_1이면_True(int value) {
+    void 값이_1이_아니면_True(int value) {
         Rank rank = new Rank(value);
 
         assertThat(rank.isFirst()).isFalse();
