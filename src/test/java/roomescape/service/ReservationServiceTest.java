@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
@@ -146,7 +145,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 내_예약과_대기가_날짜_순으로_정렬된다(){
+    void 내_예약과_대기가_날짜_순으로_정렬된다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme1 = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
         Theme theme2 = saveTheme("방탈출2", "설명2", "https://thumbnail2.com");
