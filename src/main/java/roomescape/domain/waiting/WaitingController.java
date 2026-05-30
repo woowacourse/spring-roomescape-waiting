@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
 
+@Validated
 @RestController
 public class WaitingController {
 
@@ -38,7 +40,10 @@ public class WaitingController {
 
     @GetMapping("/reservations/waiting/mine")
     public ResponseEntity<MyWaitingsResponse> getMyWaitings(
-        @RequestParam @NotBlank @Size(max = 100) String name
+        @RequestParam
+        @NotBlank(message = "이름은 필수 입력 값입니다.")
+        @Size(max = 100, message = "이름은 100자 이하여야 합니다.")
+        String name
     ) {
         MyWaitingsResponse response = waitingService.getMyWaitings(name);
         return ResponseEntity.ok(response);

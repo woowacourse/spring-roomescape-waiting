@@ -51,7 +51,10 @@ public class ReservationController {
 
     @GetMapping("/reservations/mine")
     public ResponseEntity<MyReservationsResponse> getMyReservations(
-        @RequestParam @NotBlank @Size(max = 100) String name
+        @RequestParam
+        @NotBlank(message = "이름은 필수 입력 값입니다.")
+        @Size(max = 100, message = "이름은 100자 이하여야 합니다.")
+        String name
     ) {
         MyReservationsResponse response = reservationService.getMyReservations(name);
         return ResponseEntity.ok(response);

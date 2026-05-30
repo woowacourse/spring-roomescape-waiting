@@ -240,6 +240,18 @@ class WaitingControllerTest {
     }
 
     @Test
+    void 나의_예약_대기_조회_이름이_100자를_초과하는경우_에러_반환_테스트() {
+        String name = "a".repeat(101);
+
+        RestAssured.given().log().all()
+            .queryParam("name", name)
+            .when().get("/reservations/waiting/mine")
+            .then().log().all()
+            .statusCode(400)
+            .body("message", is("이름은 100자 이하여야 합니다."));
+    }
+
+    @Test
     void createWaiting_예약이_없는_슬롯인경우_에러_반환_테스트() {
         Long themeId = insertTheme("테마1");
         Long timeId = insertTime("10:00", "11:00");
