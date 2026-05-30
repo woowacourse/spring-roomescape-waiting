@@ -1,10 +1,11 @@
 package roomescape.dto.reservationWaiting;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReservationWaitingResponse {
 
@@ -16,8 +17,7 @@ public class ReservationWaitingResponse {
     private final Long sequence;
     private final LocalDateTime createdAt;
 
-    public ReservationWaitingResponse(Long id, String name, LocalDate date, ReservationTimeResponse time, ThemeResponse theme,
-                                       Long sequence, LocalDateTime createdAt) {
+    public ReservationWaitingResponse(Long id, String name, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -52,5 +52,13 @@ public class ReservationWaitingResponse {
 
     public ThemeResponse getTheme() {
         return theme;
+    }
+
+    public Long getSequence() {
+        return sequence;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
