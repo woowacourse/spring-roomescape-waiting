@@ -437,7 +437,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약 조회에서 날짜, 시간, 테마가 같고 Confiremd인 것만 조회한다.")
-    public void existsBySlot() {
+    public void existsBySlotAndStatusConfirmed() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -446,7 +446,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
-        boolean result = reservationRepository.existsBySlot(reservation.getDate(), time.getId(), theme.getId());
+        boolean result = reservationRepository.existsBySlotAndStatusConfirmed(reservation.getDate(), time.getId(), theme.getId());
 
         // then
         assertThat(result).isTrue();

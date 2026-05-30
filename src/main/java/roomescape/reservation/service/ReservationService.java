@@ -150,7 +150,7 @@ public class ReservationService {
     }
 
     private Status determineState(LocalDate date, Long timeId, Long themeId) {
-        if (!reservationRepository.existsBySlot(date, timeId, themeId)) {
+        if (!reservationRepository.existsBySlotAndStatusConfirmed(date, timeId, themeId)) {
             return CONFIRMED;
         }
         return Status.WAITING;

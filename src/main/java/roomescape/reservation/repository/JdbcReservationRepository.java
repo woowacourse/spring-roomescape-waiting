@@ -294,7 +294,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlotAndStatusConfirmed(LocalDate date, Long timeId, Long themeId) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation

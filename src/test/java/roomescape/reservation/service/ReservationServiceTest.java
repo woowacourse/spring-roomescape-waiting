@@ -4,6 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
@@ -95,6 +97,24 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservationWaitingResult.status()).isEqualTo(Status.WAITING);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"CONFIRMED", "WAITING"})
+    @DisplayName("이미 해당 슬롯에 해당 사용자가 예약한적이 있으면 예외가 발생한다.")
+    public void create_fail_duplicated(Status status) {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        insertReservation("포비", date, time, theme, status);
+
+        clock.setFixed(date);
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.create("포비", date, time.getId(), theme.getId()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(RESERVATION_ALREADY_EXISTS.message());
     }
 
     @Test

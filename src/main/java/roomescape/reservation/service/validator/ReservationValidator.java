@@ -51,8 +51,8 @@ public class ReservationValidator {
     private void validateNotDuplicated(Reservation reservation) {
         if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
                 reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+                reservation.getTimeId(),
+                reservation.getThemeId(),
                 reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
