@@ -17,45 +17,180 @@ import roomescape.global.error.exception.GeneralException;
 class ReservationTest {
 
     private static final ReserverName DEFAULT_RESERVER_NAME = new ReserverName("예약자");
+    private static final ReserverName OTHER_RESERVER_NAME = new ReserverName("다른예약자");
     private static final Time DEFAULT_TIME = TimeFixture.VALID_10_00.createInstance();
     private static final Theme DEFAULT_THEME = ThemeFixture.VALID.createInstance();
+    private static final LocalDate FUTURE_DATE = LocalDate.now().plusYears(1);
+    private static final LocalDate PAST_DATE = LocalDate.now().minusYears(1);
 
     @Nested
     class 생성한다 {
 
         @Test
         void 미래_일정으로_생성하면_정상_생성된다() {
-            LocalDate futureDate = LocalDate.now().plusYears(1);
-
             assertThatNoException().isThrownBy(() ->
-                    Reservation.create(DEFAULT_RESERVER_NAME, futureDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE)
+                    Reservation.create(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME,
+                            ReservationStatus.ACTIVE)
             );
         }
 
         @Test
         void 과거_일정으로_생성하면_예외를_던진다() {
-            LocalDate pastDate = LocalDate.now().minusYears(1);
-
             assertThatThrownBy(() ->
-                    Reservation.create(DEFAULT_RESERVER_NAME, pastDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE)
+                    Reservation.create(DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME,
+                            ReservationStatus.ACTIVE)
             ).isInstanceOf(GeneralException.class)
-                .hasMessage("지난 예약은 생성할 수 없습니다");
+                    .hasMessage("지난 예약은 생성할 수 없습니다");
+        }
+
+        @Test
+        void WAITING_상태로_생성하면_WAITING_상태의_예약이_반환된다() {
+            Reservation reservation = Reservation.create(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME,
+                    DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         }
     }
 
-    @Test
-    void 취소하면_CANCELED_상태의_예약이_반환된다() {
-        Reservation reservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+    @Nested
+    class 수정한다 {
 
-        assertThat(reservation.cancel().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        private Reservation activeReservation() {
+            return ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+        }
+
+        @Test
+        void 정상_조건이면_수정된_예약이_반환된다() {
+            Reservation reservation = activeReservation();
+            Time newTime = TimeFixture.VALID_15_30.createInstance();
+            Theme newTheme = ThemeFixture.VALID_ANOTHER.createInstance();
+
+            assertThatNoException().isThrownBy(() ->
+                    reservation.update(DEFAULT_RESERVER_NAME, FUTURE_DATE, newTime, newTheme)
+            );
+        }
+
+        @Test
+        void 예약자명이_다르면_예외를_던진다() {
+            Reservation reservation = activeReservation();
+
+            assertThatThrownBy(() ->
+                    reservation.update(OTHER_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME)
+            ).isInstanceOf(GeneralException.class)
+                    .hasMessage("예약을 변경할 권한이 없습니다.");
+        }
+
+        @Test
+        void ACTIVE가_아닌_상태이면_예외를_던진다() {
+            Reservation waitingReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThatThrownBy(() ->
+                    waitingReservation.update(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME)
+            ).isInstanceOf(GeneralException.class)
+                    .hasMessage("활성된 예약이 아닙니다.");
+        }
+
+        @Test
+        void 현재_일정이_과거이면_예외를_던진다() {
+            Reservation pastReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE);
+
+            assertThatThrownBy(() ->
+                    pastReservation.update(DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME)
+            ).isInstanceOf(GeneralException.class)
+                    .hasMessage("지난 예약은 생성할 수 없습니다");
+        }
+
+        @Test
+        void 새_일정이_과거이면_예외를_던진다() {
+            Reservation reservation = activeReservation();
+
+            assertThatThrownBy(() ->
+                    reservation.update(DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME)
+            ).isInstanceOf(GeneralException.class)
+                    .hasMessage("지난 예약은 생성할 수 없습니다");
+        }
     }
 
-    @Test
-    void WAITING_상태로_생성하면_WAITING_상태의_예약이_반환된다() {
-        LocalDate futureDate = LocalDate.now().plusYears(1);
+    @Nested
+    class 취소한다 {
 
-        Reservation reservation = Reservation.create(DEFAULT_RESERVER_NAME, futureDate, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+        @Test
+        void 정상_조건이면_CANCELED_상태의_예약이_반환된다() {
+            Reservation reservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
 
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(reservation.cancelActive(DEFAULT_RESERVER_NAME).getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        void 예약자명이_다르면_예외를_던진다() {
+            Reservation reservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+
+            assertThatThrownBy(() -> reservation.cancelActive(OTHER_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("예약을 취소할 권한이 없습니다.");
+        }
+
+        @Test
+        void ACTIVE가_아닌_상태이면_예외를_던진다() {
+            Reservation waitingReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThatThrownBy(() -> waitingReservation.cancelActive(DEFAULT_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("활성된 예약이 아닙니다.");
+        }
+
+        @Test
+        void 과거_일정이면_예외를_던진다() {
+            Reservation pastReservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.ACTIVE);
+
+            assertThatThrownBy(() -> pastReservation.cancelActive(DEFAULT_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("지난 예약은 취소할 수 없습니다.");
+        }
+    }
+
+    @Nested
+    class 대기_취소한다 {
+
+        @Test
+        void 정상_조건이면_CANCELED_상태의_예약이_반환된다() {
+            Reservation waiting = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThat(waiting.cancelWaiting(DEFAULT_RESERVER_NAME).getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        void 예약자명이_다르면_예외를_던진다() {
+            Reservation waiting = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThatThrownBy(() -> waiting.cancelWaiting(OTHER_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("예약을 취소할 권한이 없습니다.");
+        }
+
+        @Test
+        void WAITING이_아닌_상태이면_예외를_던진다() {
+            Reservation activeReservation = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+
+            assertThatThrownBy(() -> activeReservation.cancelWaiting(DEFAULT_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("대기중인 예약이 아닙니다.");
+        }
+
+        @Test
+        void 과거_일정이면_예외를_던진다() {
+            Reservation pastWaiting = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, PAST_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThatThrownBy(() -> pastWaiting.cancelWaiting(DEFAULT_RESERVER_NAME))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("지난 예약은 취소할 수 없습니다.");
+        }
     }
 }

@@ -42,8 +42,40 @@ public class Reservation {
         return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
     }
 
-    public Reservation cancel() {
+    public Reservation cancelActive(ReserverName requestName) {
+        validateCancelable(requestName);
+
         return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+    }
+
+    public Reservation cancelWaiting(ReserverName requestName) {
+        validateWaitingCancelable(requestName);
+
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+    }
+
+    private void validateCancelable(ReserverName requestName) {
+        if (!this.name.equals(requestName)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+        if (this.status != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+        if (this.schedule.isPast()) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
+    }
+
+    private void validateWaitingCancelable(ReserverName requestName) {
+        if (!this.name.equals(requestName)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+        if (this.status != ReservationStatus.WAITING) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+        if (this.schedule.isPast()) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
     }
 
     private static void validateFuture(Schedule schedule) {

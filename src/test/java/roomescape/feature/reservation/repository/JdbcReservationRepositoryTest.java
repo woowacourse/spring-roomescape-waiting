@@ -333,7 +333,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.save(
                 Reservation.create(new ReserverName("삭제된시간예약자"), date, deletedTime, theme1, ReservationStatus.ACTIVE));
             reservationRepository.deleteReservationById(deletedReservation.getId());
-            reservationRepository.update(canceledReservation.cancel());
+            reservationRepository.update(canceledReservation.cancelActive(new ReserverName("취소된예약자")));
             timeRepository.deleteTimeById(deletedTime.getId());
 
             // when
@@ -397,7 +397,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme, ReservationStatus.ACTIVE));
             Reservation canceledWaiting = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자2"), date, time, theme, ReservationStatus.WAITING));
-            reservationRepository.update(canceledWaiting.cancel());
+            reservationRepository.update(canceledWaiting.cancelWaiting(new ReserverName("예약자2")));
             Reservation waiting = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자3"), date, time, theme, ReservationStatus.WAITING));
 
@@ -439,7 +439,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
             Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
-            reservationRepository.update(reservation.cancel());
+            reservationRepository.update(reservation.cancelActive(new ReserverName(ReservationFixture.FUTURE.getName())));
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(

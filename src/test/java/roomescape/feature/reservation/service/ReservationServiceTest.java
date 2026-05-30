@@ -61,7 +61,7 @@ class ReservationServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper(), fixedClock);
         reservationService = new ReservationService(
-            reservationRepository, timeRepository, themeRepository, mapper, fixedClock);
+            reservationRepository, timeRepository, themeRepository, mapper);
     }
 
     private Time timeWithId(Long id) {
@@ -546,7 +546,7 @@ class ReservationServiceTest {
         @Test
         void 예약을_취소한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusYears(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
@@ -635,7 +635,7 @@ class ReservationServiceTest {
         @Test
         void 예약_대기를_취소한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusYears(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(

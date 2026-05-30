@@ -1,7 +1,5 @@
 package roomescape.feature.reservation.service;
 
-import java.time.Clock;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
@@ -33,15 +31,13 @@ public class ReservationService {
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationMapper reservationMapper;
-    private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, ReservationMapper reservationMapper, Clock clock) {
+        ThemeRepository themeRepository, ReservationMapper reservationMapper) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.reservationMapper = reservationMapper;
-        this.clock = clock;
     }
 
     public List<ReservationResponseDto> getReservations() {
@@ -138,19 +134,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
-        }
-
-        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
-        }
-
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelActive(name)));
     }
 
     @Transactional
@@ -186,18 +170,6 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
-        }
-
-        if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
-        }
-
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelWaiting(name)));
     }
 }
