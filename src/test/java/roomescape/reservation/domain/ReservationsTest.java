@@ -12,6 +12,8 @@ import roomescape.theme.fixture.ThemeFixture;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
@@ -75,6 +77,42 @@ class ReservationsTest {
         // then
         Assertions.assertThat(result)
                 .isFalse();
+    }
+
+    @Test
+    @DisplayName("빈 슬롯에 예약하면, 예약 상태로 목록에 추가된다.")
+    void reserve_adds_new_reservation() {
+        // given
+        Reservations reservations = new Reservations(new ArrayList<>());
+        Reservation newReservation = ReservationFixture.reservation(name, date, time, theme);
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+
+        // when
+        reservations.reserve(name, slot, LocalDateTime.now());
+
+        // then
+        Assertions.assertThat(reservations.values())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("reservedAt")
+                .contains(newReservation);
+    }
+
+    @Test
+    @DisplayName("이미 예약된 슬롯에 다른 사람이 예약하면, 대기 상태로 목록에 추가된다.")
+    void reserve_adds_waiting_reservation() {
+        // given
+        Reservations reservations = new Reservations(
+                List.of(ReservationFixture.reservation(name, date, time, theme))
+        );
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+        Reservation waitReservation = ReservationFixture.waitReservation(anotherName, date, time, theme);
+
+        // when
+        reservations.reserve(anotherName, slot, LocalDateTime.now());
+
+        // then
+        Assertions.assertThat(reservations.values())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("reservedAt")
+                .contains(waitReservation);
     }
 
 }
