@@ -77,7 +77,7 @@ public class ReservationServiceTest {
     @DisplayName("과거의 시점으로 예약을 하면 예외가 발생한다.")
     void 지난_시간_예약_생성_예외_테스트() {
         LocalDate date = LocalDate.parse(TODAY);
-        Long timeId = 1L;
+        Long timeId = 10L;
         ReservationCommand command = new ReservationCommand(
                 name,
                 date,

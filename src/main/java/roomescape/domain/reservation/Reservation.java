@@ -91,6 +91,14 @@ public class Reservation {
         }
     }
 
+    public Reservation confirm() {
+        return new Reservation(id, userName, date, time, theme, status.confirm());
+    }
+
+    public Reservation reject() {
+        return new Reservation(id, userName, date, time, theme, status.reject());
+    }
+
     public Long getId() {
         return id;
     }

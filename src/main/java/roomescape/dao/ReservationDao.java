@@ -3,6 +3,7 @@ package roomescape.dao;
 import static roomescape.dao.rowmapper.ReservationMapper.RESERVATION_ROW_MAPPER;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,23 @@ public class ReservationDao {
                 sql,
                 RESERVATION_ROW_MAPPER,
                 userName
+        );
+    }
+
+    public List<Reservation> findByAfterDateTime(LocalDateTime now) {
+        String sql = """
+                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM reservation r
+                INNER JOIN reservation_time rt ON r.time_id = rt.id
+                INNER JOIN theme t ON r.theme_id = t.id
+                WHERE r.date >= ? AND rt.start_at > ?;
+                """;
+        return jdbcTemplate.query(
+                sql,
+                RESERVATION_ROW_MAPPER,
+                now.toLocalDate(),
+                now.toLocalTime()
         );
     }
 

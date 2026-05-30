@@ -17,7 +17,7 @@ public class FixedClockConfig {
     @Primary
     public Clock testClock() {
         return Clock.fixed(
-                Instant.parse("2026-05-10T02:00:00Z"),
+                Instant.parse("2026-05-10T00:00:00Z"),
                 ZoneId.of("Asia/Seoul")
         );
     }

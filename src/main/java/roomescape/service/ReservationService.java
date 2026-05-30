@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -14,8 +13,10 @@ import roomescape.dao.WaitingDao;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
+import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
+import roomescape.infrastructure.SlotManager;
 import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
@@ -27,6 +28,7 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final WaitingDao waitingDao;
+    private final SlotManager slotManager;
     private final Clock clock;
 
     public ReservationService(
@@ -34,12 +36,14 @@ public class ReservationService {
             ReservationTimeDao reservationTimeDao,
             ThemeDao themeDao,
             WaitingDao waitingDao,
+            SlotManager slotManager,
             Clock clock
     ) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.waitingDao = waitingDao;
+        this.slotManager = slotManager;
         this.clock = clock;
     }
 
@@ -75,17 +79,16 @@ public class ReservationService {
         Reservation reservation = new Reservation(UserName.parse(command.name()), command.date(), time, theme);
 
         reservation.verifyBookable(LocalDateTime.now(clock));
-        validateDuplicate(command.date(), time, theme);
+
+        Slot slot = new Slot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        if (!slotManager.tryAcquire(slot)) {
+            reservation.reject();
+            throw new ConflictException("이미 존재하는 예약 건입니다.");
+        }
 
         Reservation saved = reservationDao.save(reservation);
 
-        return ReservationResult.from(saved);
-    }
-
-    private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationDao.existsBy(date, theme, time)) {
-            throw new ConflictException("이미 존재하는 예약 건입니다.");
-        }
+        return ReservationResult.from(saved.confirm());
     }
 
     public ReservationResult changeDateTime(Long id, ReservationCommand command) {
@@ -94,6 +97,17 @@ public class ReservationService {
 
         ReservationTime newTime = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+
+        Slot originSlot = Slot.from(origin.getDate(), origin.getTime(), origin.getTheme());
+        Slot modifiedSlot = Slot.from(command.date(), newTime, origin.getTheme());
+
+        if (originSlot.equals(modifiedSlot)) {
+            return ReservationResult.from(origin);
+        }
+
+        if (!slotManager.tryChange(originSlot, modifiedSlot)) {
+            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+        }
 
         Reservation modified = origin.change(
                 UserName.parse(command.name()),
@@ -105,10 +119,11 @@ public class ReservationService {
         boolean isSuccessful = reservationDao.update(modified);
 
         if (!isSuccessful) {
-            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+            slotManager.tryChange(modifiedSlot, originSlot);
+            throw new NotFoundException("예약 변경 중 문제가 발생했습니다. (이미 취소된 예약일 수 있습니다.)");
         }
 
-        return ReservationResult.from(modified);
+        return ReservationResult.from(modified.confirm());
     }
 
     public void deleteReservation(Long id) {
