@@ -82,10 +82,7 @@ public class WaitingListService {
 
         validateFuture(findWaitingList);
         
-        boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
-        }
+        waitingListRepository.deleteById(deleteCommand.waitingListId());
     }
 
     private static void validateFuture(WaitingList waitingList) {

@@ -151,12 +151,12 @@ public class WaitingListRepository {
         return generatedKey.longValue();
     }
 
-    public boolean deleteById(Long id) {
+    public void deleteById(Long id) {
         final String sql = """
                 DELETE FROM waiting_list
                 WHERE id = ?
                 """;
-        return jdbcTemplate.update(sql, id) > 0;
+        jdbcTemplate.update(sql, id);
     }
 
     /**

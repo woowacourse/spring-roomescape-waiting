@@ -225,7 +225,6 @@ class WaitingListServiceTest {
         ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
         WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
-        given(waitingListRepository.deleteById(waitingListId)).willReturn(true);
 
         // when
         waitingListService.delete(deleteCommand);
