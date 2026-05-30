@@ -80,14 +80,24 @@ public class WaitingDaoTest {
         Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
         waitingDao.save(waiting);
 
-        assertThat(waitingDao.existsBy(waiting)).isTrue();
+        assertThat(waitingDao.existsBySlotAndName(
+                waiting.getName().value(),
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        )).isTrue();
     }
 
     @Test
     void 해당_예약에_대기가_존재하지_않으면_False를_반환한다() {
         Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
 
-        assertThat(waitingDao.existsBy(waiting)).isFalse();
+        assertThat(waitingDao.existsBySlotAndName(
+                waiting.getName().value(),
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        )).isFalse();
     }
 
     @DisplayName("해당 테마를 사용하는 예약 대기가 있으면 existsByThemeId는 true를 반환한다.")

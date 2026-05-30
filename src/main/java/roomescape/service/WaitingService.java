@@ -61,7 +61,7 @@ public class WaitingService {
                 LocalDateTime.now(clock)
         );
 
-        if (waitingDao.existsBy(waiting)) {
+        if (waitingDao.existsBySlotAndName(waiting.getName().value(), waiting.getDate(), time.getId(), theme.getId())) {
             throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
         }
 

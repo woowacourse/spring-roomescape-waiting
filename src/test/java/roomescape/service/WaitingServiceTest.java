@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -167,7 +168,7 @@ class WaitingServiceTest {
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.existsBy(date, theme, time)).willReturn(true);
-        given(waitingDao.existsBy(any())).willReturn(true);
+        given(waitingDao.existsBySlotAndName(anyString(), any(LocalDate.class), anyLong(), anyLong())).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(command))
                 .isInstanceOf(UnprocessableEntityException.class)

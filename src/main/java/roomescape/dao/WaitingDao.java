@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +151,7 @@ public class WaitingDao {
                 .findFirst();
     }
 
-    public boolean existsBy(Waiting waiting) {
+    public boolean existsBySlotAndName(String name, LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT EXISTS(
                             SELECT 1
@@ -163,10 +164,10 @@ public class WaitingDao {
         Boolean result = jdbcTemplate.queryForObject(
                 sql,
                 Boolean.class,
-                waiting.getName().value(),
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
+                name,
+                date,
+                timeId,
+                themeId
         );
 
         return Boolean.TRUE.equals(result);
