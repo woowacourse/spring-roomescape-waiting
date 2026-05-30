@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.ReservationWaiting;
+import roomescape.domain.WaitingWithOrder;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.dto.ReservationWaitingResponses;
@@ -34,15 +34,15 @@ public class ReservationWaitingController {
 
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> add(@RequestBody @Valid ReservationWaitingRequest request) {
-        ReservationWaiting reservationWaiting = reservationFacade.addWaiting(request);
-        ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
+        WaitingWithOrder waitingWithOrder = reservationFacade.addWaiting(request);
+        ReservationWaitingResponse response = ReservationWaitingResponse.from(waitingWithOrder);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/me")
     public ResponseEntity<ReservationWaitingResponses> searchMine(@RequestParam String name) {
-        List<ReservationWaiting> myReservationWaitings = reservationWaitingService.getMyReservationWaitings(name);
+        List<WaitingWithOrder> myReservationWaitings = reservationWaitingService.getMyReservationWaitings(name);
         return ResponseEntity.ok().body(ReservationWaitingResponses.from(myReservationWaitings));
     }
 

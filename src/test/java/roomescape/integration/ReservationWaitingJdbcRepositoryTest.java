@@ -20,6 +20,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithOrder;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 
 @JdbcTest
@@ -62,9 +63,9 @@ class ReservationWaitingJdbcRepositoryTest {
         ReservationWaiting waiting = new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation);
 
-        ReservationWaiting saved = repository.save(waiting);
+        WaitingWithOrder saved = repository.save(waiting);
 
-        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getWaiting().getId()).isNotNull();
         assertThat(saved.getOrder()).isEqualTo(1);
     }
 
@@ -73,7 +74,7 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
 
-        ReservationWaiting second = repository.save(new ReservationWaiting(
+        WaitingWithOrder second = repository.save(new ReservationWaiting(
                 "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
 
         assertThat(second.getOrder()).isEqualTo(2);
@@ -104,10 +105,10 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void findById는_저장된_대기를_반환한다() {
-        ReservationWaiting saved = repository.save(new ReservationWaiting(
+        WaitingWithOrder saved = repository.save(new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
 
-        Optional<ReservationWaiting> found = repository.findById(saved.getId());
+        Optional<ReservationWaiting> found = repository.findById(saved.getWaiting().getId());
 
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("민욱");
@@ -125,7 +126,7 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(new ReservationWaiting("브라운", waitingTime, reservation));
         repository.save(new ReservationWaiting("민욱", waitingTime.plusMinutes(1), reservation));
 
-        List<ReservationWaiting> found = repository.findByName("민욱");
+        List<WaitingWithOrder> found = repository.findByName("민욱");
 
         assertThat(found).hasSize(1);
         assertThat(found.get(0).getOrder()).isEqualTo(2);
@@ -133,11 +134,11 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void deleteById_이후_findById는_빈_Optional을_반환한다() {
-        ReservationWaiting saved = repository.save(new ReservationWaiting(
+        WaitingWithOrder saved = repository.save(new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
 
-        repository.deleteById(saved.getId());
+        repository.deleteById(saved.getWaiting().getId());
 
-        assertThat(repository.findById(saved.getId())).isEmpty();
+        assertThat(repository.findById(saved.getWaiting().getId())).isEmpty();
     }
 }

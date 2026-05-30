@@ -8,20 +8,17 @@ public class ReservationWaiting {
     private final String name;
     private final LocalDateTime createdAt;
     private final Reservation reservation;
-    private final int order;
 
     public ReservationWaiting(
             Long id,
             String name,
             LocalDateTime createdAt,
-            Reservation reservation,
-            int order
+            Reservation reservation
     ) {
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
         this.reservation = reservation;
-        this.order = order;
     }
 
     public ReservationWaiting(
@@ -29,7 +26,7 @@ public class ReservationWaiting {
             LocalDateTime createdAt,
             Reservation reservation
     ) {
-        this(null, name, createdAt, reservation, 0);
+        this(null, name, createdAt, reservation);
     }
 
     public boolean isOwnedBy(String name) {
@@ -50,10 +47,6 @@ public class ReservationWaiting {
 
     public Reservation getReservation() {
         return reservation;
-    }
-
-    public int getOrder() {
-        return order;
     }
 
     @Override

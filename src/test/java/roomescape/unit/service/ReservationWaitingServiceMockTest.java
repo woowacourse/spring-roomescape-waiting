@@ -9,6 +9,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithOrder;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationWaitingRepository;
@@ -41,7 +42,8 @@ class ReservationWaitingServiceMockTest {
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
         ReservationWaiting toSave = new ReservationWaiting("민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
-        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", toSave.getCreatedAt(), reservation, 1);
+        WaitingWithOrder saved = new WaitingWithOrder(
+                new ReservationWaiting(1L, "민욱", toSave.getCreatedAt(), reservation), 1);
         given(reservationWaitingRepository.save(toSave)).willReturn(saved);
 
         assertThat(reservationWaitingService.addWaiting(toSave)).isEqualTo(saved);
@@ -87,6 +89,6 @@ class ReservationWaitingServiceMockTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
-        return new ReservationWaiting(id, name, LocalDateTime.of(2026, 8, 1, 10, 0), reservation, 1);
+        return new ReservationWaiting(id, name, LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
     }
 }

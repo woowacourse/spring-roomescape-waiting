@@ -10,6 +10,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithOrder;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
@@ -125,7 +126,7 @@ public class ReservationFacade {
     }
 
     @Transactional
-    public ReservationWaiting addWaiting(ReservationWaitingRequest request) {
+    public WaitingWithOrder addWaiting(ReservationWaitingRequest request) {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
         Reservations reservations = reservationService.findByDateAndThemeId(request.date(), theme.getId());

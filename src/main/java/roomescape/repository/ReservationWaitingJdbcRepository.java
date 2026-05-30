@@ -1,6 +1,8 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithOrder;
 
 @Repository
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {
@@ -41,7 +44,16 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
+    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> mapWaiting(rs);
+
+    private final RowMapper<WaitingWithOrder> waitingWithOrderRowMapper =
+            (rs, rowNum) -> new WaitingWithOrder(mapWaiting(rs), rs.getInt("waiting_order"));
+
+    public ReservationWaitingJdbcRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private ReservationWaiting mapWaiting(ResultSet rs) throws SQLException {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
                 rs.getTime("time_value").toLocalTime()
@@ -63,17 +75,12 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 rs.getLong("waiting_id"),
                 rs.getString("waiting_name"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
-                reservation,
-                rs.getInt("waiting_order")
+                reservation
         );
-    };
-
-    public ReservationWaitingJdbcRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+    public WaitingWithOrder save(ReservationWaiting reservationWaiting) {
         String sql = "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -86,7 +93,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
-        return findById(id)
+        return findWithOrderById(id)
                 .orElseThrow(() -> new IllegalStateException("방금 저장한 대기를 찾을 수 없습니다. id=" + id));
     }
 
@@ -104,10 +111,16 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         return results.stream().findFirst();
     }
 
+    private Optional<WaitingWithOrder> findWithOrderById(Long id) {
+        String sql = SELECT_BASE + " WHERE rw.id = ?";
+        List<WaitingWithOrder> results = jdbcTemplate.query(sql, waitingWithOrderRowMapper, id);
+        return results.stream().findFirst();
+    }
+
     @Override
-    public List<ReservationWaiting> findByName(String name) {
+    public List<WaitingWithOrder> findByName(String name) {
         String sql = SELECT_BASE + " WHERE rw.name = ? ORDER BY rw.created_at ASC, rw.id ASC";
-        return jdbcTemplate.query(sql, waitingRowMapper, name);
+        return jdbcTemplate.query(sql, waitingWithOrderRowMapper, name);
     }
 
     @Override

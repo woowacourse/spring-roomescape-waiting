@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.WaitingWithOrder;
 import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
@@ -24,7 +25,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationWaiting addWaiting(ReservationWaiting reservationWaiting) {
+    public WaitingWithOrder addWaiting(ReservationWaiting reservationWaiting) {
         if (reservationWaitingRepository.existBy(reservationWaiting.getName(), reservationWaiting.getReservation().getId())) {
             throw new ConflictException(ALREADY_BOOKED);
         }
@@ -50,7 +51,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new NotFoundException(String.format(RESERVATION_WAITING_NOT_FOUND_FORMAT, id)));
     }
 
-    public List<ReservationWaiting> getMyReservationWaitings(String name) {
+    public List<WaitingWithOrder> getMyReservationWaitings(String name) {
         return reservationWaitingRepository.findByName(name);
     }
 }
