@@ -8,9 +8,7 @@ import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
@@ -20,66 +18,66 @@ public class Reservation {
 
     private Long id;
     private String name;
-    private ReservationDate date;
-    private ReservationTime time;
-    private Theme theme;
+    private ReservationSlot slot;
     private ReservationStatus status;
     private LocalDateTime reservedAt;
 
-    public static Reservation reserve(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
+    public static Reservation reserve(String name, ReservationSlot slot, LocalDateTime reservedAt) {
+        return of(name, slot, ReservationStatus.RESERVED, reservedAt);
     }
 
-    public static Reservation wait(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, reservedAt);
+    public static Reservation wait(String name, ReservationSlot slot, LocalDateTime reservedAt) {
+        return of(name, slot, ReservationStatus.WAITING, reservedAt);
     }
 
-    private static Reservation of(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
-        validate(name, reservationDate, time, theme);
-        validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
+    private static Reservation of(String name, ReservationSlot slot, ReservationStatus status, LocalDateTime reservedAt) {
+        validateName(name);
+        validateSlot(slot);
+        slot.validateNotPast();
+        return new Reservation(null, name, slot, status, reservedAt);
     }
 
-    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
-        validate(name, reservationDate, time, theme);
+    public static Reservation load(Long id, String name, ReservationSlot slot, ReservationStatus status, LocalDateTime reservedAt) {
+        validateName(name);
+        validateSlot(slot);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status, reservedAt);
+        return new Reservation(id, name, slot, status, reservedAt);
     }
 
     public void cancel(String requesterName) {
         validateOwner(requesterName);
         validateNotCanceled();
-        validateNotPast(date.getDate(), time.getStartAt());
+        slot.validateNotPast();
 
         this.status = ReservationStatus.CANCELED;
     }
 
-    public void changeSchedule(String requesterName, ReservationDate newDate, ReservationTime newTime) {
+    public void changeSchedule(String requesterName, ReservationSlot newSlot) {
         validateOwner(requesterName);
         validateNotCanceled();
         validateNotWaiting();
-        validateNotPast(date.getDate(), time.getStartAt());
-        validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
+        slot.validateNotPast();
+        newSlot.validateNotPast();
 
-        this.date = newDate;
-        this.time = newTime;
+        this.slot = newSlot;
     }
 
-    public void changeScheduleByManager(ReservationDate newDate, ReservationTime newTime) {
+    public void changeScheduleByManager(ReservationSlot newSlot) {
         validateNotCanceled();
         validateNotWaiting();
-        validateNotPast(date.getDate(), time.getStartAt());
-        validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
+        slot.validateNotPast();
+        newSlot.validateNotPast();
 
-        this.date = newDate;
-        this.time = newTime;
+        this.slot = newSlot;
     }
 
-    private static void validate(String name, ReservationDate reservationDate, ReservationTime time, Theme theme) {
-        validateName(name);
-        validateDate(reservationDate);
-        validateTime(time);
-        validateTheme(theme);
+    private static void validateSlot(ReservationSlot slot) {
+        if (slot == null) {
+            throw new ReservationException(RESERVATION_DATE_IS_NULL);
+        }
+        validateDate(slot.date());
+        validateTime(slot.time());
+        validateTheme(slot.theme());
     }
 
     private static void validateName(String name) {
@@ -97,12 +95,6 @@ public class Reservation {
     private static void validateTime(ReservationTime time) {
         if (time == null) {
             throw new ReservationException(RESERVATION_TIME_IS_NULL);
-        }
-    }
-
-    private static void validatePast(LocalDate date, LocalTime time) {
-        if (isPast(date, time)) {
-            throw new ReservationException(RESERVATION_PAST_DATETIME_NOT_ALLOWED);
         }
     }
 
@@ -148,20 +140,16 @@ public class Reservation {
         }
     }
 
-    private void validateNotPast(LocalDate date, LocalTime time) {
-        if (isPast(date, time)) {
-            throw new ReservationException(RESERVATION_ALREADY_PAST);
-        }
+    public ReservationDate getDate() {
+        return slot.date();
     }
 
-    private void validateNewScheduleIsPast(LocalDate date, LocalTime time) {
-        if (isPast(date, time)) {
-            throw new ReservationException(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED);
-        }
+    public ReservationTime getTime() {
+        return slot.time();
     }
 
-    private static boolean isPast(LocalDate date, LocalTime time) {
-        return LocalDateTime.of(date, time).isBefore(LocalDateTime.now());
+    public Theme getTheme() {
+        return slot.theme();
     }
 
 }

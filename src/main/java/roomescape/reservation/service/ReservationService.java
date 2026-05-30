@@ -95,7 +95,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
-        reservation.changeSchedule(command.requesterName(), newDate, newTime);
+        reservation.changeSchedule(command.requesterName(), slot);
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }
@@ -112,7 +112,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
-        reservation.changeScheduleByManager(newDate, newTime);
+        reservation.changeScheduleByManager(slot);
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }

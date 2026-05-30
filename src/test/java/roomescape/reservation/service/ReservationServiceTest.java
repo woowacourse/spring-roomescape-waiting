@@ -20,6 +20,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.FakeReservationRepository;
@@ -239,7 +240,7 @@ class ReservationServiceTest {
         // given
         ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
         Reservation saved =
-                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1, ReservationStatus.RESERVED, LocalDateTime.now()));
+                save(Reservation.load(1L, name, ReservationSlot.of(pastDate, reservationTime1, theme1), ReservationStatus.RESERVED, LocalDateTime.now()));
         Long savedId = saved.getId();
 
         // when & then
@@ -299,7 +300,7 @@ class ReservationServiceTest {
         // given
         ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
         Reservation saved =
-                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1, ReservationStatus.RESERVED, LocalDateTime.now()));
+                save(Reservation.load(1L, name, ReservationSlot.of(pastDate, reservationTime1, theme1), ReservationStatus.RESERVED, LocalDateTime.now()));
         ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, reservationDate2.getId(), reservationTime2.getId());
 
         // when
@@ -321,7 +322,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> {
                     reservationService.changeSchedule(changeCommand);
                 }).isInstanceOf(ReservationException.class)
-                .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
     @Test
@@ -382,7 +383,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() ->
                         reservationService.changeScheduleByManager(changeCommand))
                 .isInstanceOf(ReservationException.class)
-                .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
     @Test

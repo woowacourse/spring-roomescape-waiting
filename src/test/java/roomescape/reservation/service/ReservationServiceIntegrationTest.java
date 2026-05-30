@@ -352,7 +352,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             // when
             assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
                     .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                    .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
         }
 
         @Test
@@ -420,7 +420,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             // when & then
             assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
                     .isInstanceOf(ReservationException.class)
-                    .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                    .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
         }
 
         @Test

@@ -29,22 +29,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNumber) -> Reservation.load(
             resultSet.getLong("reservation_id"),
             resultSet.getString("name"),
-            ReservationDate.load(
-                    resultSet.getLong("date_id"),
-                    resultSet.getDate("date").toLocalDate(),
-                    resultSet.getBoolean("date_is_active")
-            ),
-            ReservationTime.load(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("start_at").toLocalTime(),
-                    resultSet.getBoolean("time_is_active")
-            ),
-            Theme.load(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("description"),
-                    resultSet.getString("thumbnail_url"),
-                    resultSet.getBoolean("is_active")
+            ReservationSlot.of(
+                    ReservationDate.load(
+                            resultSet.getLong("date_id"),
+                            resultSet.getDate("date").toLocalDate(),
+                            resultSet.getBoolean("date_is_active")
+                    ),
+                    ReservationTime.load(
+                            resultSet.getLong("time_id"),
+                            resultSet.getTime("start_at").toLocalTime(),
+                            resultSet.getBoolean("time_is_active")
+                    ),
+                    Theme.load(
+                            resultSet.getLong("theme_id"),
+                            resultSet.getString("theme_name"),
+                            resultSet.getString("description"),
+                            resultSet.getString("thumbnail_url"),
+                            resultSet.getBoolean("is_active")
+                    )
             ),
             ReservationStatus.valueOf(resultSet.getString("status")),
             resultSet.getTimestamp("reserved_at").toLocalDateTime()
@@ -201,18 +203,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
-                .addValue("date_id", reservation.getDate().getId())
-                .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("date_id", reservation.getSlot().getDateId())
+                .addValue("time_id", reservation.getSlot().getTimeId())
+                .addValue("theme_id", reservation.getSlot().getThemeId())
                 .addValue("status", reservation.getStatus().name())
                 .addValue("reserved_at", reservation.getReservedAt());
         Long savedId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return Reservation.load(
                 savedId,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                reservation.getSlot(),
                 reservation.getStatus(),
                 reservation.getReservedAt()
         );
@@ -255,8 +255,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE id = :id
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("dateId", reservation.getDate().getId())
-                .addValue("timeId", reservation.getTime().getId())
+                .addValue("dateId", reservation.getSlot().getDateId())
+                .addValue("timeId", reservation.getSlot().getTimeId())
                 .addValue("id", reservation.getId());
 
         int updatedCount = jdbcTemplate.update(sql, params);

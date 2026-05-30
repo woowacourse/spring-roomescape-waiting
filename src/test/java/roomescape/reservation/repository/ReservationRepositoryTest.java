@@ -102,8 +102,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         List<Reservation> reservations = List.of(
-                Reservation.reserve(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
-                Reservation.reserve(name, reservationDate1, reservationTime2, theme, LocalDateTime.now())
+                Reservation.reserve(name, ReservationSlot.of(reservationDate1, reservationTime1, theme), LocalDateTime.now()),
+                Reservation.reserve(name, ReservationSlot.of(reservationDate1, reservationTime2, theme), LocalDateTime.now())
         );
         saveAll(reservations);
 
@@ -195,7 +195,7 @@ class ReservationRepositoryTest {
     void updateSchedule() {
         // given
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme));
-        saved.changeSchedule(name, reservationDate2, reservationTime1);
+        saved.changeSchedule(name, ReservationSlot.of(reservationDate2, reservationTime1, saved.getTheme()));
 
         // when
         jdbcReservationRepository.updateSchedule(saved);

@@ -431,8 +431,8 @@ class ReservationControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().patch("/member/reservations/" + reservationId + "/schedule")
                 .then().log().all()
-                .statusCode(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getHttpStatus().value())
-                .body("message", is(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage()));
+                .statusCode(RESERVATION_ALREADY_PAST.getHttpStatus().value())
+                .body("message", is(RESERVATION_ALREADY_PAST.getMessage()));
     }
 
     @Test

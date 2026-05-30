@@ -18,10 +18,10 @@ public record Reservations(
     ) {
         validateNotAlreadyBookedBy(requesterName);
         if (hasReservedByOthers(requesterName)) {
-            return Reservation.wait(requesterName, slot.date(), slot.time(), slot.theme(), reservedAt);
+            return Reservation.wait(requesterName, slot, reservedAt);
         }
 
-        return Reservation.reserve(requesterName, slot.date(), slot.time(), slot.theme(), reservedAt);
+        return Reservation.reserve(requesterName, slot, reservedAt);
     }
 
     public void validateNotAlreadyBookedBy(String requestName) {

@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
@@ -19,7 +20,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.reserve(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.reserve(name, ReservationSlot.of(date, time, theme), LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation reservation(
@@ -29,7 +30,7 @@ public class ReservationFixture {
             Theme theme,
             LocalDateTime reservedAt
     ) {
-        return Reservation.reserve(name, date, time, theme, reservedAt.truncatedTo(ChronoUnit.MICROS));
+        return Reservation.reserve(name, ReservationSlot.of(date, time, theme), reservedAt.truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation waitReservation(
@@ -38,7 +39,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.wait(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.wait(name, ReservationSlot.of(date, time, theme), LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation canceledReservation(
@@ -47,7 +48,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        Reservation reservation = Reservation.reserve(name, date, time, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.reserve(name, ReservationSlot.of(date, time, theme), LocalDateTime.now());
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }
