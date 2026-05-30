@@ -134,6 +134,49 @@ public class WaitlistServiceTest {
         assertThat(neoCancelAfterReservation.getFirst().getWaitingOrder()).isEqualTo(1);
     }
 
+    @Test
+    void 여러_명이_대기할_때_내_대기_순번을_계산한다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest reservationRequest = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest brieWaitlistRequest = new ReservationRequest(
+                "브리",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest pobiWaitlistRequest = new ReservationRequest(
+                "포비",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest neoWaitlistRequest = new ReservationRequest(
+                "네오",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        reservationService.reserveOrWait(reservationRequest);
+        reservationService.reserveOrWait(brieWaitlistRequest);
+        reservationService.reserveOrWait(pobiWaitlistRequest);
+        reservationService.reserveOrWait(neoWaitlistRequest);
+
+        List<ReservationWithStatus> neoReservations = reservationService.getMyReservations("네오");
+
+        assertThat(neoReservations.getFirst().getWaitingOrder()).isEqualTo(3);
+    }
+
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
         Long id = timeRepository.save(reservationTime);
