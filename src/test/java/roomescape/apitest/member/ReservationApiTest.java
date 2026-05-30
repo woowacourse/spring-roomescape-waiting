@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.dto.response.ReservationResponse;
+import roomescape.controller.dto.response.WaitingDetailResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -136,10 +138,17 @@ class ReservationApiTest {
 
     @Test
     void 예약과_예약_대기_조회_API() {
-        RestAssured.given().log().all()
+        JsonPath jsonPath = RestAssured.given().log().all()
                 .when().get("/reservations?userName=" + "토리")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .extract().jsonPath();
+
+        List<ReservationResponse> reservationResponses = jsonPath.getList("reservationResponses");
+        List<WaitingDetailResponse> waitingDetailResponses = jsonPath.getList("waitingDetailResponses");
+
+        assertThat(reservationResponses).hasSize(0);
+        assertThat(waitingDetailResponses).hasSize(1);
     }
 
     @Test
