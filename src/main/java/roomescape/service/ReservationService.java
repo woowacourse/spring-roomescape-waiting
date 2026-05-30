@@ -6,6 +6,7 @@ import jakarta.annotation.Nonnull;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -30,18 +31,24 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
+    private final ReservationWriter reservationWriter;
+    private final WaitlistWriter waitlistWriter;
 
     public ReservationService(
             ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository,
-            Clock clock
+            Clock clock,
+            ReservationWriter reservationWriter,
+            WaitlistWriter waitlistWriter
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
+        this.reservationWriter = reservationWriter;
+        this.waitlistWriter = waitlistWriter;
     }
 
     public List<Reservation> getReservations() {
@@ -69,24 +76,11 @@ public class ReservationService {
 
         reservation.verifyReservable(LocalDateTime.now(clock));
 
-        if (reservationRepository.existsBy(reservation)) {
-            verifyNoDuplicateReservation(reservation);
-            Long savedId = waitlistRepository.save(reservation);
-            Waitlist waitlist = getWaitlist(savedId);
-            int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
-            return ReservationWithStatus.waiting(waitlist, waitOrder);
-        }
-
-        Reservation saved = getReservation(reservationRepository.save(reservation));
-        return ReservationWithStatus.reserved(saved);
-    }
-
-    private void verifyNoDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsBySameUser(reservation)) {
-            throw new RoomEscapeException(DUPLICATE_RESERVATION, "이미 같은 예약이 존재합니다.");
-        }
-        if (waitlistRepository.existsBySameUser(reservation)) {
-            throw new RoomEscapeException(DUPLICATE_RESERVATION, "같은 슬롯에 중복 대기가 존재합니다.");
+        try {
+            Reservation saved = reservationWriter.save(reservation);
+            return ReservationWithStatus.reserved(saved);
+        } catch (DuplicateKeyException e) {
+            return waitlistWriter.save(reservation);
         }
     }
 

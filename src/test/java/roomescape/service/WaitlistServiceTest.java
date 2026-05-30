@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
@@ -20,7 +20,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
-@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WaitlistServiceTest {
     private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
     private static final LocalTime TEN = LocalTime.of(10, 0);

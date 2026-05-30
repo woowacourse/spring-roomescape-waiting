@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -19,8 +19,8 @@ import roomescape.dto.ReservationTimeRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
-@Transactional
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
     private static final LocalTime TEN = LocalTime.of(10, 0);
