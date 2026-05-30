@@ -96,14 +96,10 @@ public class Waiting {
         final ReservationTime time,
         final Theme theme
     ) {
-        try {
-            Objects.requireNonNull(customerName);
-            Objects.requireNonNull(reservationDate);
-            Objects.requireNonNull(time);
-            Objects.requireNonNull(theme);
-        } catch (NullPointerException exception) {
-            throw new IllegalStateException("예약자명/예약대기날짜/시간/테마는 필수 입력값입니다.");
-        }
+        Objects.requireNonNull(customerName, "예약자명은 필수 입력값입니다.");
+        Objects.requireNonNull(reservationDate, "예약대기날짜는 필수 입력값입니다.");
+        Objects.requireNonNull(time, "시간은 필수 입력값입니다.");
+        Objects.requireNonNull(theme, "테마는 필수 입력값입니다.");
     }
 
     private void validateNotPast(final LocalDateTime now) {
