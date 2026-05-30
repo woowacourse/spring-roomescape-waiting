@@ -1,6 +1,7 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Reservation;
@@ -75,6 +77,16 @@ class ReservationWaitingJdbcRepositoryTest {
                 "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
 
         assertThat(second.getOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void save는_같은_이름과_예약으로_중복_신청하면_DuplicateKeyException을_던진다() {
+        repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+
+        assertThatThrownBy(() -> repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation)))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test

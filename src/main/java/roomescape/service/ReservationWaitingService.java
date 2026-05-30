@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
+import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationWaitingRepository;
@@ -14,6 +15,7 @@ public class ReservationWaitingService {
 
     private static final String RESERVATION_WAITING_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
     private static final String NOT_OWNER = "본인의 예약 대기가 아닙니다.";
+    private static final String ALREADY_BOOKED = "이미 대기 중인 예약입니다.";
 
     private final ReservationWaitingRepository reservationWaitingRepository;
 
@@ -23,6 +25,9 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaiting addWaiting(ReservationWaiting reservationWaiting) {
+        if (reservationWaitingRepository.existBy(reservationWaiting.getName(), reservationWaiting.getReservation().getId())) {
+            throw new ConflictException(ALREADY_BOOKED);
+        }
         return reservationWaitingRepository.save(reservationWaiting);
     }
 

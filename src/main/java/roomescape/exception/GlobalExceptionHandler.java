@@ -2,6 +2,7 @@ package roomescape.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private static final String DETAIL_VALIDATION_ERROR = "요청 본문의 일부 필드가 유효하지 않습니다.";
+    private static final String DETAIL_DUPLICATE_KEY = "요청이 현재 상태와 충돌하여 처리할 수 없습니다.";
     private static final String DETAIL_INTERNAL_ERROR = "요청을 처리하는 중 알 수 없는 오류가 발생했습니다.";
     private static final String ERRORS_PROPERTY = "errors";
     private static final String POINTER_PREFIX = "/";
@@ -41,6 +43,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ProblemDetail handleConflict(ConflictException ex, WebRequest request) {
         return buildProblem(HttpStatus.CONFLICT, ProblemType.CONFLICT, ex, request);
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ProblemDetail handleDuplicateKey(DuplicateKeyException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, DETAIL_DUPLICATE_KEY);
+        applyType(problem, ProblemType.CONFLICT, request);
+        logException(ex, status, request);
+        return problem;
     }
 
     @ExceptionHandler(BusinessRuleViolationException.class)
