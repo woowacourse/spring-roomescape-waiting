@@ -114,9 +114,9 @@
 
 ## 코드 적용 (도메인 리팩토링)
 
-- [ ] **WaitingService에 퍼진 규칙을 도메인으로**
-  → 맥락: "이미 대기 신청한 슬롯"을 Slot.equals로? "동일 사용자 예약"을 Waiting 생성 규칙으로?
-  → 출처: log_23
+- [x] ~~WaitingService에 퍼진 규칙을 도메인으로~~
+  → 행 간 불변식 기준으로 ①②③ 분류. ② "동일 사용자 불가"만 Waiting.create()로 이전. private 생성자 + reconstruct() 패턴 적용.
+  → 출처: log_24
 
 - [ ] **DTO 변환을 Slot 단위로**
   → 맥락: getter 위임은 1단계. DTO가 slot을 직접 받도록 점진 개선해 외부 노출 줄이기

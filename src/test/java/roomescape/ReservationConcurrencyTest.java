@@ -61,7 +61,7 @@ class ReservationConcurrencyTest {
         time = timeDao.insert(new Time(LocalTime.of(13, 0)));
         theme = themeDao.insert(new Theme(new Name("방탈출"), "http://url", "설명"));
         savedReservation = reservationDao.insert(
-                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme, null));
     }
 
     @AfterEach

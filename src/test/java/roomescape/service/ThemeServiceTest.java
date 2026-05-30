@@ -157,7 +157,7 @@ class ThemeServiceTest {
         void throwsWhenThemeHasReservation() {
             Theme savedTheme = themeService.create(requestDto1);
             Time savedTime = timeDao.insert(new Time(LocalTime.of(13, 0)));
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, savedTheme));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, savedTheme, null));
 
             Long id = savedTheme.getId();
             assertThatThrownBy(() -> themeService.delete(id))
@@ -175,7 +175,7 @@ class ThemeServiceTest {
             Time bookedTime = timeDao.insert(new Time(LocalTime.of(13, 0)));
             Time availableTime = timeDao.insert(new Time(LocalTime.of(14, 0)));
             LocalDate date = LocalDate.of(2026, 5, 10);
-            reservationDao.insert(Reservation.createByAdmin(member, date, bookedTime, savedTheme));
+            reservationDao.insert(Reservation.createByAdmin(member, date, bookedTime, savedTheme, null));
 
             List<AvailableTimeResponseDto> result = themeService.findAvailableTimesById(savedTheme.getId(), date);
 
@@ -195,7 +195,7 @@ class ThemeServiceTest {
             Theme popularTheme = themeService.create(requestDto1);
             themeService.create(requestDto2);
             Time savedTime = timeDao.insert(new Time(LocalTime.of(13, 0)));
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, popularTheme));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, popularTheme, null));
 
             List<Theme> result = themeService.findPopulars(new PopularThemeRequestDto(1, 7));
 
@@ -212,9 +212,9 @@ class ThemeServiceTest {
             Time savedTime1 = timeDao.insert(new Time(LocalTime.of(13, 0)));
             Time savedTime2 = timeDao.insert(new Time(LocalTime.of(14, 0)));
 
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime1, morePopular));
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime2, morePopular));
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime1, lessPopular));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime1, morePopular, null));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime2, morePopular, null));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime1, lessPopular, null));
 
             List<Theme> result = themeService.findPopulars(new PopularThemeRequestDto(2, 7));
 
@@ -228,7 +228,7 @@ class ThemeServiceTest {
             Theme outOfPeriodTheme = themeService.create(requestDto2);
             Time savedTime = timeDao.insert(new Time(LocalTime.of(13, 0)));
 
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime, outOfPeriodTheme));
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime, outOfPeriodTheme, null));
 
             List<Theme> result = themeService.findPopulars(new PopularThemeRequestDto(2, 1));
 

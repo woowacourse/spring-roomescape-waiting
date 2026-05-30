@@ -57,8 +57,7 @@ class ReservationTest {
         @Test
         @DisplayName("미래 예약을 취소하면 상태가 CANCELED가 된다")
         void cancelsFutureReservation() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
 
             reservation.cancelByUser(LocalDateTime.now());
 
@@ -68,8 +67,7 @@ class ReservationTest {
         @Test
         @DisplayName("과거 예약을 취소하면 예외를 던진다")
         void throwsWhenCancelingPastReservation() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().minusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().minusDays(1));
 
             assertThatThrownBy(() -> reservation.cancelByUser(LocalDateTime.now()))
                     .isInstanceOf(BusinessRuleViolationException.class);
@@ -82,8 +80,7 @@ class ReservationTest {
         @Test
         @DisplayName("과거 예약도 어드민은 취소할 수 있다")
         void adminCanCancelPastReservation() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().minusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().minusDays(1));
 
             reservation.cancelByAdmin(LocalDateTime.now());
 
@@ -97,8 +94,7 @@ class ReservationTest {
         @Test
         @DisplayName("BOOKED 상태이면 true를 반환한다")
         void returnsTrueWhenBooked() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
 
             assertThat(reservation.isActive()).isTrue();
         }
@@ -121,8 +117,7 @@ class ReservationTest {
         @Test
         @DisplayName("같은 멤버면 true를 반환한다")
         void returnsTrueForSameMember() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
 
             assertThat(reservation.isSameMember(member)).isTrue();
         }
@@ -130,8 +125,7 @@ class ReservationTest {
         @Test
         @DisplayName("다른 멤버면 false를 반환한다")
         void returnsFalseForDifferentMember() {
-            Time time = new Time(1L, LocalTime.of(10, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
             Member other = new Member(2L, "다른유저", "other@test.com", "password", MemberRole.USER);
 
             assertThat(reservation.isSameMember(other)).isFalse();
@@ -144,8 +138,7 @@ class ReservationTest {
         @Test
         @DisplayName("미래 날짜와 시간으로 수정하면 성공한다")
         void updatesWithFutureDateTime() {
-            Time futureTime = new Time(1L, LocalTime.of(13, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), futureTime, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
 
             LocalDate newDate = LocalDate.now().plusDays(3);
             Time newTime = new Time(2L, LocalTime.of(14, 0));
@@ -158,8 +151,7 @@ class ReservationTest {
         @Test
         @DisplayName("과거 날짜로 수정하면 예외를 던진다")
         void throwsWhenUpdatingWithPastDateTime() {
-            Time futureTime = new Time(1L, LocalTime.of(13, 0));
-            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), futureTime, theme);
+            Reservation reservation = bookedReservation(LocalDate.now().plusDays(1));
 
             LocalDate pastDate = LocalDate.now().minusDays(1);
             Time pastTime = new Time(2L, LocalTime.of(14, 0));
@@ -167,5 +159,10 @@ class ReservationTest {
             assertThatThrownBy(() -> reservation.update(pastDate, pastTime))
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
+    }
+
+    private Reservation bookedReservation(LocalDate date) {
+        Time time = new Time(1L, LocalTime.of(10, 0));
+        return Reservation.createByAdmin(member, date, time, theme, null);
     }
 }

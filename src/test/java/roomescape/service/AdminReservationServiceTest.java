@@ -204,7 +204,7 @@ class AdminReservationServiceTest {
         @DisplayName("과거 예약도 취소할 수 있다")
         void cancelsPastReservation() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1));
+                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1, null));
 
             adminReservationService.cancelByAdmin(saved.getId());
 
