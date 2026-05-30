@@ -8,10 +8,6 @@ public enum ReservationStatus {
   WAITING,
   CANCELED;
 
-  ReservationStatus() {
-  }
-
-  // 각 상태에서 갈 수 있는 다음 상태들
   private static final Map<ReservationStatus, Set<ReservationStatus>> TRANSITIONS = Map.of(
       RESERVED, Set.of(CANCELED),
       WAITING, Set.of(RESERVED, CANCELED),

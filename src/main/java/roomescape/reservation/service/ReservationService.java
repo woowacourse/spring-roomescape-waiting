@@ -29,7 +29,7 @@ public class ReservationService {
 
     public ReservationCreateResponse create(ReservationRequest request) {
         reservationTimeDao.findById(request.timeId());
-        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), request.timeId(), request.themeId());
+        boolean isExistSlot = reservationDao.findByDateTimeThemeStatus(request.date(), request.timeId(), request.themeId());
 
         boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), request.timeId(), request.themeId());
         if (isAlreadyExist) {
