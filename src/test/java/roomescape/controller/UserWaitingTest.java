@@ -110,4 +110,26 @@ public class UserWaitingTest {
                 .body("[0].theme.name", is("테스트"))
                 .body("[0].sequence", is(1));
     }
+
+    @Test
+    void 동일한_이름으로_같은_예약에_대기열_중복_생성시_400을_반환한다() {
+        jdbcTemplate.update("insert into theme (name, description, url) values ('테스트2', '설명2', 'url2')");
+        jdbcTemplate.update("insert into reservation(name, date, time_id, theme_id, created_at) values ('다른사람2', ?, 1, 2, '2026-05-15 10:30:00')", TOMORROW);
+        jdbcTemplate.update("insert into waiting (name, date, time_id, theme_id, created_at) values ('테스트', ?, 1, 2, '2026-05-15 10:30:00')", TOMORROW);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "테스트");
+        body.put("date", TOMORROW.toString());
+        body.put("timeId", 1);
+        body.put("themeId", 2);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_INPUT"))
+                .body("message", is("이미 해당 예약에 대기열이 존재합니다."));
+    }
 }
