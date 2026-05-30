@@ -14,6 +14,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -38,9 +40,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
-
-    private static final long MEMBER_ID = 1L;
-    private static final long OTHER_MEMBER_ID = 2L;
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -84,11 +83,17 @@ class ReservationServiceTest {
     void deleteById_user_success() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(1L);
+        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
 
-        assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
+        assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, 1L))
                 .doesNotThrowAnyException();
         verify(reservationRepository).deleteById(reservationId);
     }
@@ -98,9 +103,15 @@ class ReservationServiceTest {
     void deleteById_manager_success() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(1L);
+        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
 
         assertThatCode(() -> reservationService.deleteByIdForManager(reservationId))
                 .doesNotThrowAnyException();
@@ -112,11 +123,11 @@ class ReservationServiceTest {
     void deleteById_user_other_member_forbidden() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, OTHER_MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, 2L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
-        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
+        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, 1L))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).deleteById(anyLong());
     }
@@ -127,18 +138,24 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
+        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
+        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
-        ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, MEMBER_ID);
+        ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, 1L);
 
         assertThat(response.id()).isEqualTo(reservationId);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);
@@ -150,15 +167,21 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
+        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
+        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
         ReservationSaveResponse response = reservationService.updateForManager(request, reservationId);
@@ -173,12 +196,12 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, OTHER_MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, 2L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
-        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
     }
@@ -189,14 +212,14 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         doNothing().when(scheduleService).validateNotPastDate(oldReservation.date());
         doThrow(IllegalStateException.class).when(scheduleService).validateNotPastTime(oldReservation.date(), oldReservation.getTime());
 
-        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
                 .isInstanceOf(IllegalStateException.class);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
     }
@@ -209,24 +232,24 @@ class ReservationServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         ReservationDetailProjection reservation = reservationDetail(
-                1L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
+                1L, 1L, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
         );
         WaitingDetailProjection waiting = new WaitingDetailProjection(
                 10L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
                 "thumbnail", 1L, LocalTime.of(11, 0), 1L
         );
 
-        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(reservation));
-        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(waiting));
 
         List<ReservationDetailFindResponse> result =
-                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+                reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
         assertThat(result).hasSize(2);
-        verify(reservationRepository).findUpcomingReservationDetailsByMemberId(MEMBER_ID, now);
-        verify(waitingRepository).findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now);
+        verify(reservationRepository).findUpcomingReservationDetailsByMemberId(1L, now);
+        verify(waitingRepository).findUpcomingWaitingDetailsByMemberId(1L, now);
         verify(reservationRepository, never()).findPastReservationDetailsByMemberId(anyLong(), any());
         verify(waitingRepository, never()).findPastWaitingDetailsByMemberId(anyLong(), any());
     }
@@ -238,30 +261,30 @@ class ReservationServiceTest {
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of());
-        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of());
 
         ReservationDetailProjection reservation = reservationDetail(
-                2L, MEMBER_ID, LocalDate.of(2026, 5, 4), 1L, 1L, LocalTime.of(10, 0)
+                2L, 1L, LocalDate.of(2026, 5, 4), 1L, 1L, LocalTime.of(10, 0)
         );
         WaitingDetailProjection waiting = new WaitingDetailProjection(
                 20L, "member", LocalDate.of(2026, 5, 4), 1L, "theme", "description",
                 "thumbnail", 1L, LocalTime.of(9, 0), 2L
         );
 
-        when(reservationRepository.findPastReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findPastReservationDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(reservation));
-        when(waitingRepository.findPastWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findPastWaitingDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(waiting));
 
         List<ReservationDetailFindResponse> result =
-                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.HISTORY);
+                reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.HISTORY);
 
         assertThat(result).hasSize(2);
-        verify(reservationRepository).findPastReservationDetailsByMemberId(MEMBER_ID, now);
-        verify(waitingRepository).findPastWaitingDetailsByMemberId(MEMBER_ID, now);
+        verify(reservationRepository).findPastReservationDetailsByMemberId(1L, now);
+        verify(waitingRepository).findPastWaitingDetailsByMemberId(1L, now);
     }
 
     @Test
@@ -272,20 +295,20 @@ class ReservationServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         ReservationDetailProjection reservation = reservationDetail(
-                100L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
+                100L, 1L, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(10, 0)
         );
         WaitingDetailProjection waiting = new WaitingDetailProjection(
                 200L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
                 "thumbnail", 1L, LocalTime.of(10, 0), 1L
         );
 
-        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(1L, now))
                 .thenReturn(List.of(reservation));
-        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting));
 
         List<ReservationDetailFindResponse> result =
-                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+                reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
         assertThat(result).extracting(ReservationDetailFindResponse::status)
                 .containsExactly(ReservationStatus.RESERVED, ReservationStatus.WAITING);
@@ -299,10 +322,10 @@ class ReservationServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         ReservationDetailProjection reservation1 = reservationDetail(
-                101L, MEMBER_ID, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
+                101L, 1L, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
         );
         ReservationDetailProjection reservation2 = reservationDetail(
-                102L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
+                102L, 1L, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
         );
         WaitingDetailProjection waiting1 = new WaitingDetailProjection(
                 201L, "member", LocalDate.of(2026, 5, 5), 1L, "theme", "description",
@@ -313,13 +336,13 @@ class ReservationServiceTest {
                 "thumbnail", 1L, LocalTime.of(9, 0), 2L
         );
 
-        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(1L, now))
                 .thenReturn(List.of(reservation1, reservation2));
-        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting1, waiting2));
 
         List<ReservationDetailFindResponse> result =
-                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.UPCOMING);
+                reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
         assertThat(result).extracting(ReservationDetailFindResponse::id)
                 .containsExactly(201L, 102L, 202L, 101L);
@@ -333,10 +356,10 @@ class ReservationServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         ReservationDetailProjection reservation1 = reservationDetail(
-                301L, MEMBER_ID, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
+                301L, 1L, LocalDate.of(2026, 5, 6), 1L, 1L, LocalTime.of(10, 0)
         );
         ReservationDetailProjection reservation2 = reservationDetail(
-                302L, MEMBER_ID, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
+                302L, 1L, LocalDate.of(2026, 5, 5), 1L, 1L, LocalTime.of(12, 0)
         );
         WaitingDetailProjection waiting1 = new WaitingDetailProjection(
                 401L, "member", LocalDate.of(2026, 5, 6), 1L, "theme", "description",
@@ -347,19 +370,83 @@ class ReservationServiceTest {
                 "thumbnail", 1L, LocalTime.of(9, 0), 2L
         );
 
-        when(reservationRepository.findUpcomingReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findUpcomingReservationDetailsByMemberId(1L, now))
                 .thenReturn(List.of());
-        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of());
-        when(reservationRepository.findPastReservationDetailsByMemberId(MEMBER_ID, now))
+        when(reservationRepository.findPastReservationDetailsByMemberId(1L, now))
                 .thenReturn(List.of(reservation1, reservation2));
-        when(waitingRepository.findPastWaitingDetailsByMemberId(MEMBER_ID, now))
+        when(waitingRepository.findPastWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting1, waiting2));
 
         List<ReservationDetailFindResponse> result =
-                reservationService.findMyReservationsAndWaitingsByPeriod(MEMBER_ID, ReservationPeriod.HISTORY);
+                reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.HISTORY);
 
         assertThat(result).extracting(ReservationDetailFindResponse::id)
                 .containsExactly(401L, 301L, 302L, 402L);
+    }
+
+    @Test
+    @DisplayName("유저 예약 삭제 시 해당 슬롯의 선두 대기자는 자동 승격된다.")
+    void deleteByIdForUser_promoteFirstWaiting() {
+        long reservationId = 1L;
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+        );
+        long scheduleId = 10L;
+        Waiting waiting = new Waiting(100L, 3L, scheduleId);
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(scheduleId);
+        when(waitingRepository.findFirstByScheduleId(scheduleId)).thenReturn(Optional.of(waiting));
+
+        reservationService.deleteByIdForUser(reservationId, 1L);
+
+        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationRepository).save(argThat(promoted ->
+                promoted.getMemberId().equals(waiting.getMemberId())
+                        && promoted.getScheduleId().equals(waiting.getScheduleId())
+        ));
+        verify(waitingRepository).deleteById(waiting.getId());
+    }
+
+    @Test
+    @DisplayName("유저 예약 수정으로 기존 슬롯이 비면 선두 대기자가 자동 승격된다.")
+    void updateForUser_promoteFirstWaitingFromOldSchedule() {
+        long reservationId = 4L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+        long oldScheduleId = 30L;
+        long newScheduleId = 99L;
+        Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
+        Reservation updated = new Reservation(reservationId, 1L, newScheduleId);
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(oldScheduleId);
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(newScheduleId);
+        when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
+        when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
+        when(waitingRepository.findFirstByScheduleId(oldScheduleId)).thenReturn(Optional.of(waiting));
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+
+        reservationService.updateForUser(request, reservationId, 1L);
+
+        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
+        verify(reservationRepository).save(argThat(promoted ->
+                promoted.getMemberId().equals(waiting.getMemberId())
+                        && promoted.getScheduleId().equals(waiting.getScheduleId())
+        ));
+        verify(waitingRepository).deleteById(waiting.getId());
     }
 }

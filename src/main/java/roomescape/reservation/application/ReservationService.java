@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
@@ -15,6 +16,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.Waiting;
 import roomescape.waiting.application.readmodel.WaitingReadModel;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
@@ -49,6 +51,7 @@ public class ReservationService {
         return ReservationDetailFindResponse.from(reservationReadModels);
     }
 
+    @Transactional
     public void deleteByIdForManager(long reservationId) {
         ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
                 .orElse(null);
@@ -57,9 +60,16 @@ public class ReservationService {
         }
 
         validateNotPast(reservationDetail);
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                reservationDetail.date(),
+                reservationDetail.timeId(),
+                reservationDetail.themeId()
+        );
         reservationRepository.deleteById(reservationId);
+        promoteWaitingIfExists(scheduleId);
     }
 
+    @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
         ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
                 .orElse(null);
@@ -69,7 +79,13 @@ public class ReservationService {
 
         validateReservationOwner(reservationId, reservationDetail, memberId);
         validateNotPast(reservationDetail);
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                reservationDetail.date(),
+                reservationDetail.timeId(),
+                reservationDetail.themeId()
+        );
         reservationRepository.deleteById(reservationId);
+        promoteWaitingIfExists(scheduleId);
     }
 
     public List<ReservationDetailFindResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
@@ -93,17 +109,19 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
         ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
         validateReservationOwner(reservationId, oldReservation, memberId);
 
-        return updateReservation(body, reservationId, oldReservation);
+        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
     }
 
+    @Transactional
     public ReservationSaveResponse updateForManager(ReservationUpdateRequest body, long reservationId) {
         ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
 
-        return updateReservation(body, reservationId, oldReservation);
+        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
     }
 
     private static void validateReservationOwner(
@@ -142,11 +160,17 @@ public class ReservationService {
                 response.status() == ReservationStatus.RESERVED ? 0 : 1);
     }
 
-    private ReservationSaveResponse updateReservation(
+    private ReservationSaveResponse updateReservationAndPromoteWaiting(
             ReservationUpdateRequest body,
             long reservationId,
             ReservationDetailProjection oldReservation
     ) {
+        long oldScheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.timeId(),
+                oldReservation.themeId()
+        );
+
         validateNotPast(oldReservation);
         validateNotEmptyUpdateRequest(body);
 
@@ -158,8 +182,17 @@ public class ReservationService {
 
         int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
         validateReservationUpdated(affectedRow);
+        promoteWaitingIfExists(oldScheduleId);
 
         return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
+    }
+
+    private void promoteWaitingIfExists(long scheduleId) {
+        waitingRepository.findFirstByScheduleId(scheduleId)
+                .ifPresent(waiting -> {
+                    reservationRepository.save(new Reservation(null, waiting.getMemberId(), waiting.getScheduleId()));
+                    waitingRepository.deleteById(waiting.getId());
+                });
     }
 
     private Reservation getNewReservationOrThrow(long reservationId) {
