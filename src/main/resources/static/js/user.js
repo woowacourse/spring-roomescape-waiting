@@ -73,7 +73,16 @@
     const res = await fetch(url, options);
     if (!res.ok) {
       const t = await res.text();
-      throw new Error(t || res.statusText);
+      let message = res.statusText;
+      try {
+        const parsed = JSON.parse(t);
+        if (parsed && parsed.message) {
+          message = parsed.message;
+        }
+      } catch (_) {
+        if (t) message = t;
+      }
+      throw new Error(message);
     }
     if (res.status === 204) return null;
     return res.json();
@@ -494,11 +503,11 @@
       renderCalendar();
       setStep(2);
     } catch (e) {
-      reserveMessage.textContent = editing
+      reserveMessage.textContent = e.message || (editing
           ? "예약 변경에 실패했습니다. 입력값을 확인해 주세요."
           : isReserved
               ? "대기 신청에 실패했습니다. 입력값을 확인해 주세요."
-              : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
+              : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.");
       reserveMessage.classList.add("message--err");
     }
   });

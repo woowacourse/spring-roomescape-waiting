@@ -36,7 +36,16 @@
     const res = await fetch(url, options);
     if (!res.ok) {
       const t = await res.text();
-      throw new Error(t || res.statusText);
+      let message = res.statusText;
+      try {
+        const parsed = JSON.parse(t);
+        if (parsed && parsed.message) {
+          message = parsed.message;
+        }
+      } catch (_) {
+        if (t) message = t;
+      }
+      throw new Error(message);
     }
     if (res.status === 204) return null;
     const ct = res.headers.get("content-type") || "";
