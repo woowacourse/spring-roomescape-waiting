@@ -968,7 +968,8 @@
         return;
       }
 
-      showToast(selectedTime.available ? '예약이 완료되었습니다! 🎉' : '대기 신청이 완료되었습니다!');
+      const { reservationStatus } = await res.json();
+      showToast(reservationStatus === 'WAITING' ? '대기 신청이 완료되었습니다!' : '예약이 완료되었습니다! 🎉');
       resetBookingState();
       switchSection('my');
     } catch (e) {
