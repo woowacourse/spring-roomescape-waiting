@@ -65,32 +65,29 @@ public class ReservationService {
 
     @Transactional
     public void editDateTime(Long reservationId, LocalDate changedDate, Long changedTimeId, String requestGuestName) {
-        Reservation reservation = getReservation(reservationId);
-        reservationValidator.validateBeforeEdit(reservation, changedDate, changedTimeId, requestGuestName);
+        Reservation beforeReservation = getReservation(reservationId);
+        reservationValidator.validateBeforeEdit(beforeReservation, changedDate, changedTimeId, requestGuestName);
 
         ReservationTime changedTime = getReservationTime(changedTimeId);
 
-        Reservation beforeReservation = Reservation.clone(reservation);
-        Status afterStatus = determineState(changedDate, changedTimeId, reservation.getTheme().getId());
-        Reservation changedReservation = reservation.changeDateTimeAndStatus(
+        Status afterStatus = determineState(changedDate, changedTimeId, beforeReservation.getTheme().getId());
+        Reservation changedReservation = beforeReservation.changeDateTimeAndStatus(
                 changedDate, changedTime, afterStatus, LocalDateTime.now(clock));
 
         reservationValidator.validateEdit(changedReservation);
 
         updateDateAndTimeAndStatus(changedReservation);
-        if (beforeReservation.isConfirmed()) {
-            updateTopWaitingConfirmed(beforeReservation);
-        }
+        updateTopWaitingConfirmed(beforeReservation);
     }
 
     private void updateTopWaitingConfirmed(Reservation reservation) {
-        if(reservation.isConfirmed()) {
+        if (reservation.isConfirmed()) {
             Optional<Reservation> topWaiting = reservationRepository.findBySlotAndStatusWaitingAndWaitingNumberIsOne(
                     reservation.getDate(),
                     reservation.getTimeId(),
                     reservation.getThemeId());
 
-            if(topWaiting.isPresent()) {
+            if (topWaiting.isPresent()) {
                 Reservation top = topWaiting.get();
                 updateStatus(top.changeStatus(CONFIRMED));
             }
@@ -114,7 +111,7 @@ public class ReservationService {
     }
 
     private void cancelReservation(Long id) {
-        if(!reservationRepository.cancelById(id)) {
+        if (!reservationRepository.cancelById(id)) {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
     }
@@ -152,8 +149,8 @@ public class ReservationService {
         }
     }
 
-    private Status determineState(LocalDate date, Long timeId, Long themeId){
-        if (!reservationRepository.existsBySlot(date, timeId, themeId)){
+    private Status determineState(LocalDate date, Long timeId, Long themeId) {
+        if (!reservationRepository.existsBySlot(date, timeId, themeId)) {
             return CONFIRMED;
         }
         return Status.WAITING;
