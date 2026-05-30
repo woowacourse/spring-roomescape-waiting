@@ -7,12 +7,18 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -23,6 +29,22 @@ class ReservationIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @TestConfiguration
+    static class TestClockConfig {
+
+        @Bean
+        @Primary
+        Clock fixedClock() {
+            ZoneId zoneId = ZoneId.systemDefault();
+            return Clock.fixed(
+                LocalDateTime.of(2026, 5, 31, 13, 0)
+                    .atZone(zoneId)
+                    .toInstant(),
+                zoneId
+            );
+        }
+    }
 
     @BeforeEach
     void setUp() {
