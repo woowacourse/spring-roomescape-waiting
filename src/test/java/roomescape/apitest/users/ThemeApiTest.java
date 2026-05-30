@@ -22,7 +22,7 @@ class ThemeApiTest {
                 .when().get("/themes/1/schedules?date=" + now)
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(10));
     }
 
     @Test

@@ -29,13 +29,12 @@ class ThemeDaoTest {
         // given
         Long themeId = 1L;
         LocalDate date = LocalDate.parse(TODAY).minusDays(7);
-        boolean expected = false;
 
         // when
         List<TimeQueryResult> availableTimes = reservationTimeDao.findStatuesByThemeIdAndDate(themeId, date);
 
         // then
-        assertThat(availableTimes.get(5).isReserved()).isEqualTo(expected);
+        assertThat(availableTimes.get(6).isReserved()).isFalse();
     }
 
     @Test
