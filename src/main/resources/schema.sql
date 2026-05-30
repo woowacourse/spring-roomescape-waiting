@@ -30,7 +30,8 @@ CREATE TABLE reservation
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uq_reservation_name_theme_time UNIQUE (name, theme_id, time_id)
 );
 
 CREATE TABLE holiday
