@@ -161,11 +161,19 @@ public class ReservationService {
     }
 
     private void assignNextWaiting(Reservation reservation) {
-        reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
+        List<ReservationWaiting> allReservationWaiting = reservationWaitingRepository.findAllByDateAndTimeIdAndThemeId(
                 reservation.date(),
                 reservation.time().id(),
                 reservation.theme().id()
-        ).ifPresent(this::createReservationFromWaiting);
+        );
+
+        for (ReservationWaiting waiting : allReservationWaiting) {
+            if (!reservationRepository.existsByDateAndTimeIdAndName(waiting.date(), waiting.time().id(),
+                    waiting.name())) {
+                createReservationFromWaiting(waiting);
+                return;
+            }
+        }
     }
 
     private void createReservationFromWaiting(ReservationWaiting waiting) {

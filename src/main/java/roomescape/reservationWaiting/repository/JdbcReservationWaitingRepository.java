@@ -144,19 +144,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         return Boolean.TRUE.equals(exists);
     }
 
-    @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation_waiting
-                    WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND name = ?
-                )
-                """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, name);
-        return Boolean.TRUE.equals(exists);
-    }
 
     @Override
     public int deleteById(Long id) {
@@ -169,7 +157,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public List<ReservationWaiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
                        r.name AS reservation_waiting_name,
@@ -185,10 +173,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 INNER JOIN theme h ON r.theme_id = h.id
                 WHERE r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
                 ORDER BY r.id ASC
-                LIMIT 1
                 """;
 
-        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)
-                .stream().findFirst();
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId);
     }
 }
