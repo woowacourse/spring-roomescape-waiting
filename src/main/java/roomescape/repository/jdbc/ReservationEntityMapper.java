@@ -14,7 +14,7 @@ import roomescape.domain.TimeStatus;
 public final class ReservationEntityMapper {
 
     public static final RowMapper<ReservationEntry> RESERVATION_ENTRY_ROW_MAPPER = (rs, rowNum) ->
-            new ReservationEntry(
+            ReservationEntry.from(
                     rs.getLong("entry_id"),
                     rs.getString("entry_name"),
                     ReservationStatus.valueOf(rs.getString("entry_status")),

@@ -4,50 +4,48 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
-public class ReservationEntry {
+public abstract class ReservationEntry {
 
     private Long id;
     private String name;
-    private ReservationStatus status;
     private LocalDateTime createdAt;
 
-    public ReservationEntry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+    protected ReservationEntry(Long id, String name, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
-        this.status = status;
         this.createdAt = createdAt;
     }
 
     public static ReservationEntry reserve(String name) {
-        return new ReservationEntry(null, name, ReservationStatus.RESERVED, LocalDateTime.now());
+        return new ReservedEntry(null, name, LocalDateTime.now());
     }
 
     public static ReservationEntry waiting(String name) {
-        return new ReservationEntry(null, name, ReservationStatus.WAITING, LocalDateTime.now());
+        return new WaitingEntry(null, name, LocalDateTime.now());
     }
 
-    public boolean isReserved() {
-        return this.status == ReservationStatus.RESERVED;
+    public static ReservationEntry from(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return switch (status) {
+            case RESERVED -> new ReservedEntry(id, name, createdAt);
+            case WAITING -> new WaitingEntry(id, name, createdAt);
+            case DELETED -> new DeletedEntry(id, name, createdAt);
+        };
     }
+
+    public abstract ReservationStatus getStatus();
+
+    public abstract boolean isReserved();
+
+    public abstract boolean isWaiting();
+
+    public abstract boolean isActive();
+
+    public abstract ReservationEntry cancel();
+
+    public abstract ReservationEntry promote();
 
     public boolean isSameId(long id) {
         return this.id != null && this.id.equals(id);
-    }
-
-    public void cancel() {
-        this.status = ReservationStatus.DELETED;
-    }
-
-    public boolean isWaiting() {
-        return this.status == ReservationStatus.WAITING;
-    }
-
-    public boolean isActive() {
-        return this.status != ReservationStatus.DELETED;
-    }
-
-    public void promote() {
-        this.status = ReservationStatus.RESERVED;
     }
 
     public boolean hasSameName(String name) {
@@ -55,6 +53,6 @@ public class ReservationEntry {
     }
 
     public boolean matches(String name, ReservationStatus status) {
-        return this.name.equals(name) && this.status == status;
+        return this.name.equals(name) && this.getStatus() == status;
     }
 }

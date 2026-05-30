@@ -54,11 +54,15 @@ public class ReservationEntries {
                 .findFirst();
     }
 
+    public void replace(long id, ReservationEntry replacement) {
+        entries.replaceAll(e -> e.isSameId(id) ? replacement : e);
+    }
+
     public void promoteFirstWaiting() {
         entries.stream()
                 .filter(ReservationEntry::isWaiting)
                 .min(Comparator.comparing(ReservationEntry::getCreatedAt)
                         .thenComparing(ReservationEntry::getId))
-                .ifPresent(ReservationEntry::promote);
+                .ifPresent(entry -> replace(entry.getId(), entry.promote()));
     }
 }

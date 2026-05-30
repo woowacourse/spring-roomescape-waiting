@@ -113,7 +113,7 @@ public class Reservation {
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
 
         boolean wasReserved = entry.isReserved();
-        entry.cancel();
+        entries.replace(entryId, entry.cancel());
 
         if (wasReserved) {
             entries.promoteFirstWaiting();

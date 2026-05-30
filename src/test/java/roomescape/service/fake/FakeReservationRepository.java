@@ -33,7 +33,7 @@ public class FakeReservationRepository implements ReservationRepository {
     private List<ReservationEntry> copyEntriesWithId(Reservation reservation) {
         return reservation.getEntries()
                 .stream()
-                .map(entry -> new ReservationEntry(
+                .map(entry -> ReservationEntry.from(
                         entry.getId() == null ? entryCounter.getAndIncrement() : entry.getId(),
                         entry.getName(),
                         entry.getStatus(),

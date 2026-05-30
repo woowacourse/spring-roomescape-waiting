@@ -81,10 +81,10 @@ class ReservationEntryTest {
         ReservationEntry entry = entry(1L, ReservationStatus.RESERVED);
 
         // when
-        entry.cancel();
+        ReservationEntry cancelled = entry.cancel();
 
         // then
-        assertThat(entry.getStatus()).isEqualTo(ReservationStatus.DELETED);
+        assertThat(cancelled.getStatus()).isEqualTo(ReservationStatus.DELETED);
     }
 
     @Test
@@ -93,13 +93,13 @@ class ReservationEntryTest {
         ReservationEntry entry = entry(1L, ReservationStatus.WAITING);
 
         // when
-        entry.promote();
+        ReservationEntry promoted = entry.promote();
 
         // then
-        assertThat(entry.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
     private ReservationEntry entry(Long id, ReservationStatus status) {
-        return new ReservationEntry(id, "이프", status, LocalDateTime.now());
+        return ReservationEntry.from(id, "이프", status, LocalDateTime.now());
     }
 }

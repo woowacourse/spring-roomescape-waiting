@@ -244,6 +244,6 @@ class ReservationTest {
     }
 
     private ReservationEntry entry(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new ReservationEntry(id, name, status, createdAt);
+        return ReservationEntry.from(id, name, status, createdAt);
     }
 }
