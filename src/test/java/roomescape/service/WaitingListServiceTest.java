@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
@@ -266,6 +267,32 @@ class WaitingListServiceTest {
         assertThatThrownBy(() -> waitingListService.create(createCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_REQUIRED);
+    }
+
+    @Test
+    void 동시_예약대기_생성_시_유니크제약조건_예외발생() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        String name = "오리";
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
+        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, themeId, tomorrow, timeId)).willReturn(false); // 중복 체크 통과
+
+        given(waitingListRepository.save(any(WaitingList.class)))
+                .willThrow(new DataIntegrityViolationException("unique constraint"));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
     }
 
     @Test
