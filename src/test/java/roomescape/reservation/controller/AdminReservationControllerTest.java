@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import roomescape.reservation.controller.dto.ReservationListResponse;
+import roomescape.common.dto.PageResult;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -60,7 +61,7 @@ class AdminReservationControllerTest {
                 Reservation.of(2L, "포비", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING, now),
                 Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING, now)
         );
-        given(reservationService.findAllReservations(1, 20)).willReturn(reservations);
+        given(reservationService.findAllReservations(1, 20)).willReturn(PageResult.of(reservations, 1, 20, 3));
 
         // when then
         MvcResult result = mockMvc.perform(get("/admin/reservations"))
@@ -68,9 +69,10 @@ class AdminReservationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        ReservationListResponse response = objectMapper.readValue(
+        PageResult<ReservationResponse> response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
-                ReservationListResponse.class
+                new TypeReference<>() {
+                }
         );
 
         assertConfirmedReservationsResponse(response);
@@ -89,7 +91,7 @@ class AdminReservationControllerTest {
         List<Reservation> reservations = List.of(
                 Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.CONFIRMED, LocalDateTime.now())
         );
-        given(reservationService.findAllReservations(2, 2)).willReturn(reservations);
+        given(reservationService.findAllReservations(2, 2)).willReturn(PageResult.of(reservations, 2, 2, 3));
 
         // when then
         MvcResult result = mockMvc.perform(get("/admin/reservations")
@@ -99,12 +101,13 @@ class AdminReservationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        ReservationListResponse response = objectMapper.readValue(
+        PageResult<ReservationResponse> response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
-                ReservationListResponse.class
+                new TypeReference<>() {
+                }
         );
 
-        assertThat(response.reservations()).hasSize(1)
+        assertThat(response.contents()).hasSize(1)
                 .extracting(
                         ReservationResponse::id,
                         ReservationResponse::guestName,
@@ -139,8 +142,8 @@ class AdminReservationControllerTest {
                 .findAllReservations(anyInt(), anyInt());
     }
 
-    private static void assertConfirmedReservationsResponse(ReservationListResponse response) {
-        assertThat(response.reservations()).hasSize(3)
+    private static void assertConfirmedReservationsResponse(PageResult<ReservationResponse> response) {
+        assertThat(response.contents()).hasSize(3)
                 .extracting(
                         ReservationResponse::id,
                         ReservationResponse::guestName,

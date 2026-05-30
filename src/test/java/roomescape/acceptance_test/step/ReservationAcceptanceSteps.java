@@ -141,12 +141,12 @@ public final class ReservationAcceptanceSteps {
         ReservationCreateRequest request = reservation.request();
 
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getList("reservations.id", Integer.class)).contains(reservation.id());
-        assertThat(response.jsonPath().getList("reservations.guestName", String.class)).contains(request.guestName());
-        assertThat(response.jsonPath().getList("reservations.date", String.class)).contains(request.date().toString());
-        assertThat(response.jsonPath().getList("reservations.time.id", Integer.class))
+        assertThat(response.jsonPath().getList("contents.id", Integer.class)).contains(reservation.id());
+        assertThat(response.jsonPath().getList("contents.guestName", String.class)).contains(request.guestName());
+        assertThat(response.jsonPath().getList("contents.date", String.class)).contains(request.date().toString());
+        assertThat(response.jsonPath().getList("contents.time.id", Integer.class))
                 .contains(request.timeId().intValue());
-        assertThat(response.jsonPath().getList("reservations.theme.id", Integer.class))
+        assertThat(response.jsonPath().getList("contents.theme.id", Integer.class))
                 .contains(request.themeId().intValue());
     }
 

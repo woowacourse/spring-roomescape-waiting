@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.common.dto.PageResult;
 import roomescape.reservation.controller.dto.PageRequest;
-import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -16,12 +16,10 @@ public class AdminReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<ReservationListResponse> getAllReservations(@ModelAttribute @Valid PageRequest pageRequest) {
+    public ResponseEntity<PageResult<ReservationResponse>> getAllReservations(@ModelAttribute @Valid PageRequest pageRequest) {
         return ResponseEntity.ok(
-                ReservationListResponse.from(reservationService.findAllReservations(pageRequest.page(), pageRequest.size())
-                        .stream()
-                        .map(ReservationResponse::from)
-                        .toList()));
+                reservationService.findAllReservations(pageRequest.page(), pageRequest.size())
+                        .map(ReservationResponse::from));
     }
 
     @DeleteMapping("/{id}")

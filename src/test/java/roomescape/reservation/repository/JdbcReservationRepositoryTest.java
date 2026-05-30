@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import roomescape.common.dto.PageResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
@@ -80,10 +81,10 @@ class JdbcReservationRepositoryTest {
         Reservation excepted = sqlFixtureGenerator.insertReservation("벨로", LocalDate.of(2023, 8, 8), time, theme, CANCELED);
 
         // when
-        List<Reservation> reservations = reservationRepository.findAllByStatusCanceledNot(2, 2);
+        PageResult<Reservation> pageResult = reservationRepository.findAllByStatusCanceledNot(2, 2);
 
         // then
-        assertThat(reservations)
+        assertThat(pageResult.contents())
                 .contains(included)
                 .doesNotContain(excepted);
     }

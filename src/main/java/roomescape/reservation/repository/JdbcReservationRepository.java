@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.dto.PageResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
@@ -95,8 +96,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByStatusCanceledNot(int page, int size) {
-        return jdbcTemplate.query("""
+    public PageResult<Reservation> findAllByStatusCanceledNot(int page, int size) {
+        List<Reservation> reservations = jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
                     r.guest_name,
@@ -126,6 +127,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                         .addValue("size", size)
                         .addValue("offset", (page - 1) * size),
                 reservationRowMapper);
+        return PageResult.of(reservations, page, size, countByStatusCanceledNot());
+    }
+
+    private long countByStatusCanceledNot() {
+        Long count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE status != 'CANCELED'
+                """, new MapSqlParameterSource(), Long.class);
+        return count == null ? 0 : count;
     }
 
     @Override

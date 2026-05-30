@@ -30,6 +30,10 @@ const API_BASE = "";
       adminSelectedTimeId: null,
       adminReservationPage: 1,
       adminReservationSize: 20,
+      adminReservationNumberOfElements: 0,
+      adminReservationTotalElements: 0,
+      adminReservationTotalPages: 0,
+      adminReservationHasPrevious: false,
       adminReservationHasNext: false
     };
 
@@ -1066,8 +1070,9 @@ const API_BASE = "";
     }
 
     function renderAdmin() {
+      const rangeLabel = adminReservationRangeLabel();
       elements.reservationCount.textContent =
-        `GET /admin/reservations?page=${state.adminReservationPage}&size=${state.adminReservationSize} · ${state.reservations.length}건`;
+        `GET /admin/reservations?page=${state.adminReservationPage}&size=${state.adminReservationSize} · ${rangeLabel} / ${state.adminReservationTotalElements}건`;
       elements.adminThemeCount.textContent = `${state.themes.length}개`;
       elements.adminTimeCount.textContent = `${state.times.length}개`;
       renderAdminReservationForm();
@@ -1170,18 +1175,61 @@ const API_BASE = "";
 
     function renderAdminReservationPagination() {
       elements.adminReservationPageSize.value = String(state.adminReservationSize);
-      elements.adminReservationPageLabel.textContent = `${state.adminReservationPage} 페이지`;
-      elements.adminReservationPrevPage.disabled = state.adminReservationPage <= 1;
+      elements.adminReservationPageLabel.textContent =
+        `${state.adminReservationTotalPages === 0 ? 0 : state.adminReservationPage} / ${state.adminReservationTotalPages} 페이지`;
+      elements.adminReservationPrevPage.disabled = !state.adminReservationHasPrevious;
       elements.adminReservationNextPage.disabled = !state.adminReservationHasNext;
     }
 
-    function pagedDemoReservations() {
-      const start = (state.adminReservationPage - 1) * state.adminReservationSize;
-      const end = start + state.adminReservationSize;
+    function adminReservationRangeLabel() {
+      if (state.adminReservationNumberOfElements === 0) {
+        return "0-0";
+      }
+
+      const start = (state.adminReservationPage - 1) * state.adminReservationSize + 1;
+      const end = start + state.adminReservationNumberOfElements - 1;
+      return `${start}-${end}`;
+    }
+
+    function applyAdminReservationPage(pageData) {
+      const contents = Array.isArray(pageData?.contents) ? pageData.contents : [];
+      state.reservations = contents;
+      state.adminReservationPage = Number(pageData?.page ?? state.adminReservationPage);
+      state.adminReservationSize = Number(pageData?.size ?? state.adminReservationSize);
+      state.adminReservationNumberOfElements = Number(pageData?.numberOfElements ?? contents.length);
+      state.adminReservationTotalElements = Number(pageData?.totalElements ?? contents.length);
+      state.adminReservationTotalPages = Number(pageData?.totalPages ?? 0);
+      state.adminReservationHasPrevious = Boolean(pageData?.hasPrevious);
+      state.adminReservationHasNext = Boolean(pageData?.hasNext);
+
+      if (state.adminReservationTotalPages === 0) {
+        state.adminReservationPage = 1;
+      }
+    }
+
+    function demoReservationPage() {
       const reservations = [...state.demoReservations]
         .sort((a, b) => Number(a.id) - Number(b.id));
-      state.adminReservationHasNext = reservations.length > end;
-      return reservations.slice(start, end);
+      const totalElements = reservations.length;
+      const totalPages = Math.ceil(totalElements / state.adminReservationSize);
+      if (totalPages > 0 && state.adminReservationPage > totalPages) {
+        state.adminReservationPage = totalPages;
+      }
+
+      const start = (state.adminReservationPage - 1) * state.adminReservationSize;
+      const end = start + state.adminReservationSize;
+      const contents = reservations.slice(start, end);
+
+      return {
+        contents,
+        page: state.adminReservationPage,
+        size: state.adminReservationSize,
+        numberOfElements: contents.length,
+        totalElements,
+        totalPages,
+        hasPrevious: state.adminReservationPage > 1,
+        hasNext: state.adminReservationPage < totalPages
+      };
     }
 
     async function loadAdminReservations() {
@@ -1191,12 +1239,15 @@ const API_BASE = "";
 
       if (state.mode === "live") {
         const data = await getReservationListData();
-        state.reservations = data.reservations || [];
-        state.adminReservationHasNext = state.reservations.length === state.adminReservationSize;
+        applyAdminReservationPage(data);
+        if (state.adminReservationTotalPages > 0 && state.adminReservationPage > state.adminReservationTotalPages) {
+          state.adminReservationPage = state.adminReservationTotalPages;
+          applyAdminReservationPage(await getReservationListData());
+        }
         return;
       }
 
-      state.reservations = pagedDemoReservations();
+      applyAdminReservationPage(demoReservationPage());
     }
 
     function renderAdminThemes() {
@@ -1407,7 +1458,7 @@ const API_BASE = "";
       state.popularThemes = demoThemes.slice(0, 10);
       state.times = demoTimes.map(({ id, startAt }) => ({ id, startAt }));
       state.adminReservationPage = 1;
-      state.reservations = pagedDemoReservations();
+      applyAdminReservationPage(demoReservationPage());
       setSourceStatus();
 
       if (isAdminPage()) {
@@ -1462,8 +1513,11 @@ const API_BASE = "";
         state.themes = themeData.themes || [];
         state.popularThemes = popularityData.themes || popularityData.popularThemes || [];
         state.times = timeData.times || [];
-        state.reservations = reservationData.reservations || [];
-        state.adminReservationHasNext = state.reservations.length === state.adminReservationSize;
+        if (isAdminPage()) {
+          applyAdminReservationPage(reservationData);
+        } else {
+          state.reservations = [];
+        }
         setSourceStatus();
 
         if (isAdminPage()) {
@@ -1556,7 +1610,7 @@ const API_BASE = "";
         renderAdmin();
       });
       elements.adminReservationPrevPage.addEventListener("click", async () => {
-        if (state.adminReservationPage <= 1) {
+        if (!state.adminReservationHasPrevious) {
           return;
         }
         state.adminReservationPage -= 1;

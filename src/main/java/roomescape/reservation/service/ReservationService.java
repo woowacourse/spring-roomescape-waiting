@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.dto.PageResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
@@ -53,7 +54,7 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
     }
 
-    public List<Reservation> findAllReservations(int page, int size) {
+    public PageResult<Reservation> findAllReservations(int page, int size) {
         return reservationRepository.findAllByStatusCanceledNot(page, size);
     }
 

@@ -3,6 +3,7 @@ package roomescape.reservation.repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
+import roomescape.common.dto.PageResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ public interface ReservationRepository {
 
     Optional<ReservationWaitingDto> findWaitingById(Long id);
 
-    List<Reservation> findAllByStatusCanceledNot(int page, int size);
+    PageResult<Reservation> findAllByStatusCanceledNot(int page, int size);
 
     List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName);
 
