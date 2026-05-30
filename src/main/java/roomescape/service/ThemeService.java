@@ -62,6 +62,10 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
+        if (reservationDao.existsByThemeId(id)) {
+            throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다.");
+        }
+
         themeDao.delete(id);
     }
 
