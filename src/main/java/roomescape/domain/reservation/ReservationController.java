@@ -71,7 +71,7 @@ public class ReservationController {
     @PatchMapping("/reservation/{id}")
     public ResponseEntity<Void> updateMyReservation(
         @PathVariable Long id,
-        @RequestBody ReservationFixRequest request
+        @RequestBody @Valid ReservationFixRequest request
     ) {
         reservationService.updateMyReservation(id, request);
         return ResponseEntity.noContent().build();
