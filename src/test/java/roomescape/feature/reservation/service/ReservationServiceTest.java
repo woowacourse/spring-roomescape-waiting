@@ -66,7 +66,7 @@ class ReservationServiceTest {
     }
 
     private Time timeWithId(Long id) {
-        return Time.reconstruct(id, LocalTime.of(10, 0), null);
+        return Time.reconstruct(id, LocalTime.of(10, 0), TimeStatus.ACTIVE);
     }
 
     private Theme themeWithId(Long id) {
@@ -222,7 +222,7 @@ class ReservationServiceTest {
             // given
             Theme theme = themeWithId(1L);
             ReservationCreateCommand command = new ReservationCreateCommand(
-                new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 1L);
+                new ReserverName("예약자"), LocalDate.now().plusDays(1), 999L, 1L);
             when(timeRepository.findTimeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
 
@@ -240,7 +240,7 @@ class ReservationServiceTest {
         void timeId와_themeId가_모두_존재하지_않으면_파라미터_에러를_모두_포함한다() {
             // given
             ReservationCreateCommand command = new ReservationCreateCommand(
-                new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 999L);
+                new ReserverName("예약자"), LocalDate.now().plusDays(1), 999L, 999L);
             when(timeRepository.findTimeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
@@ -327,7 +327,7 @@ class ReservationServiceTest {
         void 존재하지_않는_timeId로_대기_생성_시_파라미터_에러가_발생한다() {
             // given
             ReservationCreateCommand command = new ReservationCreateCommand(
-                new ReserverName("예약자"), LocalDate.of(2026, 5, 20), 999L, 999L);
+                new ReserverName("예약자"), LocalDate.now().plusDays(1), 999L, 999L);
             when(timeRepository.findTimeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
@@ -347,9 +347,9 @@ class ReservationServiceTest {
         @Test
         void 예약을_수정한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusYears(1);
             Time existingTime = timeWithId(1L);
-            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), null);
+            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), TimeStatus.ACTIVE);
             Theme existingTheme = themeWithId(1L);
             Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", ThemeStatus.ACTIVE);
             Reservation existing = Reservation.reconstruct(
@@ -377,37 +377,10 @@ class ReservationServiceTest {
         }
 
         @Test
-        void null인_선택_필드는_기존_값을_유지한다() {
-            // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
-            Time existingTime = timeWithId(1L);
-            Theme existingTheme = themeWithId(1L);
-            Reservation existing = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), null, null, null);
-            Reservation updated = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
-                .thenReturn(Optional.of(existing));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                futureDate, existingTime, existingTheme, 1L)).thenReturn(false);
-            when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
-
-            // when
-            ReservationCreateResponseDto result = reservationService.updateReservation(1L, command);
-
-            // then
-            assertThat(result.date()).isEqualTo(futureDate);
-            assertThat(result.timeId()).isEqualTo(1L);
-            assertThat(result.themeId()).isEqualTo(1L);
-        }
-
-        @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), LocalDate.now(fixedClock).plusDays(1), null, null);
+                new ReserverName("예약자"), LocalDate.now(fixedClock).plusDays(1), 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(999L))
                 .thenReturn(Optional.empty());
 
@@ -426,9 +399,11 @@ class ReservationServiceTest {
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("다른사람"), futureDate, null, null);
+                new ReserverName("다른사람"), futureDate, 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
@@ -445,9 +420,11 @@ class ReservationServiceTest {
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), futureDate, null, null);
+                new ReserverName("예약자"), futureDate, 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(canceled));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
@@ -458,24 +435,49 @@ class ReservationServiceTest {
         @Test
         void 지난_날짜의_예약이면_예외가_발생한다() {
             // given
-            LocalDate pastDate = LocalDate.now(fixedClock).minusDays(1);
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            LocalDate futureDate = LocalDate.now().plusYears(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), pastDate, null, null);
+                new ReserverName("예약자"), futureDate, 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(past));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
-                .hasMessage("지난 예약은 변경할 수 없습니다.");
+                .hasMessage("지난 예약은 생성할 수 없습니다");
         }
 
         @Test
-        void 변경할_timeId와_themeId가_존재하지_않으면_파라미터_에러를_모두_포함한다() {
+        void 새_날짜와_시간이_과거이면_예외가_발생한다() {
+            // given
+            LocalDate futureDate = LocalDate.now().plusYears(1);
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation existing = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(
+                new ReserverName("예약자"), pastDate, 1L, 1L);
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(existing));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("지난 예약은 생성할 수 없습니다");
+        }
+
+        @Test
+        void 변경할_timeId가_존재하지_않으면_예외가_발생한다() {
             // given
             LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
             Time existingTime = timeWithId(1L);
@@ -483,34 +485,52 @@ class ReservationServiceTest {
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), null, 999L, 999L);
+                new ReserverName("예약자"), futureDate, 999L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("수정할 자원이 존재하지 않습니다.");
+        }
+
+        @Test
+        void 변경할_themeId가_존재하지_않으면_예외가_발생한다() {
+            // given
+            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            Time existingTime = timeWithId(1L);
+            Theme existingTheme = themeWithId(1L);
+            Reservation existing = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
+            ReservationUpdateCommand command = new ReservationUpdateCommand(
+                new ReserverName("예약자"), futureDate, 1L, 999L);
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(existing));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(existingTime));
             when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
-                .isInstanceOfSatisfying(GeneralParametersException.class, ex -> {
-                    assertThat(ex.getMessage()).isEqualTo("수정할 자원이 존재하지 않습니다.");
-                    assertThat(ex.getParameterErrors())
-                        .extracting(ParameterErrorResponseDto::parameter)
-                        .containsExactly("timeId", "themeId");
-                });
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("수정할 자원이 존재하지 않습니다.");
         }
 
         @Test
         void 다른_예약과_날짜_시간_테마가_중복되면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusYears(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate.plusDays(1), time, theme, ReservationStatus.ACTIVE);
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), futureDate, null, null);
+                new ReserverName("예약자"), futureDate, 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
                 futureDate, time, theme, 1L)).thenReturn(true);
 

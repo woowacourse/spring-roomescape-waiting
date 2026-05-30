@@ -19,10 +19,8 @@ import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
 import roomescape.feature.time.repository.TimeRepository;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
@@ -116,77 +114,22 @@ public class ReservationService {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!existingReservation.getName().equals(command.name())) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
-        }
+        Time newTime = timeRepository.findTimeByIdAndNotDeleted(command.timeId())
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
+        Theme newTheme = themeRepository.findThemeByIdAndNotDeleted(command.themeId())
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
 
-        if (existingReservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
+        Reservation updated = existingReservation.update(command.name(), command.date(), newTime, newTheme);
 
-        if (existingReservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_UPDATE);
-        }
-
-        Reservation updateReservation = createUpdateReservation(existingReservation, command);
         if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-            updateReservation.getDate(), updateReservation.getTime(), updateReservation.getTheme(), id)) {
+            updated.getDate(), updated.getTime(), updated.getTheme(), id)) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
 
         try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.update(updateReservation));
+            return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
-    }
-
-    private Reservation createUpdateReservation(Reservation existingReservation, ReservationUpdateCommand command) {
-        LocalDate date = getUpdateDate(existingReservation, command);
-        Time time = getUpdateTime(existingReservation, command);
-        Theme theme = getUpdateTheme(existingReservation, command);
-
-        validateUpdateResources(time, theme);
-
-        return Reservation.reconstruct(existingReservation.getId(), existingReservation.getName(), date, time, theme,
-            existingReservation.getStatus());
-    }
-
-    private LocalDate getUpdateDate(Reservation existingReservation, ReservationUpdateCommand command) {
-        if (command.date() == null) {
-            return existingReservation.getDate();
-        }
-        return command.date();
-    }
-
-    private Time getUpdateTime(Reservation existingReservation, ReservationUpdateCommand command) {
-        if (command.timeId() == null) {
-            return existingReservation.getTime();
-        }
-        return timeRepository.findTimeByIdAndNotDeleted(command.timeId()).orElse(null);
-    }
-
-    private Theme getUpdateTheme(Reservation existingReservation, ReservationUpdateCommand command) {
-        if (command.themeId() == null) {
-            return existingReservation.getTheme();
-        }
-        return themeRepository.findThemeByIdAndNotDeleted(command.themeId()).orElse(null);
-    }
-
-    private void validateUpdateResources(Time time, Theme theme) {
-        List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
-
-        if (time == null || time.getStatus() == TimeStatus.DELETED) {
-            parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
-        }
-
-        if (theme == null || theme.getStatus() == ThemeStatus.DELETED) {
-            parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
-        }
-
-        if (!parameterErrorResponses.isEmpty()) {
-            throw new GeneralParametersException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND,
-                parameterErrorResponses);
         }
     }
 

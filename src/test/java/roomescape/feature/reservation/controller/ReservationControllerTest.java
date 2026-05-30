@@ -135,24 +135,6 @@ class ReservationControllerTest {
         }
 
         @Test
-        void 과거_날짜로_예약하면_4xx를_반환한다() throws Exception {
-            mockMvc.perform(post("/api/reservations")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-                        {
-                          "name": "%s",
-                          "date": "%s",
-                          "timeId": 1,
-                          "themeId": 1
-                        }
-                        """.formatted(
-                            ReservationFixture.PAST.getName(),
-                            ReservationFixture.PAST.getDate()
-                        )))
-                .andExpect(status().is4xxClientError());
-        }
-
-        @Test
         void 존재하지_않는_timeId와_themeId이면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toCreateCommand(any())).thenReturn(
                 new ReservationCreateCommand(new ReserverName("예약자"), ReservationFixture.FUTURE.getDate(), 999L, 999L)
@@ -207,7 +189,7 @@ class ReservationControllerTest {
         @Test
         void 예약을_수정한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(new ReserverName("예약자"), null, 2L, null)
+                new ReservationUpdateCommand(new ReserverName("예약자"), ReservationFixture.FUTURE.getDate(), 2L, 1L)
             );
             when(reservationService.updateReservation(eq(1L), any())).thenReturn(
                 new ReservationCreateResponseDto(1L, "예약자", ReservationFixture.FUTURE.getDate(), 2L, 1L)
@@ -215,7 +197,14 @@ class ReservationControllerTest {
 
             mockMvc.perform(patch("/api/reservations/1")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"name\": \"예약자\", \"timeId\": 2}"))
+                    .content("""
+                        {
+                          "name": "예약자",
+                          "date": "%s",
+                          "timeId": 2,
+                          "themeId": 1
+                        }
+                        """.formatted(ReservationFixture.FUTURE.getDate())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.timeId", equalTo(2)));
         }
@@ -223,28 +212,42 @@ class ReservationControllerTest {
         @Test
         void 존재하지_않는_예약_ID이면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(new ReserverName("예약자"), null, null, null)
+                new ReservationUpdateCommand(new ReserverName("예약자"), ReservationFixture.FUTURE.getDate(), 1L, 1L)
             );
             when(reservationService.updateReservation(eq(999L), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
             mockMvc.perform(patch("/api/reservations/999")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"name\": \"예약자\"}"))
+                    .content("""
+                        {
+                          "name": "예약자",
+                          "date": "%s",
+                          "timeId": 1,
+                          "themeId": 1
+                        }
+                        """.formatted(ReservationFixture.FUTURE.getDate())))
                 .andExpect(status().is4xxClientError());
         }
 
         @Test
         void 예약자명이_일치하지_않으면_4xx를_반환한다() throws Exception {
             when(reservationMapper.toUpdateCommand(any())).thenReturn(
-                new ReservationUpdateCommand(new ReserverName("다른예약자"), null, null, null)
+                new ReservationUpdateCommand(new ReserverName("다른예약자"), ReservationFixture.FUTURE.getDate(), 1L, 1L)
             );
             when(reservationService.updateReservation(eq(1L), any()))
                 .thenThrow(new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN));
 
             mockMvc.perform(patch("/api/reservations/1")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"name\": \"다른예약자\"}"))
+                    .content("""
+                        {
+                          "name": "다른예약자",
+                          "date": "%s",
+                          "timeId": 1,
+                          "themeId": 1
+                        }
+                        """.formatted(ReservationFixture.FUTURE.getDate())))
                 .andExpect(status().is4xxClientError());
         }
     }

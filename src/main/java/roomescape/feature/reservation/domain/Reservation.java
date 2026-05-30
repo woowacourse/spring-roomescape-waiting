@@ -35,6 +35,13 @@ public class Reservation {
         return new Reservation(id, name, new Schedule(date, time), theme, status);
     }
 
+    public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
+        Schedule newSchedule = new Schedule(newDate, newTime);
+        validateUpdatable(requestName, newSchedule);
+
+        return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
+    }
+
     public Reservation cancel() {
         return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
     }
@@ -43,6 +50,18 @@ public class Reservation {
         if (schedule.isPast()) {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CREATE);
         }
+    }
+
+    private void validateUpdatable(ReserverName requestName, Schedule newSchedule) {
+        if (!this.name.equals(requestName)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
+        }
+        if (this.status != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+
+        validateFuture(this.schedule);
+        validateFuture(newSchedule);
     }
 
     public Long getId() {
