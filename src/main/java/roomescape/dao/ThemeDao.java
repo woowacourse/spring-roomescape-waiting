@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.slot.theme.Theme;
 
 @Repository
 public class ThemeDao {

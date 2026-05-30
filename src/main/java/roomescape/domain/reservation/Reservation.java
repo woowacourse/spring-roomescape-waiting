@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.UnprocessableEntityException;
-import roomescape.domain.reservation.theme.Theme;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.theme.Theme;
+import roomescape.domain.slot.time.ReservationTime;
 
 public class Reservation {
 

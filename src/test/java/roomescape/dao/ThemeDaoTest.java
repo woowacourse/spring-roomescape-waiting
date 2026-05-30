@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.dao.dto.TimeQueryResult;
-import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.slot.theme.Theme;
 
 @JdbcTest
 @Import({ThemeDao.class, ReservationTimeDao.class})

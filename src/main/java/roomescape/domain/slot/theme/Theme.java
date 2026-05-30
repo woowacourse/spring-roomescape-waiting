@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.theme;
+package roomescape.domain.slot.theme;
 
 import java.util.Objects;
 
@@ -7,6 +7,10 @@ public class Theme {
     private final ThemeName name;
     private final Description description;
     private final ThumbnailUrl url;
+
+    public Theme(ThemeName name, Description description, ThumbnailUrl url) {
+        this(null, name, description, url);
+    }
 
     public Theme(Long id, ThemeName name, Description description, ThumbnailUrl url) {
         validate(name, description, url);

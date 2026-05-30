@@ -1,6 +1,6 @@
 package roomescape.dao.dto;
 
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.time.ReservationTime;
 
 public record TimeQueryResult(
         ReservationTime reservationTime,

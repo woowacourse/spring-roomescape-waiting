@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.theme;
+package roomescape.domain.slot.theme;
 
 public record ThemeName(
         String value

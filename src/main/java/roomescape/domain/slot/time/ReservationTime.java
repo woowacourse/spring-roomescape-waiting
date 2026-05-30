@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.time;
+package roomescape.domain.slot.time;
 
 import java.time.LocalTime;
 import java.util.Objects;

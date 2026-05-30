@@ -11,8 +11,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.theme.Theme;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.theme.Theme;
+import roomescape.domain.slot.time.ReservationTime;
 
 @Repository
 public class ReservationDao {
@@ -121,6 +121,23 @@ public class ReservationDao {
                 sql,
                 Boolean.class,
                 timeId
+        );
+        return Boolean.TRUE.equals(result);
+    }
+
+    public boolean existsByThemeId(Long themeId) {
+        String sql = """
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM reservation
+                    WHERE theme_id = ?
+                )
+                """;
+
+        Boolean result = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                themeId
         );
         return Boolean.TRUE.equals(result);
     }

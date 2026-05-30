@@ -2,10 +2,11 @@ package roomescape.domain.reservation.theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static roomescape.domain.reservation.theme.ThemeName.THEME_NAME_MAX_LENGTH;
+import static roomescape.domain.slot.theme.ThemeName.THEME_NAME_MAX_LENGTH;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.slot.theme.ThemeName;
 
 class ThemeNameTest {
 
@@ -30,7 +31,7 @@ class ThemeNameTest {
     @Test
     @DisplayName("테마 이름 글자 수 제한을 초과하면 예외가 발생한다.")
     void 테마_이름_글자_수_초과_예외_테스트() {
-        String themeName = "0".repeat(THEME_NAME_MAX_LENGTH+1);
+        String themeName = "0".repeat(THEME_NAME_MAX_LENGTH + 1);
 
         assertThatThrownBy(() -> new ThemeName(themeName))
                 .isInstanceOf(IllegalArgumentException.class)

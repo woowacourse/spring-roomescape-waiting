@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.TimeQueryResult;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.time.ReservationTime;
 
 @Repository
 public class ReservationTimeDao {

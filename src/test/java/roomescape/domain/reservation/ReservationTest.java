@@ -8,11 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.theme.Description;
-import roomescape.domain.reservation.theme.ThemeName;
-import roomescape.domain.reservation.theme.ThumbnailUrl;
-import roomescape.domain.reservation.time.ReservationTime;
-import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.slot.theme.Description;
+import roomescape.domain.slot.theme.Theme;
+import roomescape.domain.slot.theme.ThemeName;
+import roomescape.domain.slot.theme.ThumbnailUrl;
+import roomescape.domain.slot.time.ReservationTime;
 
 class ReservationTest {
     private final UserName userName = UserName.parse("아나키");

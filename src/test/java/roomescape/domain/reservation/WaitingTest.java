@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.theme.Description;
-import roomescape.domain.reservation.theme.Theme;
-import roomescape.domain.reservation.theme.ThemeName;
-import roomescape.domain.reservation.theme.ThumbnailUrl;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.theme.Description;
+import roomescape.domain.slot.theme.Theme;
+import roomescape.domain.slot.theme.ThemeName;
+import roomescape.domain.slot.theme.ThumbnailUrl;
+import roomescape.domain.slot.time.ReservationTime;
 
 public class WaitingTest {
     private final UserName userName = UserName.parse("아나키");
@@ -26,7 +26,7 @@ public class WaitingTest {
     private final Description description = Description.parse("너무무서워");
     private final ThumbnailUrl url = ThumbnailUrl.parse("/images/horror");
     private final Theme theme = new Theme(1L, themeName, description, url);
-    private final LocalDateTime createdAt =  LocalDateTime.of(
+    private final LocalDateTime createdAt = LocalDateTime.of(
             LocalDate.parse(TODAY),
             LocalTime.parse(NOW_TIME)
     );

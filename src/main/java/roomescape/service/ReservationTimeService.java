@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.common.exception.ConflictException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.slot.time.ReservationTime;
 import roomescape.service.dto.command.ReservationTimeCommand;
 import roomescape.service.dto.result.ReservationTimeResult;
 
