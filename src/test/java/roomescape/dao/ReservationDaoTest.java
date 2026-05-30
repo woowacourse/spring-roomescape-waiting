@@ -172,4 +172,21 @@ class ReservationDaoTest {
         assertThat(reservationWaitings.getFirst().reservation().getName()).isEqualTo(reservation.getName());
         assertThat(reservationWaitings.getFirst().waitingNumber()).isEqualTo(1);
     }
+
+    @Test
+    void findAllWaitingByName_생성_시간이_같으면_ID_순서로_대기_순번_계산() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        LocalDate date = LocalDate.of(2026, 12, 31);
+        LocalDateTime createdAt = LocalDateTime.of(2026, 12, 1, 10, 0);
+        Reservation first = new Reservation("브리", date, createdAt, time, theme);
+        Reservation second = new Reservation("이든", date, createdAt, time, theme);
+
+        reservationDao.saveWaiting(first);
+        reservationDao.saveWaiting(second);
+
+        List<ReservationWaiting> reservationWaitings = reservationDao.findAllWaitingByName("이든");
+        assertThat(reservationWaitings).hasSize(1);
+        assertThat(reservationWaitings.getFirst().waitingNumber()).isEqualTo(2);
+    }
 }
