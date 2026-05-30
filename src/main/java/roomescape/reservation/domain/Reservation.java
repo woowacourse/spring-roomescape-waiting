@@ -41,8 +41,8 @@ public class Reservation {
     }
 
     public static Reservation create(
-            String guestName, LocalDate date, ReservationTime time, Theme theme, Status status, LocalDateTime changedAt) {
-        return new Reservation(null, guestName, date, time, theme, status, changedAt);
+            String guestName, LocalDate date, ReservationTime time, Theme theme, Status status, LocalDateTime lastModifiedAt) {
+        return new Reservation(null, guestName, date, time, theme, status, lastModifiedAt);
     }
 
     public static Reservation of(
@@ -52,9 +52,9 @@ public class Reservation {
             ReservationTime time,
             Theme theme,
             Status status,
-            LocalDateTime changedAt
+            LocalDateTime lastModifiedAt
     ) {
-        return new Reservation(id, guestName, date, time, theme, status, changedAt);
+        return new Reservation(id, guestName, date, time, theme, status, lastModifiedAt);
     }
 
     public static Reservation clone(Reservation reservation) {
@@ -73,12 +73,12 @@ public class Reservation {
         return of(id, guestName, date, time, theme, status, lastModifiedAt);
     }
 
-    private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime changedAt) {
+    private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime lastModifiedAt) {
         requireNonBlank(guestName, new DomainException(INVALID_RESERVATION_GUEST_NAME));
         requireNonNull(date, new DomainException(INVALID_RESERVATION_DATE));
         requireNonNull(time, new DomainException(INVALID_RESERVATION_TIME));
         requireNonNull(theme, new DomainException(INVALID_THEME));
-        requireNonNull(changedAt, new DomainException(INVALID_LAST_MODIFIED_AT));
+        requireNonNull(lastModifiedAt, new DomainException(INVALID_LAST_MODIFIED_AT));
     }
 
     public Long getThemeId() {
