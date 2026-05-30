@@ -96,7 +96,55 @@ public class ReservationApiTest {
         .body(params)
         .when().post("/reservations")
         .then().log().all()
-        .statusCode(400);
+        .statusCode(409);
+  }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
+      "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('고스트', '9999-01-01', 1, 1, 'WAITING')"
+  })
+  void 확정_예약_없이_대기만_있는_슬롯에_신청하면_확정_예약이_된다() {
+    Map<String, Object> params = new HashMap<>();
+    params.put("name", "신규");
+    params.put("date", "9999-01-01");
+    params.put("timeId", 1);
+    params.put("themeId", 1);
+
+    RestAssured.given().log().all()
+        .contentType(ContentType.JSON)
+        .body(params)
+        .when().post("/reservations")
+        .then().log().all()
+        .statusCode(201)
+        .body("status", is("RESERVED"));
+  }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
+      "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('선점자', '9999-01-01', 1, 1, 'RESERVED')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('일번대기', '9999-01-01', 1, 1, 'WAITING')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('이번대기', '9999-01-01', 1, 1, 'WAITING')"
+  })
+  void 앞_순번_대기가_취소되면_뒤_대기의_순번이_앞당겨진다() {
+    int firstWaitingId = RestAssured.given()
+        .when().get("/reservations/my?name=일번대기")
+        .then().statusCode(200)
+        .extract().path("[0].id");
+
+    RestAssured.given().log().all()
+        .when().delete("/reservations/my?name=일번대기&reservationId=" + firstWaitingId)
+        .then().log().all()
+        .statusCode(200);
+
+    RestAssured.given().log().all()
+        .when().get("/reservations/my?name=이번대기")
+        .then().log().all()
+        .statusCode(200)
+        .body("[0].waitRank", is(1));
   }
 
   @Test

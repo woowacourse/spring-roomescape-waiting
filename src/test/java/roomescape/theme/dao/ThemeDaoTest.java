@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.exception.AppException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 
@@ -90,7 +91,7 @@ class ThemeDaoTest {
         void 존재하지_않는_ID로_조회하면_예외를_던진다() {
             // when // then
             assertThatThrownBy(() -> themeDao.findById(999L))
-                    .isInstanceOf(IllegalArgumentException.class)
+                    .isInstanceOf(AppException.class)
                     .hasMessageContaining("존재하지 않는 테마");
         }
     }
