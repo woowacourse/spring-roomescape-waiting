@@ -65,21 +65,27 @@ public class ReservationValidator {
         }
     }
 
+    /**
+     *  변경된 예약 시간이 과거 시간일 때
+     */
     private void validateNotPast(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
             throw new DomainException(PAST_RESERVATION_NOT_ALLOWED);
         }
     }
 
-    private static void validateAlreadyCanceled(Reservation canceled) {
-        if(canceled.isCanceled()) {
-            throw new DomainException(CANNOT_CHANGE_ALREADY_CANCELED);
-        }
-    }
-
+    /**
+     *  이미 시작된 예약을 변경하려고 할 때
+     */
     private void validateAlreadyStarted(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
             throw new DomainException(CANNOT_CHANGE_ALREADY_STARTED_RESERVATION);
+        }
+    }
+
+    private static void validateAlreadyCanceled(Reservation canceled) {
+        if(canceled.isCanceled()) {
+            throw new DomainException(CANNOT_CHANGE_ALREADY_CANCELED);
         }
     }
 
