@@ -3,6 +3,8 @@ package roomescape.domain.waiting;
 import java.time.LocalDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 
 public class Waiting {
 
@@ -46,5 +48,11 @@ public class Waiting {
 
     public String getName() {
         return name;
+    }
+
+    public void validateOwner(String newRequestOwner) {
+        if (!name.equals(newRequestOwner)) {
+            throw new RoomescapeException(ErrorCode.UNAUTHORIZED_NAME);
+        }
     }
 }

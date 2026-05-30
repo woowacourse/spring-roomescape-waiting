@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,8 +71,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
-        validateReservationId(id);
+    public void deleteReservation(Long id, String name) {
+        validateReservationOwner(id, name);
         reservationRepository.deleteById(id);
     }
 
@@ -105,10 +104,10 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationId(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
-        }
+    private void validateReservationOwner(Long id, String name) {
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+        reservation.validateOwner(name);
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
