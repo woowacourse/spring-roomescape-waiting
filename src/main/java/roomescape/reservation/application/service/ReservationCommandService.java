@@ -44,10 +44,6 @@ public class ReservationCommandService {
         ReservationSlot slot = request.toSlot(time.getStartAt());
         Reservation reservation = request.toReservation(slot);
 
-        if (reservationRepository.existsBySlot(slot)) {
-            throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
-        }
-
         Reservation savedReservation = saveReservation(reservation);
         return ReservationApplicationResult.confirmed(
                 savedReservation,
@@ -116,7 +112,7 @@ public class ReservationCommandService {
         try {
             return reservationRepository.save(reservation);
         } catch (UniqueConstraintViolationException e) {
-            throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
+            throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
     }
 
