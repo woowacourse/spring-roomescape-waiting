@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional
 class ReservationWaitingServiceTest {
 
     @Autowired
@@ -32,8 +31,6 @@ class ReservationWaitingServiceTest {
     @Autowired
     private ThemeDao themeDao;
 
-    @Autowired
-    private ReservationWaitingService waitingService;
     @Autowired
     private ReservationWaitingService reservationWaitingService;
     @Autowired
@@ -54,7 +51,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when
-        ReservationWaitingResponse response = waitingService.addReservationWaiting(command, LocalDateTime.now());
+        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command, LocalDateTime.now());
 
         // then
         assertThat(response)

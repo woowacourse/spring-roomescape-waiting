@@ -1,9 +1,11 @@
 package roomescape.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
@@ -27,7 +29,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional
 class ReservationServiceTest {
 
     @Autowired
@@ -44,6 +45,14 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationWaitingDao waitingDao;
+
+    @Autowired
+    private DatabaseInitializer databaseInitializer;
+
+    @BeforeEach
+    void setUp() {
+        databaseInitializer.clear();
+    }
 
     @Test
     void 예약을_추가한다() {
