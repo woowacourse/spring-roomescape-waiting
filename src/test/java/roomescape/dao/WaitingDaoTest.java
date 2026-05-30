@@ -101,4 +101,16 @@ public class WaitingDaoTest {
     void existsByThemeIdResultFalse() {
         assertThat(waitingDao.existsByThemeId(15L)).isFalse();
     }
+
+    @Test
+    @DisplayName("해당 시간을 사용하는 예약 대기가 있으면 existsByTimeId는 true를 반환한다.")
+    void existsByTimeIdResultTrue() {
+        assertThat(waitingDao.existsByTimeId(5L)).isTrue();
+    }
+
+    @Test
+    @DisplayName("해당 시간을 사용하는 예약 대기가 없으면 existsByTimeId는 false를 반환한다.")
+    void existsByTimeIdResultFalse() {
+        assertThat(waitingDao.existsByTimeId(1L)).isFalse();
+    }
 }

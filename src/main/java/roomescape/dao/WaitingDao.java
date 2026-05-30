@@ -183,4 +183,16 @@ public class WaitingDao {
         Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
         return Boolean.TRUE.equals(result);
     }
+
+    public boolean existsByTimeId(Long timeId) {
+        String sql = """
+                                SELECT EXISTS(
+                                SELECT 1
+                                FROM waiting
+                                WHERE time_id = ?
+                                )
+                """;
+        Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
+        return Boolean.TRUE.equals(result);
+    }
 }

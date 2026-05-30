@@ -18,6 +18,7 @@ import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.time.ReservationTime;
 import roomescape.service.dto.command.ReservationTimeCommand;
 import roomescape.service.dto.result.ReservationTimeResult;
@@ -34,10 +35,12 @@ class ReservationTimeServiceTest {
     private ReservationTimeDao reservationTimeDao;
     @Mock
     private ReservationDao reservationDao;
+    @Mock
+    private WaitingDao waitingDao;
 
     @BeforeEach
     public void setUp() {
-        reservationTimeService = new ReservationTimeService(reservationTimeDao, reservationDao);
+        reservationTimeService = new ReservationTimeService(reservationTimeDao, reservationDao, waitingDao);
     }
 
     @Test
@@ -68,6 +71,7 @@ class ReservationTimeServiceTest {
     public void 예약_시간_삭제_정상_테스트() {
         given(reservationTimeDao.existsById(timeId)).willReturn(true);
         given(reservationDao.existsByTimeId(timeId)).willReturn(false);
+        given(waitingDao.existsByTimeId(timeId)).willReturn(false);
 
         reservationTimeService.deleteReservationTime(timeId);
 
@@ -93,6 +97,19 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeId))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
+
+        verify(reservationTimeDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 예약_대기가_존재하는_시간을_삭제하면_예외가_발생한다() {
+        given(reservationTimeDao.existsById(timeId)).willReturn(true);
+        given(reservationDao.existsByTimeId(timeId)).willReturn(false);
+        given(waitingDao.existsByTimeId(timeId)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(timeId))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("예약 대기가 존재하는 시간은 삭제할 수 없습니다.");
 
         verify(reservationTimeDao, never()).delete(anyLong());
     }

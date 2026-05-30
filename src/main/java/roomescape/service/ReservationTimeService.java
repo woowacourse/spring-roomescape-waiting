@@ -6,6 +6,7 @@ import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.time.ReservationTime;
 import roomescape.service.dto.command.ReservationTimeCommand;
 import roomescape.service.dto.result.ReservationTimeResult;
@@ -14,10 +15,13 @@ import roomescape.service.dto.result.ReservationTimeResult;
 public class ReservationTimeService {
     private final ReservationTimeDao reservationTimeDao;
     private final ReservationDao reservationDao;
+    private final WaitingDao waitingDao;
 
-    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ReservationDao reservationDao) {
+    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ReservationDao reservationDao,
+                                  WaitingDao waitingDao) {
         this.reservationTimeDao = reservationTimeDao;
         this.reservationDao = reservationDao;
+        this.waitingDao = waitingDao;
     }
 
     public List<ReservationTimeResult> findReservationTimes() {
@@ -51,6 +55,9 @@ public class ReservationTimeService {
             throw new ConflictException("예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
 
+        if (waitingDao.existsByTimeId(id)) {
+            throw new ConflictException("예약 대기가 존재하는 시간은 삭제할 수 없습니다.");
+        }
         reservationTimeDao.delete(id);
     }
 }
