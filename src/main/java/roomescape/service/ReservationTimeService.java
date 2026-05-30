@@ -1,12 +1,11 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationTimeRepository;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,11 +23,6 @@ public class ReservationTimeService {
         return timeRepository.findAll();
     }
 
-    public ReservationTime findById(Long id) {
-        return timeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_RESERVATION_TIME, id)));
-    }
-
     @Transactional
     public ReservationTime addTime(ReservationTime time) {
         return timeRepository.save(time);
@@ -37,5 +31,10 @@ public class ReservationTimeService {
     @Transactional
     public void deleteTime(Long id) {
         timeRepository.deleteById(id);
+    }
+
+    public ReservationTime getById(Long id) {
+        return timeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_RESERVATION_TIME, id)));
     }
 }

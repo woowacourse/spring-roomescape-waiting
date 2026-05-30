@@ -1,5 +1,12 @@
 package roomescape.unit.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,14 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.ReservationTimeService;
-
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceMockTest {
@@ -28,19 +27,19 @@ class ReservationTimeServiceMockTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    void findById는_존재하지_않으면_NotFoundException을_던진다() {
+    void getById는_존재하지_않으면_NotFoundException을_던진다() {
         given(timeRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationTimeService.findById(1L))
+        assertThatThrownBy(() -> reservationTimeService.getById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void findById는_존재하면_시간을_반환한다() {
+    void getById는_존재하면_시간을_반환한다() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         given(timeRepository.findById(1L)).willReturn(Optional.of(time));
 
-        assertThat(reservationTimeService.findById(1L)).isEqualTo(time);
+        assertThat(reservationTimeService.getById(1L)).isEqualTo(time);
     }
 
     @Test

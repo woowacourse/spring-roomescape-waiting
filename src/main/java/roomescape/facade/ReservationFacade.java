@@ -47,26 +47,9 @@ public class ReservationFacade {
         this.themeService = themeService;
     }
 
-    // TODO: delete cascade 불가는 db제약으로 풀어내기
-    @Transactional
-    public void deleteTime(Long id) {
-        if (reservationService.hasReservationsByTimeId(id)) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_TIME_IN_USE, id));
-        }
-        reservationTimeService.deleteTime(id);
-    }
-
-    @Transactional
-    public void deleteTheme(Long id) {
-        if (reservationService.hasReservationsByThemeId(id)) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_THEME_IN_USE, id));
-        }
-        themeService.deleteTheme(id);
-    }
-
     @Transactional
     public Reservation addReservation(ReservationRequest request) {
-        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
+        ReservationTime reservationTime = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
 
         Reservation reservation = new Reservation(
@@ -87,7 +70,7 @@ public class ReservationFacade {
     @Transactional
     public Reservation updateMyReservation(Long id, String name, ReservationUpdateRequest request) {
         Reservation existing = reservationService.getById(id);
-        ReservationTime newTime = reservationTimeService.findById(request.timeId());
+        ReservationTime newTime = reservationTimeService.getById(request.timeId());
 
         LocalDateTime now = LocalDateTime.now();
         Reservation updated = existing.updateWith(
@@ -102,6 +85,33 @@ public class ReservationFacade {
         }
 
         return reservationService.updateReservation(updated);
+    }
+
+    public List<TimeWithStatusResponse> getTimesWithAvailability(LocalDate date, Long themeId) {
+        List<ReservationTime> times = reservationTimeService.getReservationTimes();
+        Set<Long> reservedTimeIds = reservationService.getReservedTimeIds(date, themeId);
+
+        return times.stream()
+                .map(time -> TimeWithStatusResponse.from(time, reservedTimeIds.contains(time.getId())))
+                .toList();
+    }
+
+    // TODO: delete cascade 불가는 db제약으로 풀어내기
+    //  그럼 파사드에서 빠져도 됨
+    @Transactional
+    public void deleteTime(Long id) {
+        if (reservationService.hasReservationsByTimeId(id)) {
+            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_TIME_IN_USE, id));
+        }
+        reservationTimeService.deleteTime(id);
+    }
+
+    @Transactional
+    public void deleteTheme(Long id) {
+        if (reservationService.hasReservationsByThemeId(id)) {
+            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_THEME_IN_USE, id));
+        }
+        themeService.deleteTheme(id);
     }
 
     @Transactional
@@ -126,12 +136,4 @@ public class ReservationFacade {
         return reservationWaitingService.addWaiting(reservationWaiting);
     }
 
-    public List<TimeWithStatusResponse> getTimesWithAvailability(LocalDate date, Long themeId) {
-        List<ReservationTime> times = reservationTimeService.getReservationTimes();
-        Set<Long> reservedTimeIds = reservationService.getReservedTimeIds(date, themeId);
-
-        return times.stream()
-                .map(time -> TimeWithStatusResponse.from(time, reservedTimeIds.contains(time.getId())))
-                .toList();
-    }
 }

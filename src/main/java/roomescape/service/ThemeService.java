@@ -1,13 +1,12 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,14 +34,14 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public Theme findById(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_THEME, id)));
-    }
-
     public List<Theme> getPopularThemes(LocalDate now, Integer days, Integer limit) {
         LocalDate start = now.minusDays(days);
         LocalDate end = now.minusDays(1);
         return themeRepository.getPopularThemes(start, end, limit);
+    }
+
+    public Theme getById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_THEME, id)));
     }
 }
