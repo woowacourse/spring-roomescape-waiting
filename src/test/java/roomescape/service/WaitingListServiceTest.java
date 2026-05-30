@@ -33,37 +33,28 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class WaitingListServiceTest {
 
-    @Mock
-    WaitingListRepository waitingListRepository;
-    @Mock
-    ThemeRepository themeRepository;
-    @Mock
-    ReservationTimeRepository reservationTimeRepository;
-    @Mock
-    ReservationRepository reservationRepository;
+    private static final Long THEME_ID = 1L;
+    private static final Long TIME_ID = 1L;
+    private final Theme theme = Theme.createWithId(THEME_ID, "테스트용", "테스트용 설명", "https:");
 
-    @InjectMocks
-    WaitingListService waitingListService;
+    @Mock WaitingListRepository waitingListRepository;
+    @Mock ThemeRepository themeRepository;
+    @Mock ReservationTimeRepository reservationTimeRepository;
+    @Mock ReservationRepository reservationRepository;
+
+    @InjectMocks WaitingListService waitingListService;
 
     @Test
     void 예약_대기_생성() {
         // given
         String name = "김민준";
         LocalDate date = LocalDate.now().plusDays(3);
-        Long timeId = 1L;
-        Long themeId = 1L;
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(
-                name,
-                date,
-                timeId,
-                themeId
-        );
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, date, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
 
         WaitingList waitingList = WaitingList.create(name, date, theme, reservationTime);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
@@ -76,24 +67,16 @@ class WaitingListServiceTest {
         Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
         Assertions.assertThat(result.name()).isEqualTo(name);
         Assertions.assertThat(result.date()).isEqualTo(date);
-        Assertions.assertThat(result.timeId()).isEqualTo(timeId);
-        Assertions.assertThat(result.themeId()).isEqualTo(themeId);
+        Assertions.assertThat(result.timeId()).isEqualTo(TIME_ID);
+        Assertions.assertThat(result.themeId()).isEqualTo(THEME_ID);
     }
 
     @Test
     void 예약대기_신청하려는_테마가_없으면_예외발생 () {
         // given
-        String name = "김민준";
-        LocalDate date = LocalDate.now().plusDays(3);
-        Long timeId = 1L;
-        Long themeId = 1L;
         WaitingListCreateCommand createCommand = new WaitingListCreateCommand(
-                name,
-                date,
-                timeId,
-                themeId
-        );
-        given(themeRepository.findById(themeId)).willReturn(Optional.empty());
+                "김민준", LocalDate.now().plusDays(3), TIME_ID, THEME_ID);
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.empty());
 
         // when && then
         Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -105,20 +88,11 @@ class WaitingListServiceTest {
     @Test
     void 예약대기_신청하려는_시간이_없으면_예외발생() {
         // given
-        String name = "김민준";
-        LocalDate date = LocalDate.now().plusDays(3);
-        Long timeId = 1L;
-        Long themeId = 1L;
         WaitingListCreateCommand createCommand = new WaitingListCreateCommand(
-                name,
-                date,
-                timeId,
-                themeId
-        );
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+                "김민준", LocalDate.now().plusDays(3), TIME_ID, THEME_ID);
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
 
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.empty());
 
         // when && then
         Assertions.assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -131,14 +105,10 @@ class WaitingListServiceTest {
     void 과거_날짜로_예약대기_생성_시도시_예외발생() {
         // given
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", pastDate, 1L, 1L);
-
-        Long themeId = 1L;
-        Long timeId = 1L;
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", pastDate, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -149,16 +119,11 @@ class WaitingListServiceTest {
     @Test
     void 오늘날짜_과거시간으로_예약대기_생성_시도시_예외발생() {
         // given
-        LocalDate today = LocalDate.now();
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
-
-        Long themeId = 1L;
-        Long timeId = 1L;
         LocalTime now = LocalTime.now();
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.minusHours(1), now.plusHours(2));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", LocalDate.now(), TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, now.minusHours(1), now.plusHours(2));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -169,16 +134,11 @@ class WaitingListServiceTest {
     @Test
     void 오늘날짜_현재시간으로_예약대기_생성_시도시_예외발생() {
         // given
-        LocalDate today = LocalDate.now();
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
-
-        Long themeId = 1L;
-        Long timeId = 1L;
         LocalTime now = LocalTime.now();
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now, now.plusHours(2));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", LocalDate.now(), TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, now, now.plusHours(2));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -189,23 +149,17 @@ class WaitingListServiceTest {
     @Test
     void 오늘날짜_미래시간으로_예약대기_생성_성공() {
         // given
-        String name = "김민준";
-        LocalDate date = LocalDate.now();
-
+        String name = "오리";
         LocalDate today = LocalDate.now();
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
-
-        Long themeId = 1L;
-        Long timeId = 1L;
         LocalTime now = LocalTime.now();
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.plusHours(1), now.plusHours(2));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, today, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, now.plusHours(1), now.plusHours(2));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(today, TIME_ID, THEME_ID)).willReturn(true);
 
-        WaitingList waitingList = WaitingList.create(name, date, theme, reservationTime);
+        WaitingList waitingList = WaitingList.create(name, today, theme, reservationTime);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
         given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
 
@@ -215,9 +169,9 @@ class WaitingListServiceTest {
         // then
         Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
         Assertions.assertThat(result.name()).isEqualTo(name);
-        Assertions.assertThat(result.date()).isEqualTo(date);
-        Assertions.assertThat(result.timeId()).isEqualTo(timeId);
-        Assertions.assertThat(result.themeId()).isEqualTo(themeId);
+        Assertions.assertThat(result.date()).isEqualTo(today);
+        Assertions.assertThat(result.timeId()).isEqualTo(TIME_ID);
+        Assertions.assertThat(result.themeId()).isEqualTo(THEME_ID);
     }
 
     @Test
@@ -225,17 +179,13 @@ class WaitingListServiceTest {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         String name = "오리";
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, 1L, 1L);
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
-        Long themeId = 1L;
-        Long timeId = 1L;
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
-
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
-        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, themeId, tomorrow, timeId)).willReturn(true);
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, TIME_ID, THEME_ID)).willReturn(true);
+        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, THEME_ID, tomorrow, TIME_ID)).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -248,20 +198,12 @@ class WaitingListServiceTest {
         // given
         String name = "김민준";
         LocalDate date = LocalDate.now().plusDays(3);
-        Long timeId = 1L;
-        Long themeId = 1L;
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(
-                name,
-                date,
-                timeId,
-                themeId
-        );
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, date, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(false);
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
@@ -274,17 +216,13 @@ class WaitingListServiceTest {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         String name = "오리";
-        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, 1L, 1L);
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, TIME_ID, THEME_ID);
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
 
-        Long themeId = 1L;
-        Long timeId = 1L;
-        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
-        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
-
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
-        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, themeId, tomorrow, timeId)).willReturn(false); // 중복 체크 통과
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, TIME_ID, THEME_ID)).willReturn(true);
+        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, THEME_ID, tomorrow, TIME_ID)).willReturn(false); // 중복 체크 통과
 
         given(waitingListRepository.save(any(WaitingList.class)))
                 .willThrow(new DataIntegrityViolationException("unique constraint"));
@@ -302,8 +240,7 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
-        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
         WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
@@ -338,8 +275,7 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
-        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
         WaitingList waitingList = WaitingList.createWithId(waitingListId, "검프", LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
@@ -358,8 +294,7 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
-        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.of(10, 0), LocalTime.of(11, 0));
         WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now().minusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
@@ -378,8 +313,7 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
-        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().minusHours(1), LocalTime.now());
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.now().minusHours(1), LocalTime.now());
         WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now(), theme, reservationTime, LocalDateTime.now().minusDays(1));
         given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
 
@@ -395,8 +329,7 @@ class WaitingListServiceTest {
     void 사용자명으로_예약대기_목록_조회() {
         // given
         String name = "검프";
-        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
-        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
+        ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
         WaitingList waitingList = WaitingList.createWithId(1L, name, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
 
         given(waitingListRepository.findByName(name)).willReturn(List.of(waitingList));
