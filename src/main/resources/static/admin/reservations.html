@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Admin Reservations - Roomescape</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">ROOMESCAPE ADMIN</p>
+      <h1>전체 예약 조회</h1>
+      <p><a class="admin-link" href="/admin/index.html">관리자 홈으로 이동</a></p>
+    </header>
+
+    <section class="panel">
+      <button class="ghost" id="loadReservations" type="button">전체 예약 새로고침</button>
+      <div class="list" id="reservations"></div>
+    </section>
+
+    <p class="message" id="message"></p>
+  </main>
+  <script src="/admin/reservations.js"></script>
+</body>
+</html>

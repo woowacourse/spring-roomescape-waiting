@@ -1,0 +1,47 @@
+package roomescape.reservation.controller;
+
+import java.net.URI;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import roomescape.reservation.controller.dto.ReservationRequest;
+import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationResult;
+
+@RestController
+@RequestMapping("/reservations")
+public class ReservationController {
+
+    private final ReservationService reservationService;
+
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest requestDto) {
+        ReservationResult reservation = reservationService.save(requestDto.toCommand());
+        ReservationResponse response = ReservationResponse.from(reservation);
+        return ResponseEntity
+                .created(URI.create("/reservations/" + response.id()))
+                .body(response);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<ReservationWithStatusResponse>> readAllByName(@RequestParam String name) {
+        List<ReservationWithStatusResponse> responses = reservationService.findAllByName(name)
+                .stream()
+                .map(ReservationWithStatusResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+}
