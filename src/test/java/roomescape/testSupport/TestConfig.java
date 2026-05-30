@@ -1,11 +1,11 @@
 package roomescape.testSupport;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.ApplicationListener;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
+import io.restassured.RestAssured;
 
 @TestConfiguration
 public class TestConfig {
@@ -16,10 +16,7 @@ public class TestConfig {
     }
 
     @Bean
-    public Clock clock() {
-        return Clock.fixed(
-                Instant.parse("2026-05-01T09:00:00Z"),
-                ZoneOffset.UTC
-        );
+    public ApplicationListener<WebServerInitializedEvent> webServerInitializedEventApplicationListener() {
+        return event -> RestAssured.port = event.getWebServer().getPort();
     }
 }
