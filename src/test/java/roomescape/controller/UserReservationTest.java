@@ -145,6 +145,8 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("[1].rank", is(2));
+                .body("[0].status", is("예약대기"))
+                .body("[0].rank", is(2))
+                .body("[1].status", is("예약"));
     }
 }
