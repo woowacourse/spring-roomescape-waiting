@@ -44,26 +44,26 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Optional<Theme> findById(Long id) {
-        String query = "select * from theme where id = ?";
+        String query = "SELECT * FROM theme WHERE id = ?";
         return jdbcTemplate.query(query, rowMapper, id).stream().findFirst();
     }
 
     @Override
     public List<Theme> findAll() {
-        String query = "select * from theme ORDER BY id ASC";
+        String query = "SELECT * FROM theme ORDER BY id ASC";
         return jdbcTemplate.query(query, rowMapper);
     }
 
     @Override
     public boolean existsReservationByThemeId(Long themeId) {
-        String query = "select count(*) from reservation where theme_id = ?";
+        String query = "SELECT COUNT(*) FROM reservation WHERE theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, themeId);
         return count != null && count > 0;
     }
 
     @Override
     public void deleteById(Long id) {
-        String query = "delete from theme where id = ?";
+        String query = "DELETE FROM theme WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 

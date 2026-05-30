@@ -41,13 +41,13 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAll() {
-        String query = "select * from reservation_time ORDER BY start_at ASC";
+        String query = "SELECT * FROM reservation_time ORDER BY start_at ASC";
         return jdbcTemplate.query(query, rowMapper);
     }
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
-        String query = "select * from reservation_time where id = ?";
+        String query = "SELECT * FROM reservation_time WHERE id = ?";
         return jdbcTemplate.query(query, rowMapper, id).stream().findFirst();
     }
 
@@ -65,14 +65,14 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public boolean existsReservationByTimeId(Long timeId) {
-        String query = "select count(*) from reservation where time_id = ?";
+        String query = "SELECT COUNT(*) FROM reservation WHERE time_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, timeId);
         return count != null && count > 0;
     }
 
     @Override
     public void deleteById(Long id) {
-        String query = "delete from reservation_time where id = ?";
+        String query = "DELETE FROM reservation_time WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 }
