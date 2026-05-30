@@ -173,7 +173,7 @@ class WaitingControllerTest {
     @Test
     void deleteWaiting_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-            .when().delete("/reservation/waiting/999")
+            .when().delete("/reservations/waiting/999")
             .then().log().all()
             .statusCode(404);
     }
