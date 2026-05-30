@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
@@ -119,7 +120,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservedAndWaitingBySlot(Long dateId, Long timeId, Long themeId) {
+    public List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT
                     r.id AS reservation_id,
@@ -149,9 +150,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("dateId", dateId)
-                .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("dateId", slot.getDateId())
+                .addValue("timeId", slot.getTimeId())
+                .addValue("themeId", slot.getThemeId());
 
         return jdbcTemplate.query(sql, params, reservationRowMapper);
     }
@@ -218,7 +219,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlot(Long dateId, Long timeId, Long themeId) {
+    public boolean existsReservedBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) 
                 FROM reservation 
@@ -228,9 +229,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                     AND status = 'RESERVED'
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date_id", dateId)
-                .addValue("time_id", timeId)
-                .addValue("theme_id", themeId);
+                .addValue("date_id", slot.getDateId())
+                .addValue("time_id", slot.getTimeId())
+                .addValue("theme_id", slot.getThemeId());
 
         Integer count = jdbcTemplate.queryForObject(sql, params, Integer.class);
         return count != null && count > 0;

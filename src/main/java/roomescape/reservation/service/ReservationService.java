@@ -144,15 +144,11 @@ public class ReservationService {
     }
 
     private boolean checkAlreadyBookedByOthers(ReservationSlot slot) {
-        return reservationRepository.existsReservedBySlot(slot.getDateId(), slot.getTimeId(), slot.getThemeId());
+        return reservationRepository.existsReservedBySlot(slot);
     }
 
     private Reservations findTimeSlotReservations(ReservationSlot slot) {
-        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(
-                slot.getDateId(),
-                slot.getTimeId(),
-                slot.getThemeId()
-        ));
+        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(slot));
     }
 
 }

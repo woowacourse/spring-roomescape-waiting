@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -163,12 +164,14 @@ class ReservationRepositoryTest {
     void exitsByDateAndTimeId() {
         // given
         save(reservation(name, reservationDate1, reservationTime1, theme));
-        Long wrongDateId = reservationDate2.getId();
+
+        ReservationSlot slot = ReservationSlot.of(reservationDate1, reservationTime1, theme);
+        ReservationSlot wrongSlot = ReservationSlot.of(reservationDate2, reservationTime1, theme);
 
         // when & then
-        assertThat(jdbcReservationRepository.existsReservedBySlot(reservationDate1.getId(), reservationTime1.getId(), theme.getId()))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(slot))
                 .isTrue();
-        assertThat(jdbcReservationRepository.existsReservedBySlot(wrongDateId, reservationTime1.getId(), theme.getId()))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(wrongSlot))
                 .isFalse();
     }
 

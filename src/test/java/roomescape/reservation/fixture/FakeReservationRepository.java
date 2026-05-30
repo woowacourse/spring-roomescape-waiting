@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
@@ -26,11 +27,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservedAndWaitingBySlot(Long dateId, Long timeId, Long themeId) {
+    public List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot) {
         return store.values().stream()
-                .filter(reservation -> reservation.getDate().getId().equals(dateId))
-                .filter(reservation -> reservation.getTime().getId().equals(timeId))
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
+                .filter(reservation -> reservation.getDate().getId().equals(slot.getDateId()))
+                .filter(reservation -> reservation.getTime().getId().equals(slot.getTimeId()))
+                .filter(reservation -> reservation.getTheme().getId().equals(slot.getThemeId()))
                 .filter(reservation ->
                         reservation.getStatus() == RESERVED || reservation.getStatus() == WAITING)
                 .sorted(Comparator
@@ -57,12 +58,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedBySlot(Long dateId, Long timeId, Long themeId) {
+    public boolean existsReservedBySlot(ReservationSlot slot) {
         return store.values().stream()
                 .anyMatch(reservation ->
-                        reservation.getDate().getId().equals(dateId) &&
-                                reservation.getTime().getId().equals(timeId) &&
-                                reservation.getTheme().getId().equals(themeId) &&
+                        reservation.getDate().getId().equals(slot.getDateId()) &&
+                                reservation.getTime().getId().equals(slot.getTimeId()) &&
+                                reservation.getTheme().getId().equals(slot.getThemeId()) &&
                                 reservation.getStatus() == RESERVED
                 );
     }

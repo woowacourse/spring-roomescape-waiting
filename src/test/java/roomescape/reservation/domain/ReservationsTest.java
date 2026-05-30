@@ -26,7 +26,7 @@ class ReservationsTest {
 
     @Test
     @DisplayName("슬롯 예약 목록에 요청자의 예약이 있으면 예외가 발생한다.")
-    void validateNotAlreadyBookedBy_fail_whenRequesterAlreadyBooked() {
+    void validateNotAlreadyBookedBy_fail_whenRequesterAlreadyBooked() { // 특정 슬롯의 예약+대기목록
         // given
         Reservations reservations = new Reservations(List.of(ReservationFixture.reservation(name, date, time, theme)));
 
