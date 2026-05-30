@@ -35,17 +35,6 @@ CREATE TABLE member
     PRIMARY KEY (id)
 );
 
-CREATE TABLE waiting
-(
-    id          BIGINT NOT NULL AUTO_INCREMENT,
-    member_id   BIGINT NOT NULL,
-    schedule_id BIGINT NOT NULL,
-    CONSTRAINT uk_waiting_member_schedule UNIQUE (member_id, schedule_id),
-    FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
-    FOREIGN KEY (schedule_id) REFERENCES reservation (schedule_id) ON DELETE RESTRICT,
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE reservation
 (
     id          BIGINT NOT NULL AUTO_INCREMENT,
@@ -55,4 +44,15 @@ CREATE TABLE reservation
     CONSTRAINT uk_reservation_schedule UNIQUE (schedule_id),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
     FOREIGN KEY (schedule_id) REFERENCES schedule (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE waiting
+(
+    id          BIGINT NOT NULL AUTO_INCREMENT,
+    member_id   BIGINT NOT NULL,
+    schedule_id BIGINT NOT NULL,
+    CONSTRAINT uk_waiting_member_schedule UNIQUE (member_id, schedule_id),
+    FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
+    FOREIGN KEY (schedule_id) REFERENCES reservation (schedule_id) ON DELETE RESTRICT,
+    PRIMARY KEY (id)
 );
