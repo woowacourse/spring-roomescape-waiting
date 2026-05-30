@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
@@ -33,6 +34,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
     }
 
+    @Transactional
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {
         validateNotExistsReservation(themeId, date, timeId);
         validateDuplicatedReservation(name, themeId, date, timeId);
@@ -49,6 +51,7 @@ public class ReservationWaitingService {
         return reservationWaitingDao.insert(reservationWaiting);
     }
 
+    @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
         ReservationWaiting originReservationWaiting = reservationWaitingDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
