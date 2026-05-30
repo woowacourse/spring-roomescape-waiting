@@ -88,7 +88,7 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times/available?themeId=1&date=2026-06-04")
+                .when().get("/times?date=2026-06-04&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
@@ -107,7 +107,7 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times/available?themeId=1&date=2026-06-04")
+                .when().get("/times?date=2026-06-04&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))

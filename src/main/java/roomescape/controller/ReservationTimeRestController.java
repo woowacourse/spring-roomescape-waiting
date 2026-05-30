@@ -28,11 +28,6 @@ public class ReservationTimeRestController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeResponse>> readAll() {
-        return ResponseEntity.ok(reservationTimeService.readAll());
-    }
-
-    @GetMapping("/times/available")
     public ResponseEntity<List<AvailableReservationTimeResponse>> readAvailable(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
