@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.feature.theme.dto.command.ThemeCreateCommand;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.fixture.ThemeFixture;
@@ -54,8 +54,8 @@ class ThemeServiceTest {
         @Test
         void 활성_테마_목록을_조회한다() {
             // given
-            Theme theme1 = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", ThemeStatus.ACTIVE);
-            Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", ThemeStatus.ACTIVE);
+            Theme theme1 = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", EntityStatus.ACTIVE);
+            Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", EntityStatus.ACTIVE);
             when(themeRepository.findAllByNotDeleted()).thenReturn(List.of(theme1, theme2));
 
             // when
@@ -76,7 +76,7 @@ class ThemeServiceTest {
             LocalDate today = LocalDate.now(fixedClock);
             LocalDate startDate = today.minusDays(7);
             LocalDate endDate = today.minusDays(1);
-            Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", ThemeStatus.ACTIVE);
+            Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", EntityStatus.ACTIVE);
             when(themeRepository.findPopularThemesDateBetween(startDate, endDate, 10))
                 .thenReturn(List.of(popular));
 
@@ -114,7 +114,7 @@ class ThemeServiceTest {
             Theme saved = Theme.reconstruct(1L,
                 ThemeFixture.VALID.getName(),
                 ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl(), ThemeStatus.ACTIVE);
+                ThemeFixture.VALID.getImageUrl(), EntityStatus.ACTIVE);
             when(themeRepository.existsThemeByNameAndNotDeleted(ThemeFixture.VALID.getName()))
                 .thenReturn(false);
             when(themeRepository.save(any(Theme.class))).thenReturn(saved);

@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.feature.time.error.type.TimeErrorType;
 import roomescape.global.error.exception.GeneralException;
 
@@ -36,7 +36,7 @@ public class JdbcTimeRepository implements TimeRepository {
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(args).longValue();
 
-        return Time.reconstruct(generatedKey, time.getStartAt(), TimeStatus.ACTIVE);
+        return Time.reconstruct(generatedKey, time.getStartAt(), EntityStatus.ACTIVE);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class JdbcTimeRepository implements TimeRepository {
             (rs, rowNum) -> Time.reconstruct(
                 rs.getLong("id"),
                 rs.getTime("start_at").toLocalTime(),
-                TimeStatus.valueOf(rs.getString("status"))
+                EntityStatus.valueOf(rs.getString("status"))
             )
         );
     }
@@ -63,7 +63,7 @@ public class JdbcTimeRepository implements TimeRepository {
                 (resultSet, rowNum) -> Time.reconstruct(
                     resultSet.getLong("id"),
                     resultSet.getTime("start_at").toLocalTime(),
-                    TimeStatus.valueOf(resultSet.getString("status"))
+                    EntityStatus.valueOf(resultSet.getString("status"))
                 )
             );
             return Optional.ofNullable(time);

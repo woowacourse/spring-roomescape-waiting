@@ -17,9 +17,8 @@ import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @Repository
@@ -48,7 +47,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 WHERE r.status <> 'DELETED'
-                ORDER BY r.id ASC
+                ORDER BY r.id
                 """,
             (rs, rowNum) -> mapReservation(rs)
         );
@@ -62,14 +61,14 @@ public class JdbcReservationRepository implements ReservationRepository {
             Time.reconstruct(
                 rs.getLong("time_id"),
                 rs.getTime("start_at").toLocalTime(),
-                TimeStatus.valueOf(rs.getString("time_status"))
+                EntityStatus.valueOf(rs.getString("time_status"))
             ),
             Theme.reconstruct(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("image_url"),
-                ThemeStatus.valueOf(rs.getString("theme_status"))
+                EntityStatus.valueOf(rs.getString("theme_status"))
             ),
             ReservationStatus.valueOf(rs.getString("status"))
         );
@@ -87,7 +86,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             JOIN theme t ON r.theme_id = t.id
             WHERE r.name = :name
               AND r.status <> 'DELETED'
-            ORDER BY r.date ASC, rt.start_at ASC
+            ORDER BY r.date, rt.start_at
             """;
         SqlParameterSource parameters = new MapSqlParameterSource("name", name.value());
 

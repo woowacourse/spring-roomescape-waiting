@@ -26,10 +26,9 @@ import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.feature.time.repository.JdbcTimeRepository;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.error.exception.GeneralException;
@@ -90,8 +89,8 @@ class JdbcReservationRepositoryTest {
                     rs.getLong("id"),
                     new ReserverName(rs.getString("name")),
                     rs.getDate("date").toLocalDate(),
-                    Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), TimeStatus.ACTIVE),
-                    Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), ThemeStatus.ACTIVE),
+                    Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), EntityStatus.ACTIVE),
+                    Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), EntityStatus.ACTIVE),
                     ReservationStatus.valueOf(rs.getString("status"))
                 ),
                 savedReservationId
@@ -277,8 +276,8 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual).hasSize(1);
-            assertThat(actual.getFirst().getTime().getStatus()).isEqualTo(TimeStatus.DELETED);
-            assertThat(actual.getFirst().getTheme().getStatus()).isEqualTo(ThemeStatus.DELETED);
+            assertThat(actual.getFirst().getTime().getStatus()).isEqualTo(EntityStatus.DELETED);
+            assertThat(actual.getFirst().getTheme().getStatus()).isEqualTo(EntityStatus.DELETED);
         }
 
         @Test

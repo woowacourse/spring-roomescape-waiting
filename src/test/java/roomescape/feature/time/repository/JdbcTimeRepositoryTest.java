@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -65,7 +65,7 @@ class JdbcTimeRepositoryTest {
             // when
             Long savedTimeId = timeRepository.save(time).getId();
 
-            Time expectedSavedTime = Time.reconstruct(savedTimeId, startAt, TimeStatus.ACTIVE);
+            Time expectedSavedTime = Time.reconstruct(savedTimeId, startAt, EntityStatus.ACTIVE);
 
             // then
             Time actualSavedTime = jdbcTemplate.queryForObject(
@@ -73,7 +73,7 @@ class JdbcTimeRepositoryTest {
                 (rs, rowNum) -> Time.reconstruct(
                     rs.getLong("id"),
                     rs.getTime("start_at").toLocalTime(),
-                    TimeStatus.valueOf(rs.getString("status"))
+                    EntityStatus.valueOf(rs.getString("status"))
                 ),
                 savedTimeId
             );

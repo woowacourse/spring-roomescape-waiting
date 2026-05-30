@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.feature.theme.error.type.ThemeErrorType;
 import roomescape.global.error.exception.GeneralException;
 
@@ -40,7 +40,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getString("image_url"),
-                ThemeStatus.valueOf(resultSet.getString("status"))
+                EntityStatus.valueOf(resultSet.getString("status"))
             ));
     }
 
@@ -81,7 +81,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     resultSet.getString("name"),
                     resultSet.getString("description"),
                     resultSet.getString("image_url"),
-                    ThemeStatus.valueOf(resultSet.getString("status"))
+                    EntityStatus.valueOf(resultSet.getString("status"))
                 )
             );
             return Optional.ofNullable(theme);
@@ -134,7 +134,7 @@ public class JdbcThemeRepository implements ThemeRepository {
               AND r.status = 'ACTIVE'
               AND rt.status = 'ACTIVE'
             GROUP BY t.id, t.name, t.description, t.image_url, t.status
-            ORDER BY COUNT(r.id) DESC, t.id ASC
+            ORDER BY COUNT(r.id) DESC, t.id
             LIMIT :limit
             """;
 
@@ -151,7 +151,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getString("image_url"),
-                ThemeStatus.valueOf(resultSet.getString("status"))
+                EntityStatus.valueOf(resultSet.getString("status"))
             ));
     }
 }

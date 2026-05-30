@@ -27,7 +27,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -78,7 +78,7 @@ class JdbcThemeRepositoryTest {
             // when
             Long savedThemeId = themeRepository.save(theme).getId();
 
-            Theme expectedSavedTheme = Theme.reconstruct(savedThemeId, name, description, imageUrl, ThemeStatus.ACTIVE);
+            Theme expectedSavedTheme = Theme.reconstruct(savedThemeId, name, description, imageUrl, EntityStatus.ACTIVE);
 
             // then
             Theme actualSavedTheme = jdbcTemplate.queryForObject(
@@ -88,7 +88,7 @@ class JdbcThemeRepositoryTest {
                     rs.getString("name"),
                     rs.getString("description"),
                     rs.getString("image_url"),
-                    ThemeStatus.valueOf(rs.getString("status"))
+                    EntityStatus.valueOf(rs.getString("status"))
                 ),
                 savedThemeId
             );

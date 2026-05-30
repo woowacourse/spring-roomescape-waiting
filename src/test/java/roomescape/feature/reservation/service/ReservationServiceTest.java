@@ -30,11 +30,10 @@ import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
-import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.mapper.ThemeMapper;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.feature.time.domain.Time;
-import roomescape.feature.time.domain.TimeStatus;
+import roomescape.global.domain.EntityStatus;
 import roomescape.feature.time.mapper.TimeMapper;
 import roomescape.feature.time.repository.TimeRepository;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
@@ -66,11 +65,11 @@ class ReservationServiceTest {
     }
 
     private Time timeWithId(Long id) {
-        return Time.reconstruct(id, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+        return Time.reconstruct(id, LocalTime.of(10, 0), EntityStatus.ACTIVE);
     }
 
     private Theme themeWithId(Long id) {
-        return Theme.reconstruct(id, "테마 이름", "테마 설명", "https://example.com/theme.png", ThemeStatus.ACTIVE);
+        return Theme.reconstruct(id, "테마 이름", "테마 설명", "https://example.com/theme.png", EntityStatus.ACTIVE);
     }
 
     @Nested
@@ -172,7 +171,7 @@ class ReservationServiceTest {
         void 삭제된_시간이나_테마가_있는_예약은_EDIT_RECOMMENDED_상태로_반환한다() {
             // given
             LocalDate date = LocalDate.now(fixedClock).plusDays(1);
-            Time deletedTime = Time.reconstruct(1L, LocalTime.of(10, 0), TimeStatus.DELETED);
+            Time deletedTime = Time.reconstruct(1L, LocalTime.of(10, 0), EntityStatus.DELETED);
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, deletedTime, theme, ReservationStatus.ACTIVE);
@@ -349,9 +348,9 @@ class ReservationServiceTest {
             // given
             LocalDate futureDate = LocalDate.now().plusYears(1);
             Time existingTime = timeWithId(1L);
-            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), TimeStatus.ACTIVE);
+            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), EntityStatus.ACTIVE);
             Theme existingTheme = themeWithId(1L);
-            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", ThemeStatus.ACTIVE);
+            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", EntityStatus.ACTIVE);
             Reservation existing = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
             LocalDate newDate = futureDate.plusDays(1);
