@@ -4,10 +4,10 @@ import java.util.Optional;
 
 public class Theme {
 
-    private Long id;
-    private String name;
-    private String description;
-    private String thumbnailUrl;
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String thumbnailUrl;
 
     public Theme(Long id, String name, String description, String thumbnailUrl) {
         validateName(name);
@@ -23,10 +23,13 @@ public class Theme {
         return new Theme(null, name, description, thumbnailUrl);
     }
 
-    public void renewal(String name, String description, String thumbnailUrl) {
-        this.name = Optional.ofNullable(name).orElse(this.name);
-        this.description = Optional.ofNullable(description).orElse(this.description);
-        this.thumbnailUrl = Optional.ofNullable(thumbnailUrl).orElse(this.thumbnailUrl);
+    public Theme renewal(String name, String description, String thumbnailUrl) {
+        return new Theme(
+                id,
+                Optional.ofNullable(name).orElse(this.name),
+                Optional.ofNullable(description).orElse(this.description),
+                Optional.ofNullable(thumbnailUrl).orElse(this.thumbnailUrl)
+        );
     }
 
     private void validateThumbnailUrl(String thumbnailUrl) {

@@ -99,15 +99,15 @@ public class ReservationService {
     @Transactional
     public Reservation patchReservation(long id, String userName, ReservationPatchRequest request) {
         Reservation reservation = validModifiable(id, userName);
-        reservation.reschedule(
+        Reservation rescheduled = reservation.reschedule(
                 request.name(),
                 request.date(),
                 findOptionalTime(request.timeId()),
                 findOptionalTheme(request.themeId())
         );
-        validDateTime(request.date(), reservation.getTimeSlot().getStartAt());
-        validDuplicatedReservation(reservation);
-        return reservationRepository.update(reservation);
+        validDateTime(rescheduled.getDate(), rescheduled.getTimeSlot().getStartAt());
+        validDuplicatedReservation(rescheduled);
+        return reservationRepository.update(rescheduled);
     }
 
     private Reservation validModifiable(long id, String userName) {

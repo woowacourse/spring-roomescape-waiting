@@ -6,8 +6,8 @@ import java.util.Optional;
 
 public class TimeSlot {
 
-    private Long id;
-    private LocalTime startAt;
+    private final Long id;
+    private final LocalTime startAt;
 
     public TimeSlot(Long id, LocalTime startAt) {
         validate(startAt);
@@ -19,8 +19,8 @@ public class TimeSlot {
         return new TimeSlot(null, startAt);
     }
 
-    public void changeTime(LocalTime startAt) {
-        this.startAt = Optional.ofNullable(startAt).orElse(this.startAt);
+    public TimeSlot changeTime(LocalTime startAt) {
+        return new TimeSlot(id, Optional.ofNullable(startAt).orElse(this.startAt));
     }
 
     private void validate(LocalTime startAt) {

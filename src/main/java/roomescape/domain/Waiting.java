@@ -7,11 +7,11 @@ import java.time.LocalDate;
 public class Waiting {
 
     private final Long id;
-    private String name;
-    private LocalDate date;
-    private TimeSlot timeSlot;
-    private Theme theme;
-    private Integer waitingNumber;
+    private final String name;
+    private final LocalDate date;
+    private final TimeSlot timeSlot;
+    private final Theme theme;
+    private final Integer waitingNumber;
 
     public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, Integer waitingNumber) {
         validateFields(name, date, timeSlot, theme);

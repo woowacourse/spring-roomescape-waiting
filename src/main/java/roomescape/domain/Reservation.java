@@ -8,10 +8,10 @@ import java.util.Objects;
 public class Reservation {
 
     private final Long id;
-    private String name;
-    private LocalDate date;
-    private TimeSlot timeSlot;
-    private Theme theme;
+    private final String name;
+    private final LocalDate date;
+    private final TimeSlot timeSlot;
+    private final Theme theme;
 
     public Reservation(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
         validateFields(name, date, timeSlot, theme);
@@ -32,17 +32,14 @@ public class Reservation {
         }
     }
 
-    public void reschedule(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
+    public Reservation reschedule(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
         String patchedName = Objects.requireNonNullElse(name, this.name);
         LocalDate patchedDate = Objects.requireNonNullElse(date, this.date);
         TimeSlot patchedTime = Objects.requireNonNullElse(timeSlot, this.timeSlot);
         Theme patchedTheme = Objects.requireNonNullElse(theme, this.theme);
 
         validateFields(patchedName, patchedDate, patchedTime, patchedTheme);
-        this.name = patchedName;
-        this.date = patchedDate;
-        this.timeSlot = patchedTime;
-        this.theme = patchedTheme;
+        return new Reservation(this.id, patchedName, patchedDate, patchedTime, patchedTheme);
     }
 
     public Long getId() {

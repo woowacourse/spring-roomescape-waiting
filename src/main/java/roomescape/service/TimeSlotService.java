@@ -71,8 +71,8 @@ public class TimeSlotService {
     public TimeSlot patchTime(long id, TimePatchRequest request) {
         TimeSlot timeSlot = findTimeSlotById(id);
         checkDuplicatedStartAt(request.startAt());
-        timeSlot.changeTime(request.startAt());
-        return timeSlotRepository.update(timeSlot);
+        TimeSlot changed = timeSlot.changeTime(request.startAt());
+        return timeSlotRepository.update(changed);
     }
 
     public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {
