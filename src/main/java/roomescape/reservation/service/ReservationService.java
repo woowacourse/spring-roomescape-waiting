@@ -78,7 +78,7 @@ public class ReservationService {
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservation(id);
-        reservation.cancel(requesterName);
+        reservation.cancel(requesterName, LocalDateTime.now());
         reservationRepository.updateStatus(reservation);
         return reservation;
     }
@@ -95,7 +95,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
-        reservation.changeSchedule(command.requesterName(), slot);
+        reservation.changeSchedule(command.requesterName(), slot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }
@@ -112,7 +112,7 @@ public class ReservationService {
         ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
-        reservation.changeScheduleByManager(slot);
+        reservation.changeScheduleByManager(slot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }

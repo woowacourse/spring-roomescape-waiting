@@ -44,29 +44,29 @@ public class Reservation {
         return new Reservation(id, name, slot, status, reservedAt);
     }
 
-    public void cancel(String requesterName) {
+    public void cancel(String requesterName, LocalDateTime cancelRequestAt) {
         validateOwner(requesterName);
         validateNotCanceled();
-        slot.validateNotPast();
+        slot.validateNotPast(cancelRequestAt);
 
         this.status = ReservationStatus.CANCELED;
     }
 
-    public void changeSchedule(String requesterName, ReservationSlot newSlot) {
+    public void changeSchedule(String requesterName, ReservationSlot newSlot, LocalDateTime changeRequestAt) {
         validateOwner(requesterName);
         validateNotCanceled();
         validateNotWaiting();
-        slot.validateNotPast();
-        newSlot.validateNotPast();
+        slot.validateNotPast(changeRequestAt);
+        newSlot.validateNotPast(changeRequestAt);
 
         this.slot = newSlot;
     }
 
-    public void changeScheduleByManager(ReservationSlot newSlot) {
+    public void changeScheduleByManager(ReservationSlot newSlot, LocalDateTime changeRequestAt) {
         validateNotCanceled();
         validateNotWaiting();
-        slot.validateNotPast();
-        newSlot.validateNotPast();
+        slot.validateNotPast(changeRequestAt);
+        newSlot.validateNotPast(changeRequestAt);
 
         this.slot = newSlot;
     }

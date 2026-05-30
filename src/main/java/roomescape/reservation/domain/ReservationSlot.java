@@ -5,9 +5,7 @@ import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
@@ -55,20 +53,10 @@ public record ReservationSlot(
         }
     }
 
-    public void validateNotPast() {
-        if (isPast(date.getDate(), time.getStartAt())) {
-            throw new ReservationException(RESERVATION_ALREADY_PAST);
-        }
-    }
-
     public void validateNotPast(LocalDateTime reservedAt) {
         if (LocalDateTime.of(date.getDate(), time.getStartAt()).isBefore(reservedAt)) {
             throw new ReservationException(RESERVATION_ALREADY_PAST);
         }
-    }
-
-    private boolean isPast(LocalDate date, LocalTime time) {
-        return LocalDateTime.of(date, time).isBefore(LocalDateTime.now());
     }
 
 }

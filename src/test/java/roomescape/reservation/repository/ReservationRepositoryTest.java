@@ -195,7 +195,8 @@ class ReservationRepositoryTest {
     void updateSchedule() {
         // given
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme));
-        saved.changeSchedule(name, ReservationSlot.of(reservationDate2, reservationTime1, saved.getTheme()));
+        ReservationSlot newSlot = ReservationSlot.of(reservationDate2, reservationTime1, saved.getTheme());
+        saved.changeSchedule(name, newSlot, LocalDateTime.now());
 
         // when
         jdbcReservationRepository.updateSchedule(saved);
