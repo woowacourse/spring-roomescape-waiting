@@ -14,7 +14,6 @@ import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
-import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
@@ -43,8 +42,6 @@ class ReservationWaitingServiceTest {
     @Mock
     private ReservationWaitingRepository waitingRepository;
     @Mock
-    private ReservationWaitingFactory waitingFactory;
-    @Mock
     private ReservationTimeService reservationTimeService;
     @Mock
     private ThemeService themeService;
@@ -63,7 +60,6 @@ class ReservationWaitingServiceTest {
         when(themeService.getById(1L)).thenReturn(theme);
         when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(true);
         when(waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(anyLong(), any(), anyLong(), anyLong())).thenReturn(false);
-        when(waitingFactory.create(any(), any(), any(), any())).thenReturn(waiting);
         when(waitingRepository.save(any())).thenReturn(waiting);
 
         ReservationWaitingResponse response = reservationWaitingService.createWaiting(member,

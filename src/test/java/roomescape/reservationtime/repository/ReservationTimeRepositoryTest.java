@@ -13,10 +13,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.ReservationTimeFactory;
 
 @JdbcTest(properties = "spring.sql.init.data-locations=")
-@Import({JdbcReservationTimeRepository.class, ReservationTimeFactory.class})
+@Import(JdbcReservationTimeRepository.class)
 class ReservationTimeRepositoryTest {
 
     @Autowired
@@ -24,9 +23,6 @@ class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository timeRepository;
-
-    @Autowired
-    private ReservationTimeFactory reservationTimeFactory;
 
     private Long timeId;
 
@@ -50,7 +46,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void 시간_저장_성공() {
         ReservationTime saved = timeRepository.save(
-                reservationTimeFactory.create(LocalTime.of(20, 0), LocalTime.of(21, 0)));
+                ReservationTime.of(LocalTime.of(20, 0), LocalTime.of(21, 0)));
         assertThat(saved.getId()).isNotNull().isPositive();
     }
 
@@ -71,7 +67,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void 시간_삭제_성공() {
         ReservationTime saved = timeRepository.save(
-                reservationTimeFactory.create(LocalTime.of(20, 0), LocalTime.of(21, 0)));
+                ReservationTime.of(LocalTime.of(20, 0), LocalTime.of(21, 0)));
         timeRepository.deleteById(saved.getId());
         assertThat(timeRepository.findById(saved.getId())).isEmpty();
     }

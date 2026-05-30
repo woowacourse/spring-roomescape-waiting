@@ -12,10 +12,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeFactory;
 
 @JdbcTest(properties = "spring.sql.init.data-locations=")
-@Import({JdbcThemeRepository.class, ThemeFactory.class})
+@Import(JdbcThemeRepository.class)
 class ThemeRepositoryTest {
 
     @Autowired
@@ -23,9 +22,6 @@ class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private ThemeFactory themeFactory;
 
     private Long themeAId;
     private Long themeBId;
@@ -58,7 +54,7 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 저장하면 ID가 부여된다.")
     @Test
     void 테마_저장_성공() {
-        Theme saved = themeRepository.save(themeFactory.create("테마E", "설명E", "https://e.com"));
+        Theme saved = themeRepository.save(Theme.of("테마E", "설명E", "https://e.com"));
         assertThat(saved.getId()).isNotNull().isPositive();
     }
 
@@ -77,7 +73,7 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 삭제하면 더 이상 조회되지 않는다.")
     @Test
     void 테마_삭제_성공() {
-        Theme saved = themeRepository.save(themeFactory.create("테마E", "설명E", "https://e.com"));
+        Theme saved = themeRepository.save(Theme.of("테마E", "설명E", "https://e.com"));
         themeRepository.deleteById(saved.getId());
         assertThat(themeRepository.findById(saved.getId())).isEmpty();
     }

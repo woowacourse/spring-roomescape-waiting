@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.JdbcMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -21,7 +20,7 @@ import roomescape.theme.repository.JdbcThemeRepository;
 
 @JdbcTest(properties = "spring.sql.init.data-locations=")
 @Import({JdbcReservationRepository.class, JdbcMemberRepository.class,
-        JdbcReservationTimeRepository.class, JdbcThemeRepository.class, ReservationFactory.class})
+        JdbcReservationTimeRepository.class, JdbcThemeRepository.class})
 class ReservationRepositoryTest {
 
     @Autowired
@@ -38,9 +37,6 @@ class ReservationRepositoryTest {
 
     @Autowired
     private JdbcThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationFactory reservationFactory;
 
     private Member member;
     private ReservationTime time;
@@ -63,7 +59,7 @@ class ReservationRepositoryTest {
     @Test
     void 예약_저장_성공() {
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.of(member, LocalDate.now().plusDays(1), time, theme));
         assertThat(saved.getId()).isNotNull().isPositive();
     }
 
@@ -71,15 +67,15 @@ class ReservationRepositoryTest {
     @Test
     void ID로_예약_조회_성공() {
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.of(member, LocalDate.now().plusDays(1), time, theme));
         assertThat(reservationRepository.findById(saved.getId())).isPresent();
     }
 
     @DisplayName("회원 ID로 예약 목록을 조회한다.")
     @Test
     void 회원ID로_예약_조회() {
-        reservationRepository.save(reservationFactory.create(member, LocalDate.now().plusDays(1), time, theme));
-        reservationRepository.save(reservationFactory.create(member, LocalDate.now().plusDays(2), time, theme));
+        reservationRepository.save(Reservation.of(member, LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(Reservation.of(member, LocalDate.now().plusDays(2), time, theme));
         assertThat(reservationRepository.findByMemberId(member.getId())).hasSize(2);
     }
 
@@ -87,7 +83,7 @@ class ReservationRepositoryTest {
     @Test
     void 예약_삭제_성공() {
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                Reservation.of(member, LocalDate.now().plusDays(1), time, theme));
         reservationRepository.deleteById(saved.getId());
         assertThat(reservationRepository.findById(saved.getId())).isEmpty();
     }
@@ -96,7 +92,7 @@ class ReservationRepositoryTest {
     @Test
     void 예약_존재_여부_true() {
         LocalDate date = LocalDate.now().plusDays(1);
-        reservationRepository.save(reservationFactory.create(member, date, time, theme));
+        reservationRepository.save(Reservation.of(member, date, time, theme));
         assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId())).isTrue();
     }
 
@@ -112,7 +108,7 @@ class ReservationRepositoryTest {
     void 날짜_테마_시간으로_예약ID_조회() {
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(member, date, time, theme));
+                Reservation.of(member, date, time, theme));
         assertThat(reservationRepository.findReservationId(date, theme.getId(), time.getId()).id())
                 .isEqualTo(saved.getId());
     }

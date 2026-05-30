@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.ReservationTimeFactory;
 import roomescape.reservationtime.dto.TimeRequest;
 import roomescape.reservationtime.dto.TimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -30,9 +29,6 @@ class ReservationTimeServiceTest {
     @Mock
     private ReservationTimeRepository timeRepository;
 
-    @Mock
-    private ReservationTimeFactory reservationTimeFactory;
-
     @InjectMocks
     private ReservationTimeService reservationTimeService;
 
@@ -41,7 +37,6 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("시간 생성 성공")
     void 시간_생성_성공() {
-        when(reservationTimeFactory.create(any(), any())).thenReturn(time);
         when(timeRepository.save(any())).thenReturn(time);
 
         TimeResponse response = reservationTimeService.createTime(new TimeRequest(LocalTime.of(10, 0), LocalTime.of(11, 0)));

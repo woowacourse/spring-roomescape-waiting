@@ -26,6 +26,31 @@ public class Reservation {
         this.theme = theme;
     }
 
+    public static Reservation of(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        if (member == null) {
+            throw new IllegalArgumentException("예약자는 필수입니다.");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("날짜는 필수입니다.");
+        }
+        if (time == null || time.getId() == null) {
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
+        }
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.PAST_TIME_CREATE);
+        }
+        if (theme == null) {
+            throw new IllegalArgumentException("테마는 필수입니다.");
+        }
+        return Reservation.builder()
+                .id(null)
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .build();
+    }
+
     public static Reservation restore(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         return Reservation.builder()
                 .id(id)

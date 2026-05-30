@@ -15,13 +15,12 @@ import roomescape.member.repository.JdbcMemberRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
-import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 
 @JdbcTest(properties = "spring.sql.init.data-locations=")
 @Import({JdbcReservationWaitingRepository.class, JdbcMemberRepository.class,
-        JdbcReservationTimeRepository.class, JdbcThemeRepository.class, ReservationWaitingFactory.class})
+        JdbcReservationTimeRepository.class, JdbcThemeRepository.class})
 class ReservationWaitingRepositoryTest {
 
     @Autowired
@@ -38,9 +37,6 @@ class ReservationWaitingRepositoryTest {
 
     @Autowired
     private JdbcThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationWaitingFactory waitingFactory;
 
     private Member member;
     private ReservationTime time;
@@ -65,7 +61,7 @@ class ReservationWaitingRepositoryTest {
     @Test
     void 대기_저장_성공() {
         ReservationWaiting saved = waitingRepository.save(
-                waitingFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                ReservationWaiting.of(member, LocalDate.now().plusDays(1), time, theme));
         assertThat(saved.getId()).isNotNull().isPositive();
     }
 
@@ -73,7 +69,7 @@ class ReservationWaitingRepositoryTest {
     @Test
     void ID로_대기_조회_성공() {
         ReservationWaiting saved = waitingRepository.save(
-                waitingFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                ReservationWaiting.of(member, LocalDate.now().plusDays(1), time, theme));
         assertThat(waitingRepository.findById(saved.getId())).isPresent();
     }
 
@@ -81,7 +77,7 @@ class ReservationWaitingRepositoryTest {
     @Test
     void 대기_삭제_성공() {
         ReservationWaiting saved = waitingRepository.save(
-                waitingFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+                ReservationWaiting.of(member, LocalDate.now().plusDays(1), time, theme));
         waitingRepository.deleteById(saved.getId());
         assertThat(waitingRepository.findById(saved.getId())).isEmpty();
     }
@@ -89,7 +85,7 @@ class ReservationWaitingRepositoryTest {
     @DisplayName("회원 ID로 예약 대기 목록을 조회한다.")
     @Test
     void 회원ID로_대기_조회() {
-        waitingRepository.save(waitingFactory.create(member, LocalDate.now().plusDays(1), time, theme));
+        waitingRepository.save(ReservationWaiting.of(member, LocalDate.now().plusDays(1), time, theme));
         assertThat(waitingRepository.findByMemberId(member.getId())).hasSize(1);
     }
 
@@ -97,7 +93,7 @@ class ReservationWaitingRepositoryTest {
     @Test
     void 대기_존재_여부_true() {
         LocalDate date = LocalDate.now().plusDays(1);
-        waitingRepository.save(waitingFactory.create(member, date, time, theme));
+        waitingRepository.save(ReservationWaiting.of(member, date, time, theme));
         assertThat(waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(), date, time.getId(), theme.getId())).isTrue();
     }

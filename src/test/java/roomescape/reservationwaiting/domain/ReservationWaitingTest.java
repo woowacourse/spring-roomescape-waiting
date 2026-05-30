@@ -14,7 +14,6 @@ import roomescape.theme.domain.Theme;
 
 class ReservationWaitingTest {
 
-    private final ReservationWaitingFactory factory = new ReservationWaitingFactory();
     private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
     private final Theme theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
     private final Member member = Member.restore(1L, "현미밥", "test@test.com", "1234");
@@ -24,14 +23,14 @@ class ReservationWaitingTest {
     @Test
     @DisplayName("정상 대기 생성")
     void 정상_대기_생성() {
-        assertThatCode(() -> factory.create(member, futureDate, time, theme))
+        assertThatCode(() -> ReservationWaiting.of(member, futureDate, time, theme))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("멤버가 null이면 예외 발생")
     void 멤버_null_예외() {
-        assertThatThrownBy(() -> factory.create(null, futureDate, time, theme))
+        assertThatThrownBy(() -> ReservationWaiting.of(null, futureDate, time, theme))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약자는 필수입니다.");
     }
@@ -39,7 +38,7 @@ class ReservationWaitingTest {
     @Test
     @DisplayName("과거 날짜면 예외 발생")
     void 과거_날짜_예외() {
-        assertThatThrownBy(() -> factory.create(member, pastDate, time, theme))
+        assertThatThrownBy(() -> ReservationWaiting.of(member, pastDate, time, theme))
                 .isInstanceOf(BusinessException.class);
     }
 }

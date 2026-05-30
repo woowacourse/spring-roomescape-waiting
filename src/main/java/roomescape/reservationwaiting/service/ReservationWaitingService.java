@@ -11,7 +11,6 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
-import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
@@ -24,18 +23,15 @@ import roomescape.theme.service.ThemeService;
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationWaitingFactory reservationWaitingFactory;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationRepository reservationRepository;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
-                                     ReservationWaitingFactory reservationWaitingFactory,
                                      ReservationTimeService reservationTimeService,
                                      ThemeService themeService,
                                      ReservationRepository reservationRepository) {
         this.reservationWaitingRepository = reservationWaitingRepository;
-        this.reservationWaitingFactory = reservationWaitingFactory;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationRepository = reservationRepository;
@@ -56,7 +52,7 @@ public class ReservationWaitingService {
         }
 
         ReservationWaiting saved = reservationWaitingRepository.save(
-                reservationWaitingFactory.create(member, request.date(), time, theme));
+                ReservationWaiting.of(member, request.date(), time, theme));
         return ReservationWaitingResponse.from(saved);
     }
 

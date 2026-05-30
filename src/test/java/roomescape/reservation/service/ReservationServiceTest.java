@@ -21,7 +21,6 @@ import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -39,9 +38,6 @@ class ReservationServiceTest {
     private ReservationTimeService reservationTimeService;
     @Mock
     private ThemeService themeService;
-    @Mock
-    private ReservationFactory reservationFactory;
-
     @InjectMocks
     private ReservationService reservationService;
 
@@ -58,7 +54,6 @@ class ReservationServiceTest {
         when(reservationTimeService.getById(1L)).thenReturn(time);
         when(themeService.getById(1L)).thenReturn(theme);
         when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(false);
-        when(reservationFactory.create(any(), any(), any(), any())).thenReturn(reservation);
         when(reservationRepository.save(any())).thenReturn(reservation);
 
         ReservationResponse response = reservationService.createReservation(member, new ReservationRequest(futureDate, 1L, 1L));

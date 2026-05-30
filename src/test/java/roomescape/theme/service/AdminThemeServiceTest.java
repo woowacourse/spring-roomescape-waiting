@@ -16,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeFactory;
 import roomescape.theme.dto.AdminThemeRequest;
 import roomescape.theme.dto.AdminThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
@@ -27,9 +26,6 @@ class AdminThemeServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
-    @Mock
-    private ThemeFactory themeFactory;
-
     @InjectMocks
     private AdminThemeService adminThemeService;
 
@@ -38,7 +34,6 @@ class AdminThemeServiceTest {
     @Test
     @DisplayName("테마 생성 성공")
     void 테마_생성_성공() {
-        when(themeFactory.create(any(), any(), any())).thenReturn(theme);
         when(themeRepository.save(any())).thenReturn(theme);
 
         AdminThemeResponse response = adminThemeService.createTheme(new AdminThemeRequest("테마A", "설명", "https://a.com"));

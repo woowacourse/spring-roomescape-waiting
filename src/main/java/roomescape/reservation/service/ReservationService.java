@@ -12,7 +12,6 @@ import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -30,18 +29,14 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final ReservationFactory reservationFactory;
-
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
-            ThemeService themeService,
-            ReservationFactory reservationFactory
+            ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.reservationFactory = reservationFactory;
     }
 
     @Transactional
@@ -54,7 +49,7 @@ public class ReservationService {
         }
 
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(member, request.date(), time, theme));
+                Reservation.of(member, request.date(), time, theme));
         return ReservationResponse.from(saved);
     }
 
