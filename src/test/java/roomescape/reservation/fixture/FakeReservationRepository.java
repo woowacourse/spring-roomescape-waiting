@@ -22,13 +22,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByNameOrderByDateAndTime(String name) {
-        return store.values().stream()
-            .filter(reservation -> reservation.getName().equals(name))
-            .toList();
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }
@@ -65,17 +58,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
-        return store.values().stream()
-            .anyMatch(reservation ->
-                reservation.getDate().getId().equals(dateId) &&
-                    reservation.getTime().getId().equals(timeId) &&
-                    reservation.getTheme().getId().equals(themeId) &&
-                    reservation.getStatus() == ReservationStatus.RESERVED
-            );
-    }
-
-    @Override
     public boolean updateStatus(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {
@@ -83,17 +65,6 @@ public class FakeReservationRepository implements ReservationRepository {
         }
 
         findReservation.get().updateStatus(reservation.getStatus());
-        return true;
-    }
-
-    @Override
-    public boolean updateSchedule(Reservation reservation) {
-        Optional<Reservation> findReservation = findById(reservation.getId());
-        if (findReservation.isEmpty()) {
-            return false;
-        }
-
-        store.put(reservation.getId(), reservation);
         return true;
     }
 

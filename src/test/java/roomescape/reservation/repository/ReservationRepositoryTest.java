@@ -7,7 +7,6 @@ import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -147,38 +146,6 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("findAllByName 메서드는")
-    class FindAllByNameTest {
-
-
-        @Test
-        @DisplayName("요청한 예약자 이름을 가진 모든 예약을 조회한다")
-        void 성공() {
-            // given
-            List<Reservation> reservations = saveAll(List.of(
-                ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme),
-                ReservationFixture.reservation(name, reservationDate1, reservationTime2, theme),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime1, theme),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime2, theme)
-            ));
-            reservations.sort(
-                Comparator.comparing((Reservation reservation) -> reservation.getDate().getDate(),
-                        Comparator.reverseOrder())
-                    .thenComparing(reservation -> reservation.getTime().getStartAt())
-            );
-
-            // when
-            List<Reservation> actual = jdbcReservationRepository.findAllByNameOrderByDateAndTime(
-                name);
-
-            // then
-            assertThat(actual)
-                .usingRecursiveComparison()
-                .isEqualTo(reservations);
-        }
-    }
-
-    @Nested
     @DisplayName("save 메서드는")
     class SaveTest {
 
@@ -196,29 +163,6 @@ class ReservationRepositoryTest {
             // then
             assertThat(jdbcReservationRepository.findAll())
                 .hasSize(emptyReservations.size() + 1);
-        }
-    }
-
-    @Nested
-    @DisplayName("existsByDateAndTimeAndThemeId 메서드는")
-    class ExistsByDateAndTimeAndThemeId {
-
-
-        @Test
-        @DisplayName("날짜와 시간 및 테마을 가진 예약이 존재하는지 확인한다")
-        void 성공() {
-            // given
-            save(reservation(name, reservationDate1, reservationTime1, theme));
-            Long wrongDateId = reservationDate2.getId();
-
-            // when & then
-            assertThat(
-                jdbcReservationRepository.existsByDateAndTimeAndThemeId(reservationDate1.getId(),
-                    reservationTime1.getId(), theme.getId()))
-                .isTrue();
-            assertThat(jdbcReservationRepository.existsByDateAndTimeAndThemeId(wrongDateId,
-                reservationTime1.getId(), theme.getId()))
-                .isFalse();
         }
     }
 
@@ -242,28 +186,6 @@ class ReservationRepositoryTest {
             // then
             assertThat(afterReservation.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
-        }
-    }
-
-    @Nested
-    @DisplayName("updateSchedule 메서드는")
-    class UpdateScheduleTest {
-
-
-        @Test
-        @DisplayName("예약 날짜 및 시간을 변경한다")
-        void 성공() {
-            // given
-            Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme));
-            saved.changeSchedule(name, reservationDate2, reservationTime1);
-
-            // when
-            jdbcReservationRepository.updateSchedule(saved);
-
-            // then
-            assertThat(jdbcReservationRepository.findById(saved.getId()).get())
-                .usingRecursiveComparison()
-                .isEqualTo(saved);
         }
     }
 }

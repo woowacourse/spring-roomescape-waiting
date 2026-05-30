@@ -156,38 +156,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByNameOrderByDateAndTime(String name) {
-        String sql = """
-            SELECT
-                r.id AS reservation_id,
-                r.name,
-                r.status,
-                r.reserved_at,
-                d.id AS date_id,
-                d.date,
-                d.is_active as date_is_active,
-                t.id AS time_id,
-                t.start_at,
-                t.is_active as time_is_active,
-                th.id AS theme_id,
-                th.name AS theme_name,
-                th.description,
-                th.thumbnail_url,
-                th.is_active
-            FROM reservation r
-            INNER JOIN reservation_date d ON r.date_id = d.id
-            INNER JOIN reservation_time t ON r.time_id = t.id
-            INNER JOIN theme th ON r.theme_id = th.id
-            WHERE r.name = :name
-            ORDER BY d.date DESC , t.start_at ASC
-            """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource("name", name);
-
-        return jdbcTemplate.query(sql, params, reservationRowMapper);
-    }
-
-    @Override
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
             .addValue("name", reservation.getName())
@@ -208,49 +176,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
-    @Override
-    public boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
-        String sql = """
-            SELECT COUNT(*) 
-            FROM reservation 
-            WHERE date_id = :date_id
-                AND time_id = :time_id
-                AND theme_id = :theme_id
-                AND status = 'RESERVED'
-            """;
-        SqlParameterSource params = new MapSqlParameterSource()
-            .addValue("date_id", dateId)
-            .addValue("time_id", timeId)
-            .addValue("theme_id", themeId);
-
-        Integer count = jdbcTemplate.queryForObject(sql, params, Integer.class);
-        return count != null && count > 0;
-    }
-
     public boolean updateStatus(Reservation reservation) {
         String sql = "UPDATE RESERVATION SET status = :status WHERE id = :id ";
         SqlParameterSource params = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
             .addValue("status", reservation.getStatus().name());
-        int updatedCount = jdbcTemplate.update(sql, params);
-        return updatedCount > 0;
-    }
-
-    @Override
-    public boolean updateSchedule(Reservation reservation) {
-        String sql = """
-            UPDATE reservation
-            SET date_id = :dateId,
-                time_id = :timeId,
-                reserved_at = :reservedAt
-            WHERE id = :id
-            """;
-        MapSqlParameterSource params = new MapSqlParameterSource()
-            .addValue("dateId", reservation.getDate().getId())
-            .addValue("timeId", reservation.getTime().getId())
-            .addValue("reservedAt", reservation.getReservedAt())
-            .addValue("id", reservation.getId());
-
         int updatedCount = jdbcTemplate.update(sql, params);
         return updatedCount > 0;
     }

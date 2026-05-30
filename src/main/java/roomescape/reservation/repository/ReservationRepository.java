@@ -9,19 +9,13 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByNameOrderByDateAndTime(String name);
-
     Optional<Reservation> findById(Long id);
 
     List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
     Reservation save(Reservation reservation);
 
-    boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId);
-
     boolean updateStatus(Reservation reservation);
-
-    boolean updateSchedule(Reservation reservation);
 
     boolean updateScheduleAndStatus(Reservation reservation);
 
