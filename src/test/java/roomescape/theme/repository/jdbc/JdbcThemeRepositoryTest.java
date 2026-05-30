@@ -72,7 +72,7 @@ class JdbcThemeRepositoryTest {
         Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~"));
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "브라운",
                 "2026-08-05",
                 1L,

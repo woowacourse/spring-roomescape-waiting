@@ -129,7 +129,7 @@ class ThemeControllerTest {
     void 해당_테마에_예약이_있으면_테마_삭제시_409를_응답한다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
                 .when().delete("/themes/1")

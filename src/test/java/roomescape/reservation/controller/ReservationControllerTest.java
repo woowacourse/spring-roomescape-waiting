@@ -102,7 +102,7 @@ class ReservationControllerTest {
         assertThat(countReservableTimes(timeStatusesBeforeReservation)).isEqualTo(5);
 
         // 예약 추가 1
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-05", "1", "1");
 
         // 예약 후
         List<ReservationTimesWithStatus> timeStatusesAfterReservation = getReservationTimeStatusResponses();
@@ -136,8 +136,8 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "초코칩", "2026-05-13", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "재키", "2026-05-13", "2", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "초코칩", "2026-05-13", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "재키", "2026-05-13", "2", "1");
         jdbcTemplate.update("INSERT INTO waiting (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "초코칩", "2026-05-13", "2", "1");
 
         ReservationsAndWaitingsResponse responses = RestAssured.given().log().all()
@@ -190,7 +190,7 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -208,10 +208,10 @@ class ReservationControllerTest {
                 .body("theme.id", org.hamcrest.Matchers.is(1));
 
         Map<String, Object> updatedReservation = jdbcTemplate.queryForMap(
-                "SELECT date, time_id FROM reservation WHERE id = ?",
+                "SELECT reservation_date, time_id FROM reservation WHERE id = ?",
                 1L
         );
-        assertThat(updatedReservation.get("DATE").toString()).isEqualTo("2026-08-06");
+        assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo("2026-08-06");
         assertThat(updatedReservation.get("TIME_ID")).isEqualTo(2L);
     }
 
@@ -237,7 +237,7 @@ class ReservationControllerTest {
     void 존재하지_않는_예약_시간으로_수정하면_404를_응답한다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -271,7 +271,7 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -291,8 +291,8 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "재키", "2026-08-05", "2", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "재키", "2026-08-05", "2", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -312,7 +312,7 @@ class ReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -331,7 +331,7 @@ class ReservationControllerTest {
     void 예약일_당일에는_예약_시작_전이어도_사용자가_예약을_취소할_수_없다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")

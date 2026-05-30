@@ -87,7 +87,7 @@ class JdbcReservationTimeRepositoryTest {
                 "http:~"
         );
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "브라운",
                 "2026-08-05",
                 savedTime.getId(),

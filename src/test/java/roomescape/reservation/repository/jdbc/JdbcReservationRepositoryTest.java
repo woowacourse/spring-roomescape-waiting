@@ -234,7 +234,7 @@ class JdbcReservationRepositoryTest {
 
     private void insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name,
                 date,
                 timeId,

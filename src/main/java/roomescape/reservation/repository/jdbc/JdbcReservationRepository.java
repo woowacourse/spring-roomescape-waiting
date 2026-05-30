@@ -31,8 +31,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
-                    r.name AS reservation_name,
-                    r.date AS reservation_date,
+                    r.customer_name AS reservation_name,
+                    r.reservation_date AS reservation_date,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -55,8 +55,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
-                    r.name AS reservation_name,
-                    r.date AS reservation_date,
+                    r.customer_name AS reservation_name,
+                    r.reservation_date AS reservation_date,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -66,9 +66,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id
-                WHERE r.name = ?
-                  AND (r.date > ? OR (r.date = ? AND t.start_at > ?))
-                ORDER BY r.date ASC
+                WHERE r.customer_name = ?
+                  AND (r.reservation_date > ? OR (r.reservation_date = ? AND t.start_at > ?))
+                ORDER BY r.reservation_date ASC
                 """;
 
         return jdbcTemplate.query(sql,
@@ -87,8 +87,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
-                    r.name AS reservation_name,
-                    r.date AS reservation_date,
+                    r.customer_name AS reservation_name,
+                    r.reservation_date AS reservation_date,
                     r.theme_id AS theme_id,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
@@ -127,7 +127,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean update(final Reservation reservation) {
         final String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
+                SET reservation_date = ?, time_id = ?
                 WHERE id = ?
                 """;
 
@@ -168,7 +168,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation_time rt
                 LEFT JOIN reservation r
                     ON r.time_id = rt.id
-                   AND r.date = ?
+                   AND r.reservation_date = ?
                    AND r.theme_id = ?
                 ORDER BY rt.start_at;
                 """;
@@ -185,7 +185,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private long insertReservation(final ReservationEntity reservationEntity) {
         final String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
+                INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id)
                 VALUES (?, ?, ?, ?)
                 """;
 

@@ -90,8 +90,8 @@ public class JdbcThemeRepository implements ThemeRepository {
                 FROM theme t
                 LEFT JOIN reservation r
                     ON r.theme_id = t.id
-                    AND r.date >= ?
-                    AND r.date < ?
+                    AND r.reservation_date >= ?
+                    AND r.reservation_date < ?
                 GROUP BY
                     t.id,
                     t.name,

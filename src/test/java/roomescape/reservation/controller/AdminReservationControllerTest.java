@@ -67,7 +67,7 @@ class AdminReservationControllerTest {
     void 예약_목록을_조회한다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .when().get("/admin/reservations")
@@ -110,7 +110,7 @@ class AdminReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -126,10 +126,10 @@ class AdminReservationControllerTest {
                 .body("time.id", is(2));
 
         Map<String, Object> updatedReservation = jdbcTemplate.queryForMap(
-                "SELECT date, time_id FROM reservation WHERE id = ?",
+                "SELECT reservation_date, time_id FROM reservation WHERE id = ?",
                 1L
         );
-        assertThat(updatedReservation.get("DATE").toString()).isEqualTo("2026-05-02");
+        assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo("2026-05-02");
         assertThat(updatedReservation.get("TIME_ID")).isEqualTo(2L);
     }
 
@@ -138,7 +138,7 @@ class AdminReservationControllerTest {
     void 관리자는_예약을_삭제할_수_있다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
 
         RestAssured.given().log().all()
                 .when().delete("/admin/reservations/1")

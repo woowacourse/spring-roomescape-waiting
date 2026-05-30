@@ -50,7 +50,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
                 SELECT ?, ?, ?, ?
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?
+                WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
