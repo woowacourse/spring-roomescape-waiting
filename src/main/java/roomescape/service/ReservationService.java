@@ -5,9 +5,12 @@ import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 import jakarta.annotation.Nonnull;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -33,6 +36,7 @@ public class ReservationService {
     private final Clock clock;
     private final ReservationWriter reservationWriter;
     private final WaitlistWriter waitlistWriter;
+    private final WaitlistOrderPolicy waitlistOrderPolicy;
 
     public ReservationService(
             ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
@@ -40,7 +44,8 @@ public class ReservationService {
             ThemeRepository themeRepository,
             Clock clock,
             ReservationWriter reservationWriter,
-            WaitlistWriter waitlistWriter
+            WaitlistWriter waitlistWriter,
+            WaitlistOrderPolicy waitlistOrderPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
@@ -49,14 +54,39 @@ public class ReservationService {
         this.clock = clock;
         this.reservationWriter = reservationWriter;
         this.waitlistWriter = waitlistWriter;
+        this.waitlistOrderPolicy = waitlistOrderPolicy;
     }
 
     public List<Reservation> getReservations() {
         return reservationRepository.findAll();
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public List<ReservationWithStatus> getMyReservations(String name) {
-        return reservationRepository.findByName(name);
+        List<ReservationWithStatus> results = new ArrayList<>();
+
+        for (Reservation reservation : reservationRepository.findByName(name)) {
+            results.add(ReservationWithStatus.reserved(reservation));
+        }
+
+        for (Waitlist waitlist : waitlistRepository.findByName(name)) {
+            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
+        }
+
+        results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
+                .thenComparing(reservation -> reservation.getTime().getStartAt()));
+
+        return results;
+    }
+
+    private int calculateWaitingOrder(Waitlist waitlist) {
+        List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(
+                waitlist.getDate(),
+                waitlist.getTime().getId(),
+                waitlist.getTheme().getId()
+        );
+
+        return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
     }
 
     public Reservation getReservation(Long id) {

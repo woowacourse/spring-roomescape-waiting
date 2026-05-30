@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -40,18 +41,23 @@ class JdbcWaitlistRepositoryTest {
     private WaitlistRepository waitlistRepository;
 
     @Test
-    void 대기_생성시각이_같으면_id_순서로_앞_대기를_센다() {
+    void 같은_슬롯의_대기_목록을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
-        waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme));
+        Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
+        Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme));
         Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme));
 
-        Waitlist neoWaitlist = waitlistRepository.findById(neoId).get();
-        int count = waitlistRepository.countBefore(neoWaitlist);
+        List<Waitlist> waitlists = waitlistRepository.findBySlot(
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
 
-        assertThat(count).isEqualTo(2);
+        assertThat(waitlists)
+                .extracting(Waitlist::getId)
+                .containsExactly(brieId, pobiId, neoId);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {

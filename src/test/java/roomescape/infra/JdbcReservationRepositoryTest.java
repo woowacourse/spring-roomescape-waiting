@@ -14,19 +14,16 @@ import org.springframework.context.annotation.Import;
 import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
-        JdbcWaitlistRepository.class,
         TestClockConfig.class
 })
 class JdbcReservationRepositoryTest {
@@ -44,9 +41,6 @@ class JdbcReservationRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private WaitlistRepository waitlistRepository;
 
     @Test
     void 예약을_저장한다() {
@@ -185,18 +179,21 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 내_예약_조회에서_대기_생성시각이_같으면_id_순서로_순번을_계산한다() {
+    void 이름으로_예약을_조회한다() {
         ReservationTime reservationTime = createReservationTime(TEN);
+        ReservationTime anotherTime = createReservationTime(TWELVE);
         Theme theme = createTheme();
 
-        waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
-        waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme));
-        waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme));
+        reservationRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
+        reservationRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, anotherTime, theme));
+        reservationRepository.save(new Reservation("네오", FUTURE_THIRD_DATE, reservationTime, theme));
 
-        List<ReservationWithStatus> neoReservations = reservationRepository.findByName("네오");
+        List<Reservation> neoReservations = reservationRepository.findByName("네오");
 
-        assertThat(neoReservations).hasSize(1);
-        assertThat(neoReservations.getFirst().getWaitingOrder()).isEqualTo(3);
+        assertThat(neoReservations).hasSize(2);
+        assertThat(neoReservations)
+                .extracting(Reservation::getName)
+                .containsOnly("네오");
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
