@@ -239,17 +239,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .stream().findFirst();
     }
 
+
+
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name) {
         String sql = """
         SELECT EXISTS (
             SELECT 1
             FROM reservation
-            WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
+            WHERE reservation_date = ? AND time_id = ? AND name = ?
         )
         """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, name);
         return Boolean.TRUE.equals(exists);
     }
 
@@ -310,17 +312,19 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
+
+
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean existsByDateAndTimeIdAndNameAndIdNot(LocalDate date, Long timeId, String name, Long id) {
         String sql = """
         SELECT EXISTS (
             SELECT 1
             FROM reservation
-            WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id != ?
+            WHERE reservation_date = ? AND time_id = ? AND name = ? AND id != ?
         )
         """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, id);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, name, id);
         return Boolean.TRUE.equals(exists);
     }
 

@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationErrorCode;
@@ -27,11 +27,11 @@ import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -79,7 +79,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.save(
                 new ReservationCommand("브라운", LocalDate.now().plusDays(1), 1L, 1L)
-        )).isInstanceOf(DuplicateException.class)
+        )).isInstanceOf(ConflictException.class)
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
@@ -101,13 +101,12 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L))
                 .willReturn(Optional.of(new Reservation(1L, "브라운", futureDate, time, theme)));
         given(reservationTimeService.findById(1L)).willReturn(time);
-        given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                futureDate, 1L, 1L, 1L
-        )).willReturn(true);
+        org.mockito.BDDMockito.willThrow(new DataIntegrityViolationException("duplicate"))
+                .given(reservationRepository).update(any());
 
         assertThatThrownBy(() -> reservationService.update(
                 new ReservationUpdateCommand(futureDate, 1L), 1L, "브라운"
-        )).isInstanceOf(DuplicateException.class)
+        )).isInstanceOf(ConflictException.class)
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 

@@ -19,13 +19,13 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name);
 
     List<Reservation> findAll();
 
     List<PopularThemeQueryResult> findPopularThemes(LocalDate from, LocalDate to, int limit);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id);
+    boolean existsByDateAndTimeIdAndNameAndIdNot(LocalDate date, Long timeId, String name, Long id);
 
     void update(Reservation reservation);
 

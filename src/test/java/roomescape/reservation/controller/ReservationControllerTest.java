@@ -109,6 +109,6 @@ class ReservationControllerTest {
         // when & then
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다."));
+                .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다. 입력 값을 다시 확인해 주세요."));
     }
 }

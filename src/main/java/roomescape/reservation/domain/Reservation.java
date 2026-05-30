@@ -3,11 +3,10 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.global.exception.ForbiddenException;
-import roomescape.global.exception.InvalidRequestValueException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.TimeErrorCode;
 
 public record Reservation(
         Long id,
@@ -18,10 +17,6 @@ public record Reservation(
 ) {
     public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, name, date, time, theme);
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme);
     }
 
     public Reservation update(LocalDate newDate, ReservationTime newTime) {
@@ -37,18 +32,18 @@ public record Reservation(
         );
     }
 
-    private ReservationTime getNewReservationTimeValue(ReservationTime newTime) {
-        if (newTime == null) {
-            return this.time;
-        }
-        return newTime;
-    }
-
     private LocalDate getNewDateValue(LocalDate newDate) {
         if (newDate == null) {
             return this.date;
         }
         return newDate;
+    }
+
+    private ReservationTime getNewReservationTimeValue(ReservationTime newTime) {
+        if (newTime == null) {
+            return this.time;
+        }
+        return newTime;
     }
 
     public void validateOwner(String name) {
@@ -60,12 +55,13 @@ public record Reservation(
     public void validateExpiry() {
         LocalDate today = LocalDate.now();
         if (this.date.isBefore(today)) {
-            throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());
+            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE.getMessage());
         }
         LocalDateTime current = LocalDateTime.now();
+
         LocalDateTime targetTime = LocalDateTime.of(this.date, this.time.startAt());
         if (current.isAfter(targetTime)) {
-            throw new InvalidRequestValueException(TimeErrorCode.INVALID_START_AT.getMessage());
+            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME.getMessage());
         }
     }
 
