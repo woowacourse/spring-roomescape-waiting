@@ -11,38 +11,34 @@ public record ReservationSlot(LocalDate date, Long themeId, Long timeId, LocalTi
 
     @Builder
     public ReservationSlot {
-        date = requireDate(date);
-        themeId = requireTheme(themeId);
-        timeId = requireTime(timeId);
-        startAt = requireStartAt(startAt);
+        requireDate(date);
+        requireTheme(themeId);
+        requireTime(timeId);
+        requireStartAt(startAt);
     }
 
-    private static LocalDate requireDate(LocalDate date) {
+    private static void requireDate(LocalDate date) {
         if (date == null) {
             throw new RoomEscapeException("날짜는 비어있을 수 없습니다.");
         }
-        return date;
     }
 
-    private static Long requireTheme(Long themeId) {
+    private static void requireTheme(Long themeId) {
         if (themeId == null || themeId <= 0) {
             throw new RoomEscapeException("테마ID는 올바른 값이어야 합니다.");
         }
-        return themeId;
     }
 
-    private static Long requireTime(Long timeId) {
+    private static void requireTime(Long timeId) {
         if (timeId == null || timeId <= 0) {
             throw new RoomEscapeException("시간ID는 올바른 값이어야 합니다.");
         }
-        return timeId;
     }
 
-    private static LocalTime requireStartAt(LocalTime startAt) {
+    private static void requireStartAt(LocalTime startAt) {
         if (startAt == null) {
             throw new RoomEscapeException("시간은 비어있을 수 없습니다.");
         }
-        return startAt;
     }
 
     public ReservationSlot updateDateAndTime(LocalDate date, Long timeId, LocalTime startAt) {
