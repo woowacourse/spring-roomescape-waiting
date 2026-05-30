@@ -13,21 +13,17 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+    List<Reservation> findAllByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
     Reservation save(Reservation reservation);
 
     boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
-    boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId);
-
-    boolean existsByDateId(Long dateId);
-
-    boolean existsByTimeId(Long timeId);
-
     boolean updateStatus(Reservation reservation);
 
     boolean updateSchedule(Reservation reservation);
+
+    boolean updateScheduleAndStatus(Reservation reservation);
 
     List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
 

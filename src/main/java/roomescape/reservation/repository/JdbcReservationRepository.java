@@ -118,7 +118,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+    public List<Reservation> findAllByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
         String sql = """
             SELECT
                 r.id AS reservation_id,
@@ -227,50 +227,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         return count != null && count > 0;
     }
 
-    @Override
-    public boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId) {
-        String sql = """
-            SELECT COUNT(*)
-            FROM reservation 
-            WHERE name = :name 
-              AND date_id = :date_id 
-              AND time_id = :time_id
-            """;
-        SqlParameterSource params = new MapSqlParameterSource()
-            .addValue("name", name)
-            .addValue("date_id", dateId)
-            .addValue("time_id", timeId);
-
-        Integer count = jdbcTemplate.queryForObject(sql, params, Integer.class);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsByDateId(Long dateId) {
-        String sql = """
-            SELECT COUNT(*)
-            FROM reservation 
-            WHERE date_id = :date_id 
-            """;
-
-        Integer count = jdbcTemplate.queryForObject(sql,
-            new MapSqlParameterSource("date_id", dateId), Integer.class);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsByTimeId(Long timeId) {
-        String sql = """
-            SELECT COUNT(*)
-            FROM reservation 
-            WHERE time_id = :time_id 
-            """;
-
-        Integer count = jdbcTemplate.queryForObject(sql,
-            new MapSqlParameterSource("time_id", timeId), Integer.class);
-        return count != null && count > 0;
-    }
-
     public boolean updateStatus(Reservation reservation) {
         String sql = "UPDATE RESERVATION SET status = :status WHERE id = :id ";
         SqlParameterSource params = new MapSqlParameterSource()
@@ -292,6 +248,27 @@ public class JdbcReservationRepository implements ReservationRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
             .addValue("dateId", reservation.getDate().getId())
             .addValue("timeId", reservation.getTime().getId())
+            .addValue("reservedAt", reservation.getReservedAt())
+            .addValue("id", reservation.getId());
+
+        int updatedCount = jdbcTemplate.update(sql, params);
+        return updatedCount > 0;
+    }
+
+    @Override
+    public boolean updateScheduleAndStatus(Reservation reservation) {
+        String sql = """
+            UPDATE reservation
+            SET date_id = :dateId,
+                time_id = :timeId,
+                status = :status,
+                reserved_at = :reservedAt
+            WHERE id = :id
+            """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("dateId", reservation.getDate().getId())
+            .addValue("timeId", reservation.getTime().getId())
+            .addValue("status", reservation.getStatus().name())
             .addValue("reservedAt", reservation.getReservedAt())
             .addValue("id", reservation.getId());
 

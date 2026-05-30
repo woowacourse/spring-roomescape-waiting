@@ -18,6 +18,7 @@ import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.reservation.repository.JdbcReservationSlotRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
@@ -28,10 +29,14 @@ import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.JdbcReservationTimeRepository;
 
 @JdbcTest
-@Import({ReservationService.class, JdbcReservationRepository.class,
+@Import({ReservationService.class, JdbcReservationSlotRepository.class,
+    JdbcReservationRepository.class,
     JdbcReservationTimeRepository.class,
     JdbcReservationDateRepository.class, JdbcThemeRepository.class})
 class ReservationServiceIntegrationTest {
+
+    @Autowired
+    private JdbcReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     private JdbcReservationRepository reservationRepository;
@@ -50,8 +55,9 @@ class ReservationServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        reservationService = new ReservationService(reservationRepository,
-            reservationTimeRepository, reservationDateRepository, themeRepository);
+        reservationService = new ReservationService(reservationSlotRepository,
+            reservationRepository, reservationTimeRepository, reservationDateRepository,
+            themeRepository);
     }
 
     private ReservationTime saveTime() {

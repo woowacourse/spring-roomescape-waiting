@@ -27,6 +27,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.FakeReservationRepository;
+import roomescape.reservation.fixture.FakeReservationSlotRepository;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
@@ -49,6 +50,7 @@ class ReservationServiceTest {
     private Theme theme1;
     private Theme theme2;
 
+    private FakeReservationSlotRepository reservationSlotRepository;
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeReservationDateRepository reservationDateRepository;
@@ -58,14 +60,15 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setup() {
+        reservationSlotRepository = new FakeReservationSlotRepository();
         reservationRepository = new FakeReservationRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
         themeRepository = new FakeThemeRepository();
 
-        this.reservationService = new ReservationService(reservationRepository,
-            reservationTimeRepository,
-            reservationDateRepository, themeRepository);
+        this.reservationService = new ReservationService(reservationSlotRepository,
+            reservationRepository, reservationTimeRepository, reservationDateRepository,
+            themeRepository);
 
         reservationTime1 = reservationTimeRepository.save(ReservationTimeFixture.time15());
         reservationTime2 = reservationTimeRepository.save(ReservationTimeFixture.time16());

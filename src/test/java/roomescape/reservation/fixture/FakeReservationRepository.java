@@ -34,7 +34,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+    public List<Reservation> findAllByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
         return store.values().stream()
             .filter(reservation ->
                 reservation.getDate().getId().equals(dateId) &&
@@ -76,29 +76,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId) {
-        return store.values().stream()
-            .anyMatch(reservation ->
-                reservation.getName().equals(name) &&
-                    reservation.getDate().getId().equals(dateId) &&
-                    reservation.getTime().getId().equals(timeId) &&
-                    reservation.getStatus() == ReservationStatus.RESERVED
-            );
-    }
-
-    @Override
-    public boolean existsByDateId(Long dateId) {
-        return store.values().stream()
-            .anyMatch(reservation -> reservation.getDate().getId().equals(dateId));
-    }
-
-    @Override
-    public boolean existsByTimeId(Long timeId) {
-        return store.values().stream()
-            .anyMatch(reservation -> reservation.getTime().getId().equals(timeId));
-    }
-
-    @Override
     public boolean updateStatus(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {
@@ -111,6 +88,17 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public boolean updateSchedule(Reservation reservation) {
+        Optional<Reservation> findReservation = findById(reservation.getId());
+        if (findReservation.isEmpty()) {
+            return false;
+        }
+
+        store.put(reservation.getId(), reservation);
+        return true;
+    }
+
+    @Override
+    public boolean updateScheduleAndStatus(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {
             return false;

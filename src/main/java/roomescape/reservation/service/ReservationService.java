@@ -17,8 +17,10 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
@@ -34,6 +36,7 @@ import roomescape.time.repository.ReservationTimeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDateRepository reservationDateRepository;
@@ -60,11 +63,11 @@ public class ReservationService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        validateAlreadyBookedByMyself(name, reservationDate.getId(), reservationTime.getId(),
-            theme.getId());
-        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
-            reservationDate.getId(), reservationTime.getId(), theme.getId());
-        if (isAlreadyBooked) {
+        lockSlot(command.dateId(), command.timeId(), command.themeId());
+
+        boolean isReservedSlot = checkReserved(name, command.dateId(), command.timeId(),
+            command.themeId());
+        if (isReservedSlot) {
             return reservationRepository.save(
                 Reservation.wait(name, reservationDate, reservationTime, theme, now));
         }
@@ -96,15 +99,11 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        validateAlreadyBookedByMyself(reservation.getName(), command.dateId(), command.timeId(),
-            reservation.getTheme().getId());
-
-        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
-            command.dateId(), command.timeId(), reservation.getTheme().getId());
+        lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        decideStatus(command, reservation);
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
-        decideStatus(reservation, isAlreadyBooked);
         reservation.changeReservedAt(LocalDateTime.now());
-        reservationRepository.updateSchedule(reservation);
+        reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }
 
@@ -115,23 +114,25 @@ public class ReservationService {
         newTime.validateIsInactive();
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
-
-        validateAlreadyBookedByMyself(reservation.getName(), command.dateId(), command.timeId(),
-            reservation.getTheme().getId());
-
-        boolean isAlreadyBooked = reservationRepository.existsByDateAndTimeAndThemeId(
-            command.dateId(), command.timeId(), reservation.getTheme().getId());
         reservation.changeScheduleByManager(newDate, newTime);
-        decideStatus(reservation, isAlreadyBooked);
+
+        lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        decideStatus(command, reservation);
         reservation.changeReservedAt(LocalDateTime.now());
-        reservationRepository.updateSchedule(reservation);
+        reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }
 
-    private void decideStatus(Reservation reservation, boolean isAlreadyBooked) {
-        if (isAlreadyBooked) {
+    private void lockSlot(Long dateId, Long timeId, Long themeId) {
+        reservationSlotRepository.saveIfAbsent(ReservationSlot.create(dateId, timeId, themeId));
+        reservationSlotRepository.lockByDateTimeAndThemeId(dateId, timeId, themeId);
+    }
+
+    private void decideStatus(ReservationChangeCommand command, Reservation reservation) {
+        boolean isReservedSlot = checkReservedExcept(reservation.getId(), reservation.getName(),
+            command.dateId(), command.timeId(), reservation.getTheme().getId());
+        if (isReservedSlot) {
             reservation.updateStatus(WAITING);
-            reservationRepository.updateStatus(reservation);
         }
     }
 
@@ -155,13 +156,25 @@ public class ReservationService {
             .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private void validateAlreadyBookedByMyself(String name, Long dateId, Long timeId,
-        Long themeId) {
-        boolean isAlreadyBooked = reservationRepository.findByDateTimeAndThemeId(dateId, timeId,
-                themeId)
-            .stream()
+    private boolean checkReserved(String name, Long dateId, Long timeId, Long themeId) {
+        return checkReservedExcept(null, name, dateId, timeId, themeId);
+    }
+
+    private boolean checkReservedExcept(Long excludedId, String name, Long dateId,
+        Long timeId, Long themeId) {
+        List<Reservation> reservationsInSameSlot =
+            reservationRepository.findAllByDateTimeAndThemeId(dateId, timeId, themeId).stream()
+                .filter(reservation -> !reservation.getId().equals(excludedId))
+                .toList();
+        validateReservedByMyself(reservationsInSameSlot, name);
+
+        return !reservationsInSameSlot.isEmpty();
+    }
+
+    private void validateReservedByMyself(List<Reservation> reservationsInSameSlot, String name) {
+        boolean reservedByMyself = reservationsInSameSlot.stream()
             .anyMatch(reservation -> reservation.isOwner(name));
-        if (isAlreadyBooked) {
+        if (reservedByMyself) {
             throw new ReservationException(RESERVATION_ALREADY_BOOKED);
         }
     }
