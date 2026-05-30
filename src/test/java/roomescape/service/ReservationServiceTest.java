@@ -116,7 +116,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 다른_예약이_있는_시간으로_변경하면_중복_예외가_발생한다() {
+    void 다른_예약이_있는_시간으로_변경하면_대기로_등록된다() {
         // given
         ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.createDefault());
         themeRepository.save(ThemeFixture.createDefaultTheme());
@@ -126,10 +126,12 @@ class ReservationServiceTest {
 
         ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(second.getDate(), time.getId());
 
-        // when & then
-        assertThatThrownBy(() -> reservationService.change(reservedEntryId(first), command))
-                .isInstanceOf(DuplicateEntityException.class)
-                .hasMessageContaining("이미 예약 된 날짜입니다.");
+        // when
+        ReservationResult result = reservationService.change(reservedEntryId(first), command);
+
+        // then
+        assertThat(result.entry().status()).isEqualTo("WAITING");
+        assertThat(result.date()).isEqualTo(second.getDate());
     }
 
     @Test

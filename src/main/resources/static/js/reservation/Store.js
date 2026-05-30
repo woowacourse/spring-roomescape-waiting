@@ -1,6 +1,5 @@
 import {getSearchParam} from "../common/helpers.js";
 import {
-  cancelReservation,
   changeReservation,
   createReservation,
   createWaitingReservation,
@@ -116,12 +115,6 @@ export default class Store {
     };
 
     if (this.reservationId) {
-      if (this.submitMode() === "waiting") {
-        const result = await createWaitingReservation(payload);
-        await cancelReservation(this.reservationId);
-        return result;
-      }
-
       return changeReservation(this.reservationId, {
         date: payload.date,
         timeId: payload.timeId

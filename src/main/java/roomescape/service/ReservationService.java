@@ -66,7 +66,7 @@ public class ReservationService {
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
                                         LocalDate date, ReservationTime newTime, LocalDateTime now) {
         Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
-        ReservationEntry moved = target.reserve(entry.getName(), now);
+        ReservationEntry moved = target.joinWaitingList(entry.getName(), now);
 
         current.cancelEntry(entry.getId());
         reservationRepository.save(current);
