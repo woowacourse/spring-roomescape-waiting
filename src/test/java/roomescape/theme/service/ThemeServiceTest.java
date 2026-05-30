@@ -1,21 +1,23 @@
 package roomescape.theme.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import roomescape.common.exception.NotFoundException;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.exception.ThemeInUseException;
-import roomescape.theme.service.dto.request.ThemeCreateRequest;
-import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.theme.service.support.FakeThemeRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import roomescape.common.exception.NotFoundException;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.exception.ThemeInUseException;
+import roomescape.theme.domain.exception.ThemeNotFoundException;
+import roomescape.theme.service.dto.request.ThemeCreateRequest;
+import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.theme.service.support.FakeThemeRepository;
 
 class ThemeServiceTest {
 
@@ -46,6 +48,37 @@ class ThemeServiceTest {
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.name()).isEqualTo("링");
         assertThat(themeRepository.savedTheme().getName()).isEqualTo("링");
+    }
+
+    @Nested
+    @DisplayName("테마 아이디로 테마를 조회한다")
+    class GetById {
+
+        @Test
+        void 저장된_테마를_아이디로_조회한다() {
+            // given
+            final Theme saved = themeRepository.save(
+                Theme.create("name", "description", "url"));
+
+            // when
+            final Theme theme = themeService.getById(saved.getId());
+
+            // then
+            assertThat(theme.getId()).isEqualTo(saved.getId());
+            assertThat(theme.getName()).isEqualTo(saved.getName());
+            assertThat(theme.getDescription()).isEqualTo(saved.getDescription());
+            assertThat(theme.getThumbnailUrl()).isEqualTo(saved.getThumbnailUrl());
+        }
+
+        @Test
+        void 존재하지_않는_테마의_아이디로_조회하면_예외가_발생한다() {
+            // given
+            final long unsavedId = 999L;
+
+            // when & then
+            assertThatThrownBy(() -> themeService.getById(unsavedId))
+                .isInstanceOf(ThemeNotFoundException.class);
+        }
     }
 
     @Test

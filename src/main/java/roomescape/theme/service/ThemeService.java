@@ -1,5 +1,6 @@
 package roomescape.theme.service;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,11 @@ public class ThemeService {
         Theme theme = themeRepository.save(themeWithoutId);
 
         return ThemeResponse.from(theme);
+    }
+
+    public Theme getById(final long themeId) {
+        return themeRepository.findById(themeId)
+            .orElseThrow(ThemeNotFoundException::new);
     }
 
     public void delete(final Long themeId) {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.waiting.service.WaitingService;
+import roomescape.waiting.service.WaitingApplicationService;
 import roomescape.waiting.service.dto.request.WaitingCreateRequest;
 import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 
@@ -20,13 +20,13 @@ import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 @RequiredArgsConstructor
 public class WaitingController {
 
-    private final WaitingService waitingService;
+    private final WaitingApplicationService waitingApplicationService;
 
     @PostMapping
     public ResponseEntity<WaitingCreateResponse> create(
         @Valid @RequestBody WaitingCreateRequest request
     ) {
-        final WaitingCreateResponse response = waitingService.create(request);
+        final WaitingCreateResponse response = waitingApplicationService.create(request);
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(response);
@@ -37,7 +37,7 @@ public class WaitingController {
         @PathVariable Long id,
         @RequestParam("customer-name") String customerName
     ) {
-        waitingService.deleteByIdAndCustomerName(id, customerName);
+        waitingApplicationService.deleteByIdAndCustomerName(id, customerName);
         return ResponseEntity.noContent().build();
     }
 }

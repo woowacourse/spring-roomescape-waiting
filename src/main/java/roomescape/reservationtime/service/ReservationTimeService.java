@@ -1,5 +1,6 @@
 package roomescape.reservationtime.service;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,11 @@ public class ReservationTimeService {
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
+    }
+
+    public ReservationTime getById(final long timeId) {
+        return reservationTimeRepository.findById(timeId)
+            .orElseThrow(ReservationTimeNotFoundException::new);
     }
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest data) {
