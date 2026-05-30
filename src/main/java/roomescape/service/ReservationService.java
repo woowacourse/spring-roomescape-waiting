@@ -46,7 +46,7 @@ public class ReservationService {
     public Reservation findMyReservation(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_FORMAT.formatted(id)));
-        if (!reservation.getName().equals(name)) {
+        if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
         }
         return reservation;
