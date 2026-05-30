@@ -391,7 +391,8 @@ Content-Type: application/json
         "name": "블루룸",
         "description": "깊은 바닷속 미스터리를 풀어라.",
         "thumbnail": "https://via.placeholder.com/150"
-    }
+    },
+    "status": "RESERVED"
 }
 ```
 
@@ -472,7 +473,8 @@ Content-Type: application/json
             "name": "블루룸",
             "description": "깊은 바닷속 미스터리를 풀어라.",
             "thumbnail": "https://via.placeholder.com/150"
-        }
+        },
+        "status": "RESERVED"
     }
 ]
 ```
@@ -524,7 +526,8 @@ Content-Type: application/json
         "name": "블루룸",
         "description": "깊은 바닷속 미스터리를 풀어라.",
         "thumbnail": "https://via.placeholder.com/150"
-    }
+    },
+    "status": "RESERVED"
 }
 ```
 
@@ -643,7 +646,8 @@ Content-Type: application/json
     "id": 1,
     "createdAt": "2026-05-05T09:00:00",
     "slotId": 1,
-    "name": "브라운"
+    "name": "브라운",
+    "status": "WAITING"
 }
 ```
 

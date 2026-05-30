@@ -8,9 +8,15 @@ public record WaitingResponse(
         long id,
         LocalDateTime createdAt,
         long slotId,
-        String name
+        String name,
+        ReservationStatus status
 ) {
     public static WaitingResponse from(Waiting waiting) {
-        return new WaitingResponse(waiting.getId(), waiting.getCreatedAt(), waiting.getSlotId(), waiting.getName());
+        return new WaitingResponse(
+                waiting.getId(),
+                waiting.getCreatedAt(),
+                waiting.getSlotId(),
+                waiting.getName(),
+                ReservationStatus.WAITING);
     }
 }
