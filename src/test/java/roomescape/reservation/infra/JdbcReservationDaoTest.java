@@ -52,11 +52,12 @@ class JdbcReservationDaoTest {
                 elevenTimeId
         );
 
-        List<ReservationDetail> details = reservationDao.findAll();
+        List<ReservationDetail> details = reservationDao.findAllByPage(1, 0);
         ReservationDetail first = details.getFirst();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(details).hasSize(2);
+            softly.assertThat(details).hasSize(1);
+            softly.assertThat(reservationDao.countAll()).isEqualTo(2);
             softly.assertThat(first.username()).isEqualTo("스타크");
             softly.assertThat(first.date()).isEqualTo(date);
             softly.assertThat(first.themeId()).isEqualTo(themeId);

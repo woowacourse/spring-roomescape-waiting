@@ -2,6 +2,7 @@ package roomescape.reservation;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -271,35 +272,52 @@ class ReservationApiTest {
         );
 
         RestAssured.given()
+                .queryParam("page", 0)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id", greaterThan(0))
-                .body("[0].name", equalTo("스타크"))
-                .body("[0].date", equalTo("2026-05-06"))
-                .body("[0].time.id", equalTo(nineTimeId.intValue()))
-                .body("[0].time.startAt", equalTo("09:00"))
-                .body("[0].theme.id", equalTo(themeId.intValue()))
-                .body("[0].theme.name", equalTo("공포 테마"))
-                .body("[0].status", equalTo("CONFIRM"))
+                .body("content", hasSize(3))
+                .body("page", equalTo(0))
+                .body("size", equalTo(20))
+                .body("totalElements", equalTo(3))
+                .body("totalPages", equalTo(1))
+                .body("content[0].id", greaterThan(0))
+                .body("content[0].name", equalTo("스타크"))
+                .body("content[0].date", equalTo("2026-05-06"))
+                .body("content[0].time.id", equalTo(nineTimeId.intValue()))
+                .body("content[0].time.startAt", equalTo("09:00"))
+                .body("content[0].theme.id", equalTo(themeId.intValue()))
+                .body("content[0].theme.name", equalTo("공포 테마"))
+                .body("content[0].status", equalTo("CONFIRM"))
 
-                .body("[1].id", greaterThan(0))
-                .body("[1].name", equalTo("비밥"))
-                .body("[1].date", equalTo("2026-05-07"))
-                .body("[1].time.id", equalTo(nineTimeId.intValue()))
-                .body("[1].time.startAt", equalTo("09:00"))
-                .body("[1].theme.id", equalTo(themeId.intValue()))
-                .body("[1].theme.name", equalTo("공포 테마"))
-                .body("[1].status", equalTo("CONFIRM"))
+                .body("content[1].id", greaterThan(0))
+                .body("content[1].name", equalTo("비밥"))
+                .body("content[1].date", equalTo("2026-05-07"))
+                .body("content[1].time.id", equalTo(nineTimeId.intValue()))
+                .body("content[1].time.startAt", equalTo("09:00"))
+                .body("content[1].theme.id", equalTo(themeId.intValue()))
+                .body("content[1].theme.name", equalTo("공포 테마"))
+                .body("content[1].status", equalTo("CONFIRM"))
 
-                .body("[2].id", greaterThan(0))
-                .body("[2].name", equalTo("스타크"))
-                .body("[2].date", equalTo("2026-05-07"))
-                .body("[2].time.id", equalTo(tenTimeId.intValue()))
-                .body("[2].time.startAt", equalTo("10:00"))
-                .body("[2].theme.id", equalTo(themeId.intValue()))
-                .body("[2].theme.name", equalTo("공포 테마"))
-                .body("[2].status", equalTo("CONFIRM"));
+                .body("content[2].id", greaterThan(0))
+                .body("content[2].name", equalTo("스타크"))
+                .body("content[2].date", equalTo("2026-05-07"))
+                .body("content[2].time.id", equalTo(tenTimeId.intValue()))
+                .body("content[2].time.startAt", equalTo("10:00"))
+                .body("content[2].theme.id", equalTo(themeId.intValue()))
+                .body("content[2].theme.name", equalTo("공포 테마"))
+                .body("content[2].status", equalTo("CONFIRM"));
+    }
+
+    @DisplayName("관리자 예약 목록 조회 시 페이지가 0보다 작으면 400 응답 반환을 테스트합니다.")
+    @Test
+    void find_all_reservations_with_invalid_page_param() {
+        RestAssured.given()
+                .queryParam("page", -1)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("페이지 값은 0 이상이어야 합니다."));
     }
 
     @DisplayName("사용자 이름 없이 예약 목록 조회 시 400 응답 반환을 테스트합니다.")

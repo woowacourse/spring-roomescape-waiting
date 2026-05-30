@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
+import roomescape.reservation.application.dto.ReservationApplicationPageResult;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -47,23 +48,22 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        List<ReservationApplicationResult> reservations = reservationQueryService.findAll();
+        ReservationApplicationPageResult page = reservationQueryService.findAllByPage(0);
+        List<ReservationApplicationResult> reservations = page.content();
 
         ReservationApplicationResult first = reservations.getFirst();
-        ReservationApplicationResult second = reservations.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);
+            softly.assertThat(page.page()).isZero();
+            softly.assertThat(page.size()).isEqualTo(20);
+            softly.assertThat(page.totalElements()).isEqualTo(2);
+            softly.assertThat(page.totalPages()).isEqualTo(1);
             softly.assertThat(first.id()).isPositive();
             softly.assertThat(first.name()).isEqualTo("스타크");
             softly.assertThat(first.date()).isEqualTo(earlierDate);
             softly.assertThat(first.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(first.time()).isEqualTo(new ReservationTimeResult(nineTimeId, LocalTime.of(9, 0)));
-            softly.assertThat(second.id()).isPositive();
-            softly.assertThat(second.name()).isEqualTo("비밥");
-            softly.assertThat(second.date()).isEqualTo(laterDate);
-            softly.assertThat(second.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
-            softly.assertThat(second.time()).isEqualTo(new ReservationTimeResult(tenTimeId, LocalTime.of(10, 0)));
         });
     }
 

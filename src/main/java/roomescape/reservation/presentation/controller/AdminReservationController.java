@@ -1,30 +1,33 @@
 package roomescape.reservation.presentation.controller;
 
-import java.util.List;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationPageResult;
 import roomescape.reservation.application.service.ReservationQueryService;
-import roomescape.reservation.presentation.dto.ReservationApplicationResponse;
+import roomescape.reservation.presentation.dto.ReservationApplicationPageResponse;
 
 @RequiredArgsConstructor
 @RequestMapping("/admin/reservations")
+@Validated
 @RestController
 public class AdminReservationController {
 
     private final ReservationQueryService reservationQueryService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationApplicationResponse>> findAll() {
-        List<ReservationApplicationResult> results = reservationQueryService.findAll();
+    public ResponseEntity<ReservationApplicationPageResponse> findAllByPage(
+            @RequestParam(defaultValue = "0")
+            @PositiveOrZero(message = "페이지 값은 0 이상이어야 합니다.")
+            int page
+    ) {
+        ReservationApplicationPageResult result = reservationQueryService.findAllByPage(page);
 
-        List<ReservationApplicationResponse> responses = results.stream()
-                .map(ReservationApplicationResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(ReservationApplicationPageResponse.from(result));
     }
 }
