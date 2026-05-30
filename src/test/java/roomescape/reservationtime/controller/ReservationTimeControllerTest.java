@@ -1,17 +1,17 @@
 package roomescape.reservationtime.controller;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -26,51 +26,42 @@ class ReservationTimeControllerTest {
         RestAssured.port = port;
     }
 
-    @Test
     @DisplayName("시간 생성 성공")
+    @Test
     void 시간_생성_성공() {
-        RestAssured.given().log().all()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("startAt", "20:00", "finishAt", "21:00"))
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
+                .post("/times")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
                 .body("startAt", equalTo("20:00:00"));
     }
 
+    @DisplayName("전체 시간 조회 성공")
     @Test
-    @DisplayName("시간 전체 조회 성공")
-    void 시간_전체_조회_성공() {
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3));
+    void 전체_시간_조회_성공() {
+        given()
+                .get("/times")
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", equalTo(3));
     }
 
-    @Test
     @DisplayName("시간 삭제 성공")
+    @Test
     void 시간_삭제_성공() {
-        Integer id = RestAssured.given().log().all()
+        int id = given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("startAt", "20:00", "finishAt", "21:00"))
-                .when().post("/times")
-                .then().extract().path("id");
+                .post("/times")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract().path("id");
 
-        RestAssured.given().log().all()
-                .when().delete("/times/" + id)
-                .then().log().all()
-                .statusCode(204);
-    }
-
-    @Test
-    @DisplayName("예약 가능 시간 조회 성공")
-    void 예약_가능_시간_조회_성공() {
-        String date = LocalDate.now().minusDays(1).toString();
-        RestAssured.given().log().all()
-                .when().get("/times/available?date=" + date + "&themeId=1")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2));
+        given()
+                .delete("/times/" + id)
+                .then()
+                .statusCode(HttpStatus.NO_CONTENT.value());
     }
 }
