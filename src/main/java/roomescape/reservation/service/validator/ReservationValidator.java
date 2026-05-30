@@ -36,7 +36,12 @@ public class ReservationValidator {
         validateNotDuplicated(changed);
     }
 
-    public void validateDelete(Reservation deleted, String guestName) {
+    public void validateCancel(Reservation canceled) {
+        validateAlreadyCanceled(canceled);
+        validateAlreadyStarted(canceled);
+    }
+
+    public void validateCancelMine(Reservation deleted, String guestName) {
         validateIsMyReservation(guestName, deleted);
         validateAlreadyStarted(deleted);
     }
@@ -64,15 +69,21 @@ public class ReservationValidator {
         }
     }
 
+    private static void validateAlreadyCanceled(Reservation canceled) {
+        if(canceled.isCanceled()) {
+            throw new DomainException(CANNOT_CHANGE_ALREADY_CANCELED);
+        }
+    }
+
     private void validateAlreadyStarted(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
-            throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
+            throw new DomainException(CANNOT_CHANGE_ALREADY_STARTED_RESERVATION);
         }
     }
 
     private void validateIsMyReservation(String guestName, Reservation reservation) {
         if (!reservation.isSameGuest(guestName)) {
-            throw new DomainException(CANNOT_EDIT_OTHER_GUEST_RESERVATION);
+            throw new DomainException(CANNOT_CHANGE_OTHER_GUEST_RESERVATION);
         }
     }
 }

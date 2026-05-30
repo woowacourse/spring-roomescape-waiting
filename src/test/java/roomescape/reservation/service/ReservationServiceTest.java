@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
-import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
@@ -149,6 +147,38 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("이미 시작된 예약은 관리자도 취소할 수 없다.")
+    public void cancel_fail_alreadyStarted() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 8, 11));
+
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, CONFIRMED);
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.cancel(reservation.getId()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(CANNOT_CHANGE_ALREADY_STARTED_RESERVATION.message());
+    }
+
+    @Test
+    @DisplayName("이미 취소된 예약은 다시 취소할 수 없다.")
+    public void cancel_fail_alreadyCanceled() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, CANCELED);
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.cancel(reservation.getId()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(CANNOT_CHANGE_ALREADY_CANCELED.message());
+    }
+
+    @Test
     @DisplayName("본인의 예약을 취소하면 해당 예약의 상태가 취소됨으로 변경된다.")
     public void cancelMine_success1() {
         // given
@@ -212,7 +242,7 @@ class ReservationServiceTest {
         // when, then
         assertThatThrownBy(() -> reservationService.cancelMine(reservation.getId(), reservation.getGuestName()))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(CANNOT_EDIT_ALREADY_STARTED_RESERVATION.message());
+                .hasMessage(CANNOT_CHANGE_ALREADY_STARTED_RESERVATION.message());
     }
 
     @Test
@@ -228,7 +258,7 @@ class ReservationServiceTest {
         // when, then
         assertThatThrownBy(() -> reservationService.cancelMine(reservation.getId(), "포비"))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
+                .hasMessage(CANNOT_CHANGE_OTHER_GUEST_RESERVATION.message());
     }
 
     @Test
@@ -330,7 +360,7 @@ class ReservationServiceTest {
         // when then
         assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName()))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(CANNOT_EDIT_ALREADY_STARTED_RESERVATION.message());
+                .hasMessage(CANNOT_CHANGE_ALREADY_STARTED_RESERVATION.message());
     }
 
     @Test
@@ -440,7 +470,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.editDateTime(
                 reservation.getId(), LocalDate.of(2023, 8, 11), time.getId(), "other_guest"))
                 .isInstanceOf(DomainException.class)
-                .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
+                .hasMessage(CANNOT_CHANGE_OTHER_GUEST_RESERVATION.message());
     }
 
 

@@ -12,6 +12,8 @@ import java.util.Objects;
 import static roomescape.common.domain.DomainPreconditions.require;
 import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
 import static roomescape.common.domain.DomainPreconditions.requireNonNull;
+import static roomescape.reservation.domain.Status.*;
+import static roomescape.reservation.domain.Status.CANCELED;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 import static roomescape.theme.exception.ThemeErrorCode.*;
@@ -118,7 +120,11 @@ public class Reservation {
     }
 
     public boolean isConfirmed() {
-        return Status.CONFIRMED.equals(status);
+        return CONFIRMED.equals(status);
+    }
+
+    public boolean isCanceled() {
+        return CANCELED.equals(status);
     }
 
     public boolean isSameDateTime(LocalDate date, Long timeId) {

@@ -100,6 +100,7 @@ public class ReservationService {
     @Transactional
     public void cancel(Long id) {
         Reservation reservation = getReservation(id);
+        reservationValidator.validateCancel(reservation);
         cancelReservation(id);
         updateTopWaitingConfirmed(reservation);
     }
@@ -107,7 +108,7 @@ public class ReservationService {
     @Transactional
     public void cancelMine(Long id, String guestName) {
         Reservation reservation = getReservation(id);
-        reservationValidator.validateDelete(reservation, guestName);
+        reservationValidator.validateCancelMine(reservation, guestName);
         cancelReservation(id);
         updateTopWaitingConfirmed(reservation);
     }
