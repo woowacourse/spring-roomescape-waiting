@@ -10,10 +10,10 @@ public class Waitings {
         this.waitings = List.copyOf(waitings);
     }
 
-    public List<WaitingWithRank> rankedByName(String name) {
+    public List<WaitingWithRank> rankedBy(Member member) {
         return waitings.stream()
-                .filter(waiting -> waiting.isOwnedBy(name))
-                .map(waiting -> new WaitingWithRank(waiting.id(), waiting.name(), waiting.slot(), rankOf(waiting)))
+                .filter(waiting -> waiting.isOwnedBy(member))
+                .map(waiting -> new WaitingWithRank(waiting.id(), waiting.owner().name(), waiting.slot(), rankOf(waiting)))
                 .toList();
     }
 

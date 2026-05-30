@@ -7,9 +7,11 @@ import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
@@ -19,6 +21,7 @@ import roomescape.exception.ResourceNotFoundException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -41,12 +44,12 @@ public class WaitingDao {
             INNER JOIN theme as theme ON waiting.theme_id = theme.id
             """;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
 
     private final RowMapper<Waiting> rowMapper = (rs, rowNum) -> Waiting.create(
             rs.getLong("waiting_id"),
-            rs.getString("name"),
+            new Member(rs.getString("name")),
             mapSlot(rs),
             rs.getObject("created_at", LocalDateTime.class)
     );
@@ -68,7 +71,7 @@ public class WaitingDao {
     }
 
     public WaitingDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.insertExecutor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
@@ -77,7 +80,7 @@ public class WaitingDao {
     public Waiting save(Waiting waiting) {
         Slot slot = waiting.slot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", waiting.name())
+                .addValue("name", waiting.owner().name())
                 .addValue("date", slot.date())
                 .addValue("time_id", slot.time().id())
                 .addValue("theme_id", slot.theme().id())
@@ -85,12 +88,12 @@ public class WaitingDao {
 
         long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return Waiting.create(id, waiting.name(), slot, waiting.createAt());
+        return Waiting.create(id, waiting.owner(), slot, waiting.createAt());
     }
 
     public void deleteById(long id) {
-        String sql = "DELETE FROM waiting WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, id);
+        String sql = "DELETE FROM waiting WHERE id = :id";
+        int affected = jdbcTemplate.update(sql, Map.of("id", id));
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다.");
@@ -98,25 +101,43 @@ public class WaitingDao {
     }
 
     public Optional<Waiting> findById(long id) {
-        String sql = SELECT_BASE + " WHERE waiting.id = ?";
-        return jdbcTemplate.query(sql, rowMapper, id)
+        String sql = SELECT_BASE + " WHERE waiting.id = :id";
+        return jdbcTemplate.query(sql, Map.of("id", id), rowMapper)
                 .stream()
                 .findFirst();
     }
 
     public List<Waiting> findAll() {
-        return jdbcTemplate.query(SELECT_BASE, rowMapper);
+        return jdbcTemplate.query(SELECT_BASE, Map.of(), rowMapper);
     }
 
-    public boolean existsBySlotAndName(Slot slot, String name) {
+    public List<Waiting> findAllSharingSlotWith(Member member) {
+        String sql = SELECT_BASE + """
+                 WHERE EXISTS (
+                     SELECT 1 FROM waiting as mine
+                     WHERE mine.name = :name
+                         AND mine.date = waiting.date
+                         AND mine.time_id = waiting.time_id
+                         AND mine.theme_id = waiting.theme_id
+                 )
+                """;
+        return jdbcTemplate.query(sql, Map.of("name", member.name()), rowMapper);
+    }
+
+    public boolean existsBySlotAndName(Slot slot, Member member) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1 FROM waiting
-                    WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
+                    WHERE date = :date AND time_id = :timeId AND theme_id = :themeId AND name = :name
                 )
                 """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", slot.date())
+                .addValue("timeId", slot.time().id())
+                .addValue("themeId", slot.theme().id())
+                .addValue("name", member.name());
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, slot.date(), slot.time().id(), slot.theme().id(), name)
+                jdbcTemplate.queryForObject(sql, params, Boolean.class)
         );
     }
 

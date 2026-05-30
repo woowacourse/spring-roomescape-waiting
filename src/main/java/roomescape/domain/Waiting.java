@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class Waiting {
     private final Long id;
-    private final String name;
+    private final Member owner;
     private final Slot slot;
     private final LocalDateTime createdAt;
 
-    public static Waiting create(long id, String name, Slot slot, LocalDateTime createdAt) {
-        return new Waiting(id, name, slot, createdAt);
+    public static Waiting create(long id, Member owner, Slot slot, LocalDateTime createdAt) {
+        return new Waiting(id, owner, slot, createdAt);
     }
 
     public void validateNotStarted(LocalDateTime now) {
@@ -23,8 +23,8 @@ public class Waiting {
         }
     }
 
-    public void validateOwnedBy(String name) {
-        if (!isOwnedBy(name)) {
+    public void validateOwnedBy(Member member) {
+        if (!isOwnedBy(member)) {
             throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
         }
     }
@@ -33,8 +33,8 @@ public class Waiting {
         return id;
     }
 
-    public String name() {
-        return name;
+    public Member owner() {
+        return owner;
     }
 
     public Slot slot() {
@@ -57,8 +57,8 @@ public class Waiting {
         return id < other.id;
     }
 
-    public boolean isOwnedBy(String name) {
-        return this.name.equals(name);
+    public boolean isOwnedBy(Member member) {
+        return this.owner.equals(member);
     }
 
     private boolean isPast(LocalDateTime now) {

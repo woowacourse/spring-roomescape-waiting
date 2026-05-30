@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -32,7 +33,7 @@ public class ReservationCommandService {
     public Reservation create(String name, LocalDate date, long timeId, long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
-        Reservation reservation = new Reservation(null, name, slot);
+        Reservation reservation = new Reservation(null, new Member(name), slot);
 
         slot.validateNotPast(now);
         validateNoDuplicate(slot);
@@ -51,7 +52,7 @@ public class ReservationCommandService {
     public void cancel(long reservationId, String name) {
         Reservation reservation = findReservation(reservationId);
 
-        reservation.validateOwnedBy(name);
+        reservation.validateOwnedBy(new Member(name));
         reservation.validateNotStarted(LocalDateTime.now(clock));
 
         reservationDao.deleteById(reservationId);
@@ -62,7 +63,7 @@ public class ReservationCommandService {
         Reservation oldReservation = findReservation(reservationId);
         Slot newSlot = new Slot(newDate, findTimeReference(newTimeId), oldReservation.slot().theme());
 
-        oldReservation.validateOwnedBy(name);
+        oldReservation.validateOwnedBy(new Member(name));
         oldReservation.validateNotStarted(now);
         newSlot.validateNotPast(now);
         validateNoDuplicateExcluding(newSlot, reservationId);

@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 public class Reservation {
 
     private final Long id;
-    private final String name;
+    private final Member owner;
     private final Slot slot;
 
-    public static Reservation create(long id, String username, Slot slot) {
-        return new Reservation(id, username, slot);
+    public static Reservation create(long id, Member owner, Slot slot) {
+        return new Reservation(id, owner, slot);
     }
 
     public void validateNotStarted(LocalDateTime now) {
@@ -23,18 +23,18 @@ public class Reservation {
         }
     }
 
-    public void validateOwnedBy(String name) {
-        if (!isOwnedBy(name)) {
+    public void validateOwnedBy(Member member) {
+        if (!isOwnedBy(member)) {
             throw new ForbiddenException("본인의 예약만 변경할 수 있습니다.");
         }
     }
 
     public Reservation withSlot(Slot newSlot) {
-        return new Reservation(id, name, newSlot);
+        return new Reservation(id, owner, newSlot);
     }
 
-    public String name() {
-        return name;
+    public Member owner() {
+        return owner;
     }
 
     public Slot slot() {
@@ -49,7 +49,7 @@ public class Reservation {
         return slot.isPast(now);
     }
 
-    public boolean isOwnedBy(String name) {
-        return this.name.equals(name);
+    public boolean isOwnedBy(Member member) {
+        return this.owner.equals(member);
     }
 }

@@ -22,7 +22,7 @@ class WaitingTest {
     }
 
     private Waiting waiting(String name, Slot slot) {
-        return Waiting.create(1, name, slot, CREATED_AT);
+        return Waiting.create(1, new Member(name), slot, CREATED_AT);
     }
 
     @Test
@@ -30,7 +30,7 @@ class WaitingTest {
     void validateOwnedByThrows() {
         Waiting waiting = waiting("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
-        assertThatThrownBy(() -> waiting.validateOwnedBy("other"))
+        assertThatThrownBy(() -> waiting.validateOwnedBy(new Member("other")))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -39,7 +39,7 @@ class WaitingTest {
     void validateOwnedByOk() {
         Waiting waiting = waiting("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
-        assertThatCode(() -> waiting.validateOwnedBy("me"))
+        assertThatCode(() -> waiting.validateOwnedBy(new Member("me")))
                 .doesNotThrowAnyException();
     }
 
@@ -56,8 +56,8 @@ class WaitingTest {
     @DisplayName("같은 슬롯이고 생성 시각이 같으면 id가 작은 쪽이 앞선다.")
     void isAheadOfByIdTieBreak() {
         Slot slot = slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0));
-        Waiting smaller = Waiting.create(1, "a", slot, CREATED_AT);
-        Waiting bigger = Waiting.create(2, "b", slot, CREATED_AT);
+        Waiting smaller = Waiting.create(1, new Member("a"), slot, CREATED_AT);
+        Waiting bigger = Waiting.create(2, new Member("b"), slot, CREATED_AT);
 
         assertThat(smaller.isAheadOf(bigger)).isTrue();
         assertThat(bigger.isAheadOf(smaller)).isFalse();

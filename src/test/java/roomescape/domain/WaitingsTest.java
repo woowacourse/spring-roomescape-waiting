@@ -21,7 +21,7 @@ class WaitingsTest {
     }
 
     private Waiting waiting(long id, String name, Slot slot, LocalDateTime createdAt) {
-        return Waiting.create(id, name, slot, createdAt);
+        return Waiting.create(id, new Member(name), slot, createdAt);
     }
 
     @Test
@@ -76,7 +76,7 @@ class WaitingsTest {
 
         Waitings waitings = new Waitings(List.of(other, mineInA, mineInB));
 
-        List<WaitingWithRank> result = waitings.rankedByName("me");
+        List<WaitingWithRank> result = waitings.rankedBy(new Member("me"));
 
         assertThat(result)
                 .extracting(WaitingWithRank::id, WaitingWithRank::rank)

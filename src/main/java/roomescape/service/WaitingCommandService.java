@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
@@ -33,15 +34,16 @@ public class WaitingCommandService {
 
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
+        Member member = new Member(name);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
         Reservation reservation = findReservationBySlot(slot);
 
         slot.validateNotPast(now);
-        validateNotOwnReservation(reservation, name);
-        validateNoDuplicateWaiting(slot, name);
+        validateNotOwnReservation(reservation, member);
+        validateNoDuplicateWaiting(slot, member);
 
         try {
-            return waitingDao.save(new Waiting(null, name, slot, now));
+            return waitingDao.save(new Waiting(null, member, slot, now));
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
@@ -50,7 +52,7 @@ public class WaitingCommandService {
     public void cancel(long waitingId, String name) {
         Waiting waiting = findWaitingReference(waitingId);
 
-        waiting.validateOwnedBy(name);
+        waiting.validateOwnedBy(new Member(name));
         waiting.validateNotStarted(LocalDateTime.now(clock));
 
         waitingDao.deleteById(waitingId);
@@ -61,14 +63,14 @@ public class WaitingCommandService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
     }
 
-    private void validateNotOwnReservation(Reservation reservation, String name) {
-        if (reservation.isOwnedBy(name)) {
+    private void validateNotOwnReservation(Reservation reservation, Member member) {
+        if (reservation.isOwnedBy(member)) {
             throw new DuplicateException("내가 예약한 시간에 예약대기를 생성할 수 없습니다.");
         }
     }
 
-    private void validateNoDuplicateWaiting(Slot slot, String name) {
-        if (waitingDao.existsBySlotAndName(slot, name)) {
+    private void validateNoDuplicateWaiting(Slot slot, Member member) {
+        if (waitingDao.existsBySlotAndName(slot, member)) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
     }

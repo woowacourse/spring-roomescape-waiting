@@ -21,7 +21,7 @@ class ReservationTest {
     }
 
     private Reservation reservation(String name, Slot slot) {
-        return Reservation.create(1, name, slot);
+        return Reservation.create(1, new Member(name), slot);
     }
 
     @Test
@@ -29,7 +29,7 @@ class ReservationTest {
     void validateOwnedByOk() {
         Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
-        assertThatCode(() -> reservation.validateOwnedBy("me"))
+        assertThatCode(() -> reservation.validateOwnedBy(new Member("me")))
                 .doesNotThrowAnyException();
     }
 
@@ -38,7 +38,7 @@ class ReservationTest {
     void validateOwnedByThrows() {
         Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
-        assertThatThrownBy(() -> reservation.validateOwnedBy("other"))
+        assertThatThrownBy(() -> reservation.validateOwnedBy(new Member("other")))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -65,8 +65,8 @@ class ReservationTest {
     void isOwnedBy() {
         Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
-        assertThat(reservation.isOwnedBy("me")).isTrue();
-        assertThat(reservation.isOwnedBy("other")).isFalse();
+        assertThat(reservation.isOwnedBy(new Member("me"))).isTrue();
+        assertThat(reservation.isOwnedBy(new Member("other"))).isFalse();
     }
 
     @Test
@@ -79,7 +79,7 @@ class ReservationTest {
         Reservation changed = reservation.withSlot(newSlot);
 
         assertThat(changed.id()).isEqualTo(reservation.id());
-        assertThat(changed.name()).isEqualTo("me");
+        assertThat(changed.owner()).isEqualTo(new Member("me"));
         assertThat(changed.slot()).isEqualTo(newSlot);
     }
 }

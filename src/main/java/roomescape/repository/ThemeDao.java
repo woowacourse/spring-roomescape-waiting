@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -12,12 +13,13 @@ import roomescape.domain.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 public class ThemeDao {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
     private final RowMapper<Theme> rowMapper = (rs, rowNum) -> Theme.create(
             rs.getLong("id"),
@@ -27,7 +29,7 @@ public class ThemeDao {
     );
 
     public ThemeDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.insertExecutor = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
@@ -46,9 +48,9 @@ public class ThemeDao {
 
     public Optional<Theme> findById(long themeId) {
         String sql = """
-                SELECT * FROM theme WHERE id = ?
+                SELECT * FROM theme WHERE id = :id
                 """;
-        return jdbcTemplate.query(sql, rowMapper, themeId)
+        return jdbcTemplate.query(sql, Map.of("id", themeId), rowMapper)
                 .stream()
                 .findFirst();
     }
@@ -57,14 +59,14 @@ public class ThemeDao {
         String sql = """
                 SELECT * FROM theme
                 """;
-        return jdbcTemplate.query(sql, rowMapper);
+        return jdbcTemplate.query(sql, Map.of(), rowMapper);
     }
 
     public void deleteById(long themeId) {
         String sql = """
-                DELETE FROM theme WHERE id = ?
+                DELETE FROM theme WHERE id = :id
                 """;
-        int affected = jdbcTemplate.update(sql, themeId);
+        int affected = jdbcTemplate.update(sql, Map.of("id", themeId));
 
         if(affected == 0) {
             throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");
@@ -81,11 +83,15 @@ public class ThemeDao {
                     COUNT(reservation.id) as count
                 FROM reservation
                 INNER JOIN theme ON reservation.theme_id = theme.id
-                WHERE reservation.date BETWEEN ? AND ?
+                WHERE reservation.date BETWEEN :startAt AND :endAt
                 GROUP BY theme.id
                 ORDER BY COUNT(reservation.id) DESC
-                LIMIT ?
+                LIMIT :limit
                 """;
-        return jdbcTemplate.query(sql, rowMapper, startAt, endAt, limit);
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("startAt", startAt)
+                .addValue("endAt", endAt)
+                .addValue("limit", limit);
+        return jdbcTemplate.query(sql, params, rowMapper);
     }
 }

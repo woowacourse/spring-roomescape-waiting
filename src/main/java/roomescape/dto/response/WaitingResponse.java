@@ -20,7 +20,7 @@ public record WaitingResponse(
         Slot slot = waiting.slot();
         return new WaitingResponse(
                 waiting.id(),
-                waiting.name(),
+                waiting.owner().name(),
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme())
