@@ -1,6 +1,6 @@
 package roomescape.theme.controller.dto;
 
-import roomescape.global.exception.InvalidRequestFormatException;
+import roomescape.global.exception.BadRequestException;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.dto.ThemeCommand;
 
@@ -18,7 +18,7 @@ public record ThemeRequest(
 
     private void validateString(String value) {
         if (value == null || value.isBlank()) {
-            throw new InvalidRequestFormatException(ThemeErrorCode.INVALID_FORMAT.getMessage());
+            throw new BadRequestException(ThemeErrorCode.INVALID_FORMAT.getMessage());
         }
     }
 

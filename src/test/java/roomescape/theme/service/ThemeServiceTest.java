@@ -1,24 +1,18 @@
 package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import roomescape.global.exception.DuplicateException;
-import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.global.exception.NotFoundException;
-import roomescape.global.exception.BadRequestException;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.theme.domain.Theme;
-
-
-
+import roomescape.global.exception.BadRequestException;
+import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.NotFoundException;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 
@@ -39,8 +33,8 @@ class ThemeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> themeService.save(
-            new ThemeCommand("브라운", "설명", "url")
-        )).isInstanceOf(DuplicateException.class)
+                new ThemeCommand("브라운", "설명", "url")
+        )).isInstanceOf(ConflictException.class)
                 .hasMessage(ThemeErrorCode.DUPLICATE_THEME.getMessage());
     }
 

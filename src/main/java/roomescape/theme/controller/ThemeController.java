@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.global.exception.InvalidRequestValueException;
+import roomescape.global.exception.BadRequestException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.controller.dto.ThemeResponse;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -48,7 +49,7 @@ public class ThemeController {
 
     private static void validatePeriodAndLimit(int period, int limit) {
         if (period < 1 || limit < 1) {
-            throw new InvalidRequestValueException();
+            throw new BadRequestException(ThemeErrorCode.INVALID_PERIOD_OR_LIMIT.getMessage());
         }
     }
 }

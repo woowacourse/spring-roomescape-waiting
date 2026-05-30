@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.BadRequestException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeErrorCode;
@@ -32,13 +32,13 @@ public class ThemeService {
             Theme saved = themeRepository.save(newTheme);
             return ThemeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
+            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
     }
 
     private void validateThemeNameUniqueness(String name) {
         if (themeRepository.existsByName(name)) {
-            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
+            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
     }
 

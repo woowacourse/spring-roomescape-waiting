@@ -82,7 +82,7 @@ class ThemeControllerTest {
                         .param("popular", "true")
                         .param("period", "0")
                         .param("limit", "10"))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("값이 유효하지 않습니다."));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("요청 기간 및 개수는 1 이상이어야 합니다."));
     }
 }
