@@ -97,9 +97,9 @@ public class Reservation {
         }
     }
 
-    public ReservationEntry findReservedEntry(long entryId) {
+    public ReservationEntry findActiveEntry(long entryId) {
         return entries.findById(entryId)
-                .filter(ReservationEntry::isReserved)
+                .filter(ReservationEntry::isActive)
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
     }
 

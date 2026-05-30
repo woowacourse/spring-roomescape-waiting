@@ -49,7 +49,7 @@ public class ReservationService {
     public ReservationResult change(long entryId, ReservationChangeCommand command) {
         Reservation current = reservationRepository.findByEntryIdForUpdate(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
-        ReservationEntry entry = current.findReservedEntry(entryId);
+        ReservationEntry entry = current.findActiveEntry(entryId);
 
         ReservationTime newTime = findTimeWithThrow(command.timeId());
         if (current.isSameSlot(command.date(), newTime)) {
@@ -113,7 +113,7 @@ public class ReservationService {
 
     public ReservationResult getReservationEntry(long entryId) {
         Reservation reservation = findReservationByEntryIdWithThrow(entryId);
-        ReservationEntry reservationEntry = reservation.findReservedEntry(entryId);
+        ReservationEntry reservationEntry = reservation.findActiveEntry(entryId);
         return ReservationResult.from(reservation, reservationEntry);
     }
 

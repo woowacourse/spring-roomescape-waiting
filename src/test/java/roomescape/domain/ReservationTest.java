@@ -156,21 +156,21 @@ class ReservationTest {
         ));
 
         // when
-        ReservationEntry result = reservation.findReservedEntry(1L);
+        ReservationEntry result = reservation.findActiveEntry(1L);
 
         // then
         assertThat(result.getName()).isEqualTo("이프");
     }
 
     @Test
-    void 예약_상태가_아닌_엔트리를_예약된_엔트리로_조회하면_예외가_발생한다() {
+    void 활성화_상태가_아닌_엔트리를_조회하면_예외가_발생한다() {
         // given
         Reservation reservation = createReservationWithEntries(List.of(
-                entry(1L, "이프", ReservationStatus.WAITING)
+                entry(1L, "이프", ReservationStatus.DELETED)
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservation.findReservedEntry(1L))
+        assertThatThrownBy(() -> reservation.findActiveEntry(1L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("예약 정보를 찾을 수 없습니다.");
     }

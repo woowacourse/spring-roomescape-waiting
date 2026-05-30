@@ -29,7 +29,7 @@ public class ReservationEntries {
 
     public boolean hasActiveEntryByName(String name) {
         return entries.stream()
-                .filter(entry -> !entry.isDeleted())
+                .filter(ReservationEntry::isActive)
                 .anyMatch(entry -> entry.hasSameName(name));
     }
 
