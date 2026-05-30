@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.dto.*;
+import roomescape.controller.dto.BookingResponse;
+import roomescape.controller.dto.ReservationPatchRequest;
+import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.ReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
@@ -27,8 +30,8 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> reservations() {
         return ResponseEntity.ok(
                 reservationService.allReservations().stream()
-                .map(ReservationResponse::from)
-                .toList()
+                        .map(ReservationResponse::from)
+                        .toList()
         );
     }
 
@@ -48,9 +51,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request) {
-        Reservation reservation = reservationService.saveReservation(
-                request.name(), request.date(), request.timeId(), request.themeId()
-        );
+        Reservation reservation = reservationService.saveReservation(request);
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
                 .body(ReservationResponse.from(reservation));
     }
@@ -70,13 +71,12 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable
             long id,
-            @RequestBody @Valid
-            ReservationRequest request,
             @RequestParam @NotBlank
-            String userName
+            String userName,
+            @RequestBody @Valid
+            ReservationRequest request
     ) {
-        reservationService.putReservation(id, userName, request.name(), request.date(), request.timeId(),
-                request.themeId());
+        reservationService.putReservation(id, userName, request);
         return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
     }
 
@@ -89,14 +89,7 @@ public class ReservationController {
             @RequestParam @NotBlank
             String userName
     ) {
-        reservationService.patchReservation(
-                id,
-                userName,
-                request.name(),
-                request.date(),
-                request.timeId(),
-                request.themeId()
-        );
+        reservationService.patchReservation(id, userName, request);
         return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
     }
 }

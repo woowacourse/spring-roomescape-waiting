@@ -1,24 +1,16 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.ThemePatchRequest;
 import roomescape.controller.dto.ThemeRequest;
 import roomescape.controller.dto.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.service.ThemeService;
+
+import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/themes")
@@ -51,7 +43,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid ThemeRequest request) {
-        Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnailUrl());
+        Theme theme = themeService.saveTheme(request);
         return ResponseEntity.created(URI.create("/themes/" + theme.getId()))
                 .body(ThemeResponse.from(theme));
     }
@@ -64,10 +56,12 @@ public class ThemeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ThemeResponse> updateTheme(
-            @PathVariable long id,
-            @RequestBody @Valid ThemeRequest request
+            @PathVariable
+            long id,
+            @RequestBody @Valid
+            ThemeRequest request
     ) {
-        themeService.putTheme(id, request.name(), request.description(), request.thumbnailUrl());
+        themeService.putTheme(id, request);
         return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
     }
 
@@ -76,7 +70,7 @@ public class ThemeController {
             @PathVariable long id,
             @RequestBody ThemePatchRequest request
     ) {
-        themeService.patchTheme(id, request.name(), request.description(), request.thumbnailUrl());
+        themeService.patchTheme(id, request);
         return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
     }
 

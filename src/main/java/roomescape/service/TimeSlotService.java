@@ -1,11 +1,10 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.TimePatchRequest;
+import roomescape.controller.dto.TimeRequest;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.DuplicateTimeException;
 import roomescape.exception.ResourceInUseException;
@@ -14,6 +13,10 @@ import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.service.dto.AvailableTimeSlot;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -37,9 +40,9 @@ public class TimeSlotService {
     }
 
     @Transactional
-    public TimeSlot saveTime(LocalTime startAt) {
-        checkDuplicatedStartAt(startAt);
-        TimeSlot timeSlot = TimeSlot.transientOf(startAt);
+    public TimeSlot saveTime(TimeRequest request) {
+        checkDuplicatedStartAt(request.startAt());
+        TimeSlot timeSlot = TimeSlot.transientOf(request.startAt());
         return timeSlotRepository.save(timeSlot);
     }
 
@@ -54,20 +57,20 @@ public class TimeSlotService {
     }
 
     @Transactional
-    public void putTime(long id, LocalTime startAt) {
+    public void putTime(long id, TimeRequest request) {
         TimeSlot exists = findTimeSlotById(id);
-        TimeSlot timeSlot = new TimeSlot(id, startAt);
+        TimeSlot timeSlot = new TimeSlot(id, request.startAt());
         if (!exists.equals(timeSlot)) {
-            checkDuplicatedStartAt(startAt);
+            checkDuplicatedStartAt(request.startAt());
             timeSlotRepository.update(timeSlot);
         }
     }
 
     @Transactional
-    public void patchTime(long id, LocalTime startAt) {
+    public void patchTime(long id, TimePatchRequest request) {
         TimeSlot timeSlot = findTimeSlotById(id);
-        checkDuplicatedStartAt(startAt);
-        timeSlot.changeTime(startAt);
+        checkDuplicatedStartAt(request.startAt());
+        timeSlot.changeTime(request.startAt());
         timeSlotRepository.update(timeSlot);
     }
 

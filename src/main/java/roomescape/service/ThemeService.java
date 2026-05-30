@@ -3,6 +3,8 @@ package roomescape.service;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.ThemePatchRequest;
+import roomescape.controller.dto.ThemeRequest;
 import roomescape.domain.Theme;
 import roomescape.exception.ResourceInUseException;
 import roomescape.exception.ThemeNotFoundException;
@@ -32,8 +34,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme saveTheme(String name, String description, String thumbnailUrl) {
-        Theme theme = Theme.transientOf(name, description, thumbnailUrl);
+    public Theme saveTheme(ThemeRequest request) {
+        Theme theme = Theme.transientOf(request.name(), request.description(), request.thumbnailUrl());
         return themeRepository.save(theme);
     }
 
@@ -48,15 +50,15 @@ public class ThemeService {
     }
 
     @Transactional
-    public void putTheme(long id, String name, String description, String thumbnailUrl) {
+    public void putTheme(long id, ThemeRequest request) {
         findThemeById(id);
-        themeRepository.update(new Theme(id, name, description, thumbnailUrl));
+        themeRepository.update(new Theme(id, request.name(), request.description(), request.thumbnailUrl()));
     }
 
     @Transactional
-    public void patchTheme(long id, String name, String description, String thumbnailUrl) {
+    public void patchTheme(long id, ThemePatchRequest request) {
         Theme theme = findThemeById(id);
-        theme.renewal(name, description, thumbnailUrl);
+        theme.renewal(request.name(), request.description(), request.thumbnailUrl());
         themeRepository.update(theme);
     }
 

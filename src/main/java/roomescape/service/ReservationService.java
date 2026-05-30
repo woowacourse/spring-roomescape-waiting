@@ -1,8 +1,9 @@
 package roomescape.service;
 
-import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.ReservationPatchRequest;
+import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -11,13 +12,14 @@ import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.Booking;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.Booking;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,6 +42,13 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
+    public Reservation saveReservation(ReservationRequest request) {
+        Reservation transientReservation = createTransientWithValidField(request);
+        validDuplicatedReservation(transientReservation);
+        return reservationRepository.save(transientReservation);
+    }
+
     public List<Reservation> allReservations() {
         return reservationRepository.findAll();
     }
@@ -51,7 +60,7 @@ public class ReservationService {
 
     public List<Booking> findReservationByName(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
-        List<Waiting> waitings = waitingRepository.findByName(name);
+        List<Waiting> waitingList = waitingRepository.findByName(name);
 
         List<Booking> bookings = new ArrayList<>();
 
@@ -59,7 +68,7 @@ public class ReservationService {
             bookings.add(Booking.fromReservation(reservation));
         }
 
-        for (Waiting waiting : waitings) {
+        for (Waiting waiting : waitingList) {
             TimeSlot timeSlot = timeSlotRepository.findById(waiting.getTimeSlotId())
                     .orElseThrow(() -> new TimeSlotNotFoundException(waiting.getTimeSlotId()));
 
@@ -73,22 +82,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation saveReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        Reservation transientReservation = createTransientWithValidField(name, date, timeId, themeId);
-        validDuplicatedReservation(transientReservation);
-        return reservationRepository.save(transientReservation);
-    }
-
-    @Transactional
     public void removeReservation(long reservationId, String userName) {
         existsAndModifiableReservation(reservationId, userName);
         reservationRepository.deleteById(reservationId);
     }
 
     @Transactional
-    public void putReservation(long id, String userName, String name, LocalDate date, Long timeId, Long themeId) {
+    public void putReservation(long id, String userName, ReservationRequest request) {
         existsAndModifiableReservation(id, userName);
-        Reservation transientReservation = createTransientWithValidField(name, date, timeId, themeId);
+        Reservation transientReservation = createTransientWithValidField(request);
         Reservation reservation = new Reservation(
                 id,
                 transientReservation.getName(),
@@ -101,15 +103,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public void patchReservation(long id, String userName, String name, LocalDate date, Long timeId, Long themeId) {
+    public void patchReservation(long id, String userName, ReservationPatchRequest request) {
         Reservation reservation = findReservationById(id);
         reservation.validateModifiable(userName);
         validNotPast(reservation.getDate(), reservation.getTimeSlot().getStartAt());
         reservation.reschedule(
-                name,
-                date,
-                findOptionalTime(timeId),
-                findOptionalTheme(themeId)
+                request.name(),
+                request.date(),
+                findOptionalTime(request.timeId()),
+                findOptionalTheme(request.themeId())
         );
         validDuplicatedReservation(reservation);
         reservationRepository.update(reservation);
@@ -127,11 +129,11 @@ public class ReservationService {
         }
     }
 
-    private Reservation createTransientWithValidField(String name, LocalDate date, Long timeId, Long themeId) {
-        TimeSlot timeSlot = findTimeSlot(timeId);
-        Theme theme = findTheme(themeId);
-        validDateTime(date, timeSlot.getStartAt());
-        return Reservation.transientOf(name, date, timeSlot, theme);
+    private Reservation createTransientWithValidField(ReservationRequest request) {
+        TimeSlot timeSlot = findTimeSlot(request.timeId());
+        Theme theme = findTheme(request.themeId());
+        validDateTime(request.date(), timeSlot.getStartAt());
+        return Reservation.transientOf(request.name(), request.date(), timeSlot, theme);
     }
 
     private void validDateTime(LocalDate date, LocalTime time) {

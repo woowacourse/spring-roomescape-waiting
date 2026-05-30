@@ -1,22 +1,6 @@
 package roomescape.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +21,17 @@ import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.ProblemDetailsAdvice;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.service.ReservationService;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReservationController.class)
 @Import(ProblemDetailsAdvice.class)
@@ -85,7 +80,7 @@ class ReservationControllerTest {
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
     void createReservation() throws Exception {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now(), 1L, 1L);
-        given(reservationService.saveReservation(any(), any(), any(), any())).willReturn(createMockReservation());
+        given(reservationService.saveReservation(any())).willReturn(createMockReservation());
         performPost("/reservations", request).andExpect(status().isCreated()).andExpect(header().exists("Location"));
     }
 
@@ -144,7 +139,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("도메인 검증 실패(IllegalArgument) 시 400 상태 코드를 반환한다.")
     void createReservationIllegalArgument() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
+        given(reservationService.saveReservation(any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isBadRequest())
@@ -155,7 +150,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("데이터 중복 발생(DuplicateKey) 시 409 상태 코드를 반환한다.")
     void createReservationDuplicateKey() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
+        given(reservationService.saveReservation(any()))
                 .willThrow(new DuplicateKeyException("중복 데이터 발생"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isConflict())
@@ -166,7 +161,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("데이터 무결성 위반(DataIntegrity) 시 400 상태 코드를 반환한다.")
     void createReservationDataIntegrity() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
+        given(reservationService.saveReservation(any()))
                 .willThrow(new DataIntegrityViolationException("외래키 위반"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
                 .andExpect(status().isBadRequest())

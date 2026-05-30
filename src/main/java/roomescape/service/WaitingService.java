@@ -1,19 +1,17 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingException;
-import roomescape.exception.PastTimeException;
-import roomescape.exception.TimeSlotNotFoundException;
-import roomescape.exception.WaitingNotFoundException;
+import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,7 +29,8 @@ public class WaitingService {
     }
 
     @Transactional
-    public void saveWaiting(Waiting waiting) {
+    public void saveWaiting(WaitingRequest request) {
+        Waiting waiting = Waiting.transientOf(request.name(), request.date(), request.timeId(), request.themeId());
         validDuplicated(waiting);
         validReservation(waiting);
         validDateTime(waiting.getDate(), waiting.getTimeSlotId());
