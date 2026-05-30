@@ -215,6 +215,27 @@ class WaitingApiTest {
                 .body("[1].rank", equalTo(1));
     }
 
+    @DisplayName("사용자 이름 없이 예약 대기 목록 조회 시 400 응답 반환을 테스트합니다.")
+    @Test
+    void find_waitings_without_username() {
+        RestAssured.given()
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("username은(는) 필수입니다."));
+    }
+
+    @DisplayName("빈 사용자 이름으로 예약 대기 목록 조회 시 400 응답 반환을 테스트합니다.")
+    @Test
+    void find_waitings_with_blank_username() {
+        RestAssured.given()
+                .param("username", " ")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("이름은 비어있을 수 없습니다."));
+    }
+
     @DisplayName("방탈출 예약 대기 삭제 API를 테스트합니다.")
     @Test
     void delete_waiting_reservation() {

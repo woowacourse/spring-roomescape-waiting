@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
-import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -48,8 +47,7 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition(null);
-        List<ReservationApplicationResult> reservations = reservationQueryService.findAll(condition);
+        List<ReservationApplicationResult> reservations = reservationQueryService.findAll();
 
         ReservationApplicationResult first = reservations.getFirst();
         ReservationApplicationResult second = reservations.get(1);
@@ -97,8 +95,7 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition("스타크");
-        List<ReservationApplicationResult> reservations = reservationQueryService.findAll(condition);
+        List<ReservationApplicationResult> reservations = reservationQueryService.findByName("스타크");
 
         ReservationApplicationResult first = reservations.getFirst();
         ReservationApplicationResult second = reservations.get(1);

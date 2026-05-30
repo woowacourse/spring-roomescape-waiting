@@ -1,11 +1,13 @@
 package roomescape.reservation.presentation.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
-import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
@@ -26,6 +27,7 @@ import roomescape.reservation.presentation.dto.ReservationApplicationResponse;
 import roomescape.reservation.presentation.dto.ReservationUpdateRequest;
 
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/reservations")
 @RestController
 public class ReservationController {
@@ -34,11 +36,11 @@ public class ReservationController {
     private final ReservationQueryService reservationQueryService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationApplicationResponse>> findAll(
-            @RequestParam(required = false) String username
+    public ResponseEntity<List<ReservationApplicationResponse>> findByName(
+            @NotBlank(message = "이름은 비어있을 수 없습니다.")
+            @RequestParam String username
     ) {
-        List<ReservationApplicationResult> results = reservationQueryService.findAll(
-                new ReservationApplicationSearchCondition(username));
+        List<ReservationApplicationResult> results = reservationQueryService.findByName(username);
 
         List<ReservationApplicationResponse> responses = results.stream()
                 .map(ReservationApplicationResponse::from)

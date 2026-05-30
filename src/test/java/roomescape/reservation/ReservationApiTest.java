@@ -242,7 +242,7 @@ class ReservationApiTest {
                 .statusCode(404);
     }
 
-    @DisplayName("사용자 이름 없이 예약 전체 조회 API를 테스트합니다.")
+    @DisplayName("관리자 예약 전체 조회 API를 테스트합니다.")
     @Test
     void find_all_reservations() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
@@ -271,7 +271,7 @@ class ReservationApiTest {
         );
 
         RestAssured.given()
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("[0].id", greaterThan(0))
@@ -300,6 +300,27 @@ class ReservationApiTest {
                 .body("[2].theme.id", equalTo(themeId.intValue()))
                 .body("[2].theme.name", equalTo("공포 테마"))
                 .body("[2].status", equalTo("CONFIRM"));
+    }
+
+    @DisplayName("사용자 이름 없이 예약 목록 조회 시 400 응답 반환을 테스트합니다.")
+    @Test
+    void find_reservations_without_username() {
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("username은(는) 필수입니다."));
+    }
+
+    @DisplayName("빈 사용자 이름으로 예약 목록 조회 시 400 응답 반환을 테스트합니다.")
+    @Test
+    void find_reservations_with_blank_username() {
+        RestAssured.given()
+                .param("username", " ")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("이름은 비어있을 수 없습니다."));
     }
 
     @DisplayName("사용자 이름으로 예약 목록 조회 API를 테스트합니다.")

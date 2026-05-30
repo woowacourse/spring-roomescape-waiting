@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationApplicationResult.Status;
-import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -54,8 +53,7 @@ class WaitingQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition("피노");
-        List<ReservationApplicationResult> waitings = waitingQueryService.findByName(condition);
+        List<ReservationApplicationResult> waitings = waitingQueryService.findByName("피노");
 
         ReservationApplicationResult first = waitings.getFirst();
         ReservationApplicationResult second = waitings.get(1);

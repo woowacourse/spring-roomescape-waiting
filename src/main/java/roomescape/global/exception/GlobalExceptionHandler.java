@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,6 +64,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ErrorResponse handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
         return new ErrorResponse(ERROR_MESSAGES.getOrDefault(e.getRequiredType(), e.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler
+    public ErrorResponse handleMissingServletRequestParameter(MissingServletRequestParameterException e) {
+        return new ErrorResponse(e.getParameterName() + "은(는) 필수입니다.");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
