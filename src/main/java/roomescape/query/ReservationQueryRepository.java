@@ -51,7 +51,7 @@ public class ReservationQueryRepository {
                     rs.getTime("res_start_at").toLocalTime(),
                     rs.getString("theme_name"),
                     rs.getString("res_status"),
-                    rs.getInt("waiting_rank")
+                    rs.getObject("waiting_rank", Integer.class)
             );
 
     private final JdbcTemplate jdbcTemplate;
