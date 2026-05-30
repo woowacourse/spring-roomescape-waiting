@@ -219,7 +219,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
             preparedStatement.setString(5, reservation.getStatus().toString());
-            preparedStatement.setString(6, reservation.getLastModifiedAt().toString());
+            preparedStatement.setTimestamp(6, Timestamp.valueOf(reservation.getLastModifiedAt()));
             return preparedStatement;
         }, keyHolder);
 
@@ -234,6 +234,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SET date = ?, time_id = ?, status = ?, last_modified_at = ?
                 WHERE id = ?
                 """;
+
         int count = jdbcTemplate.update(sql,
                 date,
                 timeId,
