@@ -341,7 +341,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약은 취소되지 않는다.")
-    public void cancelById_fail() {
+    public void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 

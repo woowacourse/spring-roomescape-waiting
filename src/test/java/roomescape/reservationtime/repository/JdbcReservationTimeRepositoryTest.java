@@ -114,7 +114,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("예약 시간을 삭제한다.")
-    void delete_success() {
+    void cancelById_success_softDelete() {
         // given
         ReservationTime reservationTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
@@ -133,7 +133,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 시간은 삭제되지 않는다.")
-    public void cancelById_fail() {
+    public void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 

@@ -58,7 +58,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약을 생성하는 요청을 하면 생성된 예약 정보가 응답으로 반환된다.")
-    public void create_success() throws Exception {
+    public void create_success_response() throws Exception {
         // given
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
@@ -137,7 +137,7 @@ class ReservationControllerTest {
             "브라운,2023-08-05,1,",
     })
     @DisplayName("예약을 생성하는 요청을 할 때 특정 요청값이 비어있으면 에러가 발생한다.")
-    public void create_fail1(String guestName, String date, Long timeId, Long themeId) throws Exception {
+    public void create_fail_emptyField(String guestName, String date, Long timeId, Long themeId) throws Exception {
         // given
         LocalDate reservationDate = date == null ? null : LocalDate.parse(date);
         ReservationCreateRequest request = new ReservationCreateRequest(guestName, reservationDate, timeId, themeId);
@@ -154,7 +154,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약을 생성하는 요청을 할 때 날짜 형식이 올바르지 않으면 에러가 발생한다.")
-    public void create_fail2() throws Exception {
+    public void create_fail_invalidDateFormat() throws Exception {
         // given
         String request = """
                 {
@@ -177,7 +177,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약자 이름 헤더가 없으면 에러 응답을 반환한다.")
-    public void getListByGuestName_fail1() throws Exception {
+    public void getListByGuestName_fail_missingHeader() throws Exception {
         // when then
         mockMvc.perform(get("/reservations/me"))
                 .andDo(print())
@@ -188,7 +188,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약자 이름으로 된 예약을 조회하는 요청을 하면 특정 사용자의 예약 정보가 응답으로 반환된다.")
-    public void getListByGuestName_success() throws Exception {
+    public void getListByGuestName_success_response() throws Exception {
         // given
         String guestName = "브라운";
 
@@ -255,7 +255,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약의 날짜 및 시간을 수정하는 요청을 하면 200 응답 코드가 반환된다.")
-    public void editDateTime_success() throws Exception {
+    public void editDateTime_success_noContent() throws Exception {
         // given
         Long reservationId = 1L;
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(12, 0));
@@ -289,7 +289,7 @@ class ReservationControllerTest {
             "2023-08-05,"
     })
     @DisplayName("예약의 날짜 및 시간을 수정하는 요청을 할 때 특정 요청값이 비어있으면 에러가 발생한다.")
-    public void editDateTime_fail1(String date, Long timeId) throws Exception {
+    public void editDateTime_fail_emptyField(String date, Long timeId) throws Exception {
         // given
         Long reservationId = 1L;
         LocalDate reservationDate = date == null ? null : LocalDate.parse(date);
@@ -307,7 +307,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약의 날짜 및 시간을 수정하는 요청을 할 때 날짜 형식이 올바르지 않으면 에러가 발생한다.")
-    public void editDateTime_fail2() throws Exception {
+    public void editDateTime_fail_invalidDateFormat() throws Exception {
         // given
         Long reservationId = 1L;
         String request = """
@@ -330,7 +330,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약 id 타입이 올바르지 않으면 에러 응답을 반환한다.")
-    public void editDateTime_fail3() throws Exception {
+    public void editDateTime_fail_invalidIdType() throws Exception {
         // given
         ReservationEditRequest request = new ReservationEditRequest(LocalDate.of(2023, 8, 10), 1L);
 
@@ -347,7 +347,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("본인의 예약을 삭제하는 요청을 하면 응답으로 204 상태코드를 반환한다.")
-    public void delete_success() throws Exception {
+    public void delete_success_noContent() throws Exception {
         // given
         Long reservationId = 1L;
         String guestNameHeader = "브라운";

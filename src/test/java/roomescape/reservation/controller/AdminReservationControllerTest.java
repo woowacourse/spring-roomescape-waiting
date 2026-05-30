@@ -155,7 +155,7 @@ class AdminReservationControllerTest {
 
     @Test
     @DisplayName("특정 예약을 취소하는 요청을 한다.")
-    public void cancel_success() throws Exception {
+    public void cancel_success_noContent() throws Exception {
         // when then
         long id = 1L;
         mockMvc.perform(

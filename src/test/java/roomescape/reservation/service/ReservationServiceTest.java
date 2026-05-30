@@ -62,7 +62,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 날짜, 시간, 테마에 처음으로 예약을 추가하면 예약이 확정된다.")
-    public void create_success1() {
+    public void create_success_confirmed() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -80,7 +80,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약이 존재하는 날짜, 시간, 테마로 새로운 예약을 추가하면 예약이 대기 상태로 들어간다.")
-    public void create_success2() {
+    public void create_success_waiting() {
         // given
         clock.setFixed(LocalDate.of(2025, 5, 10));
 
@@ -99,7 +99,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 지난 날짜 및 시간으로 예약하려는 경우 예외가 발생한다.")
-    public void create_fail2() {
+    public void create_fail_past() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -116,7 +116,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 취소할 때 확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다. ")
-    public void cancel_success() {
+    public void cancel_success_promoteWaiting() {
         // given
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
@@ -136,7 +136,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 예약이 존재하지 않으면 취소할 수 없기 때문에 예외가 발생한다.")
-    public void cancel_fail() {
+    public void cancel_fail_notFound() {
         // given
         Long id = 1L;
 
@@ -180,7 +180,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 예약을 취소하면 해당 예약의 상태가 취소됨으로 변경된다.")
-    public void cancelMine_success1() {
+    public void cancelMine_success_canceled() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -197,7 +197,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 예약을 취소할 때 확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다.")
-    public void cancelMine_success2() {
+    public void cancelMine_success_promoteWaiting() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -219,7 +219,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("해당 예약이 존재하지 않으면 본인의 예약을 삭제할 수 없기 때문에 예외가 발생한다.")
-    public void cancelMine_fail1() {
+    public void cancelMine_fail_notFound() {
         // given
         Long id = 1L;
 
@@ -231,7 +231,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 시작된 예약은 삭제할 수 없다.")
-    public void cancelMine_fail2() {
+    public void cancelMine_fail_alreadyStarted() {
         // given
         clock.setFixed(LocalDate.of(2023, 8, 11));
 
@@ -247,7 +247,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 예약이 아니면 삭제할 수 없기 때문에 예외가 발생한다.")
-    public void cancelMine_fail3() {
+    public void cancelMine_fail_otherGuest() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -263,7 +263,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 취소된 예약이면 취소할 수 없기 때문에 예외가 발생한다.")
-    public void cancelMine_fail4() {
+    public void cancelMine_fail_alreadyCanceled() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -279,7 +279,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약의 날짜 및 시간을 수정한다.")
-    public void editDateTime_success1() {
+    public void editDateTime_success_updateSlot() {
         // given
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
@@ -304,7 +304,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("확정된 상태의 예약을 수정하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다.")
-    public void editDateTime_success2() {
+    public void editDateTime_success_promoteWaiting() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -327,7 +327,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
-    public void editDateTime_success3() {
+    public void editDateTime_success_waiting() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -351,7 +351,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("수정하려는 예약이 존재하지 않으면 예외가 발생한다.")
-    public void editDateTime_fail1() {
+    public void editDateTime_fail_notFound() {
         // given
         Long reservationId = 1L;
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
@@ -365,7 +365,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("수정하려는 예약 시간이 존재하지 않으면 예외가 발생한다.")
-    public void editDateTime_fail2() {
+    public void editDateTime_fail_timeNotFound() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 20));
 
@@ -385,7 +385,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 시작된 예약은 수정할 수 없다.")
-    public void editDateTime_fail3() {
+    public void editDateTime_fail_alreadyStarted() {
         // given
         clock.setFixed(LocalDate.of(2023, 8, 6));
 
@@ -405,7 +405,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 취소된 예약은 수정할 수 없다.")
-    public void editDateTime_fail3_() {
+    public void editDateTime_fail_alreadyCanceled() {
         // given
         clock.setFixed(LocalDate.of(2023, 8, 6));
 
@@ -425,7 +425,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 기존 날짜 및 시간으로 예약을 수정하면 예외가 발생한다.")
-    public void editDateTime_fail5() {
+    public void editDateTime_fail_sameSlot() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -474,7 +474,7 @@ class ReservationServiceTest {
             "2023-07-06, 09:59", // 시간이 지난 경우
     })
     @DisplayName("이미 지난 날짜 및 시간으로 예약을 수정하려는 경우 예외가 발생한다.")
-    public void editDateTime_fail6(LocalDate ed, LocalTime et) {
+    public void editDateTime_fail_past(LocalDate ed, LocalTime et) {
         // given
         clock.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 6);
@@ -492,7 +492,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 예약이 아니면 예외가 발생한다.")
-    public void editDateTime_fail7() {
+    public void editDateTime_fail_otherGuest() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 

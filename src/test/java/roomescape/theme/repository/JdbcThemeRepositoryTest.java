@@ -214,7 +214,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("Theme를 삭제한다.")
-    public void cancelById() {
+    public void cancelById_success_softDelete() {
         Theme theme = sqlFixtureGenerator.insertTheme("kim", "desc1", "thumb1");
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
 
@@ -229,7 +229,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 Theme는 삭제되지 않는다.")
-    public void cancelById_fail() {
+    public void cancelById_fail_notFound() {
         // given
         Long id = 1L;
 
