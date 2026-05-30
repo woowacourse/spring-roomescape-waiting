@@ -1,6 +1,7 @@
 package roomescape.api;
 
 import jakarta.validation.Valid;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -22,9 +23,11 @@ import roomescape.service.ThemeService;
 public class ThemeController {
 
     private final ThemeService themeService;
+    private final Clock clock;
 
-    public ThemeController(ThemeService themeService) {
+    public ThemeController(ThemeService themeService, Clock clock) {
         this.themeService = themeService;
+        this.clock = clock;
     }
 
     @GetMapping
@@ -52,7 +55,7 @@ public class ThemeController {
 
     @GetMapping(params = {"days"})
     public ResponseEntity<List<ThemeResponse>> searchPopularTop10(@RequestParam(defaultValue = "7") Integer days) {
-        List<ThemeResponse> responses = themeService.getPopularTop10Themes(LocalDate.now(), days).stream()
+        List<ThemeResponse> responses = themeService.getPopularTop10Themes(LocalDate.now(clock), days).stream()
                 .map(ThemeResponse::from)
                 .toList();
 

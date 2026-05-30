@@ -3,6 +3,7 @@ package roomescape.service;
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 
 import jakarta.annotation.Nonnull;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -28,16 +29,19 @@ public class ReservationService {
     private final WaitlistRepository waitlistRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
             ReservationTimeRepository timeRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.clock = clock;
     }
 
     public List<Reservation> getReservations() {
@@ -63,7 +67,7 @@ public class ReservationService {
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()));
 
-        reservation.verifyReservable(LocalDateTime.now());
+        reservation.verifyReservable(LocalDateTime.now(clock));
 
         if (reservationRepository.existsBy(reservation)) {
             verifyNoDuplicateReservation(reservation);
@@ -114,7 +118,7 @@ public class ReservationService {
     @Transactional
     public void cancelMyReservation(Long id, String name) {
         Reservation reservation = getReservation(id);
-        reservation.verifyCancelableBy(name, LocalDateTime.now());
+        reservation.verifyCancelableBy(name, LocalDateTime.now(clock));
         reservationRepository.deleteById(id);
     }
 
@@ -123,7 +127,7 @@ public class ReservationService {
         Reservation original = getReservation(id);
         Reservation updated = original.changeBy(
                 name,
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 request.date(),
                 getReservationTime(request.timeId())
         );

@@ -11,18 +11,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class
+        JdbcThemeRepository.class,
+        JdbcWaitlistRepository.class,
+        TestClockConfig.class
 })
 class JdbcReservationRepositoryTest {
 
@@ -39,6 +44,9 @@ class JdbcReservationRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private WaitlistRepository waitlistRepository;
 
     @Test
     void 예약을_저장한다() {
@@ -174,6 +182,21 @@ class JdbcReservationRepositoryTest {
         reservationRepository.deleteById(saveId);
 
         assertThat(reservationRepository.findById(saveId)).isEmpty();
+    }
+
+    @Test
+    void 내_예약_조회에서_대기_생성시각이_같으면_id_순서로_순번을_계산한다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
+        waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme));
+        waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme));
+
+        List<ReservationWithStatus> neoReservations = reservationRepository.findByName("네오");
+
+        assertThat(neoReservations).hasSize(1);
+        assertThat(neoReservations.getFirst().getWaitingOrder()).isEqualTo(3);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {

@@ -3,6 +3,7 @@ package roomescape.infra;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +22,11 @@ import roomescape.repository.WaitlistRepository;
 public class JdbcWaitlistRepository implements WaitlistRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final Clock clock;
 
-    public JdbcWaitlistRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcWaitlistRepository(JdbcTemplate jdbcTemplate, Clock clock) {
         this.jdbcTemplate = jdbcTemplate;
+        this.clock = clock;
     }
 
     private final RowMapper<Waitlist> wailtListRowMapper = (rs, rowNum) -> {
@@ -114,7 +117,7 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
             ps.setDate(2, Date.valueOf(reservation.getDate()));
-            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now(clock)));
             ps.setLong(4, reservation.getTime().getId());
             ps.setLong(5, reservation.getTheme().getId());
             return ps;
