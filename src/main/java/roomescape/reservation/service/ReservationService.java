@@ -71,7 +71,7 @@ public class ReservationService {
         ReservationTime changedTime = getReservationTime(changedTimeId);
 
         Reservation beforeReservation = Reservation.clone(reservation);
-        Status afterStatus = determineState(changedDate, changedTimeId, reservation.getTheme().getId(), reservationId);
+        Status afterStatus = determineState(changedDate, changedTimeId, reservation.getTheme().getId());
         Reservation changedReservation = reservation.changeDateTimeAndStatus(
                 changedDate, changedTime, afterStatus, LocalDateTime.now(clock));
 
@@ -153,13 +153,6 @@ public class ReservationService {
 
     private Status determineState(LocalDate date, Long timeId, Long themeId){
         if (!reservationRepository.existsBySlot(date, timeId, themeId)){
-            return CONFIRMED;
-        }
-        return Status.WAITING;
-    }
-
-    private Status determineState(LocalDate date, Long timeId, Long themeId, Long excludedReservationId) {
-        if (!reservationRepository.existsBySlotExceptReservation(date, timeId, themeId, excludedReservationId)) {
             return CONFIRMED;
         }
         return Status.WAITING;
