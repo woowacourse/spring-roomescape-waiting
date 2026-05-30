@@ -22,7 +22,7 @@ public class ReservationWaitingController {
         this.reservationWaitingService = reservationWaitingService;
     }
 
-    @GetMapping("/reservations/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
         ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
         return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservationWaiting));
@@ -37,7 +37,6 @@ public class ReservationWaitingController {
                 request.timeId()
         );
 
-        // 상의 필요
         URI location = URI.create("/reservation-waitings/" + reservationWaiting.getId());
 
         return ResponseEntity.created(location).body(ReservationWaitingResponse.from(reservationWaiting));
