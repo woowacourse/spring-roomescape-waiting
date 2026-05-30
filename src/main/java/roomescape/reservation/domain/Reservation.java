@@ -66,6 +66,13 @@ public class Reservation {
         this.status = ReservationStatus.CANCELED;
     }
 
+    public void cancelByManager() {
+        validateNotCanceled();
+        validateNotPast(date.getDate(), time.getStartAt());
+
+        this.status = ReservationStatus.CANCELED;
+    }
+
     public void changeSchedule(String requesterName, ReservationDate newDate,
         ReservationTime newTime) {
         validateOwner(requesterName);

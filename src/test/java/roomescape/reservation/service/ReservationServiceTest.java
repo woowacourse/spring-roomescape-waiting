@@ -220,45 +220,6 @@ class ReservationServiceTest {
     }
 
     @Nested
-    @DisplayName("cancelByManager 메서드는")
-    class CancelByManagerTest {
-
-
-        @Test
-        @DisplayName("예약을 취소한다")
-        void 성공1() {
-            // given
-            Reservation savedReservation = save(
-                reservation(name, reservationDate1, reservationTime1, theme1));
-
-            // when
-            Reservation actual = reservationService.cancelByManager(savedReservation.getId());
-
-            // then
-            Assertions.assertThat(actual.getStatus())
-                .isEqualTo(ReservationStatus.CANCELED);
-        }
-
-        @Test
-        @DisplayName("대기 상태인 예약도 취소한다")
-        void 성공2() {
-            // given
-            String nameInWaiting = "대기중인 사용자";
-            save(reservation(name, reservationDate1, reservationTime1, theme1));
-            Reservation reservationInWaiting = save(
-                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
-
-            // when
-            Reservation actual = reservationService.cancelByManager(reservationInWaiting.getId());
-
-            // then
-            Assertions.assertThat(actual.getStatus())
-                .isEqualTo(ReservationStatus.CANCELED);
-        }
-
-    }
-
-    @Nested
     @DisplayName("cancel 메서드는")
     class CancelTest {
 
@@ -339,6 +300,77 @@ class ReservationServiceTest {
 
             // when & then
             Assertions.assertThatThrownBy(() -> reservationService.cancel(savedId, name))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("cancelByManager 메서드는")
+    class CancelByManagerTest {
+
+
+        @Test
+        @DisplayName("예약을 취소한다")
+        void 성공1() {
+            // given
+            Reservation savedReservation = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+
+            // when
+            Reservation actual = reservationService.cancelByManager(savedReservation.getId());
+
+            // then
+            Assertions.assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        @DisplayName("대기 상태인 예약도 취소한다")
+        void 성공2() {
+            // given
+            String nameInWaiting = "대기중인 사용자";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+
+            // when
+            Reservation actual = reservationService.cancelByManager(reservationInWaiting.getId());
+
+            // then
+            Assertions.assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+
+        @Test
+        @DisplayName("이미 취소된 예약이면 예외가 발생한다")
+        void 실패1() {
+            // given
+            Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+            saved.updateStatus(ReservationStatus.CANCELED);
+            reservationRepository.updateStatus(saved);
+            Long savedId = saved.getId();
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.cancelByManager(savedId))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("과거 예약은 취소할 수 없다")
+        void 실패2() {
+            // given
+            ReservationDate pastDate = ReservationDate.load(1L, LocalDate.now().minusDays(1), true);
+            Reservation saved =
+                save(Reservation.load(1L, name, pastDate, reservationTime1, theme1,
+                    ReservationStatus.RESERVED, LocalDateTime.now()));
+            Long savedId = saved.getId();
+
+            // when & then
+            Assertions.assertThatThrownBy(() -> reservationService.cancelByManager(savedId))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
         }

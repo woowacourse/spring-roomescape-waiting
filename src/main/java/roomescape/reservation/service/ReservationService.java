@@ -77,7 +77,7 @@ public class ReservationService {
     @Transactional
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
-        reservation.updateStatus(CANCELED);
+        reservation.cancelByManager();
         reservationRepository.updateStatus(reservation);
         return reservation;
     }
