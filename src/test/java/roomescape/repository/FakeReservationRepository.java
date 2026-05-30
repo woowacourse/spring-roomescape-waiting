@@ -1,11 +1,12 @@
 package roomescape.repository;
 
+import roomescape.domain.Reservation;
+
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.Reservation;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -26,15 +27,6 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findByName(String name) {
         return storage.values().stream()
                 .filter(reservation -> reservation.getName().equals(name))
-                .toList();
-    }
-
-    @Override
-    public List<Long> findByThemeIdAndDate(long themeId, LocalDate date) {
-        return storage.values().stream()
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId) && reservation.getDate()
-                        .equals(date))
-                .map(reservation -> reservation.getTimeSlot().getId())
                 .toList();
     }
 
