@@ -29,7 +29,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = "INSERT INTO reservation_time(start_at) VALUES (:start_at)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("start_at", time.startAt());
+                .addValue("start_at", time.getStartAt());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(sql, params, keyHolder);
@@ -39,7 +39,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             throw new IllegalStateException("reservation_time 저장 후 생성된 ID를 반환받지 못했습니다.");
         }
 
-        return new ReservationTime(keyHolder.getKey().longValue(), time.startAt());
+        return new ReservationTime(keyHolder.getKey().longValue(), time.getStartAt());
     }
 
     @Override

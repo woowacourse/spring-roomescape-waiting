@@ -64,7 +64,7 @@ public class ScheduleService {
     public void validateSchedule(LocalDate date, Long timeId, Long themeId) {
         validateNotPastDate(date);
         ReservationTime reservationTime = getReservationTimeOrThrow(timeId);
-        validateNotPastTime(date, reservationTime.startAt());
+        validateNotPastTime(date, reservationTime.getStartAt());
         getThemeOrThrow(themeId);
     }
 
