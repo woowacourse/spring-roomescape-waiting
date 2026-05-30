@@ -11,7 +11,6 @@ import roomescape.service.ReservationService;
 
 import java.net.URI;
 import java.util.List;
-import roomescape.service.dto.Booking;
 
 @Validated
 @RestController
@@ -72,7 +71,7 @@ public class ReservationController {
             @PathVariable
             long id,
             @RequestBody @Valid
-            ReservationPutRequest request,
+            ReservationRequest request,
             @RequestParam @NotBlank
             String userName
     ) {

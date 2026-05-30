@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.ThemePatchRequest;
-import roomescape.controller.dto.ThemePutRequest;
 import roomescape.controller.dto.ThemeRequest;
 import roomescape.controller.dto.ThemeResponse;
 import roomescape.domain.Theme;
@@ -66,7 +65,7 @@ public class ThemeController {
     @PutMapping("/{id}")
     public ResponseEntity<ThemeResponse> updateTheme(
             @PathVariable long id,
-            @RequestBody @Valid ThemePutRequest request
+            @RequestBody @Valid ThemeRequest request
     ) {
         themeService.putTheme(id, request.name(), request.description(), request.thumbnailUrl());
         return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));

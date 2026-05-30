@@ -29,7 +29,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationPatchRequest;
-import roomescape.controller.dto.ReservationPutRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
@@ -104,7 +103,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약의 전체 정보를 수정하고 200 상태 코드를 반환한다.")
     void rescheduleAll() throws Exception {
-        ReservationPutRequest request = new ReservationPutRequest("네오", LocalDate.now(), 1L, 1L);
+        ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
         given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
         performPut("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
@@ -113,7 +112,7 @@ class ReservationControllerTest {
     @DisplayName("존재하지 않는 자원 요청 시 404 예외와 커스텀 코드를 반환한다.")
     void findNonExistentReservation() throws Exception {
         given(reservationService.findReservationById(anyLong())).willThrow(new ReservationNotFoundException(999L));
-        ReservationPutRequest request = new ReservationPutRequest("네오", LocalDate.now(), 1L, 1L);
+        ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
         performPut("/reservations/999", "브라운", request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));

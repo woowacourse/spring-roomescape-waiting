@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.TimePatchRequest;
-import roomescape.controller.dto.TimePutRequest;
 import roomescape.controller.dto.TimeRequest;
 import roomescape.controller.dto.TimeResponse;
 import roomescape.domain.TimeSlot;
@@ -69,7 +68,7 @@ public class TimeController {
     @PutMapping("/{id}")
     public ResponseEntity<TimeResponse> updateTime(
             @PathVariable long id,
-            @RequestBody @Valid TimePutRequest request
+            @RequestBody @Valid TimeRequest request
     ) {
         reservationTimeSlotService.putTime(id, request.startAt());
         return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.findTimeSlotById(id)));
