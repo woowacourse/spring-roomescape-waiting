@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import roomescape.common.exception.BusinessRuleViolationException;
 
 public class Waiting {
     private final Long id;
@@ -8,19 +9,22 @@ public class Waiting {
     private final Slot slot;
     private final Long rank;
 
-    public Waiting(Long id, Member member, Slot slot, Long rank) {
+    private Waiting(Long id, Member member, Slot slot, Long rank) {
         this.id = id;
         this.member = member;
         this.slot = slot;
         this.rank = rank;
     }
 
-    public Waiting(Long id, Member member, LocalDate date, Time time, Theme theme, Long storeId, Long rank) {
-        this(id, member, new Slot(date, time, theme, storeId), rank);
+    public static Waiting create(Member member, Reservation reservation) {
+        if (reservation.isSameMember(member)) {
+            throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
+        }
+        return new Waiting(null, member, reservation.getSlot(), null);
     }
 
-    public Waiting(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
-        this(null, member, new Slot(date, time, theme, storeId), null);
+    public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Long storeId, Long rank) {
+        return new Waiting(id, member, new Slot(date, time, theme, storeId), rank);
     }
 
     public Long getId() {

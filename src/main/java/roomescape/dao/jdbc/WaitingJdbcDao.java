@@ -39,7 +39,7 @@ public class WaitingJdbcDao implements WaitingDao {
             rs.getString("theme_thumbnail_url"),
             rs.getString("theme_description")
     );
-    private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> new Waiting(
+    private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> Waiting.reconstruct(
             rs.getLong("id"),
             MEMBER_ROW_MAPPER.mapRow(rs, rowNum),
             LocalDate.parse(rs.getString("date")),
