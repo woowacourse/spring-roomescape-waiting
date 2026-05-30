@@ -16,6 +16,7 @@ import roomescape.exception.DuplicateWaitingException;
 import roomescape.exception.PastTimeException;
 import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 
@@ -33,18 +34,23 @@ class WaitingServiceTest {
 
     @Mock
     private WaitingRepository waitingRepository;
-
     @Mock
     private ReservationRepository reservationRepository;
-
     @Mock
     private TimeSlotRepository timeSlotRepository;
+    @Mock
+    private ThemeRepository themeRepository;
 
     private WaitingService waitingService;
+    private TimeSlot savedTimeSlot;
+    private Theme savedTheme;
 
     @BeforeEach
     void setUp() {
-        waitingService = new WaitingService(waitingRepository, reservationRepository, timeSlotRepository);
+        savedTimeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
+        savedTheme = new Theme(1L, "이름", "설명", "test.com");
+        waitingService = new WaitingService(waitingRepository, reservationRepository,
+                timeSlotRepository, themeRepository);
     }
 
     @Test
@@ -68,41 +74,51 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void saveDuplicateWaiting() {
-        WaitingRequest waiting = createWaitingRequest();
+        LocalDate today = LocalDate.now();
+        stubDependencies(savedTimeSlot, savedTheme);
         given(waitingRepository.isExists(any(Waiting.class))).willReturn(true);
 
-        assertThatThrownBy(() -> waitingService.saveWaiting(waiting))
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(DuplicateWaitingException.class);
     }
 
     @Test
     @DisplayName("존재하는 예약에 대기를 추가하면, 예외가 발생한다.")
     void saveReservedWaiting() {
-        WaitingRequest waiting = createWaitingRequest();
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(waiting.date(),
-                waiting.timeId(), waiting.themeId())).willReturn(Optional.of(
-                new Reservation(1L, "브라운", LocalDate.now(), new TimeSlot(1L, LocalTime.now()),
-                        new Theme(1L, "null", "null", "null"))));
+        LocalDate today = LocalDate.now();
+        stubDependencies(savedTimeSlot, savedTheme);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
+                .willReturn(Optional.of(createReservation(today)));
 
-        assertThatThrownBy(() -> waitingService.saveWaiting(waiting))
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
     @Test
     @DisplayName("이미 지난 시간으로 대기를 추가하면, 예외가 발생한다.")
     void savePassedWaiting() {
-        WaitingRequest waiting = createWaitingRequest();
-        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(new TimeSlot(1L, LocalTime.of(0, 0))));
+        LocalDate today = LocalDate.now();
+        TimeSlot pastTimeSlot = new TimeSlot(1L, LocalTime.of(0, 0));
+        stubDependencies(pastTimeSlot, savedTheme);
 
-        assertThatThrownBy(() -> waitingService.saveWaiting(waiting))
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(PastTimeException.class);
     }
 
-    private Waiting createWaitingEntity() {
-        return new Waiting(1L, "브라운", LocalDate.now(), 1L, 1L, 1);
+    private void stubDependencies(TimeSlot timeSlot, Theme theme) {
+        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(timeSlot));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
     }
 
-    private WaitingRequest createWaitingRequest() {
-        return new WaitingRequest("브라운", LocalDate.now(), 1L, 1L);
+    private Waiting createWaitingEntity() {
+        return new Waiting(1L, "브라운", LocalDate.now(), savedTimeSlot, savedTheme, 1);
+    }
+
+    private WaitingRequest createWaitingRequest(LocalDate date) {
+        return new WaitingRequest("브라운", date, 1L, 1L);
+    }
+
+    private Reservation createReservation(LocalDate date) {
+        return new Reservation(1L, "브라운", date, savedTimeSlot, savedTheme);
     }
 }

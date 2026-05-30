@@ -1,11 +1,11 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
+import roomescape.domain.Waiting;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.Waiting;
 
 public class FakeWaitingRepository implements WaitingRepository {
 
@@ -47,7 +47,7 @@ public class FakeWaitingRepository implements WaitingRepository {
 
     @Override
     public Optional<Waiting> findById(long id) {
-        return Optional.empty();
+        return Optional.ofNullable(storage.get(id));
     }
 
     private Waiting createSavedWaiting(long id, Waiting waiting) {
@@ -55,26 +55,20 @@ public class FakeWaitingRepository implements WaitingRepository {
                 id,
                 waiting.getName(),
                 waiting.getDate(),
-                waiting.getTimeSlotId(),
-                waiting.getThemeId(),
+                waiting.getTimeSlot(),
+                waiting.getTheme(),
                 waiting.getWaitingNumber()
         );
     }
 
     private boolean isSameSchedule(Waiting first, Waiting second) {
         return first.getDate().equals(second.getDate())
-                && first.getTimeSlotId().equals(second.getTimeSlotId())
-                && first.getThemeId().equals(second.getThemeId());
+                && first.getTimeSlot().getId().equals(second.getTimeSlot().getId())
+                && first.getTheme().getId().equals(second.getTheme().getId());
     }
 
     private boolean isSameWaiting(Waiting first, Waiting second) {
         return isSameSchedule(first, second)
                 && first.getName().equals(second.getName());
-    }
-
-    private boolean isTargetSchedule(Waiting entry, LocalDate date, Long timeSlotId, Long themeId) {
-        return entry.getDate().equals(date)
-                && entry.getTimeSlotId().equals(timeSlotId)
-                && entry.getThemeId().equals(themeId);
     }
 }

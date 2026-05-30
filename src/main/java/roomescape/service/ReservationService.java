@@ -69,13 +69,7 @@ public class ReservationService {
         }
 
         for (Waiting waiting : waitingList) {
-            TimeSlot timeSlot = timeSlotRepository.findById(waiting.getTimeSlotId())
-                    .orElseThrow(() -> new TimeSlotNotFoundException(waiting.getTimeSlotId()));
-
-            Theme theme = themeRepository.findById(waiting.getThemeId())
-                    .orElseThrow(() -> new ThemeNotFoundException(waiting.getThemeId()));
-
-            bookings.add(Booking.fromWaiting(waiting, timeSlot, theme));
+            bookings.add(Booking.fromWaiting(waiting));
         }
 
         return bookings;

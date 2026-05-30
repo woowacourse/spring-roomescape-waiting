@@ -3,10 +3,13 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingRequest;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 
@@ -20,20 +23,25 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final ThemeRepository themeRepository;
 
     public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
-                          TimeSlotRepository timeSlotRepository) {
+                          TimeSlotRepository timeSlotRepository, ThemeRepository themeRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.themeRepository = themeRepository;
     }
 
     @Transactional
     public void saveWaiting(WaitingRequest request) {
-        Waiting waiting = Waiting.transientOf(request.name(), request.date(), request.timeId(), request.themeId());
+        TimeSlot timeSlot = findTimeSlot(request.timeId());
+        Theme theme = findTheme(request.themeId());
+        Waiting waiting = Waiting.transientOf(request.name(), request.date(), timeSlot, theme);
+
         validDuplicated(waiting);
         validReservation(waiting);
-        validDateTime(waiting.getDate(), waiting.getTimeSlotId());
+        validDateTime(waiting.getDate(), timeSlot);
 
         waitingRepository.save(waiting);
     }
@@ -46,27 +54,41 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
+    private TimeSlot findTimeSlot(Long timeSlotId) {
+        return timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new TimeSlotNotFoundException(timeSlotId));
+    }
+
+    private Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ThemeNotFoundException(themeId));
+    }
+
     private void validReservation(Waiting waiting) {
-        reservationRepository.findByDateAndTimeIdAndThemeId(waiting.getDate(),
-                waiting.getTimeSlotId(), waiting.getThemeId()).ifPresent(reservation -> {
-            if (reservation.getName().equals(waiting.getName())) {
-                throw new DuplicateReservationException(reservation.getDate().toString(),
-                        reservation.getTimeSlot().getId(), reservation.getTheme().getId());
-            }
-        });
+        reservationRepository.findByDateAndTimeIdAndThemeId(
+                waiting.getDate(),
+                waiting.getTimeSlot().getId(),
+                waiting.getTheme().getId()
+        ).ifPresent(reservation -> validateOwnership(reservation, waiting));
+    }
+
+    private void validateOwnership(Reservation reservation, Waiting waiting) {
+        if (reservation.getName().equals(waiting.getName())) {
+            throw new DuplicateReservationException(
+                    reservation.getDate().toString(),
+                    reservation.getTimeSlot().getId(),
+                    reservation.getTheme().getId()
+            );
+        }
     }
 
     private void validDuplicated(Waiting waiting) {
-        boolean isExists = waitingRepository.isExists(waiting);
-        if (isExists) {
+        if (waitingRepository.isExists(waiting)) {
             throw new DuplicateWaitingException(waiting);
         }
     }
 
-    private void validDateTime(LocalDate date, Long timeSlotId) {
-        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
-                .orElseThrow(() -> new TimeSlotNotFoundException(timeSlotId));
-
+    private void validDateTime(LocalDate date, TimeSlot timeSlot) {
         if (date.isBefore(LocalDate.now())) {
             throw new PastTimeException("지난 날짜로 예약 대기를 추가하실 수 없습니다.");
         }

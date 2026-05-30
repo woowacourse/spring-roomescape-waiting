@@ -1,10 +1,11 @@
 package roomescape.service.dto;
 
-import java.time.LocalDate;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
+
+import java.time.LocalDate;
 
 public record Booking(
         Long id,
@@ -17,12 +18,12 @@ public record Booking(
 ) {
 
     public static Booking fromReservation(Reservation reservation) {
-        return new Booking(reservation.getId(), reservation.getName(), reservation.getDate(), reservation.getTimeSlot(),
-                reservation.getTheme(), true, null);
+        return new Booking(reservation.getId(), reservation.getName(), reservation.getDate(),
+                reservation.getTimeSlot(), reservation.getTheme(), true, null);
     }
 
-    public static Booking fromWaiting(Waiting waiting, TimeSlot timeSlot, Theme theme) {
-        return new Booking(waiting.getId(), waiting.getName(), waiting.getDate(), timeSlot, theme, false,
-                waiting.getWaitingNumber());
+    public static Booking fromWaiting(Waiting waiting) {
+        return new Booking(waiting.getId(), waiting.getName(), waiting.getDate(),
+                waiting.getTimeSlot(), waiting.getTheme(), false, waiting.getWaitingNumber());
     }
 }
