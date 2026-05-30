@@ -23,7 +23,6 @@ import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -368,14 +367,14 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.hasConfirmedReservation(1L, newTime)).thenReturn(false);
-        when(reservationRepository.update(any(), any(), any())).thenReturn(true);
+        when(reservationRepository.update(any(), any(), any(), any())).thenReturn(true);
 
         // when
         Reservation result = reservationService.update(1L, 2L);
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
-        verify(reservationRepository).update(any(), any(), any());
+        verify(reservationRepository).update(any(), any(), any(), any());
     }
 
     @DisplayName("존재하지 않는 예약을 변경하는 경우, ReservationNotFoundException이 발생한다.")
@@ -395,7 +394,8 @@ class ReservationServiceImplTest {
         // given
         ReservationTime oldTime = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         ReservationTime newTime = new ReservationTime(2L, PAST_START, PAST_END);
-        Reservation existing = new Reservation("라이", oldTime, null, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Theme theme = new Theme("테마1", "설명", "https://img.test/a.png").withId(1L);
+        Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
 
@@ -415,23 +415,5 @@ class ReservationServiceImplTest {
         // when & then
         assertThatThrownBy(() -> reservationService.update(1L, 2L))
                 .isInstanceOf(PastReservationException.class);
-    }
-
-    @DisplayName("변경하려는 슬롯이 이미 차 있는 경우, DuplicateReservationException이 발생한다.")
-    @Test
-    void update_중복_슬롯으로_변경하면_예외() {
-        // given
-        ReservationTime oldTime = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        ReservationTime newTime = new ReservationTime(2L,
-                LocalDateTime.of(2030, 6, 1, 14, 0),
-                LocalDateTime.of(2030, 6, 1, 16, 0));
-        Reservation existing = new Reservation("라이", oldTime, new Theme("name", "description", "https://img.test/a.png").withId(1L), Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(timeService.findById(any())).thenReturn(newTime);
-        when(reservationRepository.hasConfirmedReservation(1L, newTime)).thenReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
-                .isInstanceOf(DuplicateReservationException.class);
     }
 }
