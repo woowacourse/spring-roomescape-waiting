@@ -1,18 +1,19 @@
 package roomescape.reservation.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
@@ -153,5 +154,46 @@ class ReservationTest {
 
         assertThatCode(() -> reservation.validateModifiableByCustomer(LocalDate.of(2026, 5, 8)))
                 .doesNotThrowAnyException();
+    }
+
+    @Nested
+    @DisplayName("슬롯이 미래 인지 조회한다")
+    class IsFutureSlot {
+
+        @Test
+        void 예약_시간이_미래이면_TRUE를_반환한다() {
+            // given
+            Reservation reservation = Reservation.of(
+                1L,
+                "수달",
+                NOW.toLocalDate(),
+                FUTURE_TIME,
+                THEME
+            );
+
+            // when
+            final boolean isFutureSlot = reservation.isFutureSlot(NOW);
+
+            // then
+            assertThat(isFutureSlot).isTrue();
+        }
+
+        @Test
+        void 예약_시간이_과거면_FALSE를_반환한다() {
+            // given
+            Reservation reservation = Reservation.of(
+                1L,
+                "수달",
+                NOW.toLocalDate(),
+                PAST_TIME,
+                THEME
+            );
+
+            // when
+            final boolean isFutureSlot = reservation.isFutureSlot(NOW);
+
+            // then
+            assertThat(isFutureSlot).isFalse();
+        }
     }
 }

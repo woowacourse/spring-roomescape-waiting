@@ -86,6 +86,10 @@ public class Reservation {
         }
     }
 
+    public boolean isFutureSlot(final LocalDateTime now) {
+        return reservationDateTime().isAfter(now);
+    }
+
     private boolean isBeforeReservationDate(final LocalDate today) {
         return today.isBefore(date);
     }
