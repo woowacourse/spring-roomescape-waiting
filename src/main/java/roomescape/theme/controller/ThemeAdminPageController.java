@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import roomescape.exception.ApiException;
-import roomescape.exception.ErrorCode;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
@@ -39,34 +36,15 @@ public class ThemeAdminPageController {
     public String createTheme(
             @RequestParam(required = false) final String name,
             @RequestParam(required = false) final String description,
-            @RequestParam(required = false) final String thumbnailUrl,
-            final RedirectAttributes redirectAttributes
+            @RequestParam(required = false) final String thumbnailUrl
     ) {
-        try {
-            themeService.save(name, description, thumbnailUrl);
-        } catch (ApiException exception) {
-            redirectAttributes.addAttribute("errorCode", exception.getCode());
-            return "redirect:/pages/admin/themes";
-        } catch (Exception exception) {
-            redirectAttributes.addAttribute("errorCode", ErrorCode.INTERNAL_SERVER_ERROR.getCode());
-            return "redirect:/pages/admin/themes";
-        }
-
+        themeService.save(name, description, thumbnailUrl);
         return "redirect:/pages/admin/themes";
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteTheme(@PathVariable final Long id, final RedirectAttributes redirectAttributes) {
-        try {
-            themeService.deleteById(id);
-        } catch (ApiException exception) {
-            redirectAttributes.addAttribute("errorCode", exception.getCode());
-            return "redirect:/pages/admin/themes";
-        } catch (Exception exception) {
-            redirectAttributes.addAttribute("errorCode", ErrorCode.INTERNAL_SERVER_ERROR.getCode());
-            return "redirect:/pages/admin/themes";
-        }
-
+    public String deleteTheme(@PathVariable final Long id) {
+        themeService.deleteById(id);
         return "redirect:/pages/admin/themes";
     }
 }
