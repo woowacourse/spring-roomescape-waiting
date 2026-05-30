@@ -140,7 +140,7 @@ public class WaitingDao {
                     ranked_waiting.waiting_rank
                 FROM (
                     SELECT *,
-                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC) AS waiting_rank
+                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC, id ASC) AS waiting_rank
                     FROM waiting
                 ) AS ranked_waiting
                 INNER JOIN reservation_time AS time ON ranked_waiting.time_id = time.id
