@@ -1,6 +1,6 @@
 package roomescape.reservationtime.service;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -10,8 +10,6 @@ import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundExcept
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationtime.service.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.service.dto.response.ReservationTimeResponse;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

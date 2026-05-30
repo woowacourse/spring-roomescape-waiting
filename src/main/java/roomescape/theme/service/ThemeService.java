@@ -1,6 +1,8 @@
 package roomescape.theme.service;
 
-import jakarta.validation.constraints.NotNull;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -10,10 +12,6 @@ import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.request.ThemeCreateRequest;
 import roomescape.theme.service.dto.response.ThemeResponse;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
