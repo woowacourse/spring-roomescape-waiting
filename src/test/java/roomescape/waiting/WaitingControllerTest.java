@@ -202,8 +202,24 @@ public class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("다른 사용자의 대기는 취소할 수 없다.")
+    @DisplayName("양수가 아닌 대기 id로 취소를 요청하면 400을 응답한다.")
     void 대기_취소_API_테스트_2() {
+        String accessToken = loginUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .pathParam("id", -1)
+                .when().delete("/api/user/waitings/{id}")
+                .then().log().all()
+                .statusCode(400)
+                .body("success", is(false))
+                .body("error.code", is("INVALID_INPUT_400"));
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 대기는 취소할 수 없다.")
+    void 대기_취소_API_테스트_3() {
         String accessToken = loginUser();
         String otherAccessToken = loginOtherUser();
         Integer waitingId = createWaiting(accessToken);

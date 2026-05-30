@@ -113,6 +113,20 @@ public class ReservationControllerTest {
     }
 
     @Test
+    void 양수가_아닌_예약_id로_삭제를_요청하면_400을_응답한다() {
+        String accessToken = loginUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .pathParam("id", -1)
+                .when().delete("/api/user/reservations/{id}")
+                .then().log().all()
+                .statusCode(400)
+                .body("success", is(false))
+                .body("error.code", is("INVALID_INPUT_400"));
+    }
+
+    @Test
     void 나의_예약_목록에서_대기도_함께_조회한다() {
         String accessToken = login("b", "test2");
 
