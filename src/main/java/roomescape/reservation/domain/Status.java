@@ -7,9 +7,7 @@ import java.util.Arrays;
 import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_DATE;
 
 public enum Status {
-    WAITING,
-    CONFIRMED,
-    CANCELED;
+    WAITING, CONFIRMED, CANCELED;
 
 
     public static Status from(String status) {
