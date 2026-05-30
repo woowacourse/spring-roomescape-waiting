@@ -146,7 +146,7 @@ class WaitingListServiceTest {
     }
 
     @Test
-    void 과거_시간으로_예약대기_생성_시도시_예외발생() {
+    void 오늘날짜_과거시간으로_예약대기_생성_시도시_예외발생() {
         // given
         LocalDate today = LocalDate.now();
         WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
@@ -163,6 +163,60 @@ class WaitingListServiceTest {
         assertThatThrownBy(() -> waitingListService.create(createCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
+    }
+
+    @Test
+    void 오늘날짜_현재시간으로_예약대기_생성_시도시_예외발생() {
+        // given
+        LocalDate today = LocalDate.now();
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        LocalTime now = LocalTime.now();
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now, now.plusHours(2));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
+    }
+
+    @Test
+    void 오늘날짜_미래시간으로_예약대기_생성_성공() {
+        // given
+        String name = "김민준";
+        LocalDate date = LocalDate.now();
+
+        LocalDate today = LocalDate.now();
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        LocalTime now = LocalTime.now();
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.plusHours(1), now.plusHours(2));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
+
+        WaitingList waitingList = WaitingList.create(name, date, theme, reservationTime);
+        given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
+        given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
+
+        // when
+        WaitingListResult result = waitingListService.create(createCommand);
+
+        // then
+        Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
+        Assertions.assertThat(result.name()).isEqualTo(name);
+        Assertions.assertThat(result.date()).isEqualTo(date);
+        Assertions.assertThat(result.timeId()).isEqualTo(timeId);
+        Assertions.assertThat(result.themeId()).isEqualTo(themeId);
     }
 
     @Test
