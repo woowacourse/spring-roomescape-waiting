@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationTimeNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -34,6 +35,7 @@ class ReservationTimeServiceTest {
     @Test
     void delete_정상_삭제() {
         given(reservationDao.existsByTimeId(1L)).willReturn(false);
+        given(reservationTimeDao.delete(1L)).willReturn(1);
 
         reservationTimeService.delete(1L);
 
@@ -47,5 +49,15 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("예약에 사용 중인 시간은 삭제할 수 없습니다.");
+    }
+
+    @Test
+    void delete_존재하지_않는_시간이면_예외() {
+        given(reservationDao.existsByTimeId(999L)).willReturn(false);
+        given(reservationTimeDao.delete(999L)).willReturn(0);
+
+        assertThatThrownBy(() -> reservationTimeService.delete(999L))
+                .isInstanceOf(ReservationTimeNotFoundException.class)
+                .hasMessage("존재하지 않는 예약 시간입니다.");
     }
 }

@@ -41,6 +41,16 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
+    @DisplayName("존재하지 않는 예약 삭제하면 404")
+    @Test
+    void 존재하지_않는_예약_삭제하면_404() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/{id}", 999)
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 예약입니다."));
+    }
+
     @DisplayName("사용자 예약 조회")
     @Test
     void 사용자_예약_조회() {
@@ -341,6 +351,16 @@ class ReservationControllerTest extends ControllerTest {
                 .when().delete("/reservations/waiting/{id}", waitingId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("존재하지 않는 대기 취소하면 404")
+    @Test
+    void 존재하지_않는_대기_취소하면_404() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/{id}", 999)
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 대기입니다."));
     }
 
     @DisplayName("대기 목록 조회 성공")

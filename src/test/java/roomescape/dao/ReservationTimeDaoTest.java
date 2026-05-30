@@ -73,8 +73,16 @@ class ReservationTimeDaoTest {
 
     @Test
     void delete_시간_삭제() {
-        reservationTimeDao.delete(12L);
+        int deletedCount = reservationTimeDao.delete(12L);
 
+        assertThat(deletedCount).isEqualTo(1);
         assertThat(reservationTimeDao.findById(12L)).isEmpty();
+    }
+
+    @Test
+    void delete_존재하지_않는_시간이면_0_반환() {
+        int deletedCount = reservationTimeDao.delete(999L);
+
+        assertThat(deletedCount).isZero();
     }
 }

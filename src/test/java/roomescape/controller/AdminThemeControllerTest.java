@@ -39,6 +39,17 @@ class AdminThemeControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
+    @DisplayName("존재하지 않는 테마 삭제하면 404")
+    @Test
+    void 존재하지_않는_테마_삭제하면_404() {
+        RestAssured.given().log().all()
+                .pathParam("id", 999)
+                .when().delete("/admin/themes/{id}")
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 테마입니다."));
+    }
+
     @DisplayName("예약에 사용 중인 테마 삭제하면 409")
     @Test
     void 예약에_사용중인_테마_삭제하면_400() {

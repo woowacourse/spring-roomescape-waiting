@@ -93,7 +93,7 @@ public class ThemeDao {
     }
 
 
-    public void delete(long id) {
-        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+    public int delete(long id) {
+        return jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }
 }

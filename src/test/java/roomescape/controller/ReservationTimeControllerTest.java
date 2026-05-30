@@ -55,6 +55,16 @@ class ReservationTimeControllerTest extends ControllerTest {
                 .body("times", org.hamcrest.Matchers.notNullValue());
     }
 
+    @DisplayName("존재하지 않는 예약 시간 삭제하면 404")
+    @Test
+    void 존재하지_않는_예약_시간_삭제하면_404() {
+        RestAssured.given().log().all()
+                .when().delete("/times/999")
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 예약 시간입니다."));
+    }
+
     @DisplayName("이미 존재하는 시간이면 409")
     @Test
     void 이미_존재하는_시간이면_400() {

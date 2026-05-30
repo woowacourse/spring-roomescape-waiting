@@ -68,10 +68,10 @@ public class ReservationService {
 
     @Transactional
     public void delete(long id) {
-        reservationDao.findById(id).ifPresent(reservation -> {
-            reservation.validateCancellable(LocalDateTime.now(clock));
-            reservationDao.delete(id);
-        });
+        Reservation reservation = reservationDao.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        reservation.validateCancellable(LocalDateTime.now(clock));
+        reservationDao.delete(id);
     }
 
     public List<Reservation> findAllByName(String username) {
@@ -107,10 +107,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteWaiting(long id) {
-        reservationDao.findByWaitingId(id).ifPresent(reservation -> {
-            reservation.validateCancellable(LocalDateTime.now(clock));
-            reservationDao.deleteWaiting(id);
-        });
+        Reservation reservation = reservationDao.findByWaitingId(id)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 대기입니다."));
+        reservation.validateCancellable(LocalDateTime.now(clock));
+        reservationDao.deleteWaiting(id);
     }
 
     public List<ReservationWaiting> findAllWaitingByName(String username) {

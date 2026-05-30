@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -30,6 +29,7 @@ import roomescape.domain.ReservationType;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 
@@ -127,11 +127,12 @@ class ReservationServiceTest {
     }
 
     @Test
-    void delete_존재하지_않는_예약이면_조용히_반환() {
+    void delete_존재하지_않는_예약이면_예외() {
         given(reservationDao.findById(999L)).willReturn(Optional.empty());
 
-        assertThatCode(() -> reservationService.delete(999L))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> reservationService.delete(999L))
+                .isInstanceOf(ReservationNotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다.");
         then(reservationDao).should().findById(999L);
     }
 
@@ -211,6 +212,16 @@ class ReservationServiceTest {
         reservationService.deleteWaiting(1L);
 
         then(reservationDao).should().deleteWaiting(1L);
+    }
+
+    @Test
+    void deleteWaiting_존재하지_않는_대기이면_예외() {
+        given(reservationDao.findByWaitingId(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationService.deleteWaiting(999L))
+                .isInstanceOf(ReservationNotFoundException.class)
+                .hasMessage("존재하지 않는 대기입니다.");
+        then(reservationDao).should().findByWaitingId(999L);
     }
 
     @Test

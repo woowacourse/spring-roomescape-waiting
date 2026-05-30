@@ -9,6 +9,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.domain.AvailableTime;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ThemeNotFoundException;
 
 @Service
 public class ThemeService {
@@ -45,6 +46,8 @@ public class ThemeService {
         if (reservationDao.existsByThemeId(id)) {
             throw new ReservationConflictException("예약에 사용 중인 테마는 삭제할 수 없습니다.");
         }
-        themeDao.delete(id);
+        if (themeDao.delete(id) == 0) {
+            throw new ThemeNotFoundException("존재하지 않는 테마입니다.");
+        }
     }
 }

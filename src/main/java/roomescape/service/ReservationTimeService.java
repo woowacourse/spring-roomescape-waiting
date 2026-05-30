@@ -8,6 +8,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ReservationTimeNotFoundException;
 
 @Service
 public class ReservationTimeService {
@@ -37,6 +38,8 @@ public class ReservationTimeService {
         if (reservationDao.existsByTimeId(id)) {
             throw new ReservationConflictException("예약에 사용 중인 시간은 삭제할 수 없습니다.");
         }
-        reservationTimeDao.delete(id);
+        if (reservationTimeDao.delete(id) == 0) {
+            throw new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다.");
+        }
     }
 }

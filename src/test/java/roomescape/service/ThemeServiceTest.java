@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.service.exception.ReservationConflictException;
+import roomescape.service.exception.ThemeNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -23,6 +24,7 @@ class ThemeServiceTest {
     @Test
     void delete_정상_삭제() {
         given(reservationDao.existsByThemeId(1L)).willReturn(false);
+        given(themeDao.delete(1L)).willReturn(1);
 
         themeService.delete(1L);
 
@@ -36,5 +38,15 @@ class ThemeServiceTest {
         assertThatThrownBy(() -> themeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("예약에 사용 중인 테마는 삭제할 수 없습니다.");
+    }
+
+    @Test
+    void delete_존재하지_않는_테마이면_예외() {
+        given(reservationDao.existsByThemeId(999L)).willReturn(false);
+        given(themeDao.delete(999L)).willReturn(0);
+
+        assertThatThrownBy(() -> themeService.delete(999L))
+                .isInstanceOf(ThemeNotFoundException.class)
+                .hasMessage("존재하지 않는 테마입니다.");
     }
 }

@@ -90,8 +90,16 @@ class ThemeDaoTest {
     void delete_테마_삭제() {
         long id = themeDao.save("임시 테마", "설명", "https://example.com/img.jpg");
 
-        themeDao.delete(id);
+        int deletedCount = themeDao.delete(id);
 
+        assertThat(deletedCount).isEqualTo(1);
         assertThat(themeDao.findById(id)).isEmpty();
+    }
+
+    @Test
+    void delete_존재하지_않는_테마이면_0_반환() {
+        int deletedCount = themeDao.delete(999L);
+
+        assertThat(deletedCount).isZero();
     }
 }
