@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     start_at TIME NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
@@ -11,6 +12,7 @@ CREATE TABLE IF NOT EXISTS theme
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail_url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
@@ -19,7 +21,7 @@ CREATE TABLE IF NOT EXISTS waiting
     id                  BIGINT      NOT NULL AUTO_INCREMENT,
     customer_name       VARCHAR(10) NOT NULL,
     reservation_date    DATE        NOT NULL,
-    created_at          TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+    created_at          TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
@@ -35,6 +37,7 @@ CREATE TABLE IF NOT EXISTS reservation
     reservation_date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),

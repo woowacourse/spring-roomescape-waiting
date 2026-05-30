@@ -194,7 +194,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     sql,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[]{"id"}
             );
 
             preparedStatement.setString(1, reservationEntity.name());

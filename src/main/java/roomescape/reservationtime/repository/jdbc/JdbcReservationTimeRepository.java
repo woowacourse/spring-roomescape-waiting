@@ -13,7 +13,6 @@ import roomescape.reservationtime.repository.entity.ReservationTimeEntity;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Time;
 import java.util.List;
 import java.util.Optional;
@@ -91,7 +90,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     sql,
-                    Statement.RETURN_GENERATED_KEYS
+                    new String[]{"id"}
             );
 
             preparedStatement.setTime(1, reservationTimeEntity.startAt());
