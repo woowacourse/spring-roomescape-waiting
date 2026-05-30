@@ -1,7 +1,7 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 import static roomescape.config.FixedClockConfig.TODAY;
 
@@ -16,6 +16,7 @@ import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.service.dto.command.ReservationCommand;
+import roomescape.service.dto.result.ReservationResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -38,7 +39,13 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertDoesNotThrow(() -> reservationService.registerReservation(command));
+        ReservationResult saved = reservationService.registerReservation(command);
+
+        assertThat(saved.id()).isNotNull();
+        assertThat(saved.name()).isEqualTo(name);
+        assertThat(saved.date()).isEqualTo(futureDate);
+        assertThat(saved.timeResult().id()).isEqualTo(timeId);
+        assertThat(saved.themeResult().id()).isEqualTo(themeId);
     }
 
     @Test
