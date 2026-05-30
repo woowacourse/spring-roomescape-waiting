@@ -7,6 +7,7 @@ import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +170,8 @@ class ReservationApiTest {
 
         assertThat(reservedCount).isEqualTo(5);
         assertThat(waitingCount).isEqualTo(1);
+        List<String> dates = body.getList("reservationDetailResponses.date");
+        assertThat(dates).isSortedAccordingTo(Comparator.naturalOrder());
     }
 
     @Test

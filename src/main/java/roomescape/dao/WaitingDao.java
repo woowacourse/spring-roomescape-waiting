@@ -121,6 +121,7 @@ public class WaitingDao {
                     INNER JOIN theme t ON w.theme_id = t.id
                 ) ranked
                 WHERE name = ?
+                ORDER BY date, start_at, sequence
                 """;
 
         return jdbcTemplate.query(
