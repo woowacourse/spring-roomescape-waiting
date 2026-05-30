@@ -3,45 +3,40 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.fixture.ReservationTimeFixture;
-import roomescape.domain.fixture.ThemeFixture;
 
 class ReservationEntriesTest {
 
     @Test
     void 예약_엔트리를_추가한다() {
         // given
-        Reservation reservation = reservation();
         ReservationEntries entries = new ReservationEntries(List.of());
 
         // when
-        entries.addReserved("이프", reservation);
+        entries.addReserved("이프");
 
         // then
         assertThat(entries.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getReservation, ReservationEntry::getStatus)
-                .containsExactly("이프", reservation, ReservationStatus.RESERVED);
+                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 대기_엔트리를_추가한다() {
         // given
-        Reservation reservation = reservation();
         ReservationEntries entries = new ReservationEntries(List.of());
 
         // when
-        entries.addWaiting("이프", reservation);
+        entries.addWaiting("이프");
 
         // then
         assertThat(entries.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getReservation, ReservationEntry::getStatus)
-                .containsExactly("이프", reservation, ReservationStatus.WAITING);
+                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .containsExactly("이프", ReservationStatus.WAITING);
     }
 
     @Test
@@ -157,15 +152,7 @@ class ReservationEntriesTest {
                 );
     }
 
-    private Reservation reservation() {
-        return Reservation.createSlot(
-                LocalDate.now().plusDays(1),
-                ThemeFixture.createDefaultTheme(),
-                ReservationTimeFixture.createDefault()
-        );
-    }
-
     private ReservationEntry entry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new ReservationEntry(id, name, null, status, createdAt);
+        return new ReservationEntry(id, name, status, createdAt);
     }
 }

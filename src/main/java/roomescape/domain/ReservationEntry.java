@@ -8,24 +8,22 @@ public class ReservationEntry {
 
     private Long id;
     private String name;
-    private Reservation reservation;
     private ReservationStatus status;
     private LocalDateTime createdAt;
 
-    public ReservationEntry(Long id, String name, Reservation reservation, ReservationStatus status, LocalDateTime createdAt) {
+    public ReservationEntry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
-        this.reservation = reservation;
         this.status = status;
         this.createdAt = createdAt;
     }
 
-    public static ReservationEntry reserve(String name, Reservation reservation) {
-        return new ReservationEntry(null, name, reservation, ReservationStatus.RESERVED, LocalDateTime.now());
+    public static ReservationEntry reserve(String name) {
+        return new ReservationEntry(null, name, ReservationStatus.RESERVED, LocalDateTime.now());
     }
 
-    public static ReservationEntry waiting(String name, Reservation reservation) {
-        return new ReservationEntry(null, name, reservation, ReservationStatus.WAITING, LocalDateTime.now());
+    public static ReservationEntry waiting(String name) {
+        return new ReservationEntry(null, name, ReservationStatus.WAITING, LocalDateTime.now());
     }
 
     public boolean isReserved() {

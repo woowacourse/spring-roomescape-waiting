@@ -57,8 +57,8 @@ class ReservationTest {
         // then
         assertThat(reservation.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getReservation, ReservationEntry::getStatus)
-                .containsExactly("이프", reservation, ReservationStatus.RESERVED);
+                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
@@ -244,6 +244,6 @@ class ReservationTest {
     }
 
     private ReservationEntry entry(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new ReservationEntry(id, name, null, status, createdAt);
+        return new ReservationEntry(id, name, status, createdAt);
     }
 }

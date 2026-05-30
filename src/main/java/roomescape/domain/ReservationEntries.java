@@ -15,14 +15,14 @@ public class ReservationEntries {
         this.entries = new ArrayList<>(entries);
     }
 
-    public ReservationEntry addReserved(String name, Reservation reservation) {
-        ReservationEntry entry = ReservationEntry.reserve(name, reservation);
+    public ReservationEntry addReserved(String name) {
+        ReservationEntry entry = ReservationEntry.reserve(name);
         entries.add(entry);
         return entry;
     }
 
-    public ReservationEntry addWaiting(String name, Reservation reservation) {
-        ReservationEntry entry = ReservationEntry.waiting(name, reservation);
+    public ReservationEntry addWaiting(String name) {
+        ReservationEntry entry = ReservationEntry.waiting(name);
         entries.add(entry);
         return entry;
     }

@@ -51,7 +51,6 @@ public class ReservationEntryDao {
         return new ReservationEntry(
                 keyHolder.getKey().longValue(),
                 entry.getName(),
-                entry.getReservation(),
                 entry.getStatus(),
                 entry.getCreatedAt()
         );

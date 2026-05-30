@@ -69,16 +69,16 @@ public class Reservation {
         if (entries.hasReservedEntry()) {
             throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
         }
-        return entries.addReserved(name, this);
+        return entries.addReserved(name);
     }
 
     public ReservationEntry joinWaitingList(String name) {
         validateNotPast();
         validateDuplicateEntry(name);
         if (entries.hasReservedEntry()) {
-            return entries.addWaiting(name, this);
+            return entries.addWaiting(name);
         }
-        return entries.addReserved(name, this);
+        return entries.addReserved(name);
     }
 
     public List<ReservationEntry> getEntries() {

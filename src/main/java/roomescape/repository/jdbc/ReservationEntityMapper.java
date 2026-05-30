@@ -17,7 +17,6 @@ public final class ReservationEntityMapper {
             new ReservationEntry(
                     rs.getLong("entry_id"),
                     rs.getString("entry_name"),
-                    null,
                     ReservationStatus.valueOf(rs.getString("entry_status")),
                     rs.getTimestamp("entry_created_at").toLocalDateTime()
             );
