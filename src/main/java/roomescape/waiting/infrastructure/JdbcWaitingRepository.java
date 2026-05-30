@@ -1,5 +1,9 @@
 package roomescape.waiting.infrastructure;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,9 +13,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -72,6 +73,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return jdbcTemplate.query(sql, params, waitingRowMapper)
                 .stream()
                 .findFirst();
+    }
+
+    @Override
+    public Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId) {
+        String sql = """
+                SELECT s.time_id
+                FROM waiting w
+                JOIN schedule s ON w.schedule_id = s.id
+                WHERE s.date = :date
+                AND s.theme_id = :themeId
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("themeId", themeId);
+
+        return Set.copyOf(jdbcTemplate.query(sql, params, (resultSet, rowNum) -> resultSet.getLong("time_id")));
     }
 
     @Override

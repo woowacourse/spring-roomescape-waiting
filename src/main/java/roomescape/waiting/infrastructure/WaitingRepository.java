@@ -1,5 +1,7 @@
 package roomescape.waiting.infrastructure;
 
+import java.time.LocalDate;
+import java.util.Set;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
@@ -10,6 +12,8 @@ public interface WaitingRepository {
     Waiting save(Waiting waiting);
 
     Optional<Waiting> findById(long waitingId);
+
+    Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
     boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId);
 

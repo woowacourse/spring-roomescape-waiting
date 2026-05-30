@@ -9,6 +9,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.waiting.infrastructure.JdbcWaitingRepository;
 
+import java.time.LocalDate;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
@@ -89,4 +92,13 @@ class JdbcWaitingRepositoryTest {
         assertThat(count).isEqualTo(3L);
     }
 
+    @Test
+    @DisplayName("날짜와 테마로 대기가 있는 시간 id를 조회할 수 있다.")
+    void findTimeIdByDateAndThemeId_테스트() {
+        waitingRepository.save(new Waiting(null, MEMBER_ID, SCHEDULE_ID));
+
+        Set<Long> result = waitingRepository.findTimeIdByDateAndThemeId(LocalDate.parse("2026-05-05"), 1L);
+
+        assertThat(result).containsExactly(1L);
+    }
 }

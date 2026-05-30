@@ -1,5 +1,10 @@
 package roomescape.reservationtime.application;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
@@ -13,18 +18,15 @@ import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Set;
+import roomescape.waiting.infrastructure.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationTimeService {
-    private final ReservationTimeRepository reservationTimeRepository;
     private final ScheduleService scheduleService;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationTimeSaveResponse save(ReservationTimeSaveRequest body) {
         validateAlreadyTimeNot(body.startAt());
@@ -45,7 +47,10 @@ public class ReservationTimeService {
         List<ReservationTime> totalTimes = reservationTimeRepository.findTimesByDateAndThemeId(date, themeId);
 
         // date와 themeId에 해당하는 reservation의 시간 id들을 모두 조회
-        Set<Long> notAvailableTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
+        Set<Long> reservationTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
+        Set<Long> waitingTimeIds = waitingRepository.findTimeIdByDateAndThemeId(date, themeId);
+        Set<Long> notAvailableTimeIds = new HashSet<>(reservationTimeIds);
+        notAvailableTimeIds.addAll(waitingTimeIds);
 
         return totalTimes.stream()
                 .map(time -> new AvailableTimeFindResponse(
