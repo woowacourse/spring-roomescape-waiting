@@ -24,7 +24,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     public JdbcWaitingRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate.getDataSource());
+        this.jdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
     }

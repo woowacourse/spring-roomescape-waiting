@@ -9,7 +9,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.WaitingRequestDTO;
 import roomescape.dto.WaitingResponseDTO;
-import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
