@@ -85,13 +85,22 @@ public class ReservationService {
         return reservationDao.existsByTimeId(timeId);
     }
 
-    public void deleteByNameAndReservationId(String name, Long reservationId) {
-        boolean isExistReservation = reservationDao.existsByNameAndReservationId(name, reservationId);
-        if (!isExistReservation) {
-            throw new AppException(HttpStatus.NOT_FOUND, "해당 예약이 존재하지 않습니다.");
+    public void deleteReservedByNameAndReservationId(String name, Long reservationId) {
+        Reservation reservation = reservationDao.findById(reservationId);
+        validateReservationAuthority(name, reservation);
+        if (reservation.getStatus() != ReservationStatus.RESERVED) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "예약 상태의 예약만 취소할 수 있습니다.");
         }
+        delete(reservationId);
+    }
 
-        reservationDao.deleteByNameAndReservationId(name, reservationId);
+    public void deleteWaitingByNameAndReservationId(String name, Long reservationId) {
+        Reservation reservation = reservationDao.findById(reservationId);
+        validateReservationAuthority(name, reservation);
+        if (reservation.getStatus() != ReservationStatus.WAITING) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "대기 상태의 예약만 취소할 수 있습니다.");
+        }
+        reservationDao.delete(reservationId);
     }
 
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
