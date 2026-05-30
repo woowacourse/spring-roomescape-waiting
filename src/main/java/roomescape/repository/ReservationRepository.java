@@ -7,19 +7,11 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository {
 
-    List<Reservation> findAll(int offset, int limit);
-
-    long count();
-
     Reservation save(Reservation reservation);
 
     Reservation update(Reservation reservation);
 
-    void deleteById(Long id);
-
     boolean existsByTimeId(Long timeId);
-
-    boolean existsByThemeId(Long themeId);
 
     boolean existsBySlot(LocalDate date, Long timeId, Long themeId);
 
@@ -28,4 +20,10 @@ public interface ReservationRepository {
     List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findByName(String name);
+
+    List<Reservation> findAll(int offset, int limit);
+
+    long count();
+
+    void deleteById(Long id);
 }

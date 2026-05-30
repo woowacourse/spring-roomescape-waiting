@@ -71,7 +71,7 @@ public class ThemeJdbcRepository implements ThemeRepository {
         return results.stream().findFirst();
     }
 
-    public List<Theme> getPopularThemes(LocalDate start, LocalDate end, Integer limit) {
+    public List<Theme> findPopularThemes(LocalDate start, LocalDate end, Integer limit) {
         String sql = """
                 SELECT
                     t.id, t.name, t.description, t.thumbnail_image_url

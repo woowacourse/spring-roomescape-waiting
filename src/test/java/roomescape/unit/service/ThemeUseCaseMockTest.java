@@ -16,22 +16,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.ThemeService;
+import roomescape.service.ThemeQueryService;
 
 @ExtendWith(MockitoExtension.class)
-class ThemeServiceMockTest {
+class ThemeUseCaseMockTest {
 
     @Mock
     private ThemeRepository themeRepository;
 
     @InjectMocks
-    private ThemeService themeService;
+    private ThemeQueryService themeQueryService;
 
     @Test
     void getById는_존재하지_않으면_NotFoundException을_던진다() {
         given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> themeService.getById(1L))
+        assertThatThrownBy(() -> themeQueryService.getById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -40,17 +40,17 @@ class ThemeServiceMockTest {
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
 
-        assertThat(themeService.getById(1L)).isEqualTo(theme);
+        assertThat(themeQueryService.getById(1L)).isEqualTo(theme);
     }
 
     @Test
-    void getPopularThemes는_조회_윈도우를_계산해_저장소에_위임한다() {
+    void findPopular는_조회_윈도우를_계산해_저장소에_위임한다() {
         LocalDate now = LocalDate.of(2026, 5, 8);
-        given(themeRepository.getPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10))
+        given(themeRepository.findPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10))
                 .willReturn(List.of());
 
-        themeService.getPopularThemes(now, 7, 10);
+        themeQueryService.findPopular(now, 7, 10);
 
-        verify(themeRepository).getPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10);
+        verify(themeRepository).findPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10);
     }
 }

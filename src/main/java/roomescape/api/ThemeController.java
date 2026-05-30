@@ -17,22 +17,22 @@ import roomescape.domain.Theme;
 import roomescape.dto.ThemeRequest;
 import roomescape.dto.ThemeResponse;
 import roomescape.dto.ThemeResponses;
-import roomescape.facade.ReservationFacade;
-import roomescape.service.ThemeService;
+import roomescape.service.ThemeCommandService;
+import roomescape.service.ThemeQueryService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
-    private final ReservationFacade reservationFacade;
+    private final ThemeCommandService themeCommandService;
+    private final ThemeQueryService themeQueryService;
 
     public ThemeController(
-            ThemeService themeService,
-            ReservationFacade reservationFacade
+            ThemeCommandService themeCommandService,
+            ThemeQueryService themeQueryService
     ) {
-        this.themeService = themeService;
-        this.reservationFacade = reservationFacade;
+        this.themeCommandService = themeCommandService;
+        this.themeQueryService = themeQueryService;
     }
 
     @PostMapping
@@ -40,7 +40,7 @@ public class ThemeController {
             @RequestBody @Valid ThemeRequest request
     ) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnailImageUrl());
-        Theme savedTheme = themeService.addTheme(theme);
+        Theme savedTheme = themeCommandService.save(theme);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ThemeResponse.from(savedTheme));
@@ -48,7 +48,7 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<ThemeResponses> search() {
-        List<Theme> themes = themeService.getThemes();
+        List<Theme> themes = themeQueryService.findAll();
 
         return ResponseEntity.ok()
                 .body(ThemeResponses.from(themes));
@@ -61,7 +61,7 @@ public class ThemeController {
             @RequestParam(defaultValue = "10") Integer limit
     ) {
         LocalDate baseDate = (now != null) ? now : LocalDate.now();
-        List<Theme> popularThemes = themeService.getPopularThemes(baseDate, days, limit);
+        List<Theme> popularThemes = themeQueryService.findPopular(baseDate, days, limit);
 
         return ResponseEntity.ok()
                 .body(ThemeResponses.from(popularThemes));
@@ -69,7 +69,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationFacade.deleteTheme(id);
+        themeCommandService.delete(id);
 
         return ResponseEntity.noContent().build();
     }
