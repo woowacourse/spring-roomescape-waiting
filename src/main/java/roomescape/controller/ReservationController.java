@@ -46,7 +46,7 @@ public class ReservationController {
     @PatchMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable("reservationId") Long reservationId,
-            @RequestBody UpdateReservationRequest request) {
+            @Valid @RequestBody UpdateReservationRequest request) {
         UpdateReservationCommand command = new UpdateReservationCommand(
                 request.date(), request.timeId()
         );

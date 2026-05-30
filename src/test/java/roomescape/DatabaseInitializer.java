@@ -17,6 +17,7 @@ public class DatabaseInitializer {
         jdbcTemplate.update("TRUNCATE TABLE reservation");
         jdbcTemplate.update("TRUNCATE TABLE reservation_time");
         jdbcTemplate.update("TRUNCATE TABLE theme");
+        jdbcTemplate.update("TRUNCATE TABLE reservation_waiting");
         jdbcTemplate.update("SET REFERENTIAL_INTEGRITY TRUE");
     }
 }
