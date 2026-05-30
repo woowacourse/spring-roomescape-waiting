@@ -42,6 +42,10 @@ public class WaitingControllerTest {
         return login("c", "test3");
     }
 
+    private String loginReservedUser() {
+        return login("a", "test1");
+    }
+
     private String login(String name, String password) {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", name);
@@ -164,6 +168,22 @@ public class WaitingControllerTest {
                 .statusCode(409)
                 .body("success", is(false))
                 .body("error.code", is("WAITING_409"));
+    }
+
+    @Test
+    @DisplayName("본인이 이미 예약한 스케줄에는 대기를 신청할 수 없다.")
+    void 예약_대기_API_테스트_5() {
+        String accessToken = loginReservedUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(409)
+                .body("success", is(false))
+                .body("error.code", is("WAITING_409_OWN_RESERVATION"));
     }
 
     @Test

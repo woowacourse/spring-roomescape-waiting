@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     // Waiting
     WAITING_ALREADY_EXIST(HttpStatus.CONFLICT, "WAITING_409", "이미 신청한 대기가 존재합니다."),
+    WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION(HttpStatus.CONFLICT, "WAITING_409_OWN_RESERVATION", "본인이 예약한 스케줄에는 대기를 신청할 수 없습니다."),
     WAITING_NOT_OWNED_BY_MEMBER(HttpStatus.FORBIDDEN, "WAITING_403_OWNER", "본인 대기(%d번)만 처리할 수 있습니다."),
     WAITING_TARGET_BAD_REQUEST(HttpStatus.BAD_REQUEST, "WAITING_400_TARGET_BAD_REQUEST", "예약 또는 대기가 존재하는 스케줄에만 대기를 신청할 수 있습니다."),
 

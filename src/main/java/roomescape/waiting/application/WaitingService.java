@@ -52,7 +52,7 @@ public class WaitingService {
 
     private void validateReservedByMemberNotExists(long memberId, long scheduleId) {
         if (reservationRepository.existsByMemberIdAndScheduleId(memberId, scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
+            throw new EscapeRoomException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION);
         }
     }
 

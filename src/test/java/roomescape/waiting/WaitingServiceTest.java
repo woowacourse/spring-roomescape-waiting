@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
@@ -85,7 +86,9 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST)
+                );
 
         verify(scheduleService).findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
@@ -103,7 +106,9 @@ class WaitingServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
-                .isInstanceOf(EscapeRoomException.class);
+                .isInstanceOfSatisfying(EscapeRoomException.class, exception ->
+                        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION)
+                );
 
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
