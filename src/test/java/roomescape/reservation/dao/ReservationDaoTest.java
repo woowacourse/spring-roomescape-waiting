@@ -22,35 +22,35 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
 import roomescape.reservation.dto.response.ThemeSimpleResponse;
 import roomescape.reservation.dto.response.TimeResponse;
-import roomescape.theme.dao.ThemeDAO;
+import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 
 @JdbcTest
-class ReservationDAOTest {
+class ReservationDaoTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationDAO reservationDAO;
-    private ReservationTimeDAO reservationTimeDAO;
-    private ThemeDAO themeDAO;
+    private ReservationDao reservationDao;
+    private ReservationTimeDao reservationTimeDao;
+    private ThemeDao themeDao;
 
     @BeforeEach
     void setUp() {
-        reservationDAO = new ReservationDAO(jdbcTemplate);
-        reservationTimeDAO = new ReservationTimeDAO(jdbcTemplate);
-        themeDAO = new ThemeDAO(jdbcTemplate);
+        reservationDao = new ReservationDao(jdbcTemplate);
+        reservationTimeDao = new ReservationTimeDao(jdbcTemplate);
+        themeDao = new ThemeDao(jdbcTemplate);
     }
 
     private ReservationTimeCreateResponse createTime() {
-        ReservationTime reservationTime = reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
 
         return ReservationTimeCreateResponse.of(reservationTime.getId(), LocalTime.of(10, 10));
     }
 
     private Theme createTheme() {
-        return themeDAO.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
+        return themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
     }
 
     @Nested
@@ -63,7 +63,7 @@ class ReservationDAOTest {
             Theme theme = createTheme();
 
             // when
-            Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
+            Reservation saved = reservationDao.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // then
             assertThat(saved.getId()).isNotNull();
@@ -79,10 +79,10 @@ class ReservationDAOTest {
             Theme theme = createTheme();
 
             // when
-            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
+            reservationDao.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // then
-            List<ReservationResponse> all = reservationDAO.findAll().stream()
+            List<ReservationResponse> all = reservationDao.findAll().stream()
                     .map(reservation -> ReservationResponse.of(
                             reservation.getId(),
                             reservation.getName(),
@@ -110,7 +110,7 @@ class ReservationDAOTest {
         void 저장된_모든_예약을_조회한다() {
             // given
             // when
-            List<ReservationResponse> all = reservationDAO.findAll().stream()
+            List<ReservationResponse> all = reservationDao.findAll().stream()
                     .map(reservation -> ReservationResponse.of(
                             reservation.getId(),
                             reservation.getName(),
@@ -143,7 +143,7 @@ class ReservationDAOTest {
         void ID로_예약을_조회한다() {
             // given
             // when
-            Reservation reservation = reservationDAO.findById(1L);
+            Reservation reservation = reservationDao.findById(1L);
 
             // then
             Assertions.assertThat(reservation.getName()).isEqualTo("브라운");
@@ -158,13 +158,13 @@ class ReservationDAOTest {
         // given
         ReservationTimeCreateResponse time = createTime();
         Theme theme = createTheme();
-        Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
+        Reservation saved = reservationDao.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
         // when
-        reservationDAO.delete(saved.getId());
+        reservationDao.delete(saved.getId());
 
         // then
-        List<ReservationResponse> all = reservationDAO.findAll().stream()
+        List<ReservationResponse> all = reservationDao.findAll().stream()
                 .map(reservation -> ReservationResponse.of(
                         reservation.getId(),
                         reservation.getName(),
@@ -184,10 +184,10 @@ class ReservationDAOTest {
             // given
             ReservationTimeCreateResponse time = createTime();
             Theme theme = createTheme();
-            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
+            reservationDao.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // when
-            boolean exists = reservationDAO.existsByTimeId(time.id());
+            boolean exists = reservationDao.existsByTimeId(time.id());
 
             // then
             assertThat(exists).isTrue();
@@ -196,7 +196,7 @@ class ReservationDAOTest {
         @Test
         void 해당_시간의_예약이_없으면_false를_반환한다() {
             // when
-            boolean exists = reservationDAO.existsByTimeId(999L);
+            boolean exists = reservationDao.existsByTimeId(999L);
 
             // then
             assertThat(exists).isFalse();

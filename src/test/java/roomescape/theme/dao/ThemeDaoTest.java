@@ -14,16 +14,16 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 
 @JdbcTest
-class ThemeDAOTest {
+class ThemeDaoTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ThemeDAO themeDAO;
+    private ThemeDao themeDao;
 
     @BeforeEach
     void setUp() {
-        themeDAO = new ThemeDAO(jdbcTemplate);
+        themeDao = new ThemeDao(jdbcTemplate);
     }
 
     @Nested
@@ -35,7 +35,7 @@ class ThemeDAOTest {
             Theme theme = Theme.of(1L, "테마이름", "테마설명", "https://image.url");
 
             // when
-            Theme saved = themeDAO.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
+            Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // then
             assertThat(saved.getId()).isNotNull();
@@ -48,10 +48,10 @@ class ThemeDAOTest {
             Theme theme = Theme.of(1L, "테마이름", "테마설명", "https://image.url");
 
             // when
-            Theme saved = themeDAO.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
+            Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // then
-            List<Theme> allThemes = themeDAO.findAll();
+            List<Theme> allThemes = themeDao.findAll();
             assertThat(allThemes).hasSize(1);
             assertThat(allThemes.get(0)).isEqualTo(saved);
         }
@@ -60,12 +60,12 @@ class ThemeDAOTest {
     @Test
     void 저장된_모든_테마를_조회한다() {
         // given
-        themeDAO.insert(new ThemeCreateRequest("테마이름1", "테마설명1", "https://image.url1"));
-        themeDAO.insert(new ThemeCreateRequest("테마이름2", "테마설명2", "https://image.url2"));
-        themeDAO.insert(new ThemeCreateRequest("테마이름3", "테마설명3", "https://image.url3"));
+        themeDao.insert(new ThemeCreateRequest("테마이름1", "테마설명1", "https://image.url1"));
+        themeDao.insert(new ThemeCreateRequest("테마이름2", "테마설명2", "https://image.url2"));
+        themeDao.insert(new ThemeCreateRequest("테마이름3", "테마설명3", "https://image.url3"));
 
         // when
-        List<Theme> themes = themeDAO.findAll();
+        List<Theme> themes = themeDao.findAll();
 
         // then
         assertThat(themes).hasSize(3);
@@ -77,10 +77,10 @@ class ThemeDAOTest {
         @Test
         void 존재하는_테마를_조회한다() {
             // given
-            Theme saved = themeDAO.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
+            Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // when
-            Theme found = themeDAO.findById(saved.getId());
+            Theme found = themeDao.findById(saved.getId());
 
             // then
             assertThat(found).isEqualTo(saved);
@@ -89,7 +89,7 @@ class ThemeDAOTest {
         @Test
         void 존재하지_않는_ID로_조회하면_예외를_던진다() {
             // when // then
-            assertThatThrownBy(() -> themeDAO.findById(999L))
+            assertThatThrownBy(() -> themeDao.findById(999L))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("존재하지 않는 테마");
         }
@@ -101,20 +101,20 @@ class ThemeDAOTest {
         @Test
         void ID로_테마를_삭제한다() {
             // given
-            Theme saved = themeDAO.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
+            Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // when
-            boolean deleted = themeDAO.delete(saved.getId());
+            boolean deleted = themeDao.delete(saved.getId());
 
             // then
             assertThat(deleted).isTrue();
-            assertThat(themeDAO.findAll()).isEmpty();
+            assertThat(themeDao.findAll()).isEmpty();
         }
 
         @Test
         void 존재하지_않는_ID_삭제_시_false를_반환한다() {
             // when
-            boolean deleted = themeDAO.delete(999L);
+            boolean deleted = themeDao.delete(999L);
 
             // then
             assertThat(deleted).isFalse();

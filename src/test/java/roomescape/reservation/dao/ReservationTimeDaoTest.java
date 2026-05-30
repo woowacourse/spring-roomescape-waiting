@@ -11,23 +11,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
 import roomescape.reservation.dto.response.ReservationTimeFindAllResponse;
 
 @JdbcTest
-class ReservationTimeDAOTest {
+class ReservationTimeDaoTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private ReservationTimeDAO reservationTimeDAO;
+    private ReservationTimeDao reservationTimeDao;
 
     @BeforeEach
     void setUp() {
-        reservationTimeDAO = new ReservationTimeDAO(jdbcTemplate);
+        reservationTimeDao = new ReservationTimeDao(jdbcTemplate);
     }
 
     @Nested
@@ -39,7 +38,7 @@ class ReservationTimeDAOTest {
             ReservationTimeCreateRequest time = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
 
             // when
-            ReservationTime reservationTime = reservationTimeDAO.insert(time);
+            ReservationTime reservationTime = reservationTimeDao.insert(time);
             ReservationTimeCreateResponse saved = ReservationTimeCreateResponse.of(reservationTime.getId(), LocalTime.of(10, 0));
 
             // then
@@ -50,10 +49,10 @@ class ReservationTimeDAOTest {
         @Test
         void 저장_후_전체_조회에_포함된다() {
             // given
-            reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+            reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
 
             // when
-            List<ReservationTimeFindAllResponse> all = reservationTimeDAO.findAll().stream()
+            List<ReservationTimeFindAllResponse> all = reservationTimeDao.findAll().stream()
                     .map(it -> ReservationTimeFindAllResponse.of(it.getId(), it.getStartAt()))
                     .toList();
 
@@ -65,12 +64,12 @@ class ReservationTimeDAOTest {
     @Test
     void 저장된_모든_시간을_조회한다() {
         // given
-        reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
-        reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
+        reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+        reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
+        reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
         // when
-        List<ReservationTimeFindAllResponse> all = reservationTimeDAO.findAll().stream()
+        List<ReservationTimeFindAllResponse> all = reservationTimeDao.findAll().stream()
                 .map(it -> ReservationTimeFindAllResponse.of(it.getId(), it.getStartAt()))
                 .toList();
 
@@ -84,11 +83,11 @@ class ReservationTimeDAOTest {
         @Test
         void 존재하는_시간을_조회한다() {
             // given
-            ReservationTime reservationTime = reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+            ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
             ReservationTimeCreateResponse saved = ReservationTimeCreateResponse.of(reservationTime.getId(), LocalTime.of(10, 10, 10));
 
             // when
-            ReservationTime found = reservationTimeDAO.findById(saved.id());
+            ReservationTime found = reservationTimeDao.findById(saved.id());
 
             // then
             assertThat(found.getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -97,7 +96,7 @@ class ReservationTimeDAOTest {
         @Test
         void 존재하지_않는_ID로_조회하면_예외를_던진다() {
             // when // then
-            assertThatThrownBy(() -> reservationTimeDAO.findById(999L))
+            assertThatThrownBy(() -> reservationTimeDao.findById(999L))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("존재하지 않는 예약 시간");
         }
@@ -106,14 +105,14 @@ class ReservationTimeDAOTest {
     @Test
     void ID로_시간을_삭제한다() {
         // given
-        ReservationTime reservationTime = reservationTimeDAO.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+        ReservationTime reservationTime = reservationTimeDao.insert(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
         ReservationTimeCreateResponse saved = ReservationTimeCreateResponse.of(reservationTime.getId(), LocalTime.of(10, 10, 10));
 
         // when
-        reservationTimeDAO.delete(saved.id());
+        reservationTimeDao.delete(saved.id());
 
         // then
-        List<ReservationTimeFindAllResponse> all = reservationTimeDAO.findAll().stream()
+        List<ReservationTimeFindAllResponse> all = reservationTimeDao.findAll().stream()
                 .map(it -> ReservationTimeFindAllResponse.of(it.getId(), it.getStartAt()))
                 .toList();
         assertThat(all).isEmpty();

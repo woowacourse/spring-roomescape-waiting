@@ -18,11 +18,11 @@ import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Component
-public class ReservationDAO {
+public class ReservationDao {
 
   private JdbcTemplate jdbcTemplate;
 
-  public ReservationDAO(JdbcTemplate jdbcTemplate) {
+  public ReservationDao(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 

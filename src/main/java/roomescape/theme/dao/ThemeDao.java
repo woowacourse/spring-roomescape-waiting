@@ -14,12 +14,12 @@ import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ReservedThemeResponse;
 
 @Component
-public class ThemeDAO {
+public class ThemeDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    public ThemeDAO(JdbcTemplate jdbcTemplate) {
+    public ThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
