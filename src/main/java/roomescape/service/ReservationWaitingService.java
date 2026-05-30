@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
 import roomescape.exception.NotFoundException;
-import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationWaitingRepository;
 
 @Service
@@ -13,7 +12,6 @@ import roomescape.repository.ReservationWaitingRepository;
 public class ReservationWaitingService {
 
     private static final String RESERVATION_WAITING_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
-    private static final String NOT_OWNER = "본인의 예약 대기가 아닙니다.";
 
     private final ReservationWaitingRepository reservationWaitingRepository;
 
@@ -26,21 +24,15 @@ public class ReservationWaitingService {
         return reservationWaitingRepository.save(reservationWaiting);
     }
 
-    public boolean existBy(String name, Long reservationId) {
-        return reservationWaitingRepository.existBy(name, reservationId);
-    }
-
     @Transactional
     public void cancelMyReservationWaiting(Long id, String name) {
-        ReservationWaiting reservationWaiting = findById(id);
-        if (!reservationWaiting.isOwnedBy(name)) {
-            throw new UnauthorizedException(NOT_OWNER);
-        }
+        ReservationWaiting reservationWaiting = getById(id);
+        reservationWaiting.cancelBy(name);
 
         reservationWaitingRepository.deleteById(id);
     }
 
-    public ReservationWaiting findById(Long id) {
+    public ReservationWaiting getById(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format(RESERVATION_WAITING_NOT_FOUND_FORMAT, id)));
     }

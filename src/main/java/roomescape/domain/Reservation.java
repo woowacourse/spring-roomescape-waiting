@@ -54,6 +54,16 @@ public class Reservation {
         return new Reservation(name, date, time, theme);
     }
 
+    private static void validateCreatable(LocalDate date, ReservationTime time, LocalDateTime now) {
+        if (isPast(date, time, now)) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_CREATE_REJECTED);
+        }
+    }
+
+    private static boolean isPast(LocalDate date, ReservationTime time, LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+    }
+
     public Reservation updateWith(
             String name,
             LocalDate date,
@@ -83,12 +93,7 @@ public class Reservation {
     }
 
     public boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
-    }
-
-    // TODO: slot? Theme이 없어도 slot이라 부를 수 있는가?
-    public boolean isSameSlot(LocalDate date, ReservationTime time) {
-        return this.date.equals(date) && this.time.equals(time);
+        return isPast(this.date, this.time, now);
     }
 
     public Long getId() {
@@ -141,14 +146,8 @@ public class Reservation {
     }
 
     private void validateTargetNotPast(LocalDate date, ReservationTime time, LocalDateTime now) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
+        if (isPast(date, time, now)) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_UPDATE_REJECTED);
-        }
-    }
-
-    private static void validateCreatable(LocalDate date, ReservationTime time, LocalDateTime now) {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_CREATE_REJECTED);
         }
     }
 }

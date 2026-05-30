@@ -1,5 +1,16 @@
 package roomescape.unit.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,18 +24,6 @@ import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.ReservationWaitingService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceMockTest {
@@ -48,19 +47,19 @@ class ReservationWaitingServiceMockTest {
     }
 
     @Test
-    void findById는_존재하지_않으면_NotFoundException을_던진다() {
+    void getById는_존재하지_않으면_NotFoundException을_던진다() {
         given(reservationWaitingRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationWaitingService.findById(1L))
+        assertThatThrownBy(() -> reservationWaitingService.getById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void findById는_존재하면_대기를_반환한다() {
+    void getById는_존재하면_대기를_반환한다() {
         ReservationWaiting waiting = waitingOwnedBy(1L, "민욱");
         given(reservationWaitingRepository.findById(1L)).willReturn(Optional.of(waiting));
 
-        assertThat(reservationWaitingService.findById(1L)).isEqualTo(waiting);
+        assertThat(reservationWaitingService.getById(1L)).isEqualTo(waiting);
     }
 
     @Test

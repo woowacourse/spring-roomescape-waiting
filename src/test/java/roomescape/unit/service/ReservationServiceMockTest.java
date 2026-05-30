@@ -39,28 +39,28 @@ class ReservationServiceMockTest {
     private ReservationService reservationService;
 
     @Test
-    void findMyReservation은_예약이_없으면_NotFoundException을_던진다() {
+    void getById는_예약이_없으면_NotFoundException을_던진다() {
         given(reservationRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.findMyReservation(1L, "민욱"))
+        assertThatThrownBy(() -> reservationService.getById(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
     @Test
-    void findMyReservation은_본인_예약이_아니면_UnauthorizedException을_던진다() {
-        Reservation reservation = new Reservation(1L, "티뉴", FUTURE, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        assertThatThrownBy(() -> reservationService.findMyReservation(1L, "민욱"))
-                .isInstanceOf(UnauthorizedException.class);
-    }
-
-    @Test
-    void findMyReservation은_본인_예약이면_예약을_반환한다() {
+    void getById는_예약이_있으면_예약을_반환한다() {
         Reservation reservation = new Reservation(1L, "민욱", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
-        assertThat(reservationService.findMyReservation(1L, "민욱")).isEqualTo(reservation);
+        assertThat(reservationService.getById(1L)).isEqualTo(reservation);
+    }
+
+    @Test
+    void cancelMyReservation은_본인_예약이_아니면_UnauthorizedException을_던진다() {
+        Reservation reservation = new Reservation(1L, "티뉴", FUTURE, TIME, THEME);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.cancelMyReservation(1L, "민욱"))
+                .isInstanceOf(UnauthorizedException.class);
     }
 
     @Test

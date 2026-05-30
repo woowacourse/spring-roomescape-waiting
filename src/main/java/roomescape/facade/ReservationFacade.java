@@ -14,7 +14,6 @@ import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.TimeWithStatusResponse;
-import roomescape.exception.BusinessRuleViolationException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -22,9 +21,6 @@ import roomescape.service.ThemeService;
 
 @Component
 public class ReservationFacade {
-
-    private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
-    private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
 
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
@@ -94,14 +90,7 @@ public class ReservationFacade {
     @Transactional
     public ReservationWaiting addWaiting(ReservationWaitingRequest request) {
         Reservation reservation = reservationService.getById(request.reservationId());
-        if (reservation.isOwnedBy(request.name())) {
-            throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
-        }
-        if (reservation.isPast(LocalDateTime.now())) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
-        }
-
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWith(
                 request.name(),
                 LocalDateTime.now(),
                 reservation

@@ -2,8 +2,14 @@ package roomescape.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.UnauthorizedException;
 
 public class ReservationWaiting {
+
+    private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
+    private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
+    private static final String NOT_OWNER = "본인의 예약 대기가 아닙니다.";
 
     private final Long id;
     private final String name;
@@ -33,8 +39,26 @@ public class ReservationWaiting {
         this(null, name, createdAt, reservation, 0);
     }
 
-    public boolean isOwnedBy(String name) {
-        return name.equals(this.name);
+    public static ReservationWaiting createWith(
+            String name,
+            LocalDateTime now,
+            Reservation reservation
+    ) {
+        validateWaitable(name, now, reservation);
+        return new ReservationWaiting(name, now, reservation);
+    }
+
+    private static void validateWaitable(String name, LocalDateTime now, Reservation reservation) {
+        if (reservation.isOwnedBy(name)) {
+            throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
+        }
+        if (reservation.isPast(now)) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
+        }
+    }
+
+    public void cancelBy(String name) {
+        validateOwner(name);
     }
 
     public Long getId() {
@@ -72,5 +96,11 @@ public class ReservationWaiting {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    private void validateOwner(String name) {
+        if (!this.name.equals(name)) {
+            throw new UnauthorizedException(NOT_OWNER);
+        }
     }
 }
