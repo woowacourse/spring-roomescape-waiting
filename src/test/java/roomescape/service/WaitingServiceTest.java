@@ -11,10 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingException;
-import roomescape.exception.PastTimeException;
-import roomescape.exception.WaitingNotFoundException;
+import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
@@ -95,14 +92,31 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("이미 지난 시간으로 대기를 추가하면, 예외가 발생한다.")
+    @DisplayName("존재하는 예약이지만 이미 지난 시간으로 대기를 추가하면, 예외가 발생한다.")
     void savePassedWaiting() {
         LocalDate today = LocalDate.now();
-        TimeSlot pastTimeSlot = new TimeSlot(1L, LocalTime.of(0, 0));
-        stubDependencies(pastTimeSlot, savedTheme);
-
+        TimeSlot pastTime = new TimeSlot(1L, LocalTime.of(0, 0));
+        stubDependencies(pastTime, savedTheme);
+        stubOtherPersonReservation(today, pastTime);
         assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(PastTimeException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약에 대기를 추가하면, 예외가 발생한다.")
+    void saveNotExistsReservationWaiting() {
+        LocalDate today = LocalDate.now();
+        stubDependencies(savedTimeSlot, savedTheme);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
+                .willReturn(Optional.empty());
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
+                .isInstanceOf(InvalidWaitingPrerequisiteException.class);
+    }
+
+    private void stubOtherPersonReservation(LocalDate date, TimeSlot timeSlot) {
+        Reservation reservation = new Reservation(2L, "포비", date, timeSlot, savedTheme);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L))
+                .willReturn(Optional.of(reservation));
     }
 
     private void stubDependencies(TimeSlot timeSlot, Theme theme) {

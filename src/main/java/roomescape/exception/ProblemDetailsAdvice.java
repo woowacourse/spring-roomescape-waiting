@@ -1,9 +1,6 @@
 package roomescape.exception;
 
 import jakarta.validation.ConstraintViolationException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +14,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ProblemDetailsAdvice {
@@ -28,6 +29,7 @@ public class ProblemDetailsAdvice {
         exceptionHttpStatusMap.put(DuplicateTimeException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(DuplicateWaitingException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(InvalidOwnershipException.class, HttpStatus.FORBIDDEN);
+        exceptionHttpStatusMap.put(InvalidWaitingPrerequisiteException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(PastReservationControlException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(PastTimeException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(ReservationNotFoundException.class, HttpStatus.NOT_FOUND);

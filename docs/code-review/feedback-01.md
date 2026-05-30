@@ -9,9 +9,12 @@
 
 ### Review 01
 
-> `Booking`(`Reservation` + `Waiting`) 조회 시 `Waiting` 개수만큼 추가 쿼리 발생
+> ### `Booking`(`Reservation` + `Waiting`) 조회 시 `Waiting` 개수만큼 추가 쿼리 발생
+>
+> Reservation을 조회하고 존재하는 Waiting마다 쿼리가 추가로 발생하게 되어서 매번 2번씩 추가쿼리가 발생하게 됩니다.  
+> waiting을 처음에 조회해올 때 Join문을 써서 한번에 가져오면 어떤가요?
 
-### Reply 01
+### Feedback 01
 
 ```java
 public class Waiting {
@@ -52,9 +55,28 @@ WHERE w.id = ?
 
 ### Review 02
 
+> ### 존재하지 않는 예약에 대한 대기 가능
 >
+> 예약이 있는 슬롯에만 대기를 신청할 수 있도록 하는 조건도 검증해줘야하지 않을까요?
 
-### Reply 02
+### Feedback 02
+
+```java
+    private void validReservation(Waiting waiting) {
+    Reservation reservation = findReservationOrThrow(waiting);
+    validateOwnership(reservation, waiting);
+}
+
+private Reservation findReservationOrThrow(Waiting waiting) {
+    return reservationRepository.findByDateAndTimeIdAndThemeId(
+            waiting.getDate(),
+            waiting.getTimeSlot().getId(),
+            waiting.getTheme().getId()
+    ).orElseThrow(InvalidWaitingPrerequisiteException::new);
+}
+```
+
+해당 정보의 예약이 존재하는지 먼저 확인하고, 있을 경우에만 검증을 진행하도록 수정했습니다!
 
 ---
 
@@ -62,7 +84,7 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0
 
 ---
 
@@ -70,7 +92,7 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0
 
 ---
 
@@ -78,7 +100,7 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0
 
 ---
 
@@ -86,7 +108,7 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0
 
 ---
 
@@ -94,7 +116,7 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0
 
 ---
 
@@ -102,4 +124,4 @@ WHERE w.id = ?
 
 >
 
-### Reply 0
+### Feedback 0

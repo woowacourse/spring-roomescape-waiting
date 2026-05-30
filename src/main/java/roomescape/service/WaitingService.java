@@ -65,11 +65,16 @@ public class WaitingService {
     }
 
     private void validReservation(Waiting waiting) {
-        reservationRepository.findByDateAndTimeIdAndThemeId(
+        Reservation reservation = findReservationOrThrow(waiting);
+        validateOwnership(reservation, waiting);
+    }
+
+    private Reservation findReservationOrThrow(Waiting waiting) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(
                 waiting.getDate(),
                 waiting.getTimeSlot().getId(),
                 waiting.getTheme().getId()
-        ).ifPresent(reservation -> validateOwnership(reservation, waiting));
+        ).orElseThrow(InvalidWaitingPrerequisiteException::new);
     }
 
     private void validateOwnership(Reservation reservation, Waiting waiting) {
