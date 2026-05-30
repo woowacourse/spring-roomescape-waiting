@@ -137,19 +137,12 @@ public class ReservationService {
         List<Reservation> orderedReservations = reservationRepository.findAllByReservationIdOrder(
             reservationSlot.getId());
         if (orderedReservations.isEmpty()) {
-            deleteReservationSlotIfEmpty(reservationSlot);
+            reservationSlotRepository.deleteById(reservationSlot.getId());
             return;
         }
         reservationRepository.updateWaitingNumbers(orderedReservations);
         reservationRepository.updateStatus(orderedReservations.getFirst().getId(), ReservationStatus.CONFIRMED);
         reservationRepository.updateAllStatus(orderedReservations.subList(1, orderedReservations.size()));
-    }
-
-    private void deleteReservationSlotIfEmpty(ReservationSlot reservationSlot) {
-        Long remainingReservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
-        if (remainingReservationCount == 0) {
-            reservationSlotRepository.deleteById(reservationSlot.getId());
-        }
     }
 
     private boolean hasSameReservationSlot(ReservationSlot oldSlot, ReservationSlot newSlot) {
