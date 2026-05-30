@@ -219,25 +219,12 @@ public Waiting saveWaiting(WaitingRequest request) {
 
 ### Review 09
 
-> ###   
->
+> ### 대기 순번 조회 방식 혼재
+> 현재 대기 순번을 조회하는 방식이 2가지가 혼재되어 있는 것 같습니다.  
+> 하나의 로직으로 통일하는게 어떤가요?
 
 ### Feedback 09
 
----
-
-### Review 10
-
-> ###   
->
-
-### Feedback 10
-
----
-
-### Review 0
-
-> ###   
->
-
-### Feedback 0
+[이전 리뷰](https://github.com/woowacourse/spring-roomescape-waiting/pull/413#discussion_r3320846648) 반영 과정에서 일원화했습니다!  
+쿼리를 상수로 분리하는건 별로 선호하지 않지만 쿼리가 길어져서 확인이 힘들 때나  
+공통적으로 쿼리에 등장하는 부분이 있을 때는 상수 추출이 꽤나 효과적이네요.
