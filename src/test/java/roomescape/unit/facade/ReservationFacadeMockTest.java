@@ -105,7 +105,8 @@ class ReservationFacadeMockTest {
     void 이미_대기를_신청한_예약에는_다시_신청할_수_없다() {
         Reservation other = new Reservation(RESERVATION_ID, "티뉴", DATE, TIME, THEME);
         given(reservationService.getById(RESERVATION_ID)).willReturn(other);
-        given(reservationWaitingService.existBy("민욱", RESERVATION_ID)).willReturn(true);
+        given(reservationWaitingService.addWaiting(any(ReservationWaiting.class)))
+                .willThrow(new BusinessRuleViolationException("이미 대기를 신청한 예약입니다."));
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 

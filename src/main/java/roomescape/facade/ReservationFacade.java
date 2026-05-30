@@ -23,11 +23,8 @@ import roomescape.service.ThemeService;
 @Component
 public class ReservationFacade {
 
-    private static final String CANNOT_DELETE_TIME_IN_USE = "ID %d번 시간을 사용 중인 예약이 존재하여 시간을 삭제할 수 없습니다.";
-    private static final String CANNOT_DELETE_THEME_IN_USE = "ID %d번 테마를 사용 중인 예약이 존재하여 테마를 삭제할 수 없습니다.";
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
-    private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
@@ -72,7 +69,7 @@ public class ReservationFacade {
                 LocalDateTime.now()
         );
 
-        return reservationService.updateReservation(existing, updated);
+        return reservationService.updateReservation(updated);
     }
 
     public List<TimeWithStatusResponse> getTimesWithAvailability(LocalDate date, Long themeId) {
@@ -84,21 +81,13 @@ public class ReservationFacade {
                 .toList();
     }
 
-    // TODO: delete cascade 불가는 db제약으로 풀어내기
-    //  그럼 파사드에서 빠져도 됨
     @Transactional
     public void deleteTime(Long id) {
-        if (reservationService.hasReservationsByTimeId(id)) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_TIME_IN_USE, id));
-        }
         reservationTimeService.deleteTime(id);
     }
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (reservationService.hasReservationsByThemeId(id)) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_THEME_IN_USE, id));
-        }
         themeService.deleteTheme(id);
     }
 
@@ -110,9 +99,6 @@ public class ReservationFacade {
         }
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
-        }
-        if (reservationWaitingService.existBy(request.name(), reservation.getId())) {
-            throw new BusinessRuleViolationException(ALREADY_WAITING);
         }
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(

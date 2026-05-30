@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,9 +15,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
 
 @Repository
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {
+
+    private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
+    private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
 
     private static final String SELECT_BASE = """
             SELECT rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
@@ -78,13 +85,22 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         String sql = "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservationWaiting.getName());
-            ps.setTimestamp(2, Timestamp.valueOf(reservationWaiting.getCreatedAt()));
-            ps.setLong(3, reservationWaiting.getReservation().getId());
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+                ps.setString(1, reservationWaiting.getName());
+                ps.setTimestamp(2, Timestamp.valueOf(reservationWaiting.getCreatedAt()));
+                ps.setLong(3, reservationWaiting.getReservation().getId());
+                return ps;
+            }, keyHolder);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessRuleViolationException(ALREADY_WAITING, e);
+        } catch (DataIntegrityViolationException e) {
+            throw new NotFoundException(
+                    String.format(RESERVATION_NOT_FOUND_FORMAT, reservationWaiting.getReservation().getId()),
+                    e
+            );
+        }
 
         long id = keyHolder.getKey().longValue();
         return new ReservationWaiting(

@@ -1,6 +1,7 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessRuleViolationException;
 import roomescape.repository.ThemeJdbcRepository;
 
 @JdbcTest
@@ -39,6 +41,16 @@ class ThemeJdbcRepositoryTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("공포");
+    }
+
+    @Test
+    void 예약에서_사용_중인_테마를_삭제하면_BusinessRuleViolationException을_던진다() {
+        Theme saved = repository.save(new Theme(null, "공포", "무서운 테마", "https://example.com/horror.jpg"));
+        insertReservation("브라운", LocalDate.of(2026, 8, 5), saved.getId());
+
+        assertThatThrownBy(() -> repository.deleteById(saved.getId()))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("사용 중인 예약");
     }
 
     @Test

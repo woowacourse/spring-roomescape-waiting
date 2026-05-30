@@ -1,6 +1,7 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 
 @JdbcTest
@@ -62,6 +65,36 @@ class ReservationWaitingJdbcRepositoryTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getOrder()).isEqualTo(1);
+    }
+
+    @Test
+    void 같은_예약에_같은_이름으로_대기를_저장하면_BusinessRuleViolationException을_던진다() {
+        repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+
+        ReservationWaiting duplicated = new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation);
+
+        assertThatThrownBy(() -> repository.save(duplicated))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("이미 대기");
+    }
+
+    @Test
+    void 존재하지_않는_예약에_대기를_저장하면_NotFoundException을_던진다() {
+        Reservation missingReservation = new Reservation(
+                9999L,
+                "티뉴",
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+        ReservationWaiting waiting = new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), missingReservation);
+
+        assertThatThrownBy(() -> repository.save(waiting))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("예약을 찾을 수 없습니다");
     }
 
     @Test

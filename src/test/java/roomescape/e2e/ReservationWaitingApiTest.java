@@ -63,6 +63,23 @@ class ReservationWaitingApiTest {
     }
 
     @Test
+    void 같은_예약에_이미_대기를_신청했으면_422를_반환한다() {
+        Integer timeId = createTime("12:00");
+        Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
+        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", reservationId);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(waitingRequest("민욱", reservationId))
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(422)
+                .body("type", is(ProblemType.BUSINESS_RULE_VIOLATION.uri().toString()))
+                .body("detail", is("이미 대기를 신청한 예약입니다."));
+    }
+
+    @Test
     void 내_대기_목록_조회시_대기_순번을_함께_반환한다() {
         Integer timeId = createTime("12:30");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");

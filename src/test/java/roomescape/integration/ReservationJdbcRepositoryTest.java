@@ -1,7 +1,9 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -15,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.ConflictException;
 import roomescape.repository.ReservationJdbcRepository;
 
 @JdbcTest
@@ -52,6 +55,40 @@ class ReservationJdbcRepositoryTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(repository.count()).isEqualTo(1L);
+    }
+
+    @Test
+    void 같은_날짜_시간_테마로_저장하면_ConflictException을_던진다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        repository.save(new Reservation("브라운", date, time, theme));
+
+        assertThatThrownBy(() -> repository.save(new Reservation("티뉴", date, time, theme)))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("이미 예약이 존재합니다");
+    }
+
+    @Test
+    void 같은_날짜_시간_테마로_수정하면_ConflictException을_던진다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES ('11:00')");
+        Long otherTimeId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_time WHERE start_at = '11:00'",
+                Long.class
+        );
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        ReservationTime otherTime = new ReservationTime(otherTimeId, LocalTime.of(11, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        repository.save(new Reservation("브라운", date, time, theme));
+        Reservation saved = repository.save(new Reservation("티뉴", date, otherTime, theme));
+
+        Reservation updated = new Reservation(saved.getId(), saved.getName(), date, time, theme);
+
+        assertThatThrownBy(() -> repository.update(updated))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("이미 예약이 존재합니다");
     }
 
     @Test
@@ -101,6 +138,22 @@ class ReservationJdbcRepositoryTest {
 
         Optional<Reservation> found = repository.findById(saved.getId());
         assertThat(found).isEmpty();
+    }
+
+    @Test
+    void deleteById는_예약에_달린_대기도_함께_삭제한다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        Reservation saved = repository.save(new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme));
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)",
+                "민욱", Timestamp.valueOf(LocalDate.of(2026, 8, 1).atTime(10, 0)), saved.getId()
+        );
+
+        repository.deleteById(saved.getId());
+
+        Integer waitingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation_waiting", Integer.class);
+        assertThat(waitingCount).isZero();
     }
 
     @Test

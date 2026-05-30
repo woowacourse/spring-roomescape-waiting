@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.ConflictException;
 
 @Repository
 public class ReservationJdbcRepository implements ReservationRepository {
+
+    private static final String ALREADY_EXISTS_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
 
     private static final String SELECT_BASE = """
             SELECT r.id as reservation_id, r.name, r.date,
@@ -86,14 +90,18 @@ public class ReservationJdbcRepository implements ReservationRepository {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setDate(2, Date.valueOf(reservation.getDate()));
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+                ps.setString(1, reservation.getName());
+                ps.setDate(2, Date.valueOf(reservation.getDate()));
+                ps.setLong(3, reservation.getTime().getId());
+                ps.setLong(4, reservation.getTheme().getId());
+                return ps;
+            }, keyHolder);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(ALREADY_EXISTS_RESERVATION, e);
+        }
 
         long id = keyHolder.getKey().longValue();
         return new Reservation(
@@ -107,13 +115,17 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     public Reservation update(Reservation reservation) {
         String sql = "UPDATE reservation SET date = ?, time_id = ?, theme_id = ? WHERE id = ?";
-        jdbcTemplate.update(
-                sql,
-                Date.valueOf(reservation.getDate()),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getId()
-        );
+        try {
+            jdbcTemplate.update(
+                    sql,
+                    Date.valueOf(reservation.getDate()),
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId(),
+                    reservation.getId()
+            );
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(ALREADY_EXISTS_RESERVATION, e);
+        }
         return reservation;
     }
 

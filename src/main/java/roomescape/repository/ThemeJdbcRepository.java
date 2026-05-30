@@ -4,15 +4,19 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessRuleViolationException;
 
 @Repository
 public class ThemeJdbcRepository implements ThemeRepository {
+
+    private static final String CANNOT_DELETE_THEME_IN_USE = "ID %d번 테마를 사용 중인 예약이 존재하여 테마를 삭제할 수 없습니다.";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -45,11 +49,20 @@ public class ThemeJdbcRepository implements ThemeRepository {
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
-        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailImageUrl());
+        return new Theme(
+                id,
+                theme.getName(),
+                theme.getDescription(),
+                theme.getThumbnailImageUrl()
+        );
     }
 
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+        try {
+            jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_THEME_IN_USE, id), e);
+        }
     }
 
     public Optional<Theme> findById(Long id) {

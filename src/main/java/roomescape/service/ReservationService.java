@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.dto.ReservationResponses;
-import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
@@ -19,7 +18,6 @@ import roomescape.repository.ReservationRepository;
 public class ReservationService {
 
     private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
-    private static final String ALREADY_EXISTS_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
     private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
     private final ReservationRepository reservationRepository;
@@ -38,11 +36,8 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findByName(name);
         return ReservationResponses.from(reservations, reservations.size(), 0, reservations.size());
     }
-
-    public boolean hasReservationsByTimeId(Long timeId) {
-        return reservationRepository.existsByTimeId(timeId);
-    }
-
+    
+    // TODO: 테스트에서만 사용됨
     public Reservation findMyReservation(Long id, String name) {
         Reservation reservation = getById(id);
         if (!reservation.isOwnedBy(name)) {
@@ -53,25 +48,12 @@ public class ReservationService {
 
     @Transactional
     public Reservation addReservation(Reservation reservation) {
-        validateConflict(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        );
-
         return reservationRepository.save(reservation);
     }
 
     @Transactional
-    public Reservation updateReservation(Reservation existing, Reservation updated) {
-        if (!existing.isSameSlot(updated.getDate(), updated.getTime())) {
-            validateConflict(
-                    updated.getDate(),
-                    updated.getTime().getId(),
-                    updated.getTheme().getId()
-            );
-        }
-        return reservationRepository.update(updated);
+    public Reservation updateReservation(Reservation reservation) {
+        return reservationRepository.update(reservation);
     }
 
     @Transactional
@@ -89,12 +71,6 @@ public class ReservationService {
 
     public boolean hasReservationsByThemeId(Long themeId) {
         return reservationRepository.existsByThemeId(themeId);
-    }
-
-    public void validateConflict(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsBySlot(date, timeId, themeId)) {
-            throw new ConflictException(ALREADY_EXISTS_RESERVATION);
-        }
     }
 
     public Set<Long> getReservedTimeIds(LocalDate date, Long themeId) {

@@ -3,15 +3,22 @@ package roomescape.repository;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.ConflictException;
 
 @Repository
 public class ReservationTimeJdbcRepository implements ReservationTimeRepository {
+
+    private static final String ALREADY_EXISTS_TIME = "이미 존재하는 예약 시간입니다.";
+    private static final String CANNOT_DELETE_TIME_IN_USE = "ID %d번 시간을 사용 중인 예약이 존재하여 시간을 삭제할 수 없습니다.";
 
     private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
             rs.getLong("id"),
@@ -32,18 +39,29 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
         String sql = "INSERT INTO reservation_time (start_at) VALUES (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, time.getStartAt().toString());
-            return ps;
-        }, keyHolder);
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+                ps.setString(1, time.getStartAt().toString());
+                return ps;
+            }, keyHolder);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException(ALREADY_EXISTS_TIME, e);
+        }
 
         long id = keyHolder.getKey().longValue();
-        return new ReservationTime(id, time.getStartAt());
+        return new ReservationTime(
+                id,
+                time.getStartAt()
+        );
     }
 
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+        try {
+            jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_TIME_IN_USE, id), e);
+        }
     }
 
     public boolean existsById(Long id) {
@@ -58,4 +76,3 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
         return results.stream().findFirst();
     }
 }
-
