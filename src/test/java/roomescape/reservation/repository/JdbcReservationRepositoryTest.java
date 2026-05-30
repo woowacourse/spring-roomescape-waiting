@@ -9,17 +9,17 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@JdbcTest
+@Import(JdbcReservationRepository.class)
 class JdbcReservationRepositoryTest {
 
     @Autowired
@@ -76,16 +76,16 @@ class JdbcReservationRepositoryTest {
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
                 LocalDateTime.now().plusHours(3).toString());
-        insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
+        Long firstId = insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
         insertReservation("어셔2", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(2));
-        insertReservation("어셔3", timeId, themeId, Status.WAITING,  LocalDateTime.now().plusHours(3));
+        insertReservation("어셔3", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(3));
 
         // when
         Optional<Long> id = reservationRepository.findEarliestWaiting(timeId, themeId);
 
         // then
         assertThat(id).isPresent();
-        assertThat(id.get()).isEqualTo(1L);
+        assertThat(id.get()).isEqualTo(firstId);
     }
 
     @DisplayName("예약 대기 상태를 RESERVED로 승격한다.")
@@ -95,11 +95,11 @@ class JdbcReservationRepositoryTest {
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
                 LocalDateTime.now().plusHours(3).toString());
-        insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
+        Long waitingId = insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
 
         // when
-        boolean affected = reservationRepository.promoteToReserved(1L);
-        Optional<Reservation> reservation = reservationRepository.findById(1L);
+        boolean affected = reservationRepository.promoteToReserved(waitingId);
+        Optional<Reservation> reservation = reservationRepository.findById(waitingId);
 
         // then
         assertThat(affected).isTrue();
@@ -227,7 +227,7 @@ class JdbcReservationRepositoryTest {
         );
     }
 
-    private void insertReservation(String name, Long timeId, Long themeId, Status status, LocalDateTime createdAt) {
+    private Long insertReservation(String name, Long timeId, Long themeId, Status status, LocalDateTime createdAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, time_id, theme_id, status, created_at) VALUES (?, ?, ?, ?, ?)",
                 name,
@@ -235,6 +235,11 @@ class JdbcReservationRepositoryTest {
                 themeId,
                 status.name(),
                 createdAt.toString()
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation WHERE name = ? AND time_id = ? AND theme_id = ? AND created_at = ?",
+                Long.class,
+                name, timeId, themeId, createdAt.toString()
         );
     }
 }

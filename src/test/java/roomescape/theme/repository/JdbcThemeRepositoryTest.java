@@ -5,18 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-
 import roomescape.theme.domain.Theme;
 
-@SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@JdbcTest
+@Import(JdbcThemeRepository.class)
 class JdbcThemeRepositoryTest {
 
     @Autowired
@@ -28,9 +26,11 @@ class JdbcThemeRepositoryTest {
     @DisplayName("테마를 저장한다.")
     @Test
     void save() {
+        // when
         Theme saved = jdbcThemeRepository.save(new Theme("테마", "내용", "https://img.test/b.png"));
 
-        assertThat(saved.getId()).isEqualTo(1L);
+        // then
+        assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo("테마");
         assertThat(saved.getDescription()).isEqualTo("내용");
         assertThat(saved.getImageUrl()).isEqualTo("https://img.test/b.png");
@@ -39,13 +39,15 @@ class JdbcThemeRepositoryTest {
     @DisplayName("저장된 테마를 조회한다.")
     @Test
     void findAll() {
-        assertThat(jdbcThemeRepository.findAll()).isEmpty();
+        // given
+        Theme saved = jdbcThemeRepository.save(new Theme("이름", "설명", "https://img.test/a.png"));
 
-        jdbcThemeRepository.save(new Theme("이름", "설명", "https://img.test/a.png"));
-
+        // when
         List<Theme> themes = jdbcThemeRepository.findAll();
+
+        // then
         assertThat(themes).hasSize(1);
-        assertThat(themes.getFirst().getId()).isEqualTo(1L);
+        assertThat(themes.getFirst().getId()).isEqualTo(saved.getId());
         assertThat(themes.getFirst().getName()).isEqualTo("이름");
         assertThat(themes.getFirst().getDescription()).isEqualTo("설명");
         assertThat(themes.getFirst().getImageUrl()).isEqualTo("https://img.test/a.png");
@@ -54,28 +56,30 @@ class JdbcThemeRepositoryTest {
     @DisplayName("id로 테마를 삭제한다.")
     @Test
     void deleteById() {
-        jdbcThemeRepository.save(new Theme("x", "y", "https://img.test/c.png"));
+        // given
+        Theme saved = jdbcThemeRepository.save(new Theme("x", "y", "https://img.test/c.png"));
 
-        assertThat(jdbcThemeRepository.deleteById(1L)).isTrue();
+        // when & then
+        assertThat(jdbcThemeRepository.deleteById(saved.getId())).isTrue();
         assertThat(jdbcThemeRepository.findAll()).isEmpty();
-
-        assertThat(jdbcThemeRepository.deleteById(1L)).isFalse();
+        assertThat(jdbcThemeRepository.deleteById(saved.getId())).isFalse();
     }
 
     @DisplayName("id로 테마가 존재하는지 판단한다.")
     @Test
     void existsById() {
-        assertThat(jdbcThemeRepository.existsById(1L)).isFalse();
+        // given
+        Theme saved = jdbcThemeRepository.save(new Theme("테마", "설명", "https://img.test/a.png"));
 
-        jdbcThemeRepository.save(new Theme("테마", "설명", "https://img.test/a.png"));
-
-        assertThat(jdbcThemeRepository.existsById(1L)).isTrue();
-        assertThat(jdbcThemeRepository.existsById(2L)).isFalse();
+        // when & then
+        assertThat(jdbcThemeRepository.existsById(saved.getId())).isTrue();
+        assertThat(jdbcThemeRepository.existsById(saved.getId() + 1)).isFalse();
     }
 
     @DisplayName("특정 날짜의 인기 테마를 조회한다.")
     @Test
     void findBestThemesByDate_인기_테마_조회() {
+        // given
         Theme theme1 = jdbcThemeRepository.save(new Theme("테마1", "설명1", "https://img.test/1.png"));
         Theme theme2 = jdbcThemeRepository.save(new Theme("테마2", "설명2", "https://img.test/2.png"));
         Theme theme3 = jdbcThemeRepository.save(new Theme("테마3", "설명3", "https://img.test/3.png"));
