@@ -17,6 +17,7 @@ import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -40,8 +41,10 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
         Theme theme = findThemeByThemeId(request.getThemeId());
 
+        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
+
         Reservation reservation = Reservation.reserve(new ReservationName(request.getName()),
-                new ReservationDate(request.getDate()), reservationTime, theme, now);
+                new ReservationDate(request.getDate()), reservationTime, theme, status, now);
 
         validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
         Reservation saved = reservationRepository.save(reservation);
@@ -100,7 +103,7 @@ public class ReservationService {
         validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
 
         Reservation target = Reservation.reserve(reservation.getName(), reservationDate, reservationTime,
-                reservation.getTheme(), now);
+                reservation.getTheme(), reservation.getStatus(), now);
         Reservation updated = reservationRepository.update(id, target);
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
@@ -115,7 +118,24 @@ public class ReservationService {
     public void cancel(long reservationId, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
         reservation.ensureNotPast(now);
+
+        Status cancelledStatus = reservation.getStatus();
         reservationRepository.deleteById(reservationId);
+
+        if (cancelledStatus == Status.APPROVED) {
+            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId(),
+                    reservation.getDate().getDate()
+            ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
+        }
+    }
+
+    private Status determineStatus(long timeId, long themeId, LocalDate date) {
+        if (reservationRepository.existsApprovedByTimeAndThemeAndDate(timeId, themeId, date)) {
+            return Status.WAITING;
+        }
+        return Status.APPROVED;
     }
 
     private ReservationTime findReservationTimeByTimeId(long reservationTimeId) {

@@ -21,47 +21,47 @@ INSERT INTO THEME (name, description, thumbnail_url) VALUES ('탐정 사무소',
 -- RESERVATION: 33개 (2026-05-23 ~ 2026-05-30, 오늘=2026-05-27 전후 혼재)
 -- created_at: 항상 해당 row의 date보다 과거. id 순으로 증가하는 상대 순서 보존.
 -- Theme 1 (공포의 저택): 10건 → 1위
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('김철수', '2026-05-23', 1, 1, '2026-05-21 09:12:33');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('이영희', '2026-05-23', 2, 1, '2026-05-21 11:45:07');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('박민수', '2026-05-24', 3, 1, '2026-05-22 14:30:51');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('홍길동', '2026-05-24', 4, 1, '2026-05-22 18:05:22');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('정수진', '2026-05-25', 5, 1, '2026-05-23 21:40:18');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('한동훈', '2026-05-25', 6, 1, '2026-05-24 08:15:44');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('임채원', '2026-05-26', 7, 1, '2026-05-24 10:50:09');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('서태양', '2026-05-27', 8, 1, '2026-05-25 13:22:37');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('김철수', '2026-05-28', 9, 1, '2026-05-26 16:48:55');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('유민호', '2026-05-30', 10, 1, '2026-05-28 20:11:02');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('김철수', '2026-05-23', 1, 1, 'APPROVED', '2026-05-21 09:12:33');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('이영희', '2026-05-23', 2, 1, 'APPROVED', '2026-05-21 11:45:07');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('박민수', '2026-05-24', 3, 1, 'APPROVED', '2026-05-22 14:30:51');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('홍길동', '2026-05-24', 4, 1, 'APPROVED', '2026-05-22 18:05:22');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('정수진', '2026-05-25', 5, 1, 'APPROVED', '2026-05-23 21:40:18');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('한동훈', '2026-05-25', 6, 1, 'APPROVED', '2026-05-24 08:15:44');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('임채원', '2026-05-26', 7, 1, 'APPROVED', '2026-05-24 10:50:09');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('서태양', '2026-05-27', 8, 1, 'APPROVED', '2026-05-25 13:22:37');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('김철수', '2026-05-28', 9, 1, 'APPROVED', '2026-05-26 16:48:55');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('유민호', '2026-05-30', 10, 1, 'APPROVED', '2026-05-28 20:11:02');
 
 -- Theme 2 (우주 탐험): 8건 → 2위
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('강민준', '2026-05-23', 3, 2, '2026-05-20 07:33:19');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('조현아', '2026-05-24', 4, 2, '2026-05-22 09:58:41');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('김철수', '2026-05-25', 5, 2, '2026-05-23 12:27:06');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('홍길동', '2026-05-26', 6, 2, '2026-05-24 15:44:50');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('황준혁', '2026-05-26', 7, 2, '2026-05-25 19:09:28');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('송미래', '2026-05-27', 8, 2, '2026-05-26 08:41:13');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('안태양', '2026-05-28', 9, 2, '2026-05-27 11:16:39');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('배소희', '2026-05-30', 10, 2, '2026-05-29 14:52:04');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('강민준', '2026-05-23', 3, 2, 'APPROVED', '2026-05-20 07:33:19');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('조현아', '2026-05-24', 4, 2, 'APPROVED', '2026-05-22 09:58:41');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('김철수', '2026-05-25', 5, 2, 'APPROVED', '2026-05-23 12:27:06');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('홍길동', '2026-05-26', 6, 2, 'APPROVED', '2026-05-24 15:44:50');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('황준혁', '2026-05-26', 7, 2, 'APPROVED', '2026-05-25 19:09:28');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('송미래', '2026-05-27', 8, 2, 'APPROVED', '2026-05-26 08:41:13');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('안태양', '2026-05-28', 9, 2, 'APPROVED', '2026-05-27 11:16:39');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('배소희', '2026-05-30', 10, 2, 'APPROVED', '2026-05-29 14:52:04');
 
 -- Theme 3 (마법 학교): 6건 → 3위
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('권지훈', '2026-05-24', 1, 3, '2026-05-22 17:30:47');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('홍길동', '2026-05-25', 2, 3, '2026-05-23 20:55:21');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('김철수', '2026-05-26', 3, 3, '2026-05-25 09:05:58');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('류지아', '2026-05-27', 4, 3, '2026-05-26 12:38:16');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('서태양', '2026-05-28', 5, 3, '2026-05-27 15:11:33');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('서태양', '2026-05-30', 6, 3, '2026-05-29 18:47:09');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('권지훈', '2026-05-24', 1, 3, 'APPROVED', '2026-05-22 17:30:47');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('홍길동', '2026-05-25', 2, 3, 'APPROVED', '2026-05-23 20:55:21');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('김철수', '2026-05-26', 3, 3, 'APPROVED', '2026-05-25 09:05:58');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('류지아', '2026-05-27', 4, 3, 'APPROVED', '2026-05-26 12:38:16');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('서태양', '2026-05-28', 5, 3, 'APPROVED', '2026-05-27 15:11:33');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('서태양', '2026-05-30', 6, 3, 'APPROVED', '2026-05-29 18:47:09');
 
 -- Theme 4 (고대 유적): 4건 → 4위
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('홍길동', '2026-05-25', 7, 4, '2026-05-23 08:23:42');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('전현무', '2026-05-26', 8, 4, '2026-05-25 10:59:27');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('서태양', '2026-05-27', 9, 4, '2026-05-26 13:34:50');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('표민혁', '2026-05-28', 10, 4, '2026-05-27 16:20:15');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('홍길동', '2026-05-25', 7, 4, 'APPROVED', '2026-05-23 08:23:42');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('전현무', '2026-05-26', 8, 4, 'APPROVED', '2026-05-25 10:59:27');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('서태양', '2026-05-27', 9, 4, 'APPROVED', '2026-05-26 13:34:50');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('표민혁', '2026-05-28', 10, 4, 'APPROVED', '2026-05-27 16:20:15');
 
 -- Theme 5 (탐정 사무소): 2건 → 5위
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('서태양', '2026-05-26', 11, 5, '2026-05-24 19:48:33');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('홍길동', '2026-05-30', 1, 5, '2026-05-28 09:14:06');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('서태양', '2026-05-26', 11, 5, 'APPROVED', '2026-05-24 19:48:33');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('홍길동', '2026-05-30', 1, 5, 'APPROVED', '2026-05-28 09:14:06');
 
 -- 같은 슬롯 예약 (대기 순번 테스트용): 2026-05-23, time_id=1, theme_id=1
--- date는 김철수(첫 row)와 동일 슬롯, created_at 선후 관계 보존
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('대기자A', '2026-05-23', 1, 1, '2026-05-21 09:30:00');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('대기자B', '2026-05-23', 1, 1, '2026-05-21 10:00:00');
-INSERT INTO RESERVATION (name, date, time_id, theme_id, created_at) VALUES ('대기자C', '2026-05-23', 1, 1, '2026-05-21 10:30:00');
+-- 김철수(id=1)가 APPROVED, 이후 예약은 WAITING
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('대기자A', '2026-05-23', 1, 1, 'WAITING', '2026-05-21 09:30:00');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('대기자B', '2026-05-23', 1, 1, 'WAITING', '2026-05-21 10:00:00');
+INSERT INTO RESERVATION (name, date, time_id, theme_id, status, created_at) VALUES ('대기자C', '2026-05-23', 1, 1, 'WAITING', '2026-05-21 10:30:00');

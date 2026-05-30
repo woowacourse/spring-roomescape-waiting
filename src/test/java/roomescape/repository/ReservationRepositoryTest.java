@@ -58,8 +58,13 @@ class ReservationRepositoryTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return reservation(name, date, time, theme, roomescape.domain.reservation.Status.APPROVED);
+    }
+
+    private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme,
+                                    roomescape.domain.reservation.Status status) {
         return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme,
-                LocalDateTime.now(FIXED_CLOCK));
+                status, LocalDateTime.now(FIXED_CLOCK));
     }
 
     @Nested
@@ -329,6 +334,82 @@ class ReservationRepositoryTest {
                 soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(),
                         TODAY.plusDays(1), name)).isFalse();
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("existsApprovedByTimeAndThemeAndDate")
+    class ExistsApproved {
+
+        @Test
+        void APPROVED_예약이_있으면_true() {
+            Theme theme = giveTheme("테마1");
+            ReservationTime time = giveTime(14);
+
+            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
+
+            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isTrue();
+        }
+
+        @Test
+        void WAITING_예약만_있으면_false() {
+            Theme theme = giveTheme("테마1");
+            ReservationTime time = giveTime(14);
+
+            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+
+            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("findFirstWaitingByTimeAndThemeAndDate")
+    class FindFirstWaiting {
+
+        @Test
+        void WAITING_예약이_있으면_가장_먼저_생성된_예약을_반환한다() {
+            Theme theme = giveTheme("테마1");
+            ReservationTime time = giveTime(14);
+
+            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
+            Reservation first = reservationRepository.save(reservation("민구", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+            reservationRepository.save(reservation("철수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+
+            assertThat(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY))
+                    .isPresent()
+                    .get()
+                    .extracting(r -> r.getId())
+                    .isEqualTo(first.getId());
+        }
+
+        @Test
+        void WAITING_예약이_없으면_빈_Optional을_반환한다() {
+            Theme theme = giveTheme("테마1");
+            ReservationTime time = giveTime(14);
+
+            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
+
+            assertThat(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("updateStatus")
+    class UpdateStatus {
+
+        @Test
+        void WAITING_예약을_APPROVED로_변경할_수_있다() {
+            Theme theme = giveTheme("테마1");
+            ReservationTime time = giveTime(14);
+
+            Reservation saved = reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+            reservationRepository.updateStatus(saved.getId(), roomescape.domain.reservation.Status.APPROVED);
+
+            assertThat(reservationRepository.findById(saved.getId()))
+                    .isPresent()
+                    .get()
+                    .extracting(r -> r.getStatus())
+                    .isEqualTo(roomescape.domain.reservation.Status.APPROVED);
         }
     }
 }

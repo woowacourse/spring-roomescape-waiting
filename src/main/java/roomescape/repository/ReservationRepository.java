@@ -12,6 +12,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -25,11 +26,13 @@ public class ReservationRepository {
             ReservationTime.of(resultSet.getLong("time_id"), resultSet.getTime("start_at").toLocalTime()),
             Theme.load(resultSet.getLong("theme_id"), new ThemeName(resultSet.getString("theme_name")),
                     resultSet.getString("description"), new ThumbnailUrl(resultSet.getString("thumbnail_url"))),
+            Status.valueOf(resultSet.getString("status")),
             resultSet.getTimestamp("created_at").toLocalDateTime());
     private static final String SELECT_ALL = """
             SELECT r.id   AS reservation_id,
                    r.name,
                    r.date,
+                   r.status,
                    r.created_at,
                    rt.id  AS time_id,
                    rt.start_at,
@@ -60,16 +63,29 @@ public class ReservationRepository {
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
             )
             """;
+    private static final String EXISTS_APPROVED_BY_SLOT = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'APPROVED'
+            )
+            """;
+    private static final String SELECT_FIRST_WAITING_BY_SLOT = SELECT_ALL + """
+            WHERE r.date = ? AND rt.id = ? AND t.id = ? AND r.status = 'WAITING'
+            ORDER BY r.created_at, r.id
+            LIMIT 1
+            """;
+    private static final String UPDATE_STATUS = "UPDATE reservation SET status = ? WHERE id = ?";
     private static final String EXISTS_BY_TIME_ID = """
             SELECT EXISTS (
-                SELECT 1 
+                SELECT 1
                     FROM reservation
                     WHERE time_id = ?
                     )
             """;
     private static final String EXISTS_BY_THEME_ID = """
             SELECT EXISTS (
-                SELECT 1 
+                SELECT 1
                     FROM reservation
                     WHERE theme_id = ?
                     )
@@ -104,6 +120,7 @@ public class ReservationRepository {
                 "date", reservation.getDate().getDate(),
                 "time_id", reservation.getTime().getId(),
                 "theme_id", reservation.getTheme().getId(),
+                "status", reservation.getStatus().name(),
                 "created_at", reservation.getDateTime()
         );
 
@@ -112,8 +129,7 @@ public class ReservationRepository {
         return Reservation.load(generatedKey,
                 reservation.getName(),
                 reservation.getDate(), reservation.getTime(),
-                reservation.getTheme()
-                , reservation.getDateTime());
+                reservation.getTheme(), reservation.getStatus(), reservation.getDateTime());
     }
 
     public Reservation update(long id, Reservation target) {
@@ -121,7 +137,7 @@ public class ReservationRepository {
                 target.getTheme().getId(), target.getDateTime(), id);
 
         return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(),
-                target.getDateTime());
+                target.getStatus(), target.getDateTime());
     }
 
     public void deleteById(Long id) {
@@ -145,24 +161,23 @@ public class ReservationRepository {
                         themeId, name));
     }
 
-    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
-        String sql = """
-                SELECT r.id   AS reservation_id,
-                       r.name,
-                       r.date,
-                       r.created_at,
-                       rt.id  AS time_id,
-                       rt.start_at,
-                       t.id   AS theme_id,
-                       t.name AS theme_name,
-                       t.description,
-                       t.thumbnail_url
-                FROM reservation r
-                INNER JOIN reservation_time rt ON r.time_id  = rt.id
-                INNER JOIN theme             t  ON r.theme_id = t.id
-                WHERE date = ? AND t.id = ? AND rt.id = ?
-                """;
+    public boolean existsApprovedByTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(EXISTS_APPROVED_BY_SLOT, Boolean.class, date, timeId, themeId));
+    }
 
+    public Optional<Reservation> findFirstWaitingByTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
+        List<Reservation> result = jdbcTemplate.query(SELECT_FIRST_WAITING_BY_SLOT, RESERVATION_ROW_MAPPER,
+                date, timeId, themeId);
+        return result.stream().findFirst();
+    }
+
+    public void updateStatus(Long id, Status status) {
+        jdbcTemplate.update(UPDATE_STATUS, status.name(), id);
+    }
+
+    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
+        String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ?";
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
     }
 }

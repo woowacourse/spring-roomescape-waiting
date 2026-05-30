@@ -12,31 +12,35 @@ public class Reservation {
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final Status status;
     private final LocalDateTime dateTime;
 
     private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                        Theme theme, LocalDateTime dateTime) {
+                        Theme theme, Status status, LocalDateTime dateTime) {
         this.id = id;
         this.reservationName = Objects.requireNonNull(reservationName);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
         this.theme = Objects.requireNonNull(theme);
+        this.status = Objects.requireNonNull(status);
         this.dateTime = Objects.requireNonNull(dateTime);
     }
 
     public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                   Theme theme, LocalDateTime dateTime) {
-        return new Reservation(id, reservationName, date, time, theme, dateTime);
+                                   Theme theme, Status status, LocalDateTime dateTime) {
+        return new Reservation(id, reservationName, date, time, theme, status, dateTime);
     }
 
     public static Reservation reserve(
             ReservationName reservationName,
             ReservationDate date,
             ReservationTime time,
-            Theme theme, LocalDateTime now
+            Theme theme,
+            Status status,
+            LocalDateTime now
     ) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(null, reservationName, date, time, theme, now);
+        Reservation reservation = new Reservation(null, reservationName, date, time, theme, status, now);
         reservation.ensureNotPast(now);
         return reservation;
     }
@@ -67,6 +71,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public LocalDateTime getDateTime() {

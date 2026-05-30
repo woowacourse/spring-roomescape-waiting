@@ -17,8 +17,8 @@ public class ReservationTest {
     @ParameterizedTest
     @MethodSource("nullCases")
     void 매개변수에_NULL이_포함되면_예외가_발생한다(ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                   Theme theme) {
-        assertThatThrownBy(() -> Reservation.reserve(reservationName, date, time, theme, LocalDateTime.MIN))
+                                   Theme theme, Status status) {
+        assertThatThrownBy(() -> Reservation.reserve(reservationName, date, time, theme, status, LocalDateTime.MIN))
                 .isInstanceOf(NullPointerException.class);
     }
 
@@ -34,10 +34,11 @@ public class ReservationTest {
         );
 
         return Stream.of(
-                Arguments.of(null, date, time, theme),
-                Arguments.of(name, null, time, theme),
-                Arguments.of(name, date, null, theme),
-                Arguments.of(name, date, time, null)
+                Arguments.of(null, date, time, theme, Status.APPROVED),
+                Arguments.of(name, null, time, theme, Status.APPROVED),
+                Arguments.of(name, date, null, theme, Status.APPROVED),
+                Arguments.of(name, date, time, null, Status.APPROVED),
+                Arguments.of(name, date, time, theme, null)
         );
     }
 }

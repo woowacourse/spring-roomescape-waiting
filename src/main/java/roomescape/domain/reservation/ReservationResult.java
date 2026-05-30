@@ -11,8 +11,8 @@ public class ReservationResult {
         this.reservation = reservation;
     }
 
-    public Status status(){
-        return rank.decideStatus();
+    public Status status() {
+        return reservation.getStatus();
     }
 
     public Rank getRank() {

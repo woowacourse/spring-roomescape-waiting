@@ -31,6 +31,7 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -54,7 +55,7 @@ class ReservationControllerTest {
         Reservation reservation = Reservation.load(1L,
                 new ReservationName("zeze"),
                 new ReservationDate(LocalDate.of(2099, 1, 1)),
-                time, theme, LocalDateTime.now());
+                time, theme, Status.APPROVED, LocalDateTime.now());
         return new ReservationResult(new Rank(1), reservation);
     }
 
@@ -64,7 +65,7 @@ class ReservationControllerTest {
         Reservation reservation = Reservation.load(2L,
                 new ReservationName("mingu"),
                 new ReservationDate(LocalDate.of(2099, 1, 1)),
-                time, theme, LocalDateTime.now());
+                time, theme, Status.WAITING, LocalDateTime.now());
         return new ReservationResult(new Rank(2), reservation);
     }
 

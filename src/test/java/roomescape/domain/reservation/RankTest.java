@@ -2,23 +2,15 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class RankTest {
-    @Test
-    void 첫번째_순서라면_승인을_반환한다() {
-        Rank rank = new Rank(1);
-
-        assertThat(rank.decideStatus()).isEqualTo(Status.APPROVED);
-    }
-
-    @ValueSource(ints = {0, 2})
+    @ValueSource(ints = {1, 2, 3})
     @ParameterizedTest
-    void 첫번째_순서가_아니면_대기를_반환한다(int value) {
+    void 순번_값을_반환한다(int value) {
         Rank rank = new Rank(value);
 
-        assertThat(rank.decideStatus()).isEqualTo(Status.WAITING);
+        assertThat(rank.getValue()).isEqualTo(value);
     }
 }
