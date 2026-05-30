@@ -28,8 +28,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.repository.dto.WaitingWithRank;
 import roomescape.waiting.service.dto.response.WaitingResponse;
 
 @Service
@@ -57,24 +57,18 @@ public class ReservationService {
             new CustomerName(customerName),
             now
         );
-        final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+        final List<WaitingWithRank> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
             customerName,
             now
         );
 
-        final List<WaitingResponse> waitingsWithRank = waitings.stream()
-            .map(waiting -> {
-                int rank = waitingRepository.countEarlierWaitingsInSlot(
-                    waiting.getReservationDate(),
-                    waiting.getTimeId(),
-                    waiting.getThemeId(),
-                    waiting.getCreatedAt()
-                ) + 1;
-                return WaitingResponse.of(waiting, rank);
-            })
-            .toList();
-
-        return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);
+        return ReservationsAndWaitingsResponse.from(
+            reservations,
+            waitingsWithRank.stream()
+                .map(waitingWithRank -> WaitingResponse.of(
+                    waitingWithRank.waiting(),
+                    waitingWithRank.rank())
+                ).toList());
     }
 
     public List<ReservationTimesWithStatus> getReservationTimeStatuses(final LocalDate date, final Long themeId) {

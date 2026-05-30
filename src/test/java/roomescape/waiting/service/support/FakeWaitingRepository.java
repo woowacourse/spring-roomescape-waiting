@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.repository.dto.WaitingWithRank;
 
 public class FakeWaitingRepository implements WaitingRepository {
 
@@ -50,31 +51,28 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int countEarlierWaitingsInSlot(
-        final LocalDate date,
-        final long timeId,
-        final long themeId,
-        final LocalDateTime createdAt
-    ) {
-        return (int) waitings.stream()
-            .filter(w -> w.getReservationDate().equals(date))
-            .filter(w -> w.getTime().getId().equals(timeId))
-            .filter(w -> w.getTheme().getId().equals(themeId))
-            .filter(w -> w.getCreatedAt().isBefore(createdAt))
-            .count();
-    }
-
-    @Override
-    public List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
+    public List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(
         final String customerName,
         final LocalDateTime now
     ) {
-        return waitings.stream()
-            .filter(waiting -> waiting.isOwnedBy(customerName))
-            .filter(waiting -> LocalDateTime.of(
-                waiting.getReservationDate(),
-                waiting.getTime().getStartAt()
+        List<Waiting> customerWaitings = waitings.stream()
+            .filter(w -> w.isOwnedBy(customerName))
+            .filter(w -> LocalDateTime.of(
+                w.getReservationDate(),
+                w.getTime().getStartAt()
             ).isAfter(now))
+            .toList();
+
+        return customerWaitings.stream()
+            .map(w -> {
+                int rank = (int) waitings.stream()
+                    .filter(o -> o.getReservationDate().equals(w.getReservationDate()))
+                    .filter(o -> o.getTime().getId().equals(w.getTimeId()))
+                    .filter(o -> o.getTheme().getId().equals(w.getThemeId()))
+                    .filter(o -> o.getCreatedAt().isBefore(w.getCreatedAt()))
+                    .count() + 1;
+                return new WaitingWithRank(w, rank);
+            })
             .toList();
     }
 

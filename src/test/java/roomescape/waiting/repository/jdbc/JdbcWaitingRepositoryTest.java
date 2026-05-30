@@ -24,6 +24,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.dto.WaitingWithRank;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -159,24 +160,54 @@ class JdbcWaitingRepositoryTest {
         }
     }
 
-    @Test
-    @Sql("/find_own_waitings_after_today_test_data.sql")
-    void 본인의_현재_이후의_전체_대기_목록을_조회한다() {
-        //given
-        final String customerName = "재키";
+    @Nested
+    @DisplayName("본인의 현재 이후의 전체 대기 목록을 조회한다")
+    class FindAllWithRankByCustomerNameAndReservationDateTimeAfter {
 
-        //when
-        List<Waiting> waitings = jdbcWaitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
-            customerName,
-            NOW
-        );
+        @Test
+        @Sql({"/clear.sql", "/find_own_waitings_after_today_test_data.sql"})
+        void 본인의_현재_이후의_전체_대기_목록을_조회한다() {
+            //given
+            final String customerName = "재키";
 
-        //then
-        assertThat(waitings).hasSize(2);
-        assertThat(waitings).extracting(waiting ->
-                LocalDateTime.of(waiting.getReservationDate(), waiting.getTime().getStartAt()))
-            .allMatch(dateTime -> dateTime.isAfter(NOW));
+            //when
+            List<WaitingWithRank> waitingWithRanks = jdbcWaitingRepository
+                .findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+                    customerName,
+                    NOW
+                );
 
+            //then
+            assertThat(waitingWithRanks).hasSize(2);
+            assertThat(waitingWithRanks).extracting(waitingWithRank ->
+                LocalDateTime.of(
+                    waitingWithRank.waiting().getReservationDate(),
+                    waitingWithRank.waiting().getTime().getStartAt())
+            ).allMatch(dateTime -> dateTime.isAfter(NOW));
+        }
+
+        @Test
+        @Sql({"/clear.sql", "/find_own_waitings_after_today_test_data.sql"})
+        void 대기_순위는_같은_슬롯_내_등록_순서로_결정된다() {
+            //given
+            final String customerName = "재키";
+
+            //when
+            List<WaitingWithRank> waitingWithRanks = jdbcWaitingRepository
+                .findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+                    customerName,
+                    NOW
+                );
+
+            //then
+            WaitingWithRank rankTwo = waitingWithRanks.stream()
+                .filter(wr ->
+                    wr.waiting().getReservationDate().equals(LocalDate.of(2026, 5, 8)))
+                .findFirst()
+                .orElseThrow();
+
+            assertThat(rankTwo.rank()).isEqualTo(2);
+        }
     }
 
     private ReservationTime insertReservationTime(final String startAt) {
