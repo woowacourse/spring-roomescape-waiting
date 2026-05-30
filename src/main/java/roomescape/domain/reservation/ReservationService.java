@@ -73,7 +73,7 @@ public class ReservationService {
     public void cancelReservationByAdmin(Long id) {
         Reservation reservation = findReservationByIdOrThrow(id);
         reservationRepository.deleteById(id);
-        reorderWaitingNumbersBySlot(reservation.getReservationSlot());
+        deleteReservationSlotIfEmpty(reservation.getReservationSlot());
     }
 
     @Transactional
@@ -81,7 +81,7 @@ public class ReservationService {
         Reservation reservation = findReservationByIdOrThrow(id);
         validateReservationDeletionAllowed(reservation);
         reservationRepository.deleteById(id);
-        reorderWaitingNumbersBySlot(reservation.getReservationSlot());
+        deleteReservationSlotIfEmpty(reservation.getReservationSlot());
     }
 
     @Transactional
@@ -133,16 +133,12 @@ public class ReservationService {
         return reservationTime;
     }
 
-    private void reorderWaitingNumbersBySlot(ReservationSlot reservationSlot) {
+    private void deleteReservationSlotIfEmpty(ReservationSlot reservationSlot) {
         List<Reservation> orderedReservations = reservationRepository.findAllByReservationIdOrder(
             reservationSlot.getId());
         if (orderedReservations.isEmpty()) {
             reservationSlotRepository.deleteById(reservationSlot.getId());
-            return;
         }
-        reservationRepository.updateWaitingNumbers(orderedReservations);
-        reservationRepository.updateStatus(orderedReservations.getFirst().getId(), ReservationStatus.CONFIRMED);
-        reservationRepository.updateAllStatus(orderedReservations.subList(1, orderedReservations.size()));
     }
 
     private boolean hasSameReservationSlot(ReservationSlot oldSlot, ReservationSlot newSlot) {
@@ -151,7 +147,7 @@ public class ReservationService {
 
     private void updateReservationWhenSameSlot(Reservation reservation, ReservationSlot currentReservationSlot) {
         reservationRepository.update(reservation.getId(), reservation.update(clock));
-        reorderWaitingNumbersBySlot(currentReservationSlot);
+        deleteReservationSlotIfEmpty(currentReservationSlot);
     }
 
     private void updateReservationWhenMovingSlot(
@@ -171,7 +167,7 @@ public class ReservationService {
 
         reservationRepository.update(reservation.getId(), reservationToSave);
 
-        reorderWaitingNumbersBySlot(currentSlot);
+        deleteReservationSlotIfEmpty(currentSlot);
     }
 
     private Reservation buildReservation(ReservationSlot reservationSlot, User user) {
@@ -180,10 +176,17 @@ public class ReservationService {
         return Reservation.createWithoutId(
             reservationSlot,
             user,
-            currentReservationCount,
+            waitingNumberOf(newReservationStatus, currentReservationCount),
             newReservationStatus,
             clock
         );
+    }
+
+    private Long waitingNumberOf(ReservationStatus reservationStatus, Long reservationCount) {
+        if (reservationStatus == ReservationStatus.CONFIRMED) {
+            return null;
+        }
+        return reservationCount;
     }
 
     private void validateNoDuplicateReservation(User user, ReservationSlot reservationSlot) {

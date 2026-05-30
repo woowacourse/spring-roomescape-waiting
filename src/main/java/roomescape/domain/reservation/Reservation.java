@@ -78,7 +78,7 @@ public class Reservation {
             id,
             updatedReservationSlot,
             user,
-            reservationCount,
+            waitingNumberOf(reservationStatus, reservationCount),
             reservationStatus,
             createdAt,
             LocalDateTime.now(clock)
@@ -123,5 +123,12 @@ public class Reservation {
         if (status == ReservationStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
             throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
+    }
+
+    private static Long waitingNumberOf(ReservationStatus status, Long reservationCount) {
+        if (status == ReservationStatus.CONFIRMED) {
+            return null;
+        }
+        return reservationCount;
     }
 }

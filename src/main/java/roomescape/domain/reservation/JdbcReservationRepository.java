@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -44,11 +43,19 @@ public class JdbcReservationRepository implements ReservationRepository {
             insert into reservation(reservation_slot_id, user_id, waiting_number, status, created_at, updated_at)
             values (?, ?, ?, ?, ?, ?)
             """;
-    private static final String FIND_ALL_SQL =
+    private static final String FIND_ALL_WITH_ORDER_AND_STATUS_SQL =
         """
+            with ranked_reservation as (
+                select r.*,
+                       row_number() over (
+                           partition by r.reservation_slot_id
+                           order by r.updated_at, r.id
+                       ) as reservation_order
+                from reservation r
+            )
             select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
+                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
+                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -62,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from reservation r
+            from ranked_reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
@@ -72,9 +79,17 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_BY_ID_SQL =
         """
+            with ranked_reservation as (
+                select r.*,
+                       row_number() over (
+                           partition by r.reservation_slot_id
+                           order by r.updated_at, r.id
+                       ) as reservation_order
+                from reservation r
+            )
             select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
+                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
+                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -88,7 +103,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from reservation r
+            from ranked_reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
@@ -98,9 +113,17 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_ALL_BY_USERNAME_SQL =
         """
+            with ranked_reservation as (
+                select r.*,
+                       row_number() over (
+                           partition by r.reservation_slot_id
+                           order by r.updated_at, r.id
+                       ) as reservation_order
+                from reservation r
+            )
             select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
+                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
+                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -114,7 +137,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from reservation r
+            from ranked_reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
@@ -125,9 +148,17 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_ALL_BY_RESERVATION_ID_ORDER_SQL =
         """
+            with ranked_reservation as (
+                select r.*,
+                       row_number() over (
+                           partition by r.reservation_slot_id
+                           order by r.updated_at, r.id
+                       ) as reservation_order
+                from reservation r
+            )
             select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
+                   case when r.reservation_order = 1 then null else r.reservation_order - 1 end as waiting_number,
+                   case when r.reservation_order = 1 then 'CONFIRMED' else 'WAITING' end as status,
                    u.id as user_id,
                    u.name as user_name,
                    rs.id as reservation_slot_id,
@@ -141,7 +172,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                    th.url as theme_url,
                    r.created_at,
                    r.updated_at
-            from reservation r
+            from ranked_reservation r
             join users u on r.user_id = u.id
             join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
@@ -169,18 +200,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         """
             update reservation
             set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, created_at = ?, updated_at = ?
-            where id = ?
-            """;
-    private static final String UPDATE_WAITING_NUMBER_SQL =
-        """
-            update reservation
-            set waiting_number = ?
-            where id = ?
-            """;
-    private static final String UPDATE_STATUS_SQL =
-        """
-            update reservation
-            set status = ?
             where id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
@@ -225,7 +244,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAll() {
-        return jdbcTemplate.query(FIND_ALL_SQL, userReservationRowMapper());
+        return jdbcTemplate.query(FIND_ALL_WITH_ORDER_AND_STATUS_SQL, userReservationRowMapper());
     }
 
     @Override
@@ -268,11 +287,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Long id, ReservationStatus status) {
-        jdbcTemplate.update(UPDATE_STATUS_SQL, status.name(), id);
-    }
-
-    @Override
     public boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId) {
         Boolean exists = jdbcTemplate.queryForObject(
             EXISTS_ACTIVE_BY_USER_ID_AND_RESERVATION_ID_SQL,
@@ -281,33 +295,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             reservationId
         );
         return exists != null && exists;
-    }
-
-    @Override
-    public void updateWaitingNumbers(List<Reservation> userReservations) {
-        AtomicLong waitingNumber = new AtomicLong(0L);
-        jdbcTemplate.batchUpdate(
-            UPDATE_WAITING_NUMBER_SQL,
-            userReservations,
-            userReservations.size(),
-            (ps, userReservation) -> {
-                ps.setLong(1, waitingNumber.getAndIncrement());
-                ps.setLong(2, userReservation.getId());
-            }
-        );
-    }
-
-    @Override
-    public void updateAllStatus(List<Reservation> userReservations) {
-        jdbcTemplate.batchUpdate(
-            UPDATE_STATUS_SQL,
-            userReservations,
-            userReservations.size(),
-            (ps, userReservation) -> {
-                ps.setString(1, ReservationStatus.WAITING.name());
-                ps.setLong(2, userReservation.getId());
-            }
-        );
     }
 
     @Override

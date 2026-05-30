@@ -1,6 +1,5 @@
 package roomescape.support.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
-import roomescape.domain.theme.Theme;
 
 public class FakeReservationSlotRepository implements ReservationSlotRepository {
 
@@ -69,11 +67,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate endDay) {
-        return List.of();
-    }
-
-    @Override
     public int countByThemeId(Long themeId) {
         int count = 0;
         for (ReservationSlot reservation : storage.values()) {
@@ -85,29 +78,12 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public boolean existsReservation(Long timeId, Long dateId, Long themeId) {
-        return existsBySchedule(timeId, dateId, themeId);
-    }
-
-    @Override
-    public boolean existsBySchedule(Long timeId, Long dateId, Long themeId) {
-        for (ReservationSlot reservation : storage.values()) {
-            if (timeId.equals(reservation.getTime().getId())
-                    && dateId.equals(reservation.getDate().getId())
-                    && themeId.equals(reservation.getTheme().getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
         return storage.values().stream()
-                .filter(reservation -> timeId.equals(reservation.getTime().getId()))
-                .filter(reservation -> dateId.equals(reservation.getDate().getId()))
-                .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
-                .findFirst();
+            .filter(reservation -> timeId.equals(reservation.getTime().getId()))
+            .filter(reservation -> dateId.equals(reservation.getDate().getId()))
+            .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
+            .findFirst();
     }
 
     @Override

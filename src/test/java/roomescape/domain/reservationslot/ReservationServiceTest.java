@@ -563,7 +563,7 @@ class ReservationServiceTest {
             .orElseThrow();
         assertSoftly(softly -> {
             assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-            assertThat(updatedFirstWaitingReservation.getWaitingNumber()).isEqualTo(0L);
+            assertThat(updatedFirstWaitingReservation.getWaitingNumber()).isNull();
             assertThat(updatedSecondWaitingReservation.getWaitingNumber()).isEqualTo(1L);
             assertThat(updatedSecondWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
             assertThat(updatedConfirmedReservation.getWaitingNumber()).isEqualTo(2L);

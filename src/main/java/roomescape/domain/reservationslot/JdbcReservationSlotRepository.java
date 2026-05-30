@@ -2,7 +2,6 @@ package roomescape.domain.reservationslot;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import roomescape.domain.theme.Theme;
 public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_NAME = "name";
     private static final String COLUMN_DATE_ID = "date_id";
     private static final String COLUMN_DATE = "date";
     private static final String COLUMN_TIME_ID = "time_id";
@@ -29,8 +27,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String COLUMN_THEME_NAME = "theme_name";
     private static final String COLUMN_THEME_CONTENT = "theme_content";
     private static final String COLUMN_THEME_URL = "theme_url";
-    private static final String COLUMN_CONTENT = "content";
-    private static final String COLUMN_URL = "url";
 
     private static final String INSERT_SQL = "insert into reservation_slot(date_id, time_id, theme_id) values (?, ?, ?)";
     private static final String FIND_ALL_SQL =
@@ -58,36 +54,11 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             where date_id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation_slot where id = ?";
-    private static final String FIND_POPULAR_THEME_SQL =
-        """
-            select
-                th.id,
-                th.name,
-                th.content,
-                th.url
-            from reservation r
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join theme th on rs.theme_id = th.id
-            where rd.date between ? and ?
-              and r.status = 'CONFIRMED'
-            group by th.id, th.name, th.content, th.url
-            order by count(r.id) desc, th.id asc
-            limit ?
-            """;
     private static final String COUNT_BY_THEME_ID_SQL =
         """
             select count(*)
             from reservation_slot
             where theme_id = ?
-            """;
-    private static final String EXISTS_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL =
-        """
-            select exists(
-                select 1
-                from reservation_slot r
-                where time_id = ? and date_id = ? and theme_id = ?
-            )
             """;
     private static final String FIND_BY_SCHEDULE_SQL =
         """
@@ -165,34 +136,12 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate endDay) {
-        return jdbcTemplate.query(FIND_POPULAR_THEME_SQL, popularThemeRowMapper(), startDay, endDay, rankLimit);
-    }
-
-    @Override
     public int countByThemeId(Long themeId) {
         Integer count = jdbcTemplate.queryForObject(COUNT_BY_THEME_ID_SQL, Integer.class, themeId);
         if (count == null) {
             return 0;
         }
         return count;
-    }
-
-    @Override
-    public boolean existsReservation(Long timeId, Long dateId, Long themeId) {
-        return existsBySchedule(timeId, dateId, themeId);
-    }
-
-    @Override
-    public boolean existsBySchedule(Long timeId, Long dateId, Long themeId) {
-        Boolean exists = jdbcTemplate.queryForObject(
-            EXISTS_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL,
-            Boolean.class,
-            timeId,
-            dateId,
-            themeId
-        );
-        return exists != null && exists;
     }
 
     @Override
@@ -245,15 +194,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 rs.getString(COLUMN_THEME_CONTENT),
                 rs.getString(COLUMN_THEME_URL)
             )
-        );
-    }
-
-    private RowMapper<Theme> popularThemeRowMapper() {
-        return (rs, rowNum) -> Theme.of(
-            rs.getLong(COLUMN_ID),
-            rs.getString(COLUMN_NAME),
-            rs.getString(COLUMN_CONTENT),
-            rs.getString(COLUMN_URL)
         );
     }
 

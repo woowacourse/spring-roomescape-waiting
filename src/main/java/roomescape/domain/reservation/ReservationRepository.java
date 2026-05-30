@@ -20,13 +20,7 @@ public interface ReservationRepository {
 
     void update(Long id, Reservation updatedReservation);
 
-    void updateStatus(Long id, ReservationStatus status);
-
     boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
-
-    void updateWaitingNumbers(List<Reservation> userReservations);
-
-    void updateAllStatus(List<Reservation> userReservations);
 
     void deleteById(Long id);
 
