@@ -2,12 +2,16 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +22,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
@@ -101,8 +106,10 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.applyReservation(request))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.applyReservation(request),
+                RESERVATION_TIME_NOT_FOUND
+        );
     }
 
     @Test
@@ -116,8 +123,10 @@ class ReservationServiceTest {
                 1L
         );
 
-        assertThatThrownBy(() -> reservationService.applyReservation(request))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.applyReservation(request),
+                THEME_NOT_FOUND
+        );
     }
 
     @Test
@@ -134,8 +143,10 @@ class ReservationServiceTest {
 
         reservationService.applyReservation(request);
 
-        assertThatThrownBy(() -> reservationService.applyReservation(request))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.applyReservation(request),
+                DUPLICATE_RESERVATION
+        );
     }
 
     @Test
@@ -160,8 +171,10 @@ class ReservationServiceTest {
         );
         reservationService.applyReservation(waitlistRequest);
 
-        assertThatThrownBy(() -> reservationService.applyReservation(waitlistRequest))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.applyReservation(waitlistRequest),
+                DUPLICATE_RESERVATION
+        );
     }
 
     @Test
@@ -180,14 +193,18 @@ class ReservationServiceTest {
 
         reservationService.deleteReservation(savedReservation.getId());
 
-        assertThatThrownBy(() -> reservationService.getReservation(savedReservation.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getReservation(savedReservation.getId()),
+                RESERVATION_NOT_FOUND
+        );
     }
 
     @Test
     void 없는_예약을_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.deleteReservation(1L),
+                RESERVATION_NOT_FOUND
+        );
     }
 
     @Test
@@ -206,14 +223,18 @@ class ReservationServiceTest {
 
         reservationService.cancelMyReservation(reservation.getId(), name);
 
-        assertThatThrownBy(() -> reservationService.getReservation(reservation.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getReservation(reservation.getId()),
+                RESERVATION_NOT_FOUND
+        );
     }
 
     @Test
     void 사용자_예약을_취소할_때_존재하지_않는_예약이면_예외() {
-        assertThatThrownBy(() -> reservationService.cancelMyReservation(1L, "브라운"))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.cancelMyReservation(1L, "브라운"),
+                RESERVATION_NOT_FOUND
+        );
     }
 
     @Test
@@ -228,8 +249,10 @@ class ReservationServiceTest {
         );
 
         assertThat(dateTime.isBefore(LocalDateTime.now())).isTrue();
-        assertThatThrownBy(() -> reservationService.cancelMyReservation(pastReservation.getId(), name))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.cancelMyReservation(pastReservation.getId(), name),
+                PAST_RESERVATION
+        );
     }
 
     @Test
@@ -271,8 +294,10 @@ class ReservationServiceTest {
                 updateTime.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.updateReservation(1L, "브라운", updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.updateReservation(1L, "브라운", updateRequest),
+                RESERVATION_NOT_FOUND
+        );
     }
 
     @Test
@@ -293,8 +318,10 @@ class ReservationServiceTest {
                 999L
         );
 
-        assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), name, updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                RESERVATION_TIME_NOT_FOUND
+        );
     }
 
     @Test
@@ -325,8 +352,10 @@ class ReservationServiceTest {
                 twelveClock.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), name, updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.updateReservation(reservation.getId(), name, updateRequest),
+                DUPLICATE_RESERVATION
+        );
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
@@ -358,5 +387,11 @@ class ReservationServiceTest {
                 time.getId(),
                 theme.getId()
         );
+    }
+
+    private void assertThatRoomEscapeExceptionCode(ThrowingCallable callable, DomainErrorCode expectedCode) {
+        assertThatThrownBy(callable)
+                .isInstanceOfSatisfying(RoomEscapeException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(expectedCode));
     }
 }

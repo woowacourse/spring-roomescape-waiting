@@ -1,6 +1,6 @@
 package roomescape.repository;
 
-import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.WAITLIST_NOT_FOUND;
 
 import java.util.Optional;
 import roomescape.domain.Reservation;
@@ -24,6 +24,6 @@ public interface WaitlistRepository {
     void deleteById(Long id);
 
     default Waitlist getById(Long id, String message) {
-        return findById(id).orElseThrow(() -> new RoomEscapeException(RESERVATION_NOT_FOUND, message));
+        return findById(id).orElseThrow(() -> new RoomEscapeException(WAITLIST_NOT_FOUND, message));
     }
 }

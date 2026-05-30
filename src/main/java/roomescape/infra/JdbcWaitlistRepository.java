@@ -72,11 +72,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
                 WHERE date = ?
                     AND time_id = ?
                     AND theme_id = ?
-                    AND created_at < ?
+                    AND (
+                        created_at < ?
                         OR (
                             created_at = ?
                             AND id < ?
-                        );
+                        )
+                    );
                 """;
 
         Integer count = jdbcTemplate.queryForObject(

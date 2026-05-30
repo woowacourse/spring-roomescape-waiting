@@ -1,9 +1,13 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.WAITLIST_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
 import roomescape.repository.ReservationTimeRepository;
@@ -57,14 +62,18 @@ public class WaitlistServiceTest {
 
         waitlistService.cancelMyWaitlist(savedWaitlist.getId(), "브리");
 
-        assertThatThrownBy(() -> waitlistService.getWaitlist(savedWaitlist.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> waitlistService.getWaitlist(savedWaitlist.getId()),
+                WAITLIST_NOT_FOUND
+        );
     }
 
     @Test
     void id가_존재하지_않으면_예외() {
-        assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(1L, "브라운"))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> waitlistService.cancelMyWaitlist(1L, "브라운"),
+                WAITLIST_NOT_FOUND
+        );
     }
 
     @Test
@@ -87,8 +96,16 @@ public class WaitlistServiceTest {
         ));
 
         String other = "브리";
-        assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(savedWaitlist.getId(), other))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> waitlistService.cancelMyWaitlist(savedWaitlist.getId(), other),
+                UNAUTHORIZED_RESERVATION
+        );
+    }
+
+    private void assertThatRoomEscapeExceptionCode(ThrowingCallable callable, DomainErrorCode expectedCode) {
+        assertThatThrownBy(callable)
+                .isInstanceOfSatisfying(RoomEscapeException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(expectedCode));
     }
 
 

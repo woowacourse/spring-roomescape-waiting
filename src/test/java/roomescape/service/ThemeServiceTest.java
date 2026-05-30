@@ -2,11 +2,14 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.exception.DomainErrorCode.REFERENTIAL_INTEGRITY;
+import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ThemeRequest;
 import roomescape.repository.ReservationRepository;
@@ -101,14 +105,18 @@ class ThemeServiceTest {
 
         themeService.deleteTheme(saveId);
 
-        assertThatThrownBy(() -> themeService.getTheme(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> themeService.getTheme(saveId),
+                THEME_NOT_FOUND
+        );
     }
 
     @Test
     void 없는_테마를_삭제할_수_없다() {
-        assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> themeService.deleteTheme(1L),
+                THEME_NOT_FOUND
+        );
     }
 
     @Test
@@ -128,8 +136,10 @@ class ThemeServiceTest {
                 theme
         ));
 
-        assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> themeService.deleteTheme(theme.getId()),
+                REFERENTIAL_INTEGRITY
+        );
     }
 
     @Test
@@ -152,5 +162,11 @@ class ThemeServiceTest {
                         "침몰하는 잠수함",
                         "은행 금고"
                 );
+    }
+
+    private void assertThatRoomEscapeExceptionCode(ThrowingCallable callable, DomainErrorCode expectedCode) {
+        assertThatThrownBy(callable)
+                .isInstanceOfSatisfying(RoomEscapeException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(expectedCode));
     }
 }

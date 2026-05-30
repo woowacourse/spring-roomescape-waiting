@@ -2,11 +2,14 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.exception.DomainErrorCode.REFERENTIAL_INTEGRITY;
+import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.repository.ReservationRepository;
@@ -73,8 +77,10 @@ class ReservationTimeServiceTest {
 
         reservationTimeService.deleteReservationTime(saveId);
 
-        assertThatThrownBy(() -> reservationTimeService.getReservationTime(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationTimeService.getReservationTime(saveId),
+                RESERVATION_TIME_NOT_FOUND
+        );
     }
 
     @Test
@@ -92,13 +98,23 @@ class ReservationTimeServiceTest {
                 theme.get()
         ));
 
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservationTime.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationTimeService.deleteReservationTime(reservationTime.getId()),
+                REFERENTIAL_INTEGRITY
+        );
     }
 
     @Test
     void 없는_예약시간을_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationTimeService.deleteReservationTime(1L),
+                RESERVATION_TIME_NOT_FOUND
+        );
+    }
+
+    private void assertThatRoomEscapeExceptionCode(ThrowingCallable callable, DomainErrorCode expectedCode) {
+        assertThatThrownBy(callable)
+                .isInstanceOfSatisfying(RoomEscapeException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(expectedCode));
     }
 }

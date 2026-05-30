@@ -2,11 +2,15 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
+import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 
 class ReservationTest {
@@ -39,8 +43,10 @@ class ReservationTest {
         LocalTime pastTime = LocalTime.now().minusMinutes(1);
         Reservation reservation = new Reservation(NAME, now, new ReservationTime(pastTime), THEME);
 
-        assertThatThrownBy(() -> reservation.verifyReservable(LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.verifyReservable(LocalDateTime.now()),
+                PAST_RESERVATION
+        );
     }
 
     @Test
@@ -48,8 +54,10 @@ class ReservationTest {
         LocalDate past = LocalDate.now().minusDays(1);
         Reservation reservation = new Reservation(NAME, past, TIME, THEME);
 
-        assertThatThrownBy(() -> reservation.verifyReservable(LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.verifyReservable(LocalDateTime.now()),
+                PAST_RESERVATION
+        );
     }
 
     @Test
@@ -58,8 +66,10 @@ class ReservationTest {
 
         String other = "브라운";
 
-        assertThatThrownBy(() -> reservation.verifyCancelableBy(other, NOW))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.verifyCancelableBy(other, NOW),
+                UNAUTHORIZED_RESERVATION
+        );
     }
 
     @Test
@@ -68,8 +78,10 @@ class ReservationTest {
 
         Reservation reservation = new Reservation(NAME, past, TIME, THEME);
 
-        assertThatThrownBy(() -> reservation.verifyCancelableBy(NAME, NOW))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.verifyCancelableBy(NAME, NOW),
+                PAST_RESERVATION
+        );
     }
 
     @Test
@@ -92,8 +104,10 @@ class ReservationTest {
         LocalDate newDate = LocalDate.now().plusDays(1);
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
-        assertThatThrownBy(() -> reservation.changeBy(other, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.changeBy(other, NOW, newDate, newTime),
+                UNAUTHORIZED_RESERVATION
+        );
     }
 
     @Test
@@ -104,8 +118,10 @@ class ReservationTest {
         LocalDate newDate = LocalDate.now().plusDays(1);
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
-        assertThatThrownBy(() -> reservation.changeBy(NAME, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.changeBy(NAME, NOW, newDate, newTime),
+                PAST_RESERVATION
+        );
     }
 
     @Test
@@ -114,8 +130,16 @@ class ReservationTest {
         LocalDate newDate = LocalDate.now().minusDays(1);
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
-        assertThatThrownBy(() -> reservation.changeBy(NAME, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservation.changeBy(NAME, NOW, newDate, newTime),
+                PAST_RESERVATION
+        );
+    }
+
+    private void assertThatRoomEscapeExceptionCode(ThrowingCallable callable, DomainErrorCode expectedCode) {
+        assertThatThrownBy(callable)
+                .isInstanceOfSatisfying(RoomEscapeException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(expectedCode));
     }
 
 }
