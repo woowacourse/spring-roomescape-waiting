@@ -254,8 +254,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> update(Long id, Reservation updatedReservation) {
-        int updatedCount = jdbcTemplate.update(
+    public void update(Long id, Reservation updatedReservation) {
+        jdbcTemplate.update(
             UPDATE_SQL,
             updatedReservation.getReservationSlot().getId(),
             updatedReservation.getUser().getId(),
@@ -265,10 +265,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             Timestamp.valueOf(updatedReservation.getUpdatedAt()),
             id
         );
-        if (updatedCount == 0) {
-            return Optional.empty();
-        }
-        return findById(id);
     }
 
     @Override

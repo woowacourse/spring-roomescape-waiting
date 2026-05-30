@@ -64,13 +64,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> update(Long id, Reservation userReservation) {
+    public void update(Long id, Reservation userReservation) {
         if (!storage.containsKey(id)) {
-            return Optional.empty();
+            return;
         }
         Reservation updatedUserReservation = Reservation.createWithId(id, userReservation);
         storage.put(id, updatedUserReservation);
-        return Optional.of(updatedUserReservation);
     }
 
     @Override
