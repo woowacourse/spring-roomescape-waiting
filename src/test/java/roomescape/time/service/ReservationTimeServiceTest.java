@@ -11,18 +11,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
-
-    @Mock
-    ThemeRepository themeRepository;
 
     @Mock
     ReservationTimeRepository reservationTimeRepository;
@@ -40,7 +36,7 @@ class ReservationTimeServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationTimeService.save(
                 new ReservationTimeCommand(LocalTime.of(10, 0))
-        )).isInstanceOf(DuplicateException.class)
+        )).isInstanceOf(ConflictException.class)
                 .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
     }
 
@@ -66,7 +62,7 @@ class ReservationTimeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
-                .isInstanceOf(roomescape.global.exception.DeleteFailedException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage(TimeErrorCode.TIME_IN_USE.getMessage());
     }
 }

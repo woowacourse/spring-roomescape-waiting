@@ -9,8 +9,4 @@ public record ReservationTime(
     public static ReservationTime of(LocalTime startAt) {
         return new ReservationTime(null, startAt);
     }
-
-    public ReservationTime withId(Long id) {
-        return new ReservationTime(id, this.startAt);
-    }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
@@ -17,8 +17,8 @@ import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -39,13 +39,13 @@ public class ReservationTimeService {
             ReservationTime saved = reservationTimeRepository.save(reservationTime);
             return ReservationTimeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(TimeErrorCode.DUPLICATE_TIME.getMessage());
+            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME.getMessage());
         }
     }
 
     private void validateReservationTimeUniqueness(LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new DuplicateException(TimeErrorCode.DUPLICATE_TIME.getMessage());
+            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME.getMessage());
         }
     }
 
@@ -76,7 +76,7 @@ public class ReservationTimeService {
                 throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage());
             }
         } catch (DataIntegrityViolationException e) {
-            throw new roomescape.global.exception.DeleteFailedException(TimeErrorCode.TIME_IN_USE.getMessage());
+            throw new ConflictException(TimeErrorCode.TIME_IN_USE.getMessage());
         }
     }
 }
