@@ -175,11 +175,15 @@ private Reservation validModifiable(long id, String userName) {
 
 ---
 
-### Review 0
+### Review 07
 
->
+> ### SimpleJdbcInsert 중복 생성
+> 이렇게 작성하면 매 호출마다 SimpleJdbcInsert를 생성하게 됩니다.  
+> 해당 객체는 메타 데이터만 조회하는 것이라서 한번만 초기화하고 사용하시면 됩니다.
 
-### Feedback 0
+### Feedback 07
+
+잘못된 사용법이었네요. 생성자에서 초기화 후 재사용하는 방식으로 수정했습니다!
 
 ---
 

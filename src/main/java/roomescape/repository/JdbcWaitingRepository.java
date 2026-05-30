@@ -98,9 +98,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
             """;
 
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert simpleJdbcInsert;
 
     public JdbcWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("name", "date", "time_id", "theme_id");
     }
 
     @Override
@@ -112,9 +117,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Waiting save(Waiting waiting) {
-        SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);
-        long waitingId = insert.executeAndReturnKey(params).longValue();
+        long waitingId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new Waiting(
                 waitingId,
                 waiting.getName(),
@@ -145,13 +149,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Optional<Waiting> findById(long waitingId) {
         List<Waiting> waitings = jdbcTemplate.query(FIND_BY_ID_SQL, rowMapper(), waitingId);
         return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
-    }
-
-    private SimpleJdbcInsert createInsert() {
-        return new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("waiting")
-                .usingGeneratedKeyColumns("id")
-                .usingColumns("name", "date", "time_id", "theme_id");
     }
 
     private Map<String, Object> createParams(Waiting waiting) {

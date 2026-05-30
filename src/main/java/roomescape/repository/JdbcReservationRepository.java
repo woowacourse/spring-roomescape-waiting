@@ -20,9 +20,13 @@ import java.util.Optional;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert jdbcInsert;
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
     }
 
     @Override
@@ -90,9 +94,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(reservation);
-        long reservationId = insert.executeAndReturnKey(params).longValue();
+        long reservationId = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(
                 reservationId,
                 reservation.getName(),
@@ -148,12 +151,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             throw new ReservationNotFoundException(reservation.getId());
         }
         return reservation;
-    }
-
-    private SimpleJdbcInsert createInsert() {
-        return new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("reservation")
-                .usingGeneratedKeyColumns("id");
     }
 
     private Map<String, Object> createParams(Reservation reservation) {

@@ -19,9 +19,14 @@ import java.util.Optional;
 public class JdbcTimeSlotRepository implements TimeSlotRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert simpleJdbcInsert;
 
     public JdbcTimeSlotRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("time_slot")
+                .usingGeneratedKeyColumns("id");
+
     }
 
     @Override
@@ -59,9 +64,8 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
 
     @Override
     public TimeSlot save(TimeSlot timeSlot) {
-        SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(timeSlot);
-        long reservationId = insert.executeAndReturnKey(params).longValue();
+        long reservationId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new TimeSlot(reservationId, timeSlot.getStartAt());
     }
 
@@ -79,12 +83,6 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
             throw new TimeSlotNotFoundException(timeSlot.getId());
         }
         return timeSlot;
-    }
-
-    private SimpleJdbcInsert createInsert() {
-        return new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("time_slot")
-                .usingGeneratedKeyColumns("id");
     }
 
     private Map<String, Object> createParams(TimeSlot timeSlot) {

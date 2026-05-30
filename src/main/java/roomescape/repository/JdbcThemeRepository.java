@@ -17,9 +17,13 @@ import java.util.Optional;
 public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert simpleJdbcInsert;
 
     public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("theme")
+                .usingGeneratedKeyColumns("id");
     }
 
     private static Map<String, Object> createParams(Theme theme) {
@@ -45,9 +49,8 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(theme);
-        long id = insert.executeAndReturnKey(params).longValue();
+        long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new Theme(
                 id,
                 theme.getName(),
@@ -102,12 +105,6 @@ public class JdbcThemeRepository implements ThemeRepository {
                 toDate,
                 topCount
         );
-    }
-
-    private SimpleJdbcInsert createInsert() {
-        return new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("theme")
-                .usingGeneratedKeyColumns("id");
     }
 
     private RowMapper<Theme> rowMapper() {
