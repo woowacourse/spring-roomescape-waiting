@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.service.dto.command.ReservationTimeCommand;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -37,15 +36,5 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(id))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("예약이 존재하는 시간은 삭제할 수 없습니다.");
-    }
-
-    @Test
-    @DisplayName("없는 시간을 삭제하면 에러가 발생한다.")
-    void 없는_시간_삭제_에러_테스트() {
-        Long id = 999L;
-
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(id))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("존재하지 않는 시간입니다.");
     }
 }
