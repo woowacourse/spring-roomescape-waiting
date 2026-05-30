@@ -215,7 +215,7 @@ class ReservationControllerTest {
         Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-            .when().delete("/reservation/" + reservationId)
+            .when().delete("/reservations/" + reservationId + "?name=유저1")
             .then().log().all()
             .statusCode(204);
 
@@ -228,7 +228,7 @@ class ReservationControllerTest {
     @Test
     void deleteReservation_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-            .when().delete("/reservation/999")
+            .when().delete("/reservations/999?name=유저1")
             .then().log().all()
             .statusCode(404);
     }

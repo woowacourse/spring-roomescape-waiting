@@ -160,18 +160,19 @@ class ReservationServiceTest {
 
         @Test
         void 정상_삭제() {
-            when(reservationRepository.existsById(1L)).thenReturn(true);
+            Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-            reservationService.deleteReservation(1L);
+            reservationService.deleteReservation(1L, "유저1");
 
             verify(reservationRepository, times(1)).deleteById(1L);
         }
 
         @Test
         void 존재하지_않는_id면_예외() {
-            when(reservationRepository.existsById(99L)).thenReturn(false);
+            when(reservationRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> reservationService.deleteReservation(99L))
+            assertThatThrownBy(() -> reservationService.deleteReservation(99L, "유저1"))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
