@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.waiting.service.WaitingApplicationService;
-import roomescape.waiting.service.dto.request.WaitingCreateRequest;
+import roomescape.waiting.controller.dto.request.WaitingCreateRequest;
 import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 
 @RestController

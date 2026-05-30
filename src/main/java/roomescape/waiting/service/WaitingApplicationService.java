@@ -7,7 +7,7 @@ import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.service.dto.request.WaitingCreateRequest;
+import roomescape.waiting.controller.dto.request.WaitingCreateRequest;
 import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 
 @Service
