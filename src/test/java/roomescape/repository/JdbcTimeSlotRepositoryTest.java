@@ -1,12 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +11,15 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.exception.TimeSlotNotFoundException;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -75,14 +77,14 @@ class JdbcTimeSlotRepositoryTest {
     void updateExisting() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         TimeSlot updateTime = new TimeSlot(savedTimeSlot.getId(), LocalTime.of(12, 0));
-        assertThat(timeRepository.update(updateTime)).isEqualTo(1);
+        assertThat(timeRepository.update(updateTime)).isEqualTo(updateTime);
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 시간을 수정하면 0을 반환한다.")
+    @DisplayName("존재하지 않는 예약 시간을 수정하면 예외가 발생한다.")
     void updateNonExisting() {
         TimeSlot updateTime = new TimeSlot(999L, LocalTime.of(12, 0));
-        assertThat(timeRepository.update(updateTime)).isZero();
+        assertThatThrownBy(() -> timeRepository.update(updateTime)).isInstanceOf(TimeSlotNotFoundException.class);
     }
 
     @Test

@@ -50,16 +50,16 @@ public class ThemeService {
     }
 
     @Transactional
-    public void putTheme(long id, ThemeRequest request) {
+    public Theme putTheme(long id, ThemeRequest request) {
         findThemeById(id);
-        themeRepository.update(new Theme(id, request.name(), request.description(), request.thumbnailUrl()));
+        return themeRepository.update(new Theme(id, request.name(), request.description(), request.thumbnailUrl()));
     }
 
     @Transactional
-    public void patchTheme(long id, ThemePatchRequest request) {
+    public Theme patchTheme(long id, ThemePatchRequest request) {
         Theme theme = findThemeById(id);
         theme.renewal(request.name(), request.description(), request.thumbnailUrl());
-        themeRepository.update(theme);
+        return themeRepository.update(theme);
     }
 
     public List<Theme> findPopularThemes(Long topCount, Long during) {

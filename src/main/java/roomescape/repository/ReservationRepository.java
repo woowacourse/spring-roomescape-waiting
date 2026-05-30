@@ -22,5 +22,5 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    int update(Reservation reservation);
+    Reservation update(Reservation reservation);
 }

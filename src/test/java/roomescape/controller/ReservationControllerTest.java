@@ -26,8 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -99,15 +98,19 @@ class ReservationControllerTest {
     @DisplayName("예약의 전체 정보를 수정하고 200 상태 코드를 반환한다.")
     void rescheduleAll() throws Exception {
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
-        given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
+        given(reservationService.putReservation(anyLong(), anyString(), any(ReservationRequest.class)))
+                .willReturn(createMockReservation());
+
         performPut("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("존재하지 않는 자원 요청 시 404 예외와 커스텀 코드를 반환한다.")
     void findNonExistentReservation() throws Exception {
-        given(reservationService.findReservationById(anyLong())).willThrow(new ReservationNotFoundException(999L));
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
+        given(reservationService.putReservation(anyLong(), anyString(), any(ReservationRequest.class)))
+                .willThrow(new ReservationNotFoundException(999L));
+
         performPut("/reservations/999", "브라운", request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));
@@ -117,7 +120,9 @@ class ReservationControllerTest {
     @DisplayName("예약의 부분 정보를 수정하고 200 상태 코드를 반환한다.")
     void reschedulePart() throws Exception {
         ReservationPatchRequest request = new ReservationPatchRequest("네오", null, null, null);
-        given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
+        given(reservationService.patchReservation(anyLong(), anyString(), any(ReservationPatchRequest.class)))
+                .willReturn(createMockReservation());
+
         performReschedule("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 

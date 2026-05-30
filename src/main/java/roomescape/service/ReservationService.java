@@ -82,7 +82,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void putReservation(long id, String userName, ReservationRequest request) {
+    public Reservation putReservation(long id, String userName, ReservationRequest request) {
         validModifiable(id, userName);
         Reservation transientReservation = createTransientWithValidField(request);
         Reservation reservation = new Reservation(
@@ -93,11 +93,11 @@ public class ReservationService {
                 transientReservation.getTheme()
         );
         validDuplicatedReservation(reservation);
-        reservationRepository.update(reservation);
+        return reservationRepository.update(reservation);
     }
 
     @Transactional
-    public void patchReservation(long id, String userName, ReservationPatchRequest request) {
+    public Reservation patchReservation(long id, String userName, ReservationPatchRequest request) {
         Reservation reservation = validModifiable(id, userName);
         reservation.reschedule(
                 request.name(),
@@ -107,7 +107,7 @@ public class ReservationService {
         );
         validDateTime(request.date(), reservation.getTimeSlot().getStartAt());
         validDuplicatedReservation(reservation);
-        reservationRepository.update(reservation);
+        return reservationRepository.update(reservation);
     }
 
     private Reservation validModifiable(long id, String userName) {

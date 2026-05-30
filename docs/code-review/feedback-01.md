@@ -160,11 +160,18 @@ private Reservation validModifiable(long id, String userName) {
 
 ---
 
-### Review 0
+### Review 06
 
->
+> ### UPDATE 쿼리의 결과값 반환
+> 여기 조회하는 부분도 update 했을 때 객체를 반환하도록 수정하면 불필요한 조회를 줄일 수 있겠네요
 
-### Feedback 0
+### Feedback 06
+
+앞선 미션에서
+[CQS 에 대해 학습한 내용](https://github.com/nn98/spring-roomescape-admin/blob/nn98/docs/study-log/log-02.md) 과
+설정한 [실용적 예외의 기준](https://github.com/woowacourse/spring-roomescape-member/pull/409#discussion_r3209591855) 에 따라  
+생성에서의 결과 반환은 구현했는데 수정도 동일하게 처리하는 것이 좋겠네요.  
+각 실행 흐름에서 수정된 결과 객체를 반환하도록 수정했습니다!
 
 ---
 

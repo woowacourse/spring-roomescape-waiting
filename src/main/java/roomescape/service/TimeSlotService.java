@@ -57,21 +57,22 @@ public class TimeSlotService {
     }
 
     @Transactional
-    public void putTime(long id, TimeRequest request) {
+    public TimeSlot putTime(long id, TimeRequest request) {
         TimeSlot exists = findTimeSlotById(id);
         TimeSlot timeSlot = new TimeSlot(id, request.startAt());
-        if (!exists.equals(timeSlot)) {
-            checkDuplicatedStartAt(request.startAt());
-            timeSlotRepository.update(timeSlot);
+        if (exists.equals(timeSlot)) {
+            return exists;
         }
+        checkDuplicatedStartAt(request.startAt());
+        return timeSlotRepository.update(timeSlot);
     }
 
     @Transactional
-    public void patchTime(long id, TimePatchRequest request) {
+    public TimeSlot patchTime(long id, TimePatchRequest request) {
         TimeSlot timeSlot = findTimeSlotById(id);
         checkDuplicatedStartAt(request.startAt());
         timeSlot.changeTime(request.startAt());
-        timeSlotRepository.update(timeSlot);
+        return timeSlotRepository.update(timeSlot);
     }
 
     public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {

@@ -37,8 +37,8 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int update(Theme theme) {
-        return 1;
+    public Theme update(Theme theme) {
+        return theme;
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.exception.ReservationNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -133,9 +134,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int update(Reservation reservation) {
+    public Reservation update(Reservation reservation) {
         String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
-        return jdbcTemplate.update(
+        int columns = jdbcTemplate.update(
                 sql,
                 reservation.getName(),
                 reservation.getDate(),
@@ -143,6 +144,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getTheme().getId(),
                 reservation.getId()
         );
+        if (columns == 0) {
+            throw new ReservationNotFoundException(reservation.getId());
+        }
+        return reservation;
     }
 
     private SimpleJdbcInsert createInsert() {

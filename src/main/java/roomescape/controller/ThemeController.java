@@ -61,8 +61,7 @@ public class ThemeController {
             @RequestBody @Valid
             ThemeRequest request
     ) {
-        themeService.putTheme(id, request);
-        return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
+        return ResponseEntity.ok(ThemeResponse.from(themeService.putTheme(id, request)));
     }
 
     @PatchMapping("/{id}")
@@ -70,8 +69,7 @@ public class ThemeController {
             @PathVariable long id,
             @RequestBody ThemePatchRequest request
     ) {
-        themeService.patchTheme(id, request);
-        return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
+        return ResponseEntity.ok(ThemeResponse.from(themeService.patchTheme(id, request)));
     }
 
     private List<ThemeResponse> convertToThemeResponses(List<Theme> themes) {

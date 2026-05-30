@@ -39,8 +39,8 @@ public class FakeTimeSlotRepository implements TimeSlotRepository {
     }
 
     @Override
-    public int update(TimeSlot timeSlot) {
-        return 1;
+    public TimeSlot update(TimeSlot timeSlot) {
+        return timeSlot;
     }
 
     @Override

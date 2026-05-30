@@ -76,8 +76,7 @@ public class ReservationController {
             @RequestBody @Valid
             ReservationRequest request
     ) {
-        reservationService.putReservation(id, userName, request);
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.putReservation(id, userName, request)));
     }
 
     @PatchMapping(value = "/{id}")
@@ -89,7 +88,6 @@ public class ReservationController {
             @RequestParam @NotBlank
             String userName
     ) {
-        reservationService.patchReservation(id, userName, request);
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.patchReservation(id, userName, request)));
     }
 }

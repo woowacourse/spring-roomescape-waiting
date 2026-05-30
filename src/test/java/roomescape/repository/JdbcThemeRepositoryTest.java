@@ -1,11 +1,5 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +8,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
+import roomescape.exception.ThemeNotFoundException;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -85,14 +88,14 @@ class JdbcThemeRepositoryTest {
     void updateExisting() {
         Theme savedTheme = jdbcThemeRepository.save(Theme.transientOf("공포", "귀신의 집", "https://url"));
         Theme updateTheme = new Theme(savedTheme.getId(), "코믹", "웃긴 집", "https://url2");
-        assertThat(jdbcThemeRepository.update(updateTheme)).isEqualTo(1);
+        assertThat(jdbcThemeRepository.update(updateTheme)).isEqualTo(updateTheme);
     }
 
     @Test
-    @DisplayName("존재하지 않는 테마를 수정하면 0을 반환한다.")
+    @DisplayName("존재하지 않는 테마를 수정하면 예외가 발생한다.")
     void updateNonExisting() {
         Theme updateTheme = new Theme(999L, "코믹", "웃긴 집", "https://url2");
-        assertThat(jdbcThemeRepository.update(updateTheme)).isZero();
+        assertThatThrownBy(() -> jdbcThemeRepository.update(updateTheme)).isInstanceOf(ThemeNotFoundException.class);
     }
 
     private void insertReservation(long themeId) {

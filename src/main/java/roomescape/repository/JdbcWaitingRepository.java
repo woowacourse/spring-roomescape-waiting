@@ -111,10 +111,18 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void save(Waiting waiting) {
+    public Waiting save(Waiting waiting) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);
-        insert.execute(params);
+        long waitingId = insert.executeAndReturnKey(params).longValue();
+        return new Waiting(
+                waitingId,
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTimeSlot(),
+                waiting.getTheme(),
+                waiting.getWaitingNumber()
+        );
     }
 
     @Override
@@ -142,6 +150,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
+                .usingGeneratedKeyColumns("id")
                 .usingColumns("name", "date", "time_id", "theme_id");
     }
 

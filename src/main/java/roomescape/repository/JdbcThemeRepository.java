@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
+import roomescape.exception.ThemeNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -62,10 +63,14 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int update(Theme theme) {
+    public Theme update(Theme theme) {
         String sql = "UPDATE theme SET name = ?, description = ?, thumbnail_url = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(),
+        int columns = jdbcTemplate.update(sql, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(),
                 theme.getId());
+        if (columns == 0) {
+            throw new ThemeNotFoundException(theme.getId());
+        }
+        return theme;
     }
 
     @Override

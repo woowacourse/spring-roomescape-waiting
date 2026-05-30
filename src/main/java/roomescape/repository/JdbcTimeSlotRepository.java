@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.TimeSlot;
+import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.service.dto.AvailableTimeSlot;
 
 import java.time.LocalDate;
@@ -71,9 +72,13 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
     }
 
     @Override
-    public int update(TimeSlot timeSlot) {
+    public TimeSlot update(TimeSlot timeSlot) {
         String sql = "UPDATE time_slot SET start_at = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, timeSlot.getStartAt(), timeSlot.getId());
+        int columns = jdbcTemplate.update(sql, timeSlot.getStartAt(), timeSlot.getId());
+        if (columns == 0) {
+            throw new TimeSlotNotFoundException(timeSlot.getId());
+        }
+        return timeSlot;
     }
 
     private SimpleJdbcInsert createInsert() {

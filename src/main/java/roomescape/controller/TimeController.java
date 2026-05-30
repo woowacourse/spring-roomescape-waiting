@@ -66,8 +66,7 @@ public class TimeController {
             @RequestBody @Valid
             TimeRequest request
     ) {
-        reservationTimeSlotService.putTime(id, request);
-        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.findTimeSlotById(id)));
+        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.putTime(id, request)));
     }
 
     @PatchMapping("/{id}")
@@ -77,8 +76,7 @@ public class TimeController {
             @RequestBody
             TimePatchRequest request
     ) {
-        reservationTimeSlotService.patchTime(id, request);
-        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.findTimeSlotById(id)));
+        return ResponseEntity.ok(TimeResponse.from(reservationTimeSlotService.patchTime(id, request)));
     }
 
     private List<TimeResponse> convertToTimeResponses(List<TimeSlot> reservationTimeSlots) {

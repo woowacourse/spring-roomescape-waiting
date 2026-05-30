@@ -34,7 +34,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void saveWaiting(WaitingRequest request) {
+    public Waiting saveWaiting(WaitingRequest request) {
         TimeSlot timeSlot = findTimeSlot(request.timeId());
         Theme theme = findTheme(request.themeId());
         Waiting waiting = Waiting.transientOf(request.name(), request.date(), timeSlot, theme);
@@ -43,7 +43,7 @@ public class WaitingService {
         validReservation(waiting);
         validDateTime(waiting.getDate(), timeSlot);
 
-        waitingRepository.save(waiting);
+        return waitingRepository.save(waiting);
     }
 
     @Transactional

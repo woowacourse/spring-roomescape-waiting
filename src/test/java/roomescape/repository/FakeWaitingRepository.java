@@ -21,10 +21,11 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void save(Waiting waiting) {
+    public Waiting save(Waiting waiting) {
         long id = sequence++;
         Waiting savedWaiting = createSavedWaiting(id, waiting);
         storage.put(id, savedWaiting);
+        return waiting;
     }
 
     @Override

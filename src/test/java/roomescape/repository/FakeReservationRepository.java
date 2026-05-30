@@ -53,12 +53,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int update(Reservation reservation) {
+    public Reservation update(Reservation reservation) {
         if (!storage.containsKey(reservation.getId())) {
-            return 0;
+            return null;
         }
         storage.put(reservation.getId(), reservation);
-        return 1;
+        return reservation;
     }
 
     private boolean isDuplicate(Reservation reservation, LocalDate date, Long timeId, Long themeId) {
