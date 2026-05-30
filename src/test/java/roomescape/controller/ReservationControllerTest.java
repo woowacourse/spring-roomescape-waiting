@@ -13,8 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -119,7 +120,7 @@ class ReservationControllerTest {
     void 예약_생성시_서비스에서_중복_예외_발생시_409를_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.of(2099, 1, 1), 1L, 1L);
         given(reservationService.reserve(any(), any()))
-                .willThrow(new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION));
+                .willThrow(new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION));
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -131,7 +132,7 @@ class ReservationControllerTest {
     void 예약_생성시_과거_날짜면_422를_반환한다() throws Exception {
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.of(2000, 1, 1), 1L, 1L);
         given(reservationService.reserve(any(), any()))
-                .willThrow(new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED));
+                .willThrow(new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED));
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +171,7 @@ class ReservationControllerTest {
     @Test
     void 없는_예약_단건_조회시_404를_반환한다() throws Exception {
         given(reservationService.find(999L))
-                .willThrow(new RoomEscapeException(ErrorCode.RESERVATION_NOT_FOUND));
+                .willThrow(new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
 
         mockMvc.perform(get("/reservations/999"))
                 .andExpect(status().isNotFound());
@@ -187,7 +188,7 @@ class ReservationControllerTest {
 
     @Test
     void 예약_삭제시_이름이_다르면_401을_반환한다() throws Exception {
-        willThrow(new RoomEscapeException(ErrorCode.UNAUTHORIZED_SAME_NAME))
+        willThrow(new RoomEscapeException(ReservationErrorCode.UNAUTHORIZED_SAME_NAME))
                 .given(reservationService).cancel(anyLong(), anyString(), any());
 
         mockMvc.perform(delete("/reservations/1")
@@ -217,7 +218,7 @@ class ReservationControllerTest {
     void 예약_수정시_존재하지_않는_예약이면_404를_반환한다() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.of(2099, 6, 1), 1L, 1L);
         given(reservationService.update(any(), anyLong(), any()))
-                .willThrow(new RoomEscapeException(ErrorCode.RESERVATION_NOT_FOUND));
+                .willThrow(new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
 
         mockMvc.perform(put("/reservations/999")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -229,7 +230,7 @@ class ReservationControllerTest {
     void 예약_수정시_과거_날짜면_422를_반환한다() throws Exception {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.of(2000, 1, 1), 1L, 1L);
         given(reservationService.update(any(), anyLong(), any()))
-                .willThrow(new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED));
+                .willThrow(new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED));
 
         mockMvc.perform(put("/reservations/1")
                         .contentType(MediaType.APPLICATION_JSON)

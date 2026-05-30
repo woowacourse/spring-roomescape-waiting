@@ -7,7 +7,7 @@ services:
       - TZ=Asia/Seoul
 
   frontend:
-    image: alstj2384/spring-roomescape-member-front:v3.2
+    image: dalsu1904/spring-roomescape-member-front:latest
     ports:
       - "4173:4173"
     environment:

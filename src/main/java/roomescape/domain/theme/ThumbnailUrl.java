@@ -1,7 +1,9 @@
 package roomescape.domain.theme;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.ThemeErrorCode;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -17,7 +19,7 @@ public class ThumbnailUrl {
     private void validate(String value) {
         Objects.requireNonNull(value);
         if (!URL_PATTERN.matcher(value).matches()) {
-            throw new RoomEscapeException(ErrorCode.INVALID_THUMBNAIL_URL);
+            throw new RoomEscapeException(ThemeErrorCode.INVALID_THUMBNAIL_URL);
         }
     }
 

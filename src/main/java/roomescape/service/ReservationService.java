@@ -1,7 +1,9 @@
 package roomescape.service;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.ReservationTimeErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ThemeErrorCode;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Rank;
@@ -148,7 +151,7 @@ public class ReservationService {
         reservation.ensureNotPast(now);
 
         if (!reservation.isSameName(name)) {
-            throw new RoomEscapeException(ErrorCode.UNAUTHORIZED_SAME_NAME);
+            throw new RoomEscapeException(ReservationErrorCode.UNAUTHORIZED_SAME_NAME);
         }
 
         reservationRepository.deleteById(reservationId);
@@ -156,22 +159,22 @@ public class ReservationService {
 
     private ReservationTime findReservationTimeByTimeId(long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
+                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
     }
 
     private Theme findThemeByThemeId(long themeId) {
         return themeRepository.findById(themeId).orElseThrow(
-                () -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
+                () -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
     }
 
     private void validateIsDuplicateReservation(long timeId, long themeId, LocalDate date, String name) {
         if (reservationRepository.existsByTimeAndThemeAndDateAndName(timeId, themeId, date, name)) {
-            throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
+            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
     private Reservation findReservationById(long reservationId) {
         return reservationRepository.findById(reservationId).orElseThrow(
-                () -> new RoomEscapeException(ErrorCode.RESERVATION_NOT_FOUND));
+                () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 }

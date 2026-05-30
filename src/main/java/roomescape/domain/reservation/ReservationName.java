@@ -1,7 +1,8 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.util.Objects;
 
 public class ReservationName {
@@ -19,7 +20,7 @@ public class ReservationName {
 
     public void validateLength(String value) {
         if (value.length() < MIN_NAME_LENGTH || value.length() > MAX_NAME_LENGTH) {
-            throw new RoomEscapeException(ErrorCode.INVALID_NAME_LENGTH);
+            throw new RoomEscapeException(ReservationErrorCode.INVALID_NAME_LENGTH);
         }
     }
 

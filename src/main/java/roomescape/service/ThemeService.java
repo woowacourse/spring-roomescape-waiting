@@ -1,11 +1,12 @@
 package roomescape.service;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ThemeErrorCode;
 import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
@@ -36,7 +37,7 @@ public class ThemeService {
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
+        return themeRepository.findById(themeId).orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
     }
 
     public List<Theme> findAll() {
@@ -63,11 +64,11 @@ public class ThemeService {
     @Transactional
     public void delete(long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new RoomEscapeException(ErrorCode.THEME_NOT_FOUND);
+            throw new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND);
         }
 
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new RoomEscapeException(ErrorCode.THEME_IN_USE);
+            throw new RoomEscapeException(ThemeErrorCode.THEME_IN_USE);
         }
 
         themeRepository.deleteById(themeId);

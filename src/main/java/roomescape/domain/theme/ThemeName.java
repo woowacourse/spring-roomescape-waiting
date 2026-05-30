@@ -1,7 +1,9 @@
 package roomescape.domain.theme;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.ThemeErrorCode;
+
 import java.util.Objects;
 
 public class ThemeName {
@@ -18,7 +20,7 @@ public class ThemeName {
 
     private void validate(String value) {
         if (MIN_NAME_LENGTH > value.length() || MAX_NAME_LENGTH < value.length()) {
-            throw new RoomEscapeException(ErrorCode.INVALID_THEME_NAME_LENGTH);
+            throw new RoomEscapeException(ThemeErrorCode.INVALID_THEME_NAME_LENGTH);
         }
     }
 

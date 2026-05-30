@@ -1,9 +1,12 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import roomescape.common.exception.ThemeErrorCode;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
@@ -45,7 +48,7 @@ public class Reservation {
         LocalDateTime requestDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
 
         if (requestDateTime.isBefore(now)) {
-            throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
+            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
     }
 

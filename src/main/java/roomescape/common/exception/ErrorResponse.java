@@ -1,4 +1,4 @@
-package common.exception;
+package roomescape.common.exception;
 
 import java.time.LocalDateTime;
 

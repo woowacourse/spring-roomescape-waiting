@@ -1,6 +1,6 @@
 package roomescape.domain.theme;
 
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.RoomEscapeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

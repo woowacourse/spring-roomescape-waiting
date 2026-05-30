@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.ReservationTimeErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -155,7 +157,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 999L, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class).hasMessage(
-                        ErrorCode.RESERVATION_NOT_FOUND.getMessage());
+                        ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -166,7 +168,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MAX))
                 .isInstanceOf(RoomEscapeException.class).hasMessage(
-                        ErrorCode.PAST_RESERVATION_NOT_ALLOWED.getMessage());
+                        ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -178,7 +180,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class).hasMessage(
-                        ErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
+                        ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -194,7 +196,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class).hasMessage(
-                        ErrorCode.DUPLICATE_RESERVATION.getMessage());
+                        ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
     @Test
@@ -243,7 +245,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
                 .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ErrorCode.RESERVATION_NOT_FOUND.getMessage());
+                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test

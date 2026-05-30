@@ -1,8 +1,5 @@
 package roomescape.domain.reservation;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
-
 public class Rank {
     private final int value;
 

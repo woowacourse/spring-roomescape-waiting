@@ -2,7 +2,7 @@ package roomescape.service;
 
 import static org.mockito.BDDMockito.given;
 
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package roomescape.controller;
 
-import common.exception.ErrorResponse;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorResponse;
+import roomescape.common.exception.RoomEscapeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

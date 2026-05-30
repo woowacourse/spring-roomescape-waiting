@@ -1,7 +1,9 @@
 package roomescape.service;
 
-import common.exception.ErrorCode;
-import common.exception.RoomEscapeException;
+import roomescape.common.exception.ErrorCode;
+import roomescape.common.exception.ReservationErrorCode;
+import roomescape.common.exception.ReservationTimeErrorCode;
+import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class ReservationTimeService {
 
     public List<ReservationTime> findAvailable(AvailableTimeFindRequest request, LocalDate now) {
         if (now.isAfter(request.getDate())) {
-            throw new RoomEscapeException(ErrorCode.PAST_DATE_NOT_ALLOWED);
+            throw new RoomEscapeException(ReservationErrorCode.PAST_DATE_NOT_ALLOWED);
         }
 
         return reservationTimeRepository.findByDateAndTheme(request.getDate(), request.getThemeId());
@@ -45,11 +47,11 @@ public class ReservationTimeService {
     @Transactional
     public void delete(long reservationTimeId) {
         if (!reservationTimeRepository.existsById(reservationTimeId)) {
-            throw new RoomEscapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND);
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND);
         }
 
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
-            throw new RoomEscapeException(ErrorCode.RESERVATION_TIME_IN_USE);
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_IN_USE);
         }
 
         reservationTimeRepository.delete(reservationTimeId);
