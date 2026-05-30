@@ -37,4 +37,8 @@ public class Waiting {
                 .slot(this.slot)
                 .build();
     }
+
+    public String getUserName() {
+        return user.name();
+    }
 }

@@ -74,7 +74,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", waiting.getUser().name())
+                .addValue("name", waiting.getUserName())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());

@@ -20,7 +20,7 @@ public record ReservationApplicationResult(
                                                          ReservationTimeResult timeResult) {
         return new ReservationApplicationResult(
                 reservation.getId(),
-                reservation.getUser().name(),
+                reservation.getUserName(),
                 reservation.getSlot().date(),
                 themeResult,
                 timeResult,
@@ -34,7 +34,7 @@ public record ReservationApplicationResult(
                                                        Long rank) {
         return new ReservationApplicationResult(
                 waiting.getId(),
-                waiting.getUser().name(),
+                waiting.getUserName(),
                 waiting.getSlot().date(),
                 themeResult,
                 timeResult,

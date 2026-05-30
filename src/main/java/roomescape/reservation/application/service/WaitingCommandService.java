@@ -41,7 +41,7 @@ public class WaitingCommandService {
         ReservationSlot slot = request.toSlot(time.getStartAt());
         Waiting waiting = request.toWaiting(slot);
 
-        validateNoReservationConflict(waiting.getUser().name(), slot);
+        validateNoReservationConflict(waiting.getUserName(), slot);
 
         try {
             Waiting savedWaiting = waitingRepository.save(waiting);

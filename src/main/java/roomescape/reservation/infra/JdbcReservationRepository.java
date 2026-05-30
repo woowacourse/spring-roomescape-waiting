@@ -76,7 +76,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.getUser().name())
+                .addValue("name", reservation.getUserName())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());
