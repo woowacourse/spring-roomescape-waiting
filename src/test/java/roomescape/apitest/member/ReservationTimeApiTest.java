@@ -1,4 +1,4 @@
-package roomescape.apitest.users;
+package roomescape.apitest.member;
 
 import static org.hamcrest.Matchers.is;
 

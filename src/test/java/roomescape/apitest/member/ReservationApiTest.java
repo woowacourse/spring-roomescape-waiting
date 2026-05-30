@@ -1,4 +1,4 @@
-package roomescape.apitest.users;
+package roomescape.apitest.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;

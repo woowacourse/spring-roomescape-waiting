@@ -1,4 +1,4 @@
-package roomescape.apitest.users;
+package roomescape.apitest.member;
 
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
@@ -19,7 +19,7 @@ public class WaitingApiTest {
     private final Long themeId = 1L;
 
     @Test
-    void 예약_대기_생성_API(){
+    void 예약_대기_생성_API() {
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", userName);
         reservation.put("date", FUTURE_DATE);
@@ -35,7 +35,7 @@ public class WaitingApiTest {
     }
 
     @Test
-    void 예약_대기_취소_API(){
+    void 예약_대기_취소_API() {
         String userName = "토리";
         RestAssured.given().log().all()
                 .when().delete("/waitings/" + waitingId + "?name=" + userName)
