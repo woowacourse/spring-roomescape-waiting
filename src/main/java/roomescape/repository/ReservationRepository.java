@@ -12,6 +12,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByDateAndThemeAndTimeForUpdate(ReservationCondition condition);
 
+    Optional<Reservation> findByEntryId(long entryId);
+
     Optional<Reservation> findByEntryIdForUpdate(long entryId);
 
     void update(Reservation reservation);

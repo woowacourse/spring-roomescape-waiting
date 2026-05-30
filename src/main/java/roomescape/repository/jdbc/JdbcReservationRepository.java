@@ -57,6 +57,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByEntryId(long entryId) {
+        return reservationSlotDao.findByEntryId(entryId)
+                .map(this::withEntries);
+    }
+
+    @Override
     public void update(Reservation reservation) {
         save(reservation);
     }

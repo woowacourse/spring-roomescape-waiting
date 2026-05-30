@@ -115,7 +115,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간 정보입니다."));
     }
 
-    public ReservationResult getReservationEntry(long entryId) {
+    public ReservationResult getActiveReservationEntry(long entryId) {
         Reservation reservation = findReservationByEntryIdWithThrow(entryId);
         ReservationEntry reservationEntry = reservation.findActiveEntry(entryId);
         return ReservationResult.from(reservation, reservationEntry);
@@ -130,7 +130,7 @@ public class ReservationService {
     }
 
     private Reservation findReservationByEntryIdWithThrow(long entryId) {
-        return reservationRepository.findByEntryIdForUpdate(entryId)
+        return reservationRepository.findByEntryId(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
     }
 }

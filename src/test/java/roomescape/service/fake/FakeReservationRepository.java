@@ -63,12 +63,17 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByEntryIdForUpdate(long entryId) {
+    public Optional<Reservation> findByEntryId(long entryId) {
         return storage.values()
                 .stream()
                 .filter(reservation -> reservation.getEntries()
                         .stream()
                         .anyMatch(entry -> entry.getId() != null && entry.isSameId(entryId)))
                 .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByEntryIdForUpdate(long entryId) {
+        return findByEntryId(entryId);
     }
 }

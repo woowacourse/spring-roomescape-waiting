@@ -69,7 +69,7 @@ public class ReservationApiController {
     public ResponseEntity<ReservationDetailResponse> getReservationEntry(
             @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId
     ) {
-        ReservationResult result = reservationService.getReservationEntry(entryId);
+        ReservationResult result = reservationService.getActiveReservationEntry(entryId);
         return ResponseEntity.ok(ReservationDetailResponse.from(result));
     }
 
