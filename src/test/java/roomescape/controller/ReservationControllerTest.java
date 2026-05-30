@@ -36,15 +36,30 @@ class ReservationControllerTest extends ControllerTest {
         long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
 
         RestAssured.given().log().all()
+                .queryParam("username", "브라운")
                 .when().delete("/reservations/{id}", id)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("본인 예약이 아니면 삭제할 수 없다")
+    @Test
+    void 본인_예약이_아니면_삭제할_수_없다() {
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
+
+        RestAssured.given().log().all()
+                .queryParam("username", "이든")
+                .when().delete("/reservations/{id}", id)
+                .then().log().all()
+                .statusCode(403)
+                .body("message", equalTo("본인의 예약 또는 대기만 취소할 수 있습니다."));
     }
 
     @DisplayName("존재하지 않는 예약 삭제하면 404")
     @Test
     void 존재하지_않는_예약_삭제하면_404() {
         RestAssured.given().log().all()
+                .queryParam("username", "브라운")
                 .when().delete("/reservations/{id}", 999)
                 .then().log().all()
                 .statusCode(404)
@@ -348,15 +363,32 @@ class ReservationControllerTest extends ControllerTest {
         long waitingId = createReservationWaiting("이영희", futureDate, 6, 4);
 
         RestAssured.given().log().all()
+                .queryParam("username", "이영희")
                 .when().delete("/reservations/waiting/{id}", waitingId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @DisplayName("본인 대기가 아니면 취소할 수 없다")
+    @Test
+    void 본인_대기가_아니면_취소할_수_없다() {
+        String futureDate = LocalDate.now().plusDays(4).toString();
+        createReservation("김철수", futureDate, 6, 4);
+        long waitingId = createReservationWaiting("이영희", futureDate, 6, 4);
+
+        RestAssured.given().log().all()
+                .queryParam("username", "이든")
+                .when().delete("/reservations/waiting/{id}", waitingId)
+                .then().log().all()
+                .statusCode(403)
+                .body("message", equalTo("본인의 예약 또는 대기만 취소할 수 있습니다."));
     }
 
     @DisplayName("존재하지 않는 대기 취소하면 404")
     @Test
     void 존재하지_않는_대기_취소하면_404() {
         RestAssured.given().log().all()
+                .queryParam("username", "이영희")
                 .when().delete("/reservations/waiting/{id}", 999)
                 .then().log().all()
                 .statusCode(404)

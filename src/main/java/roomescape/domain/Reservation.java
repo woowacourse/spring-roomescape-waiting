@@ -40,6 +40,10 @@ public class Reservation {
         }
     }
 
+    public boolean isOwnedBy(String username) {
+        return Objects.equals(name, username);
+    }
+
     public Long getId() {
         return id;
     }

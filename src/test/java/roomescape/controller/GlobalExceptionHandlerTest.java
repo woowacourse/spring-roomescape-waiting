@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.InvalidInputException;
 import roomescape.domain.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
@@ -68,6 +69,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/conflict")
         void conflict() {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+
+        @GetMapping("/test/forbidden")
+        void forbidden() {
+            throw new ForbiddenException("본인의 예약 또는 대기만 취소할 수 있습니다.");
         }
 
         @GetMapping("/test/past")
@@ -131,6 +137,14 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(get("/test/conflict"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("이미 예약된 시간입니다."));
+    }
+
+    @DisplayName("ForbiddenException → 403")
+    @Test
+    void forbidden_403() throws Exception {
+        mockMvc.perform(get("/test/forbidden"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("본인의 예약 또는 대기만 취소할 수 있습니다."));
     }
 
     @DisplayName("PastReservationException → 422")

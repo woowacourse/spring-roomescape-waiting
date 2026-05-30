@@ -28,6 +28,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationType;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.ForbiddenException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -121,16 +122,27 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
 
-        reservationService.delete(1L);
+        reservationService.delete(1L, "브라운");
 
         then(reservationDao).should().delete(1L);
+    }
+
+    @Test
+    void delete_본인_예약이_아니면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.delete(1L, "이든"))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
     }
 
     @Test
     void delete_존재하지_않는_예약이면_예외() {
         given(reservationDao.findById(999L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.delete(999L))
+        assertThatThrownBy(() -> reservationService.delete(999L, "브라운"))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
         then(reservationDao).should().findById(999L);
@@ -209,16 +221,27 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         given(reservationDao.findByWaitingId(1L)).willReturn(Optional.of(reservation));
 
-        reservationService.deleteWaiting(1L);
+        reservationService.deleteWaiting(1L, "브라운");
 
         then(reservationDao).should().deleteWaiting(1L);
+    }
+
+    @Test
+    void deleteWaiting_본인_대기가_아니면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findByWaitingId(1L)).willReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.deleteWaiting(1L, "이든"))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("본인의 예약 또는 대기만 취소할 수 있습니다.");
     }
 
     @Test
     void deleteWaiting_존재하지_않는_대기이면_예외() {
         given(reservationDao.findByWaitingId(999L)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.deleteWaiting(999L))
+        assertThatThrownBy(() -> reservationService.deleteWaiting(999L, "브라운"))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessage("존재하지 않는 대기입니다.");
         then(reservationDao).should().findByWaitingId(999L);

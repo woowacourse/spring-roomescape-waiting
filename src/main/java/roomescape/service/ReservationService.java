@@ -18,6 +18,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.ForbiddenException;
 import roomescape.service.dto.Page;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -67,6 +68,15 @@ public class ReservationService {
     }
 
     @Transactional
+    public void delete(long id, String username) {
+        Reservation reservation = reservationDao.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+        validateOwned(reservation, username);
+        reservation.validateCancellable(LocalDateTime.now(clock));
+        reservationDao.delete(id);
+    }
+
+    @Transactional
     public void delete(long id) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
@@ -106,9 +116,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteWaiting(long id) {
+    public void deleteWaiting(long id, String username) {
         Reservation reservation = reservationDao.findByWaitingId(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 대기입니다."));
+        validateOwned(reservation, username);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationDao.deleteWaiting(id);
     }
@@ -130,6 +141,12 @@ public class ReservationService {
                         .thenComparing(r -> r.reservation().getTime().getStartAt())
                         .thenComparing(MyReservation::reservationType))
                 .toList();
+    }
+
+    private void validateOwned(Reservation reservation, String username) {
+        if (!reservation.isOwnedBy(username)) {
+            throw new ForbiddenException("본인의 예약 또는 대기만 취소할 수 있습니다.");
+        }
     }
 
     private ReservationTime validateReservationTime(long timeId) {

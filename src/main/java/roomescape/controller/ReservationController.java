@@ -60,8 +60,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
-        reservationService.delete(id);
+    public ResponseEntity<Void> deleteReservation(@PathVariable long id, @RequestParam String username) {
+        reservationService.delete(id, username);
         return ResponseEntity.noContent().build();
     }
 
@@ -75,8 +75,8 @@ public class ReservationController {
     }
 
     @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable long id) {
-        reservationService.deleteWaiting(id);
+    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable long id, @RequestParam String username) {
+        reservationService.deleteWaiting(id, username);
         return ResponseEntity.noContent().build();
     }
 
