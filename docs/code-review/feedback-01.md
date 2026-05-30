@@ -62,7 +62,7 @@ WHERE w.id = ?
 ### Feedback 02
 
 ```java
-    private void validReservation(Waiting waiting) {
+private void validReservation(Waiting waiting) {
     Reservation reservation = findReservationOrThrow(waiting);
     validateOwnership(reservation, waiting);
 }
@@ -130,19 +130,33 @@ private void validDateTime(LocalDate date, LocalTime time) {
 
 ---
 
-### Review 0
+### Review 04
 
 >
 
-### Feedback 0
+### Feedback 04
 
 ---
 
-### Review 0
+### Review 05
 
->
+> ### 중복 조회 로직 제거
+> existsAndModifiableReservation 여기 내부에서 이미 findBy를 한번 하는데  
+> 이 값을 쓰도록 구조를 수정하면 쿼리를 줄일 수 있을 것 같습니다
 
-### Feedback 0
+### Feedback 05
+
+```java
+private Reservation validModifiable(long id, String userName) {
+    Reservation existingReservation = findReservationById(id);
+    existingReservation.validateModifiable(userName);
+    validUpcoming(existingReservation);
+    return existingReservation;
+}
+```
+
+[Feedback03](https://github.com/woowacourse/spring-roomescape-waiting/pull/413#discussion_r3320869563) 반영 과정에서 존재 여부와 조작
+가능 여부를 동시에 검증하고 존재하는 예약을 리턴하도록 수정했습니다!
 
 ---
 
