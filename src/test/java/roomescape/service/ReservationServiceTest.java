@@ -149,6 +149,20 @@ class ReservationServiceTest {
     }
 
     @Test
+    public void 대기가_있는_슬롯에_예약하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(waitingDao.existsBySlot(futureDate, timeId, themeId)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약 대기자가 있는 시간입니다, 예약 대기로 신청해주세요.");
+
+        verify(reservationDao, never()).save(any());
+    }
+
+    @Test
     public void 예약_변경_정상_테스트() {
         ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
         Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
@@ -219,6 +233,23 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+    }
+
+    @Test
+    public void 대기가_있는_슬롯으로_예약을_변경하면_예외가_발생한다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(waitingDao.existsBySlot(futureDate, timeId, themeId)).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약 대기자가 있는 시간입니다, 예약 대기로 신청해주세요.");
+
+        verify(reservationDao, never()).update(any());
     }
 
     @Test

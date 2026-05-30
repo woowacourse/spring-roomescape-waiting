@@ -67,6 +67,7 @@ public class ReservationService {
 
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
+        validateNoWaiting(command);
         Reservation reserved = reservationDao.save(reservation);
         return ReservationResult.from(reserved);
     }
@@ -76,6 +77,7 @@ public class ReservationService {
         origin.validateOwner(command.name());
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
+        validateNoWaiting(command);
 
         boolean isSuccessful = reservationDao.update(modified);
 
@@ -84,6 +86,17 @@ public class ReservationService {
         }
 
         return ReservationResult.from(modified);
+    }
+
+    public void removeReservation(Long id) {
+        reservationDao.delete(id);
+    }
+
+    public void cancelReservation(Long id, String userName) {
+        Reservation origin = getReservationOrThrow(id);
+        origin.validateOwner(userName);
+        validatePastTime(origin.getDate(), origin.getTime());
+        reservationDao.delete(id);
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
@@ -119,15 +132,10 @@ public class ReservationService {
         }
     }
 
-    public void removeReservation(Long id) {
-        reservationDao.delete(id);
-    }
-
-    public void cancelReservation(Long id, String userName) {
-        Reservation origin = getReservationOrThrow(id);
-        origin.validateOwner(userName);
-        validatePastTime(origin.getDate(), origin.getTime());
-        reservationDao.delete(id);
+    private void validateNoWaiting(ReservationCommand command) {
+        if (waitingDao.existsBySlot(command.date(), command.timeId(), command.themeId())) {
+            throw new ConflictException("이미 예약 대기자가 있는 시간입니다, 예약 대기로 신청해주세요.");
+        }
     }
 
     private Reservation getReservationOrThrow(Long id) {

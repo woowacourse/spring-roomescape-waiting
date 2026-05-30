@@ -151,6 +151,26 @@ public class WaitingDao {
                 .findFirst();
     }
 
+    public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS(
+                            SELECT 1
+                            FROM waiting
+                            WHERE date = ? AND
+                                  time_id = ? AND theme_id = ?
+                )
+                """;
+        Boolean result = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                date,
+                timeId,
+                themeId
+        );
+
+        return Boolean.TRUE.equals(result);
+    }
+
     public boolean existsBySlotAndName(String name, LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT EXISTS(
