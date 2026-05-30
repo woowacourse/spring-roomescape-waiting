@@ -1,9 +1,7 @@
 package roomescape.feature.reservation.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +38,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservationsByName(
-        @RequestParam
-        @NotBlank(message = "예약자명은 필수입니다.")
-        @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
-        String name
+        @RequestParam String name
     ) {
         return ResponseEntity.ok(reservationService.getReservationsByName(new ReserverName(name)));
     }
@@ -66,10 +61,7 @@ public class ReservationController {
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ReservationCancelResponseDto> cancelReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
-        @RequestParam
-        @NotBlank(message = "예약자명은 필수입니다.")
-        @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
-        String name
+        @RequestParam String name
     ) {
         return ResponseEntity.ok(reservationService.cancelReservation(id, new ReserverName(name)));
     }
@@ -84,10 +76,7 @@ public class ReservationController {
     @PatchMapping("/{id}/waitings/cancel")
     public ResponseEntity<ReservationCancelResponseDto> cancelWaitingReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
-        @RequestParam
-        @NotBlank(message = "예약자명은 필수입니다.")
-        @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
-        String name
+        @RequestParam String name
     ) {
         return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, new ReserverName(name)));
     }

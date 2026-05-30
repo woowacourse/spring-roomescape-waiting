@@ -135,20 +135,6 @@ class ReservationControllerTest {
         }
 
         @Test
-        void 예약자명이_없으면_4xx를_반환한다() throws Exception {
-            mockMvc.perform(post("/api/reservations")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-                        {
-                          "date": "%s",
-                          "timeId": 1,
-                          "themeId": 1
-                        }
-                        """.formatted(ReservationFixture.FUTURE.getDate())))
-                .andExpect(status().is4xxClientError());
-        }
-
-        @Test
         void 과거_날짜로_예약하면_4xx를_반환한다() throws Exception {
             mockMvc.perform(post("/api/reservations")
                     .contentType(MediaType.APPLICATION_JSON)

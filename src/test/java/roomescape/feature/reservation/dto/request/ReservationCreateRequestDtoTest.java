@@ -46,41 +46,6 @@ class ReservationCreateRequestDtoTest {
     @Nested
     class Failed {
 
-        @ParameterizedTest
-        @ValueSource(strings = {"", " "})
-        void 예약자명이_비어있거나_공백이면_검증_오류가_발생한다(String name) {
-            // given
-            ReservationCreateRequestDto request = new ReservationCreateRequestDto(
-                name,
-                VALID_DATE,
-                1L,
-                1L
-            );
-
-            // when
-            Set<String> violationMessages = validate(request);
-
-            // then
-            assertThat(violationMessages).contains("예약자명은 필수입니다.");
-        }
-
-        @Test
-        void 예약자명이_20자를_초과하면_검증_오류가_발생한다() {
-            // given
-            ReservationCreateRequestDto request = new ReservationCreateRequestDto(
-                "a".repeat(21),
-                VALID_DATE,
-                1L,
-                1L
-            );
-
-            // when
-            Set<String> violationMessages = validate(request);
-
-            // then
-            assertThat(violationMessages).contains("예약자명의 길이는 1이상 20이하 입니다.");
-        }
-
         @Test
         void 예약_날짜가_null이면_검증_오류가_발생한다() {
             // given
