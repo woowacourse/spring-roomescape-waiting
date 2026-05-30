@@ -57,7 +57,8 @@ public class ReservationEntries {
     public void promoteFirstWaiting() {
         entries.stream()
                 .filter(ReservationEntry::isWaiting)
-                .min(Comparator.comparing(ReservationEntry::getCreatedAt))
+                .min(Comparator.comparing(ReservationEntry::getCreatedAt)
+                        .thenComparing(ReservationEntry::getId))
                 .ifPresent(ReservationEntry::promote);
     }
 }

@@ -93,30 +93,31 @@ public class ReservationQueryRepository {
         }
 
         String joinClause = """
-            FROM reservation r
-            JOIN reservation_entry re ON re.reservation_id = r.id AND re.status != 'DELETED'
-            JOIN theme t ON r.theme_id = t.id
-            JOIN reservation_time rt ON r.time_id = rt.id
-            """;
+                FROM reservation r
+                JOIN reservation_entry re ON re.reservation_id = r.id AND re.status != 'DELETED'
+                JOIN theme t ON r.theme_id = t.id
+                JOIN reservation_time rt ON r.time_id = rt.id
+                """;
 
         String countSql = "SELECT COUNT(*) " + joinClause + whereClause;
         long totalElements = jdbcTemplate.queryForObject(countSql, Long.class, params.toArray());
 
         StringBuilder contentSql = new StringBuilder("""
-                SELECT re.id AS res_id,
-                       re.name AS res_name,
-                       r.date AS res_date,
-                       rt.start_at AS res_start_at,
-                       t.name AS theme_name,
-                       re.status AS res_status,
-                       CASE WHEN re.status = 'WAITING'
-                            THEN (SELECT COUNT(*) + 1
-                                  FROM reservation_entry re2
-                                  WHERE re2.reservation_id = re.reservation_id
-                                    AND re2.status = 'WAITING'
-                                    AND re2.created_at < re.created_at)
-                            ELSE NULL
-                       END AS waiting_rank
+                   SELECT re.id AS res_id,
+                          re.name AS res_name,
+                          r.date AS res_date,
+                          rt.start_at AS res_start_at,
+                          t.name AS theme_name,
+                          re.status AS res_status,
+                          CASE WHEN re.status = 'WAITING'
+                               THEN (SELECT COUNT(*) + 1
+                                     FROM reservation_entry re2
+                                     WHERE re2.reservation_id = re.reservation_id
+                                       AND re2.status = 'WAITING'
+                                       AND (re2.created_at < re.created_at
+                                           OR (re2.created_at = re.created_at AND re2.id < re.id)))
+                               ELSE NULL
+                          END AS waiting_rank
                 """);
         contentSql.append(joinClause);
         contentSql.append(whereClause);
