@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.WaitingWithRank;
+import roomescape.domain.Waitings;
 import roomescape.repository.WaitingDao;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class WaitingQueryService {
     private final WaitingDao waitingDao;
 
     public List<WaitingWithRank> getByName(String name) {
-        return waitingDao.findAllByName(name);
+        Waitings waitings = new Waitings(waitingDao.findAll());
+        return waitings.rankedByName(name);
     }
 }

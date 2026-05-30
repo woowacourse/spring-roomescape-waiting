@@ -1,0 +1,27 @@
+package roomescape.domain;
+
+import java.util.List;
+
+public class Waitings {
+
+    private final List<Waiting> waitings;
+
+    public Waitings(List<Waiting> waitings) {
+        this.waitings = List.copyOf(waitings);
+    }
+
+    public List<WaitingWithRank> rankedByName(String name) {
+        return waitings.stream()
+                .filter(waiting -> waiting.isOwnedBy(name))
+                .map(waiting -> new WaitingWithRank(waiting.id(), waiting.name(), waiting.slot(), rankOf(waiting)))
+                .toList();
+    }
+
+    public int rankOf(Waiting target) {
+        long ahead = waitings.stream()
+                .filter(target::isSameSlot)
+                .filter(waiting -> waiting.isAheadOf(target))
+                .count();
+        return (int) ahead + 1;
+    }
+}

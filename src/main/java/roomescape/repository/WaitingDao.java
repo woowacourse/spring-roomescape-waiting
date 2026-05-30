@@ -14,7 +14,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
@@ -25,6 +24,23 @@ import java.util.Optional;
 @Repository
 public class WaitingDao {
 
+    private static final String SELECT_BASE = """
+            SELECT
+                waiting.id as waiting_id,
+                waiting.name,
+                waiting.date,
+                time.id as time_id,
+                time.start_at as time_value,
+                theme.id as theme_id,
+                theme.name as theme_name,
+                theme.thumbnail_url as thumbnail_url,
+                theme.description as theme_description,
+                waiting.created_at as created_at
+            FROM waiting as waiting
+            INNER JOIN reservation_time as time ON waiting.time_id = time.id
+            INNER JOIN theme as theme ON waiting.theme_id = theme.id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
 
@@ -33,13 +49,6 @@ public class WaitingDao {
             rs.getString("name"),
             mapSlot(rs),
             rs.getObject("created_at", LocalDateTime.class)
-    );
-
-    private final RowMapper<WaitingWithRank> withRankRowMapper = (rs, rowNum) -> new WaitingWithRank(
-            rs.getLong("waiting_id"),
-            rs.getString("name"),
-            mapSlot(rs),
-            rs.getInt("waiting_rank")
     );
 
     private static Slot mapSlot(ResultSet rs) throws SQLException {
@@ -89,28 +98,14 @@ public class WaitingDao {
     }
 
     public Optional<Waiting> findById(long id) {
-        String sql = """
-                SELECT
-                    waiting.id as waiting_id,
-                    waiting.name,
-                    waiting.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description,
-                    waiting.created_at as created_at
-                FROM waiting as waiting
-                INNER JOIN reservation_time as time
-                ON waiting.time_id = time.id
-                INNER JOIN theme as theme
-                ON waiting.theme_id = theme.id
-                WHERE waiting.id = ?
-                """;
+        String sql = SELECT_BASE + " WHERE waiting.id = ?";
         return jdbcTemplate.query(sql, rowMapper, id)
                 .stream()
                 .findFirst();
+    }
+
+    public List<Waiting> findAll() {
+        return jdbcTemplate.query(SELECT_BASE, rowMapper);
     }
 
     public boolean existsBySlotAndName(Slot slot, String name) {
@@ -125,28 +120,4 @@ public class WaitingDao {
         );
     }
 
-    public List<WaitingWithRank> findAllByName(String name) {
-        String sql = """
-                SELECT
-                    ranked_waiting.id AS waiting_id,
-                    ranked_waiting.name,
-                    ranked_waiting.date,
-                    time.id AS time_id,
-                    time.start_at AS time_value,
-                    theme.id AS theme_id,
-                    theme.name AS theme_name,
-                    theme.thumbnail_url AS thumbnail_url,
-                    theme.description AS theme_description,
-                    ranked_waiting.waiting_rank
-                FROM (
-                    SELECT *,
-                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC, id ASC) AS waiting_rank
-                    FROM waiting
-                ) AS ranked_waiting
-                INNER JOIN reservation_time AS time ON ranked_waiting.time_id = time.id
-                INNER JOIN theme ON ranked_waiting.theme_id = theme.id
-                WHERE ranked_waiting.name = ?
-                """;
-        return jdbcTemplate.query(sql, withRankRowMapper, name);
-    }
 }

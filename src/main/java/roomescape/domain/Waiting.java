@@ -45,11 +45,23 @@ public class Waiting {
         return createdAt;
     }
 
-    private boolean isPast(LocalDateTime now) {
-        return slot.isPast(now);
+    public boolean isSameSlot(Waiting other) {
+        return slot.isSameSlot(other.slot);
     }
 
-    private boolean isOwnedBy(String name) {
+    public boolean isAheadOf(Waiting other) {
+        int byCreatedAt = createdAt.compareTo(other.createdAt);
+        if (byCreatedAt != 0) {
+            return byCreatedAt < 0;
+        }
+        return id < other.id;
+    }
+
+    public boolean isOwnedBy(String name) {
         return this.name.equals(name);
+    }
+
+    private boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
     }
 }
