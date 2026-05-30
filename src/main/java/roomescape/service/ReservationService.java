@@ -101,7 +101,6 @@ public class ReservationService {
 
         Reservation target = Reservation.reserve(reservation.getName(), reservationDate, reservationTime,
                 reservation.getTheme(), now);
-        target.ensureNotPast(now);
         Reservation updated = reservationRepository.update(id, target);
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
