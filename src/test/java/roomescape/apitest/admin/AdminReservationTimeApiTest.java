@@ -32,7 +32,7 @@ class AdminReservationTimeApiTest {
     }
 
     @Test
-    @DisplayName("테마 이름이 null이면 상태코드 400을 반환한다.")
+    @DisplayName("시간이 null이면 상태코드 400을 반환한다.")
     void 요청_이름_null_테스트() {
         Map<String, String> params = new HashMap<>();
 
