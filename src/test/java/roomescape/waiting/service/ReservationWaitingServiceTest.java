@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.reservation.dao.ReservationDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
 import roomescape.waiting.ReservationWaiting;
@@ -31,7 +32,25 @@ public class ReservationWaitingServiceTest {
     private ReservationWaitingService reservationWaitingService;
 
     @Mock
+    private ReservationDao reservationDao;
+
+    @Mock
     private TimeDao timeDao;
+
+    @Test
+    void 이미_예약한_경우_예약_대기_신청_시_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+
+        when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, timeId))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
+    }
 
     @Test
     void 중복_예약_대기_신청하는_경우_예외_발생() {
@@ -40,6 +59,8 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
+        when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(false);
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong())).thenReturn(true);
 
         assertThatThrownBy(() ->reservationWaitingService.add(name, themeId, date, timeId))

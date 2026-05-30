@@ -104,4 +104,29 @@ public class ReservationDaoTest {
         assertThat(reservation.getDate()).isEqualTo(changedDate);
         assertThat(reservation.getTime().getId()).isEqualTo(changedTimeId);
     }
+
+    @Test
+    void 예약이_존재하는_경우_true_반환() {
+        String name = "초록";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime reservationTime = new ReservationTime(6L, LocalTime.parse("15:00"));
+        reservationDao.insert(new Reservation(name, themeId, date, reservationTime));
+
+        boolean actual = reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, reservationTime.getId());
+
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void 예약이_존재하지_않는_경우_false_반환() {
+        String name = "초록";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 6L;
+
+        boolean actual = reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, timeId);
+
+        assertThat(actual).isFalse();
+    }
 }

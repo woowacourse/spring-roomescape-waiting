@@ -134,6 +134,18 @@ public class ReservationDao {
         return count > 0;
     }
 
+    public boolean existsByNameAndThemeIdAndDateAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation
+                    WHERE name = ? AND theme_id = ? AND date = ? AND time_id = ?
+                )
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, themeId, date, timeId) == Boolean.TRUE;
+    }
+
     public void deleteById(Long id) {
         String sql = "delete from reservation where id = ?";
         jdbcTemplate.update(sql, id);
