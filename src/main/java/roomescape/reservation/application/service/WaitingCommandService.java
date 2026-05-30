@@ -2,12 +2,12 @@ package roomescape.reservation.application.service;
 
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
+import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.domain.ReservationSlot;
@@ -52,7 +52,7 @@ public class WaitingCommandService {
                     ReservationTimeResult.from(time),
                     rank
             );
-        } catch (DataIntegrityViolationException e) {
+        } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
         }
     }

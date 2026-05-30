@@ -2,11 +2,13 @@ package roomescape.reservation.infra;
 
 import java.time.LocalTime;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
@@ -79,8 +81,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());
 
-        Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return waiting.withId(id);
+        try {
+            Long id = jdbcInsert.executeAndReturnKey(params).longValue();
+            return waiting.withId(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new UniqueConstraintViolationException(e);
+        }
     }
 
     @Override

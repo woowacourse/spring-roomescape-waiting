@@ -1,6 +1,7 @@
 package roomescape.reservation.infra;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.fixture.ReservationFixture;
+import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
@@ -84,6 +86,29 @@ class JdbcWaitingRepositoryTest {
             assertSoftly.assertThat(savedWaiting.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedWaiting.getSlot().timeId()).isEqualTo(timeId);
         });
+    }
+
+    @DisplayName("동일한 사용자와 슬롯으로 예약 대기 추가 시 유니크 제약 위반 예외를 테스트합니다.")
+    @Test
+    void save_duplicate_user_and_slot_exception() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 4);
+        testHelper.insertWaiting("스타크", date, themeId, timeId);
+        User stark = ReservationFixture.userNameStark();
+
+        Waiting waiting = Waiting.builder()
+                .user(stark)
+                .slot(ReservationSlot.builder()
+                        .date(date)
+                        .themeId(themeId)
+                        .timeId(timeId)
+                        .startAt(LocalTime.of(9, 0))
+                        .build())
+                .build();
+
+        assertThatThrownBy(() -> waitingRepository.save(waiting))
+                .isInstanceOf(UniqueConstraintViolationException.class);
     }
 
     @DisplayName("방탈출 예약 대기 삭제를 테스트합니다.")

@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.UniqueConstraintViolationException;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
@@ -118,7 +118,7 @@ public class ReservationCommandService {
     private Reservation saveReservation(Reservation reservation) {
         try {
             return reservationRepository.save(reservation);
-        } catch (DataIntegrityViolationException e) {
+        } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
         }
     }
