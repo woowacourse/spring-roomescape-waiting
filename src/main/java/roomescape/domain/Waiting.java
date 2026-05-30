@@ -5,24 +5,22 @@ import java.time.LocalDate;
 public class Waiting {
     private final Long id;
     private final Member member;
-    private final LocalDate date;
-    private final Time time;
-    private final Theme theme;
-    private final Long storeId;
+    private final Slot slot;
     private final Long rank;
 
-    public Waiting(Long id, Member member, LocalDate date, Time time, Theme theme, Long storeId, Long rank) {
+    public Waiting(Long id, Member member, Slot slot, Long rank) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.storeId = storeId;
+        this.slot = slot;
         this.rank = rank;
     }
 
+    public Waiting(Long id, Member member, LocalDate date, Time time, Theme theme, Long storeId, Long rank) {
+        this(id, member, new Slot(date, time, theme, storeId), rank);
+    }
+
     public Waiting(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
-        this(null, member, date, time, theme, storeId, null);
+        this(null, member, new Slot(date, time, theme, storeId), null);
     }
 
     public Long getId() {
@@ -33,20 +31,24 @@ public class Waiting {
         return member;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public Time getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public Long getStoreId() {
-        return storeId;
+        return slot.getStoreId();
     }
 
     public Long getRank() {
