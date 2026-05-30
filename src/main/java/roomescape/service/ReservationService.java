@@ -6,14 +6,12 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
-import roomescape.service.dto.response.ServiceReceptionResponse;
 
 @Component
 @Transactional(readOnly = true)
@@ -31,20 +29,12 @@ public class ReservationService {
         return reservationRepository.save(reservationWithoutId);
     }
 
-    public List<ServiceReceptionResponse> findByName(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-
-        return reservations.stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
-                .toList();
+    public List<Reservation> findByName(String name) {
+        return reservationRepository.findByName(name);
     }
 
-    public List<ServiceReceptionResponse> findAll() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return reservations.stream()
-                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
-                .toList();
+    public List<Reservation> findAll() {
+        return reservationRepository.findAll();
     }
 
     public Reservation findReservation(Long reservationId) {

@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ControllerReservationCreateRequest;
-import roomescape.controller.dto.response.ControllerReservationResponse;
+import roomescape.controller.dto.response.ReceptionResponse;
 import roomescape.facade.ReceptionFacade;
-import roomescape.service.dto.response.ServiceReceptionResponse;
 
 @RestController
 @RequestMapping(value = "/reservations")
@@ -27,34 +26,22 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ControllerReservationResponse> save(
+    public ResponseEntity<ReceptionResponse> save(
             @RequestBody ControllerReservationCreateRequest request) {
-        ServiceReceptionResponse serviceResponses = receptionFacade.save(
-                request.toServiceReservationRequest());
-        ControllerReservationResponse controllerResponse = ControllerReservationResponse.from(serviceResponses);
-        return ResponseEntity.
-                status(HttpStatus.CREATED)
-                .body(controllerResponse);
+        ReceptionResponse response = receptionFacade.save(request.toServiceReservationRequest());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<List<ControllerReservationResponse>> findByName(
+    public ResponseEntity<List<ReceptionResponse>> findByName(
             @RequestParam("name") String name
     ) {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findByName(name);
-        List<ControllerReservationResponse> controllerResponses = serviceResponses.stream()
-                .map(ControllerReservationResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponses);
+        return ResponseEntity.ok(receptionFacade.findByName(name));
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerReservationResponse>> findAll() {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findAll();
-        List<ControllerReservationResponse> controllerResponse = serviceResponses.stream()
-                .map(ControllerReservationResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponse);
+    public ResponseEntity<List<ReceptionResponse>> findAll() {
+        return ResponseEntity.ok(receptionFacade.findAll());
     }
 
     @DeleteMapping("/{id}")

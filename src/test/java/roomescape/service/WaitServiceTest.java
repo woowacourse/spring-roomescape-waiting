@@ -14,13 +14,11 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.repository.WaitRepository;
-import roomescape.service.dto.response.ServiceReceptionResponse;
 
 public class WaitServiceTest {
     private WaitService waitService;
@@ -49,10 +47,8 @@ public class WaitServiceTest {
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
-        when(waitRepository.findOrderByWait(wait)).thenReturn(1L);
-        ServiceReceptionResponse result = waitService.save(waitWithoutId);
 
-        assertThat(result).isEqualTo(ServiceReceptionResponse.of(wait, 1L, ReservationStatus.WAITING.name()));
+        assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
     }
 
     @Test
@@ -103,15 +99,8 @@ public class WaitServiceTest {
 
         List<Wait> fizzWaits = List.of(wait1, wait2);
         when(waitRepository.findByName("fizz")).thenReturn(fizzWaits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
 
-        List<ServiceReceptionResponse> results = List.of(
-                ServiceReceptionResponse.of(wait1, 1L, ReservationStatus.WAITING.name()),
-                ServiceReceptionResponse.of(wait2, 1L, ReservationStatus.WAITING.name())
-        );
-
-        assertThat(waitService.findByName("fizz")).isEqualTo(results);
+        assertThat(waitService.findByName("fizz")).isEqualTo(fizzWaits);
     }
 
     @Test
@@ -125,15 +114,8 @@ public class WaitServiceTest {
 
         List<Wait> waits = List.of(wait1, wait2);
         when(waitRepository.findAll()).thenReturn(waits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
 
-        List<ServiceReceptionResponse> results = List.of(
-                ServiceReceptionResponse.of(wait1, 1L, ReservationStatus.WAITING.name()),
-                ServiceReceptionResponse.of(wait2, 1L, ReservationStatus.WAITING.name())
-        );
-
-        assertThat(waitService.findAll()).isEqualTo(results);
+        assertThat(waitService.findAll()).isEqualTo(waits);
     }
 
     @Test

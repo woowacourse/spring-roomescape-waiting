@@ -4,12 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeResponse;
+import roomescape.domain.ReservationTime;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 @Service
 public class ReservationTimeFacade {
@@ -26,18 +27,27 @@ public class ReservationTimeFacade {
     }
 
     @Transactional
-    public ServiceReservationTimeResponse save(ServiceReservationTimeCreateRequest request) {
-        return reservationTimeService.save(request);
+    public ReservationTimeResponse save(ServiceReservationTimeCreateRequest request) {
+        ReservationTime reservationTime = reservationTimeService.save(request);
+        return ReservationTimeResponse.from(reservationTime);
     }
 
-    public List<ServiceReservationTimeResponse> findAll() {
-        return reservationTimeService.findAll();
+    public List<ReservationTimeResponse> findAll() {
+        return reservationTimeService.findAll().stream()
+                .map(ReservationTimeResponse::from)
+                .toList();
     }
 
-    public List<ServiceReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(LocalDate date,
-                                                                                           Long themeId) {
+    public List<ReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(LocalDate date, Long themeId) {
         themeService.validateExistTheme(themeId);
-        return reservationTimeService.findAvailabilityByDateAndTheme(date, themeId);
+        reservationTimeService.validateNotPastDate(date);
+
+        List<ReservationTime> allTimes = reservationTimeService.findAll();
+        List<Long> reservedTimeIds = reservationTimeService.findReservedTimeIdsByDateAndTheme(date, themeId);
+
+        return allTimes.stream()
+                .map(time -> ReservationTimeAvailabilityResponse.from(time, !reservedTimeIds.contains(time.getId())))
+                .toList();
     }
 
     @Transactional

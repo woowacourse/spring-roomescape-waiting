@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ControllerThemeCreateRequest;
-import roomescape.controller.dto.response.ControllerThemeResponse;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.facade.ThemeFacade;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 @RestController
 @RequestMapping("/admin/themes")
@@ -24,12 +23,9 @@ public class AdminThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ControllerThemeResponse> save(@RequestBody ControllerThemeCreateRequest requestDto) {
-        ServiceThemeResponse serviceResponse = themeFacade.save(requestDto.toServiceThemeRequest());
-        ControllerThemeResponse controllerResponse = ControllerThemeResponse.from(serviceResponse);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(controllerResponse);
+    public ResponseEntity<ThemeResponse> save(@RequestBody ControllerThemeCreateRequest requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(themeFacade.save(requestDto.toServiceThemeRequest()));
     }
 
     @DeleteMapping("/{id}")

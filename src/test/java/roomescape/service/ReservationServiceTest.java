@@ -15,14 +15,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
-import roomescape.service.dto.response.ServiceReceptionResponse;
 
 public class ReservationServiceTest {
 
@@ -63,12 +61,8 @@ public class ReservationServiceTest {
         );
 
         when(reservationRepository.findByName("fizz")).thenReturn(reservations);
-        List<ServiceReceptionResponse> results = reservationService.findByName("fizz");
 
-        assertThat(results.get(0)).isEqualTo(
-                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED.name()));
-        assertThat(results.get(1)).isEqualTo(
-                ServiceReceptionResponse.of(reservations.get(1), 0L, ReservationStatus.CONFIRMED.name()));
+        assertThat(reservationService.findByName("fizz")).isEqualTo(reservations);
     }
 
     @Test
@@ -79,12 +73,8 @@ public class ReservationServiceTest {
         );
 
         when(reservationRepository.findAll()).thenReturn(reservations);
-        List<ServiceReceptionResponse> results = reservationService.findAll();
 
-        assertThat(results.get(0)).isEqualTo(
-                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED.name()));
-        assertThat(results.get(1)).isEqualTo(
-                ServiceReceptionResponse.of(reservations.get(1), 0L, ReservationStatus.CONFIRMED.name()));
+        assertThat(reservationService.findAll()).isEqualTo(reservations);
     }
 
     @Test

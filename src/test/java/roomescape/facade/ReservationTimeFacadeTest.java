@@ -11,14 +11,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 public class ReservationTimeFacadeTest {
 
@@ -47,39 +47,39 @@ public class ReservationTimeFacadeTest {
     @Test
     void saveTest() {
         ServiceReservationTimeCreateRequest request = new ServiceReservationTimeCreateRequest(LocalTime.of(10, 0));
-        ServiceReservationTimeResponse response = ServiceReservationTimeResponse.from(reservationTime);
 
-        when(reservationTimeService.save(request)).thenReturn(response);
+        when(reservationTimeService.save(request)).thenReturn(reservationTime);
 
-        assertThat(reservationTimeFacade.save(request)).isEqualTo(response);
+        assertThat(reservationTimeFacade.save(request)).isEqualTo(ReservationTimeResponse.from(reservationTime));
     }
 
     @Test
     void findAllTest() {
-        List<ServiceReservationTimeResponse> responses = List.of(
-                new ServiceReservationTimeResponse(1L, LocalTime.of(10, 0)),
-                new ServiceReservationTimeResponse(2L, LocalTime.of(11, 0))
-        );
+        ReservationTime firstTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime secondTime = new ReservationTime(2L, LocalTime.of(11, 0));
 
-        when(reservationTimeService.findAll()).thenReturn(responses);
+        when(reservationTimeService.findAll()).thenReturn(List.of(firstTime, secondTime));
 
-        assertThat(reservationTimeFacade.findAll()).isEqualTo(responses);
+        assertThat(reservationTimeFacade.findAll()).isEqualTo(List.of(
+                ReservationTimeResponse.from(firstTime),
+                ReservationTimeResponse.from(secondTime)
+        ));
     }
 
     @Test
     void findAvailabilityByDateAndThemeTest() {
-        ServiceReservationTimeResponse firstTime = new ServiceReservationTimeResponse(1L, LocalTime.of(10, 0));
-        ServiceReservationTimeResponse secondTime = new ServiceReservationTimeResponse(2L, LocalTime.of(11, 0));
-        List<ServiceReservationTimeAvailabilityResponse> responses = List.of(
-                new ServiceReservationTimeAvailabilityResponse(firstTime, true),
-                new ServiceReservationTimeAvailabilityResponse(secondTime, false)
-        );
+        ReservationTime firstTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime secondTime = new ReservationTime(2L, LocalTime.of(11, 0));
 
-        when(reservationTimeService.findAvailabilityByDateAndTheme(reservationDate, theme.getId())).thenReturn(
-                responses);
+        when(reservationTimeService.findAll()).thenReturn(List.of(firstTime, secondTime));
+        when(reservationTimeService.findReservedTimeIdsByDateAndTheme(reservationDate, theme.getId()))
+                .thenReturn(List.of(secondTime.getId()));
 
         assertThat(reservationTimeFacade.findAvailabilityByDateAndTheme(reservationDate, theme.getId())).isEqualTo(
-                responses);
+                List.of(
+                        ReservationTimeAvailabilityResponse.from(firstTime, true),
+                        ReservationTimeAvailabilityResponse.from(secondTime, false)
+                ));
 
         verify(themeService, times(1)).validateExistTheme(theme.getId());
     }

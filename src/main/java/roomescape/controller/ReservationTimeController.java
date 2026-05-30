@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ControllerReservationTimeCreateRequest;
-import roomescape.controller.dto.response.ControllerReservationTimeAvailabilityResponse;
-import roomescape.controller.dto.response.ControllerReservationTimeResponse;
+import roomescape.controller.dto.response.ReservationTimeAvailabilityResponse;
+import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.facade.ReservationTimeFacade;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 @RestController
 @RequestMapping(value = "/times")
@@ -32,36 +30,21 @@ public class ReservationTimeController {
 
 
     @PostMapping
-    public ResponseEntity<ControllerReservationTimeResponse> save(
+    public ResponseEntity<ReservationTimeResponse> save(
             @Valid @RequestBody ControllerReservationTimeCreateRequest requestDto) {
-        ServiceReservationTimeResponse serviceResponse = reservationTimeFacade.save(
-                requestDto.toServiceReservationTimeRequest());
-        ControllerReservationTimeResponse controllerResponse = ControllerReservationTimeResponse.from(serviceResponse);
-        return ResponseEntity.
-                status(HttpStatus.CREATED)
-                .body(controllerResponse);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(reservationTimeFacade.save(requestDto.toServiceReservationTimeRequest()));
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerReservationTimeResponse>> findAll() {
-        List<ServiceReservationTimeResponse> serviceResponses = reservationTimeFacade.findAll();
-        List<ControllerReservationTimeResponse> controllerResponses = serviceResponses.stream()
-                .map(ControllerReservationTimeResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponses);
+    public ResponseEntity<List<ReservationTimeResponse>> findAll() {
+        return ResponseEntity.ok(reservationTimeFacade.findAll());
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<ControllerReservationTimeAvailabilityResponse>> findAvailabilityByDateAndTheme(
+    public ResponseEntity<List<ReservationTimeAvailabilityResponse>> findAvailabilityByDateAndTheme(
             @RequestParam("date") LocalDate date, @RequestParam("themeId") Long themeId) {
-
-        List<ServiceReservationTimeAvailabilityResponse> serviceResponses = reservationTimeFacade.findAvailabilityByDateAndTheme(
-                date, themeId);
-
-        List<ControllerReservationTimeAvailabilityResponse> controllerResponses = serviceResponses.stream()
-                .map(ControllerReservationTimeAvailabilityResponse::from)
-                .toList();
-        return ResponseEntity.ok(controllerResponses);
+        return ResponseEntity.ok(reservationTimeFacade.findAvailabilityByDateAndTheme(date, themeId));
     }
 
     @DeleteMapping("/{id}")

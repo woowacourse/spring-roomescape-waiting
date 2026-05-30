@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -11,8 +12,6 @@ import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 @Component
 @Transactional(readOnly = true)
@@ -27,46 +26,34 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ServiceReservationTimeResponse save(ServiceReservationTimeCreateRequest request) {
+    public ReservationTime save(ServiceReservationTimeCreateRequest request) {
         validateDuplicatedReservationTime(request.startAt());
-
-        ReservationTime reservationTime = reservationTimeRepository.save(request.toEntity());
-        return ServiceReservationTimeResponse.from(reservationTime);
+        return reservationTimeRepository.save(request.toEntity());
     }
 
-    public List<ServiceReservationTimeResponse> findAll() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
-                .map(ServiceReservationTimeResponse::from)
-                .toList();
+    public List<ReservationTime> findAll() {
+        return reservationTimeRepository.findAll();
     }
 
-    private void validateDuplicatedReservationTime(LocalTime startAt) {
-        if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION_TIME);
+    public List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Long themeId) {
+        return reservationTimeRepository.findReservedTimeIdByDateAndTheme(date, themeId);
+    }
+
+    public void validateNotPastDate(LocalDate date) {
+        if (date.isBefore(LocalDate.now(clock))) {
+            throw new CustomInvalidRequestException(ErrorCode.PAST_RESERVATION_TIME_READ);
         }
     }
 
-    public List<ServiceReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(
-            LocalDate date, Long themeId) {
-        validateNotPastDate(date);
-
-        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
-        List<Long> reservedTimeIdByDateAndTheme = reservationTimeRepository.findReservedTimeIdByDateAndTheme(date,
-                themeId);
-
-        return allReservationTimes.stream()
-                .map(reservationTime -> {
-                    if (reservedTimeIdByDateAndTheme.contains(reservationTime.getId())) {
-                        return ServiceReservationTimeAvailabilityResponse.from(reservationTime, false);
-                    }
-                    return ServiceReservationTimeAvailabilityResponse.from(reservationTime, true);
-                }).toList();
+    public void validateNotPastSlotForCreate(LocalDate date, ReservationTime time) {
+        if (isPastSlot(date, time)) {
+            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
+        }
     }
 
-    private void validateNotPastDate(LocalDate date) {
-        if (date.isBefore(LocalDate.now(clock))) {
-            throw new CustomInvalidRequestException(ErrorCode.PAST_RESERVATION_TIME_READ);
+    public void validateNotPastSlotForDelete(LocalDate date, ReservationTime time) {
+        if (isPastSlot(date, time)) {
+            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE);
         }
     }
 
@@ -78,5 +65,25 @@ public class ReservationTimeService {
     public ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
+    }
+
+    private boolean isPastSlot(LocalDate date, ReservationTime time) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDate nowDate = now.toLocalDate();
+        LocalTime nowTime = now.toLocalTime();
+
+        if (date.isBefore(nowDate)) {
+            return true;
+        }
+        if (date.isAfter(nowDate)) {
+            return false;
+        }
+        return time.isPast(nowTime);
+    }
+
+    private void validateDuplicatedReservationTime(LocalTime startAt) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
+            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION_TIME);
+        }
     }
 }
