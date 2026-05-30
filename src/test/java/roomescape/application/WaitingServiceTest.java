@@ -1,7 +1,6 @@
 package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -25,12 +24,10 @@ import roomescape.support.ServiceIntegrationTest;
  * <b>Mock 없이 실제 H2 통합 테스트로</b> 검증한다.
  *
  * <p>커밋 9의 WaitingServiceMockTest(같은 분기를 Mock 단위로)와 대조하기 위한 기준선이다.
- * 이 파일을 먼저 작성해 "통합으로 흡수했을 때 무엇이 들고, 무엇이 무거운가"를 체감한 뒤,
- * Mock 버전과 diff로 비교하며 "Mock 서비스 단위 테스트가 정말 필요한가"를 판단한다.
+ * 이 파일을 먼저 작성해 "통합으로 흡수했을 때 무엇이 들고, 무엇이 무거운가"를 체감한 뒤, Mock 버전과 diff로 비교하며 "Mock 서비스 단위 테스트가 정말 필요한가"를 판단한다.
  *
  * <p>검증 시선: 이 분기들은 "시스템 상태(이미 저장된 예약/대기)에 의존하는 비즈니스 규칙"이다.
- * Mock으로 existsBy...의 결과를 흉내 내면 "그 SQL이 진짜 그렇게 동작한다"는 보장이 없다.
- * 실제 DB로 검증하면 그 보장까지 함께 얻는다. (토론 규칙 3)
+ * Mock으로 existsBy...의 결과를 흉내 내면 "그 SQL이 진짜 그렇게 동작한다"는 보장이 없다. 실제 DB로 검증하면 그 보장까지 함께 얻는다. (토론 규칙 3)
  *
  * <p>관찰 포인트(학습용): create의 한 분기를 검증하려면 given에서 매번
  * 시간·테마·예약을 깔아야 한다. 이 "준비 비용"이 분기 수만큼 반복되는 게 통합 흡수본의 특징이다.
