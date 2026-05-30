@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -64,15 +65,15 @@ class JdbcTimeRepositoryTest {
             // when
             Long savedTimeId = timeRepository.save(time).getId();
 
-            Time expectedSavedTime = Time.reconstruct(savedTimeId, startAt, null);
+            Time expectedSavedTime = Time.reconstruct(savedTimeId, startAt, TimeStatus.ACTIVE);
 
             // then
             Time actualSavedTime = jdbcTemplate.queryForObject(
-                "SELECT id, start_at, deleted_at FROM reservation_time WHERE id = ?",
+                "SELECT id, start_at, status FROM reservation_time WHERE id = ?",
                 (rs, rowNum) -> Time.reconstruct(
                     rs.getLong("id"),
                     rs.getTime("start_at").toLocalTime(),
-                    rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                    TimeStatus.valueOf(rs.getString("status"))
                 ),
                 savedTimeId
             );
@@ -116,7 +117,7 @@ class JdbcTimeRepositoryTest {
             Time time3 = timeRepository.save(Time.create(LocalTime.of(13, 0)));
 
             // when
-            List<Time> actual = timeRepository.findAllByDeletedAtIsNull();
+            List<Time> actual = timeRepository.findAllByNotDeleted();
 
             // then
             assertThat(actual)
@@ -144,7 +145,7 @@ class JdbcTimeRepositoryTest {
             Time savedTime = timeRepository.save(Time.create(LocalTime.of(15, 30)));
 
             // when
-            Optional<Time> actual = timeRepository.findTimeByIdAndDeletedAtIsNull(savedTime.getId());
+            Optional<Time> actual = timeRepository.findTimeByIdAndNotDeleted(savedTime.getId());
 
             // then
             assertThat(actual).isPresent();
@@ -155,7 +156,7 @@ class JdbcTimeRepositoryTest {
         @Test
         void 존재하지_않는_ID이면_빈_값을_반환한다() {
             // when
-            Optional<Time> actual = timeRepository.findTimeByIdAndDeletedAtIsNull(1L);
+            Optional<Time> actual = timeRepository.findTimeByIdAndNotDeleted(1L);
 
             // then
             assertThat(actual).isEmpty();
@@ -177,7 +178,7 @@ class JdbcTimeRepositoryTest {
             timeRepository.save(Time.create(startAt));
 
             // when
-            boolean actual = timeRepository.existsTimeByStartAtAndDeletedAtIsNull(startAt);
+            boolean actual = timeRepository.existsTimeByStartAtAndNotDeleted(startAt);
 
             // then
             assertThat(actual).isTrue();
@@ -186,7 +187,7 @@ class JdbcTimeRepositoryTest {
         @Test
         void 해당_시작_시간이_존재하지_않으면_false를_반환한다() {
             // when
-            boolean actual = timeRepository.existsTimeByStartAtAndDeletedAtIsNull(LocalTime.of(15, 30));
+            boolean actual = timeRepository.existsTimeByStartAtAndNotDeleted(LocalTime.of(15, 30));
 
             // then
             assertThat(actual).isFalse();
@@ -207,7 +208,7 @@ class JdbcTimeRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
 
             // when
-            boolean actual = timeRepository.existsTimeByIdAndDeletedAtIsNull(time.getId());
+            boolean actual = timeRepository.existsTimeByIdAndNotDeleted(time.getId());
 
             // then
             assertThat(actual).isTrue();
@@ -216,7 +217,7 @@ class JdbcTimeRepositoryTest {
         @Test
         void 해당_ID가_존재하지_않으면_false를_반환한다() {
             // when
-            boolean actual = timeRepository.existsTimeByIdAndDeletedAtIsNull(1L);
+            boolean actual = timeRepository.existsTimeByIdAndNotDeleted(1L);
 
             // then
             assertThat(actual).isFalse();
@@ -241,13 +242,13 @@ class JdbcTimeRepositoryTest {
             timeRepository.deleteTimeById(time1.getId());
 
             // then
-            assertThat(timeRepository.findAllByDeletedAtIsNull())
+            assertThat(timeRepository.findAllByNotDeleted())
                 .extracting(Time::getId, Time::getStartAt)
                 .containsExactly(tuple(time2.getId(), time2.getStartAt()));
             assertThat(countDeletedTimeById(time1.getId())).isEqualTo(1);
-            assertThat(timeRepository.findTimeByIdAndDeletedAtIsNull(time1.getId())).isEmpty();
-            assertThat(timeRepository.existsTimeByIdAndDeletedAtIsNull(time1.getId())).isFalse();
-            assertThat(timeRepository.existsTimeByStartAtAndDeletedAtIsNull(time1.getStartAt())).isFalse();
+            assertThat(timeRepository.findTimeByIdAndNotDeleted(time1.getId())).isEmpty();
+            assertThat(timeRepository.existsTimeByIdAndNotDeleted(time1.getId())).isFalse();
+            assertThat(timeRepository.existsTimeByStartAtAndNotDeleted(time1.getStartAt())).isFalse();
         }
 
         @Test
@@ -265,7 +266,7 @@ class JdbcTimeRepositoryTest {
 
     private Integer countDeletedTimeById(Long id) {
         return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation_time WHERE id = ? AND deleted_at IS NOT NULL",
+            "SELECT COUNT(*) FROM reservation_time WHERE id = ? AND status = 'DELETED'",
             Integer.class,
             id
         );

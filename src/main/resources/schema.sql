@@ -1,9 +1,9 @@
 CREATE TABLE reservation_time (
     id BIGINT NOT NULL AUTO_INCREMENT,
     start_at TIME NOT NULL,
-    deleted_at DATETIME DEFAULT NULL,
+    status ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
     active_start_at TIME GENERATED ALWAYS AS (
-        CASE WHEN deleted_at IS NULL THEN start_at ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN start_at ELSE NULL END
     ),
     PRIMARY KEY (id)
 );

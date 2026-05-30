@@ -3,7 +3,6 @@ package roomescape.feature.reservation.repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +19,7 @@ import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 import roomescape.global.error.exception.GeneralException;
 
 @Repository
@@ -41,7 +41,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(
             """
                 SELECT r.id, r.name, r.date, r.status,
-                       rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                       rt.id AS time_id, rt.start_at, rt.status AS time_status,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                        t.status AS theme_status
                 FROM reservation r
@@ -62,7 +62,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             Time.reconstruct(
                 rs.getLong("time_id"),
                 rs.getTime("start_at").toLocalTime(),
-                getNullableLocalDateTime(rs, "time_deleted_at")
+                TimeStatus.valueOf(rs.getString("time_status"))
             ),
             Theme.reconstruct(
                 rs.getLong("theme_id"),
@@ -75,20 +75,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
-    private LocalDateTime getNullableLocalDateTime(ResultSet rs, String columnLabel)
-        throws SQLException {
-        java.sql.Timestamp timestamp = rs.getTimestamp(columnLabel);
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
-    }
-
     @Override
     public List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   rt.id AS time_id, rt.start_at, rt.status AS time_status,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                    t.status AS theme_status
             FROM reservation r
@@ -111,7 +102,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   rt.id AS time_id, rt.start_at, rt.status AS time_status,
                    t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
                    t.status AS theme_status
             FROM reservation r
@@ -140,7 +131,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             WHERE r.date = :date
               AND r.theme_id = :themeId
               AND r.status = 'ACTIVE'
-              AND rt.deleted_at IS NULL
+              AND rt.status = 'ACTIVE'
               AND t.status = 'ACTIVE'
             """;
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(

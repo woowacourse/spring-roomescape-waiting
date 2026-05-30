@@ -49,7 +49,7 @@ class TimeServiceTest {
 
         @Test
         void 예약_시간이_없으면_빈_목록을_반환한다() {
-            when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+            when(timeRepository.findAllByNotDeleted()).thenReturn(List.of());
 
             assertThat(timeService.getTimes()).isEmpty();
         }
@@ -59,7 +59,7 @@ class TimeServiceTest {
             // given
             Time time1 = Time.reconstruct(1L, LocalTime.of(10, 0), null);
             Time time2 = Time.reconstruct(2L, LocalTime.of(15, 30), null);
-            when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(time1, time2));
+            when(timeRepository.findAllByNotDeleted()).thenReturn(List.of(time1, time2));
 
             // when
             List<TimeResponseDto> result = timeService.getTimes();
@@ -84,7 +84,7 @@ class TimeServiceTest {
             when(themeRepository.existsThemeByIdAndNotDeleted(themeId)).thenReturn(true);
             when(reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(date, themeId))
                 .thenReturn(List.of(1L));
-            when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(reservedTime, availableTime));
+            when(timeRepository.findAllByNotDeleted()).thenReturn(List.of(reservedTime, availableTime));
 
             // when
             List<TimeAvailabilityResponseDto> result = timeService.getTimeAvailabilities(date, themeId);
@@ -119,7 +119,7 @@ class TimeServiceTest {
             // given
             TimeCreateCommand command = new TimeCreateCommand(TimeFixture.VALID_10_00.getStartAt());
             Time saved = Time.reconstruct(1L, TimeFixture.VALID_10_00.getStartAt(), null);
-            when(timeRepository.existsTimeByStartAtAndDeletedAtIsNull(TimeFixture.VALID_10_00.getStartAt()))
+            when(timeRepository.existsTimeByStartAtAndNotDeleted(TimeFixture.VALID_10_00.getStartAt()))
                 .thenReturn(false);
             when(timeRepository.save(any(Time.class))).thenReturn(saved);
 
@@ -135,7 +135,7 @@ class TimeServiceTest {
         void 이미_등록된_예약_시간이면_예외가_발생한다() {
             // given
             TimeCreateCommand command = new TimeCreateCommand(TimeFixture.VALID_10_00.getStartAt());
-            when(timeRepository.existsTimeByStartAtAndDeletedAtIsNull(TimeFixture.VALID_10_00.getStartAt()))
+            when(timeRepository.existsTimeByStartAtAndNotDeleted(TimeFixture.VALID_10_00.getStartAt()))
                 .thenReturn(true);
 
             // when & then
@@ -150,7 +150,7 @@ class TimeServiceTest {
 
         @Test
         void 예약_시간을_삭제한다() {
-            when(timeRepository.existsTimeByIdAndDeletedAtIsNull(1L)).thenReturn(true);
+            when(timeRepository.existsTimeByIdAndNotDeleted(1L)).thenReturn(true);
 
             timeService.deleteTimeById(1L);
         }
@@ -158,7 +158,7 @@ class TimeServiceTest {
         @Test
         void 존재하지_않는_예약_시간_ID이면_예외가_발생한다() {
             // given
-            when(timeRepository.existsTimeByIdAndDeletedAtIsNull(999L)).thenReturn(false);
+            when(timeRepository.existsTimeByIdAndNotDeleted(999L)).thenReturn(false);
 
             // when & then
             assertThatThrownBy(() -> timeService.deleteTimeById(999L))

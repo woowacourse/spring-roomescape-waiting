@@ -29,6 +29,7 @@ import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 import roomescape.feature.time.repository.JdbcTimeRepository;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.error.exception.GeneralException;
@@ -89,7 +90,7 @@ class JdbcReservationRepositoryTest {
                     rs.getLong("id"),
                     new ReserverName(rs.getString("name")),
                     rs.getDate("date").toLocalDate(),
-                    Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), null),
+                    Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), TimeStatus.ACTIVE),
                     Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), ThemeStatus.ACTIVE),
                     ReservationStatus.valueOf(rs.getString("status"))
                 ),
@@ -276,7 +277,7 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual).hasSize(1);
-            assertThat(actual.getFirst().getTime().getDeletedAt()).isNotNull();
+            assertThat(actual.getFirst().getTime().getStatus()).isEqualTo(TimeStatus.DELETED);
             assertThat(actual.getFirst().getTheme().getStatus()).isEqualTo(ThemeStatus.DELETED);
         }
 

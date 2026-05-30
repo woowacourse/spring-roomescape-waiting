@@ -7,6 +7,7 @@ import roomescape.feature.time.dto.response.ReservationTimeResponseDto;
 import roomescape.feature.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.feature.time.dto.response.TimeResponseDto;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 
 @Component
 public final class TimeMapper {
@@ -24,7 +25,7 @@ public final class TimeMapper {
     }
 
     public ReservationTimeResponseDto toReservationResponseDto(Time time) {
-        return new ReservationTimeResponseDto(time.getId(), time.getStartAt(), time.getDeletedAt() != null);
+        return new ReservationTimeResponseDto(time.getId(), time.getStartAt(), time.getStatus() == TimeStatus.DELETED);
     }
 
     public TimeAvailabilityResponseDto toAvailabilityResponseDto(Time time, boolean available) {

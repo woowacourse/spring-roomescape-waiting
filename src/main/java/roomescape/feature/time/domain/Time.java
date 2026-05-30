@@ -1,26 +1,25 @@
 package roomescape.feature.time.domain;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class Time {
 
     private final Long id;
     private final LocalTime startAt;
-    private final LocalDateTime deletedAt;
+    private final TimeStatus status;
 
-    private Time(Long id, LocalTime startAt, LocalDateTime deletedAt) {
+    private Time(Long id, LocalTime startAt, TimeStatus status) {
         this.id = id;
         this.startAt = startAt;
-        this.deletedAt = deletedAt;
+        this.status = status;
     }
 
     public static Time create(LocalTime startAt) {
-        return new Time(null, startAt, null);
+        return new Time(null, startAt, TimeStatus.ACTIVE);
     }
 
-    public static Time reconstruct(Long id, LocalTime startAt, LocalDateTime deletedAt) {
-        return new Time(id, startAt, deletedAt);
+    public static Time reconstruct(Long id, LocalTime startAt, TimeStatus status) {
+        return new Time(id, startAt, status);
     }
 
     public Long getId() {
@@ -31,7 +30,7 @@ public class Time {
         return startAt;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public TimeStatus getStatus() {
+        return status;
     }
 }

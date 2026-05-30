@@ -132,7 +132,7 @@ public class JdbcThemeRepository implements ThemeRepository {
             WHERE r.date BETWEEN :startDate AND :endDate
               AND t.status = 'ACTIVE'
               AND r.status = 'ACTIVE'
-              AND rt.deleted_at IS NULL
+              AND rt.status = 'ACTIVE'
             GROUP BY t.id, t.name, t.description, t.image_url, t.status
             ORDER BY COUNT(r.id) DESC, t.id ASC
             LIMIT :limit

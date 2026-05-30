@@ -22,6 +22,7 @@ import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.domain.ThemeStatus;
 import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 import roomescape.feature.time.repository.TimeRepository;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
@@ -92,7 +93,7 @@ public class ReservationService {
     private Reservation createReservation(ReservationCreateCommand command, ReservationStatus status) {
         List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
 
-        Time time = timeRepository.findTimeByIdAndDeletedAtIsNull(command.timeId()).orElse(null);
+        Time time = timeRepository.findTimeByIdAndNotDeleted(command.timeId()).orElse(null);
         if (time == null) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
         }
@@ -162,7 +163,7 @@ public class ReservationService {
         if (command.timeId() == null) {
             return existingReservation.getTime();
         }
-        return timeRepository.findTimeByIdAndDeletedAtIsNull(command.timeId()).orElse(null);
+        return timeRepository.findTimeByIdAndNotDeleted(command.timeId()).orElse(null);
     }
 
     private Theme getUpdateTheme(Reservation existingReservation, ReservationUpdateCommand command) {
@@ -175,7 +176,7 @@ public class ReservationService {
     private void validateUpdateResources(Time time, Theme theme) {
         List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
 
-        if (time == null || time.getDeletedAt() != null) {
+        if (time == null || time.getStatus() == TimeStatus.DELETED) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
         }
 

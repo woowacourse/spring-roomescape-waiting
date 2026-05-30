@@ -9,13 +9,13 @@ public interface TimeRepository {
 
     Time save(Time time);
 
-    List<Time> findAllByDeletedAtIsNull();
+    List<Time> findAllByNotDeleted();
 
-    Optional<Time> findTimeByIdAndDeletedAtIsNull(Long id);
+    Optional<Time> findTimeByIdAndNotDeleted(Long id);
 
-    boolean existsTimeByIdAndDeletedAtIsNull(Long id);
+    boolean existsTimeByIdAndNotDeleted(Long id);
 
-    boolean existsTimeByStartAtAndDeletedAtIsNull(LocalTime startAt);
+    boolean existsTimeByStartAtAndNotDeleted(LocalTime startAt);
 
     void deleteTimeById(Long id);
 }

@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.feature.time.domain.Time;
+import roomescape.feature.time.domain.TimeStatus;
 import roomescape.feature.time.error.type.TimeErrorType;
 import roomescape.global.error.exception.GeneralException;
 
@@ -35,25 +36,25 @@ public class JdbcTimeRepository implements TimeRepository {
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(args).longValue();
 
-        return Time.reconstruct(generatedKey, time.getStartAt(), null);
+        return Time.reconstruct(generatedKey, time.getStartAt(), TimeStatus.ACTIVE);
     }
 
     @Override
-    public List<Time> findAllByDeletedAtIsNull() {
-        String sql = "SELECT id, start_at FROM reservation_time WHERE deleted_at IS NULL";
+    public List<Time> findAllByNotDeleted() {
+        String sql = "SELECT id, start_at, status FROM reservation_time WHERE status = 'ACTIVE'";
         return jdbcTemplate.query(
             sql,
             (rs, rowNum) -> Time.reconstruct(
                 rs.getLong("id"),
                 rs.getTime("start_at").toLocalTime(),
-                null
+                TimeStatus.valueOf(rs.getString("status"))
             )
         );
     }
 
     @Override
-    public Optional<Time> findTimeByIdAndDeletedAtIsNull(Long id) {
-        String sql = "SELECT id, start_at FROM reservation_time WHERE id = :id AND deleted_at IS NULL";
+    public Optional<Time> findTimeByIdAndNotDeleted(Long id) {
+        String sql = "SELECT id, start_at, status FROM reservation_time WHERE id = :id AND status = 'ACTIVE'";
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
         try {
             Time time = jdbcTemplate.queryForObject(
@@ -62,7 +63,7 @@ public class JdbcTimeRepository implements TimeRepository {
                 (resultSet, rowNum) -> Time.reconstruct(
                     resultSet.getLong("id"),
                     resultSet.getTime("start_at").toLocalTime(),
-                    null
+                    TimeStatus.valueOf(resultSet.getString("status"))
                 )
             );
             return Optional.ofNullable(time);
@@ -72,13 +73,13 @@ public class JdbcTimeRepository implements TimeRepository {
     }
 
     @Override
-    public boolean existsTimeByIdAndDeletedAtIsNull(Long id) {
+    public boolean existsTimeByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
                 FROM reservation_time
                 WHERE id = :id
-                  AND deleted_at IS NULL
+                  AND status = 'ACTIVE'
             )
             """;
 
@@ -88,13 +89,13 @@ public class JdbcTimeRepository implements TimeRepository {
     }
 
     @Override
-    public boolean existsTimeByStartAtAndDeletedAtIsNull(LocalTime startAt) {
+    public boolean existsTimeByStartAtAndNotDeleted(LocalTime startAt) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
                 FROM reservation_time
                 WHERE start_at = :startAt
-                  AND deleted_at IS NULL
+                  AND status = 'ACTIVE'
             )
             """;
 
@@ -107,9 +108,9 @@ public class JdbcTimeRepository implements TimeRepository {
     public void deleteTimeById(Long id) {
         final String sql = """
             UPDATE reservation_time
-            SET deleted_at = CURRENT_TIMESTAMP
+            SET status = 'DELETED'
             WHERE id = :id
-              AND deleted_at IS NULL
+              AND status = 'ACTIVE'
             """;
         final SqlParameterSource parameters = new MapSqlParameterSource("id", id);
 

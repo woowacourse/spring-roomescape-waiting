@@ -35,7 +35,7 @@ public class TimeService {
     }
 
     public List<TimeResponseDto> getTimes() {
-        return timeRepository.findAllByDeletedAtIsNull()
+        return timeRepository.findAllByNotDeleted()
             .stream()
             .map(timeMapper::toResponseDto)
             .toList();
@@ -49,7 +49,7 @@ public class TimeService {
 
         List<Long> reservedTimeIds = reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(date, themeId);
 
-        return timeRepository.findAllByDeletedAtIsNull()
+        return timeRepository.findAllByNotDeleted()
             .stream()
             .map(time -> timeMapper.toAvailabilityResponseDto(time, !reservedTimeIds.contains(time.getId())))
             .toList();
@@ -57,7 +57,7 @@ public class TimeService {
 
     @Transactional
     public TimeResponseDto saveTime(TimeCreateCommand command) {
-        if (timeRepository.existsTimeByStartAtAndDeletedAtIsNull(command.startAt())) {
+        if (timeRepository.existsTimeByStartAtAndNotDeleted(command.startAt())) {
             throw new GeneralException(TimeErrorType.ALREADY_EXIST_TIME);
         }
 
@@ -71,7 +71,7 @@ public class TimeService {
 
     @Transactional
     public void deleteTimeById(Long id) {
-        if (!timeRepository.existsTimeByIdAndDeletedAtIsNull(id)) {
+        if (!timeRepository.existsTimeByIdAndNotDeleted(id)) {
             throw new GeneralException(TimeErrorType.TIME_NOT_FOUND);
         }
 
