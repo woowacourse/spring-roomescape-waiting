@@ -60,7 +60,7 @@ public class ReservationWaitingService {
         if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(
                     ErrorCode.RESERVATION_WAITING_NOT_FOUND,
-                    "삭제된 대기 데이터가 없습니다.");
+                    "본인의 대기만 취소할 수 있습니다.");
         }
     }
 }
