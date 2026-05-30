@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationJdbcRepository;
 
@@ -55,16 +55,26 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findByDateAndThemeId는_같은_날짜와_테마의_예약만_반환한다() {
+    void findReservedTimeIdsByDateAndThemeId는_같은_날짜와_테마의_예약_시간_id만_반환한다() {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
         LocalDate targetDate = LocalDate.of(2026, 8, 5);
         repository.save(new Reservation("브라운", targetDate, time, theme));
         repository.save(new Reservation("티뉴", LocalDate.of(2026, 8, 6), time, theme));
 
-        Reservations result = repository.findByDateAndThemeId(targetDate, themeId);
+        List<Long> result = repository.findReservedTimeIdsByDateAndThemeId(targetDate, themeId);
 
-        assertThat(result.isOccupied(time)).isTrue();
+        assertThat(result).containsExactly(timeId);
+    }
+
+    @Test
+    void existsByDateAndTimeIdAndThemeId는_해당_슬롯에_예약이_있으면_true를_반환한다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        repository.save(new Reservation("브라운", date, time, theme));
+
+        assertThat(repository.existsBySlot(date, timeId, themeId)).isTrue();
     }
 
     @Test

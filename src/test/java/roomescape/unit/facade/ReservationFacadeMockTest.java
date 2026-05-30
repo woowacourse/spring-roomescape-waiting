@@ -23,7 +23,9 @@ import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
+import roomescape.service.ThemeService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationFacadeMockTest {
@@ -40,7 +42,13 @@ class ReservationFacadeMockTest {
     private ReservationService reservationService;
 
     @Mock
+    private ReservationTimeService reservationTimeService;
+
+    @Mock
     private ReservationWaitingService reservationWaitingService;
+
+    @Mock
+    private ThemeService themeService;
 
     @InjectMocks
     private ReservationFacade facade;
@@ -111,7 +119,7 @@ class ReservationFacadeMockTest {
         Long reservationId = 1L;
         String name = "민욱";
         Reservation past = new Reservation(reservationId, name, PAST_DATE, TIME, THEME);
-        given(reservationService.findMyReservation(reservationId, name)).willReturn(past);
+        given(reservationService.getById(reservationId)).willReturn(past);
 
         ReservationUpdateRequest request = new ReservationUpdateRequest(DATE, TIME_ID);
 

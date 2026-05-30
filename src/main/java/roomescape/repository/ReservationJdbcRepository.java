@@ -12,7 +12,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 
 @Repository
@@ -77,6 +76,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return count != null && count > 0;
     }
 
+    public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
     public Reservation save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -122,9 +127,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return results.stream().findFirst();
     }
 
-    public Reservations findByDateAndThemeId(LocalDate date, Long themeId) {
-        String sql = SELECT_BASE + " WHERE r.date = ? AND r.theme_id = ?";
-        return new Reservations(jdbcTemplate.query(sql, reservationRowMapper, date, themeId));
+    public List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId) {
+        String sql = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?";
+        return jdbcTemplate.queryForList(sql, Long.class, date, themeId);
     }
 
     public List<Reservation> findByName(String name) {
