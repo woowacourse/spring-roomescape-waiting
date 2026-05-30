@@ -11,9 +11,9 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.reservation.Waiting;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 import roomescape.service.dto.command.WaitingCommand;
 import roomescape.service.dto.result.WaitingResult;
 

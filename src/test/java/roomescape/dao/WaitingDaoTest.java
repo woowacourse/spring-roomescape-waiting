@@ -15,12 +15,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.reservation.Waiting;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
 import roomescape.domain.slot.theme.ThumbnailUrl;
 import roomescape.domain.slot.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 
 @JdbcTest
 @Import(WaitingDao.class)

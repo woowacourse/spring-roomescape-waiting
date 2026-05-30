@@ -15,6 +15,7 @@ import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
 import roomescape.domain.slot.theme.ThumbnailUrl;
 import roomescape.domain.slot.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 
 public class WaitingTest {
     private final UserName userName = UserName.parse("아나키");

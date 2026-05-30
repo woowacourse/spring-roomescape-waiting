@@ -1,8 +1,9 @@
-package roomescape.domain.reservation;
+package roomescape.domain.waiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.reservation.UserName;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 

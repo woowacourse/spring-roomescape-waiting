@@ -11,12 +11,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.reservation.Waiting;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
 import roomescape.domain.slot.theme.ThumbnailUrl;
 import roomescape.domain.slot.time.ReservationTime;
+import roomescape.domain.waiting.Waiting;
 
 @Repository
 public class WaitingDao {
