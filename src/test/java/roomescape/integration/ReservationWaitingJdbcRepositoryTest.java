@@ -121,7 +121,7 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void findByName은_같은_예약의_대기_순번을_계산해_반환한다() {
+    void findByName은_본인_대기만_반환한다() {
         LocalDateTime waitingTime = LocalDateTime.of(2026, 8, 1, 10, 0, 0);
         repository.save(new ReservationWaiting("브라운", waitingTime, reservation));
         repository.save(new ReservationWaiting("민욱", waitingTime.plusMinutes(1), reservation));
@@ -129,6 +129,17 @@ class ReservationWaitingJdbcRepositoryTest {
         List<WaitingWithOrder> found = repository.findByName("민욱");
 
         assertThat(found).hasSize(1);
+        assertThat(found.get(0).getWaiting().getName()).isEqualTo("민욱");
+    }
+
+    @Test
+    void findByName은_같은_예약의_대기_순번을_계산해_반환한다() {
+        LocalDateTime waitingTime = LocalDateTime.of(2026, 8, 1, 10, 0, 0);
+        repository.save(new ReservationWaiting("브라운", waitingTime, reservation));
+        repository.save(new ReservationWaiting("민욱", waitingTime.plusMinutes(1), reservation));
+
+        List<WaitingWithOrder> found = repository.findByName("민욱");
+
         assertThat(found.get(0).getOrder()).isEqualTo(2);
     }
 
