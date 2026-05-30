@@ -17,37 +17,31 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
+@JdbcTest
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class JdbcTimeRepositoryTest {
 
     private static volatile boolean saveSucceeded = false;
     private static volatile boolean findSucceeded = false;
 
-    private JdbcTimeRepository timeRepository;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private JdbcTimeRepository timeRepository;
+
     @BeforeEach
-    void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-            "jdbc:h2:mem:" + System.nanoTime() + ";MODE=MySQL;DB_CLOSE_DELAY=-1",
-            "sa",
-            ""
-        );
-
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("schema.sql"));
-        populator.execute(dataSource);
-
+    void setUpRepository() {
         timeRepository = new JdbcTimeRepository(dataSource);
-        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Nested

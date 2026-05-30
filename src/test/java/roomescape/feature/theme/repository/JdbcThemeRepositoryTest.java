@@ -20,40 +20,34 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
+@JdbcTest
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class JdbcThemeRepositoryTest {
 
     private static volatile boolean saveSucceeded = false;
     private static volatile boolean findSucceeded = false;
 
-    private JdbcThemeRepository themeRepository;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private JdbcThemeRepository themeRepository;
     private SimpleJdbcInsert timeInsert;
     private int timeSequence;
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-            "jdbc:h2:mem:" + System.nanoTime() + ";MODE=MySQL;DB_CLOSE_DELAY=-1",
-            "sa",
-            ""
-        );
-
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("schema.sql"));
-        populator.execute(dataSource);
-
         themeRepository = new JdbcThemeRepository(dataSource);
-        jdbcTemplate = new JdbcTemplate(dataSource);
         timeInsert = new SimpleJdbcInsert(dataSource)
             .withTableName("reservation_time")
             .usingColumns("start_at")

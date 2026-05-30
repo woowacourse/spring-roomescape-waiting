@@ -17,48 +17,42 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestClassOrder;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.theme.repository.JdbcThemeRepository;
 import roomescape.feature.time.domain.Time;
-import roomescape.global.domain.EntityStatus;
 import roomescape.feature.time.repository.JdbcTimeRepository;
 import roomescape.fixture.ReservationFixture;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
+@JdbcTest
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class JdbcReservationRepositoryTest {
 
     private static volatile boolean saveSucceeded = false;
     private static volatile boolean findSucceeded = false;
 
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private JdbcReservationRepository reservationRepository;
     private JdbcTimeRepository timeRepository;
     private JdbcThemeRepository themeRepository;
-    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = new DriverManagerDataSource(
-            "jdbc:h2:mem:" + System.nanoTime() + ";MODE=MySQL;DB_CLOSE_DELAY=-1",
-            "sa",
-            ""
-        );
-
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource("schema.sql"));
-        populator.execute(dataSource);
-
         reservationRepository = new JdbcReservationRepository(dataSource);
         timeRepository = new JdbcTimeRepository(dataSource);
         themeRepository = new JdbcThemeRepository(dataSource);
-        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Nested
