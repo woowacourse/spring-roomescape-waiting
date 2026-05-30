@@ -35,7 +35,7 @@ public class Reservation {
     }
 
     public void changeStatus(ReservationStatus status) {
-        this.status = this.status.transitionTo(status);  // 한 줄로 끝
+        this.status = this.status.transitionTo(status);
     }
 
     public Long getId() {
