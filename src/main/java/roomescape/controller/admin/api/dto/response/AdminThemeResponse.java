@@ -15,6 +15,6 @@ public record AdminThemeResponse(
                 result.name(),
                 result.description(),
                 result.thumbnailImageUrl(),
-                true);
+                result.isActive());
     }
 }

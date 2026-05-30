@@ -21,7 +21,6 @@ import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
 import roomescape.controller.client.api.dto.response.ReservationResponse;
-import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.service.ReservationService;
@@ -34,7 +33,6 @@ import roomescape.service.result.ReservationResult;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
-    private final ReservationQuery reservationQuery;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> reserve(@Valid @RequestBody ReservationRequest request) {
@@ -80,6 +78,7 @@ public class ReservationApiController {
             @ModelAttribute @Valid ReservationSearchCondition condition,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(reservationQuery.search(condition, pageable));
+        return ResponseEntity.ok(reservationService.search(condition, pageable)
+                .map(ReservationSearchResponse::from));
     }
 }

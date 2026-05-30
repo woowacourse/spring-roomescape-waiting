@@ -9,13 +9,13 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
-import roomescape.controller.admin.api.query.AdminReservationQuery;
+import roomescape.query.ReservationQueryRepository;
+import roomescape.service.result.ReservationResult;
 
 class AdminReservationQueryTest extends BaseIntegrationTest {
 
     @Autowired
-    private AdminReservationQuery adminReservationQuery;
+    private ReservationQueryRepository reservationQueryRepository;
     @Autowired
     private ReservationDataSource dataSource;
 
@@ -34,11 +34,11 @@ class AdminReservationQueryTest extends BaseIntegrationTest {
         dataSource.insertReservation("이프", date, 1L, 1L);
 
         // when
-        List<AdminReservationResponse> result = adminReservationQuery.getAllReservations();
+        List<ReservationResult> result = reservationQueryRepository.getAllReservations();
 
         // then
         assertThat(result).hasSize(1);
-        AdminReservationResponse reservation = result.getFirst();
+        ReservationResult reservation = result.getFirst();
         assertThat(reservation.reservationId()).isEqualTo(1L);
         assertThat(reservation.date()).isEqualTo(date);
         assertThat(reservation.theme().name()).isEqualTo("공포");

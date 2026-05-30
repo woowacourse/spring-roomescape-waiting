@@ -1,14 +1,19 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.Page;
+import roomescape.common.Pageable;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.EntityNotFoundException;
+import roomescape.query.ReservationQueryRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -16,6 +21,7 @@ import roomescape.repository.dto.ReservationCondition;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSearchResult;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,6 +31,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationQueryRepository reservationQueryRepository;
 
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
@@ -108,6 +115,14 @@ public class ReservationService {
         Reservation reservation = findReservationByEntryIdWithThrow(entryId);
         ReservationEntry reservationEntry = reservation.findReservedEntry(entryId);
         return ReservationResult.from(reservation, reservationEntry);
+    }
+
+    public List<ReservationResult> getAllReservations() {
+        return reservationQueryRepository.getAllReservations();
+    }
+
+    public Page<ReservationSearchResult> search(ReservationSearchCondition condition, Pageable pageable) {
+        return reservationQueryRepository.search(condition, pageable);
     }
 
     private Reservation findReservationByEntryIdWithThrow(long entryId) {

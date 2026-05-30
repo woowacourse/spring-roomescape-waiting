@@ -1,6 +1,7 @@
 package roomescape.common;
 
 import java.util.List;
+import java.util.function.Function;
 
 public record Page<T>(int totalPages, int totalElements, List<T> content) {
 
@@ -11,5 +12,9 @@ public record Page<T>(int totalPages, int totalElements, List<T> content) {
 
         int totalPages = (int) Math.ceil((double) totalElements / size);
         return new Page<>(totalPages, (int) totalElements, content);
+    }
+
+    public <R> Page<R> map(Function<T, R> mapper) {
+        return new Page<>(totalPages, totalElements, content.stream().map(mapper).toList());
     }
 }

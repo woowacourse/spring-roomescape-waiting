@@ -23,7 +23,6 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminThemeApiController;
 import roomescape.controller.admin.api.dto.request.AdminThemeRequest;
 import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
-import roomescape.controller.admin.api.query.AdminThemeQuery;
 import roomescape.service.ThemeService;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.result.ThemeRegisterResult;
@@ -33,9 +32,6 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
     private ThemeService themeService;
-
-    @MockitoBean
-    private AdminThemeQuery themeQuery;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext) {
@@ -47,7 +43,7 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
         // given
         AdminThemeRequest body = new AdminThemeRequest("공포", "공포 방탈출입니다.", "http://image.com/image.png");
 
-        ThemeRegisterResult result = new ThemeRegisterResult(1L, "공포", "공포 방탈출입니다.", "http://image.com/image.png");
+        ThemeRegisterResult result = new ThemeRegisterResult(1L, "공포", "공포 방탈출입니다.", "http://image.com/image.png", true);
         when(themeService.register(any(ThemeRegisterCommand.class))).thenReturn(result);
 
         AdminThemeResponse expected = AdminThemeResponse.from(result);

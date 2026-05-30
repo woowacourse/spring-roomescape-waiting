@@ -9,13 +9,13 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
-import roomescape.controller.client.api.query.ThemeTimesQuery;
+import roomescape.query.ThemeQueryRepository;
+import roomescape.service.result.ThemeTimesResult;
 
 class ThemeTimesQueryTest extends BaseIntegrationTest {
 
     @Autowired
-    private ThemeTimesQuery themeTimesQuery;
+    private ThemeQueryRepository themeQueryRepository;
     @Autowired
     private ReservationTimeDataSource dataSource;
 
@@ -34,11 +34,11 @@ class ThemeTimesQueryTest extends BaseIntegrationTest {
         dataSource.insertReservation(1L, date, 1L);
 
         // when
-        List<ThemeTimesResponse> result = themeTimesQuery.getThemeReservationStatus(1L, date);
+        List<ThemeTimesResult> result = themeQueryRepository.getThemeReservationStatus(1L, date);
 
         // then
         assertThat(result)
-                .extracting(ThemeTimesResponse::status)
+                .extracting(ThemeTimesResult::status)
                 .containsExactly("WAITING_AVAILABLE", "RESERVABLE", "RESERVABLE");
     }
 
@@ -48,14 +48,14 @@ class ThemeTimesQueryTest extends BaseIntegrationTest {
         LocalDate date = LocalDate.now().minusDays(1);
 
         // when
-        List<ThemeTimesResponse> result = themeTimesQuery.getThemeReservationStatus(1L, date);
+        List<ThemeTimesResult> result = themeQueryRepository.getThemeReservationStatus(1L, date);
 
         // then
         assertThat(result)
-                .extracting(ThemeTimesResponse::status)
+                .extracting(ThemeTimesResult::status)
                 .containsOnly("UNAVAILABLE");
         assertThat(result)
-                .extracting(ThemeTimesResponse::isReservable)
+                .extracting(ThemeTimesResult::isReservable)
                 .containsOnly(false);
     }
 }

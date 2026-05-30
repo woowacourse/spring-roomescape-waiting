@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -18,6 +19,7 @@ import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.exception.EntityNotFoundException;
+import roomescape.query.ReservationQueryRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.command.ReservationChangeCommand;
@@ -41,7 +43,8 @@ class ReservationServiceTest {
         this.reservationRepository = new FakeReservationRepository();
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
-        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository);
+        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+                Mockito.mock(ReservationQueryRepository.class));
     }
 
     @Test

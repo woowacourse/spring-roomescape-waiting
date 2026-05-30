@@ -1,19 +1,24 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateEntityException;
+import roomescape.query.ThemeQueryRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.result.ThemeRegisterResult;
+import roomescape.service.result.ThemeTimesResult;
 
 @Service
 @RequiredArgsConstructor
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final ThemeQueryRepository themeQueryRepository;
 
     @Transactional
     public ThemeRegisterResult register(ThemeRegisterCommand command) {
@@ -40,6 +45,22 @@ public class ThemeService {
                     existingTheme.activate();
                     themeRepository.update(existingTheme);
                 });
+    }
+
+    public List<ThemeRegisterResult> getAllThemes() {
+        return themeQueryRepository.getAllThemes();
+    }
+
+    public List<ThemeRegisterResult> getAllActiveThemes() {
+        return themeQueryRepository.getAllActiveThemes();
+    }
+
+    public List<ThemeRegisterResult> getPopularThemes(LocalDate startDate, LocalDate endDate) {
+        return themeQueryRepository.getPopularThemes(startDate, endDate);
+    }
+
+    public List<ThemeTimesResult> getThemeReservationStatus(long themeId, LocalDate date) {
+        return themeQueryRepository.getThemeReservationStatus(themeId, date);
     }
 
     private void validateDuplicationName(String name) {

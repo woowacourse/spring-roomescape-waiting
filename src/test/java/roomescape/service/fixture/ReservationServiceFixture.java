@@ -13,14 +13,14 @@ public class ReservationServiceFixture {
 
     public static ReservationResult createReservationResult() {
         ReservationTimeResult timeResult = new ReservationTimeResult(1L, LocalTime.now(), "ACTIVE");
-        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "테마", "테마설명", "테마 이미지");
+        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "테마", "테마설명", "테마 이미지", true);
         ReservationEntryResult entryResult = new ReservationEntryResult(1L, "이프", "RESERVED", LocalDateTime.now());
         return new ReservationResult(1L, LocalDate.now(), themeResult, timeResult, entryResult);
     }
 
     public static ReservationResult createWaitingResult() {
         ReservationTimeResult timeResult = new ReservationTimeResult(1L, LocalTime.now(), "ACTIVE");
-        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "테마", "테마설명", "테마 이미지");
+        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "테마", "테마설명", "테마 이미지", true);
         ReservationEntryResult entryResult = new ReservationEntryResult(2L, "라텔", "WAITING", LocalDateTime.now());
         return new ReservationResult(1L, LocalDate.now(), themeResult, timeResult, entryResult);
     }

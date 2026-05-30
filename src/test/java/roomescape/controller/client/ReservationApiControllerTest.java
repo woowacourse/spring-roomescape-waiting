@@ -29,7 +29,6 @@ import roomescape.controller.client.api.ReservationApiController;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
 import roomescape.controller.client.api.dto.response.ReservationResponse;
-import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.fixture.ReservationApiRequestFixture;
@@ -38,14 +37,13 @@ import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
+import roomescape.service.result.ReservationSearchResult;
 
 @WebMvcTest(ReservationApiController.class)
 class ReservationApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
     private ReservationService reservationService;
-    @MockitoBean
-    private ReservationQuery reservationQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -87,10 +85,10 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 사용자_이름으로_예약_정보를_조회할_수_있다() {
         // given
-        ReservationSearchResponse searchResponse =
-                new ReservationSearchResponse(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
-        Page<ReservationSearchResponse> result = Page.of(10, 10, List.of(searchResponse));
-        when(reservationQuery.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(result);
+        ReservationSearchResult searchResult =
+                new ReservationSearchResult(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
+        Page<ReservationSearchResult> serviceResult = Page.of(10, 10, List.of(searchResult));
+        when(reservationService.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(serviceResult);
 
         // when
         Page<ReservationSearchResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -102,7 +100,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
                 });
 
         // then
-        assertThat(response).isEqualTo(result);
+        assertThat(response).isEqualTo(serviceResult.map(ReservationSearchResponse::from));
     }
 
     @Test

@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.client.api.dto.response.ThemeResponse;
 import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
-import roomescape.controller.client.api.query.ThemeQuery;
-import roomescape.controller.client.api.query.ThemeTimesQuery;
+import roomescape.service.ThemeService;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +21,7 @@ import roomescape.controller.client.api.query.ThemeTimesQuery;
 @Validated
 public class ThemeApiController {
 
-    private final ThemeQuery themeQuery;
-    private final ThemeTimesQuery themeTimesQuery;
+    private final ThemeService themeService;
 
     @GetMapping("/{id}/times")
     public ResponseEntity<List<ThemeTimesResponse>> getThemeReservationStatus(
@@ -31,16 +29,19 @@ public class ThemeApiController {
             @Positive(message = "테마 조회 식별자는 양수여야 합니다.") Long id,
             @RequestParam LocalDate date
     ) {
-        return ResponseEntity.ok().body(themeTimesQuery.getThemeReservationStatus(id, date));
+        return ResponseEntity.ok().body(themeService.getThemeReservationStatus(id, date)
+                .stream().map(ThemeTimesResponse::from).toList());
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getAllThemes() {
-        return ResponseEntity.ok().body(themeQuery.getAllActiveThemes());
+        return ResponseEntity.ok().body(themeService.getAllActiveThemes()
+                .stream().map(ThemeResponse::from).toList());
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes(@RequestParam LocalDate startDate) {
-        return ResponseEntity.ok().body(themeQuery.getPopularThemes(startDate, LocalDate.now()));
+        return ResponseEntity.ok().body(themeService.getPopularThemes(startDate, LocalDate.now())
+                .stream().map(ThemeResponse::from).toList());
     }
 }

@@ -23,17 +23,15 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ThemeApiController;
 import roomescape.controller.client.api.dto.response.ThemeResponse;
 import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
-import roomescape.controller.client.api.query.ThemeQuery;
-import roomescape.controller.client.api.query.ThemeTimesQuery;
+import roomescape.service.ThemeService;
+import roomescape.service.result.ThemeRegisterResult;
+import roomescape.service.result.ThemeTimesResult;
 
 @WebMvcTest(ThemeApiController.class)
 class ThemeApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
-    private ThemeQuery themeQuery;
-
-    @MockitoBean
-    private ThemeTimesQuery themeTimesQuery;
+    private ThemeService themeService;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -43,8 +41,8 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 테마_시간대_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
-        ThemeTimesResponse result = new ThemeTimesResponse(1L, LocalTime.now(), true, "RESERVABLE");
-        when(themeTimesQuery.getThemeReservationStatus(anyLong(), any(LocalDate.class))).thenReturn(List.of(result));
+        ThemeTimesResult timesResult = new ThemeTimesResult(1L, LocalTime.now(), true, "RESERVABLE");
+        when(themeService.getThemeReservationStatus(anyLong(), any(LocalDate.class))).thenReturn(List.of(timesResult));
 
         // when & then
         List<ThemeTimesResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -55,7 +53,7 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).containsOnly(result);
+        assertThat(response).containsOnly(ThemeTimesResponse.from(timesResult));
     }
 
     @ParameterizedTest
@@ -73,8 +71,8 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 테마_목록_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
-        ThemeResponse result = new ThemeResponse(1L, "공포테마", "어마무시한 공포 테마입니다.", "https://image.com/image.png");
-        when(themeQuery.getAllActiveThemes()).thenReturn(List.of(result));
+        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "공포테마", "어마무시한 공포 테마입니다.", "https://image.com/image.png", true);
+        when(themeService.getAllActiveThemes()).thenReturn(List.of(themeResult));
 
         // when & then
         List<ThemeResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -84,14 +82,14 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).containsOnly(result);
+        assertThat(response).containsOnly(ThemeResponse.from(themeResult));
     }
 
     @Test
     void 인기_테마_목록_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
-        ThemeResponse result = new ThemeResponse(1L, "공포테마", "어마무시한 공포 테마입니다.", "https://image.com/image.png");
-        when(themeQuery.getPopularThemes(any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(result));
+        ThemeRegisterResult themeResult = new ThemeRegisterResult(1L, "공포테마", "어마무시한 공포 테마입니다.", "https://image.com/image.png", true);
+        when(themeService.getPopularThemes(any(LocalDate.class), any(LocalDate.class))).thenReturn(List.of(themeResult));
 
         // when & then
         List<ThemeResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -103,7 +101,7 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).containsOnly(result);
+        assertThat(response).containsOnly(ThemeResponse.from(themeResult));
     }
 
     @Test

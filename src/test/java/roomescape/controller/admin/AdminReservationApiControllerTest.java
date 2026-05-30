@@ -25,7 +25,6 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminReservationApiController;
 import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
 import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
-import roomescape.controller.admin.api.query.AdminReservationQuery;
 import roomescape.controller.admin.fixture.AdminReservationApiRequestFixture;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationCommand;
@@ -37,8 +36,6 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
     private ReservationService reservationService;
-    @MockitoBean
-    private AdminReservationQuery reservationQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -101,9 +98,8 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 전체_예약_정보_조회_요청시_200OK와_예약_정보들을_응답한다() {
         // given
-        List<AdminReservationResponse> result = List.of();
-        when(reservationQuery.getAllReservations()).thenReturn(result);
-        
+        when(reservationService.getAllReservations()).thenReturn(List.of());
+
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .when().get("/api/admin/reservations")

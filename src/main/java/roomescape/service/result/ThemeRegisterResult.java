@@ -6,14 +6,16 @@ public record ThemeRegisterResult(
         long id,
         String name,
         String description,
-        String thumbnailImageUrl
+        String thumbnailImageUrl,
+        boolean isActive
 ) {
 
-    public static ThemeRegisterResult from(Theme theme){
+    public static ThemeRegisterResult from(Theme theme) {
         return new ThemeRegisterResult(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnailImageUrl());
+                theme.getThumbnailImageUrl(),
+                theme.isActive());
     }
 }

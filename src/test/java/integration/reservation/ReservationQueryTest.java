@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
-import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
+import roomescape.query.ReservationQueryRepository;
+import roomescape.service.result.ReservationSearchResult;
 
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
 class ReservationQueryTest extends BaseIntegrationTest {
 
     @Autowired
-    private ReservationQuery reservationQuery;
+    private ReservationQueryRepository reservationQueryRepository;
 
     @Test
     void 검색_필터가_없을_때_전체_카운트를_계산하고_페이징과_정렬이_적용된_데이터를_반환한다() {
@@ -26,7 +26,7 @@ class ReservationQueryTest extends BaseIntegrationTest {
         Pageable pageable = new Pageable(5, 5);
 
         // when
-        Page<ReservationSearchResponse> result = reservationQuery.search(noCondition, pageable);
+        Page<ReservationSearchResult> result = reservationQueryRepository.search(noCondition, pageable);
 
         // then: 전체 카운트, 페이지 계산, 데이터 개수, 그리고 정렬(내림차순)을 한 번에 검증
         // 총 5페이지(21/5 + 1)로 구성되고 마지막 페이지는 1개임
@@ -46,7 +46,7 @@ class ReservationQueryTest extends BaseIntegrationTest {
         Pageable pageable = new Pageable(1, 10);
 
         // when
-        Page<ReservationSearchResponse> result = reservationQuery.search(condition, pageable);
+        Page<ReservationSearchResult> result = reservationQueryRepository.search(condition, pageable);
 
         // then: 필터링된 정보에 대해 추가 검증
         assertAll(

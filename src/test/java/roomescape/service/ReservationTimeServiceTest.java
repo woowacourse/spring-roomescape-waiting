@@ -6,9 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.TimeStatus;
 import roomescape.exception.DuplicateEntityException;
+import roomescape.query.ReservationTimeQueryRepository;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.result.ReservationTimeResult;
@@ -21,7 +23,8 @@ class ReservationTimeServiceTest {
     @BeforeEach
     void setUp() {
         this.reservationTimeRepository = new FakeReservationTimeRepository();
-        this.reservationTimeService = new ReservationTimeService(this.reservationTimeRepository);
+        this.reservationTimeService = new ReservationTimeService(this.reservationTimeRepository,
+                Mockito.mock(ReservationTimeQueryRepository.class));
     }
 
     @Test

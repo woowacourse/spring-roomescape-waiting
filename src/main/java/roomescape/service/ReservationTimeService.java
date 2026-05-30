@@ -1,11 +1,13 @@
 package roomescape.service;
 
 import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
+import roomescape.query.ReservationTimeQueryRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.result.ReservationTimeResult;
@@ -16,6 +18,7 @@ import roomescape.service.result.ReservationTimeResult;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeQueryRepository reservationTimeQueryRepository;
 
     @Transactional
     public ReservationTimeResult register(ReservationTimeCommand command) {
@@ -42,6 +45,10 @@ public class ReservationTimeService {
                     time.activate();
                     reservationTimeRepository.update(time);
                 });
+    }
+
+    public List<ReservationTimeResult> getAllReservationTimes() {
+        return reservationTimeQueryRepository.getAllReservationTimes();
     }
 
     private void validateAlreadyTime(LocalTime startAt) {
