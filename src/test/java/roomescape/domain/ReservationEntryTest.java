@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ class ReservationEntryTest {
     @Test
     void 예약_엔트리를_생성한다() {
         // when
-        ReservationEntry entry = ReservationEntry.reserve("이프");
+        ReservationEntry entry = ReservationEntry.reserve("이프", FIXED);
 
         // then
         assertThat(entry)
@@ -26,7 +27,7 @@ class ReservationEntryTest {
     @Test
     void 대기_엔트리를_생성한다() {
         // when
-        ReservationEntry entry = ReservationEntry.waiting("이프");
+        ReservationEntry entry = ReservationEntry.waiting("이프", FIXED);
 
         // then
         assertThat(entry)

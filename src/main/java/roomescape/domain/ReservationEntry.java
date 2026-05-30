@@ -16,12 +16,12 @@ public abstract class ReservationEntry {
         this.createdAt = createdAt;
     }
 
-    public static ReservationEntry reserve(String name) {
-        return new ReservedEntry(null, name, LocalDateTime.now());
+    public static ReservationEntry reserve(String name, LocalDateTime createdAt) {
+        return new ReservedEntry(null, name, createdAt);
     }
 
-    public static ReservationEntry waiting(String name) {
-        return new WaitingEntry(null, name, LocalDateTime.now());
+    public static ReservationEntry waiting(String name, LocalDateTime createdAt) {
+        return new WaitingEntry(null, name, createdAt);
     }
 
     public static ReservationEntry from(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {

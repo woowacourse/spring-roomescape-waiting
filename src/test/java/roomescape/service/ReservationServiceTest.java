@@ -5,8 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.domain.fixture.ReservationFixture.createDefaultReservationWithName;
 import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -43,8 +46,9 @@ class ReservationServiceTest {
         this.reservationRepository = new FakeReservationRepository();
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
+        Clock clock = Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.systemDefault());
         this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-                Mockito.mock(ReservationQueryRepository.class));
+                Mockito.mock(ReservationQueryRepository.class), clock);
     }
 
     @Test

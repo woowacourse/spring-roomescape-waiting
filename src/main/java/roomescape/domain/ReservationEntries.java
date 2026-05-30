@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -15,14 +16,14 @@ public class ReservationEntries {
         this.entries = new ArrayList<>(entries);
     }
 
-    public ReservationEntry addReserved(String name) {
-        ReservationEntry entry = ReservationEntry.reserve(name);
+    public ReservationEntry addReserved(String name, LocalDateTime createdAt) {
+        ReservationEntry entry = ReservationEntry.reserve(name, createdAt);
         entries.add(entry);
         return entry;
     }
 
-    public ReservationEntry addWaiting(String name) {
-        ReservationEntry entry = ReservationEntry.waiting(name);
+    public ReservationEntry addWaiting(String name, LocalDateTime createdAt) {
+        ReservationEntry entry = ReservationEntry.waiting(name, createdAt);
         entries.add(entry);
         return entry;
     }

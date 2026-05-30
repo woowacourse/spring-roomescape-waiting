@@ -1,6 +1,7 @@
 package roomescape.domain.fixture;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
@@ -9,6 +10,8 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public class ReservationFixture {
+
+    public static final LocalDateTime FIXED = LocalDateTime.of(2025, 1, 1, 12, 0);
 
     public static Stream<Arguments> invalidReservationConstructor() {
         return Stream.of(
@@ -55,7 +58,7 @@ public class ReservationFixture {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
+        reservation.reserve(name, FIXED);
         return reservation;
     }
 
@@ -63,13 +66,13 @@ public class ReservationFixture {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
+        reservation.reserve(name, FIXED);
         return reservation;
     }
 
     public static Reservation createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
         Reservation reservation = Reservation.createSlot(date, theme, time);
-        reservation.reserve(name);
+        reservation.reserve(name, FIXED);
         return reservation;
     }
 }

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
+import static roomescape.domain.fixture.ReservationFixture.FIXED;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -52,7 +54,7 @@ class ReservationTest {
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
-        reservation.reserve("이프");
+        reservation.reserve("이프", FIXED);
 
         // then
         assertThat(reservation.getEntries())
@@ -66,10 +68,10 @@ class ReservationTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
-        reservation.reserve("이프");
+        reservation.reserve("이프", FIXED);
 
         // when & then
-        assertThatThrownBy(() -> reservation.reserve("라텔"))
+        assertThatThrownBy(() -> reservation.reserve("라텔", FIXED))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 된 날짜입니다.");
     }
@@ -79,10 +81,10 @@ class ReservationTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
-        reservation.reserve("이프");
+        reservation.reserve("이프", FIXED);
 
         // when & then
-        assertThatThrownBy(() -> reservation.reserve("이프"))
+        assertThatThrownBy(() -> reservation.reserve("이프", FIXED))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
     }
@@ -92,10 +94,10 @@ class ReservationTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
-        reservation.reserve("이프");
+        reservation.reserve("이프", FIXED);
 
         // when
-        reservation.joinWaitingList("라텔");
+        reservation.joinWaitingList("라텔", FIXED);
 
         // then
         assertThat(reservation.getEntries())
@@ -113,7 +115,7 @@ class ReservationTest {
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
-        reservation.joinWaitingList("라텔");
+        reservation.joinWaitingList("라텔", FIXED);
 
         // then
         assertThat(reservation.getEntries())
@@ -127,10 +129,10 @@ class ReservationTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
-        reservation.reserve("이프");
+        reservation.reserve("이프", FIXED);
 
         // when & then
-        assertThatThrownBy(() -> reservation.joinWaitingList("이프"))
+        assertThatThrownBy(() -> reservation.joinWaitingList("이프", FIXED))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
     }
@@ -142,7 +144,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(1L, pastDate, theme, reservationTime, List.of());
 
         // when & then
-        assertThatThrownBy(() -> reservation.reserve("이프"))
+        assertThatThrownBy(() -> reservation.reserve("이프", FIXED))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지난 예약입니다.");
     }
@@ -178,9 +180,9 @@ class ReservationTest {
     @Test
     void 예약된_엔트리를_취소하면_가장_먼저_등록된_대기_엔트리가_예약된다() {
         // given
-        ReservationEntry reserved = entry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
-        ReservationEntry firstWaiting = entry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
-        ReservationEntry secondWaiting = entry(3L, "도기", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
+        ReservationEntry reserved = entry(1L, "이프", ReservationStatus.RESERVED, FIXED);
+        ReservationEntry firstWaiting = entry(2L, "라텔", ReservationStatus.WAITING, FIXED.minusMinutes(2));
+        ReservationEntry secondWaiting = entry(3L, "도기", ReservationStatus.WAITING, FIXED.minusMinutes(1));
         Reservation reservation = createReservationWithEntries(List.of(reserved, firstWaiting, secondWaiting));
 
         // when

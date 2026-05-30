@@ -1,6 +1,8 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationQueryRepository reservationQueryRepository;
+    private final Clock clock;
 
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
@@ -41,7 +44,7 @@ public class ReservationService {
                     ReservationTime time = findTimeWithThrow(command.timeId());
                     return Reservation.createSlot(command.date(), theme, time);
                 });
-        reservation.reserve(command.name());
+        reservation.reserve(command.name(), LocalDateTime.now(clock));
         return ReservationResult.from(reservationRepository.save(reservation));
     }
 
@@ -56,13 +59,14 @@ public class ReservationService {
             return ReservationResult.from(current, entry);
         }
 
-        return moveEntry(entry, current, command.date(), newTime);
+        LocalDateTime now = LocalDateTime.now(clock);
+        return moveEntry(entry, current, command.date(), newTime, now);
     }
 
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
-                                        LocalDate date, ReservationTime newTime) {
+                                        LocalDate date, ReservationTime newTime, LocalDateTime now) {
         Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
-        ReservationEntry moved = target.reserve(entry.getName());
+        ReservationEntry moved = target.reserve(entry.getName(), now);
 
         current.cancelEntry(entry.getId());
         reservationRepository.save(current);
@@ -85,7 +89,7 @@ public class ReservationService {
                     ReservationTime time = findTimeWithThrow(command.timeId());
                     return Reservation.createSlot(command.date(), theme, time);
                 });
-        ReservationEntry added = reservation.joinWaitingList(command.name());
+        ReservationEntry added = reservation.joinWaitingList(command.name(), LocalDateTime.now(clock));
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }

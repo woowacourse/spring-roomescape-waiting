@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.EqualsAndHashCode;
@@ -63,22 +64,22 @@ public class Reservation {
         return this.date.isEqual(date) && this.time.equals(time);
     }
 
-    public ReservationEntry reserve(String name) {
+    public ReservationEntry reserve(String name, LocalDateTime createdAt) {
         validateNotPast();
         validateDuplicateEntry(name);
         if (entries.hasReservedEntry()) {
             throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
         }
-        return entries.addReserved(name);
+        return entries.addReserved(name, createdAt);
     }
 
-    public ReservationEntry joinWaitingList(String name) {
+    public ReservationEntry joinWaitingList(String name, LocalDateTime createdAt) {
         validateNotPast();
         validateDuplicateEntry(name);
         if (entries.hasReservedEntry()) {
-            return entries.addWaiting(name);
+            return entries.addWaiting(name, createdAt);
         }
-        return entries.addReserved(name);
+        return entries.addReserved(name, createdAt);
     }
 
     public List<ReservationEntry> getEntries() {
