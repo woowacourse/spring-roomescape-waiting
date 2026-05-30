@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
+import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -77,18 +78,16 @@ public class WaitingDao {
     public Waiting save(Waiting waiting) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", waiting.getName().value());
-        params.put("date", waiting.getDate());
-        params.put("time_id", waiting.getTime().getId());
-        params.put("theme_id", waiting.getTheme().getId());
+        params.put("date", waiting.getSlot().date());
+        params.put("time_id", waiting.getSlot().time().getId());
+        params.put("theme_id", waiting.getSlot().theme().getId());
         params.put("created_at", waiting.getCreatedAt());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Waiting(
                 id,
                 waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getTheme(),
+                waiting.getSlot(),
                 waiting.getCreatedAt()
         );
     }
@@ -154,9 +153,31 @@ public class WaitingDao {
                 sql,
                 Boolean.class,
                 waiting.getName().value(),
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
+                waiting.getSlot().date(),
+                waiting.getSlot().time().getId(),
+                waiting.getSlot().theme().getId()
+        );
+
+        return Boolean.TRUE.equals(result);
+    }
+
+    public boolean existsByUserNameAndSlot(String userName, Slot slot) {
+        String sql = """
+                SELECT EXISTS(
+                            SELECT 1
+                            FROM waiting
+                            WHERE name = ? AND date = ? AND
+                                  time_id = ? AND theme_id = ?
+                )
+                """;
+
+        Boolean result = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                userName,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
         );
 
         return Boolean.TRUE.equals(result);

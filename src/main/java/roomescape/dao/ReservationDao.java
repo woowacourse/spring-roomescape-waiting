@@ -2,7 +2,6 @@ package roomescape.dao;
 
 import static roomescape.dao.rowmapper.ReservationMapper.RESERVATION_ROW_MAPPER;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.slot.theme.Theme;
-import roomescape.domain.slot.time.ReservationTime;
+import roomescape.domain.slot.Slot;
 
 @Repository
 public class ReservationDao {
@@ -160,7 +158,7 @@ public class ReservationDao {
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {
+    public boolean existsBySlot(Slot slot) {
         Boolean result = jdbcTemplate.queryForObject("""
                         SELECT EXISTS(
                             SELECT *
@@ -171,14 +169,14 @@ public class ReservationDao {
                         ) 
                         """,
                 Boolean.class,
-                date,
-                time.getId(),
-                theme.getId()
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
         );
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsByUserNameAndSlot(String userName, LocalDate date, Theme theme, ReservationTime time) {
+    public boolean existsByUserNameAndSlot(String userName, Slot slot) {
         String sql = """
                 SELECT EXISTS(
                     SELECT 1
@@ -193,9 +191,9 @@ public class ReservationDao {
                 sql,
                 Boolean.class,
                 userName,
-                date,
-                time.getId(),
-                theme.getId()
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
         );
         return Boolean.TRUE.equals(result);
     }

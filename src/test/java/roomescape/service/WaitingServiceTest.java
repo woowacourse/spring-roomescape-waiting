@@ -22,6 +22,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.UserName;
+import roomescape.domain.slot.Slot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -46,6 +47,8 @@ class WaitingServiceTest {
     private final Description description = Description.parse("100년 전 사라진 가문의 비밀을 파헤쳐라");
     private final ThumbnailUrl url = ThumbnailUrl.parse("/images/cursed-mansion");
     private final Theme theme = new Theme(themeId, themeName, description, url);
+
+    private final Slot slot = new Slot(date, time, theme);
 
     private final Clock fixedClock = new FixedClockConfig().testClock();
     private final LocalDateTime createAt = LocalDateTime.now(fixedClock);
@@ -81,23 +84,21 @@ class WaitingServiceTest {
         Waiting saved = new Waiting(
                 waitingId,
                 UserName.parse(userName),
-                date,
-                time,
-                theme,
+                slot,
                 createAt
         );
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.save(any())).willReturn(saved);
-        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(reservationDao.existsBySlot(slot)).willReturn(true);
 
         WaitingResult result = waitingService.registerWaiting(command);
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.name()).isEqualTo(saved.getName().value());
-        assertThat(result.date()).isEqualTo(saved.getDate());
-        assertThat(result.timeResult()).isEqualTo(ReservationTimeResult.from(saved.getTime()));
-        assertThat(result.themeResult()).isEqualTo(ThemeResult.from(saved.getTheme()));
+        assertThat(result.date()).isEqualTo(saved.getSlot().date());
+        assertThat(result.timeResult()).isEqualTo(ReservationTimeResult.from(saved.getSlot().time()));
+        assertThat(result.themeResult()).isEqualTo(ThemeResult.from(saved.getSlot().theme()));
         assertThat(result.createdAt()).isEqualTo(saved.getCreatedAt());
     }
 

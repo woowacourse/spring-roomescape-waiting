@@ -17,9 +17,9 @@ public record WaitingResult(
         return new WaitingResult(
                 waiting.getId(),
                 waiting.getName().value(),
-                waiting.getDate(),
-                ReservationTimeResult.from(waiting.getTime()),
-                ThemeResult.from(waiting.getTheme()),
+                waiting.getSlot().date(),
+                ReservationTimeResult.from(waiting.getSlot().time()),
+                ThemeResult.from(waiting.getSlot().theme()),
                 waiting.getCreatedAt()
         );
     }
