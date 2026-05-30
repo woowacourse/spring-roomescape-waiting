@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:," />
   <title>방탈출 예약</title>
-  <link rel="stylesheet" href="/css/roomescape.css" />
+  <link rel="stylesheet" href="/css/roomescape.css?v=popup-errors-2" />
 </head>
 <body data-page="user">
   <div class="app-shell">
@@ -165,6 +165,16 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/js/roomescape.js?v=reservation-times-1" defer></script>
+  <div id="errorPopup" class="message-popup" role="alertdialog" aria-modal="true" aria-labelledby="errorPopupTitle" aria-describedby="errorPopupMessage" hidden>
+    <div class="message-popup-panel">
+      <div class="message-popup-icon" aria-hidden="true">!</div>
+      <div class="message-popup-content">
+        <h2 id="errorPopupTitle" class="message-popup-title">확인해주세요</h2>
+        <p id="errorPopupMessage" class="message-popup-message"></p>
+      </div>
+      <button id="errorPopupClose" class="message-popup-button" type="button">확인</button>
+    </div>
+  </div>
+  <script src="/js/roomescape.js?v=popup-errors-2" defer></script>
 </body>
 </html>

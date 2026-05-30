@@ -645,8 +645,65 @@
     }
 
     .message.error {
-      color: var(--danger);
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 90;
+      width: min(520px, calc(100vw - 36px));
+      min-height: 0;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(182, 52, 48, 0.22);
+      border-radius: 8px;
+      background: #fffdf8;
+      color: var(--text);
+      box-shadow: 0 24px 70px rgba(31, 24, 18, 0.28);
+      padding: 62px 26px 26px 86px;
+      font-size: 16px;
       font-weight: 750;
+      line-height: 1.55;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .message.error:empty {
+      display: none;
+    }
+
+    .message.error::before {
+      content: "!";
+      position: absolute;
+      left: 26px;
+      top: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #fff1ed;
+      color: var(--danger);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .message.error::after {
+      content: "확인해주세요";
+      position: absolute;
+      left: 86px;
+      top: 26px;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    body:has(.message.error:not(:empty))::before,
+    body:has(.admin-message.error:not(:empty))::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(31, 24, 18, 0.46);
     }
 
     .admin-header {
@@ -932,8 +989,56 @@
     }
 
     .admin-message.error {
-      color: var(--danger);
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 90;
+      width: min(520px, calc(100vw - 36px));
+      min-height: 0;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(182, 52, 48, 0.22);
+      border-radius: 8px;
+      background: #fffdf8;
+      color: var(--text);
+      box-shadow: 0 24px 70px rgba(31, 24, 18, 0.28);
+      padding: 62px 26px 26px 86px;
+      font-size: 16px;
       font-weight: 750;
+      line-height: 1.55;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-message.error:empty {
+      display: none;
+    }
+
+    .admin-message.error::before {
+      content: "!";
+      position: absolute;
+      left: 26px;
+      top: 24px;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #fff1ed;
+      color: var(--danger);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .admin-message.error::after {
+      content: "확인해주세요";
+      position: absolute;
+      left: 86px;
+      top: 26px;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.25;
     }
 
     .admin-reserve-grid {
@@ -991,6 +1096,87 @@
     .toast strong {
       display: block;
       margin-bottom: 5px;
+    }
+
+    .popup-open {
+      overflow: hidden;
+    }
+
+    .message-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(31, 24, 18, 0.46);
+    }
+
+    .message-popup[hidden] {
+      display: none;
+    }
+
+    .message-popup-panel {
+      width: min(520px, 100%);
+      border: 1px solid rgba(182, 52, 48, 0.22);
+      border-radius: 8px;
+      background: #fffdf8;
+      box-shadow: 0 24px 70px rgba(31, 24, 18, 0.28);
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .message-popup-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #fff1ed;
+      color: var(--danger);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .message-popup-content {
+      min-width: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .message-popup-title {
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .message-popup-message {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.55;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+
+    .message-popup-button {
+      grid-column: 2;
+      justify-self: end;
+      min-width: 90px;
+      height: 42px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--danger);
+      color: white;
+      font-weight: 850;
+    }
+
+    .message-popup-button:focus-visible {
+      outline: 3px solid rgba(182, 52, 48, 0.28);
+      outline-offset: 2px;
     }
 
     .empty {

@@ -142,8 +142,14 @@ const API_BASE = "";
       adminReservationPageLabel: $("#adminReservationPageLabel"),
       adminThemeCount: $("#adminThemeCount"),
       adminTimeCount: $("#adminTimeCount"),
-      toast: $("#toast")
+      toast: $("#toast"),
+      errorPopup: $("#errorPopup"),
+      errorPopupTitle: $("#errorPopupTitle"),
+      errorPopupMessage: $("#errorPopupMessage"),
+      errorPopupClose: $("#errorPopupClose")
     };
+
+    let popupPreviousFocus = null;
 
     function posterFor(theme) {
       const [start, end] = colors[(theme.id - 1) % colors.length];
@@ -277,6 +283,61 @@ const API_BASE = "";
         return error.message;
       }
       return fallback;
+    }
+
+    function showErrorPopup(message, title = "확인해주세요") {
+      const text = String(message || "요청을 처리하지 못했습니다.");
+      if (!elements.errorPopup) {
+        window.alert(text);
+        return;
+      }
+
+      popupPreviousFocus = document.activeElement;
+      elements.errorPopupTitle.textContent = title;
+      elements.errorPopupMessage.textContent = text;
+      elements.errorPopup.hidden = false;
+      elements.errorPopup.classList.add("show");
+      document.body.classList.add("popup-open");
+      elements.errorPopupClose.focus();
+    }
+
+    function hideErrorPopup() {
+      if (!elements.errorPopup || elements.errorPopup.hidden) {
+        return;
+      }
+
+      elements.errorPopup.classList.remove("show");
+      elements.errorPopup.hidden = true;
+      document.body.classList.remove("popup-open");
+
+      if (popupPreviousFocus && typeof popupPreviousFocus.focus === "function") {
+        popupPreviousFocus.focus();
+      }
+      popupPreviousFocus = null;
+    }
+
+    function setInlineMessage(element, baseClass, text, type = "") {
+      if (!element) {
+        return;
+      }
+
+      if (type === "error") {
+        element.textContent = "";
+        element.className = baseClass;
+        showErrorPopup(text);
+        return;
+      }
+
+      element.textContent = text;
+      element.className = `${baseClass}${type ? ` ${type}` : ""}`;
+    }
+
+    function setFormMessage(text, type = "") {
+      setInlineMessage(elements.formMessage, "message", text, type);
+    }
+
+    function setLookupMessage(text, type = "") {
+      setInlineMessage(elements.lookupMessage, "message", text, type);
     }
 
     async function getReservationListData(page = state.adminReservationPage, size = state.adminReservationSize) {
@@ -478,8 +539,7 @@ const API_BASE = "";
       const canReserve = Boolean(elements.nameInput.value.trim() && theme && time);
       elements.reserveButton.disabled = !canReserve;
       elements.reserveButton.textContent = "예약/대기 신청하기";
-      elements.formMessage.textContent = canReserve ? "" : "이름, 테마, 시간을 모두 선택하면 예약하거나 대기할 수 있습니다.";
-      elements.formMessage.className = "message";
+      setFormMessage(canReserve ? "" : "이름, 테마, 시간을 모두 선택하면 예약하거나 대기할 수 있습니다.");
     }
 
     function nextDemoWaitNumber(date, timeId, themeId, excludedId = null) {
@@ -568,13 +628,11 @@ const API_BASE = "";
         elements.nameInput.value = "";
         state.selectedTimeId = null;
         renderTimes();
-        elements.formMessage.textContent = isWaiting
+        setFormMessage(isWaiting
           ? `대기 신청이 완료되었습니다.${waitNumber ? ` 현재 대기 ${waitNumber}번입니다.` : ""}`
-          : "예약이 완료되었습니다.";
-        elements.formMessage.className = "message ok";
+          : "예약이 완료되었습니다.", "ok");
       } catch (error) {
-        elements.formMessage.textContent = endpointMessageOr(error, "예약 요청에 실패했습니다.");
-        elements.formMessage.className = "message error";
+        setFormMessage(endpointMessageOr(error, "예약 요청에 실패했습니다."), "error");
       }
     }
 
@@ -592,13 +650,11 @@ const API_BASE = "";
     }
 
     function setAdminMessage(text, type = "") {
-      elements.adminMessage.textContent = text;
-      elements.adminMessage.className = `admin-message${type ? ` ${type}` : ""}`;
+      setInlineMessage(elements.adminMessage, "admin-message", text, type);
     }
 
     function setAdminReserveMessage(text, type = "") {
-      elements.adminReserveMessage.textContent = text;
-      elements.adminReserveMessage.className = `admin-message${type ? ` ${type}` : ""}`;
+      setInlineMessage(elements.adminReserveMessage, "admin-message", text, type);
     }
 
     function getReservationTheme(reservation) {
@@ -618,13 +674,11 @@ const API_BASE = "";
     }
 
     function setEditReservationMessage(text, type = "") {
-      elements.editReservationMessage.textContent = text;
-      elements.editReservationMessage.className = `message${type ? ` ${type}` : ""}`;
+      setInlineMessage(elements.editReservationMessage, "message", text, type);
     }
 
     function setCancelReservationMessage(text, type = "") {
-      elements.cancelReservationMessage.textContent = text;
-      elements.cancelReservationMessage.className = `message${type ? ` ${type}` : ""}`;
+      setInlineMessage(elements.cancelReservationMessage, "message", text, type);
     }
 
     function syncEditReservationForm() {
@@ -787,8 +841,7 @@ const API_BASE = "";
       event.preventDefault();
       const guestName = elements.lookupGuestName.value.trim();
       if (!guestName) {
-        elements.lookupMessage.textContent = "예약자 이름을 입력해주세요.";
-        elements.lookupMessage.className = "message error";
+        setLookupMessage("예약자 이름을 입력해주세요.", "error");
         renderLookupReservations([]);
         clearEditReservation();
         clearCancelReservation();
@@ -796,8 +849,7 @@ const API_BASE = "";
       }
 
       elements.lookupButton.disabled = true;
-      elements.lookupMessage.textContent = "예약을 조회하는 중입니다.";
-      elements.lookupMessage.className = "message";
+      setLookupMessage("예약을 조회하는 중입니다.");
       clearEditReservation();
       clearCancelReservation();
 
@@ -807,12 +859,11 @@ const API_BASE = "";
           : state.demoReservations.filter((reservation) => reservation.guestName === guestName);
 
         renderLookupReservations(reservations);
-        elements.lookupMessage.textContent = reservations.length === 0 ? "조회된 예약이 없습니다." : "예약 조회가 완료되었습니다.";
-        elements.lookupMessage.className = `message${reservations.length === 0 ? "" : " ok"}`;
+        setLookupMessage(reservations.length === 0 ? "조회된 예약이 없습니다." : "예약 조회가 완료되었습니다.",
+          reservations.length === 0 ? "" : "ok");
       } catch (error) {
         renderLookupReservations([]);
-        elements.lookupMessage.textContent = endpointMessageOr(error, "예약 조회에 실패했습니다.");
-        elements.lookupMessage.className = "message error";
+        setLookupMessage(endpointMessageOr(error, "예약 조회에 실패했습니다."), "error");
       } finally {
         elements.lookupButton.disabled = false;
       }
@@ -961,8 +1012,7 @@ const API_BASE = "";
         clearCancelReservation();
         showToast("예약이 취소되었습니다.", authorizationName);
         renderTimes();
-        elements.lookupMessage.textContent = "예약 취소가 완료되었습니다.";
-        elements.lookupMessage.className = "message ok";
+        setLookupMessage("예약 취소가 완료되었습니다.", "ok");
       } catch (error) {
         setCancelReservationMessage(endpointMessageOr(error, "예약 취소에 실패했습니다."), "error");
         syncCancelReservationForm();
@@ -1008,8 +1058,7 @@ const API_BASE = "";
         clearEditReservation();
         showToast("예약이 수정되었습니다.", `${formatDate(payload.date)} · ${normalizeTime(getReservationTime(editedReservation || { timeId: payload.timeId })?.startAt || "")}`);
         renderTimes();
-        elements.lookupMessage.textContent = "예약 수정이 완료되었습니다.";
-        elements.lookupMessage.className = "message ok";
+        setLookupMessage("예약 수정이 완료되었습니다.", "ok");
       } catch (error) {
         setEditReservationMessage(endpointMessageOr(error, "예약 수정에 실패했습니다."), "error");
         syncEditReservationForm();
@@ -1521,6 +1570,20 @@ const API_BASE = "";
         state.adminReservationPage += 1;
         await loadAdminReservations();
         renderAdmin();
+      });
+    }
+
+    if (elements.errorPopup && elements.errorPopupClose) {
+      elements.errorPopupClose.addEventListener("click", hideErrorPopup);
+      elements.errorPopup.addEventListener("click", (event) => {
+        if (event.target === elements.errorPopup) {
+          hideErrorPopup();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          hideErrorPopup();
+        }
       });
     }
 
