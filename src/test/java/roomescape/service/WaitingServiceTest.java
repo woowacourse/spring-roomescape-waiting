@@ -113,6 +113,17 @@ class WaitingServiceTest extends ServiceTest {
                 .hasMessage(WaitingErrorCode.CANNOT_WAIT_SLOT_WITHOUT_RESERVATION.getMessage());
     }
 
+    @Test
+    void 존재하지_않는_ID로_대기_삭제를_시도하면_예외가_발생한다() {
+        // given
+        long id = 999L;
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.delete(id))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
+    }
+
     private Theme saveTheme(String name) {
         Theme theme = new Theme(
                 name,

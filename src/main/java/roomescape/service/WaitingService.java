@@ -82,6 +82,13 @@ public class WaitingService {
     }
 
     public void delete(long waitingId) {
+        validateWaitingExists(waitingId);
         waitingDao.delete(waitingId);
+    }
+
+    private void validateWaitingExists(long waitingId) {
+        if (!waitingDao.existsById(waitingId)) {
+            throw new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND);
+        }
     }
 }

@@ -94,6 +94,17 @@ public class WaitingDao {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId, name));
     }
 
+    public boolean existsById(long waitingId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM waiting
+                    WHERE id = ?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, waitingId));
+    }
+
     public int delete(long waitingId) {
         String sql = """
                 DELETE FROM waiting
