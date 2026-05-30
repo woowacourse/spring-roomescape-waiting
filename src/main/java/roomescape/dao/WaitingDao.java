@@ -171,4 +171,16 @@ public class WaitingDao {
 
         return Boolean.TRUE.equals(result);
     }
+
+    public boolean existsByThemeId(Long themeId) {
+        String sql = """
+                        SELECT EXISTS(
+                            SELECT 1
+                            FROM waiting
+                            WHERE theme_id = ?
+                        )
+                """;
+        Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
+        return Boolean.TRUE.equals(result);
+    }
 }

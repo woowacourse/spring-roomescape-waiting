@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -87,5 +88,17 @@ public class WaitingDaoTest {
         Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
 
         assertThat(waitingDao.existsBy(waiting)).isFalse();
+    }
+
+    @DisplayName("해당 테마를 사용하는 예약 대기가 있으면 existsByThemeId는 true를 반환한다.")
+    @Test
+    void existsByThemeIdResultTrue() {
+        assertThat(waitingDao.existsByThemeId(1L)).isTrue();
+    }
+
+    @Test
+    @DisplayName("해당 테마를 사용하는 예약 대기가 없으면 existsByThemeId는 false를 반환한다.")
+    void existsByThemeIdResultFalse() {
+        assertThat(waitingDao.existsByThemeId(15L)).isFalse();
     }
 }
