@@ -13,7 +13,6 @@ import roomescape.theme.dto.AdminThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-@Transactional(readOnly = true)
 public class AdminThemeService {
 
     private final ThemeRepository themeRepository;

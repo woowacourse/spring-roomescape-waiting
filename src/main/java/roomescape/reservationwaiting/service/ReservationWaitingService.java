@@ -18,7 +18,6 @@ import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;

@@ -22,7 +22,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
