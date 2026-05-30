@@ -37,22 +37,17 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(final Long themeId) {
         final String sql = """
-                SELECT id, name, description, thumbnail_url
-                FROM theme
-                WHERE id = ?
-                """;
+            SELECT id, name, description, thumbnail_url
+            FROM theme
+            WHERE id = ?
+            """;
 
-        try {
-            final Theme theme = jdbcTemplate.queryForObject(
-                    sql,
-                    this::mapToDomain,
-                    themeId
-            );
-
-            return Optional.of(theme);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(
+                sql,
+                this::mapToDomain,
+                themeId)
+            .stream()
+            .findFirst();
     }
 
     @Override
