@@ -63,6 +63,9 @@ public class ExceptionIntegrationTest {
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
+        Map<String, Object> duplicateBody = new HashMap<>(body);
+        duplicateBody.put("name", "pobi");
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -72,7 +75,7 @@ public class ExceptionIntegrationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(duplicateBody)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)

@@ -2,9 +2,8 @@ package roomescape.global.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class DuplicateException extends BusinessException {
-
-    public DuplicateException(String message) {
+public class ConflictException extends BusinessException {
+    public ConflictException(String message) {
         super(HttpStatus.CONFLICT, message);
     }
 }
