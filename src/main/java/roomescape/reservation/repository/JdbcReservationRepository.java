@@ -199,7 +199,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                        rt.id AS time_id,
                        rt.start_time,
                        rt.end_time,
-                       COALESCE(ranked.rank, 0) AS orderWaiting
+                       ranked.rank AS orderWaiting
                   FROM reservation r
                   JOIN theme t ON r.theme_id = t.id
                   JOIN reservation_time rt ON r.time_id = rt.id
@@ -231,7 +231,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ReservationTimeResponse.from(time),
                     ThemeResponse.from(theme),
                     Status.valueOf(rs.getString("status")),
-                    rs.getInt("orderWaiting")
+                    rs.getObject("orderWaiting", Integer.class)
             );
         }, Status.WAITING.name(), name);
     }

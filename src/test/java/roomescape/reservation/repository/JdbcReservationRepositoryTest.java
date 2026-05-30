@@ -177,7 +177,7 @@ class JdbcReservationRepositoryTest {
         assertThat(result).isFalse();
     }
 
-    @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다.")
+    @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다. 확정 예약인 경우, waitingOrder는 null이 된다.")
     @Test
     void findAllByName_대기_순번_포함_예약_대기_정보_조회() {
         // given
@@ -197,7 +197,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(reservations).hasSize(2);
         assertThat(reservations.get(0).waitingOrder()).isEqualTo(2);
-        assertThat(reservations.get(1).waitingOrder()).isEqualTo(0);
+        assertThat(reservations.get(1).waitingOrder()).isNull();
     }
 
     private Long insertTime(String startAt, String endAt) {
