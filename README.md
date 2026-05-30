@@ -222,17 +222,18 @@
 | **테마 전체 조회**        | `GET /themes`                       | —                                      | `200 [{id, name, description, thumbnailUrl}]`                            |
 | **인기 테마 조회**        | `GET /themes?condition=popular&size={n}` | —                                 | `200 [{id, name, description, thumbnailUrl}]`                            |
 | **테마별 예약 가능 시간 조회** | `GET /themes/{id}/times?date={date}` | —                                     | `200 [{id, startAt, isAvailable}]`                                       |
-| **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time}]` |
-| **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}`   |
+| **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}]` |
+| **내 예약 통합 조회**     | `GET /reservations/me?username={name}` | —                                   | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber, reservationStatus}]` |
+| **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}`   |
 | **예약 삭제**           | `DELETE /reservations/{id}`         | —                                      | `204`                                                                    |
 
 ### 예약 대기 API 명세
 
 | 기능 | 메서드 / URL | 요청 본문 / 쿼리 파라미터 | 응답 |
 |------|------------|----------------------|------|
-| **예약 대기 신청** | `POST /reservations/waiting` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **예약 대기 신청** | `POST /reservations/waiting` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time, reservationStatus}` |
 | **예약 대기 취소** | `DELETE /reservations/waiting/{id}` | - | `204` |
-| **내 예약 대기 조회** | `GET /reservations/waiting?username={name}` | - | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber}]` |
+| **내 예약 대기 조회** | `GET /reservations/waiting?username={name}` | - | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber, reservationStatus}]` |
 
 ---
 
