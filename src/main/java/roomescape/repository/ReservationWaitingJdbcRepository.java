@@ -74,7 +74,6 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
-        int waitingOrder = calculateWaitingOrder(reservationWaiting);
         String sql = "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -87,13 +86,8 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
-        return new ReservationWaiting(
-                id,
-                reservationWaiting.getName(),
-                reservationWaiting.getCreatedAt(),
-                reservationWaiting.getReservation(),
-                waitingOrder
-        );
+        return findById(id)
+                .orElseThrow(() -> new IllegalStateException("방금 저장한 대기를 찾을 수 없습니다. id=" + id));
     }
 
     @Override
@@ -119,22 +113,5 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
-    }
-
-    private int calculateWaitingOrder(ReservationWaiting reservationWaiting) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM reservation_waiting
-                WHERE reservation_id = ?
-                AND created_at <= ?
-                """;
-        Integer waitingCount = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                reservationWaiting.getReservation().getId(),
-                Timestamp.valueOf(reservationWaiting.getCreatedAt())
-        );
-
-        return waitingCount != null ? waitingCount + 1 : 1;
     }
 }
