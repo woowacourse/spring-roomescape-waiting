@@ -142,7 +142,10 @@ public class ReservationService {
     }
 
     private void validateScheduleAvailableForUpdate(long reservationId, long scheduleId) {
-        ~
+        if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)
+                || waitingRepository.existsByScheduleId(scheduleId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+        }
     }
 
     private void validateScheduleAvailableForReservation(long scheduleId) {
