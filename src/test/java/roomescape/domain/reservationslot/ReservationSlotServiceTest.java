@@ -18,16 +18,19 @@ import roomescape.domain.reservationslot.dto.ReservationSlotResponse;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.fake.FakeReservationDateRepository;
+import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeThemeRepository;
 
 class ReservationSlotServiceTest {
 
+    private FakeReservationSlotRepository reservationSlotRepository;
     private FakeThemeRepository themeRepository;
     private FakeReservationDateRepository reservationDateRepository;
     private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
+        reservationSlotRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
         reservationRepository = org.mockito.Mockito.mock(ReservationRepository.class);
@@ -97,6 +100,7 @@ class ReservationSlotServiceTest {
 
     private ReservationSlotService createReservationSlotService() {
         return new ReservationSlotService(
+            reservationSlotRepository,
             themeRepository,
             reservationDateRepository,
             reservationRepository

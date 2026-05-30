@@ -9,6 +9,7 @@ import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse
 import roomescape.domain.reservationdate.dto.ReservationDateResponse;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.support.exception.ConflictException;
+import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
 
 @Service
@@ -40,5 +41,10 @@ public class ReservationDateService {
         return reservationDateRepository.findAll().stream()
             .map(ReservationDateResponse::from)
             .toList();
+    }
+
+    public ReservationDate findDateByIdOrThrow(Long dateId) {
+        return reservationDateRepository.findById(dateId)
+            .orElseThrow(() -> new NotFoundException(ReservationDateErrors.RESERVATION_DATE_NOT_EXIST));
     }
 }

@@ -8,6 +8,7 @@ import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;
 import roomescape.domain.reservationtime.admin.dto.ReservationTimeResponse;
 import roomescape.support.exception.ConflictException;
+import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationTimeErrors;
 
 @Service
@@ -33,5 +34,10 @@ public class ReservationTimeService {
             throw new ConflictException(ReservationTimeErrors.RESERVATION_TIME_IN_USE);
         }
         reservationTimeRepository.deleteById(id);
+    }
+
+    public ReservationTime findTimeByIdOrThrow(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+            .orElseThrow(() -> new NotFoundException(ReservationTimeErrors.RESERVATION_TIME_NOT_EXIST));
     }
 }

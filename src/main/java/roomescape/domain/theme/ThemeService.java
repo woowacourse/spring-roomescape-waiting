@@ -13,6 +13,7 @@ import roomescape.domain.theme.dto.ThemeRankResponse;
 import roomescape.domain.theme.dto.ThemeRankResult;
 import roomescape.domain.theme.dto.ThemeResponse;
 import roomescape.support.exception.ConflictException;
+import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ThemeErrors;
 
 @Service
@@ -58,5 +59,10 @@ public class ThemeService {
         return popularThemes.stream()
             .map(ThemeRankResponse::from)
             .toList();
+    }
+
+    public Theme findThemeByIdOrThrow(Long themeId) {
+        return themeRepository.findById(themeId)
+            .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
     }
 }

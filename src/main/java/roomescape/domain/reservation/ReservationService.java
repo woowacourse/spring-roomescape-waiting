@@ -14,39 +14,40 @@ import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateRepository;
+import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
+import roomescape.domain.reservationslot.ReservationSlotService;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.theme.ThemeService;
 import roomescape.domain.user.User;
-import roomescape.domain.user.UserRepository;
+import roomescape.domain.user.UserService;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
 import roomescape.support.exception.errors.ReservationErrors;
 import roomescape.support.exception.errors.ReservationSlotErrors;
 import roomescape.support.exception.errors.ReservationTimeErrors;
-import roomescape.support.exception.errors.ThemeErrors;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationSlotRepository reservationSlotRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDateRepository reservationDateRepository;
     private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final ReservationSlotService reservationSlotService;
+    private final ThemeService themeService;
+    private final ReservationDateService reservationDateService;
+    private final ReservationTimeService reservationTimeService;
 
     private final Clock clock;
 
     @Transactional
     public CreateReservationResponse createReservation(CreateReservationRequest request) {
-        User reservationUser = findOrCreateUser(request);
+        User reservationUser = userService.findOrCreateUser(request.name());
 
         ReservationSlot targetReservationSlot = resolveReservationSlot(request);
         validateNoDuplicateReservation(reservationUser, targetReservationSlot);
@@ -99,12 +100,13 @@ public class ReservationService {
     }
 
     private ReservationSlot resolveReservationSlot(CreateReservationRequest request) {
-        ReservationTime requestedReservationTime = findTimeByIdOrThrow(request.timeId());
-        ReservationDate requestedReservationDate = findDateByIdOrThrow(request.dateId());
+        ReservationTime requestedReservationTime = reservationTimeService.findTimeByIdOrThrow(request.timeId());
+        ReservationDate requestedReservationDate = reservationDateService.findDateByIdOrThrow(request.dateId());
         validateReservationSchedule(requestedReservationDate, requestedReservationTime);
 
-        Theme requestedTheme = findThemeByIdOrThrow(request.themeId());
-        return findOrCreateReservationSlot(requestedReservationDate, requestedReservationTime, requestedTheme);
+        Theme requestedTheme = themeService.findThemeByIdOrThrow(request.themeId());
+        return reservationSlotService
+            .findOrCreateReservationSlot(requestedReservationDate, requestedReservationTime, requestedTheme);
     }
 
     private ReservationSlot resolveUpdatedReservationSlot(
@@ -114,19 +116,19 @@ public class ReservationService {
         ReservationTime updatedTime = resolveReservationTime(request, currentSlot.getTime());
         ReservationDate updatedDate = resolveReservationDate(request, currentSlot.getDate());
         validateReservationSchedule(updatedDate, updatedTime);
-        return findOrCreateReservationSlot(updatedDate, updatedTime, currentSlot.getTheme());
+        return reservationSlotService.findOrCreateReservationSlot(updatedDate, updatedTime, currentSlot.getTheme());
     }
 
     private ReservationDate resolveReservationDate(UpdateReservationRequest request, ReservationDate reservationDate) {
         if (request.dateId() != null) {
-            return findDateByIdOrThrow(request.dateId());
+            return reservationDateService.findDateByIdOrThrow(request.dateId());
         }
         return reservationDate;
     }
 
     private ReservationTime resolveReservationTime(UpdateReservationRequest request, ReservationTime reservationTime) {
         if (request.timeId() != null) {
-            return findTimeByIdOrThrow(request.timeId());
+            return reservationTimeService.findTimeByIdOrThrow(request.timeId());
         }
         return reservationTime;
     }
@@ -250,46 +252,5 @@ public class ReservationService {
     private Reservation findReservationByIdOrThrow(Long id) {
         return reservationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
-    }
-
-    private User findOrCreateUser(CreateReservationRequest request) {
-        return userRepository.findByName(request.name())
-            .orElseGet(() -> userRepository.save(User.createWithoutId(request.name())));
-    }
-
-    private ReservationSlot findOrCreateReservationSlot(
-        ReservationDate reservationDate,
-        ReservationTime reservationTime,
-        Theme theme
-    ) {
-        return reservationSlotRepository.findBySchedule(
-            reservationTime.getId(),
-            reservationDate.getId(),
-            theme.getId()
-        ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
-    }
-
-    private Theme findThemeByIdOrThrow(Long themeId) {
-        return themeRepository.findById(themeId)
-            .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
-    }
-
-    private ReservationDate findDateByIdOrThrow(Long dateId) {
-        return reservationDateRepository.findById(dateId)
-            .orElseThrow(() -> new NotFoundException(ReservationDateErrors.RESERVATION_DATE_NOT_EXIST));
-    }
-
-    private ReservationTime findTimeByIdOrThrow(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-            .orElseThrow(() -> new NotFoundException(ReservationTimeErrors.RESERVATION_TIME_NOT_EXIST));
-    }
-
-    private ReservationSlot saveReservationSlot(
-        ReservationDate reservationDate,
-        ReservationTime reservationTime,
-        Theme theme
-    ) {
-        return reservationSlotRepository.save(
-            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme));
     }
 }
