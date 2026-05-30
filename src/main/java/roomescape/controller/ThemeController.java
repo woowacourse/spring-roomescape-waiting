@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.controller.dto.response.ThemeResponses;
 import roomescape.domain.theme.Theme;
 import roomescape.service.ThemeService;
 
@@ -43,20 +44,16 @@ public class ThemeController {
 
     @GetMapping("/themes/famous")
     @ResponseStatus(HttpStatus.OK)
-    public List<ThemeResponse> findFamous(@Valid @ModelAttribute ThemeFamousFindRequest request) {
+    public ThemeResponses findFamous(@Valid @ModelAttribute ThemeFamousFindRequest request) {
         List<Theme> themes = themeService.findFamous(request, LocalDate.now());
-        return themes.stream()
-                .map(ThemeResponse::toDto)
-                .toList();
+        return ThemeResponses.toDto(themes);
     }
 
     @GetMapping("/themes")
     @ResponseStatus(HttpStatus.OK)
-    public List<ThemeResponse> findAll() {
+    public ThemeResponses findAll() {
         List<Theme> themes = themeService.findAll();
-        return themes.stream()
-                .map(ThemeResponse::toDto)
-                .toList();
+        return ThemeResponses.toDto(themes);
     }
 
     @DeleteMapping({"/admin/themes/{id}"})

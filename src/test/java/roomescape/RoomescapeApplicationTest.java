@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.controller.dto.response.ReservationResponses;
+import roomescape.controller.dto.response.ReservationTimeResponses;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -44,8 +46,9 @@ class RoomescapeApplicationTest {
     void 예약_없는_날짜_조회시_전체_시간이_반환된다() {
         int total = RestAssured.given()
                 .when().get("/times")
-                .then().statusCode(200)
-                .extract().jsonPath().getList(".").size();
+                .then().statusCode(200).extract()
+                .as(ReservationTimeResponses.class)
+                .getTimes().size();
 
         int available = availableCount(AVAILABLE_DATE, 1);
 
@@ -148,14 +151,7 @@ class RoomescapeApplicationTest {
         RestAssured.given().params("name", "zeze")
                 .when().get("/reservations")
                 .then().log().all()
-                .body("size()", is(3));
-    }
-
-    private int availableCount(String date, long themeId) {
-        return RestAssured.given()
-                .when().get("/times/available?date=" + date + "&themeId=" + themeId)
-                .then().statusCode(200)
-                .extract().jsonPath().getList(".").size();
+                .body("reservations.size()", is(3));
     }
 
     @Test
@@ -177,7 +173,7 @@ class RoomescapeApplicationTest {
         RestAssured.given()
                 .when().get("/reservations")
                 .then().statusCode(200)
-                .body("size()", is(2));
+                .body("reservations.size()", is(2));
     }
 
     @Test
@@ -297,6 +293,14 @@ class RoomescapeApplicationTest {
                 .when().post("/reservations")
                 .then().statusCode(201)
                 .extract().jsonPath().getInt("id");
+    }
+
+    private int availableCount(String date, long themeId) {
+        return RestAssured.given()
+                .when().get("/times/available?date=" + date + "&themeId=" + themeId)
+                .then().statusCode(200).extract()
+                .as(ReservationTimeResponses.class)
+                .getTimes().size();
     }
 
     private void reserve(String name, String date, Long timeId, Long themeId, int expectedStatusCode) {

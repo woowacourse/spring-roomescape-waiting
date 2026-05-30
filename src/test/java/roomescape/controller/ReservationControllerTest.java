@@ -145,7 +145,7 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.reservations.length()").value(2));
     }
 
     @Test
@@ -154,8 +154,8 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/reservations").param("name", "zeze"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("zeze"));
+                .andExpect(jsonPath("$.reservations.length()").value(1))
+                .andExpect(jsonPath("$.reservations[0].name").value("zeze"));
     }
 
     @Test

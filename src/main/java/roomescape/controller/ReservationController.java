@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
+import roomescape.controller.dto.response.ReservationResponses;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.service.ReservationService;
 
@@ -31,18 +32,14 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse create(@Valid @RequestBody ReservationCreateRequest request) {
         ReservationResult reservation = reservationService.reserve(request, LocalDateTime.now());
-
         return ReservationResponse.toDto(reservation);
     }
 
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
-    public List<ReservationResponse> findList(@RequestParam(required = false) String name) {
+    public ReservationResponses findList(@RequestParam(required = false) String name) {
         List<ReservationResult> reservations = reservationService.findList(name);
-
-        return reservations.stream()
-                .map(ReservationResponse::toDto)
-                .toList();
+        return ReservationResponses.toDto(reservations);
     }
 
     @GetMapping("/reservations/{id}")
