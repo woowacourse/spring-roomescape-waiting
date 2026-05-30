@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -36,7 +37,11 @@ public class ReservationCommandService {
         slot.validateNotPast(now);
         validateNoDuplicate(slot);
 
-        return reservationDao.save(reservation);
+        try {
+            return reservationDao.save(reservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
+        }
     }
 
     public void delete(long reservationId) {
@@ -62,7 +67,11 @@ public class ReservationCommandService {
         newSlot.validateNotPast(now);
         validateNoDuplicateExcluding(newSlot, reservationId);
 
-        return reservationDao.update(oldReservation.withSlot(newSlot));
+        try {
+            return reservationDao.update(oldReservation.withSlot(newSlot));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
+        }
     }
 
     private void validateNoDuplicate(Slot slot) {

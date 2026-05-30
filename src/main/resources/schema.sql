@@ -28,6 +28,7 @@ CREATE TABLE reservation
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT uk_reservation_slot UNIQUE (date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );
@@ -41,6 +42,7 @@ CREATE TABLE waiting
     theme_id   BIGINT       NOT NULL,
     created_at DATETIME     NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT uk_waiting_slot_name UNIQUE (date, time_id, theme_id, name),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );

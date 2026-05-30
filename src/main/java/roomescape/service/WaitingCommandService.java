@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -39,7 +40,11 @@ public class WaitingCommandService {
         validateNotOwnReservation(reservation, name);
         validateNoDuplicateWaiting(slot, name);
 
-        return waitingDao.save(new Waiting(null, name, slot, now));
+        try {
+            return waitingDao.save(new Waiting(null, name, slot, now));
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
+        }
     }
 
     public void cancel(long waitingId, String name) {
