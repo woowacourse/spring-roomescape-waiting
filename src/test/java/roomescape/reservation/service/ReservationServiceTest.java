@@ -118,7 +118,7 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("예약을 생성한다")
-        void 성공() {
+        void 성공1() {
             //given & when
             List<Reservation> reservations = List.of();
             reservationService.reserve(name,
@@ -127,6 +127,65 @@ class ReservationServiceTest {
             //then
             assertThat(reservationService.readAll())
                 .hasSize(reservations.size() + 1);
+        }
+
+
+        @Test
+        @DisplayName("같은 슬롯에 예약이 있으면 대기 상태로 예약된다")
+        void 성공2() {
+            // given
+            String otherName = "다른 이용자";
+            Reservation reservation = reservation(otherName, reservationDate1, reservationTime1,
+                theme1);
+            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
+                reservationTime1, theme1);
+            save(reservation);
+
+            // when
+            Reservation actual = reservationService.reserve(name, duplicated);
+
+            // then
+            assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.WAITING);
+        }
+
+
+        @Test
+        @DisplayName("기존 예약이 취소된 슬롯에 예약을 하면 reserved로 처리된다")
+        void 성공3() {
+            // given
+            Reservation reservation = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
+                reservationTime1, theme1);
+            cancelByManager(reservation);
+
+            // when
+            Reservation actual = reservationService.reserve(name, duplicated);
+
+            // then
+            assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
+
+        @Test
+        @DisplayName("다른 사람의 예약이 취소된 슬롯에 예약을 하면 reserved로 처리된다")
+        void 성공4() {
+            // given
+            String anotherName = "다른사람";
+            Reservation reservation = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
+                reservationTime1, theme1);
+            cancelByManager(reservation);
+
+            // when
+            Reservation actual = reservationService.reserve(anotherName, duplicated);
+
+            // then
+            Assertions.assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
         }
 
 
@@ -161,77 +220,13 @@ class ReservationServiceTest {
     }
 
     @Nested
-    @DisplayName("reserved 메서드는")
-    class ReservedTest {
-
-
-        @Test
-        @DisplayName("같은 슬롯에 예약이 있으면 대기 상태로 예약된다")
-        void 성공1() {
-            // given
-            String otherName = "다른 이용자";
-            Reservation reservation = reservation(otherName, reservationDate1, reservationTime1,
-                theme1);
-            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
-                reservationTime1, theme1);
-            save(reservation);
-
-            // when
-            Reservation actual = reservationService.reserve(name, duplicated);
-
-            // then
-            assertThat(actual.getStatus())
-                .isEqualTo(ReservationStatus.WAITING);
-        }
-
-
-        @Test
-        @DisplayName("기존 예약이 취소된 슬롯에 예약을 하면 reserved로 처리된다")
-        void 성공2() {
-            // given
-            Reservation reservation = save(
-                reservation(name, reservationDate1, reservationTime1, theme1));
-            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
-                reservationTime1, theme1);
-            cancelByManager(reservation);
-
-            // when
-            Reservation actual = reservationService.reserve(name, duplicated);
-
-            // then
-            assertThat(actual.getStatus())
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-
-
-        @Test
-        @DisplayName("다른 사람의 예약이 취소된 슬롯에 예약을 하면 reserved로 처리된다")
-        void 성공3() {
-            // given
-            String anotherName = "다른사람";
-            Reservation reservation = save(
-                reservation(name, reservationDate1, reservationTime1, theme1));
-            ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1,
-                reservationTime1, theme1);
-            cancelByManager(reservation);
-
-            // when
-            Reservation actual = reservationService.reserve(anotherName, duplicated);
-
-            // then
-            Assertions.assertThat(actual.getStatus())
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-    }
-
-    @Nested
     @DisplayName("cancelByManager 메서드는")
     class CancelByManagerTest {
 
 
         @Test
         @DisplayName("예약을 취소한다")
-        void 성공() {
+        void 성공1() {
             // given
             Reservation savedReservation = save(
                 reservation(name, reservationDate1, reservationTime1, theme1));
@@ -243,6 +238,24 @@ class ReservationServiceTest {
             Assertions.assertThat(actual.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
         }
+
+        @Test
+        @DisplayName("대기 상태인 예약도 취소한다")
+        void 성공2() {
+            // given
+            String nameInWaiting = "대기중인 사용자";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+
+            // when
+            Reservation actual = reservationService.cancelByManager(reservationInWaiting.getId());
+
+            // then
+            Assertions.assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+        }
+
     }
 
     @Nested
@@ -259,6 +272,23 @@ class ReservationServiceTest {
 
             // when
             Reservation actual = reservationService.cancel(savedReservation.getId(), name);
+
+            // then
+            Assertions.assertThat(actual.getStatus())
+                .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        @DisplayName("대기 상태인 예약도 취소한다")
+        void 성공2() {
+            // given
+            String nameInWaiting = "대기중인 사용자";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+
+            // when
+            Reservation actual = reservationService.cancel(reservationInWaiting.getId(), nameInWaiting);
 
             // then
             Assertions.assertThat(actual.getStatus())

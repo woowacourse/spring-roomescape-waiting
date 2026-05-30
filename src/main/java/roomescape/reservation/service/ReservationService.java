@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
-import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
