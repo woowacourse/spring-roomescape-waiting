@@ -57,3 +57,9 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_theme_is_active ON theme (is_active);
+CREATE INDEX IF NOT EXISTS idx_reservation_time_is_active ON reservation_date (is_active);
+CREATE INDEX IF NOT EXISTS idx_reservation_date_is_active ON reservation_time (is_active);
+CREATE INDEX IF NOT EXISTS idx_reservation_date_time_theme_status ON reservation (date_id, time_id, theme_id, status);
+CREATE INDEX IF NOT EXISTS idx_reservation_name ON reservation (name);
