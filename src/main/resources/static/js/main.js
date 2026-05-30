@@ -325,17 +325,17 @@ async function refreshEverything() {
 }
 
 async function loadAllData() {
-    const [themes, popularThemes, adminTimes, reservations] = await Promise.all([
+    const [themes, popularThemes, adminTimes, reservationPage] = await Promise.all([
         api("/themes"),
         api("/themes/popular-top-10"),
         api("/admin/times"),
-        api("/reservations")
+        api("/admin/reservations")
     ]);
 
     state.themes = themes;
     state.popularThemes = popularThemes;
     state.adminTimes = adminTimes;
-    state.reservations = reservations;
+    state.reservations = reservationPage.content || [];
 }
 
 async function loadAvailableTimes(options = {}) {
