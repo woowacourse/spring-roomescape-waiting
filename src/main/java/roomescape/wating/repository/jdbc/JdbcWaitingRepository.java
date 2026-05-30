@@ -113,7 +113,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme th ON w.theme_id = th.id
                 WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ?
-                ORDER BY w.created_at ASC
+                ORDER BY w.created_at ASC, w.id ASC
                 LIMIT 1
                 """;
         return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, Date.valueOf(date), timeId, themeId)
@@ -126,12 +126,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
             final LocalDate date,
             final long timeId,
             final long themeId,
-            final LocalDateTime createdAt
+            final LocalDateTime createdAt,
+            final long waitingId
     ) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting
-                WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND created_at < ?
+                WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
+                  AND (created_at < ? OR (created_at = ? AND id < ?))
                 """;
         Integer count = jdbcTemplate.queryForObject(
                 sql,
@@ -139,7 +141,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 Date.valueOf(date),
                 timeId,
                 themeId,
-                Timestamp.valueOf(createdAt)
+                Timestamp.valueOf(createdAt),
+                Timestamp.valueOf(createdAt),
+                waitingId
         );
         return count == null ? 0 : count;
     }

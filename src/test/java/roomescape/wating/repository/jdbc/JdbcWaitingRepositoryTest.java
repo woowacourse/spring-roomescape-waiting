@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -154,6 +155,50 @@ class JdbcWaitingRepositoryTest {
 
     }
 
+    @Test
+    void 같은_생성_시각이면_id가_작은_대기를_먼저_조회한다() {
+        // given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        final LocalDate reservationDate = NOW.plusDays(1).toLocalDate();
+        final LocalDateTime sameCreatedAt = NOW.minusMinutes(1);
+
+        insertWaiting(1L, "코로구", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
+        insertWaiting(2L, "재키", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
+
+        // when
+        Optional<Waiting> waiting = jdbcWaitingRepository.findEarliestBySlot(reservationDate, time.getId(), theme.getId());
+
+        // then
+        assertThat(waiting).isPresent();
+        assertThat(waiting.get().getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void 같은_생성_시각이면_id가_작은_대기를_앞선_대기로_계산한다() {
+        // given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        final LocalDate reservationDate = NOW.plusDays(1).toLocalDate();
+        final LocalDateTime sameCreatedAt = NOW.minusMinutes(1);
+
+        insertWaiting(1L, "코로구", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
+        final long targetWaitingId = 2L;
+        insertWaiting(targetWaitingId, "재키", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
+
+        // when
+        final int count = jdbcWaitingRepository.countEarlierWaitingsInSlot(
+                reservationDate,
+                time.getId(),
+                theme.getId(),
+                sameCreatedAt,
+                targetWaitingId
+        );
+
+        // then
+        assertThat(count).isEqualTo(1);
+    }
+
     private ReservationTime insertReservationTime(final String startAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_at) VALUES (?)",
@@ -214,5 +259,29 @@ class JdbcWaitingRepositoryTest {
             throw new IllegalStateException("대기 생성에 실패했습니다.");
         }
         return key.longValue();
+    }
+
+    private void insertWaiting(
+            final long id,
+            final String name,
+            final LocalDate reservationDate,
+            final long timeId,
+            final long themeId,
+            final LocalDateTime createdAt
+    ) {
+        final String sql = """
+                INSERT INTO waiting(id, customer_name, reservation_date, time_id, theme_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                id,
+                name,
+                Date.valueOf(reservationDate),
+                timeId,
+                themeId,
+                Timestamp.valueOf(createdAt)
+        );
     }
 }

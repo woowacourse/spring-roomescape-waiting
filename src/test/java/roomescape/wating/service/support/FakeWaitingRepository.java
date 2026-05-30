@@ -55,7 +55,8 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(w -> w.getReservationDate().equals(date))
                 .filter(w -> w.getTime().getId().equals(timeId))
                 .filter(w -> w.getTheme().getId().equals(themeId))
-                .min(Comparator.comparing(Waiting::getCreatedAt));
+                .min(Comparator.comparing(Waiting::getCreatedAt)
+                        .thenComparing(Waiting::getId));
     }
 
     @Override
@@ -63,13 +64,15 @@ public class FakeWaitingRepository implements WaitingRepository {
             final LocalDate date,
             final long timeId,
             final long themeId,
-            final LocalDateTime createdAt
+            final LocalDateTime createdAt,
+            final long waitingId
     ) {
         return (int) waitings.stream()
                 .filter(w -> w.getReservationDate().equals(date))
                 .filter(w -> w.getTime().getId().equals(timeId))
                 .filter(w -> w.getTheme().getId().equals(themeId))
-                .filter(w -> w.getCreatedAt().isBefore(createdAt))
+                .filter(w -> w.getCreatedAt().isBefore(createdAt)
+                        || (w.getCreatedAt().equals(createdAt) && w.getId() < waitingId))
                 .count();
     }
 

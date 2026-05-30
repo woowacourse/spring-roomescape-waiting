@@ -437,6 +437,25 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 대기_순위는_createdAt이_같으면_id_순서로_계산된다() {
+        // given
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+
+        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(3L, "영이", Date.valueOf(futureDate), NOW, time, theme));
+
+        // when
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("영이");
+
+        // then
+        assertThat(response.waitings()).hasSize(1);
+        assertThat(response.waitings().getFirst().rank()).isEqualTo(3);
+    }
+
+    @Test
     void 예약_취소_시_해당_슬롯의_가장_빠른_대기가_예약으로_전환된다() {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
@@ -447,6 +466,25 @@ class ReservationServiceTest {
 
         waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+
+        // when
+        reservationService.cancel(1L);
+
+        // then
+        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+    }
+
+    @Test
+    void 예약_취소_시_createdAt이_같으면_id가_작은_대기가_예약으로_전환된다() {
+        // given
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+
+        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+
+        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
 
         // when
         reservationService.cancel(1L);

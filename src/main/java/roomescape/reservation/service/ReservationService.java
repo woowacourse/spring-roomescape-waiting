@@ -64,7 +64,8 @@ public class ReservationService {
                             waiting.getReservationDate(),
                             waiting.getTime().getId(),
                             waiting.getTheme().getId(),
-                            waiting.getCreatedAt()
+                            waiting.getCreatedAt(),
+                            waiting.getId()
                     ) + 1;
                     return WaitingResponse.of(waiting, rank);
                 })

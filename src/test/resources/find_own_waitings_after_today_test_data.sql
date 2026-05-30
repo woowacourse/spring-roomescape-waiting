@@ -1,10 +1,10 @@
 -- 시간 데이터
-INSERT INTO reservation_time (start_at) VALUES ('09:00:00'); -- id=1, 오늘 이미 지난 시간
-INSERT INTO reservation_time (start_at) VALUES ('11:00:00'); -- id=2, 오늘 아직 안 지난 시간
-INSERT INTO reservation_time (start_at) VALUES ('10:00:00'); -- id=3, 오늘 이미 지난 시간
+INSERT INTO reservation_time (id, start_at) VALUES (1, '09:00:00'); -- id=1, 오늘 이미 지난 시간
+INSERT INTO reservation_time (id, start_at) VALUES (2, '11:00:00'); -- id=2, 오늘 아직 안 지난 시간
+INSERT INTO reservation_time (id, start_at) VALUES (3, '10:00:00'); -- id=3, 오늘 이미 지난 시간
 
 -- 테마 데이터
-INSERT INTO theme (name, description, thumbnail_url) VALUES ('링', '공포 테마', 'http://thumbnail.com');
+INSERT INTO theme (id, name, description, thumbnail_url) VALUES (1, '링', '공포 테마', 'http://thumbnail.com');
 
 -- 대기 데이터
 -- 포함돼야 하는 케이스
