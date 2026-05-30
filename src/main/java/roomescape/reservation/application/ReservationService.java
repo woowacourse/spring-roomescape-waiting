@@ -122,7 +122,7 @@ public class ReservationService {
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId,
                 oldReservation.getThemeId());
         scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
-        validateDuplicatedReservationNot(reservationId, scheduleId);
+        validateScheduleAvailableForUpdate(reservationId, scheduleId);
 
         int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
         validateReservationUpdated(affectedRow);
@@ -141,10 +141,8 @@ public class ReservationService {
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 
-    private void validateDuplicatedReservationNot(long reservationId, long scheduleId) {
-        if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
-        }
+    private void validateScheduleAvailableForUpdate(long reservationId, long scheduleId) {
+        ~
     }
 
     private void validateScheduleAvailableForReservation(long scheduleId) {

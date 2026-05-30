@@ -13,6 +13,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,6 +40,9 @@ class ReservationServiceTest {
 
     @Mock
     private ScheduleService scheduleService;
+
+    @Mock
+    private WaitingRepository waitingRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -163,6 +167,47 @@ class ReservationServiceTest {
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
+                .isInstanceOf(EscapeRoomException.class);
+        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("변경할 스케줄에 다른 예약이 있으면 예약 수정에 실패한다.")
+    void update_duplicated_reservation_fail() {
+        long reservationId = 4L;
+        long newScheduleId = 99L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(newScheduleId);
+        when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(true);
+
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
+                .isInstanceOf(EscapeRoomException.class);
+        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("변경할 스케줄에 대기열이 있으면 예약 수정에 실패한다.")
+    void update_waiting_exists_fail() {
+        long reservationId = 4L;
+        long newScheduleId = 99L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(newScheduleId);
+        when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
+        when(waitingRepository.existsByScheduleId(newScheduleId)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
                 .isInstanceOf(EscapeRoomException.class);
