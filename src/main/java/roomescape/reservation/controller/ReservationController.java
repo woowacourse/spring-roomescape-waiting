@@ -68,7 +68,7 @@ public class ReservationController {
     public ResponseEntity<Void> cancel(
             @PathVariable("reservation-id") Long reservationId
     ) {
-        reservationService.cancel(reservationId);
+        reservationService.cancelByCustomer(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

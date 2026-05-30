@@ -372,7 +372,7 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_예약을_취소하면_예외가_발생한다() {
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(1L))
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -388,7 +388,7 @@ class ReservationServiceTest {
         ));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancel(1L))
+        assertThatThrownBy(() -> reservationService.cancelByCustomer(1L))
                 .isInstanceOf(ReservationCancellationException.class);
     }
 
@@ -404,7 +404,7 @@ class ReservationServiceTest {
         ));
 
         // when
-        reservationService.delete(1L);
+        reservationService.deleteByAdmin(1L);
 
         // then
         assertThat(reservationRepository.findById(1L)).isEmpty();
@@ -413,7 +413,7 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_예약을_관리자가_삭제하면_예외가_발생한다() {
         // when & then
-        assertThatThrownBy(() -> reservationService.delete(1L))
+        assertThatThrownBy(() -> reservationService.deleteByAdmin(1L))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -468,7 +468,7 @@ class ReservationServiceTest {
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
 
         // when
-        reservationService.cancel(1L);
+        reservationService.cancelByCustomer(1L);
 
         // then
         assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
@@ -487,7 +487,7 @@ class ReservationServiceTest {
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW, time, theme));
 
         // when
-        reservationService.cancel(1L);
+        reservationService.cancelByCustomer(1L);
 
         // then
         assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
@@ -503,7 +503,7 @@ class ReservationServiceTest {
         reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
 
         // when
-        reservationService.cancel(1L);
+        reservationService.cancelByCustomer(1L);
 
         // then
         assertThat(reservationRepository.findById(1L)).isEmpty();

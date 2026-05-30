@@ -109,7 +109,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancel(final Long reservationId) {
+    public void cancelByCustomer(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
 
@@ -118,7 +118,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void delete(final Long reservationId) {
+    public void deleteByAdmin(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
 
         deleteReservation(reservationId);
