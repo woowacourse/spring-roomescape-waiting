@@ -16,12 +16,17 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("사용자 예약 추가")
     @Test
     void 사용자_예약_추가_API() {
+        String date = LocalDate.now().plusDays(1).toString();
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 1, 1))
+                .body(reservationParams("브라운", date, 1, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
+                .body("date", equalTo(date))
+                .body("time", equalTo("10:00"))
+                .body("themeName", equalTo("공포의 저택"))
                 .body("reservationStatus", equalTo("RESERVED"));
     }
 
@@ -100,9 +105,10 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void 예약_변경_성공() {
         long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
+        String updateDate = LocalDate.now().plusDays(2).toString();
 
         Map<String, Object> updateParams = new HashMap<>();
-        updateParams.put("date", LocalDate.now().plusDays(2).toString());
+        updateParams.put("date", updateDate);
         updateParams.put("timeId", 2);
 
         RestAssured.given().log().all()
@@ -110,7 +116,10 @@ class ReservationControllerTest extends ControllerTest {
                 .body(updateParams)
                 .when().patch("/reservations/{id}", id)
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("date", equalTo(updateDate))
+                .body("time", equalTo("11:00"))
+                .body("reservationStatus", equalTo("RESERVED"));
     }
 
     @DisplayName("존재하지 않는 예약 변경하면 404")
@@ -191,6 +200,9 @@ class ReservationControllerTest extends ControllerTest {
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201)
+                .body("date", equalTo(futureDate))
+                .body("time", equalTo("13:00"))
+                .body("themeName", equalTo("우주 정거장"))
                 .body("reservationStatus", equalTo("WAITING"));
     }
 
@@ -271,6 +283,9 @@ class ReservationControllerTest extends ControllerTest {
                 .when().get("/reservations/waiting")
                 .then().log().all()
                 .statusCode(200)
+                .body("reservations[0].date", equalTo(futureDate))
+                .body("reservations[0].time", equalTo("15:00"))
+                .body("reservations[0].themeName", equalTo("탐정 사무소"))
                 .body("reservations[0].waitingNumber", equalTo(1))
                 .body("reservations[0].reservationStatus", equalTo("WAITING"));
     }
@@ -288,8 +303,12 @@ class ReservationControllerTest extends ControllerTest {
                 .when().get("/reservations/me")
                 .then().log().all()
                 .statusCode(200)
+                .body("reservations[0].date", equalTo(futureDate))
+                .body("reservations[0].time", equalTo("15:00"))
                 .body("reservations[0].reservationStatus", equalTo("WAITING"))
                 .body("reservations[0].waitingNumber", equalTo(1))
+                .body("reservations[1].date", equalTo(futureDate))
+                .body("reservations[1].time", equalTo("16:00"))
                 .body("reservations[1].reservationStatus", equalTo("RESERVED"))
                 .body("reservations[1].waitingNumber", nullValue());
     }
