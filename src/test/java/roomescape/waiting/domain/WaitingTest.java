@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -21,6 +23,44 @@ class WaitingTest {
             .toInstant(),
         ZoneId.of("Asia/Seoul")
     ));
+
+    @Nested
+    @DisplayName("필드가 null인 경우 객체 생성 시 예외가 발생한다")
+    class RequireNonNull {
+
+        @Test
+        void 예약_날짜가_null인_경우_예외가_발생한다() {
+            assertThatThrownBy(() -> Waiting.create(
+                "name",
+                null,
+                ReservationTime.of(1L, NOW.toLocalTime()),
+                Theme.of(1L, "name", "description", "url"),
+                NOW
+            )).isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        void 예약_시간이_null인_경우_예외가_발생한다() {
+            assertThatThrownBy(() -> Waiting.create(
+                "name",
+                NOW.toLocalDate(),
+                null,
+                Theme.of(1L, "name", "description", "url"),
+                NOW
+            )).isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        void 테마가_null인_경우_예외가_발생한다() {
+            assertThatThrownBy(() -> Waiting.create(
+                "name",
+                NOW.toLocalDate(),
+                ReservationTime.of(1L, NOW.toLocalTime()),
+                null,
+                NOW
+            )).isInstanceOf(NullPointerException.class);
+        }
+    }
 
     @Test
     void 현재_시간_이전으로_대기를_등록하면_예외가_발생한다() {

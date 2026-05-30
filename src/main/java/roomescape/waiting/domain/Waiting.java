@@ -28,7 +28,7 @@ public class Waiting {
         final ReservationTime time,
         final Theme theme
     ) {
-        validateNotNull(customerName, reservationDate, time, theme);
+        validateNotNull(reservationDate, time, theme);
         this.id = id;
         this.customerName = customerName;
         this.reservationDate = reservationDate;
@@ -50,7 +50,8 @@ public class Waiting {
             date,
             null,
             time,
-            theme);
+            theme
+        );
 
         waiting.validateNotPast(now);
         return waiting;
@@ -91,12 +92,10 @@ public class Waiting {
     }
 
     private void validateNotNull(
-        final CustomerName customerName,
         final LocalDate reservationDate,
         final ReservationTime time,
         final Theme theme
     ) {
-        Objects.requireNonNull(customerName, "예약자명은 필수 입력값입니다.");
         Objects.requireNonNull(reservationDate, "예약대기날짜는 필수 입력값입니다.");
         Objects.requireNonNull(time, "시간은 필수 입력값입니다.");
         Objects.requireNonNull(theme, "테마는 필수 입력값입니다.");
