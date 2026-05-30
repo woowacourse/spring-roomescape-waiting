@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import roomescape.exception.ErrorCode;
+import roomescape.history.MyHistory;
 import roomescape.history.ReservationHistoryStatus;
 import roomescape.history.controller.dto.HistoryResponse;
 import roomescape.history.service.MyHistoryService;
@@ -68,7 +69,9 @@ public class ReservationPageModelAssembler {
         model.addAttribute("reservationTimes", reservationTimeService.getAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList());
-        List<HistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
+        List<HistoryResponse> myHistories = getMyHistories(reservationName, errorCode).stream()
+                .map(HistoryResponse::from)
+                .toList();
         model.addAttribute("availableTimes", getAvailableTimes(
                 selectedThemeId,
                 selectedTheme,
@@ -134,7 +137,7 @@ public class ReservationPageModelAssembler {
                 .orElse(null);
     }
 
-    private List<HistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
+    private List<MyHistory> getMyHistories(final String reservationName, final String errorCode) {
         if (reservationName == null || reservationName.isBlank()) {
             return List.of();
         }
