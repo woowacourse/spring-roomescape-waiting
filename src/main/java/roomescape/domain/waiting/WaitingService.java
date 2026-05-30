@@ -59,7 +59,7 @@ public class WaitingService {
             Waiting saved = waitingRepository.save(waiting);
             return WaitingResponse.of(saved);
         } catch (DuplicateKeyException exception) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_WAITING_NAME);
         }
     }
 

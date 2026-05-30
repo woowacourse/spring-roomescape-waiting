@@ -160,7 +160,7 @@ class WaitingControllerTest {
         Long waitingId = insertWaiting("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-            .when().delete("/reservations/waiting/" + waitingId)
+            .when().delete("/reservations/waiting/" + waitingId + "?name=유저1")
             .then().log().all()
             .statusCode(204);
 
@@ -173,7 +173,7 @@ class WaitingControllerTest {
     @Test
     void deleteWaiting_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-            .when().delete("/reservations/waiting/999")
+            .when().delete("/reservations/waiting/999?name=유저1")
             .then().log().all()
             .statusCode(404);
     }

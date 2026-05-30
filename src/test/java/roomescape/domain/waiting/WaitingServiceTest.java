@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.dao.DuplicateKeyException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -126,6 +127,22 @@ class WaitingServiceTest {
         }
 
         @Test
+        void 저장_중_중복_대기이면_예외() {
+            WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
+            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
+                request.name())).thenReturn(false);
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
+                .thenReturn(Optional.of("예약자"));
+            when(waitingRepository.save(any(Waiting.class))).thenThrow(DuplicateKeyException.class);
+
+            assertThatThrownBy(() -> waitingService.createWaiting(request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME);
+        }
+
+        @Test
         void 예약이_없는_슬롯이면_예외() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
@@ -162,18 +179,19 @@ class WaitingServiceTest {
 
         @Test
         void 정상_삭제() {
-            when(waitingRepository.existsById(1L)).thenReturn(true);
+            Waiting waiting = Waiting.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
+            when(waitingRepository.findById(1L)).thenReturn(Optional.of(waiting));
 
-            waitingService.deleteWaiting(1L);
+            waitingService.deleteWaiting(1L, "유저1");
 
             verify(waitingRepository, times(1)).deleteById(1L);
         }
 
         @Test
         void 존재하지_않는_id면_예외() {
-            when(waitingRepository.existsById(99L)).thenReturn(false);
+            when(waitingRepository.findById(99L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> waitingService.deleteWaiting(99L))
+            assertThatThrownBy(() -> waitingService.deleteWaiting(99L, "유저1"))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
         }
