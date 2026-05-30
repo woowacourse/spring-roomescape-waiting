@@ -1,11 +1,10 @@
 package roomescape.reservationWaiting.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.BadRequestException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
@@ -30,23 +29,20 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command) {
-        ReservationWaiting newReservationWaiting = consistValidReservationWaiting(command);
+        ReservationWaiting newReservationWaiting = buildValidReservationWaiting(command);
 
         try {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);
             return ReservationWaitingResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
+            throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
         }
     }
 
-    private ReservationWaiting consistValidReservationWaiting(ReservationWaitingCommand command) {
-        validateReservationWaitingUniqueness(command);
+    private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command) {
         Reservation targetReservation = findTargetReservationByDateAndTimeIdAndThemeId(command);
 
-        if (targetReservation.hasSameName(command.name())) {
-            throw new BadRequestException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
-        }
+        validateNotAlreadyReservedOrWaiting(command);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.of(
                 command.name(),
@@ -66,17 +62,18 @@ public class ReservationWaitingService {
         );
     }
 
-    private void validateReservationWaitingUniqueness(ReservationWaitingCommand command) {
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                command.date(), command.timeId(), command.themeId(), command.name())
-        ) {
-            throw new DuplicateException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
+    private void validateNotAlreadyReservedOrWaiting(ReservationWaitingCommand command) {
+        if (reservationRepository.existsByDateAndTimeIdAndName(command.date(), command.timeId(), command.name())) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+        }
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndName(command.date(), command.timeId(), command.name())) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage()); // Or another appropriate error message
         }
     }
 
     @Transactional
     public void delete(Long id, String userName) {
-        ReservationWaiting reservationWaiting = findReservationWatingById(id);
+        ReservationWaiting reservationWaiting = findReservationWaitingById(id);
         reservationWaiting.validateExpiry();
         reservationWaiting.validateOwner(userName);
 
@@ -86,8 +83,7 @@ public class ReservationWaitingService {
         }
     }
 
-    @NonNull
-    private ReservationWaiting findReservationWatingById(Long id) {
+    private ReservationWaiting findReservationWaitingById(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(
                         () -> new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage())

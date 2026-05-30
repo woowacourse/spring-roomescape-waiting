@@ -13,7 +13,7 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findAllByName(String name);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name);
+    boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name);
 
     int deleteById(Long id);
 

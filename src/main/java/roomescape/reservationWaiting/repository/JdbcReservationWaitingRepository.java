@@ -128,6 +128,22 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, name);
     }
 
+
+
+    @Override
+    public boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation_waiting
+                    WHERE reservation_date = ? AND time_id = ? AND name = ?
+                )
+                """;
+
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, name);
+        return Boolean.TRUE.equals(exists);
+    }
+
     @Override
     public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name) {
         String sql = """

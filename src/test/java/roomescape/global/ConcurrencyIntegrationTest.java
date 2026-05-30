@@ -17,7 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
-import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -100,14 +100,14 @@ class ConcurrencyIntegrationTest {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationService.save(new ReservationCommand(
-                                "name",
+                                "name" + java.util.UUID.randomUUID().toString(),
                                 LocalDate.now().plusDays(7),
                                 1L,
                                 1L
                         )
                 ),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -125,7 +125,7 @@ class ConcurrencyIntegrationTest {
                         new ReservationTimeCommand(LocalTime.of(10, 0))
                 ),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -143,7 +143,7 @@ class ConcurrencyIntegrationTest {
                         new ThemeCommand("테마", "설명", "thumbnailUrl")
                 ),
                 100,
-                DuplicateException.class
+                ConflictException.class
         );
 
         //then
@@ -254,7 +254,7 @@ class ConcurrencyIntegrationTest {
                     startLatch.await();
                     task.run();
                     successCount.incrementAndGet();
-                } catch (DuplicateException e) {
+                } catch (ConflictException e) {
                     duplicateCount.incrementAndGet();
                 } catch (Throwable throwable) {
                     unexpectedErrorCount.incrementAndGet();
@@ -293,7 +293,7 @@ class ConcurrencyIntegrationTest {
                         )
                 ),
                 100,
-                DuplicateException.class
+                BusinessException.class
         );
 
         //then

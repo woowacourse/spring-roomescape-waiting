@@ -16,16 +16,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.ForbiddenException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.global.exception.InvalidRequestValueException;
-import roomescape.global.exception.DuplicateException;
-import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
-
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
@@ -49,9 +47,6 @@ class ReservationWaitingServiceTest {
     void save_validCommand_returnsReservationWaiting() {
         //given
         LocalDate futureDate = LocalDate.now().plusDays(7);
-
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .willReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
@@ -78,15 +73,22 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 기존에 이미 동일한 예약 대기가 있으면 예외가 발생한다.")
     void save_duplicateWaiting_throwsDuplicateException() {
         //given
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .willReturn(true);
+        LocalDate futureDate = LocalDate.now().plusDays(7);
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .willReturn(Optional.of(new Reservation(1L, "포비", futureDate, time, theme)));
+
+        given(reservationWaitingRepository.save(any()))
+                .willThrow(new org.springframework.dao.DataIntegrityViolationException("Duplicate"));
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.now().plusDays(7), 1L, 1L
+                        "브라운", futureDate, 1L, 1L
                 )
-        )).isInstanceOf(DuplicateException.class)
+        )).isInstanceOf(ConflictException.class)
                 .hasMessage(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
     }
 
@@ -94,8 +96,6 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 해당 슬롯의 예약이 없으면 예외가 발생한다.")
     void save_noTargetReservation_throwsNotFoundException() {
         //given
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .willReturn(false);
 
         given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
@@ -112,12 +112,9 @@ class ReservationWaitingServiceTest {
 
     @Test
     @DisplayName("예약 대기 생성 시, 해당 슬롯으로 자신이 예약을 했었다면 예외가 발생한다.")
-    void save_alreadyReservedByRequester_throwsBadRequestException() {
+    void save_alreadyReservedByRequester_throwsInvalidBusinessStateException() {
         //given
         LocalDate futureDate = LocalDate.now().plusDays(7);
-
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .willReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
@@ -126,12 +123,41 @@ class ReservationWaitingServiceTest {
                 any(), any(), any())
         ).willReturn(Optional.of(new Reservation(1L, "브라운", futureDate, time, theme)));
 
+        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), anyString()))
+                .willReturn(true);
+
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", futureDate, 1L, 1L
                 )
-        )).isInstanceOf(roomescape.global.exception.BadRequestException.class)
+        )).isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+    }
+
+    @Test
+    void save_alreadyReservedOtherSlot_throwBusinessException() {
+        // given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
+
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+
+        // The target slot is reserved by someone ELSE ("포비")
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(
+                any(), any(), any())
+        ).willReturn(Optional.of(new Reservation(1L, "포비", futureDate, time, theme)));
+
+        // But the requester ("브라운") already has a reservation for a DIFFERENT theme at the SAME time
+        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), anyString()))
+                .willReturn(true);
+
+        //when & then
+        assertThatThrownBy(() -> reservationWaitingService.save(
+                new ReservationWaitingCommand(
+                        "브라운", futureDate, 1L, 1L
+                )
+        )).isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 
@@ -181,7 +207,7 @@ class ReservationWaitingServiceTest {
 
         // when,then
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
-                InvalidRequestValueException.class);
+                InvalidBusinessStateException.class);
     }
 
     @Test

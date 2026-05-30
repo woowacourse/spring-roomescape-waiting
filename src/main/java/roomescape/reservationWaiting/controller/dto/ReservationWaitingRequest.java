@@ -1,7 +1,7 @@
 package roomescape.reservationWaiting.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.global.exception.InvalidRequestFormatException;
+import roomescape.global.exception.BadRequestException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 
@@ -21,13 +21,13 @@ public record ReservationWaitingRequest(
 
     private void validateString(String value) {
         if (value == null || value.isBlank()) {
-            throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
+            throw new BadRequestException(ReservationErrorCode.INVALID_FORMAT.getMessage());
         }
     }
 
     private void validateNotNull(Object value) {
         if (value == null) {
-            throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
+            throw new BadRequestException(ReservationErrorCode.INVALID_FORMAT.getMessage());
         }
     }
 

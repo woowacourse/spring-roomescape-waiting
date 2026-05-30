@@ -120,27 +120,26 @@ class JdbcReservationWaitingRepositoryTest {
         return new Theme(themeId, name, description, thumbnailUrl);
     }
 
+
+
     @Test
-    @DisplayName("날짜, 시간, 테마, 예약자 이름에 해당하는 예약 대기가 존재하는지 조회한다.")
-    void existsByDateAndTimeIdAndThemeIdAndName_matchingEntry_returnsTrue() {
+    @DisplayName("날짜, 시간, 예약자 이름에 해당하는 예약 대기가 존재하는지 조회한다.")
+    void existsByDateAndTimeIdAndAndName_matchingEntry_returnsTrue() {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-
         ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         //when & then
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
+        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndName(
                 saved.date(),
                 saved.time().id(),
-                saved.theme().id(),
                 "브라운"
         )).isTrue();
 
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
+        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndName(
                 saved.date(),
                 saved.time().id(),
-                saved.theme().id(),
                 "포비"
         )).isFalse();
     }
