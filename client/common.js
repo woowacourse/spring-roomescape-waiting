@@ -218,10 +218,11 @@ function renderAvailableTimes(items) {
     const button = document.createElement("button");
     const timeId = item.timeInformation.id;
     const timeLabel = item.timeInformation.time;
+    const reservable = item.status === "RESERVABLE";
     button.type = "button";
-    button.className = `chip${item.isAvailable ? "" : " waitable"}`;
-    button.textContent = `${timeLabel} ${item.isAvailable ? "(예약)" : "(대기)"}`;
-    if (!item.isAvailable) {
+    button.className = `chip${reservable ? "" : " waitable"}`;
+    button.textContent = `${timeLabel} ${reservable ? "(예약)" : "(대기)"}`;
+    if (!reservable) {
       button.addEventListener("click", async () => {
         await requestWaiting(timeId, timeLabel);
       });
@@ -391,7 +392,7 @@ function renderEditAvailableTimes(items, currentTime) {
   items.forEach((item) => {
     const button = document.createElement("button");
     const isCurrent = item.timeInformation.id === currentTime.id;
-    const available = item.isAvailable || isCurrent;
+    const available = item.status === "RESERVABLE" || isCurrent;
     button.type = "button";
     button.className = `chip${available ? "" : " disabled"}${isCurrent ? " selected" : ""}`;
     button.textContent = `${item.timeInformation.time}`;

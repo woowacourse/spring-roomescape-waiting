@@ -16,6 +16,7 @@ import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
+import roomescape.reservationtime.dto.response.TimeSlotStatus;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.infrastructure.WaitingRepository;
@@ -46,7 +47,6 @@ public class ReservationTimeService {
         // schedule에서 존재하는 시간 id 모두 조회
         List<ReservationTime> totalTimes = reservationTimeRepository.findTimesByDateAndThemeId(date, themeId);
 
-        // date와 themeId에 해당하는 reservation의 시간 id들을 모두 조회
         Set<Long> reservationTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);
         Set<Long> waitingTimeIds = waitingRepository.findTimeIdByDateAndThemeId(date, themeId);
         Set<Long> notAvailableTimeIds = new HashSet<>(reservationTimeIds);
@@ -55,9 +55,16 @@ public class ReservationTimeService {
         return totalTimes.stream()
                 .map(time -> new AvailableTimeFindResponse(
                         new TimeInformation(time.id(), time.startAt()),
-                        !notAvailableTimeIds.contains(time.id())
+                        getStatus(time, notAvailableTimeIds)
                 ))
                 .toList();
+    }
+
+    private TimeSlotStatus getStatus(ReservationTime time, Set<Long> notAvailableTimeIds) {
+        if (notAvailableTimeIds.contains(time.id())) {
+            return TimeSlotStatus.WAITABLE;
+        }
+        return TimeSlotStatus.RESERVABLE;
     }
 
     private void validateAlreadyTimeNot(LocalTime startAt) {

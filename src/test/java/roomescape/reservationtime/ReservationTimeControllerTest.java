@@ -72,7 +72,7 @@ public class ReservationTimeControllerTest {
                 .then().log().all()
                 .body("success", is(true))
                 .body("data.size()", is(1))
-                .body("data[0].isAvailable", is(false))
+                .body("data[0].status", is("WAITABLE"))
                 .statusCode(200);
     }
 
@@ -93,7 +93,7 @@ public class ReservationTimeControllerTest {
                 .then().log().all()
                 .body("success", is(true))
                 .body("data.size()", is(1))
-                .body("data[0].isAvailable", is(true))
+                .body("data[0].status", is("RESERVABLE"))
                 .statusCode(200);
 
         // 예약 생성
@@ -123,7 +123,7 @@ public class ReservationTimeControllerTest {
                 .then().log().all()
                 .body("success", is(true))
                 .body("data.size()", is(1))
-                .body("data[0].isAvailable", is(false))
+                .body("data[0].status", is("WAITABLE"))
                 .statusCode(200);
     }
 
