@@ -3,6 +3,7 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.repository.ReservationTimeDao;
@@ -10,6 +11,7 @@ import roomescape.repository.ReservationTimeDao;
 import java.time.LocalTime;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservationTimeCommandService {
 
