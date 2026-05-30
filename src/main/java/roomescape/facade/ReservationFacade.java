@@ -32,7 +32,6 @@ public class ReservationFacade {
     private static final String PAST_RESERVATION_UPDATE_REJECTED = "지난 시각으로 예약을 변경할 수 없습니다.";
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
-    private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
@@ -132,9 +131,6 @@ public class ReservationFacade {
         Reservations reservations = reservationService.findByDateAndThemeId(request.date(), theme.getId());
         Reservation reservation = reservations.findByTime(reservationTime);
 
-        if (reservation.isOwnedBy(request.name())) {
-            throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
-        }
         if (reservation.isPast(LocalDateTime.now())) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
         }

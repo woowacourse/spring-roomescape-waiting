@@ -1,9 +1,14 @@
 package roomescape.domain;
 
+import roomescape.exception.BusinessRuleViolationException;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ReservationWaiting {
+
+    private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
+
     private final Long id;
     private final String name;
     private final LocalDateTime createdAt;
@@ -27,6 +32,9 @@ public class ReservationWaiting {
             Reservation reservation
     ) {
         this(null, name, createdAt, reservation);
+        if (reservation.isOwnedBy(name)) {
+            throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
+        }
     }
 
     public boolean isOwnedBy(String name) {
