@@ -47,13 +47,15 @@ export default class Controller {
 
     this.views.formView.on("@submit", async () => {
       try {
-        await this.store.submit();
+        const wasWaiting = this.store.submitMode() === "waiting";
+        const result = await this.store.submit();
+        const isReserved = result.entry.status === "RESERVED";
 
-        const submitMode = this.store.submitMode();
         this.views.toastView.show(
             this.store.reservationId
-                ? submitMode === "waiting" ? "대기가 등록되었습니다." : "예약이 변경되었습니다."
-                : submitMode === "waiting" ? "대기가 등록되었습니다." : "예약이 완료되었습니다."
+                ? isReserved ? "예약이 변경되었습니다." : "대기가 등록되었습니다."
+                : wasWaiting && isReserved ? "기존 예약이 취소되어 예약으로 전환되었습니다."
+                : isReserved ? "예약이 완료되었습니다." : "대기가 등록되었습니다."
         );
 
         location.href = this.store.reservationId ? "/search" : "/";
