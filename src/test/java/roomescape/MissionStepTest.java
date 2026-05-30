@@ -2,16 +2,16 @@ package roomescape;
 
 import static org.hamcrest.Matchers.is;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql("/truncate.sql")
 public class MissionStepTest {
 
     @Test
@@ -31,24 +31,24 @@ public class MissionStepTest {
         theme.put("imageUrl", "https://example.com/theme.png");
 
         RestAssured.given().log().all()
-            .contentType(ContentType.JSON)
-            .body(theme)
-            .when().post("/themes")
-            .then().log().all()
-            .statusCode(201)
-            .body("id", is(1));
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/themes")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1));
 
         Map<String, String> time = new HashMap<>();
         time.put("startAt", "2030-08-05T15:40");
         time.put("endAt", "2030-08-05T18:00");
 
         RestAssured.given().log().all()
-            .contentType(ContentType.JSON)
-            .body(time)
-            .when().post("/times")
-            .then().log().all()
-            .statusCode(201)
-            .body("id", is(1));
+                .contentType(ContentType.JSON)
+                .body(time)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1));
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
@@ -56,29 +56,29 @@ public class MissionStepTest {
         params.put("timeId", 1);
 
         RestAssured.given().log().all()
-            .contentType(ContentType.JSON)
-            .body(params)
-            .when().post("/admin/reservations")
-            .then().log().all()
-            .statusCode(201)
-            .body("id", is(1));
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1));
 
         RestAssured.given().log().all()
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(200)
-            .body("size()", is(1));
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
 
         RestAssured.given().log().all()
-            .when().delete("/admin/reservations/1")
-            .then().log().all()
-            .statusCode(204);
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
 
         RestAssured.given().log().all()
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(200)
-            .body("size()", is(0));
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 
     @Test
@@ -157,9 +157,9 @@ public class MissionStepTest {
     @Test
     void 없는_예약_삭제시_404_응답() {
         RestAssured.given().log().all()
-            .when().delete("/admin/reservations/999")
-            .then().log().all()
-            .statusCode(404);
+                .when().delete("/admin/reservations/999")
+                .then().log().all()
+                .statusCode(404);
     }
 
     @Test
