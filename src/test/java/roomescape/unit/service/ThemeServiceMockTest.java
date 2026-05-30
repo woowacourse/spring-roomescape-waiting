@@ -46,12 +46,13 @@ class ThemeServiceMockTest {
 
     @Test
     void getPopularThemes는_조회_윈도우를_계산해_저장소에_위임한다() {
-        LocalDate now = LocalDate.of(2026, 5, 8);
-        given(themeRepository.getPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10))
-                .willReturn(List.of());
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(7);
+        LocalDate end = today.minusDays(1);
+        given(themeRepository.getPopularThemes(start, end, 10)).willReturn(List.of());
 
-        themeService.getPopularThemes(now, 7, 10);
+        themeService.getPopularThemes(7, 10);
 
-        verify(themeRepository).getPopularThemes(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 7), 10);
+        verify(themeRepository).getPopularThemes(start, end, 10);
     }
 }

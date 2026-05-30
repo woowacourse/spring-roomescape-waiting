@@ -74,22 +74,22 @@ class ThemeApiTest {
     }
 
     @Test
-    void 인기_테마_조회시_now_기준_윈도우_내_예약수가_많은_순으로_정렬된다() {
+    void 인기_테마_조회시_윈도우_내_예약수가_많은_순으로_정렬된다() {
         Integer themeA = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer themeB = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer time = createTime("10:00");
 
-        // 윈도우: now=2026-05-06, days=7 → [2026-04-29, 2026-05-05]
-        createReservation("user1", "2026-05-05", time, themeA);
-        createReservation("user2", "2026-05-04", time, themeA); // A: 2건
-        createReservation("user3", "2026-05-03", time, themeB); // B: 1건
+        // 윈도우: days=7 → [오늘-7, 오늘-1]
+        createReservation("user1", LocalDate.now().minusDays(1), time, themeA);
+        createReservation("user2", LocalDate.now().minusDays(2), time, themeA); // A: 2건
+        createReservation("user3", LocalDate.now().minusDays(3), time, themeB); // B: 1건
 
         // 윈도우 밖
-        createReservation("user4", "2026-05-06", time, themeB); // 오늘 = end 다음날
-        createReservation("user5", "2026-04-28", time, themeB); // start 직전
+        createReservation("user4", LocalDate.now(), time, themeB);           // 오늘 = end 다음날
+        createReservation("user5", LocalDate.now().minusDays(8), time, themeB); // start 직전
 
         RestAssured.given().log().all()
-                .when().get("/themes/popular?now=2026-05-06&days=7")
+                .when().get("/themes/popular?days=7")
                 .then().log().all()
                 .statusCode(200)
                 .body("themes.size()", is(2))
@@ -101,10 +101,11 @@ class ThemeApiTest {
     void 인기_테마_조회시_윈도우_내_예약이_없으면_빈_목록을_반환한다() {
         Integer theme = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer time = createTime("10:00");
-        createReservation("user1", "2026-05-05", time, theme);
+        // 윈도우 [오늘-7, 오늘-1] 밖
+        createReservation("user1", LocalDate.now().minusDays(30), time, theme);
 
         RestAssured.given().log().all()
-                .when().get("/themes/popular?now=2026-01-01&days=7")
+                .when().get("/themes/popular?days=7")
                 .then().log().all()
                 .statusCode(200)
                 .body("themes.size()", is(0));
@@ -118,21 +119,21 @@ class ThemeApiTest {
         Integer time = createTime("10:00");
         Integer time2 = createTime("11:00");
 
-        createReservation("user1", "2026-05-05", time, themeA);
-        createReservation("user2", "2026-05-04", time, themeA);
-        createReservation("user3", "2026-05-05", time, themeB);
-        createReservation("user4", "2026-05-05", time2, themeB);
-        createReservation("user5", "2026-05-04", time2, themeC);
+        createReservation("user1", LocalDate.now().minusDays(1), time, themeA);
+        createReservation("user2", LocalDate.now().minusDays(2), time, themeA);
+        createReservation("user3", LocalDate.now().minusDays(1), time, themeB);
+        createReservation("user4", LocalDate.now().minusDays(1), time2, themeB);
+        createReservation("user5", LocalDate.now().minusDays(2), time2, themeC);
 
         RestAssured.given().log().all()
-                .when().get("/themes/popular?now=2026-05-06&days=7&limit=2")
+                .when().get("/themes/popular?days=7&limit=2")
                 .then().log().all()
                 .statusCode(200)
                 .body("themes.size()", is(2));
     }
 
     @Test
-    void 인기_테마_조회시_now를_지정하지_않으면_시스템_시각_기준_200을_반환한다() {
+    void 인기_테마_조회시_파라미터를_생략하면_기본값으로_200을_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/themes/popular")
                 .then().log().all()
@@ -186,7 +187,7 @@ class ThemeApiTest {
     void 사용중인_테마를_삭제하면_422() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer timeId = createTime("10:00");
-        createReservation("브라운", "2026-08-05", timeId, themeId);
+        createReservation("브라운", LocalDate.of(2026, 8, 5), timeId, themeId);
 
         RestAssured.given().log().all()
                 .when().delete("/themes/" + themeId)
@@ -222,10 +223,10 @@ class ThemeApiTest {
                 .extract().jsonPath().get("id");
     }
 
-    private void createReservation(String name, String date, Integer timeId, Integer themeId) {
+    private void createReservation(String name, LocalDate date, Integer timeId, Integer themeId) {
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, LocalDate.parse(date), timeId, themeId
+                name, date, timeId, themeId
         );
     }
 }

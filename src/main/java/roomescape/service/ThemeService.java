@@ -40,7 +40,8 @@ public class ThemeService {
                 .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_THEME, id)));
     }
 
-    public List<Theme> getPopularThemes(LocalDate now, Integer days, Integer limit) {
+    public List<Theme> getPopularThemes(Integer days, Integer limit) {
+        LocalDate now = LocalDate.now();
         LocalDate start = now.minusDays(days);
         LocalDate end = now.minusDays(1);
         return themeRepository.getPopularThemes(start, end, limit);

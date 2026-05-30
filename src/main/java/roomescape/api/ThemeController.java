@@ -18,8 +18,6 @@ import roomescape.dto.ThemeResponses;
 import roomescape.facade.ReservationFacade;
 import roomescape.service.ThemeService;
 
-import java.time.LocalDate;
-
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
@@ -54,11 +52,9 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<ThemeResponses> searchPopular(
-            @RequestParam(required = false) LocalDate now,
             @RequestParam(defaultValue = "7") Integer days,
             @RequestParam(defaultValue = "10") Integer limit
     ) {
-        LocalDate baseDate = (now != null) ? now : LocalDate.now();
-        return ResponseEntity.ok().body(ThemeResponses.from(themeService.getPopularThemes(baseDate, days, limit)));
+        return ResponseEntity.ok().body(ThemeResponses.from(themeService.getPopularThemes(days, limit)));
     }
 }
