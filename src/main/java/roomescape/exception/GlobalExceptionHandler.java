@@ -1,5 +1,7 @@
 package roomescape.exception;
 
+import java.net.URI;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -14,9 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.net.URI;
-import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -145,7 +144,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return "";
     }
 
-    public record FieldErrorDetail(String pointer, String reason) {
+    public record FieldErrorDetail(
+            String pointer,
+            String reason
+    ) {
         public static FieldErrorDetail from(FieldError fieldError) {
             return new FieldErrorDetail(POINTER_PREFIX + fieldError.getField(), fieldError.getDefaultMessage());
         }

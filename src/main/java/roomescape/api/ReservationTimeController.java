@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeAvailability;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.dto.ReservationTimeResponses;
@@ -61,11 +62,14 @@ public class ReservationTimeController {
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
-        List<TimeWithStatusResponse> timesWithAvailability = reservationTimeQueryService.findWithAvailability(date,
-                themeId);
+        List<ReservationTimeAvailability> availabilities
+                = reservationTimeQueryService.findWithAvailability(date, themeId);
+        List<TimeWithStatusResponse> responses = availabilities.stream()
+                .map(TimeWithStatusResponse::from)
+                .toList();
 
         return ResponseEntity.ok()
-                .body(TimeWithStatusResponses.of(timesWithAvailability));
+                .body(TimeWithStatusResponses.of(responses));
     }
 
     @DeleteMapping("/{id}")

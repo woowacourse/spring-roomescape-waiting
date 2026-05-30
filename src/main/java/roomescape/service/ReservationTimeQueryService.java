@@ -6,14 +6,14 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.TimeWithStatusResponse;
+import roomescape.domain.ReservationTimeAvailability;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeQueryService {
-    
+
     private final ReservationTimeRepository timeRepository;
     private final ReservationQueryService reservationQueryService;
 
@@ -34,12 +34,12 @@ public class ReservationTimeQueryService {
         return timeRepository.findAll();
     }
 
-    public List<TimeWithStatusResponse> findWithAvailability(LocalDate date, Long themeId) {
+    public List<ReservationTimeAvailability> findWithAvailability(LocalDate date, Long themeId) {
         List<ReservationTime> times = timeRepository.findAll();
         Set<Long> reservedTimeIds = reservationQueryService.findReservedTimeIds(date, themeId);
 
         return times.stream()
-                .map(time -> TimeWithStatusResponse.from(time, reservedTimeIds.contains(time.getId())))
+                .map(time -> new ReservationTimeAvailability(time, !reservedTimeIds.contains(time.getId())))
                 .toList();
     }
 }
