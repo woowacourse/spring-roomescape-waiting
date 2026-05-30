@@ -48,7 +48,7 @@ public class ReservationWaitingService {
         Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
         reservation.validateDuplicatedReservationByName(reservationWaitingReq.name());
 
-        if(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingReq.name(), reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.timeId())) {
+        if(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingReq.name(), reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())) {
             throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
         }
 
