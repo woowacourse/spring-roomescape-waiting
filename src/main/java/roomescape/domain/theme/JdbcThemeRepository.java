@@ -60,11 +60,11 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<ThemeRankResult> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate today) {
         return jdbcTemplate.query(
-                FIND_ALL_WITH_RANK_SQL,
-                themeRankRowMapper(),
-                startDay,
-                today,
-                rankLimit
+            FIND_ALL_WITH_RANK_SQL,
+            themeRankRowMapper(),
+            startDay,
+            today,
+            rankLimit
         );
     }
 
@@ -103,10 +103,10 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     private RowMapper<ThemeRankResult> themeRankRowMapper() {
         return ((rs, rowNum) -> ThemeRankResult.of(
-                rs.getLong(COLUMN_ID),
-                rs.getString(COLUMN_NAME),
-                rs.getString(COLUMN_URL),
-                rs.getInt("rank")
+            rs.getLong(COLUMN_ID),
+            rs.getString(COLUMN_NAME),
+            rs.getString(COLUMN_URL),
+            rs.getInt("rank")
         ));
     }
 

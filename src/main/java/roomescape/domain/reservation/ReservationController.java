@@ -28,7 +28,7 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<CreateReservationResponse> createReservation(
-            @Valid @RequestBody CreateReservationRequest request
+        @Valid @RequestBody CreateReservationRequest request
     ) {
         CreateReservationResponse response = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -36,9 +36,9 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<UserReservationsResponse> getUserReservations(
-            @RequestParam
-            @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
-            String name
+        @RequestParam
+        @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
+        String name
     ) {
         UserReservationsResponse response = reservationService.getUserReservations(name);
         return ResponseEntity.ok(response);
@@ -46,7 +46,7 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> cancelUserReservation(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         reservationService.cancelUserReservation(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -54,8 +54,8 @@ public class ReservationController {
 
     @PatchMapping("/reservations/{id}")
     public ResponseEntity<Void> updateReservation(
-            @PathVariable Long id,
-            @RequestBody UpdateReservationRequest request
+        @PathVariable Long id,
+        @RequestBody UpdateReservationRequest request
     ) {
         reservationService.updateReservation(id, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
