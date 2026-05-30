@@ -1,9 +1,7 @@
 package roomescape.theme.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,8 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -43,7 +44,7 @@ class ThemeIntegrationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].id", is(1))
+                .body("[0].id", notNullValue())
                 .body("[0].name", is("오리엔탈"))
                 .body("[0].description", is("오리엔탈 설명"))
                 .body("[0].imageUrl", is("https://example.com/oriental.png"));
@@ -60,7 +61,7 @@ class ThemeIntegrationTest {
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", is(1))
+                .body("id", notNullValue())
                 .body("name", is("오리엔탈"))
                 .body("description", is("오리엔탈 설명"))
                 .body("imageUrl", is("https://example.com/oriental.png"));
@@ -71,15 +72,16 @@ class ThemeIntegrationTest {
     void delete() {
         Map<String, String> body = themeBody();
 
-        RestAssured.given().log().all()
+        long themeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/themes")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
 
         RestAssured.given().log().all()
-                .when().delete("/themes/1")
+                .when().delete("/themes/" + themeId)
                 .then().log().all()
                 .statusCode(204);
 

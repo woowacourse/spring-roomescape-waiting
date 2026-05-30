@@ -1,15 +1,5 @@
 package roomescape.reservation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,10 +10,20 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminReservationController.class)
 public class AdminReservationControllerTest {
@@ -136,7 +136,7 @@ public class AdminReservationControllerTest {
         mockMvc.perform(delete("/admin/reservations/{id}", 1L))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(reservationService).cancel(1L);
+        verify(reservationService).cancel(1L);
     }
 
     @DisplayName("존재하지 않는 예약을 취소하는 경우, 404를 반환한다.")

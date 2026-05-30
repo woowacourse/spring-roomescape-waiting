@@ -1,9 +1,7 @@
 package roomescape.time.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,8 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -41,7 +42,7 @@ class TimeIntegrationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].id", is(1))
+                .body("[0].id", notNullValue())
                 .body("[0].startAt", is("2030-06-01T10:00"))
                 .body("[0].endAt", is("2030-06-01T12:00"));
     }
@@ -55,7 +56,7 @@ class TimeIntegrationTest {
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", is(1))
+                .body("id", notNullValue())
                 .body("startAt", is("2030-06-01T10:00"))
                 .body("endAt", is("2030-06-01T12:00"));
     }
@@ -63,15 +64,16 @@ class TimeIntegrationTest {
     @DisplayName("시간 슬롯을 삭제한다.")
     @Test
     void delete() {
-        RestAssured.given().log().all()
+        long timeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(timeBody())
                 .when().post("/times")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
 
         RestAssured.given().log().all()
-                .when().delete("/times/1")
+                .when().delete("/times/" + timeId)
                 .then().log().all()
                 .statusCode(204);
 

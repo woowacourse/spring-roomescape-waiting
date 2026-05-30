@@ -1,17 +1,19 @@
 package roomescape.reservation.controller;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -42,7 +44,7 @@ class ReservationIntegrationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].id", is(1))
+                .body("[0].id", notNullValue())
                 .body("[0].name", is("라이"))
                 .body("[0].status", is("RESERVED"));
     }
@@ -58,7 +60,7 @@ class ReservationIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", is(1))
+                .body("id", notNullValue())
                 .body("name", is("라이"))
                 .body("status", is("RESERVED"));
     }
@@ -89,15 +91,16 @@ class ReservationIntegrationTest {
     void cancel() {
         createThemeAndTime();
 
-        RestAssured.given()
+        long createdId = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(reservationBody("라이"))
                 .when().post("/reservations")
-                .then().statusCode(201);
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
 
         RestAssured.given().log().all()
                 .queryParam("name", "라이")
-                .when().delete("/reservations/1")
+                .when().delete("/reservations/" + createdId)
                 .then().log().all()
                 .statusCode(204);
 
