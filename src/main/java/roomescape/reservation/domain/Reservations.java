@@ -43,7 +43,7 @@ public record Reservations(
                 .anyMatch(reservation -> !reservation.isOwner(name) && reservation.isReserved());
     }
 
-    public Reservation register(Reservation reservation) {
+    private Reservation register(Reservation reservation) {
         values.add(reservation);
         return reservation;
     }
