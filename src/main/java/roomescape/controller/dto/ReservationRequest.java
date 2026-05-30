@@ -9,9 +9,9 @@ public record ReservationRequest(
         String name,
         @NotNull(message = "날짜는 필수입니다.")
         LocalDate date,
-        @NotNull
+        @NotNull(message = "유효한 시간대 번호가 필요합니다.")
         Long timeId,
-        @NotNull
+        @NotNull(message = "유효한 테마 번호가 필요합니다.")
         Long themeId
 ) {
 }
