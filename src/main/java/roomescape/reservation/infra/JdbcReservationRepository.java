@@ -93,11 +93,15 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Integer update(Long id, ReservationSlot slot) {
-        return jdbcTemplate.update(
-                "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
-                slot.date(),
-                slot.timeId(),
-                id);
+        try {
+            return jdbcTemplate.update(
+                    "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
+                    slot.date(),
+                    slot.timeId(),
+                    id);
+        } catch (DataIntegrityViolationException e) {
+            throw new UniqueConstraintViolationException(e);
+        }
     }
 
     @Override
@@ -133,18 +137,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 slot.date(),
                 slot.themeId(),
                 slot.timeId());
-    }
-
-    @Override
-    public Boolean existsDuplicateExcluding(Reservation reservation) {
-        ReservationSlot slot = reservation.getSlot();
-        return jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ? AND id != ?)",
-                Boolean.class,
-                slot.date(),
-                slot.themeId(),
-                slot.timeId(),
-                reservation.getId());
     }
 
     @Override

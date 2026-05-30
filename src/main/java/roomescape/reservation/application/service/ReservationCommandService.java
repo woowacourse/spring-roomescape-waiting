@@ -98,10 +98,7 @@ public class ReservationCommandService {
                 request.now()
         );
 
-        validateNoDuplicateReservationSlot(updatedReservation);
-        if (reservationRepository.update(updatedReservation.getId(), updatedReservation.getSlot()) == 0) {
-            throw new NotFoundException("존재하지 않는 예약입니다.");
-        }
+        updateReservation(updatedReservation);
 
         return updatedReservation;
     }
@@ -123,8 +120,12 @@ public class ReservationCommandService {
         }
     }
 
-    private void validateNoDuplicateReservationSlot(Reservation reservation) {
-        if (reservationRepository.existsDuplicateExcluding(reservation)) {
+    private void updateReservation(Reservation reservation) {
+        try {
+            if (reservationRepository.update(reservation.getId(), reservation.getSlot()) == 0) {
+                throw new NotFoundException("존재하지 않는 예약입니다.");
+            }
+        } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
         }
     }

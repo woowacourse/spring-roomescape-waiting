@@ -170,61 +170,6 @@ class JdbcReservationRepositoryTest {
         });
     }
 
-    @DisplayName("특정 ID를 제외하고 테마, 날짜, 시간이 동일한 예약이 있는지 확인을 테스트합니다.")
-    @Test
-    void check_exist_by_theme_date_time_exclude_id() {
-        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
-        Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        LocalDate date = LocalDate.of(2026, 5, 6);
-        Long reservationId = testHelper.insertReservation(
-                "스타크",
-                date,
-                themeId,
-                nineTimeId
-        );
-        User stark = ReservationFixture.userNameStark();
-
-        Reservation reservation = Reservation.builder()
-                .id(reservationId)
-                .user(stark)
-                .slot(ReservationSlot.builder()
-                        .date(date)
-                        .themeId(themeId)
-                        .timeId(nineTimeId)
-                        .startAt(LocalTime.of(9, 0))
-                        .build())
-                .build();
-
-        Reservation differentIdReservation = Reservation.builder()
-                .id(100L)
-                .user(stark)
-                .slot(ReservationSlot.builder()
-                        .date(date)
-                        .themeId(themeId)
-                        .timeId(nineTimeId)
-                        .startAt(LocalTime.of(9, 0))
-                        .build())
-                .build();
-
-        Reservation differentTimeReservation = Reservation.builder()
-                .id(reservationId)
-                .user(stark)
-                .slot(ReservationSlot.builder()
-                        .date(date)
-                        .themeId(themeId)
-                        .timeId(tenTimeId)
-                        .startAt(LocalTime.of(10, 0))
-                        .build())
-                .build();
-
-        SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(reservationRepository.existsDuplicateExcluding(reservation)).isFalse();
-            assertSoftly.assertThat(reservationRepository.existsDuplicateExcluding(differentIdReservation)).isTrue();
-            assertSoftly.assertThat(reservationRepository.existsDuplicateExcluding(differentTimeReservation)).isFalse();
-        });
-    }
-
     @DisplayName("예약 업데이트를 테스트합니다.")
     @Test
     void update_reservation() {
@@ -261,5 +206,36 @@ class JdbcReservationRepositoryTest {
             assertSoftly.assertThat(updated.getSlot().date()).isEqualTo(newDate);
             assertSoftly.assertThat(updated.getSlot().timeId()).isEqualTo(newTimeId);
         });
+    }
+
+    @DisplayName("이미 예약이 존재하는 슬롯으로 업데이트 시 유니크 제약 위반 예외를 테스트합니다.")
+    @Test
+    void update_duplicate_slot_exception() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long updateReservationId = testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "피노",
+                date,
+                themeId,
+                tenTimeId
+        );
+
+        ReservationSlot duplicateSlot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(tenTimeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        assertThatThrownBy(() -> reservationRepository.update(updateReservationId, duplicateSlot))
+                .isInstanceOf(UniqueConstraintViolationException.class);
     }
 }

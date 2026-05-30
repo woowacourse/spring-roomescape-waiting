@@ -16,6 +16,7 @@ import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -71,6 +72,69 @@ public class ReservationConcurrencyTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(successCount.get()).isEqualTo(1);
             softly.assertThat(exceptionCount.get()).isEqualTo(numberOfThreads - 1);
+            softly.assertThat(exceptions).hasOnlyElementsOfType(ConflictException.class);
+        });
+    }
+
+    @DisplayName("동시에 같은 슬롯으로 예약 변경 시 하나는 성공하고 나머지는 예외 발생을 테스트합니다.")
+    @Test
+    void update_concurrent_duplicate_exception() throws InterruptedException {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long targetTimeId = testHelper.insertReservationTime(LocalTime.of(0, 0));
+        Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long elevenTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
+        Long starkReservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                tenTimeId
+        );
+        Long pkReservationId = testHelper.insertReservation(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                elevenTimeId
+        );
+        List<Long> reservationIds = List.of(starkReservationId, pkReservationId);
+        ReservationUpdateCommand command = new ReservationUpdateCommand(
+                ReservationFixture.futureReservationUpdateDate(),
+                targetTimeId,
+                NOW
+        );
+
+        int numberOfThreads = 2;
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch readyThreadCounter = new CountDownLatch(numberOfThreads);
+        CountDownLatch callingThreadBlocker = new CountDownLatch(1);
+        CountDownLatch completedThreadCounter = new CountDownLatch(numberOfThreads);
+        List<Exception> exceptions = new CopyOnWriteArrayList<>();
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger exceptionCount = new AtomicInteger();
+
+        for (Long reservationId : reservationIds) {
+            executor.execute(() -> {
+                try {
+                    readyThreadCounter.countDown();
+                    callingThreadBlocker.await();
+                    reservationCommandService.update(reservationId, command);
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    exceptions.add(e);
+                    exceptionCount.incrementAndGet();
+                } finally {
+                    completedThreadCounter.countDown();
+                }
+            });
+        }
+        readyThreadCounter.await();
+        callingThreadBlocker.countDown();
+        completedThreadCounter.await();
+        executor.shutdown();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(successCount.get()).isEqualTo(1);
+            softly.assertThat(exceptionCount.get()).isEqualTo(1);
             softly.assertThat(exceptions).hasOnlyElementsOfType(ConflictException.class);
         });
     }
