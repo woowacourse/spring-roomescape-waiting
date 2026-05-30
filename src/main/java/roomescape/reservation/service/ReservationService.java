@@ -69,6 +69,15 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        Reservation reservation = reservationDao.findById(id);
+        if (reservation.getStatus() == ReservationStatus.RESERVED) {
+            reservationDao.findFirstWaitingByDateTimeTheme(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+            ).ifPresent(waiting -> {
+                waiting.changeStatus(ReservationStatus.RESERVED);
+                reservationDao.updateStatus(waiting.getId(), waiting.getStatus());
+            });
+        }
         reservationDao.delete(id);
     }
 

@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -59,6 +60,27 @@ public class ReservationDao {
     return Reservation.of(keyHolder.getKey().longValue(), name, date, time, theme, status);
   }
 
+  private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+    ReservationTime time = ReservationTime.of(
+        resultSet.getLong("time_id"),
+        LocalTime.parse(resultSet.getString("start_at"))
+    );
+    Theme theme = Theme.of(
+        resultSet.getLong("theme_id"),
+        resultSet.getString("theme_name"),
+        resultSet.getString("theme_description"),
+        resultSet.getString("theme_image_url")
+    );
+    return Reservation.of(
+        resultSet.getLong("id"),
+        resultSet.getString("name"),
+        LocalDate.parse(resultSet.getString("date")),
+        time,
+        theme,
+        ReservationStatus.valueOf(resultSet.getString("status"))
+    );
+  };
+
   public List<Reservation> findAll() {
     String sql = "select r.id, r.name, r.date, r.status, "
         + "t.id as time_id, t.start_at, "
@@ -68,28 +90,7 @@ public class ReservationDao {
         + "inner join reservation_time t on r.time_id = t.id "
         + "inner join theme th on r.theme_id = th.id";
 
-    RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
-      ReservationTime time = ReservationTime.of(
-          resultSet.getLong("time_id"),
-          LocalTime.parse(resultSet.getString("start_at"))
-      );
-      Theme theme = Theme.of(
-          resultSet.getLong("theme_id"),
-          resultSet.getString("theme_name"),
-          resultSet.getString("theme_description"),
-          resultSet.getString("theme_image_url")
-      );
-      return Reservation.of(
-          resultSet.getLong("id"),
-          resultSet.getString("name"),
-          LocalDate.parse(resultSet.getString("date")),
-          time,
-          theme,
-          ReservationStatus.valueOf(resultSet.getString("status"))
-      );
-    };
-
-    return jdbcTemplate.query(sql, rowMapper);
+    return jdbcTemplate.query(sql, reservationRowMapper);
   }
 
   public void delete(Long id) {
@@ -114,28 +115,27 @@ public class ReservationDao {
         + "inner join theme th on r.theme_id = th.id "
         + "where r.id = ?";
 
-    RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
-      ReservationTime time = ReservationTime.of(
-          resultSet.getLong("time_id"),
-          LocalTime.parse(resultSet.getString("start_at"))
-      );
-      Theme theme = Theme.of(
-          resultSet.getLong("theme_id"),
-          resultSet.getString("theme_name"),
-          resultSet.getString("theme_description"),
-          resultSet.getString("theme_image_url")
-      );
-      return Reservation.of(
-          resultSet.getLong("id"),
-          resultSet.getString("name"),
-          LocalDate.parse(resultSet.getString("date")),
-          time,
-          theme,
-          ReservationStatus.valueOf(resultSet.getString("status"))
-      );
-    };
+    return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
+  }
 
-    return jdbcTemplate.queryForObject(sql, rowMapper, id);
+  public Optional<Reservation> findFirstWaitingByDateTimeTheme(LocalDate date, Long timeId, Long themeId) {
+    String sql = "select r.id, r.name, r.date, r.status, "
+        + "t.id as time_id, t.start_at, "
+        + "th.id as theme_id, th.name as theme_name, "
+        + "th.description as theme_description, th.image_url as theme_image_url "
+        + "from reservation r "
+        + "inner join reservation_time t on r.time_id = t.id "
+        + "inner join theme th on r.theme_id = th.id "
+        + "where r.date = ? and r.time_id = ? and r.theme_id = ? and r.status = ? "
+        + "order by r.id asc limit 1";
+
+    List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId, ReservationStatus.WAITING.name());
+    return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+  }
+
+  public void updateStatus(Long id, ReservationStatus status) {
+    String sql = "update reservation set status = ? where id = ?";
+    jdbcTemplate.update(sql, status.name(), id);
   }
 
   public boolean findByDateTimeThemeStatus(String date, Long timeId, Long themeId) {
