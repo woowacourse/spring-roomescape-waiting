@@ -179,7 +179,6 @@ public class ReservationService {
         reservationRepository.update(reservation.getId(), reservationToSave);
 
         reorderWaitingNumbersBySlot(currentSlot);
-        reorderWaitingNumbersBySlot(updatedSlot);
     }
 
     private Reservation buildReservation(ReservationSlot reservationSlot, User user) {
