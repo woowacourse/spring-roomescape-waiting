@@ -42,6 +42,6 @@ public class ManagerReservationTimeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         reservationTimeService.delete(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 }

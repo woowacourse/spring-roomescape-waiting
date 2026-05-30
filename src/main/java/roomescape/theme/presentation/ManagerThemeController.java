@@ -45,6 +45,6 @@ public class ManagerThemeController {
             @PathVariable @Positive long id
     ) {
         themeService.delete(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 }

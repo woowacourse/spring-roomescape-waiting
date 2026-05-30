@@ -31,7 +31,7 @@ public class WaitingController {
             @LoginMember AuthenticatedMember member
     ) {
         WaitingResponse response = waitingService.save(body, member.id());
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
     @DeleteMapping("/{id}")
@@ -40,6 +40,6 @@ public class WaitingController {
             @LoginMember AuthenticatedMember member
     ) {
         waitingService.deleteByIdForUser(id, member.id());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 }

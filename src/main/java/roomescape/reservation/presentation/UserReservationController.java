@@ -48,7 +48,7 @@ public class UserReservationController {
             @LoginMember AuthenticatedMember member
     ) {
         reservationService.deleteByIdForUser(id, member.id());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

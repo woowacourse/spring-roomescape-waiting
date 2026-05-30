@@ -54,6 +54,6 @@ public class ManagerScheduleController {
             @PathVariable @Positive long scheduleId
     ) {
         scheduleService.deleteById(scheduleId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+        return ResponseEntity.noContent().build();
     }
 }
