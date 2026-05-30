@@ -75,7 +75,13 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
                 WHERE date = ?
                     AND time_id = ?
                     AND theme_id = ?
-                    AND created_at < ?;
+                    AND (
+                        created_at < ?
+                        OR (
+                            created_at = ?
+                            AND id < ?
+                        )
+                    );
                 """;
 
         Integer count = jdbcTemplate.queryForObject(
@@ -84,7 +90,9 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
                 waitlist.getDate(),
                 waitlist.getTime().getId(),
                 waitlist.getTheme().getId(),
-                waitlist.getCreatedAt()
+                waitlist.getCreatedAt(),
+                waitlist.getCreatedAt(),
+                waitlist.getId()
         );
 
         return count == null ? 0 : count;
