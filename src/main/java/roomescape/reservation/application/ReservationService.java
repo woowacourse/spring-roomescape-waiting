@@ -65,8 +65,7 @@ public class ReservationService {
                 reservationDetail.timeId(),
                 reservationDetail.themeId()
         );
-        reservationRepository.deleteById(reservationId);
-        promoteWaitingIfExists(scheduleId);
+        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
     }
 
     @Transactional
@@ -84,8 +83,7 @@ public class ReservationService {
                 reservationDetail.timeId(),
                 reservationDetail.themeId()
         );
-        reservationRepository.deleteById(reservationId);
-        promoteWaitingIfExists(scheduleId);
+        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
     }
 
     public List<ReservationDetailFindResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
@@ -174,6 +172,12 @@ public class ReservationService {
         validateNotPast(oldReservation);
         validateNotEmptyUpdateRequest(body);
 
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(oldScheduleId)
+                .orElse(null);
+        if (firstWaiting != null) {
+            waitingRepository.deleteById(firstWaiting.getId());
+        }
+
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId, oldReservation.getThemeId());
@@ -182,17 +186,24 @@ public class ReservationService {
 
         int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
         validateReservationUpdated(affectedRow);
-        promoteWaitingIfExists(oldScheduleId);
+        if (firstWaiting != null) {
+            reservationRepository.save(new Reservation(null, firstWaiting.getMemberId(), oldScheduleId));
+        }
 
         return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
     }
 
-    private void promoteWaitingIfExists(long scheduleId) {
-        waitingRepository.findFirstByScheduleId(scheduleId)
-                .ifPresent(waiting -> {
-                    reservationRepository.save(new Reservation(null, waiting.getMemberId(), waiting.getScheduleId()));
-                    waitingRepository.deleteById(waiting.getId());
-                });
+    private void deleteReservationAndPromoteWaiting(long reservationId, long scheduleId) {
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(scheduleId)
+                .orElse(null);
+        if (firstWaiting != null) {
+            waitingRepository.deleteById(firstWaiting.getId());
+            reservationRepository.deleteById(reservationId);
+            reservationRepository.save(new Reservation(null, firstWaiting.getMemberId(), scheduleId));
+            return;
+        }
+
+        reservationRepository.deleteById(reservationId);
     }
 
     private Reservation getNewReservationOrThrow(long reservationId) {
