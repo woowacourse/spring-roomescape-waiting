@@ -17,7 +17,6 @@ import roomescape.reservation.infrastructure.projection.ReservationDetailProject
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.application.readmodel.WaitingReadModel;
 import roomescape.waiting.infrastructure.WaitingRepository;
-import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -25,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @Service
@@ -51,15 +49,27 @@ public class ReservationService {
         return ReservationDetailFindResponse.from(reservationReadModels);
     }
 
-    public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> { });
+    public void deleteByIdForManager(long reservationId) {
+        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+                .orElse(null);
+        if (reservationDetail == null) {
+            return;
+        }
+
+        validateNotPast(reservationDetail);
+        reservationRepository.deleteById(reservationId);
     }
 
     public void deleteByIdForUser(long reservationId, long memberId) {
-        deleteInternal(
-                reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
-        );
+        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+                .orElse(null);
+        if (reservationDetail == null) {
+            return;
+        }
+
+        validateReservationOwner(reservationId, reservationDetail, memberId);
+        validateNotPast(reservationDetail);
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<ReservationDetailFindResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
@@ -84,16 +94,16 @@ public class ReservationService {
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
-        return updateInternal(
-                body,
-                reservationId,
-                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
-        );
+        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
+        validateReservationOwner(reservationId, oldReservation, memberId);
+
+        return updateReservation(body, reservationId, oldReservation);
     }
 
-    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {
-        });
+    public ReservationSaveResponse updateForManager(ReservationUpdateRequest body, long reservationId) {
+        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
+
+        return updateReservation(body, reservationId, oldReservation);
     }
 
     private static void validateReservationOwner(
@@ -132,27 +142,11 @@ public class ReservationService {
                 response.status() == ReservationStatus.RESERVED ? 0 : 1);
     }
 
-    private void deleteInternal(
-            long reservationId,
-            Consumer<ReservationDetailProjection> accessValidator
-    ) {
-        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
-                .orElse(null);
-        if (reservationDetail == null) {
-            return;
-        }
-        accessValidator.accept(reservationDetail);
-        validateNotPast(reservationDetail);
-        reservationRepository.deleteById(reservationId);
-    }
-
-    private ReservationSaveResponse updateInternal(
+    private ReservationSaveResponse updateReservation(
             ReservationUpdateRequest body,
             long reservationId,
-            Consumer<ReservationDetailProjection> accessValidator
+            ReservationDetailProjection oldReservation
     ) {
-        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
-        accessValidator.accept(oldReservation);
         validateNotPast(oldReservation);
         validateNotEmptyUpdateRequest(body);
 

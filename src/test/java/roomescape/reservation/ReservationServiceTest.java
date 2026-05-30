@@ -102,7 +102,7 @@ class ReservationServiceTest {
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
-        assertThatCode(() -> reservationService.deleteById(reservationId))
+        assertThatCode(() -> reservationService.deleteByIdForManager(reservationId))
                 .doesNotThrowAnyException();
         verify(reservationRepository).deleteById(reservationId);
     }
@@ -161,7 +161,7 @@ class ReservationServiceTest {
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
-        ReservationSaveResponse response = reservationService.update(request, reservationId);
+        ReservationSaveResponse response = reservationService.updateForManager(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);
