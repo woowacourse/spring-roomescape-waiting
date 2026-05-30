@@ -27,8 +27,8 @@ public class ThemeController {
 
     @GetMapping("/ranking")
     public ResponseEntity<List<ThemeResponse>> findRanking(
-            @RequestParam("start-date") LocalDate startDate,
-            @RequestParam("end-date") LocalDate endDate
+            @RequestParam("startDate") LocalDate startDate,
+            @RequestParam("endDate") LocalDate endDate
     ) {
         return ResponseEntity.ok(themeFacade.findRanking(startDate, endDate));
     }
