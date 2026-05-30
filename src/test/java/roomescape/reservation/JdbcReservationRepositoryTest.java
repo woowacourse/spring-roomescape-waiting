@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.infrastructure.JdbcReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
@@ -18,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @JdbcTest
-@Transactional
 @ActiveProfiles("test")
 @Import(JdbcReservationRepository.class)
 class JdbcReservationRepositoryTest {

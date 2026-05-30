@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.schedule.infrastructure.JdbcScheduleRepository;
 
 import java.time.LocalDate;
@@ -16,7 +15,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Transactional
 @ActiveProfiles("test")
 @Import(JdbcScheduleRepository.class)
 class JdbcScheduleRepositoryTest {
