@@ -1,6 +1,8 @@
 package roomescape.reservationwaiting;
 
 import java.time.LocalDateTime;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
 import roomescape.reservation.Reservation;
 
 public class ReservationWaiting {
@@ -10,6 +12,7 @@ public class ReservationWaiting {
     private final LocalDateTime requestAt;
 
     public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestAt) {
+        validateName(name);
         this.id = id;
         this.reservation = reservation;
         this.name = name;
@@ -38,5 +41,18 @@ public class ReservationWaiting {
 
     public LocalDateTime getRequestAt() {
         return requestAt;
+    }
+
+    private String validateName(final String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 필수입니다.");
+        }
+
+        String trimmedName = name.trim();
+        if (trimmedName.length() >= 10) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 10자 미만이어야 합니다.");
+        }
+
+        return trimmedName;
     }
 }

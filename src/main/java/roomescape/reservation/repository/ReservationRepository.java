@@ -13,6 +13,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByIdAndName(long id, String name);
 
+    Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
+
     int deleteById(long id);
 
     Reservation save(Reservation reservation);

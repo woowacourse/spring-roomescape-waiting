@@ -121,6 +121,29 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndThemeIdAndTimeId(final LocalDate date, final long themeId, final long timeId) {
+        String sql = """
+                SELECT r.id,
+                    r.name AS reservation_name,
+                    r.date,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description,
+                    t.thumbnail_url
+                FROM reservation AS r
+                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN theme AS t ON r.theme_id = t.id
+                WHERE r.date = ? AND theme_id = ? AND time_id = ?;
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper, date, themeId, timeId)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
     public int deleteById(final long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         return jdbcTemplate.update(sql, id);

@@ -71,6 +71,7 @@ class ReservationWaitingApiTest {
     @Test
     @DisplayName("존재하지 않는 예약에는 대기를 생성할 수 없다")
     void createReservationWaitingWithoutReservation() throws Exception {
+        // 8월 6일 예약 존재
         mockMvc.perform(post("/waitings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
