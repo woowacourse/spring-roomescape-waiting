@@ -3,6 +3,7 @@ package roomescape.common.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
@@ -10,10 +11,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.Objects;
 
+import static roomescape.common.exception.GlobalErrorCode.URL_NOT_FOUND;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 
 /**
@@ -83,6 +86,19 @@ public class CustomSpringMvcExceptionHandler {
             HttpServletRequest request
     ) {
         return validationError(request, ex.getPropertyName() + " 값의 타입이 올바르지 않습니다.");
+    }
+
+    /**
+     * NoResourceFoundException: 없는 URL을 호출했을 때
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of(pathFrom(request), URL_NOT_FOUND.code(), URL_NOT_FOUND.message()));
     }
 
     private ResponseEntity<ErrorResponse> validationError(HttpServletRequest request, String message) {

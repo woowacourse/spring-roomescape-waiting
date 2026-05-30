@@ -28,10 +28,6 @@ public class ErrorResponse {
         return new ErrorResponse(path, code, message, null);
     }
 
-    public static ErrorResponse of(String path, String message) {
-        return of(path, null, message);
-    }
-
     public static ErrorResponse of(String path, String code, List<String> messages) {
         List<String> copiedMessages = List.copyOf(messages);
         return new ErrorResponse(path, code, null, copiedMessages);
