@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import roomescape.holiday.controller.dto.HolidayResponse;
 import roomescape.holiday.exception.HolidayNotFoundException;
 import roomescape.holiday.service.HolidayService;
-import roomescape.holiday.service.dto.HolidaySaveServiceDto;
+import roomescape.holiday.service.dto.HolidaySaveServiceRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -273,7 +273,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            holidayService.create(new HolidaySaveServiceDto(date));
+            holidayService.create(new HolidaySaveServiceRequest(date));
             addSuccessMessage(redirectAttributes, "휴일을 추가했습니다.");
         } catch (IllegalArgumentException e) {
             addExpectedErrorMessage(redirectAttributes, "휴일 추가에 실패했습니다. 입력값을 다시 확인해 주세요.", e);

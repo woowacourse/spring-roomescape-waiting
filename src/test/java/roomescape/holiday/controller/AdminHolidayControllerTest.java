@@ -10,14 +10,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.holiday.domain.Holiday;
 import roomescape.holiday.service.HolidayService;
-import roomescape.holiday.service.dto.HolidaySaveServiceDto;
+import roomescape.holiday.service.dto.HolidaySaveServiceRequest;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminHolidayController.class)
@@ -37,7 +36,7 @@ class AdminHolidayControllerTest {
         Holiday holiday3 = new Holiday(3L, LocalDate.of(2026,7,6));
         List<Holiday> holidayList = List.of(holiday1,holiday2,holiday3);
 
-        Mockito.when(holidayService.getAll()).thenReturn(holidayList);
+        when(holidayService.getAll()).thenReturn(holidayList);
 
         mockMvc.perform(get("/admin/holidays")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -49,8 +48,9 @@ class AdminHolidayControllerTest {
     void 휴일_생성() throws Exception {
         LocalDate date = LocalDate.of(2026, 8, 8);
         Holiday savedHoliday = new Holiday(1L, date);
+        HolidaySaveServiceRequest request = new HolidaySaveServiceRequest(date);
 
-        Mockito.when(holidayService.create(Mockito.any(HolidaySaveServiceDto.class)))
+        when(holidayService.create(request))
                 .thenReturn(savedHoliday);
 
         String requestBody = String.format("{\"id\":%d,\"date\":\"%s\"}", 1L, date);

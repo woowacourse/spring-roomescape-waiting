@@ -1,16 +1,5 @@
 package roomescape.reservation.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDateTime;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,9 +16,18 @@ import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationSaveServiceRequest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest {
@@ -211,7 +209,8 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationService.create(any())).thenReturn(saved);
+        ReservationSaveServiceRequest request = new ReservationSaveServiceRequest("라이", 1L, 1L);
+        when(reservationService.create(request)).thenReturn(saved);
 
         String requestBody = """
                 {
@@ -240,7 +239,8 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation saved = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
-        when(reservationService.create(any())).thenReturn(saved);
+        ReservationSaveServiceRequest request = new ReservationSaveServiceRequest("라이", 1L, 1L);
+        when(reservationService.create(request)).thenReturn(saved);
 
         String requestBody = """
                 {

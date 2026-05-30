@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.domain.Holiday;
 import roomescape.holiday.exception.HolidayNotFoundException;
 import roomescape.holiday.repository.HolidayRepository;
-import roomescape.holiday.service.dto.HolidaySaveServiceDto;
+import roomescape.holiday.service.dto.HolidaySaveServiceRequest;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,7 +26,7 @@ public class HolidayServiceImpl implements HolidayService {
 
     @Override
     @Transactional
-    public Holiday create(HolidaySaveServiceDto holiday) {
+    public Holiday create(HolidaySaveServiceRequest holiday) {
         return holidayRepository.save(new Holiday(holiday.date()));
     }
 

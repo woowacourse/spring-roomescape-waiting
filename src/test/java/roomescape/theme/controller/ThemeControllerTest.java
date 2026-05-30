@@ -1,26 +1,23 @@
 package roomescape.theme.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeSaveServiceRequest;
+
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
@@ -37,7 +34,7 @@ class ThemeControllerTest {
         Theme theme1 = new Theme("이름1", "설명1", "https://img.test/1.png").withId(1L);
         Theme theme2 = new Theme("이름2", "설명2", "https://img.test/2.png").withId(2L);
 
-        Mockito.when(themeService.getAll()).thenReturn(List.of(theme1, theme2));
+        when(themeService.getAll()).thenReturn(List.of(theme1, theme2));
 
         mockMvc.perform(get("/themes")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -52,13 +49,13 @@ class ThemeControllerTest {
     @DisplayName("이름, 설명으로 테마를 생성 후 201을 반환한다.")
     @Test
     void 테마_생성() throws Exception {
-        Theme saved = new Theme("이름", "설명", "https://img.test/a.png").withId(1L);
-        Mockito.when(themeService.create(Mockito.any(ThemeSaveServiceRequest.class)))
-                .thenReturn(saved);
+        Theme saved = new Theme("라이", "설명", "https://img.test/a.png").withId(1L);
+        ThemeSaveServiceRequest request = new ThemeSaveServiceRequest("라이", "설명", "https://img.test/a.png");
+        when(themeService.create(request)).thenReturn(saved);
 
         String requestBody = """
                 {
-                    "name": "이름",
+                    "name": "라이",
                     "description": "설명",
                     "imageUrl": "https://img.test/a.png"
                 }
@@ -69,7 +66,7 @@ class ThemeControllerTest {
                         .content(requestBody))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("이름"))
+                .andExpect(jsonPath("$.name").value("라이"))
                 .andExpect(jsonPath("$.description").value("설명"))
                 .andExpect(jsonPath("$.imageUrl").value("https://img.test/a.png"));
     }
@@ -82,14 +79,14 @@ class ThemeControllerTest {
         mockMvc.perform(delete("/themes/{id}", id))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(themeService).deleteById(id);
+        verify(themeService).deleteById(id);
     }
 
     @DisplayName("존재하지 않는 테마 ID로 삭제 요청인 경우, 404를 반환한다.")
     @Test
     void 존재하지_않는_테마_삭제_404() throws Exception {
         Long id = 999L;
-        Mockito.doThrow(new ThemeNotFoundException(id))
+        doThrow(new ThemeNotFoundException(id))
                 .when(themeService).deleteById(id);
 
         mockMvc.perform(delete("/themes/{id}", id))
@@ -153,7 +150,7 @@ class ThemeControllerTest {
         Theme top1 = new Theme("1위", "설명1", "https://img.test/1.png").withId(1L);
         Theme top2 = new Theme("2위", "설명2", "https://img.test/2.png").withId(2L);
 
-        Mockito.when(themeService.getBestThemes()).thenReturn(List.of(top1, top2));
+        when(themeService.getBestThemes()).thenReturn(List.of(top1, top2));
 
         mockMvc.perform(get("/themes/best")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -168,7 +165,7 @@ class ThemeControllerTest {
     @DisplayName("인기 테마가 없으면 빈 목록을 반환한다.")
     @Test
     void 인기_테마_빈_목록_조회() throws Exception {
-        Mockito.when(themeService.getBestThemes()).thenReturn(List.of());
+        when(themeService.getBestThemes()).thenReturn(List.of());
 
         mockMvc.perform(get("/themes/best")
                         .contentType(MediaType.APPLICATION_JSON))

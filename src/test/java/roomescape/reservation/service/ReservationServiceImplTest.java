@@ -72,8 +72,8 @@ class ReservationServiceImplTest {
 
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
-        when(holidayService.isHoliday(any())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(false);
+        when(holidayService.isHoliday(time.getDate())).thenReturn(false);
+        when(reservationRepository.isDuplicated(1L, time)).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
         when(themeRepository.findById(1L)).thenReturn(theme);
 
@@ -97,8 +97,8 @@ class ReservationServiceImplTest {
 
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
-        when(holidayService.isHoliday(any())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(true);
+        when(holidayService.isHoliday(time.getDate())).thenReturn(false);
+        when(reservationRepository.isDuplicated(1L, time)).thenReturn(true);
         when(reservationRepository.save(any())).thenReturn(saved);
         when(themeRepository.findById(1L)).thenReturn(theme);
 
@@ -191,7 +191,7 @@ class ReservationServiceImplTest {
         when(themeRepository.findById(1L)).thenReturn(theme);
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
 
-        when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(true);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, time)).thenReturn(true);
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
 
         // when & then
@@ -210,9 +210,9 @@ class ReservationServiceImplTest {
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(true);
+        when(reservationRepository.isDuplicated(1L, time)).thenReturn(true);
         when(themeRepository.findById(1L)).thenReturn(theme);
-        when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(false);
+        when(reservationRepository.isDuplicatedWithName("라이", 1L, time)).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
 
@@ -373,7 +373,7 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(any())).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
         when(reservationRepository.promoteToReserved(2L)).thenReturn(true);
         when(reservationRepository.deleteById(1L)).thenReturn(true);
@@ -417,14 +417,14 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
-        when(reservationRepository.update(any(), any(), any())).thenReturn(true);
+        when(reservationRepository.update(eq(1L), eq(2L), any())).thenReturn(true);
 
         // when
         Reservation result = reservationService.update(1L, 2L);
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
-        verify(reservationRepository).update(any(), any(), any());
+        verify(reservationRepository).update(eq(1L), eq(2L), any());
     }
 
     @DisplayName("존재하지 않는 예약을 변경하는 경우, ReservationNotFoundException이 발생한다.")
@@ -476,7 +476,7 @@ class ReservationServiceImplTest {
                 LocalDateTime.of(2030, 6, 1, 16, 0));
         Reservation existing = new Reservation("라이", oldTime, new Theme("name", "description", "https://img.test/a.png").withId(1L), Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(timeService.findById(any())).thenReturn(newTime);
+        when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(true);
 
         // when & then

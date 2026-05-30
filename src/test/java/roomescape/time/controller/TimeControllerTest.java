@@ -1,16 +1,5 @@
 package roomescape.time.controller;
 
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,12 +8,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
+import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeConflictException;
 import roomescape.time.exception.TimeNotFoundException;
-import roomescape.theme.service.ThemeService;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TimeController.class)
 class TimeControllerTest {
@@ -48,7 +46,7 @@ class TimeControllerTest {
                 new ReservationTime(1L, LocalDateTime.of(2026, 5, 6, 10, 0), LocalDateTime.of(2026, 5, 6, 12, 0)),
                 new ReservationTime(2L, LocalDateTime.of(2026, 5, 6, 12, 0), LocalDateTime.of(2026, 5, 6, 14, 0))
         );
-        Mockito.when(themeService.getAvailableTimes(themeId, date)).thenReturn(times);
+        when(themeService.getAvailableTimes(themeId, date)).thenReturn(times);
 
         mockMvc.perform(get("/times")
                         .queryParam("themeId", String.valueOf(themeId))
@@ -67,7 +65,7 @@ class TimeControllerTest {
                 new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0)),
                 new ReservationTime(2L, LocalDateTime.of(2030, 6, 1, 13, 0), LocalDateTime.of(2030, 6, 1, 15, 0))
         );
-        Mockito.when(timeService.findAll()).thenReturn(times);
+        when(timeService.findAll()).thenReturn(times);
 
         mockMvc.perform(get("/times")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -80,11 +78,12 @@ class TimeControllerTest {
     @DisplayName("시간 슬롯을 생성한 후, 201을 반환한다.")
     @Test
     void 시간_생성() throws Exception {
+        LocalDateTime start = LocalDateTime.of(2030, 6, 1, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2030, 6, 1, 12, 0);
         ReservationTime saved = new ReservationTime(1L,
                 LocalDateTime.of(2030, 6, 1, 10, 0),
                 LocalDateTime.of(2030, 6, 1, 12, 0));
-        Mockito.when(timeService.create(Mockito.any(), Mockito.any()))
-                .thenReturn(saved);
+        when(timeService.create(start, end)).thenReturn(saved);
 
         String requestBody = """
                 {
