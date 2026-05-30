@@ -1,16 +1,13 @@
 package roomescape.time.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import roomescape.reservation.exception.PastReservationException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import roomescape.reservation.exception.PastReservationException;
+import static org.assertj.core.api.Assertions.*;
 
 class ReservationTimeTest {
 
@@ -67,12 +64,13 @@ class ReservationTimeTest {
                 .hasMessageContaining("종료 시간은 시작 시간 이후여야 합니다.");
     }
 
-    @DisplayName("startAt으로부터 날짜를 반환한다.")
+    @DisplayName("startAt으로부터 endAt이 다음 날에 걸쳐있어도 startAt의 날짜를 반환한다.")
     @Test
     void getDate_날짜_반환_테스트() {
         // given
-        LocalDateTime start = LocalDateTime.of(2030, 6, 1, 10, 0);
-        ReservationTime time = new ReservationTime(1L, start, start.plusHours(2));
+        LocalDateTime start = LocalDateTime.of(2030, 6, 1, 23, 0);
+        LocalDateTime end = LocalDateTime.of(2030, 6, 2, 1, 0);
+        ReservationTime time = new ReservationTime(1L, start, end);
 
         // when
         LocalDate date = time.getDate();
