@@ -1,7 +1,7 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -108,7 +108,7 @@ class ReservationSlotTest {
                 .startAt(LocalTime.of(11, 0))
                 .build();
 
-        assertDoesNotThrow(() -> reservationSlot.validateReservable(now));
+        assertThatNoException().isThrownBy(() -> reservationSlot.validateReservable(now));
     }
 
     @DisplayName("현재 시간보다 이전 시간으로 예약 시 예외 발생을 테스트합니다.")
@@ -138,7 +138,7 @@ class ReservationSlotTest {
                 .startAt(LocalTime.of(11, 0))
                 .build();
 
-        assertDoesNotThrow(() -> reservationSlot.validateDeletable(now));
+        assertThatNoException().isThrownBy(() -> reservationSlot.validateDeletable(now));
     }
 
     @DisplayName("이미 지나간 슬롯 삭제 시 예외 발생을 테스트합니다.")
@@ -155,5 +155,35 @@ class ReservationSlotTest {
         assertThatThrownBy(() -> reservationSlot.validateDeletable(now))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("현재 시간 이후의 슬롯이면 변경이 가능합니다.")
+    @Test
+    void validate_updatable_future() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 17, 10, 0);
+        ReservationSlot reservationSlot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 17))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(11, 0))
+                .build();
+
+        assertThatNoException().isThrownBy(() -> reservationSlot.validateUpdatable(now));
+    }
+
+    @DisplayName("이미 지나간 슬롯 변경 시 예외 발생을 테스트합니다.")
+    @Test
+    void validate_updatable_past_exception() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 17, 10, 0);
+        ReservationSlot reservationSlot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 17))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        assertThatThrownBy(() -> reservationSlot.validateUpdatable(now))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("이미 지나간 예약은 변경할 수 없습니다.");
     }
 }

@@ -118,7 +118,7 @@ class ReservationCommandServiceTest {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(0, 0));
         Long reservationId = testHelper.insertReservation(
                 "스타크",
-                ReservationFixture.pastReservationDate(),
+                ReservationFixture.futureReservationDate(),
                 themeId,
                 timeId
         );
@@ -126,11 +126,11 @@ class ReservationCommandServiceTest {
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         ReservationApplicationResult result = reservationCommandService.update(
                 reservationId,
-                new ReservationUpdateCommand(ReservationFixture.futureReservationDate(), updateTimeId, NOW)
+                new ReservationUpdateCommand(ReservationFixture.futureReservationUpdateDate(), updateTimeId, NOW)
         );
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.date()).isEqualTo(ReservationFixture.futureReservationDate());
+            softly.assertThat(result.date()).isEqualTo(ReservationFixture.futureReservationUpdateDate());
             softly.assertThat(result.time().id()).isEqualTo(updateTimeId);
         });
     }
@@ -173,7 +173,7 @@ class ReservationCommandServiceTest {
         Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long starkReservationId = testHelper.insertReservation(
                 "스타크",
-                ReservationFixture.pastReservationDate(),
+                ReservationFixture.futureReservationDate(),
                 themeId,
                 tenTimeId
         );
@@ -181,7 +181,7 @@ class ReservationCommandServiceTest {
         Long elevenTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         testHelper.insertReservation(
                 "카야",
-                ReservationFixture.futureReservationDate(),
+                ReservationFixture.futureReservationUpdateDate(),
                 themeId,
                 elevenTimeId
         );
@@ -213,6 +213,30 @@ class ReservationCommandServiceTest {
                 ))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
+    }
+
+    @DisplayName("이미 지나간 예약 변경 시 예외 발생을 테스트합니다.")
+    @Test
+    void update_past_reservation_exception() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(0, 0));
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
+
+        assertThatThrownBy(() ->
+                reservationCommandService.update(
+                        reservationId,
+                        new ReservationUpdateCommand(ReservationFixture.futureReservationUpdateDate(), updateTimeId,
+                                NOW)
+                ))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("이미 지나간 예약은 변경할 수 없습니다.");
     }
 
     @DisplayName("이미 확정된 예약이 존재할 경우, 예약 생성 예외를 테스트합니다.")
@@ -293,7 +317,7 @@ class ReservationCommandServiceTest {
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         reservationCommandService.update(
                 reservationId,
-                new ReservationUpdateCommand(ReservationFixture.futureReservationDate(), updateTimeId, NOW)
+                new ReservationUpdateCommand(ReservationFixture.futureReservationUpdateDate(), updateTimeId, NOW)
         );
 
         ReservationSlot originalSlot = ReservationSlot.builder()
@@ -305,7 +329,7 @@ class ReservationCommandServiceTest {
         Reservation promoteReservation = testHelper.findReservationBySlot(originalSlot);
 
         ReservationSlot updatedSlot = ReservationSlot.builder()
-                .date(ReservationFixture.futureReservationDate())
+                .date(ReservationFixture.futureReservationUpdateDate())
                 .themeId(themeId)
                 .timeId(updateTimeId)
                 .startAt(LocalTime.of(11, 0))

@@ -142,7 +142,7 @@ class ReservationApiTest {
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
                 "스타크",
-                ReservationFixture.pastReservationDate(),
+                ReservationFixture.futureReservationDate(),
                 themeId,
                 timeId
         );
@@ -157,7 +157,7 @@ class ReservationApiTest {
                 .statusCode(200)
                 .body("id", equalTo(reservationId.intValue()))
                 .body("name", equalTo("스타크"))
-                .body("date", equalTo("2099-12-31"))
+                .body("date", equalTo("2100-01-01"))
                 .body("time.id", equalTo(updateTimeId.intValue()))
                 .body("time.startAt", equalTo("10:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
@@ -189,13 +189,13 @@ class ReservationApiTest {
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long reservationId = testHelper.insertReservation(
                 "스타크",
-                ReservationFixture.pastReservationDate(),
+                ReservationFixture.futureReservationDate(),
                 themeId,
                 timeId
         );
         testHelper.insertReservation(
                 "비밥",
-                ReservationFixture.futureReservationDate(),
+                ReservationFixture.futureReservationUpdateDate(),
                 themeId,
                 updateTimeId
         );
@@ -232,6 +232,30 @@ class ReservationApiTest {
                 .then().log().all()
                 .statusCode(422)
                 .body("errorMessage", equalTo("현재 시간보다 이전 시간으로 예약을 할 수 없습니다."));
+    }
+
+    @DisplayName("이미 지나간 예약 변경 요청 시 422 응답 반환을 테스트합니다.")
+    @Test
+    void update_past_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Map<String, String> params = ReservationFixture.futureReservationUpdateParams(updateTimeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(422)
+                .body("errorMessage", equalTo("이미 지나간 예약은 변경할 수 없습니다."));
     }
 
     @DisplayName("존재하지 않는 예약을 삭제 시 404 응답 반환을 테스트합니다.")

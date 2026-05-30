@@ -97,7 +97,7 @@ class ReservationTest {
     @Test
     void update_date_and_time_past_exception() {
         ReservationSlot slot = ReservationSlot.builder()
-                .date(LocalDate.of(2026, 5, 6))
+                .date(LocalDate.of(2026, 5, 8))
                 .themeId(1L)
                 .timeId(1L)
                 .startAt(LocalTime.of(9, 0))
@@ -116,5 +116,30 @@ class ReservationTest {
         ))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
+    }
+
+    @DisplayName("이미 지나간 예약의 날짜와 시간 변경 시 예외를 테스트합니다.")
+    @Test
+    void update_past_reservation_exception() {
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 6))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .user(STARK)
+                .slot(slot)
+                .build();
+
+        assertThatThrownBy(() -> reservation.updateDateAndTime(
+                LocalDate.of(2026, 5, 8),
+                2L,
+                LocalTime.of(10, 0),
+                LocalDateTime.of(2026, 5, 7, 11, 0)
+        ))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("이미 지나간 예약은 변경할 수 없습니다.");
     }
 }

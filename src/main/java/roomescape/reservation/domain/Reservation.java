@@ -30,6 +30,7 @@ public class Reservation {
     }
 
     public Reservation updateDateAndTime(LocalDate date, Long timeId, LocalTime startAt, LocalDateTime now) {
+        slot.validateUpdatable(now);
         ReservationSlot updatedSlot = slot.updateDateAndTime(date, timeId, startAt);
         updatedSlot.validateReservable(now);
 

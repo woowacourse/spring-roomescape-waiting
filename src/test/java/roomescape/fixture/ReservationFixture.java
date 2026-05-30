@@ -16,8 +16,10 @@ public class ReservationFixture {
     private static final String NEO = "네오";
     private static final LocalDate PAST_RESERVATION_DATE = LocalDate.of(2000, 5, 6);
     private static final LocalDate FUTURE_RESERVATION_DATE = LocalDate.of(2099, 12, 31);
+    private static final LocalDate FUTURE_RESERVATION_UPDATE_DATE = LocalDate.of(2100, 1, 1);
     private static final String PAST_RESERVATION_DATE_TEXT = "2000-05-06";
     private static final String FUTURE_RESERVATION_DATE_TEXT = "2099-12-31";
+    private static final String FUTURE_RESERVATION_UPDATE_DATE_TEXT = "2100-01-01";
 
     private ReservationFixture() {
     }
@@ -38,7 +40,7 @@ public class ReservationFixture {
     }
 
     public static ReservationUpdateCommand futureStarkUpdateCommand(Long timeId, LocalDateTime now) {
-        return new ReservationUpdateCommand(FUTURE_RESERVATION_DATE, timeId, now);
+        return new ReservationUpdateCommand(FUTURE_RESERVATION_UPDATE_DATE, timeId, now);
     }
 
     public static LocalDate pastReservationDate() {
@@ -47,6 +49,10 @@ public class ReservationFixture {
 
     public static LocalDate futureReservationDate() {
         return FUTURE_RESERVATION_DATE;
+    }
+
+    public static LocalDate futureReservationUpdateDate() {
+        return FUTURE_RESERVATION_UPDATE_DATE;
     }
 
     public static User userNameStark() {
@@ -87,7 +93,7 @@ public class ReservationFixture {
 
     public static Map<String, String> futureReservationUpdateParams(Long timeId) {
         Map<String, String> params = new HashMap<>();
-        params.put("date", FUTURE_RESERVATION_DATE_TEXT);
+        params.put("date", FUTURE_RESERVATION_UPDATE_DATE_TEXT);
         params.put("timeId", String.valueOf(timeId));
         return params;
     }
