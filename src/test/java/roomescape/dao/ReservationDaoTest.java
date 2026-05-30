@@ -55,16 +55,20 @@ class ReservationDaoTest {
     @Test
     void 예약_목록을_조회한다() {
         // given
-        ReservationTime savedReservationTime = saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime time1 = saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = saveReservationTime(LocalTime.of(11, 0));
+        ReservationTime time3 = saveReservationTime(LocalTime.of(12, 0));
+        ReservationTime time4 = saveReservationTime(LocalTime.of(13, 0));
+        ReservationTime time5 = saveReservationTime(LocalTime.of(14, 0));
         Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        saveReservation("브라운", date, savedReservationTime, savedTheme);
-        saveReservation("로지", date, savedReservationTime, savedTheme);
-        saveReservation("러키", date, savedReservationTime, savedTheme);
-        saveReservation("러로", date, savedReservationTime, savedTheme);
-        saveReservation("밤밤", date, savedReservationTime, savedTheme);
+        saveReservation("브라운", date, time1, savedTheme);
+        saveReservation("로지", date, time2, savedTheme);
+        saveReservation("러키", date, time3, savedTheme);
+        saveReservation("러로", date, time4, savedTheme);
+        saveReservation("밤밤", date, time5, savedTheme);
 
         // when
         List<Reservation> reservations = reservationDao.findAll();
@@ -75,8 +79,8 @@ class ReservationDaoTest {
                 () -> assertThat(reservations.getFirst().getName()).isEqualTo("브라운"),
                 () -> assertThat(reservations.getFirst().getDate()).isEqualTo(date),
 
-                () -> assertThat(reservations.getFirst().getTime().getId()).isEqualTo(savedReservationTime.getId()),
-                () -> assertThat(reservations.getFirst().getTime().getStartAt()).isEqualTo(savedReservationTime.getStartAt()),
+                () -> assertThat(reservations.getFirst().getTime().getId()).isEqualTo(time1.getId()),
+                () -> assertThat(reservations.getFirst().getTime().getStartAt()).isEqualTo(time1.getStartAt()),
 
                 () -> assertThat(reservations.getFirst().getTheme().getId()).isEqualTo(savedTheme.getId()),
                 () -> assertThat(reservations.getFirst().getTheme().getName()).isEqualTo(savedTheme.getName()),

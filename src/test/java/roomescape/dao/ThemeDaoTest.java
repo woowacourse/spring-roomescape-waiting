@@ -1,12 +1,5 @@
 package roomescape.dao;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -15,6 +8,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @JdbcTest
 @Import({ThemeDao.class, ReservationTimeDao.class, ReservationDao.class, SlotDao.class})
@@ -238,8 +239,6 @@ class ThemeDaoTest {
         saveReservation("예약자", oldDate, time7, theme12);
         saveReservation("예약자", oldDate, time8, theme12);
         saveReservation("예약자", oldDate, time9, theme12);
-        saveReservation("예약자", oldDate, time1, theme12);
-        saveReservation("예약자", oldDate, time2, theme12);
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {
