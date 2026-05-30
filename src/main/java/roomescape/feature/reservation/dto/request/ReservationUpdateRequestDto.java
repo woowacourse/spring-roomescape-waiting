@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
 public record ReservationUpdateRequestDto(
+    @NotNull(message = "예약자명은 필수입니다.")
     String name,
 
     @NotNull(message = "예약 날짜는 필수입니다.")

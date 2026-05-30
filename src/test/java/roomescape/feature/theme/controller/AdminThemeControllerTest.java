@@ -40,6 +40,21 @@ class AdminThemeControllerTest {
     @MockitoBean
     private ThemeMapper themeMapper;
 
+    private static final String VALID_NAME = "\"%s\"".formatted(ThemeFixture.VALID.getName());
+    private static final String VALID_DESCRIPTION = "\"%s\"".formatted(ThemeFixture.VALID.getDescription());
+    private static final String VALID_IMAGE_URL = "\"%s\"".formatted(ThemeFixture.VALID.getImageUrl());
+    private static final String OMITTED = "null";
+
+    private String themeRequestBody(String name, String description, String imageUrl) {
+        return """
+            {
+              "name": %s,
+              "description": %s,
+              "imageUrl": %s
+            }
+            """.formatted(name, description, imageUrl);
+    }
+
     @Nested
     class 테마_생성 {
 
@@ -76,19 +91,25 @@ class AdminThemeControllerTest {
 
         @Test
         void 테마_이름이_없으면_4xx를_반환한다() throws Exception {
-            when(themeMapper.toCreateCommand(any())).thenThrow(new GeneralException(ThemeErrorType.INVALID_NAME));
-
             mockMvc.perform(post("/api/admin/themes")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("""
-                        {
-                          "description": "%s",
-                          "imageUrl": "%s"
-                        }
-                        """.formatted(
-                            ThemeFixture.VALID.getDescription(),
-                            ThemeFixture.VALID.getImageUrl()
-                        )))
+                    .content(themeRequestBody(OMITTED, VALID_DESCRIPTION, VALID_IMAGE_URL)))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 테마_설명이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/admin/themes")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(themeRequestBody(VALID_NAME, OMITTED, VALID_IMAGE_URL)))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 테마_이미지_URL이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/admin/themes")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(themeRequestBody(VALID_NAME, VALID_DESCRIPTION, OMITTED)))
                 .andExpect(status().is4xxClientError());
         }
 

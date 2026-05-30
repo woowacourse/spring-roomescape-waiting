@@ -14,6 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -49,6 +51,21 @@ class ReservationControllerTest {
 
     @MockitoBean
     private ReservationMapper reservationMapper;
+
+    private static final String VALID_NAME = "\"%s\"".formatted(ReservationFixture.FUTURE.getName());
+    private static final String VALID_DATE = "\"%s\"".formatted(ReservationFixture.FUTURE.getDate());
+    private static final String OMITTED = "null";
+
+    private String reservationRequestBody(String name, String date, String timeId, String themeId) {
+        return """
+            {
+              "name": %s,
+              "date": %s,
+              "timeId": %s,
+              "themeId": %s
+            }
+            """.formatted(name, date, timeId, themeId);
+    }
 
     private ReservationCreateCommand sampleCreateCommand() {
         return new ReservationCreateCommand(
@@ -181,6 +198,56 @@ class ReservationControllerTest {
                         )))
                 .andExpect(status().is4xxClientError());
         }
+
+        @Test
+        void 예약자명이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(OMITTED, VALID_DATE, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 예약_날짜가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, OMITTED, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void timeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, OMITTED, "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void themeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", OMITTED)))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void timeId가_양수가_아니면_4xx를_반환한다(long timeId) throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, String.valueOf(timeId), "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void themeId가_양수가_아니면_4xx를_반환한다(long themeId) throws Exception {
+            mockMvc.perform(post("/api/reservations")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", String.valueOf(themeId))))
+                .andExpect(status().is4xxClientError());
+        }
     }
 
     @Nested
@@ -248,6 +315,56 @@ class ReservationControllerTest {
                           "themeId": 1
                         }
                         """.formatted(ReservationFixture.FUTURE.getDate())))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 예약자명이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(OMITTED, VALID_DATE, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 예약_날짜가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, OMITTED, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void timeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, OMITTED, "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void themeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", OMITTED)))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void timeId가_양수가_아니면_4xx를_반환한다(long timeId) throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, String.valueOf(timeId), "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void themeId가_양수가_아니면_4xx를_반환한다(long themeId) throws Exception {
+            mockMvc.perform(patch("/api/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", String.valueOf(themeId))))
                 .andExpect(status().is4xxClientError());
         }
     }
@@ -337,6 +454,56 @@ class ReservationControllerTest {
                             ReservationFixture.FUTURE.getName(),
                             ReservationFixture.FUTURE.getDate()
                         )))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 예약자명이_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(OMITTED, VALID_DATE, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void 예약_날짜가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, OMITTED, "1", "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void timeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, OMITTED, "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        void themeId가_없으면_4xx를_반환한다() throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", OMITTED)))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void timeId가_양수가_아니면_4xx를_반환한다(long timeId) throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, String.valueOf(timeId), "1")))
+                .andExpect(status().is4xxClientError());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {0L, -1L})
+        void themeId가_양수가_아니면_4xx를_반환한다(long themeId) throws Exception {
+            mockMvc.perform(post("/api/reservations/waitings")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(reservationRequestBody(VALID_NAME, VALID_DATE, "1", String.valueOf(themeId))))
                 .andExpect(status().is4xxClientError());
         }
     }

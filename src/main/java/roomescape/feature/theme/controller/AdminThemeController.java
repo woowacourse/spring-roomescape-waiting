@@ -1,5 +1,6 @@
 package roomescape.feature.theme.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class AdminThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponseDto> saveTheme(@RequestBody ThemeCreateRequestDto requestDto) {
+    public ResponseEntity<ThemeResponseDto> saveTheme(@Valid @RequestBody ThemeCreateRequestDto requestDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(themeService.saveTheme(themeMapper.toCreateCommand(requestDto)));
     }
