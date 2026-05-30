@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.exception.AppException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -51,7 +53,7 @@ public class ReservationTimeDao {
                     id
             );
         } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 예약 시간입니다.");
+            throw new AppException(HttpStatus.NOT_FOUND, "존재하지 않는 예약 시간입니다.");
         }
     }
 

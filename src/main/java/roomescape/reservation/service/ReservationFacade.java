@@ -1,7 +1,9 @@
 package roomescape.reservation.service;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import roomescape.exception.AppException;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
@@ -28,7 +30,7 @@ public class ReservationFacade {
 
     public void deleteReservationTime(Long id) {
         if (reservationService.existsByTimeId(id)) {
-            throw new IllegalStateException("[ERROR] 해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new AppException(HttpStatus.CONFLICT, "해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
         }
 
         reservationTimeService.delete(id);

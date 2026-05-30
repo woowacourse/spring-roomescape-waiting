@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import roomescape.exception.AppException;
 
 @Component
 public class CustomExceptionResolver implements HandlerExceptionResolver, Ordered {
@@ -31,6 +32,11 @@ public class CustomExceptionResolver implements HandlerExceptionResolver, Ordere
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
                                          @Nullable Object handler, Exception ex) {
         try {
+            if (ex instanceof AppException appException) {
+                writeJsonResponse(response, appException.getStatus(), appException.getMessage());
+                return new ModelAndView();
+            }
+
             if (ex instanceof IllegalArgumentException) {
                 writeJsonResponse(response, HttpStatus.BAD_REQUEST, ex.getMessage());
                 return new ModelAndView();
