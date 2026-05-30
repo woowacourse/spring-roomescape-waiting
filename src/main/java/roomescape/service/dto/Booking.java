@@ -6,7 +6,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 
-public record ReservationAndWaiting(
+public record Booking(
         Long id,
         String name,
         LocalDate date,
@@ -16,13 +16,13 @@ public record ReservationAndWaiting(
         Integer waitingNumber
 ) {
 
-    public static ReservationAndWaiting fromReservation(Reservation reservation) {
-        return new ReservationAndWaiting(reservation.getId(), reservation.getName(), reservation.getDate(), reservation.getTimeSlot(),
+    public static Booking fromReservation(Reservation reservation) {
+        return new Booking(reservation.getId(), reservation.getName(), reservation.getDate(), reservation.getTimeSlot(),
                 reservation.getTheme(), true, null);
     }
 
-    public static ReservationAndWaiting fromWaiting(Waiting waiting, TimeSlot timeSlot, Theme theme) {
-        return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), timeSlot, theme, false,
+    public static Booking fromWaiting(Waiting waiting, TimeSlot timeSlot, Theme theme) {
+        return new Booking(waiting.getId(), waiting.getName(), waiting.getDate(), timeSlot, theme, false,
                 waiting.getWaitingNumber());
     }
 }

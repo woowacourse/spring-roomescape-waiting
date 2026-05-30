@@ -17,7 +17,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.ReservationAndWaiting;
+import roomescape.service.dto.Booking;
 
 @Service
 @Transactional(readOnly = true)
@@ -49,14 +49,14 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(id));
     }
 
-    public List<ReservationAndWaiting> findReservationByName(String name) {
+    public List<Booking> findReservationByName(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         List<Waiting> waitings = waitingRepository.findByName(name);
 
-        List<ReservationAndWaiting> reservationAndWaitings = new ArrayList<>();
+        List<Booking> bookings = new ArrayList<>();
 
         for (Reservation reservation : reservations) {
-            reservationAndWaitings.add(ReservationAndWaiting.fromReservation(reservation));
+            bookings.add(Booking.fromReservation(reservation));
         }
 
         for (Waiting waiting : waitings) {
@@ -66,10 +66,10 @@ public class ReservationService {
             Theme theme = themeRepository.findById(waiting.getThemeId())
                     .orElseThrow(() -> new ThemeNotFoundException(waiting.getThemeId()));
 
-            reservationAndWaitings.add(ReservationAndWaiting.fromWaiting(waiting, timeSlot, theme));
+            bookings.add(Booking.fromWaiting(waiting, timeSlot, theme));
         }
 
-        return reservationAndWaitings;
+        return bookings;
     }
 
     @Transactional
