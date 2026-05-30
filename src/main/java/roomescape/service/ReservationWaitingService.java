@@ -55,7 +55,8 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = reservationWaitingReq.to(reservationTimeById, themeById);
         Long id = reservationWaitingUpdatingDao.create(reservationWaiting);
 
-        return ReservationWaitingResponse.from(reservationWaiting.withReservationWaitingId(id));
+        return ReservationWaitingResponse.from(reservationWaitingQueryingDao.findReservationWaitingById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다.")));
     }
 
     public void delete(Long id) {

@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -59,13 +60,16 @@ public class ReservationWaitingServiceTest {
     @Test
     void 예약_대기열이_정상_생성된다() {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", now, 1L, 1L);
+        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.timeId())).thenReturn(false);
+        when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId())).thenReturn(false);
         when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
                 Optional.of(new Reservation("test2", now, reservationTime, theme))
         );
+        when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(createdWaiting));
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
 
