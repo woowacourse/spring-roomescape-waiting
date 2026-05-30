@@ -33,7 +33,7 @@ public class Reservation {
     private static Reservation of(String name, ReservationSlot slot, ReservationStatus status, LocalDateTime reservedAt) {
         validateName(name);
         validateSlot(slot);
-        slot.validateNotPast();
+        slot.validateNotPast(reservedAt);
         return new Reservation(null, name, slot, status, reservedAt);
     }
 
@@ -75,32 +75,11 @@ public class Reservation {
         if (slot == null) {
             throw new ReservationException(RESERVATION_DATE_IS_NULL);
         }
-        validateDate(slot.date());
-        validateTime(slot.time());
-        validateTheme(slot.theme());
     }
 
     private static void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new ReservationException(RESERVATION_NAME_IS_NULL);
-        }
-    }
-
-    private static void validateDate(ReservationDate date) {
-        if (date == null) {
-            throw new ReservationException(RESERVATION_DATE_IS_NULL);
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new ReservationException(RESERVATION_TIME_IS_NULL);
-        }
-    }
-
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new ReservationException(RESERVATION_THEME_IS_NULL);
         }
     }
 
