@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservation.application.dto.ReservationApplicationPageResult;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationPageResult;
+import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -48,10 +48,10 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationApplicationPageResult page = reservationQueryService.findAllByPage(0);
-        List<ReservationApplicationResult> reservations = page.content();
+        ReservationPageResult page = reservationQueryService.findAllByPage(0);
+        List<ReservationResult> reservations = page.content();
 
-        ReservationApplicationResult first = reservations.getFirst();
+        ReservationResult first = reservations.getFirst();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);
@@ -95,10 +95,10 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        List<ReservationApplicationResult> reservations = reservationQueryService.findByName("스타크");
+        List<ReservationResult> reservations = reservationQueryService.findByName("스타크");
 
-        ReservationApplicationResult first = reservations.getFirst();
-        ReservationApplicationResult second = reservations.get(1);
+        ReservationResult first = reservations.getFirst();
+        ReservationResult second = reservations.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);

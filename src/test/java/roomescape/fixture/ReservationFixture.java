@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.application.dto.WaitingCreateCommand;
 import roomescape.reservation.domain.User;
 
 public class ReservationFixture {
@@ -24,19 +25,29 @@ public class ReservationFixture {
     private ReservationFixture() {
     }
 
-    public static ReservationApplicationCreateCommand pastStarkCreateCommand(Long themeId, Long timeId,
-                                                                             LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(STARK, PAST_RESERVATION_DATE, themeId, timeId, now);
+    public static ReservationCreateCommand pastStarkCreateCommand(Long themeId, Long timeId,
+                                                                  LocalDateTime now) {
+        return new ReservationCreateCommand(STARK, PAST_RESERVATION_DATE, themeId, timeId, now);
     }
 
-    public static ReservationApplicationCreateCommand futureStarkCreateCommand(Long themeId, Long timeId,
-                                                                               LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(STARK, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    public static ReservationCreateCommand futureStarkCreateCommand(Long themeId, Long timeId,
+                                                                    LocalDateTime now) {
+        return new ReservationCreateCommand(STARK, FUTURE_RESERVATION_DATE, themeId, timeId, now);
     }
 
-    public static ReservationApplicationCreateCommand futureKayaCreateCommand(Long themeId, Long timeId,
-                                                                              LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    public static ReservationCreateCommand futureKayaCreateCommand(Long themeId, Long timeId,
+                                                                   LocalDateTime now) {
+        return new ReservationCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    }
+
+    public static WaitingCreateCommand futureStarkWaitingCreateCommand(Long themeId, Long timeId,
+                                                                       LocalDateTime now) {
+        return new WaitingCreateCommand(STARK, FUTURE_RESERVATION_DATE, themeId, timeId, now);
+    }
+
+    public static WaitingCreateCommand futureKayaWaitingCreateCommand(Long themeId, Long timeId,
+                                                                      LocalDateTime now) {
+        return new WaitingCreateCommand(KAYA, FUTURE_RESERVATION_DATE, themeId, timeId, now);
     }
 
     public static ReservationUpdateCommand futureStarkUpdateCommand(Long timeId, LocalDateTime now) {
@@ -74,6 +85,15 @@ public class ReservationFixture {
     }
 
     public static Map<String, String> futureReservationParams(Long themeId, Long timeId) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", STARK);
+        params.put("date", FUTURE_RESERVATION_DATE_TEXT);
+        params.put("themeId", String.valueOf(themeId));
+        params.put("timeId", String.valueOf(timeId));
+        return params;
+    }
+
+    public static Map<String, String> futureWaitingParams(Long themeId, Long timeId) {
         Map<String, String> params = new HashMap<>();
         params.put("name", STARK);
         params.put("date", FUTURE_RESERVATION_DATE_TEXT);

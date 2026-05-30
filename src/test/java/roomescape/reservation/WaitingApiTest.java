@@ -35,7 +35,7 @@ class WaitingApiTest {
                 timeId
         );
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -78,7 +78,7 @@ class WaitingApiTest {
                 timeId
         );
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
         params.put("name", "카야");
 
         RestAssured.given()
@@ -97,7 +97,7 @@ class WaitingApiTest {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -123,7 +123,7 @@ class WaitingApiTest {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
         params.put(fieldName, invalidValue);
 
         RestAssured.given()
@@ -153,7 +153,7 @@ class WaitingApiTest {
                 timeId
         );
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -176,7 +176,7 @@ class WaitingApiTest {
                 timeId
         );
 
-        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        Map<String, String> params = ReservationFixture.futureWaitingParams(themeId, timeId);
 
         RestAssured.given()
                 .contentType(ContentType.JSON)

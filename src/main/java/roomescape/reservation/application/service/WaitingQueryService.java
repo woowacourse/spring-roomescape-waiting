@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dao.WaitingDetailDao;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.WaitingResult;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -14,9 +14,9 @@ public class WaitingQueryService {
 
     private final WaitingDetailDao waitingDetailDao;
 
-    public List<ReservationApplicationResult> findByName(String username) {
+    public List<WaitingResult> findByName(String username) {
         return waitingDetailDao.findByName(username).stream()
-                .map(ReservationApplicationResult::from)
+                .map(WaitingResult::from)
                 .toList();
     }
 }

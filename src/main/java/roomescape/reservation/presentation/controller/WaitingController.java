@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.application.service.WaitingQueryService;
-import roomescape.reservation.presentation.dto.ReservationApplicationCreateRequest;
-import roomescape.reservation.presentation.dto.ReservationApplicationResponse;
+import roomescape.reservation.presentation.dto.WaitingCreateRequest;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @RequiredArgsConstructor
 @Validated
@@ -33,24 +33,24 @@ public class WaitingController {
     private final WaitingQueryService waitingQueryService;
 
     @PostMapping
-    public ResponseEntity<ReservationApplicationResponse> save(
-            @Valid @RequestBody ReservationApplicationCreateRequest request
+    public ResponseEntity<WaitingResponse> save(
+            @Valid @RequestBody WaitingCreateRequest request
     ) {
-        ReservationApplicationCreateCommand createCommand = request.toCommand(LocalDateTime.now());
+        WaitingCreateCommand createCommand = request.toCommand(LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationApplicationResponse.from(waitingCommandService.save(createCommand)));
+                .body(WaitingResponse.from(waitingCommandService.save(createCommand)));
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationApplicationResponse>> findByName(
+    public ResponseEntity<List<WaitingResponse>> findByName(
             @NotBlank(message = "이름은 비어있을 수 없습니다.")
             @RequestParam String username
     ) {
-        List<ReservationApplicationResult> results = waitingQueryService.findByName(username);
+        List<WaitingResult> results = waitingQueryService.findByName(username);
 
-        List<ReservationApplicationResponse> responses = results.stream()
-                .map(ReservationApplicationResponse::from)
+        List<WaitingResponse> responses = results.stream()
+                .map(WaitingResponse::from)
                 .toList();
 
         return ResponseEntity.ok(responses);

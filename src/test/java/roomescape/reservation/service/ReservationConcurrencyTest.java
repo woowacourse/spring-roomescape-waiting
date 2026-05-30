@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.support.ServiceTest;
@@ -37,7 +37,7 @@ public class ReservationConcurrencyTest {
     void save_concurrent_duplicate_exception() throws InterruptedException {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        ReservationApplicationCreateCommand command = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+        ReservationCreateCommand command = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
 
         int numberOfThreads = 5;
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);

@@ -8,8 +8,8 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.global.exception.UniqueConstraintViolationException;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -31,7 +31,7 @@ public class WaitingCommandService {
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationApplicationResult save(ReservationApplicationCreateCommand request) {
+    public WaitingResult save(WaitingCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
@@ -46,7 +46,7 @@ public class WaitingCommandService {
         try {
             Waiting savedWaiting = waitingRepository.save(waiting);
             Long rank = waitingRepository.getRank(savedWaiting);
-            return ReservationApplicationResult.waiting(
+            return WaitingResult.from(
                     savedWaiting,
                     ThemeResult.from(theme),
                     ReservationTimeResult.from(time),

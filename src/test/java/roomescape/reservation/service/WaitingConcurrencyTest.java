@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.WaitingCreateCommand;
 import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -37,7 +37,7 @@ public class WaitingConcurrencyTest {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         testHelper.insertReservation("카야", ReservationFixture.futureReservationDate(), themeId, timeId);
-        ReservationApplicationCreateCommand command = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+        WaitingCreateCommand command = ReservationFixture.futureStarkWaitingCreateCommand(themeId, timeId, NOW);
 
         int numberOfThreads = 5;
         ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);

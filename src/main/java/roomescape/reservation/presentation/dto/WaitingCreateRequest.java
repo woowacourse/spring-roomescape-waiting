@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.WaitingCreateCommand;
 
-public record ReservationApplicationCreateRequest(
+public record WaitingCreateRequest(
         @NotBlank(message = "이름은 비어있을 수 없습니다.")
         String name,
         @NotNull(message = "날짜는 비어있을 수 없습니다.")
@@ -21,7 +21,7 @@ public record ReservationApplicationCreateRequest(
         @Positive(message = "시간ID는 양수여야 합니다.")
         Long timeId
 ) {
-    public ReservationApplicationCreateCommand toCommand(LocalDateTime now) {
-        return new ReservationApplicationCreateCommand(name, date, themeId, timeId, now);
+    public WaitingCreateCommand toCommand(LocalDateTime now) {
+        return new WaitingCreateCommand(name, date, themeId, timeId, now);
     }
 }

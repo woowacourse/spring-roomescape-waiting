@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservation.application.dto.ReservationApplicationResult;
-import roomescape.reservation.application.dto.ReservationApplicationResult.Status;
+import roomescape.reservation.application.dto.WaitingResult;
+import roomescape.reservation.application.dto.WaitingResult.Status;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -53,10 +53,10 @@ class WaitingQueryServiceTest {
                 tenTimeId
         );
 
-        List<ReservationApplicationResult> waitings = waitingQueryService.findByName("피노");
+        List<WaitingResult> waitings = waitingQueryService.findByName("피노");
 
-        ReservationApplicationResult first = waitings.getFirst();
-        ReservationApplicationResult second = waitings.get(1);
+        WaitingResult first = waitings.getFirst();
+        WaitingResult second = waitings.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(waitings).hasSize(2);

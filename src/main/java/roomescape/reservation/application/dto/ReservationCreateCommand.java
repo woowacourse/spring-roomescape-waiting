@@ -6,9 +6,8 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
-import roomescape.reservation.domain.Waiting;
 
-public record ReservationApplicationCreateCommand(
+public record ReservationCreateCommand(
         String name,
         LocalDate date,
         Long themeId,
@@ -17,10 +16,6 @@ public record ReservationApplicationCreateCommand(
 ) {
     public Reservation toReservation(ReservationSlot slot) {
         return Reservation.create(toUser(name), slot, now);
-    }
-
-    public Waiting toWaiting(ReservationSlot slot) {
-        return Waiting.create(toUser(name), slot, now);
     }
 
     public ReservationSlot toSlot(LocalTime startAt) {
