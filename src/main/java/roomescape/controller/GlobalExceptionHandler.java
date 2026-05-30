@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse methodArgumentNotValidExceptionHandle(MethodArgumentNotValidException e) {
         log.info("입력 값 검증 중 예외가 발생했습니다.", e);
         return ErrorResponse.create(e.getMessage());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingParams(MissingServletRequestParameterException e) {
+        log.info("입력 값 검증 중 예외가 발생했습니다.", e);
+        return ErrorResponse.create("필수 파라미터가 없습니다.");
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

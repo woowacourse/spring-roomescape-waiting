@@ -26,7 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.request.ReservationCreateRequest;
-import roomescape.controller.dto.request.ReservationDeleteDto;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.Reservation;
@@ -179,31 +178,26 @@ class ReservationControllerTest {
 
     @Test
     void 예약_삭제_성공시_200을_반환한다() throws Exception {
-        ReservationDeleteDto dto = new ReservationDeleteDto("zeze");
+
 
         mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk());
+                        .param("name", "홍길동"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
     void 예약_삭제시_이름이_다르면_401을_반환한다() throws Exception {
-        ReservationDeleteDto dto = new ReservationDeleteDto("other");
         willThrow(new RoomEscapeException(ErrorCode.UNAUTHORIZED_SAME_NAME))
                 .given(reservationService).cancel(anyLong(), anyString(), any());
 
         mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .param("name","other"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void 예약_삭제시_이름_body가_없으면_400을_반환한다() throws Exception {
-        mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+    void 예약_삭제시_이름이_없으면_400을_반환한다() throws Exception {
+        mockMvc.perform(delete("/reservations/1"))
                 .andExpect(status().isBadRequest());
     }
 

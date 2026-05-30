@@ -79,16 +79,11 @@ public class MissionStep2Test {
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(count).isEqualTo(1);
 
-
-        params = new HashMap<>();
-        params.put("name", "브라운");
-
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
+                .param("name", "브라운")
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
 
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);
