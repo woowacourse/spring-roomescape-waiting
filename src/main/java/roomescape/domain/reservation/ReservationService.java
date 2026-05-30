@@ -36,7 +36,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
-        ReservationTime time = reservationTimeRepository.findByIdForUpdate(request.timeId())
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
@@ -55,7 +55,7 @@ public class ReservationService {
             Reservation saved = reservationRepository.save(reservation);
             return ReservationResponse.from(saved);
         } catch (DuplicateKeyException exception) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -84,7 +84,7 @@ public class ReservationService {
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
-        ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
+        ReservationTime newTime = reservationTimeRepository.findById(fixRequest.timeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         newTime.validateIfTimePast(fixRequest.date());
 
@@ -100,7 +100,7 @@ public class ReservationService {
         try {
             reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
         } catch (DuplicateKeyException exception) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 

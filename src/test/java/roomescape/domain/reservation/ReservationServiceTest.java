@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,6 +23,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.ReservationRequest;
@@ -65,7 +67,7 @@ class ReservationServiceTest {
         void 정상_생성() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             Reservation saved = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
@@ -78,7 +80,7 @@ class ReservationServiceTest {
         @Test
         void 시간_id가_없으면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 99L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+            when(reservationTimeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -88,7 +90,7 @@ class ReservationServiceTest {
         @Test
         void 테마_id가_없으면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 99L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -99,7 +101,7 @@ class ReservationServiceTest {
         @Test
         void 과거_날짜면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2000, 1, 1), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -110,9 +112,22 @@ class ReservationServiceTest {
         @Test
         void 중복_예약이면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> reservationService.createReservation(request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
+        }
+
+        @Test
+        void 저장_중_중복_예약이면_예외() {
+            ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
+            when(reservationRepository.save(any(Reservation.class))).thenThrow(DuplicateKeyException.class);
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -215,7 +230,7 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
@@ -223,7 +238,7 @@ class ReservationServiceTest {
             reservationService.updateMyReservation(1L, request);
 
             InOrder inOrder = inOrder(reservationTimeRepository, reservationRepository);
-            inOrder.verify(reservationTimeRepository).findByIdForUpdate(1L);
+            inOrder.verify(reservationTimeRepository).findById(1L);
             inOrder.verify(reservationRepository).existsByIdForUpdate(1L);
             verify(reservationRepository, times(1)).updateDateAndTime(1L, request.date(), 1L);
         }
@@ -231,7 +246,7 @@ class ReservationServiceTest {
         @Test
         void 존재하지_않는_예약이면_예외() {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByIdForUpdate(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(99L, request))
@@ -243,7 +258,7 @@ class ReservationServiceTest {
         void 존재하지_않는_시간이면_예외() {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 99L);
 
-            when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+            when(reservationTimeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
                 .isInstanceOf(RoomescapeException.class)
@@ -255,7 +270,7 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("다른유저", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
@@ -269,7 +284,7 @@ class ReservationServiceTest {
         void 과거_날짜면_예외() {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2000, 1, 1), 1L);
 
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
                 .isInstanceOf(RoomescapeException.class)
@@ -281,10 +296,27 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
             when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
+
+            assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
+        }
+
+        @Test
+        void 수정_중_중복_예약이면_예외() {
+            Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
+            ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
+
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
+            doThrow(DuplicateKeyException.class)
+                .when(reservationRepository).updateDateAndTime(1L, request.date(), 1L);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
                 .isInstanceOf(RoomescapeException.class)
