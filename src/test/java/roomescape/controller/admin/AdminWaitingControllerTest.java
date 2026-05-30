@@ -37,7 +37,7 @@ class AdminWaitingControllerTest {
     private final Member user = new Member(2L, "유저", "user@test.com", "password", MemberRole.USER);
     private final Time time = new Time(1L, LocalTime.of(13, 0));
     private final Theme theme = new Theme(1L, new Name("방탈출테마"), "http://example.com/img.jpg", "방탈출 테마 설명");
-    private final Waiting waiting = new Waiting(1L, user, LocalDate.of(2026, 5, 10), time, theme, 1L, 1L);
+    private final Waiting waiting = Waiting.reconstruct(1L, user, LocalDate.of(2026, 5, 10), time, theme, 1L, 1L);
 
     @Autowired
     private MockMvc mockMvc;
