@@ -1,5 +1,13 @@
 package roomescape.unit.facade;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,26 +16,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
 import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
-import roomescape.service.ThemeService;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationFacadeMockTest {
@@ -36,6 +32,7 @@ class ReservationFacadeMockTest {
     private static final LocalDate PAST_DATE = LocalDate.of(2020, 1, 1);
     private static final Long TIME_ID = 1L;
     private static final Long THEME_ID = 1L;
+    private static final Long RESERVATION_ID = 99L;
     private static final ReservationTime TIME = new ReservationTime(TIME_ID, LocalTime.of(10, 0));
     private static final Theme THEME = new Theme(THEME_ID, "공포", "무서운 테마", "https://example.com/horror.jpg");
 
@@ -43,26 +40,17 @@ class ReservationFacadeMockTest {
     private ReservationService reservationService;
 
     @Mock
-    private ReservationTimeService reservationTimeService;
-
-    @Mock
     private ReservationWaitingService reservationWaitingService;
-
-    @Mock
-    private ThemeService themeService;
 
     @InjectMocks
     private ReservationFacade facade;
 
     @Test
     void 본인이_예약한_슬롯에는_대기를_신청할_수_없다() {
-        Reservation owned = new Reservation(99L, "민욱", DATE, TIME, THEME);
-        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
-        given(themeService.findById(THEME_ID)).willReturn(THEME);
-        given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
-                .willReturn(new Reservations(List.of(owned)));
+        Reservation owned = new Reservation(RESERVATION_ID, "민욱", DATE, TIME, THEME);
+        given(reservationService.getById(RESERVATION_ID)).willReturn(owned);
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 
         assertThatThrownBy(() -> facade.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -70,28 +58,22 @@ class ReservationFacadeMockTest {
     }
 
     @Test
-    void 예약되지_않은_슬롯에는_대기를_신청할_수_없다() {
-        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
-        given(themeService.findById(THEME_ID)).willReturn(THEME);
-        given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
-                .willReturn(new Reservations(List.of()));
+    void 존재하지_않는_예약에는_대기를_신청할_수_없다() {
+        given(reservationService.getById(RESERVATION_ID))
+                .willThrow(new NotFoundException("ID 99번 예약을 찾을 수 없습니다."));
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 
         assertThatThrownBy(() -> facade.addWaiting(request))
-                .isInstanceOf(BusinessRuleViolationException.class)
-                .hasMessageContaining("예약된 슬롯");
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
     void 지난_예약에는_대기를_신청할_수_없다() {
-        Reservation past = new Reservation(99L, "티뉴", PAST_DATE, TIME, THEME);
-        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
-        given(themeService.findById(THEME_ID)).willReturn(THEME);
-        given(reservationService.findByDateAndThemeId(PAST_DATE, THEME_ID))
-                .willReturn(new Reservations(List.of(past)));
+        Reservation past = new Reservation(RESERVATION_ID, "티뉴", PAST_DATE, TIME, THEME);
+        given(reservationService.getById(RESERVATION_ID)).willReturn(past);
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", PAST_DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 
         assertThatThrownBy(() -> facade.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -101,13 +83,10 @@ class ReservationFacadeMockTest {
 
     @Test
     void 다른_사람이_예약한_슬롯에는_대기_신청이_저장소까지_도달한다() {
-        Reservation other = new Reservation(99L, "티뉴", DATE, TIME, THEME);
-        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
-        given(themeService.findById(THEME_ID)).willReturn(THEME);
-        given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
-                .willReturn(new Reservations(List.of(other)));
+        Reservation other = new Reservation(RESERVATION_ID, "티뉴", DATE, TIME, THEME);
+        given(reservationService.getById(RESERVATION_ID)).willReturn(other);
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 
         facade.addWaiting(request);
 
@@ -116,14 +95,11 @@ class ReservationFacadeMockTest {
 
     @Test
     void 이미_대기를_신청한_예약에는_다시_신청할_수_없다() {
-        Reservation other = new Reservation(99L, "티뉴", DATE, TIME, THEME);
-        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
-        given(themeService.findById(THEME_ID)).willReturn(THEME);
-        given(reservationService.findByDateAndThemeId(DATE, THEME_ID))
-                .willReturn(new Reservations(List.of(other)));
-        given(reservationWaitingService.existBy("민욱", 99L)).willReturn(true);
+        Reservation other = new Reservation(RESERVATION_ID, "티뉴", DATE, TIME, THEME);
+        given(reservationService.getById(RESERVATION_ID)).willReturn(other);
+        given(reservationWaitingService.existBy("민욱", RESERVATION_ID)).willReturn(true);
 
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_ID);
 
         assertThatThrownBy(() -> facade.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)

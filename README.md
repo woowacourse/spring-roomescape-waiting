@@ -82,7 +82,7 @@
 | GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                              |
 | PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`                      |
 | DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                                        |
-| POST   | `/waitings`             | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme, order }`               |
+| POST   | `/waitings`             | `{ name, reservationId }`         | 201 `{ id, name, date, time, theme, order }`               |
 | GET    | `/waitings/me`          | `?name={이름}`                      | 200 `{ waitings: [ id, name, order, date, time, theme ] }` |
 | DELETE | `/waitings/me/{id}`     | `{ name }`                        | 204                                                        |
 

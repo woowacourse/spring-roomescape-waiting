@@ -126,11 +126,7 @@ public class ReservationFacade {
 
     @Transactional
     public ReservationWaiting addWaiting(ReservationWaitingRequest request) {
-        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
-        Theme theme = themeService.findById(request.themeId());
-        Reservations reservations = reservationService.findByDateAndThemeId(request.date(), theme.getId());
-        Reservation reservation = reservations.findByTime(reservationTime);
-
+        Reservation reservation = reservationService.getById(request.reservationId());
         if (reservation.isOwnedBy(request.name())) {
             throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
         }

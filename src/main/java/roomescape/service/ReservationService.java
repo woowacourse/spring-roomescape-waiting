@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -9,10 +12,6 @@ import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -44,9 +43,8 @@ public class ReservationService {
     }
 
     public Reservation findMyReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_FORMAT.formatted(id)));
-        if (!reservation.getName().equals(name)) {
+        Reservation reservation = getById(id);
+        if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
         }
         return reservation;
@@ -84,5 +82,10 @@ public class ReservationService {
 
     public Reservations findByDateAndThemeId(LocalDate date, Long themeId) {
         return reservationRepository.findByDateAndThemeId(date, themeId);
+    }
+
+    public Reservation getById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_FORMAT.formatted(id)));
     }
 }
