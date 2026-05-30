@@ -28,6 +28,7 @@ public class ReservationValidator {
     public void validateBeforeEdit(Reservation original, LocalDate changedDate, Long changedTimeId, String guestName) {
         validateIsSameDateTime(original, changedDate, changedTimeId);
         validateIsMyReservation(guestName, original);
+        validateAlreadyCanceled(original);
         validateAlreadyStarted(original);
     }
 
@@ -41,9 +42,10 @@ public class ReservationValidator {
         validateAlreadyStarted(canceled);
     }
 
-    public void validateCancelMine(Reservation deleted, String guestName) {
-        validateIsMyReservation(guestName, deleted);
-        validateAlreadyStarted(deleted);
+    public void validateCancelMine(Reservation canceled, String guestName) {
+        validateIsMyReservation(guestName, canceled);
+        validateAlreadyCanceled(canceled);
+        validateAlreadyStarted(canceled);
     }
 
     private void validateNotDuplicated(Reservation reservation) {

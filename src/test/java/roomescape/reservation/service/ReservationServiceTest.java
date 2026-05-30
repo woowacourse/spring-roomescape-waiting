@@ -262,6 +262,22 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("이미 취소된 예약이면 취소할 수 없기 때문에 예외가 발생한다.")
+    public void cancelMine_fail4() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, CANCELED);
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.cancelMine(reservation.getId(), "브라운"))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(CANNOT_CHANGE_ALREADY_CANCELED.message());
+    }
+
+    @Test
     @DisplayName("예약의 날짜 및 시간을 수정한다.")
     public void editDateTime_success1() {
         // given
@@ -307,6 +323,30 @@ class ReservationServiceTest {
         // then
         Reservation updatedWaiting = reservationRepository.findById(waiting1.getId()).get();
         assertThat(updatedWaiting.getStatus()).isEqualTo(CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
+    public void editDateTime_success3() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+
+        LocalDate editedDate = LocalDate.of(2023, 8, 10);
+        ReservationTime editedTime = insertReservationTime(LocalTime.of(10, 0));
+
+        insertReservation("브라운", editedDate, editedTime, theme, CONFIRMED);
+
+        LocalDate existDate = LocalDate.of(2023, 8, 6);
+        ReservationTime existTime = insertReservationTime(LocalTime.of(12, 0));
+        Reservation reservation = insertReservation("포비", existDate, existTime, theme, CONFIRMED);
+
+        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), "포비");
+
+        // then
+        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())
+                .isEqualTo(Status.WAITING);
     }
 
     @Test
@@ -364,27 +404,23 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
-    public void editDateTime_fail4() {
+    @DisplayName("이미 취소된 예약은 수정할 수 없다.")
+    public void editDateTime_fail3_() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        clock.setFixed(LocalDate.of(2023, 8, 6));
 
+        ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
+        LocalDate existDate = LocalDate.of(2023, 8, 7);
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation reservation = insertReservation("브라운", existDate, existTime, theme, CANCELED);
 
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
-        ReservationTime editedTime = insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime editedTime = insertReservationTime(LocalTime.of(12, 0));
 
-        insertReservation("브라운", editedDate, editedTime, theme, CONFIRMED);
-
-        LocalDate existDate = LocalDate.of(2023, 8, 6);
-        ReservationTime existTime = insertReservationTime(LocalTime.of(12, 0));
-        Reservation reservation = insertReservation("포비", existDate, existTime, theme, CONFIRMED);
-
-        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), "포비");
-
-        // then
-        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())
-                .isEqualTo(Status.WAITING);
+        // when then
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(CANNOT_CHANGE_ALREADY_CANCELED.message());
     }
 
     @Test
