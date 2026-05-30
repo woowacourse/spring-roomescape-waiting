@@ -13,7 +13,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findAllByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+    List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
     Reservation save(Reservation reservation);
 

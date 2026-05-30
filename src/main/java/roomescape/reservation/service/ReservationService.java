@@ -163,7 +163,7 @@ public class ReservationService {
     private boolean checkReservedExcept(Long excludedId, String name, Long dateId,
         Long timeId, Long themeId) {
         List<Reservation> reservationsInSameSlot =
-            reservationRepository.findAllByDateTimeAndThemeId(dateId, timeId, themeId).stream()
+            reservationRepository.findAllActiveByDateTimeAndThemeId(dateId, timeId, themeId).stream()
                 .filter(reservation -> !reservation.getId().equals(excludedId))
                 .toList();
         validateReservedByMyself(reservationsInSameSlot, name);
