@@ -39,14 +39,13 @@ public class WaitingCommandService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
         ReservationSlot slot = request.toSlot(time.getStartAt());
-        slot.validateReservable(request.now());
+        Waiting waiting = request.toWaiting(slot);
 
         if (!reservationRepository.existsBySlot(slot)) {
             throw new RoomEscapeException("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다.");
         }
 
         try {
-            Waiting waiting = request.toWaiting(slot);
             Waiting savedWaiting = waitingRepository.save(waiting);
             Long rank = waitingRepository.getRank(savedWaiting);
             return ReservationApplicationResult.waiting(

@@ -21,6 +21,15 @@ public class Reservation {
         this.slot = Objects.requireNonNull(slot);
     }
 
+    public static Reservation create(User user, ReservationSlot slot, LocalDateTime now) {
+        slot.validateReservable(now);
+
+        return Reservation.builder()
+                .user(user)
+                .slot(slot)
+                .build();
+    }
+
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
                 .id(generatedId)

@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -18,6 +19,15 @@ public class Waiting {
         this.id = id;
         this.user = Objects.requireNonNull(user);
         this.slot = Objects.requireNonNull(slot);
+    }
+
+    public static Waiting create(User user, ReservationSlot slot, LocalDateTime now) {
+        slot.validateReservable(now);
+
+        return Waiting.builder()
+                .user(user)
+                .slot(slot)
+                .build();
     }
 
     public Waiting withId(Long generatedId) {

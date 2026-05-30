@@ -42,13 +42,13 @@ public class ReservationCommandService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
         ReservationSlot slot = request.toSlot(time.getStartAt());
-        slot.validateReservable(request.now());
+        Reservation reservation = request.toReservation(slot);
 
         if (reservationRepository.existsBySlot(slot)) {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
-        Reservation savedReservation = saveReservation(request.toReservation(slot));
+        Reservation savedReservation = saveReservation(reservation);
         return ReservationApplicationResult.confirmed(
                 savedReservation,
                 ThemeResult.from(theme),
@@ -64,7 +64,7 @@ public class ReservationCommandService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
         Reservation updatedReservation = updateReservationSlot(request, updateTime.getStartAt(), reservation);
-        promoteFirstWaitingToReservation(reservation.getSlot());
+        promoteFirstWaitingToReservation(reservation.getSlot(), request.now());
 
         Theme theme = themeRepository.findById(updatedReservation.getSlot().themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
@@ -86,7 +86,7 @@ public class ReservationCommandService {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
 
-        promoteFirstWaitingToReservation(slot);
+        promoteFirstWaitingToReservation(slot, now);
     }
 
     private Reservation updateReservationSlot(ReservationUpdateCommand request, LocalTime startAt,
@@ -106,15 +106,12 @@ public class ReservationCommandService {
         return updatedReservation;
     }
 
-    private void promoteFirstWaitingToReservation(ReservationSlot slot) {
+    private void promoteFirstWaitingToReservation(ReservationSlot slot, LocalDateTime now) {
         Optional<Waiting> firstWaitingBySlot = waitingRepository.findFirstBySlot(slot);
         firstWaitingBySlot.ifPresent(waiting -> {
             waitingRepository.delete(waiting.getId());
 
-            saveReservation(Reservation.builder()
-                    .user(waiting.getUser())
-                    .slot(waiting.getSlot())
-                    .build());
+            saveReservation(Reservation.create(waiting.getUser(), waiting.getSlot(), now));
         });
     }
 

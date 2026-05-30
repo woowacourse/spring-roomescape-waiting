@@ -17,6 +17,47 @@ class ReservationTest {
             .name("스타크")
             .build();
 
+    @DisplayName("현재 시간 이후의 슬롯으로 예약 생성을 테스트합니다.")
+    @Test
+    void create_reservation() {
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 30))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        Reservation reservation = Reservation.create(
+                STARK,
+                slot,
+                LocalDateTime.of(2026, 5, 1, 9, 0)
+        );
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservation.getUser()).isEqualTo(STARK);
+            softly.assertThat(reservation.getSlot()).isEqualTo(slot);
+        });
+    }
+
+    @DisplayName("현재 시간보다 이전 슬롯으로 예약 생성 시 예외를 테스트합니다.")
+    @Test
+    void create_past_reservation_exception() {
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 30))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        assertThatThrownBy(() -> Reservation.create(
+                STARK,
+                slot,
+                LocalDateTime.of(2026, 6, 1, 9, 0)
+        ))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
+    }
+
     @DisplayName("ID가 없는 예약은 같은 이름과 슬롯이어도 동등하지 않는 것을 테스트 합니다.")
     @Test
     void not_equal_without_id() {

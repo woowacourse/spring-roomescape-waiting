@@ -16,17 +16,11 @@ public record ReservationApplicationCreateCommand(
         LocalDateTime now
 ) {
     public Reservation toReservation(ReservationSlot slot) {
-        return Reservation.builder()
-                .user(toUser(name))
-                .slot(slot)
-                .build();
+        return Reservation.create(toUser(name), slot, now);
     }
 
     public Waiting toWaiting(ReservationSlot slot) {
-        return Waiting.builder()
-                .user(toUser(name))
-                .slot(slot)
-                .build();
+        return Waiting.create(toUser(name), slot, now);
     }
 
     public ReservationSlot toSlot(LocalTime startAt) {
