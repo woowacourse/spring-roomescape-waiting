@@ -68,7 +68,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean update(Long id, Long timeId, LocalDateTime now, Status status) {
         int affected = jdbcTemplate.update(
                 "UPDATE reservation SET time_id = ?, created_at = ?, status = ? WHERE id = ?",
-                timeId, now, status, id
+                timeId, now, status.name(), id
         );
         return affected > 0;
     }
@@ -87,10 +87,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean hasConfirmedReservation(Long themeId, ReservationTime time) {
         Integer exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status = 'RESERVED')",
+                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status = ?)",
                 Integer.class,
                 themeId,
-                time.getId()
+                time.getId(),
+                Status.RESERVED.name()
         );
         return exists != null && exists == 1;
     }
@@ -132,18 +133,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                 "SELECT id FROM reservation "
                         + "WHERE time_id = ? "
                         + "AND theme_id = ? "
-                        + "AND status = 'WAITING' "
+                        + "AND status = ? "
                         + "ORDER BY created_at ASC "
                         + "LIMIT 1",
                 (rs, rowNum) -> rs.getLong("id"),
-                timeId, themeId
+                timeId, themeId, Status.WAITING.name()
         ).stream().findFirst();
     }
 
     @Override
     public boolean promoteToReserved(Long waitingId) {
         int affected = jdbcTemplate.update(
-                "UPDATE reservation SET status = 'RESERVED' where id = ?",
+                "UPDATE reservation SET status = ? where id = ?",
+                Status.RESERVED.name(),
                 waitingId);
         return affected > 0;
     }
@@ -208,7 +210,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                                  ORDER BY created_at ASC
                              ) AS rank
                       FROM reservation
-                      WHERE status = 'WAITING'
+                      WHERE status = ?
                   ) ranked ON r.id = ranked.id
                   WHERE r.name = ?;
                 """;
@@ -231,7 +233,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     Status.valueOf(rs.getString("status")),
                     rs.getInt("orderWaiting")
             );
-        }, name);
+        }, Status.WAITING.name(), name);
     }
 
     @Override
