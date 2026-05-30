@@ -4,13 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
@@ -22,26 +18,20 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
-    private final TimeSlotRepository timeSlotRepository;
-    private final ThemeRepository themeRepository;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
-                          TimeSlotRepository timeSlotRepository, ThemeRepository themeRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
-        this.timeSlotRepository = timeSlotRepository;
-        this.themeRepository = themeRepository;
     }
 
     @Transactional
     public Waiting saveWaiting(WaitingRequest request) {
-        TimeSlot timeSlot = findTimeSlot(request.timeId());
-        Theme theme = findTheme(request.themeId());
-        Waiting waiting = Waiting.transientOf(request.name(), request.date(), timeSlot, theme);
+        Reservation reservation = findReservationOrThrow(request.date(), request.timeId(), request.themeId());
+        validNotReservedBySelf(reservation, request.name());
+        Waiting waiting = Waiting.transientOf(request.name(), request.date(), reservation.getTimeSlot(), reservation.getTheme());
 
         validDuplicated(waiting);
-        validReservation(waiting);
-        validDateTime(waiting.getDate(), timeSlot);
+        validDateTime(waiting.getDate(), waiting.getTimeSlot().getStartAt());
 
         return waitingRepository.save(waiting);
     }
@@ -54,31 +44,13 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    private TimeSlot findTimeSlot(Long timeSlotId) {
-        return timeSlotRepository.findById(timeSlotId)
-                .orElseThrow(() -> new TimeSlotNotFoundException(timeSlotId));
+    private Reservation findReservationOrThrow(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(InvalidWaitingPrerequisiteException::new);
     }
 
-    private Theme findTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ThemeNotFoundException(themeId));
-    }
-
-    private void validReservation(Waiting waiting) {
-        Reservation reservation = findReservationOrThrow(waiting);
-        validateOwnership(reservation, waiting);
-    }
-
-    private Reservation findReservationOrThrow(Waiting waiting) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(
-                waiting.getDate(),
-                waiting.getTimeSlot().getId(),
-                waiting.getTheme().getId()
-        ).orElseThrow(InvalidWaitingPrerequisiteException::new);
-    }
-
-    private void validateOwnership(Reservation reservation, Waiting waiting) {
-        if (reservation.getName().equals(waiting.getName())) {
+    private void validNotReservedBySelf(Reservation reservation, String userName) {
+        if (reservation.getName().equals(userName)) {
             throw new DuplicateReservationException(
                     reservation.getDate().toString(),
                     reservation.getTimeSlot().getId(),
@@ -93,11 +65,11 @@ public class WaitingService {
         }
     }
 
-    private void validDateTime(LocalDate date, TimeSlot timeSlot) {
+    private void validDateTime(LocalDate date, LocalTime time) {
         if (date.isBefore(LocalDate.now())) {
             throw new PastTimeException("지난 날짜로 예약 대기를 추가하실 수 없습니다.");
         }
-        if (date.isEqual(LocalDate.now()) && timeSlot.getStartAt().isBefore(LocalTime.now())) {
+        if (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now())) {
             throw new PastTimeException("지난 시간으로 예약 대기를 추가하실 수 없습니다.");
         }
     }

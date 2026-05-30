@@ -13,8 +13,6 @@ import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
@@ -33,10 +31,6 @@ class WaitingServiceTest {
     private WaitingRepository waitingRepository;
     @Mock
     private ReservationRepository reservationRepository;
-    @Mock
-    private TimeSlotRepository timeSlotRepository;
-    @Mock
-    private ThemeRepository themeRepository;
 
     private WaitingService waitingService;
     private TimeSlot savedTimeSlot;
@@ -46,8 +40,7 @@ class WaitingServiceTest {
     void setUp() {
         savedTimeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         savedTheme = new Theme(1L, "이름", "설명", "test.com");
-        waitingService = new WaitingService(waitingRepository, reservationRepository,
-                timeSlotRepository, themeRepository);
+        waitingService = new WaitingService(waitingRepository, reservationRepository);
     }
 
     @Test
@@ -72,7 +65,8 @@ class WaitingServiceTest {
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void saveDuplicateWaiting() {
         LocalDate today = LocalDate.now();
-        stubDependencies(savedTimeSlot, savedTheme);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .willReturn(Optional.of(new Reservation(1L, "포비", today, savedTimeSlot, savedTheme)));
         given(waitingRepository.isExists(any(Waiting.class))).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
@@ -80,10 +74,9 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("존재하는 예약에 대기를 추가하면, 예외가 발생한다.")
+    @DisplayName("자신의 예약에 대기를 추가하면, 예외가 발생한다.")
     void saveReservedWaiting() {
         LocalDate today = LocalDate.now();
-        stubDependencies(savedTimeSlot, savedTheme);
         given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
                 .willReturn(Optional.of(createReservation(today)));
 
@@ -96,8 +89,8 @@ class WaitingServiceTest {
     void savePassedWaiting() {
         LocalDate today = LocalDate.now();
         TimeSlot pastTime = new TimeSlot(1L, LocalTime.of(0, 0));
-        stubDependencies(pastTime, savedTheme);
         stubOtherPersonReservation(today, pastTime);
+
         assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(PastTimeException.class);
     }
@@ -106,9 +99,9 @@ class WaitingServiceTest {
     @DisplayName("존재하지 않는 예약에 대기를 추가하면, 예외가 발생한다.")
     void saveNotExistsReservationWaiting() {
         LocalDate today = LocalDate.now();
-        stubDependencies(savedTimeSlot, savedTheme);
         given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
                 .willReturn(Optional.empty());
+
         assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(InvalidWaitingPrerequisiteException.class);
     }
@@ -117,11 +110,6 @@ class WaitingServiceTest {
         Reservation reservation = new Reservation(2L, "포비", date, timeSlot, savedTheme);
         given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L))
                 .willReturn(Optional.of(reservation));
-    }
-
-    private void stubDependencies(TimeSlot timeSlot, Theme theme) {
-        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(timeSlot));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
     }
 
     private Waiting createWaitingEntity() {

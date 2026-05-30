@@ -187,8 +187,57 @@ private Reservation validModifiable(long id, String userName) {
 
 ---
 
+### Review 08
+
+> ### 불필요한 조회 로직 반복
+> 이미 saveWaiting 흐름 안에서 validReservation 에서 한번 timeSlot을 조회했는데 또 한번 조회하고 있습니다.  
+> 한번만 조회하고 해당 객체를 전달해주면 DB 조회를 줄일 수 있을 것 같네요
+
+### Feedback 08
+
+`Reservation` 조회에 `TimeSlot` / `Theme` 가 다 조인된다는 점을 감안하지 못했네요!
+
+```java
+
+@Transactional
+public Waiting saveWaiting(WaitingRequest request) {
+    Reservation reservation = findReservationOrThrow(request.date(), request.timeId(), request.themeId());
+    validNotReservedBySelf(reservation, request.name());
+    Waiting waiting = Waiting.transientOf(request.name(), request.date(), reservation.getTimeSlot(), reservation.getTheme());
+
+    validDuplicated(waiting);
+    validDateTime(waiting.getDate(), waiting.getTimeSlot().getStartAt());
+
+    return waitingRepository.save(waiting);
+}
+```
+
+식별자 참조 -> 객체 참조로 변경된 구조에 맞춰  
+`WaitingRequest` 값을 기반으로 `Reservation` 을 조회하고 재활용했습니다!
+
+---
+
+### Review 09
+
+> ###   
+>
+
+### Feedback 09
+
+---
+
+### Review 10
+
+> ###   
+>
+
+### Feedback 10
+
+---
+
 ### Review 0
 
+> ###   
 >
 
 ### Feedback 0
