@@ -105,19 +105,19 @@ INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user4', DATEADD
 
 -- 예약 대기 데이터
 -- ID 37 (user2/오늘/time2/theme1) 대기: user1(1번), user3(2번), user5(3번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 37);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user3', 37);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user5', 37);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user1', CURRENT_DATE, 2, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user3', CURRENT_DATE, 2, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user5', CURRENT_DATE, 2, 1);
 -- ID 36 (user1/오늘/time1/theme1) 대기: user2(1번), user4(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 36);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user4', 36);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user2', CURRENT_DATE, 1, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user4', CURRENT_DATE, 1, 1);
 -- ID 47 (user2/내일/time2/theme1) 대기: user1(1번), user4(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 47);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user4', 47);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user1', DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user4', DATEADD(DAY, 1, CURRENT_DATE), 2, 1);
 -- ID 46 (user1/내일/time1/theme1) 대기: user2(1번), user3(2번), user5(3번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 46);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user3', 46);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user5', 46);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user2', DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user3', DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user5', DATEADD(DAY, 1, CURRENT_DATE), 1, 1);
 -- ID 44 (user3/오늘/time1/theme4) 대기: user1(1번), user2(2번)
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user1', 44);
-INSERT INTO reservation_waiting (name, reservation_id) VALUES ('user2', 44);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user1', CURRENT_DATE, 1, 4);
+INSERT INTO reservation_waiting (name, date, time_id, theme_id) VALUES ('user2', CURRENT_DATE, 1, 4);
