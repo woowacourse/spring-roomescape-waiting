@@ -1,10 +1,5 @@
 package roomescape.dao;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,6 +9,12 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class ReservationDao {
@@ -208,6 +209,18 @@ public class ReservationDao {
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId, name));
+    }
+
+    public boolean existsBySlotId(Long slotId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    INNER JOIN slot s ON r.slot_id=s.id
+                    WHERE s.id=?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId));
     }
 
     public void update(Reservation reservation) {

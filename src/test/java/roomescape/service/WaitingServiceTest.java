@@ -1,12 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
@@ -22,6 +15,14 @@ import roomescape.dto.request.WaitingRequest;
 import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.WaitingException;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 class WaitingServiceTest extends ServiceTest {
 
@@ -94,6 +95,22 @@ class WaitingServiceTest extends ServiceTest {
             softly.assertThat(response.getFirst().rank()).isEqualTo(1);
             softly.assertThat(response.getFirst().name()).isEqualTo(testUser);
         });
+    }
+
+    @Test
+    void 예약이_없는_슬롯에_대기를_신청하면_예외가_발생한다() {
+        // given
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        Slot savedSlot = slotDao.save(new Slot(LocalDate.now(clock), reservationTime, theme));
+        Long slotId = savedSlot.getId();
+
+        WaitingRequest request = new WaitingRequest(LocalDate.now(clock), savedSlot.getTime().getId(), savedSlot.getTheme().getId(), "user999");
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.create(request))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.CANNOT_WAIT_SLOT_WITHOUT_RESERVATION.getMessage());
     }
 
     private Theme saveTheme(String name) {

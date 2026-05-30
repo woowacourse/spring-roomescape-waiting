@@ -8,7 +8,7 @@ public enum WaitingErrorCode implements ErrorCode {
     WAITING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 대기입니다."),
     WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 대기입니다."),
     CANNOT_WAIT_OWN_RESERVATION(HttpStatus.CONFLICT, "본인의 예약에는 대기를 신청할 수 없습니다."),
-    ;
+    CANNOT_WAIT_SLOT_WITHOUT_RESERVATION(HttpStatus.BAD_REQUEST, "예약이 존재하지 않는 슬롯에는 대기를 신청할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -42,6 +42,7 @@ public class WaitingService {
         validateNotOwnReservation(slot.getId(), request.name());
 
         Waiting waiting = new Waiting(LocalDateTime.now(clock), slot.getId(), request.name());
+        validateSlotsReserved(slot.getId());
         validateUniqueWaiting(slot.getId(), request.name());
         Waiting savedWaiting = waitingDao.save(waiting);
         return WaitingResponse.from(savedWaiting);
@@ -56,6 +57,12 @@ public class WaitingService {
     private void validateNotOwnReservation(long slotId, String name) {
         if (reservationDao.existsBySlotIdAndName(slotId, name)) {
             throw new WaitingException(WaitingErrorCode.CANNOT_WAIT_OWN_RESERVATION);
+        }
+    }
+
+    private void validateSlotsReserved(Long slotId) {
+        if (!reservationDao.existsBySlotId(slotId)) {
+            throw new WaitingException(WaitingErrorCode.CANNOT_WAIT_SLOT_WITHOUT_RESERVATION);
         }
     }
 
