@@ -23,12 +23,7 @@ public class Reservation {
     }
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
-        this.id = null;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this(null, name, date, time, theme);
     }
 
     public static Reservation of(Long id, Reservation reservation) {

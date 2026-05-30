@@ -21,12 +21,7 @@ public class Theme {
     }
 
     public Theme(String name, String description, String thumbnailUrl) {
-        validate(name, description, thumbnailUrl);
-
-        this.id = null;
-        this.name = name;
-        this.description = description;
-        this.thumbnailUrl = thumbnailUrl;
+        this(null, name, description, thumbnailUrl);
     }
 
     public static Theme of(Long id, Theme theme) {
