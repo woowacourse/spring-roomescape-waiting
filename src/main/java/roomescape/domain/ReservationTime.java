@@ -50,11 +50,11 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) object;
-        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
+        return Objects.equals(startAt, that.startAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt);
+        return Objects.hashCode(startAt);
     }
 }

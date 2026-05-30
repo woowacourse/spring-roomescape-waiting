@@ -67,13 +67,12 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) object;
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
-                && Objects.equals(description, theme.description) && Objects.equals(thumbnailUrl,
-                theme.thumbnailUrl);
+        return Objects.equals(name, theme.name) && Objects.equals(description, theme.description)
+                && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnailUrl);
+        return Objects.hash(name, description, thumbnailUrl);
     }
 }

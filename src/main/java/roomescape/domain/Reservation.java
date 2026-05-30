@@ -76,13 +76,12 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) object;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name)
-                && Objects.equals(date, that.date) && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+        return Objects.equals(name, that.name) && Objects.equals(date, that.date)
+                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, date, time, theme);
+        return Objects.hash(name, date, time, theme);
     }
 }

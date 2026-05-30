@@ -82,14 +82,13 @@ public class Wait {
             return false;
         }
         Wait wait = (Wait) object;
-        return Objects.equals(id, wait.id) && Objects.equals(createdAt, wait.createdAt)
-                && Objects.equals(name, wait.name) && Objects.equals(reservationDate,
-                wait.reservationDate) && Objects.equals(time, wait.time) && Objects.equals(theme,
-                wait.theme);
+        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(name, wait.name)
+                && Objects.equals(reservationDate, wait.reservationDate) && Objects.equals(time,
+                wait.time) && Objects.equals(theme, wait.theme);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdAt, name, reservationDate, time, theme);
+        return Objects.hash(createdAt, name, reservationDate, time, theme);
     }
 }
