@@ -36,4 +36,6 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long aLong, Long aLong1, Long aLong2,
                                                          ReservationStatus reservationStatus);
+
+    int countWaitingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId);
 }

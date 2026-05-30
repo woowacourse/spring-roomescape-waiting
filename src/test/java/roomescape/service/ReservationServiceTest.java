@@ -17,6 +17,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
+import roomescape.dto.reservation.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -183,7 +184,6 @@ class ReservationServiceTest {
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
     }
 
-    @Disabled("TODO: 예약 대기 순번 조회 구현 후 작성")
     @Test
     void getMyReservations_예약_대기는_대기_순번을_포함해_반환한다() {
         User brown = buildUser("브라운");
@@ -195,13 +195,15 @@ class ReservationServiceTest {
 
         reservationRepository.save(buildReservation(charles, themeBId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildWaitingReservation(aron, themeBId, timeId, LocalDate.of(2026, 5, 2)));
-        reservationRepository.save(buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
+        reservationRepository.save(
+                buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
 
         ReservationWithStatusResponses results = service.getMyReservations(brown.getId());
 
         assertThat(results.waitingReservations()).hasSize(1);
         assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
-        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder()).isEqualTo(2);
+        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder())
+                .isEqualTo(2);
     }
 
     @Test
@@ -446,15 +448,14 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
-        Reservation waitingReservation = service.createWaitingReservation(
+        WaitingReservationResponse result = service.createWaitingReservation(
                 Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId));
 
-        assertThat(waitingReservation.getDate()).isEqualTo(LocalDate.of(2026, 6, 1));
-        assertThat(waitingReservation.getTheme().getId()).isEqualTo(themeId);
-        assertThat(waitingReservation.getTime().getId()).isEqualTo(timeId);
-        assertThat(waitingReservation.getUser().getId()).isEqualTo(charles.getId());
-        assertThat(waitingReservation.getUser().getId()).isEqualTo(charles.getId());
-        assertThat(waitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(result.date()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(result.themeName()).isEqualTo("공포");
+        assertThat(result.name()).isEqualTo("샤를");
+        assertThat(result.time()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(result.waitingOrder()).isEqualTo(1);
     }
 
     @Test

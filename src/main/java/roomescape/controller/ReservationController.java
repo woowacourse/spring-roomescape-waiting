@@ -19,6 +19,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.dto.reservation.UpdateReservationRequest;
+import roomescape.dto.reservation.WaitingReservationResponse;
 import roomescape.infrastructure.LoginUserId;
 import roomescape.service.ReservationService;
 
@@ -43,26 +44,26 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createReservation(
+    public ResponseEntity<ReservationResponse> createReservation(
             @LoginUserId Long userId,
             @Valid @RequestBody CreateReservationRequest request) {
         Reservation createdReservation = reservationService.createReservation(
                 CreateReservationCommand.of(userId, request));
 
         URI location = URI.create("/reservations/" + createdReservation.getId());
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(ReservationResponse.from(createdReservation));
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<Void> createWaitingReservation(
+    public ResponseEntity<WaitingReservationResponse> createWaitingReservation(
             @LoginUserId Long userId,
             @Valid @RequestBody CreateReservationRequest request
     ) {
-        Reservation createdReservationWaiting = reservationService.createWaitingReservation(
+        WaitingReservationResponse response = reservationService.createWaitingReservation(
                 CreateReservationCommand.of(userId, request));
 
-        URI location = URI.create("/reservations/" + createdReservationWaiting.getId());
-        return ResponseEntity.created(location).build();
+        URI location = URI.create("/reservations/" + response.id());
+        return ResponseEntity.created(location).body(response);
     }
 
 

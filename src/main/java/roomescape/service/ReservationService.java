@@ -15,6 +15,7 @@ import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
+import roomescape.dto.reservation.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -103,7 +104,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createWaitingReservation(CreateReservationCommand command) {
+    public WaitingReservationResponse createWaitingReservation(CreateReservationCommand command) {
         validateReservationIsFullyBooked(command);
 
         Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
@@ -113,7 +114,11 @@ public class ReservationService {
         validateNotDuplicatedWaiting(newWaitingReservation);
 
         Long newReservationId = reservationRepository.save(newWaitingReservation);
-        return newWaitingReservation.withId(newReservationId);
+        Reservation saved = newWaitingReservation.withId(newReservationId);
+
+        int waitingOrder = reservationRepository.countWaitingByDateAndTimeAndThemeAndStore(
+                saved.getDate(), saved.getTime().getId(), saved.getTheme().getId(), saved.getStore().getId());
+        return WaitingReservationResponse.from(saved, waitingOrder);
     }
 
     @Transactional

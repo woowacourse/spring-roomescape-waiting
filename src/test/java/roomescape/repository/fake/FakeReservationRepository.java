@@ -136,6 +136,17 @@ public class FakeReservationRepository implements ReservationRepository {
                         && r.getStatus().equals(status));
     }
 
+    @Override
+    public int countWaitingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
+        return (int) store.values().stream()
+                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
+                .filter(r -> r.getDate().equals(date))
+                .filter(r -> r.getTime().getId().equals(timeId))
+                .filter(r -> r.getTheme().getId().equals(themeId))
+                .filter(r -> r.getStore().getId().equals(storeId))
+                .count();
+    }
+
     Collection<Reservation> all() {
         return Collections.unmodifiableCollection(store.values());
     }

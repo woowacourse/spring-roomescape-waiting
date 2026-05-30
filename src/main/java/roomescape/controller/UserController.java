@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.User;
 import roomescape.dto.user.CreateUserRequest;
+import roomescape.dto.user.UserResponse;
 import roomescape.service.UserService;
 
 @RestController
@@ -20,9 +21,9 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createUser(@RequestBody CreateUserRequest createUserRequest) {
+    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
         User createdUser = userService.register(createUserRequest);
         URI location = URI.create("/users/" + createdUser.getId());
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(UserResponse.from(createdUser));
     }
 }

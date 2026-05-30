@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
+import roomescape.dto.reservation.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -73,7 +74,6 @@ class ReservationControllerTest {
         verify(reservationService).getMyReservations(1L);
     }
 
-    @Disabled("TODO: 예약 상태별 내 예약 조회 응답 구현 후 작성")
     @Test
     void GET_reservations_mine_예약_확정과_예약_대기_목록을_구분해서_응답한다() throws Exception {
         given(reservationService.getMyReservations(1L))
@@ -382,9 +382,9 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_waiting_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
+    void POST_reservations_waiting_생성된_대기_예약을_body에_담고_Location_헤더와_함께_201을_반환한다() throws Exception {
         given(reservationService.createWaitingReservation(any(CreateReservationCommand.class)))
-                .willReturn(Fixtures.sampleWaitingReservation(7L));
+                .willReturn(WaitingReservationResponse.from(Fixtures.sampleWaitingReservation(7L), 2));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-01",
@@ -396,7 +396,9 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/reservations/7"));
+                .andExpect(header().string("Location", "/reservations/7"))
+                .andExpect(jsonPath("$.id").value(7))
+                .andExpect(jsonPath("$.waitingOrder").value(2));
     }
 
     @Test

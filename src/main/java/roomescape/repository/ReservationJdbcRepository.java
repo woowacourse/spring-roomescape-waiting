@@ -253,4 +253,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId, reservationStatus.name()));
     }
+
+    @Override
+    public int countWaitingByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
+        String sql = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ? and status = ?";
+        Integer count = jdbcTemplate.queryForObject(
+                sql, Integer.class, date, timeId, themeId, storeId, ReservationStatus.WAITING.name());
+        return count == null ? 0 : count;
+    }
 }
