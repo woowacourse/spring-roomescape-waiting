@@ -2,7 +2,6 @@ package roomescape.reservationwaiting.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;

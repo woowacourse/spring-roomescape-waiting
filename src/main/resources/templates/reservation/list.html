@@ -3,878 +3,876 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예약 관리</title>
+    <title>방탈출 예약</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg: #f7f3ea;
-            --card: #fffdf8;
-            --line: #d8cbb4;
-            --text: #2f2418;
-            --point: #0e7490;
-            --point-dark: #155e75;
-            --accent: #efb366;
-            --accent-soft: #fff1dc;
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #eef2ff;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+            --radius: 14px;
+            --radius-sm: 8px;
         }
-        * { box-sizing: border-box; }
+
         body {
-            margin: 0;
-            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(239, 179, 102, 0.35), transparent 30%),
-                linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+            background: var(--bg);
             color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
         }
-        .wrap {
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-inner {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 32px 20px 64px;
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
-        .hero {
-            display: grid;
-            gap: 12px;
+        .logo {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--text); }
+        .topbar-nav {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex: 1;
+        }
+        .topbar-nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 999px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .topbar-nav a:hover { background: var(--bg); color: var(--text); }
+        .topbar-nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+        .topbar-badge {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Layout ── */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        /* ── Hero ── */
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+        .page-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        /* ── Feedback ── */
+        .feedback {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px 18px;
+            border-radius: var(--radius);
+            background: var(--danger-light);
+            border: 1px solid rgba(220,38,38,0.18);
             margin-bottom: 24px;
         }
-        .eyebrow {
+        .feedback.hidden { display: none; }
+        .feedback-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .feedback-body { display: grid; gap: 3px; }
+        .feedback-title { font-weight: 700; font-size: 15px; color: var(--danger); }
+        .feedback-msg { font-size: 14px; color: #7f1d1d; }
+        .feedback-hint { font-size: 13px; color: #991b1b; opacity: 0.8; }
+
+        /* ── Grid layouts ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 860px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .card + .card { }
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--primary-light);
+            color: var(--primary);
             display: inline-flex;
-            width: fit-content;
-            padding: 8px 12px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, 0.75);
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* ── Forms ── */
+        .form { display: grid; gap: 14px; }
+        .field { display: grid; gap: 5px; }
+        .field label {
             font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        input[type="time"],
+        input[type="url"],
+        textarea,
+        select {
+            font: inherit;
+            font-size: 14px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
+            color: var(--text);
+            transition: border-color 0.15s;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+            text-decoration: none;
+        }
+        .btn:hover { opacity: 0.88; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1.5px solid rgba(79,70,229,0.2);
+        }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger-outline {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1.5px solid rgba(220,38,38,0.2);
+        }
+        .btn-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+            border: 1.5px solid rgba(217,119,6,0.25);
+        }
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 7px 12px; font-size: 13px; }
+
+        /* ── Time slot list ── */
+        .slot-list { display: grid; gap: 10px; }
+        .slot-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .slot-item.reservable {
+            cursor: pointer;
+            border-color: rgba(79,70,229,0.25);
+        }
+        .slot-item.reservable:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+        .slot-item.booked { opacity: 0.7; background: #f8fafc; }
+        .slot-item.past { opacity: 0.5; background: #f8fafc; }
+        .slot-meta { display: grid; gap: 2px; }
+        .slot-time { font-weight: 700; font-size: 16px; }
+        .slot-label { font-size: 12px; color: var(--text-muted); }
+        .slot-actions { display: flex; gap: 8px; align-items: center; }
+
+        /* ── Status chips ── */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.04em;
         }
-        .hero h1 {
-            margin: 0;
-            font-size: clamp(32px, 5vw, 56px);
-            line-height: 1;
-        }
-        .hero p {
-            margin: 0;
-            max-width: 700px;
-            color: rgba(47, 36, 24, 0.76);
-        }
-        .nav {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 28px;
-        }
-        .nav a {
-            text-decoration: none;
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid var(--line);
-            padding: 10px 14px;
-            border-radius: 999px;
-        }
-        .admin-link {
-            margin-left: auto;
-            background: rgba(14, 116, 144, 0.08) !important;
-            border-color: rgba(14, 116, 144, 0.24) !important;
-            color: var(--point) !important;
-            font-weight: 700;
-        }
-        .top-grid {
-            display: grid;
-            grid-template-columns: minmax(360px, 1.15fr) minmax(320px, 0.85fr);
-            gap: 20px;
-        }
-        .bottom-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
-            gap: 20px;
-            margin-top: 20px;
-            align-items: start;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 16px 32px rgba(47, 36, 24, 0.08);
-        }
-        .stack {
-            display: grid;
-            gap: 20px;
-        }
-        .card h2 {
-            margin: 0 0 16px;
-            font-size: 22px;
-        }
-        form {
-            display: grid;
-            gap: 12px;
-        }
-        label {
-            display: grid;
-            gap: 6px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        input, select, button {
-            border-radius: 12px;
-            border: 1px solid var(--line);
+        .chip-primary { background: var(--primary-light); color: var(--primary); }
+        .chip-warning { background: var(--warning-light); color: var(--warning); border: 1px solid rgba(217,119,6,0.2); }
+        .chip-muted { background: #f1f5f9; color: var(--text-muted); }
+        .chip-danger { background: var(--danger-light); color: var(--danger); }
+
+        /* ── Selection highlight ── */
+        .selection-box {
             padding: 12px 14px;
-            font: inherit;
+            border-radius: var(--radius-sm);
+            background: var(--primary-light);
+            border: 1.5px solid rgba(79,70,229,0.25);
+            margin-top: 12px;
         }
-        button {
-            background: var(--point);
-            color: white;
-            border: 0;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        button:hover {
-            background: var(--point-dark);
-        }
-        button.secondary {
-            background: rgba(14, 116, 144, 0.12);
-            color: var(--point);
-            border: 1px solid rgba(14, 116, 144, 0.2);
-        }
-        button.secondary:hover {
-            background: rgba(14, 116, 144, 0.18);
-        }
-        button.delete {
-            background: #d1495b;
-        }
-        ul, ol {
-            margin: 0;
-            padding-left: 20px;
-        }
-        .list {
-            display: grid;
-            gap: 12px;
-        }
-        .item {
+        .selection-box.hidden { display: none; }
+        .selection-box strong { display: block; font-size: 14px; color: var(--primary); margin-bottom: 3px; }
+        .selection-box span { font-size: 13px; color: #4338ca; }
+
+        /* ── My history list ── */
+        .history-list { display: grid; gap: 10px; }
+        .history-item {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
             gap: 12px;
-            align-items: center;
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 12px 14px;
-            background: rgba(255, 255, 255, 0.72);
-        }
-        .item strong {
-            display: block;
-        }
-        .item span {
-            font-size: 14px;
-            color: rgba(47, 36, 24, 0.72);
-        }
-        .time-option {
-            width: 100%;
-            text-align: left;
-            background: transparent;
-            color: inherit;
-            border: 0;
-            padding: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-        }
-        .time-option:hover strong {
-            color: var(--point-dark);
-        }
-        .time-option small {
-            color: var(--point);
-            font-weight: 700;
-        }
-        .time-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .waiting-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: flex-end;
-            align-items: center;
-        }
-        .waiting-form input {
-            width: 132px;
-            padding: 10px 12px;
-        }
-        .waiting-form button {
-            padding: 10px 12px;
-        }
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            width: fit-content;
-            border-radius: 999px;
-            padding: 6px 10px;
-            border: 1px solid rgba(47, 36, 24, 0.14);
-            background: rgba(255, 255, 255, 0.78);
-            color: rgba(47, 36, 24, 0.72);
-            font-size: 12px;
-            font-weight: 800;
-        }
-        .status-chip.reservation {
-            color: var(--point);
-            border-color: rgba(14, 116, 144, 0.24);
-            background: rgba(14, 116, 144, 0.08);
-        }
-        .status-chip.waiting {
-            color: #9a5c00;
-            border-color: rgba(239, 179, 102, 0.42);
-            background: var(--accent-soft);
-        }
-        .selection-card {
-            margin-top: 14px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(14, 116, 144, 0.24);
-            background: rgba(14, 116, 144, 0.08);
-        }
-        .selection-card.hidden {
-            display: none;
-        }
-        .inline-form {
-            display: inline;
-        }
-        .hint {
-            margin-top: 8px;
-            font-size: 14px;
-            color: rgba(47, 36, 24, 0.72);
-        }
-        .helper {
-            font-size: 13px;
-            color: rgba(47, 36, 24, 0.68);
-        }
-        .action-stack {
-            display: grid;
-            gap: 10px;
-        }
-        .edit-panel {
-            margin-top: 14px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(14, 116, 144, 0.22);
-            background: rgba(14, 116, 144, 0.06);
-            display: grid;
-            gap: 12px;
-        }
-        .edit-panel.hidden {
-            display: none;
-        }
-        .feedback {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 20px;
-            padding: 16px 18px;
-            border-radius: 18px;
-            border: 1px solid rgba(14, 116, 144, 0.18);
-            background: rgba(255, 250, 240, 0.95);
-        }
-        .feedback.hidden {
-            display: none;
-        }
-        .feedback strong {
-            font-size: 17px;
-        }
-        .feedback p {
-            margin: 0;
-            color: rgba(47, 36, 24, 0.78);
-        }
-        .feedback small {
-            color: rgba(47, 36, 24, 0.64);
-        }
-        .popular-list {
-            display: grid;
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .popular-card {
-            display: grid;
-            grid-template-columns: 56px 1fr;
-            gap: 14px;
-            align-items: center;
             padding: 14px;
-            border-radius: 18px;
-            border: 1px solid rgba(14, 116, 144, 0.15);
-            background:
-                linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,244,227,0.95)),
-                var(--card);
-            box-shadow: 0 10px 24px rgba(14, 116, 144, 0.08);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
+        }
+        .history-meta { display: grid; gap: 3px; flex: 1; }
+        .history-name { font-weight: 700; font-size: 15px; }
+        .history-info { font-size: 13px; color: var(--text-muted); }
+        .history-actions { display: flex; flex-direction: column; gap: 7px; flex-shrink: 0; }
+
+        /* ── Edit panel ── */
+        .edit-panel {
+            margin-top: 16px;
+            padding: 18px;
+            border-radius: var(--radius-sm);
+            background: #f8f7ff;
+            border: 1.5px solid rgba(79,70,229,0.22);
+        }
+        .edit-panel.hidden { display: none; }
+        .edit-panel-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .edit-panel-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+        /* ── Popular themes ── */
+        .popular-list { display: grid; gap: 10px; margin-top: 4px; }
+        .popular-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
         }
         .popular-rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: white;
+            font-size: 18px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, var(--accent), #ffd8a8);
-            color: #5d3700;
-            font-size: 22px;
-            font-weight: 800;
+            flex-shrink: 0;
         }
-        .popular-meta {
-            display: grid;
-            gap: 4px;
+        .popular-rank.rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #78350f; }
+        .popular-rank.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #1e293b; }
+        .popular-rank.rank-3 { background: linear-gradient(135deg, #d97706, #f59e0b); color: #78350f; }
+        .popular-meta { display: grid; gap: 2px; flex: 1; }
+        .popular-name { font-weight: 700; font-size: 15px; }
+        .popular-desc { font-size: 12px; color: var(--text-muted); }
+
+        /* ── Divider ── */
+        .section-gap { margin-top: 20px; }
+
+        /* ── Empty ── */
+        .empty-state {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
         }
-        .popular-meta strong {
-            font-size: 17px;
-        }
-        .popular-meta span {
-            font-size: 13px;
-            color: rgba(47, 36, 24, 0.7);
-        }
-        @media (max-width: 980px) {
-            .top-grid,
-            .bottom-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+
+        /* ── Hint text ── */
+        .hint { font-size: 13px; color: var(--text-muted); margin-top: 10px; }
+
+        .inline-form { display: inline; }
     </style>
 </head>
 <body>
-<div class="wrap">
-    <section class="hero">
-        <span class="eyebrow">USER PAGE</span>
-        <h1>예약 페이지</h1>
-        <p>날짜와 테마를 고른 뒤 예약 가능한 시간대를 클릭하면, 아래 예약 폼이 자동으로 채워집니다. 관리 기능은 관리자 페이지에서만 다룰 수 있도록 분리했습니다.</p>
-    </section>
 
-    <nav class="nav">
-        <a th:href="@{/pages/user/reservations}">예약 홈</a>
-        <a th:href="@{/pages/admin/reservations}" class="admin-link">관리자 콘솔로 이동</a>
-    </nav>
+<!-- ── Top Navigation ── -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/pages/user/reservations" class="logo">🗝 Room<span>Escape</span></a>
+        <nav class="topbar-nav">
+            <a th:href="@{/pages/user/reservations}" class="active">예약하기</a>
+        </nav>
+        <a th:href="@{/pages/admin/themes}" class="topbar-badge">⚙ 관리자</a>
+    </div>
+</header>
 
-    <section id="page-feedback"
-             class="feedback hidden"
-             th:attr="data-error-code=${errorCode}">
-        <strong id="feedback-title"></strong>
-        <p id="feedback-message"></p>
-        <small id="feedback-hint"></small>
-    </section>
+<!-- ── Page ── -->
+<main class="page">
 
-    <section class="top-grid">
-        <article class="card">
-            <div class="stack">
-                <section>
-                    <h2>예약 가능 시간 조회</h2>
-                    <form id="available-times-form" method="get" th:action="@{/pages/user/reservations}">
-                        <label>
-                            테마
-                            <select name="themeId" required>
-                                <option value="">테마를 선택하세요</option>
-                                <option th:each="theme : ${themes}"
-                                        th:value="${theme.id}"
-                                        th:selected="${selectedThemeId != null and selectedThemeId == theme.id}"
-                                        th:text="${theme.name}">
-                                </option>
-                            </select>
-                        </label>
-                        <label>
-                            날짜
-                            <input type="date" name="date" th:value="${selectedDate}" required>
-                        </label>
-                        <button type="submit">가능 시간 찾기</button>
-                    </form>
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">방탈출 예약</h1>
+        <p class="page-desc">테마와 날짜를 선택해 예약 가능한 시간을 조회하고 예약하세요.</p>
+    </div>
 
-                    <div class="hint" th:if="${selectedThemeId == null or selectedDate == null}">
-                        테마와 날짜를 고르면 아래에 예약 가능한 시간 카드가 표시됩니다.
-                    </div>
-                </section>
+    <!-- Error Feedback -->
+    <div id="page-feedback"
+         class="feedback hidden"
+         th:attr="data-error-code=${errorCode}">
+        <div class="feedback-icon">⚠️</div>
+        <div class="feedback-body">
+            <div id="feedback-title" class="feedback-title"></div>
+            <div id="feedback-message" class="feedback-msg"></div>
+            <div id="feedback-hint" class="feedback-hint"></div>
+        </div>
+    </div>
 
-                <section>
-                    <h2>조회된 시간</h2>
-                    <div class="list" th:if="${selectedThemeId != null and selectedDate != null}">
-                        <div class="item" th:if="${#lists.isEmpty(availableTimes)}">
-                            <div>
-                                <strong>조회된 시간이 없습니다.</strong>
-                                <span>관리자가 등록한 시간이 아직 없습니다.</span>
+    <!-- Top Grid: Time Finder + Reservation Form -->
+    <div class="grid-2">
+
+        <!-- Time Finder -->
+        <div class="card">
+            <h2 class="card-title">
+                <span class="icon">🔍</span>
+                예약 가능 시간 조회
+            </h2>
+
+            <form id="available-times-form" class="form" method="get" th:action="@{/pages/user/reservations}">
+                <!-- hidden params to preserve state -->
+                <input type="hidden" name="reservationName" th:value="${reservationName}">
+                <input type="hidden" name="period" th:value="${period}">
+                <input type="hidden" name="limit" th:value="${limit}">
+                <div class="field">
+                    <label for="themeSelect">테마</label>
+                    <select id="themeSelect" name="themeId" required>
+                        <option value="">테마를 선택하세요</option>
+                        <option th:each="theme : ${themes}"
+                                th:value="${theme.id}"
+                                th:selected="${selectedThemeId != null and selectedThemeId == theme.id}"
+                                th:text="${theme.name}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="dateInput">날짜</label>
+                    <input type="date" id="dateInput" name="date" th:value="${selectedDate}" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">시간 조회</button>
+            </form>
+
+            <!-- Time Slot Results -->
+            <div class="section-gap" th:if="${selectedThemeId != null and selectedDate != null}">
+                <div class="slot-list" th:if="${!#lists.isEmpty(availableTimes)}">
+                    <div th:each="time : ${availableTimes}">
+
+                        <!-- Reservable -->
+                        <div class="slot-item reservable"
+                             th:if="${time.reservable}"
+                             th:attr="data-time-id=${time.id},data-date=${selectedDate},data-theme-name=${selectedTheme != null ? selectedTheme.name : ''},data-start-at=${time.startAt}"
+                             onclick="selectTimeSlot(this)">
+                            <div class="slot-meta">
+                                <div class="slot-time" th:text="${time.startAt}">10:00</div>
+                                <div class="slot-label" th:text="${selectedTheme != null ? selectedTheme.name : ''}">테마명</div>
+                            </div>
+                            <div class="slot-actions">
+                                <span class="chip chip-primary">예약 가능 →</span>
                             </div>
                         </div>
-                        <div class="item" th:each="time : ${availableTimes}">
-                            <button type="button"
-                                    class="time-option"
-                                    th:if="${time.reservable}"
-                                    th:attr="data-time-id=${time.id},data-date=${selectedDate},data-theme-name=${selectedTheme != null ? selectedTheme.name : ''},data-start-at=${time.startAt}"
-                                    onclick="selectTimeSlot(this)">
-                                <div>
-                                    <strong th:text="${time.startAt}">10:00</strong>
-                                    <span th:text="${selectedTheme != null ? selectedTheme.name : ''}">테마명</span>
+
+                        <!-- Not Reservable -->
+                        <div th:if="${!time.reservable}">
+
+                            <!-- Past -->
+                            <div class="slot-item past" th:if="${time.past}">
+                                <div class="slot-meta">
+                                    <div class="slot-time" th:text="${time.startAt}">10:00</div>
+                                    <div class="slot-label">지난 시간</div>
                                 </div>
-                                <small>예약하기</small>
-                            </button>
-                            <div th:if="${!time.reservable}" class="time-option">
-                                <div>
-                                    <strong th:text="${time.startAt}">10:00</strong>
-                                    <span th:if="${time.past}">지난 시간</span>
-                                    <span th:if="${time.waitable and time.waiting}">대기 신청 완료</span>
-                                    <span th:if="${time.waitable and !time.waiting}">예약 마감</span>
+                                <span class="chip chip-muted">신청 불가</span>
+                            </div>
+
+                            <!-- Waitable - already waiting -->
+                            <div class="slot-item booked" th:if="${time.waitable and time.waiting}">
+                                <div class="slot-meta">
+                                    <div class="slot-time" th:text="${time.startAt}">10:00</div>
+                                    <div class="slot-label">대기 신청 완료</div>
                                 </div>
-                                <div class="time-actions">
+                                <div class="slot-actions">
                                     <form method="post"
-                                          th:if="${time.waitable and time.waiting}"
                                           th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${time.waitingId})}">
                                         <input type="hidden" name="reservationName" th:value="${reservationName}">
                                         <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                                         <input type="hidden" name="date" th:value="${selectedDate}">
-                                        <button type="submit" class="delete">대기 취소</button>
+                                        <button type="submit" class="btn btn-danger-outline btn-sm">대기 취소</button>
                                     </form>
-                                    <form class="waiting-form"
+                                </div>
+                            </div>
+
+                            <!-- Waitable - not waiting yet -->
+                            <div class="slot-item booked" th:if="${time.waitable and !time.waiting}">
+                                <div class="slot-meta">
+                                    <div class="slot-time" th:text="${time.startAt}">10:00</div>
+                                    <div class="slot-label">예약 마감</div>
+                                </div>
+                                <div class="slot-actions">
+                                    <form style="display:flex;gap:6px;align-items:center;"
                                           method="post"
-                                          th:if="${time.waitable and !time.waiting}"
                                           th:action="@{/pages/user/reservations/waitings}">
                                         <input type="text"
                                                name="name"
                                                th:value="${reservationName}"
                                                maxlength="9"
                                                placeholder="대기자 이름"
-                                               aria-label="대기자 이름"
+                                               style="width:110px;padding:7px 10px;font-size:13px;"
                                                required>
                                         <input type="hidden" name="date" th:value="${selectedDate}">
                                         <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                                         <input type="hidden" name="timeId" th:value="${time.id}">
-                                        <button type="submit" class="secondary">대기 신청</button>
+                                        <button type="submit" class="btn btn-warning btn-sm">대기 신청</button>
                                     </form>
-                                    <span class="status-chip"
-                                          th:if="${time.past}">
-                                        신청 불가
-                                    </span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
-                    <p class="hint" th:if="${selectedThemeId == null or selectedDate == null}">조회 후 예약 가능한 시간은 예약으로, 마감된 시간은 대기 신청으로 이어집니다.</p>
-                </section>
-            </div>
-        </article>
+                </div>
 
-        <article class="card" id="reservation-form-card">
-            <h2>예약 생성</h2>
-            <form id="reservation-create-form" method="post" th:action="@{/pages/user/reservations}">
-                <label>
-                    예약자 이름
-                    <input type="text" id="reservation-name" name="name" maxlength="9" required>
-                </label>
-                <label>
-                    날짜
-                    <input type="date" id="reservation-date" name="date" th:value="${selectedDate}" required>
-                </label>
-                <label>
-                    시간 슬롯
-                    <select id="reservation-time" name="timeId" required>
-                        <option value="">예약 가능한 시간을 먼저 조회하세요</option>
+                <div class="empty-state" th:if="${#lists.isEmpty(availableTimes)}">
+                    등록된 시간 슬롯이 없습니다.
+                </div>
+            </div>
+
+            <p class="hint" th:if="${selectedThemeId == null or selectedDate == null}">
+                테마와 날짜를 선택하면 예약 가능한 시간 슬롯이 표시됩니다.
+            </p>
+        </div>
+
+        <!-- Reservation Form -->
+        <div class="card" id="reservation-form-card">
+            <h2 class="card-title">
+                <span class="icon">📋</span>
+                예약 생성
+            </h2>
+
+            <form id="reservation-create-form" class="form" method="post" th:action="@{/pages/user/reservations}">
+                <div class="field">
+                    <label for="reservation-name">예약자 이름</label>
+                    <input type="text" id="reservation-name" name="name"
+                           th:value="${reservationName}"
+                           maxlength="9"
+                           placeholder="이름을 입력하세요">
+                </div>
+                <div class="field">
+                    <label for="reservation-date">날짜</label>
+                    <input type="date" id="reservation-date" name="date" th:value="${selectedDate}">
+                </div>
+                <div class="field">
+                    <label for="reservation-time">시간 슬롯</label>
+                    <select id="reservation-time" name="timeId">
+                        <option value="">시간을 조회하고 선택하세요</option>
                         <option th:each="time : ${availableTimes}"
                                 th:if="${time.reservable}"
                                 th:value="${time.id}"
-                                th:text="${time.startAt}">
-                        </option>
+                                th:text="${time.startAt}"></option>
                     </select>
-                </label>
-                <input type="hidden" name="themeId" th:value="${selectedThemeId}">
-                <div id="selection-card" class="selection-card hidden">
-                    <strong id="selection-title">선택한 시간</strong>
-                    <div id="selection-body" class="helper">조회 결과에서 시간을 고르면 자동으로 채워집니다.</div>
                 </div>
-                <button type="submit">예약 저장</button>
-            </form>
-            <p class="hint">조회 결과에서 시간 카드를 누르면 날짜와 시간 슬롯이 자동으로 선택되고, 이름만 입력하면 바로 예약할 수 있습니다.</p>
-        </article>
-    </section>
+                <input type="hidden" name="themeId" th:value="${selectedThemeId}">
 
-    <section class="bottom-grid">
-        <article class="card">
-            <h2>내 예약 및 대기 조회</h2>
-            <form id="my-reservations-form" method="get" th:action="@{/pages/user/reservations}">
+                <div id="selection-card" class="selection-box hidden">
+                    <strong id="selection-title">선택된 시간</strong>
+                    <span id="selection-body">왼쪽에서 시간을 클릭하면 자동으로 채워집니다.</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">예약 저장</button>
+            </form>
+
+            <p class="hint">왼쪽 목록에서 시간을 클릭하면 날짜·시간이 자동 입력됩니다.</p>
+        </div>
+    </div>
+
+    <!-- Bottom Grid: My History + Popular Themes -->
+    <div class="grid-2 section-gap">
+
+        <!-- My Reservations -->
+        <div class="card">
+            <h2 class="card-title">
+                <span class="icon">🙋</span>
+                내 예약 · 대기 조회
+            </h2>
+
+            <form id="my-reservations-form" class="form" method="get" th:action="@{/pages/user/reservations}">
                 <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                 <input type="hidden" name="date" th:value="${selectedDate}">
                 <input type="hidden" name="period" th:value="${period}">
                 <input type="hidden" name="limit" th:value="${limit}">
-                <label>
-                    이름
-                    <input type="text" name="reservationName" th:value="${reservationName}" maxlength="9" required>
-                </label>
-                <button type="submit">내 기록 찾기</button>
+                <div class="field">
+                    <label for="reservationName">이름으로 조회</label>
+                    <input type="text" id="reservationName" name="reservationName"
+                           th:value="${reservationName}"
+                           maxlength="9"
+                           placeholder="예약자 이름">
+                </div>
+                <button type="submit" class="btn btn-secondary btn-block">내 기록 찾기</button>
             </form>
-            <div class="list" th:if="${!#lists.isEmpty(myHistories)}">
-                <div class="item" th:each="history : ${myHistories}">
-                    <div>
-                        <strong th:text="${history.name}">브라운</strong>
-                        <span th:text="${history.date + ' / ' + history.theme.name + ' / ' + history.time.startAt}">내용</span>
-                        <span class="status-chip reservation"
-                              th:if="${history.status.name() == 'RESERVATION'}">예약</span>
-                        <span class="status-chip waiting"
-                              th:if="${history.status.name() == 'WAITING'}"
-                              th:text="${'대기 ' + history.sequence + '번'}">대기 1번</span>
+
+            <!-- History List -->
+            <div class="history-list section-gap" th:if="${!#lists.isEmpty(myHistories)}">
+                <div class="history-item" th:each="history : ${myHistories}">
+                    <div class="history-meta">
+                        <div class="history-name" th:text="${history.name}">이름</div>
+                        <div class="history-info"
+                             th:text="${history.date + ' / ' + history.theme.name + ' / ' + history.time.startAt}">
+                        </div>
+                        <div style="margin-top: 4px;">
+                            <span class="chip chip-primary"
+                                  th:if="${history.status.name() == 'RESERVATION'}">✅ 예약 확정</span>
+                            <span class="chip chip-warning"
+                                  th:if="${history.status.name() == 'WAITING'}"
+                                  th:text="${'⏳ 대기 ' + history.sequence + '번'}"></span>
+                        </div>
                     </div>
-                    <div class="action-stack" th:if="${history.status.name() == 'RESERVATION'}">
+                    <div class="history-actions">
                         <button type="button"
-                                class="secondary"
+                                class="btn btn-secondary btn-sm"
+                                th:if="${history.status.name() == 'RESERVATION'}"
                                 th:attr="data-reservation-id=${history.reservationId},data-reservation-date=${history.date},data-time-id=${history.time.id},data-theme-name=${history.theme.name},data-start-at=${history.time.startAt}"
-                                onclick="openReservationEditForm(this)">
-                            수정
-                        </button>
-                        <form class="inline-form" method="post" th:action="@{/pages/user/reservations/{id}/delete(id=${history.reservationId})}">
+                                onclick="openEditForm(this)">수정</button>
+                        <form class="inline-form" method="post"
+                              th:if="${history.status.name() == 'RESERVATION'}"
+                              th:action="@{/pages/user/reservations/{id}/delete(id=${history.reservationId})}">
                             <input type="hidden" name="reservationName" th:value="${reservationName}">
-                            <button type="submit" class="delete">삭제</button>
+                            <button type="submit" class="btn btn-danger-outline btn-sm">삭제</button>
                         </form>
-                    </div>
-                    <div class="action-stack" th:if="${history.status.name() == 'WAITING'}">
-                        <form class="inline-form" method="post" th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${history.waitingId})}">
+                        <form class="inline-form" method="post"
+                              th:if="${history.status.name() == 'WAITING'}"
+                              th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${history.waitingId})}">
                             <input type="hidden" name="reservationName" th:value="${reservationName}">
                             <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                             <input type="hidden" name="date" th:value="${selectedDate}">
-                            <button type="submit" class="delete">대기 취소</button>
+                            <button type="submit" class="btn btn-danger-outline btn-sm">취소</button>
                         </form>
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Panel -->
             <div id="reservation-edit-panel" class="edit-panel hidden">
-                <strong id="reservation-edit-title">예약 변경</strong>
-                <div id="reservation-edit-body" class="helper">수정할 예약을 고르면 날짜와 시간이 자동으로 채워집니다.</div>
-                <form id="reservation-edit-form" method="post">
+                <div class="edit-panel-title">예약 수정</div>
+                <div id="reservation-edit-body" class="edit-panel-desc">수정할 새 날짜와 시간을 선택하세요.</div>
+                <form id="reservation-edit-form" class="form" method="post">
                     <input type="hidden" name="reservationName" th:value="${reservationName}">
-                    <label>
-                        변경 날짜
+                    <div class="field">
+                        <label>변경 날짜</label>
                         <input type="date" id="reservation-edit-date" name="date" required>
-                    </label>
-                    <label>
-                        변경 시간
+                    </div>
+                    <div class="field">
+                        <label>변경 시간</label>
                         <select id="reservation-edit-time" name="timeId" required>
                             <option th:each="time : ${reservationTimes}"
                                     th:value="${time.id}"
-                                    th:text="${time.startAt}">
-                            </option>
+                                    th:text="${time.startAt}"></option>
                         </select>
-                    </label>
-                    <div class="action-stack">
-                        <button type="submit">변경 저장</button>
-                        <button type="button" class="secondary" onclick="closeReservationEditForm()">닫기</button>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button type="submit" class="btn btn-primary" style="flex:1">저장</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditForm()">닫기</button>
                     </div>
                 </form>
             </div>
-            <p class="hint" th:if="${reservationName == null}">이름으로 예약과 대기 내역을 함께 조회할 수 있습니다.</p>
-            <p class="hint" th:if="${reservationName != null and #lists.isEmpty(myHistories)}">조회한 이름으로 등록된 예약이나 대기가 아직 없습니다.</p>
-        </article>
 
-        <article class="card">
-            <h2>최근 인기 테마</h2>
-            <form id="popular-themes-form" method="get" th:action="@{/pages/user/reservations}">
+            <p class="hint" th:if="${reservationName == null}">이름을 입력하면 예약과 대기 내역을 함께 조회할 수 있습니다.</p>
+            <p class="hint" th:if="${reservationName != null and #lists.isEmpty(myHistories)}">해당 이름의 예약 또는 대기 내역이 없습니다.</p>
+        </div>
+
+        <!-- Popular Themes -->
+        <div class="card">
+            <h2 class="card-title">
+                <span class="icon">🏆</span>
+                인기 테마
+            </h2>
+
+            <form id="popular-themes-form" class="form" method="get" th:action="@{/pages/user/reservations}">
                 <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                 <input type="hidden" name="date" th:value="${selectedDate}">
-                <label>
-                    최근 기간(일)
-                    <input type="number" min="1" name="period" th:value="${period}" required>
-                </label>
-                <label>
-                    노출 개수
-                    <input type="number" min="1" name="limit" th:value="${limit}" required>
-                </label>
-                <button type="submit">인기 테마 갱신</button>
+                <input type="hidden" name="reservationName" th:value="${reservationName}">
+                <div class="grid-2" style="gap:10px;">
+                    <div class="field">
+                        <label>최근 기간 (일)</label>
+                        <input type="number" name="period" min="1" th:value="${period}">
+                    </div>
+                    <div class="field">
+                        <label>노출 개수</label>
+                        <input type="number" name="limit" min="1" th:value="${limit}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-block">인기 테마 갱신</button>
             </form>
+
             <div class="popular-list" th:if="${!#lists.isEmpty(popularThemes)}">
-                <div class="popular-card" th:each="theme, stat : ${popularThemes}">
-                    <div class="popular-rank" th:text="${stat.count}">1</div>
+                <div class="popular-item" th:each="theme, stat : ${popularThemes}">
+                    <div class="popular-rank"
+                         th:classappend="${stat.count == 1 ? 'rank-1' : (stat.count == 2 ? 'rank-2' : (stat.count == 3 ? 'rank-3' : ''))}"
+                         th:text="${stat.count}">1</div>
                     <div class="popular-meta">
-                        <strong th:text="${theme.name}">테마명</strong>
-                        <span th:text="${theme.description}">설명</span>
+                        <div class="popular-name" th:text="${theme.name}">테마명</div>
+                        <div class="popular-desc" th:text="${theme.description}">설명</div>
                     </div>
                 </div>
             </div>
-            <p class="hint" th:if="${#lists.isEmpty(popularThemes)}">선택한 기간 안에 집계된 인기 테마가 아직 없습니다.</p>
-        </article>
-    </section>
-</div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(popularThemes)}" style="margin-top:14px;">
+                해당 기간 동안 집계된 인기 테마가 없습니다.
+            </div>
+        </div>
+    </div>
+</main>
+
 <script>
-    const reservationServerMessages = {
+    /* ── Error messages ── */
+    const ERROR_MESSAGES = {
         RESERVATION_DATE_TIME_IN_PAST: {
             title: "이미 지난 시간은 예약할 수 없어요",
-            message: "지금보다 앞선 날짜나 시간은 선택할 수 없어서, 더 늦은 시간으로 안내해드릴게요.",
-            hint: "같은 날짜라면 더 뒤의 시간을, 아니면 다른 날짜를 골라보세요."
+            message: "선택한 날짜/시간이 현재보다 앞선 시간입니다.",
+            hint: "더 늦은 시간이나 다른 날짜를 선택해 주세요."
         },
         RESERVATION_DUPLICATED: {
-            title: "그 시간은 방금 사용 중이 되었어요",
-            message: "같은 테마의 같은 시간에는 이미 예약이 있어 다른 시간으로 선택해야 해요.",
-            hint: "조회된 가능 시간 중 다른 슬롯을 누르면 바로 이어서 예약할 수 있어요."
+            title: "같은 시간에 이미 예약이 있어요",
+            message: "해당 테마의 해당 시간에는 이미 예약이 존재합니다.",
+            hint: "다른 시간 슬롯을 선택해 주세요."
         },
         RESERVATION_WAITING_DUPLICATED: {
-            title: "이 이름으로는 대기할 수 없어요",
-            message: "이미 예약한 사람이나 이미 대기 중인 사람은 같은 예약에 다시 대기할 수 없어요.",
-            hint: "예약자와 다른 이름으로 대기 신청을 진행해 주세요."
+            title: "이미 예약하거나 대기 중인 시간이에요",
+            message: "동일한 예약에 예약자나 대기자가 이미 있습니다.",
+            hint: "다른 이름이나 다른 시간으로 신청해 주세요."
         },
         THEME_NOT_FOUND: {
-            title: "선택한 테마를 다시 불러올게요",
-            message: "방금 보던 테마 정보를 찾지 못해서 목록을 새로 확인하는 편이 안전해요.",
-            hint: "테마를 다시 선택하면 계속 진행할 수 있어요."
+            title: "테마를 찾을 수 없어요",
+            message: "선택한 테마 정보가 없습니다.",
+            hint: "테마를 다시 선택해 주세요."
         },
         RESERVATION_TIME_NOT_FOUND: {
-            title: "선택한 시간이 더 이상 보이지 않아요",
-            message: "시간 슬롯이 바뀌었거나 이미 정리되어, 가능한 시간을 다시 조회하는 편이 좋아요.",
-            hint: "같은 날짜로 다시 조회하면 최신 시간 목록을 볼 수 있어요."
+            title: "선택한 시간을 찾을 수 없어요",
+            message: "해당 시간 슬롯이 존재하지 않습니다.",
+            hint: "다시 조회한 뒤 시간을 선택해 주세요."
         },
         MY_RESERVATION_NOT_FOUND: {
-            title: "내 예약 목록을 한 번 더 새로 볼게요",
-            message: "방금 보던 예약이 더 이상 없거나, 지금 조회한 이름의 예약이 아닐 수 있어요.",
-            hint: "이름으로 다시 조회하면 최신 예약 목록을 바로 확인할 수 있어요."
+            title: "해당 예약을 찾을 수 없어요",
+            message: "조회된 예약이 더 이상 존재하지 않습니다.",
+            hint: "이름으로 다시 조회해 주세요."
         },
         PAST_RESERVATION_CANNOT_BE_CANCELLED: {
-            title: "지난 예약은 취소 대신 기록으로 남겨둘게요",
-            message: "이미 시작된 예약은 취소 처리할 수 없어서, 앞으로의 예약만 변경하거나 취소할 수 있어요.",
-            hint: "다음 일정이 있다면 같은 목록에서 다른 예약을 선택해 계속 진행할 수 있어요."
+            title: "지난 예약은 취소할 수 없어요",
+            message: "이미 시작된 예약은 취소가 불가능합니다.",
+            hint: "아직 시작 전인 예약만 취소할 수 있습니다."
         },
         PAST_RESERVATION_CANNOT_BE_UPDATED: {
-            title: "지난 예약은 새로운 일정으로 다시 잡아주세요",
-            message: "이미 시작된 예약은 시간을 바꾸지 않고 기록으로 남겨두고, 앞으로의 예약만 변경할 수 있어요.",
-            hint: "필요하면 새 예약을 만들거나, 아직 시작 전인 예약을 선택해 변경할 수 있어요."
+            title: "지난 예약은 수정할 수 없어요",
+            message: "이미 시작된 예약은 변경이 불가능합니다.",
+            hint: "시작 전인 예약을 선택하거나 새로 예약해 주세요."
         },
         INTERNAL_SERVER_ERROR: {
-            title: "지금은 저장을 잠시 멈출게요",
-            message: "입력 문제라기보다 시스템 쪽에서 바로 처리하지 못한 상황이에요.",
-            hint: "잠시 후 다시 시도하거나, 같은 문제가 반복되면 데이터를 새로고침한 뒤 다시 진행해보세요."
+            title: "서버 오류가 발생했어요",
+            message: "일시적인 오류입니다.",
+            hint: "잠시 후 다시 시도해 주세요."
         },
         INVALID_INPUT: {
             title: "요청을 처리하지 못했어요",
-            message: "브라우저에서 먼저 걸러지지 않은 요청 흐름 문제가 있었어요.",
-            hint: "같은 문제가 반복되면 입력값과 서버 검증 로직을 함께 확인해보세요."
+            message: "입력값이 올바르지 않습니다.",
+            hint: "값을 확인한 뒤 다시 시도해 주세요."
         }
     };
 
-    function showReservationFeedback(title, message, hint) {
-        const feedback = document.getElementById("page-feedback");
+    function showFeedback(title, message, hint) {
+        const el = document.getElementById("page-feedback");
         document.getElementById("feedback-title").textContent = title;
         document.getElementById("feedback-message").textContent = message;
         document.getElementById("feedback-hint").textContent = hint;
-        feedback.classList.remove("hidden");
+        el.classList.remove("hidden");
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    function applyPageFeedback() {
-        const feedback = document.getElementById("page-feedback");
-        const errorCode = feedback.dataset.errorCode;
-
-        if (!errorCode) {
-            return;
-        }
-
-        const message = reservationServerMessages[errorCode] || reservationServerMessages.INVALID_INPUT;
-        showReservationFeedback(message.title, message.message, message.hint);
+    function applyServerFeedback() {
+        const el = document.getElementById("page-feedback");
+        const code = el.dataset.errorCode;
+        if (!code) return;
+        const msg = ERROR_MESSAGES[code] || ERROR_MESSAGES.INVALID_INPUT;
+        showFeedback(msg.title, msg.message, msg.hint);
     }
 
-    function isBlank(value) {
-        return !value || !value.trim();
-    }
+    /* ── Validation ── */
+    function isBlank(v) { return !v || !v.trim(); }
 
-    function validateAvailableTimesForm(event) {
+    document.getElementById("available-times-form").addEventListener("submit", function(e) {
         const themeId = document.querySelector("#available-times-form select[name='themeId']").value;
         const date = document.querySelector("#available-times-form input[name='date']").value;
+        if (!themeId) { e.preventDefault(); showFeedback("테마를 선택해 주세요", "테마가 필요합니다.", "목록에서 테마를 선택해 주세요."); return; }
+        if (!date) { e.preventDefault(); showFeedback("날짜를 선택해 주세요", "날짜가 필요합니다.", "달력에서 날짜를 선택해 주세요."); }
+    });
 
-        if (!themeId) {
-            event.preventDefault();
-            showReservationFeedback(
-                "테마를 먼저 선택해 주세요",
-                "가능 시간 조회에 필요한 값이라 서버 요청 전에 바로 확인했어요.",
-                "테마를 고른 뒤 다시 조회해 주세요."
-            );
-            return;
-        }
-
-        if (!date) {
-            event.preventDefault();
-            showReservationFeedback(
-                "날짜를 먼저 골라주세요",
-                "날짜가 없으면 가능한 시간을 계산할 수 없어요.",
-                "달력에서 날짜를 고른 뒤 다시 조회해 주세요."
-            );
-        }
-    }
-
-    function validateReservationCreateForm(event) {
+    document.getElementById("reservation-create-form").addEventListener("submit", function(e) {
         const name = document.getElementById("reservation-name").value;
         const date = document.getElementById("reservation-date").value;
         const timeId = document.getElementById("reservation-time").value;
         const themeId = document.querySelector("#reservation-create-form input[name='themeId']").value;
+        if (isBlank(name)) { e.preventDefault(); showFeedback("예약자 이름을 입력해 주세요", "이름이 비어 있습니다.", "이름을 입력하세요."); return; }
+        if (name.trim().length >= 10) { e.preventDefault(); showFeedback("이름이 너무 길어요", "이름은 9자 이하여야 합니다.", "이름을 줄여주세요."); return; }
+        if (!themeId) { e.preventDefault(); showFeedback("테마를 선택해 주세요", "테마가 없습니다.", "왼쪽에서 먼저 테마를 조회하세요."); return; }
+        if (!date) { e.preventDefault(); showFeedback("날짜를 선택해 주세요", "날짜가 없습니다.", "날짜를 선택하세요."); return; }
+        if (!timeId) { e.preventDefault(); showFeedback("시간을 선택해 주세요", "시간 슬롯이 없습니다.", "조회된 목록에서 시간을 선택하세요."); }
+    });
 
-        if (isBlank(name)) {
-            event.preventDefault();
-            showReservationFeedback(
-                "예약자 이름을 입력해 주세요",
-                "이름이 비어 있는지는 브라우저에서 바로 확인할 수 있어서 서버 요청 전에 막았어요.",
-                "이름을 입력한 뒤 다시 예약해 주세요."
-            );
-            return;
-        }
-
-        if (name.trim().length >= 10) {
-            event.preventDefault();
-            showReservationFeedback(
-                "이름을 조금만 짧게 적어주세요",
-                "예약자 이름은 10자 미만이어야 해서 프론트에서 먼저 안내드렸어요.",
-                "9자 이하로 줄인 뒤 다시 예약해 주세요."
-            );
-            return;
-        }
-
-        if (!themeId) {
-            event.preventDefault();
-            showReservationFeedback(
-                "테마를 먼저 선택해 주세요",
-                "어떤 테마인지 알아야 예약 저장을 진행할 수 있어요.",
-                "가능 시간 조회에서 테마를 먼저 고른 뒤 다시 예약해 주세요."
-            );
-            return;
-        }
-
-        if (!date) {
-            event.preventDefault();
-            showReservationFeedback(
-                "날짜를 먼저 골라주세요",
-                "날짜가 없으면 예약을 저장할 수 없어요.",
-                "날짜를 선택한 뒤 다시 예약해 주세요."
-            );
-            return;
-        }
-
-        if (!timeId) {
-            event.preventDefault();
-            showReservationFeedback(
-                "시간을 하나 선택해 주세요",
-                "예약 가능한 시간 슬롯을 골라야 저장할 수 있어요.",
-                "조회된 가능 시간에서 원하는 시간을 선택해 주세요."
-            );
-        }
-    }
-
-    function validateMyReservationsForm(event) {
+    document.getElementById("my-reservations-form").addEventListener("submit", function(e) {
         const name = document.querySelector("#my-reservations-form input[name='reservationName']").value;
+        if (isBlank(name)) { e.preventDefault(); showFeedback("이름을 입력해 주세요", "조회할 이름이 필요합니다.", "예약자 이름을 입력하세요."); return; }
+        if (name.trim().length >= 10) { e.preventDefault(); showFeedback("이름이 너무 길어요", "이름은 9자 이하여야 합니다.", "이름을 줄여주세요."); }
+    });
 
-        if (isBlank(name)) {
-            event.preventDefault();
-            showReservationFeedback(
-                "조회할 이름을 입력해 주세요",
-                "내 예약 조회는 이름 값이 꼭 필요해서 서버로 보내기 전에 확인했어요.",
-                "예약자 이름을 입력한 뒤 다시 조회해 주세요."
-            );
-            return;
-        }
-
-        if (name.trim().length >= 10) {
-            event.preventDefault();
-            showReservationFeedback(
-                "조회할 이름을 조금만 짧게 적어주세요",
-                "예약자 이름은 10자 미만이어야 해서 조회 전에 바로 안내드렸어요.",
-                "9자 이하 이름으로 다시 조회해 주세요."
-            );
-        }
-    }
-
-    function validateReservationEditForm(event) {
+    document.getElementById("reservation-edit-form").addEventListener("submit", function(e) {
         const date = document.getElementById("reservation-edit-date").value;
         const timeId = document.getElementById("reservation-edit-time").value;
+        if (!date) { e.preventDefault(); showFeedback("변경 날짜를 선택해 주세요", "날짜가 필요합니다.", "날짜를 선택하세요."); return; }
+        if (!timeId) { e.preventDefault(); showFeedback("변경 시간을 선택해 주세요", "시간이 필요합니다.", "시간을 선택하세요."); }
+    });
 
-        if (!date) {
-            event.preventDefault();
-            showReservationFeedback(
-                "변경 날짜를 선택해 주세요",
-                "날짜가 있어야 예약 변경 요청을 만들 수 있어요.",
-                "새 날짜를 고른 뒤 다시 저장해 주세요."
-            );
-            return;
-        }
-
-        if (!timeId) {
-            event.preventDefault();
-            showReservationFeedback(
-                "변경 시간을 선택해 주세요",
-                "시간이 있어야 예약 변경을 완료할 수 있어요.",
-                "새 시간을 고른 뒤 다시 저장해 주세요."
-            );
-        }
-    }
-
-    function validatePopularThemesForm(event) {
+    document.getElementById("popular-themes-form").addEventListener("submit", function(e) {
         const period = document.querySelector("#popular-themes-form input[name='period']").value;
         const limit = document.querySelector("#popular-themes-form input[name='limit']").value;
+        if (!period || Number(period) < 1) { e.preventDefault(); showFeedback("기간을 확인해 주세요", "1일 이상 입력해야 합니다.", "1 이상의 숫자를 입력하세요."); return; }
+        if (!limit || Number(limit) < 1) { e.preventDefault(); showFeedback("개수를 확인해 주세요", "1개 이상 입력해야 합니다.", "1 이상의 숫자를 입력하세요."); }
+    });
 
-        if (!period || Number(period) < 1) {
-            event.preventDefault();
-            showReservationFeedback(
-                "최근 기간을 다시 확인해 주세요",
-                "인기 테마 집계 기간은 1일 이상이어야 해요.",
-                "1 이상의 숫자로 다시 입력해 주세요."
-            );
-            return;
-        }
+    /* ── Select time slot ── */
+    function selectTimeSlot(el) {
+        const timeId = el.dataset.timeId;
+        const date = el.dataset.date;
+        const themeName = el.dataset.themeName;
+        const startAt = el.dataset.startAt;
 
-        if (!limit || Number(limit) < 1) {
-            event.preventDefault();
-            showReservationFeedback(
-                "노출 개수를 다시 확인해 주세요",
-                "표시할 개수는 1개 이상이어야 해요.",
-                "1 이상의 숫자로 다시 입력해 주세요."
-            );
-        }
+        document.getElementById("reservation-date").value = date;
+        document.getElementById("reservation-time").value = timeId;
+
+        const card = document.getElementById("selection-card");
+        document.getElementById("selection-title").textContent = themeName + "  " + startAt;
+        document.getElementById("selection-body").textContent = date + " · 이름만 입력하면 바로 예약할 수 있습니다.";
+        card.classList.remove("hidden");
+
+        document.getElementById("reservation-form-card").scrollIntoView({ behavior: "smooth", block: "center" });
+        document.getElementById("reservation-name").focus();
     }
 
-    function selectTimeSlot(button) {
-        const timeId = button.dataset.timeId;
-        const date = button.dataset.date;
-        const themeName = button.dataset.themeName;
-        const startAt = button.dataset.startAt;
-
-        const dateInput = document.getElementById("reservation-date");
-        const timeSelect = document.getElementById("reservation-time");
-        const nameInput = document.getElementById("reservation-name");
-        const selectionCard = document.getElementById("selection-card");
-        const selectionTitle = document.getElementById("selection-title");
-        const selectionBody = document.getElementById("selection-body");
-        const formCard = document.getElementById("reservation-form-card");
-
-        dateInput.value = date;
-        timeSelect.value = timeId;
-        selectionCard.classList.remove("hidden");
-        selectionTitle.textContent = themeName + " / " + startAt;
-        selectionBody.textContent = date + " 예약으로 바로 연결됩니다. 이름만 입력하면 저장할 수 있습니다.";
-
-        formCard.scrollIntoView({behavior: "smooth", block: "center"});
-        nameInput.focus();
-    }
-
-    function openReservationEditForm(button) {
-        const reservationId = button.dataset.reservationId;
-        const reservationDate = button.dataset.reservationDate;
-        const timeId = button.dataset.timeId;
-        const themeName = button.dataset.themeName;
-        const startAt = button.dataset.startAt;
+    /* ── Edit form ── */
+    function openEditForm(btn) {
+        const reservationId = btn.dataset.reservationId;
+        const date = btn.dataset.reservationDate;
+        const timeId = btn.dataset.timeId;
+        const themeName = btn.dataset.themeName;
+        const startAt = btn.dataset.startAt;
 
         const panel = document.getElementById("reservation-edit-panel");
         const form = document.getElementById("reservation-edit-form");
-        const dateInput = document.getElementById("reservation-edit-date");
-        const timeSelect = document.getElementById("reservation-edit-time");
-        const title = document.getElementById("reservation-edit-title");
-        const body = document.getElementById("reservation-edit-body");
 
         form.action = "/pages/user/reservations/" + reservationId + "/update";
-        dateInput.value = reservationDate;
-        timeSelect.value = timeId;
-        title.textContent = "예약 변경";
-        body.textContent = themeName + " / " + startAt + " 예약을 새 날짜와 시간으로 바꿀 수 있어요.";
+        document.getElementById("reservation-edit-date").value = date;
+        document.getElementById("reservation-edit-time").value = timeId;
+        document.getElementById("reservation-edit-body").textContent = themeName + " / " + startAt + " 예약을 수정합니다.";
         panel.classList.remove("hidden");
-        panel.scrollIntoView({behavior: "smooth", block: "center"});
+        panel.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    function closeReservationEditForm() {
-        const panel = document.getElementById("reservation-edit-panel");
-        panel.classList.add("hidden");
+    function closeEditForm() {
+        document.getElementById("reservation-edit-panel").classList.add("hidden");
     }
 
-    document.getElementById("available-times-form").addEventListener("submit", validateAvailableTimesForm);
-    document.getElementById("reservation-create-form").addEventListener("submit", validateReservationCreateForm);
-    document.getElementById("my-reservations-form").addEventListener("submit", validateMyReservationsForm);
-    document.getElementById("reservation-edit-form").addEventListener("submit", validateReservationEditForm);
-    document.getElementById("popular-themes-form").addEventListener("submit", validatePopularThemesForm);
-    applyPageFeedback();
+    applyServerFeedback();
 </script>
 </body>
 </html>

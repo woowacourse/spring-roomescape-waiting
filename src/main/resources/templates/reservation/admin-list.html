@@ -3,188 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예약 관리</title>
+    <title>예약 관리 · 관리자</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg: #f3efe6;
-            --card: #fffdf8;
-            --line: #d9ccb6;
-            --text: #2b2117;
-            --point: #1d6f5f;
-            --warn: #c44536;
+            --primary: #0f766e;
+            --primary-dark: #0d6b64;
+            --primary-light: #f0fdfa;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --radius: 14px;
+            --radius-sm: 8px;
         }
-        * { box-sizing: border-box; }
+
         body {
-            margin: 0;
-            font-family: "Pretendard", "Apple SD Gothic Neo", sans-serif;
-            background: linear-gradient(135deg, #f4efe7 0%, #ece5d8 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+            background: var(--bg);
             color: var(--text);
+            line-height: 1.5;
         }
-        .wrap {
+
+        /* ── Admin Topbar ── */
+        .topbar {
+            background: #0f172a;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-inner {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 32px 20px 64px;
-        }
-        .nav {
+            padding: 0 24px;
+            height: 58px;
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 24px;
-        }
-        .nav a {
-            text-decoration: none;
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid var(--line);
-            padding: 10px 14px;
-            border-radius: 999px;
-        }
-        .user-link {
-            margin-left: auto;
-            color: var(--point) !important;
-            border-color: rgba(29, 111, 95, 0.24) !important;
-            background: rgba(29, 111, 95, 0.08) !important;
-            font-weight: 700;
-        }
-        .eyebrow {
-            display: inline-flex;
-            width: fit-content;
-            padding: 8px 12px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: rgba(255, 255, 255, 0.75);
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 14px;
-        }
-        .hero h1 { margin: 0 0 8px; font-size: 42px; }
-        .hero p { margin: 0 0 24px; color: rgba(43, 33, 23, 0.72); }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--line);
-            border-radius: 24px;
-            padding: 20px;
-        }
-        .list {
-            display: grid;
-            gap: 14px;
-        }
-        .item {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
             align-items: center;
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.78);
+            gap: 20px;
         }
-        .item strong {
-            display: block;
+        .logo {
+            font-weight: 800;
+            font-size: 17px;
+            color: #7dd3fc;
+            text-decoration: none;
+            letter-spacing: -0.4px;
+            flex-shrink: 0;
+        }
+        .logo span { color: white; }
+        .admin-badge {
+            font-size: 10px;
+            font-weight: 800;
+            background: #1e40af;
+            color: #bfdbfe;
+            padding: 2px 7px;
+            border-radius: 999px;
+            letter-spacing: 0.08em;
+        }
+        .topbar-nav {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            flex: 1;
+        }
+        .topbar-nav a {
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.12s, color 0.12s;
+        }
+        .topbar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .topbar-nav a.active { background: rgba(255,255,255,0.12); color: white; font-weight: 700; }
+        .topbar-user {
+            margin-left: auto;
+            text-decoration: none;
+            color: #34d399;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(52,211,153,0.3);
+            flex-shrink: 0;
+        }
+        .topbar-user:hover { background: rgba(52,211,153,0.08); }
+
+        /* ── Page ── */
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        .page-header { margin-bottom: 24px; }
+        .page-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: var(--primary-light);
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(15,118,110,0.2);
+            margin-bottom: 10px;
+        }
+        .page-title {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
             margin-bottom: 4px;
         }
-        .item span {
-            display: block;
-            color: rgba(43, 33, 23, 0.72);
-            font-size: 14px;
-        }
-        button {
-            border: 0;
-            border-radius: 12px;
-            padding: 12px 14px;
-            background: var(--warn);
-            color: white;
-            cursor: pointer;
-            font: inherit;
-            font-weight: 700;
-        }
+        .page-desc { font-size: 14px; color: var(--text-muted); }
+
+        /* ── Feedback ── */
         .feedback {
-            display: grid;
-            gap: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: var(--radius);
+            background: var(--danger-light);
+            border: 1px solid rgba(220,38,38,0.18);
             margin-bottom: 20px;
-            padding: 16px 18px;
-            border-radius: 18px;
-            border: 1px solid rgba(196, 69, 54, 0.18);
-            background: rgba(255, 248, 246, 0.96);
         }
         .feedback.hidden { display: none; }
-        .feedback p,
-        .feedback small { margin: 0; }
-        @media (max-width: 760px) {
-            .item { align-items: stretch; flex-direction: column; }
-            .user-link { margin-left: 0; }
+        .feedback-icon { font-size: 18px; flex-shrink: 0; }
+        .feedback-body { display: grid; gap: 2px; }
+        .feedback-title { font-weight: 700; font-size: 14px; color: var(--danger); }
+        .feedback-msg { font-size: 13px; color: #7f1d1d; }
+        .feedback-hint { font-size: 12px; color: #991b1b; opacity: 0.8; }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
         }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        .count-badge {
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(15,118,110,0.18);
+        }
+
+        /* ── List ── */
+        .reservation-list { display: grid; gap: 10px; }
+        .reservation-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
+            transition: border-color 0.12s;
+        }
+        .reservation-item:hover { border-color: #cbd5e1; }
+        .reservation-meta { display: grid; gap: 3px; flex: 1; }
+        .reservation-name { font-weight: 700; font-size: 15px; }
+        .reservation-info { font-size: 13px; color: var(--text-muted); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.12s;
+            text-decoration: none;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-danger { background: var(--danger); color: white; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+        }
+        .empty-icon { font-size: 32px; display: block; margin-bottom: 8px; }
     </style>
 </head>
 <body>
-<div class="wrap">
-    <nav class="nav">
-        <a th:href="@{/pages/admin/themes}">관리자 홈</a>
-        <a th:href="@{/pages/admin/themes}">테마 관리</a>
-        <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
-        <a th:href="@{/pages/admin/reservations}">예약 관리</a>
-        <a th:href="@{/pages/user/reservations}" class="user-link">사용자 예약 페이지</a>
-    </nav>
 
-    <section class="hero">
-        <span class="eyebrow">ADMIN PAGE</span>
-        <h1>예약 관리</h1>
-        <p>현재 등록된 예약을 확인하고 관리자 권한으로 삭제할 수 있습니다.</p>
-    </section>
+<!-- ── Admin Topbar ── -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/pages/admin/themes" class="logo">🗝 Room<span>Escape</span></a>
+        <span class="admin-badge">ADMIN</span>
+        <nav class="topbar-nav">
+            <a th:href="@{/pages/admin/themes}">테마 관리</a>
+            <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+            <a th:href="@{/pages/admin/reservations}" class="active">예약 관리</a>
+        </nav>
+        <a th:href="@{/pages/user/reservations}" class="topbar-user">← 사용자 페이지</a>
+    </div>
+</header>
 
-    <section id="page-feedback"
-             class="feedback hidden"
-             th:attr="data-error-code=${errorCode}">
-        <strong id="feedback-title"></strong>
-        <p id="feedback-message"></p>
-        <small id="feedback-hint"></small>
-    </section>
+<!-- ── Page ── -->
+<main class="page">
 
-    <article class="card">
-        <h2>예약 목록</h2>
-        <div class="list" th:if="${!#lists.isEmpty(reservations)}">
-            <div class="item" th:each="reservation : ${reservations}">
-                <div>
-                    <strong th:text="${reservation.name}">브라운</strong>
-                    <span th:text="${reservation.date + ' / ' + reservation.theme.name + ' / ' + reservation.time.startAt}">
-                        2026-08-06 / 미술관의 밤 / 10:00
-                    </span>
+    <div class="page-header">
+        <div class="page-eyebrow">ADMIN · RESERVATIONS</div>
+        <h1 class="page-title">예약 관리</h1>
+        <p class="page-desc">현재 등록된 모든 예약을 조회하고 삭제할 수 있습니다.</p>
+    </div>
+
+    <!-- Error Feedback -->
+    <div id="page-feedback"
+         class="feedback hidden"
+         th:attr="data-error-code=${errorCode}">
+        <div class="feedback-icon">⚠️</div>
+        <div class="feedback-body">
+            <div id="feedback-title" class="feedback-title"></div>
+            <div id="feedback-message" class="feedback-msg"></div>
+            <div id="feedback-hint" class="feedback-hint"></div>
+        </div>
+    </div>
+
+    <!-- Reservation List Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">예약 목록</h2>
+            <span class="count-badge"
+                  th:text="${#lists.size(reservations) + '건'}">0건</span>
+        </div>
+
+        <div class="reservation-list" th:if="${!#lists.isEmpty(reservations)}">
+            <div class="reservation-item" th:each="reservation : ${reservations}">
+                <div class="reservation-meta">
+                    <div class="reservation-name" th:text="${reservation.name}">이름</div>
+                    <div class="reservation-info"
+                         th:text="${reservation.date + '  ·  ' + reservation.theme.name + '  ·  ' + reservation.time.startAt}">
+                    </div>
                 </div>
-                <form method="post" th:action="@{/pages/admin/reservations/{id}/delete(id=${reservation.id})}">
-                    <button type="submit">삭제</button>
+                <form method="post"
+                      th:action="@{/pages/admin/reservations/{id}/delete(id=${reservation.id})}">
+                    <button type="submit" class="btn btn-danger">삭제</button>
                 </form>
             </div>
         </div>
-        <p th:if="${#lists.isEmpty(reservations)}">등록된 예약이 없습니다.</p>
-    </article>
-</div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(reservations)}">
+            <span class="empty-icon">📭</span>
+            등록된 예약이 없습니다.
+        </div>
+    </div>
+
+</main>
+
 <script>
-    const reservationAdminMessages = {
+    const ADMIN_MESSAGES = {
         INTERNAL_SERVER_ERROR: {
-            title: "예약 관리 작업을 처리하지 못했어요",
-            message: "서버에서 예상하지 못한 문제가 발생했습니다.",
+            title: "서버 오류가 발생했어요",
+            message: "예약 관리 작업 중 서버에서 오류가 발생했습니다.",
             hint: "잠시 후 다시 시도해 주세요."
         },
         INVALID_INPUT: {
             title: "요청을 처리하지 못했어요",
-            message: "요청 값이 올바르지 않습니다.",
+            message: "올바르지 않은 요청입니다.",
             hint: "목록을 새로고침한 뒤 다시 시도해 주세요."
         }
     };
 
     function applyFeedback() {
-        const feedback = document.getElementById("page-feedback");
-        const errorCode = feedback.dataset.errorCode;
-
-        if (!errorCode) {
-            return;
-        }
-
-        const message = reservationAdminMessages[errorCode] || reservationAdminMessages.INTERNAL_SERVER_ERROR;
-        document.getElementById("feedback-title").textContent = message.title;
-        document.getElementById("feedback-message").textContent = message.message;
-        document.getElementById("feedback-hint").textContent = message.hint;
-        feedback.classList.remove("hidden");
+        const el = document.getElementById("page-feedback");
+        const code = el.dataset.errorCode;
+        if (!code) return;
+        const msg = ADMIN_MESSAGES[code] || ADMIN_MESSAGES.INTERNAL_SERVER_ERROR;
+        document.getElementById("feedback-title").textContent = msg.title;
+        document.getElementById("feedback-message").textContent = msg.message;
+        document.getElementById("feedback-hint").textContent = msg.hint;
+        el.classList.remove("hidden");
     }
 
     applyFeedback();

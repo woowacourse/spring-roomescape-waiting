@@ -91,6 +91,8 @@ public class ReservationPageController {
             parsedDate = reservationPageRequestParser.parseDate(date);
             reservationService.save(name, parsedDate, parsedThemeId, parsedTimeId);
             addReservationNameAttribute(redirectAttributes, name);
+            addThemeIdAttribute(redirectAttributes, parsedThemeId);
+            addDateAttribute(redirectAttributes, parsedDate);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
