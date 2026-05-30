@@ -137,7 +137,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByThemeId(Long themeId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM `reservation` WHERE `time_id` = (?)) AS exist";
+        String sql = "SELECT EXISTS (SELECT 1 FROM `reservation` WHERE `theme_id` = (?)) AS exist";
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeId));
     }

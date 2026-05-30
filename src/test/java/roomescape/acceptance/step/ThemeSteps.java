@@ -40,8 +40,8 @@ public class ThemeSteps {
 
     public static void checkThemeRanking(String startDate, String endDate, int expectedRanking) {
         RestAssured.given().log().all()
-                .param("start-date", startDate)
-                .param("end-date", endDate)
+                .param("startDate", startDate)
+                .param("endDate", endDate)
                 .when().get("/themes/ranking")
                 .then().log().all()
                 .statusCode(200)

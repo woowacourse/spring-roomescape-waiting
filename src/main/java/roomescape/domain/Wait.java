@@ -15,19 +15,19 @@ public class Wait {
     private final ReservationTime time;
     private final Theme theme;
 
-    public Wait(Long id, LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time,
+    public Wait(Long id, LocalDateTime createdAt, String name, LocalDate reservationDate, ReservationTime time,
                 Theme theme) {
-        validate(createAt, name, reservationDate, time, theme);
+        validate(createdAt, name, reservationDate, time, theme);
         this.id = id;
-        this.createdAt = createAt;
+        this.createdAt = createdAt;
         this.name = name;
         this.reservationDate = reservationDate;
         this.time = time;
         this.theme = theme;
     }
 
-    public Wait(LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time, Theme theme) {
-        this(null, createAt, name, reservationDate, time, theme);
+    public Wait(LocalDateTime createdAt, String name, LocalDate reservationDate, ReservationTime time, Theme theme) {
+        this(null, createdAt, name, reservationDate, time, theme);
     }
 
     public static Wait of(Long id, Wait wait) {
@@ -58,8 +58,8 @@ public class Wait {
         return theme;
     }
 
-    private void validate(LocalDateTime createAt, String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (createAt == null) {
+    private void validate(LocalDateTime createdAt, String name, LocalDate date, ReservationTime time, Theme theme) {
+        if (createdAt == null) {
             throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_TIME_NULL);
         }
         if (name == null || name.isBlank()) {

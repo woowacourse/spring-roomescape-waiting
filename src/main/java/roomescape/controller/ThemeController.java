@@ -32,8 +32,8 @@ public class ThemeController {
 
     @GetMapping("/ranking")
     public ResponseEntity<List<ControllerThemeResponse>> findRanking(
-            @RequestParam("start-date") LocalDate startDate,
-            @RequestParam("end-date") LocalDate endDate
+            @RequestParam("startDate") LocalDate startDate,
+            @RequestParam("endDate") LocalDate endDate
     ) {
         List<ServiceThemeResponse> serviceResponses = themeFacade.findRanking(startDate, endDate);
         List<ControllerThemeResponse> controllerResponses = serviceResponses.stream()
