@@ -8,21 +8,15 @@ import roomescape.common.exception.BusinessRuleViolationException;
 public class Reservation {
     private final Long id;
     private final Member member;
-    private final Theme theme;
-    private final Long storeId;
     private final long version;
-    private LocalDate date;
-    private Time time;
+    private Slot slot;
     private ReservationStatus status;
     private LocalDateTime deletedAt;
 
     private Reservation(Builder builder) {
         this.id = builder.id;
         this.member = builder.member;
-        this.date = builder.date;
-        this.time = builder.time;
-        this.theme = builder.theme;
-        this.storeId = builder.storeId;
+        this.slot = builder.slot;
         this.status = builder.status;
         this.deletedAt = builder.deletedAt;
         this.version = builder.version;
@@ -30,11 +24,12 @@ public class Reservation {
 
     public static Reservation createByUser(Member member, LocalDate date, Time time, Theme theme,
                                            Long storeId, LocalDateTime now) {
-        if (time.isReservationBefore(now, date)) {
+        Slot slot = new Slot(date, time, theme, storeId);
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 생성은 불가능합니다.");
         }
         return new Builder()
-                .member(member).date(date).time(time).theme(theme).storeId(storeId)
+                .member(member).slot(slot)
                 .build();
     }
 
@@ -44,7 +39,7 @@ public class Reservation {
 
     public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
         return new Builder()
-                .member(member).date(date).time(time).theme(theme).storeId(storeId)
+                .member(member).slot(new Slot(date, time, theme, storeId))
                 .build();
     }
 
@@ -52,7 +47,7 @@ public class Reservation {
                                           ReservationStatus status, LocalDateTime deletedAt, long version,
                                           Long storeId) {
         return new Builder()
-                .id(id).member(member).date(date).time(time).theme(theme).storeId(storeId)
+                .id(id).member(member).slot(new Slot(date, time, theme, storeId))
                 .status(status).deletedAt(deletedAt).version(version)
                 .build();
     }
@@ -62,7 +57,7 @@ public class Reservation {
     }
 
     public void cancelByUser(LocalDateTime now) {
-        if (getTime().isReservationBefore(now, date)) {
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 예약은 취소 불가능합니다.");
         }
         doCancel(now);
@@ -79,11 +74,11 @@ public class Reservation {
 
     public void update(LocalDate date, Time time) {
         LocalDateTime now = LocalDateTime.now();
-        if (time.isReservationBefore(now, date)) {
+        Slot newSlot = new Slot(date, time, slot.getTheme(), slot.getStoreId());
+        if (newSlot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 수정은 불가능합니다.");
         }
-        this.date = date;
-        this.time = time;
+        this.slot = newSlot;
     }
 
     public boolean isActive() {
@@ -109,10 +104,11 @@ public class Reservation {
 
     public Long getId() { return id; }
     public Member getMember() { return member; }
-    public LocalDate getDate() { return date; }
-    public Time getTime() { return time; }
-    public Theme getTheme() { return theme; }
-    public Long getStoreId() { return storeId; }
+    public Slot getSlot() { return slot; }
+    public LocalDate getDate() { return slot.getDate(); }
+    public Time getTime() { return slot.getTime(); }
+    public Theme getTheme() { return slot.getTheme(); }
+    public Long getStoreId() { return slot.getStoreId(); }
     public ReservationStatus getStatus() { return status; }
     public long getVersion() { return version; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
@@ -120,10 +116,7 @@ public class Reservation {
     private static class Builder {
         private Long id;
         private Member member;
-        private LocalDate date;
-        private Time time;
-        private Theme theme;
-        private Long storeId;
+        private Slot slot;
         private ReservationStatus status = ReservationStatus.BOOKED;
         private LocalDateTime deletedAt;
         private long version = 0L;
@@ -138,23 +131,8 @@ public class Reservation {
             return this;
         }
 
-        Builder date(LocalDate date) {
-            this.date = date;
-            return this;
-        }
-
-        Builder time(Time time) {
-            this.time = time;
-            return this;
-        }
-
-        Builder theme(Theme theme) {
-            this.theme = theme;
-            return this;
-        }
-
-        Builder storeId(Long storeId) {
-            this.storeId = storeId;
+        Builder slot(Slot slot) {
+            this.slot = slot;
             return this;
         }
 
