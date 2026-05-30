@@ -20,9 +20,17 @@ public class MissionStep3Test {
     @LocalServerPort
     int port;
 
+    String sessionId;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        sessionId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "user1@test.com", "password", "1234"))
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().cookie("JSESSIONID");
     }
 
     @Test
@@ -53,15 +61,10 @@ public class MissionStep3Test {
 
     @Test
     void 예약과_시간_연결() {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2099-08-05");
-        reservation.put("timeId", 1);
-        reservation.put("themeId", 1);
-
         RestAssured.given().log().all()
+                .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
-                .body(reservation)
+                .body(Map.of("date", "2099-08-05", "timeId", 1, "themeId", 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
