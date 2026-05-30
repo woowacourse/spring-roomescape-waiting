@@ -81,6 +81,28 @@ public class ReservationApiTest {
   @Sql(statements = {
       "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
       "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
+      "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('누누', '9999-01-01', 1, 1, 'CANCELED')"
+  })
+  void 취소된_이력이_있는_슬롯에_동일_사용자가_재신청하면_성공한다() {
+    Map<String, Object> params = new HashMap<>();
+    params.put("name", "누누");
+    params.put("date", "9999-01-01");
+    params.put("timeId", 1);
+    params.put("themeId", 1);
+
+    RestAssured.given().log().all()
+        .contentType(ContentType.JSON)
+        .body(params)
+        .when().post("/reservations")
+        .then().log().all()
+        .statusCode(201)
+        .body("status", is("RESERVED"));
+  }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO theme (name, description, image_url) VALUES ('테마', '설명', 'url')",
+      "INSERT INTO reservation_time (start_at) VALUES ('10:00')",
       "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('선점자', '9999-01-01', 1, 1, 'RESERVED')",
       "INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('누누', '9999-01-01', 1, 1, 'WAITING')"
   })
