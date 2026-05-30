@@ -5,12 +5,12 @@ import roomescape.global.domain.EntityStatus;
 public class Theme {
 
     private final Long id;
-    private final String name;
-    private final String description;
-    private final String imageUrl;
+    private final ThemeName name;
+    private final ThemeDescription description;
+    private final ThemeImageUrl imageUrl;
     private final EntityStatus status;
 
-    private Theme(Long id, String name, String description, String imageUrl, EntityStatus status) {
+    private Theme(Long id, ThemeName name, ThemeDescription description, ThemeImageUrl imageUrl, EntityStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -19,11 +19,13 @@ public class Theme {
     }
 
     public static Theme create(String name, String description, String imageUrl) {
-        return new Theme(null, name, description, imageUrl, EntityStatus.ACTIVE);
+        return new Theme(null, new ThemeName(name), new ThemeDescription(description), new ThemeImageUrl(imageUrl),
+            EntityStatus.ACTIVE);
     }
 
     public static Theme reconstruct(Long id, String name, String description, String imageUrl, EntityStatus status) {
-        return new Theme(id, name, description, imageUrl, status);
+        return new Theme(id, new ThemeName(name), new ThemeDescription(description), new ThemeImageUrl(imageUrl),
+            status);
     }
 
     public Long getId() {
@@ -31,15 +33,15 @@ public class Theme {
     }
 
     public String getName() {
-        return name;
+        return name.value();
     }
 
     public String getDescription() {
-        return description;
+        return description.value();
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return imageUrl.value();
     }
 
     public EntityStatus getStatus() {

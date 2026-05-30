@@ -48,12 +48,12 @@ public class ThemeService {
 
     @Transactional
     public ThemeResponseDto saveTheme(ThemeCreateCommand command) {
-        if (themeRepository.existsThemeByNameAndNotDeleted(command.name())) {
+        if (themeRepository.existsThemeByNameAndNotDeleted(command.name().value())) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);
         }
 
         try {
-            Theme theme = Theme.create(command.name(), command.description(), command.imageUrl());
+            Theme theme = Theme.create(command.name().value(), command.description().value(), command.imageUrl().value());
             return themeMapper.toResponseDto(themeRepository.save(theme));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);

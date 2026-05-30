@@ -72,7 +72,7 @@ class JdbcThemeRepositoryTest {
             // given
             String name = "테마1";
             String description = "설명1";
-            String imageUrl = "image1";
+            String imageUrl = "https://example.com/image1.png";
             Theme theme = Theme.create(name, description, imageUrl);
 
             // when
@@ -105,10 +105,10 @@ class JdbcThemeRepositoryTest {
             Assumptions.assumeTrue(saveSucceeded, "save 기능이 동작하지 않아 건너뜁니다.");
 
             // given
-            themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
 
             // when & then
-            assertThatThrownBy(() -> themeRepository.save(Theme.create("테마1", "설명2", "image2.png")))
+            assertThatThrownBy(() -> themeRepository.save(Theme.create("테마1", "설명2", "https://example.com/image2.png")))
                 .isInstanceOf(DuplicateKeyException.class);
         }
     }
@@ -127,8 +127,8 @@ class JdbcThemeRepositoryTest {
         @Order(1)
         void 활성_테마를_조회한다() {
             // given
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
 
             // when
             List<Theme> actual = themeRepository.findAllByNotDeleted();
@@ -137,8 +137,8 @@ class JdbcThemeRepositoryTest {
             assertThat(actual)
                 .extracting(Theme::getId, Theme::getName, Theme::getDescription, Theme::getImageUrl)
                 .containsExactly(
-                    tuple(theme1.getId(), "테마1", "설명1", "image1.png"),
-                    tuple(theme2.getId(), "테마2", "설명2", "image2.png")
+                    tuple(theme1.getId(), "테마1", "설명1", "https://example.com/image1.png"),
+                    tuple(theme2.getId(), "테마2", "설명2", "https://example.com/image2.png")
                 );
             findSucceeded = true;
         }
@@ -147,8 +147,8 @@ class JdbcThemeRepositoryTest {
         @Order(2)
         void 삭제된_테마는_조회하지_않는다() {
             // given
-            Theme deletedTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme activeTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Theme deletedTheme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme activeTheme = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
             themeRepository.deleteThemeById(deletedTheme.getId());
 
             // when
@@ -157,7 +157,7 @@ class JdbcThemeRepositoryTest {
             // then
             assertThat(actual)
                 .extracting(Theme::getId, Theme::getName, Theme::getDescription, Theme::getImageUrl)
-                .containsExactly(tuple(activeTheme.getId(), "테마2", "설명2", "image2.png"));
+                .containsExactly(tuple(activeTheme.getId(), "테마2", "설명2", "https://example.com/image2.png"));
         }
     }
 
@@ -172,7 +172,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 테마를_ID로_조회한다() {
             // given
-            Theme savedTheme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme savedTheme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
 
             // when
             Optional<Theme> actual = themeRepository.findThemeByIdAndNotDeleted(savedTheme.getId());
@@ -204,8 +204,8 @@ class JdbcThemeRepositoryTest {
         @Test
         void 테마를_소프트_삭제한다() {
             // given
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
 
             // when
             themeRepository.deleteThemeById(theme1.getId());
@@ -222,7 +222,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 이미_삭제된_테마를_삭제하면_예외가_발생한다() {
             // given
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
             themeRepository.deleteThemeById(theme.getId());
 
             // when & then
@@ -243,7 +243,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 존재하면_true를_반환한다() {
             // given
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
 
             // when
             boolean actual = themeRepository.existsThemeByIdAndNotDeleted(theme.getId());
@@ -273,7 +273,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 해당_이름의_테마가_존재하면_true를_반환한다() {
             // given
-            themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
 
             // when
             boolean actual = themeRepository.existsThemeByNameAndNotDeleted("테마1");
@@ -294,7 +294,7 @@ class JdbcThemeRepositoryTest {
         @Test
         void 삭제된_테마의_이름이면_false를_반환한다() {
             // given
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
             themeRepository.deleteThemeById(theme.getId());
 
             // when
@@ -318,9 +318,9 @@ class JdbcThemeRepositoryTest {
             // given
             LocalDate startDate = LocalDate.of(2026, 5, 1);
             LocalDate endDate = LocalDate.of(2026, 5, 7);
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
-            Theme theme3 = themeRepository.save(Theme.create("테마3", "설명3", "image3.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
+            Theme theme3 = themeRepository.save(Theme.create("테마3", "설명3", "https://example.com/image3.png"));
             saveReservations(theme1, startDate, 3);
             saveReservations(theme2, startDate, 5);
             saveReservations(theme3, startDate, 1);
@@ -339,8 +339,8 @@ class JdbcThemeRepositoryTest {
             // given
             LocalDate startDate = LocalDate.of(2026, 5, 1);
             LocalDate endDate = LocalDate.of(2026, 5, 7);
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
             saveReservations(theme1, startDate.minusDays(1), 8);
             saveReservations(theme1, startDate, 1);
             saveReservations(theme2, startDate, 2);
@@ -360,7 +360,7 @@ class JdbcThemeRepositoryTest {
             LocalDate startDate = LocalDate.of(2026, 5, 1);
             LocalDate endDate = LocalDate.of(2026, 5, 7);
             for (int i = 1; i <= 12; i++) {
-                Theme theme = themeRepository.save(Theme.create("테마" + i, "설명" + i, "image" + i + ".png"));
+                Theme theme = themeRepository.save(Theme.create("테마" + i, "설명" + i, "https://example.com/image" + i + ".png"));
                 saveReservations(theme, startDate, i);
             }
 
@@ -379,9 +379,9 @@ class JdbcThemeRepositoryTest {
             // given
             LocalDate startDate = LocalDate.of(2026, 5, 1);
             LocalDate endDate = LocalDate.of(2026, 5, 7);
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
-            Theme theme3 = themeRepository.save(Theme.create("테마3", "설명3", "image3.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
+            Theme theme3 = themeRepository.save(Theme.create("테마3", "설명3", "https://example.com/image3.png"));
             saveReservations(theme1, startDate, 3);
             List<Long> theme2ReservationIds = saveReservations(theme2, startDate, 5);
             saveReservations(theme3, startDate, 7);
@@ -404,8 +404,8 @@ class JdbcThemeRepositoryTest {
             // given
             LocalDate startDate = LocalDate.of(2026, 5, 1);
             LocalDate endDate = LocalDate.of(2026, 5, 7);
-            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+            Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
             saveReservations(theme1, startDate, 2);
             Long deletedTimeId = saveTime(LocalTime.of(15, 0));
             saveReservation("삭제된시간예약자", startDate, deletedTimeId, theme2.getId());

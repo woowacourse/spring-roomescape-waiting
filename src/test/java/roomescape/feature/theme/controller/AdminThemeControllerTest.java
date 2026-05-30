@@ -17,6 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.feature.theme.domain.ThemeDescription;
+import roomescape.feature.theme.domain.ThemeImageUrl;
+import roomescape.feature.theme.domain.ThemeName;
 import roomescape.feature.theme.dto.command.ThemeCreateCommand;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.theme.error.type.ThemeErrorType;
@@ -43,9 +46,9 @@ class AdminThemeControllerTest {
         @Test
         void 테마를_생성한다() throws Exception {
             when(themeMapper.toCreateCommand(any())).thenReturn(new ThemeCreateCommand(
-                ThemeFixture.VALID.getName(),
-                ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl()
+                new ThemeName(ThemeFixture.VALID.getName()),
+                new ThemeDescription(ThemeFixture.VALID.getDescription()),
+                new ThemeImageUrl(ThemeFixture.VALID.getImageUrl())
             ));
             when(themeService.saveTheme(any())).thenReturn(new ThemeResponseDto(1L,
                 ThemeFixture.VALID.getName(),
@@ -73,6 +76,8 @@ class AdminThemeControllerTest {
 
         @Test
         void 테마_이름이_없으면_4xx를_반환한다() throws Exception {
+            when(themeMapper.toCreateCommand(any())).thenThrow(new GeneralException(ThemeErrorType.INVALID_NAME));
+
             mockMvc.perform(post("/api/admin/themes")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
@@ -89,6 +94,8 @@ class AdminThemeControllerTest {
 
         @Test
         void 올바르지_않은_이미지_URL이면_4xx를_반환한다() throws Exception {
+            when(themeMapper.toCreateCommand(any())).thenThrow(new GeneralException(ThemeErrorType.INVALID_IMAGE_URL));
+
             mockMvc.perform(post("/api/admin/themes")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("""
@@ -108,9 +115,9 @@ class AdminThemeControllerTest {
         @Test
         void 이미_등록된_테마_이름이면_4xx를_반환한다() throws Exception {
             when(themeMapper.toCreateCommand(any())).thenReturn(new ThemeCreateCommand(
-                ThemeFixture.VALID.getName(),
-                ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl()
+                new ThemeName(ThemeFixture.VALID.getName()),
+                new ThemeDescription(ThemeFixture.VALID.getDescription()),
+                new ThemeImageUrl(ThemeFixture.VALID.getImageUrl())
             ));
             when(themeService.saveTheme(any())).thenThrow(new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME));
 

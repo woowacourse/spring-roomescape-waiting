@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.feature.theme.domain.ThemeDescription;
+import roomescape.feature.theme.domain.ThemeImageUrl;
+import roomescape.feature.theme.domain.ThemeName;
 import roomescape.feature.theme.dto.command.ThemeCreateCommand;
 import roomescape.feature.theme.dto.response.ThemeResponseDto;
 import roomescape.feature.theme.domain.Theme;
@@ -107,9 +110,9 @@ class ThemeServiceTest {
         void 테마를_생성한다() {
             // given
             ThemeCreateCommand command = new ThemeCreateCommand(
-                ThemeFixture.VALID.getName(),
-                ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl()
+                new ThemeName(ThemeFixture.VALID.getName()),
+                new ThemeDescription(ThemeFixture.VALID.getDescription()),
+                new ThemeImageUrl(ThemeFixture.VALID.getImageUrl())
             );
             Theme saved = Theme.reconstruct(1L,
                 ThemeFixture.VALID.getName(),
@@ -131,9 +134,9 @@ class ThemeServiceTest {
         void 같은_이름의_테마가_이미_존재하면_예외가_발생한다() {
             // given
             ThemeCreateCommand command = new ThemeCreateCommand(
-                ThemeFixture.VALID.getName(),
-                ThemeFixture.VALID.getDescription(),
-                ThemeFixture.VALID.getImageUrl()
+                new ThemeName(ThemeFixture.VALID.getName()),
+                new ThemeDescription(ThemeFixture.VALID.getDescription()),
+                new ThemeImageUrl(ThemeFixture.VALID.getImageUrl())
             );
             when(themeRepository.existsThemeByNameAndNotDeleted(ThemeFixture.VALID.getName()))
                 .thenReturn(true);
