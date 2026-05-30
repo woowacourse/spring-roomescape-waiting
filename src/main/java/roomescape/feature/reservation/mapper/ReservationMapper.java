@@ -1,6 +1,5 @@
 package roomescape.feature.reservation.mapper;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
@@ -23,12 +22,10 @@ public final class ReservationMapper {
 
     private final TimeMapper timeMapper;
     private final ThemeMapper themeMapper;
-    private final Clock clock;
 
-    public ReservationMapper(TimeMapper timeMapper, ThemeMapper themeMapper, Clock clock) {
+    public ReservationMapper(TimeMapper timeMapper, ThemeMapper themeMapper) {
         this.timeMapper = timeMapper;
         this.themeMapper = themeMapper;
-        this.clock = clock;
     }
 
     public ReservationCreateCommand toCreateCommand(ReservationCreateRequestDto requestDto) {
@@ -54,7 +51,7 @@ public final class ReservationMapper {
             return ReservationEditableStatus.CANCELED;
         }
 
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
+        if (reservation.getDate().isBefore(LocalDate.now())) {
             return ReservationEditableStatus.LOCKED;
         }
 

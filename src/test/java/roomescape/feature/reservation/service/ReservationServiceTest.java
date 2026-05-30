@@ -5,11 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,14 +49,9 @@ class ReservationServiceTest {
 
     private ReservationService reservationService;
 
-    private final Clock fixedClock = Clock.fixed(
-        Instant.parse("2026-05-08T00:00:00Z"),
-        ZoneId.of("Asia/Seoul")
-    );
-
     @BeforeEach
     void setUp() {
-        ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper(), fixedClock);
+        ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         reservationService = new ReservationService(
             reservationRepository, timeRepository, themeRepository, mapper);
     }
@@ -85,7 +77,7 @@ class ReservationServiceTest {
         @Test
         void 미래_활성_예약은_EDITABLE_상태로_반환한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
@@ -103,7 +95,7 @@ class ReservationServiceTest {
         @Test
         void 취소된_예약은_CANCELED_상태로_반환한다() {
             // given
-            LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate date = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
@@ -131,7 +123,7 @@ class ReservationServiceTest {
         @Test
         void 대기_예약은_순번을_포함하여_WAITING_상태로_반환한다() {
             // given
-            LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate date = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
@@ -152,7 +144,7 @@ class ReservationServiceTest {
         @Test
         void 지난_날짜의_예약은_LOCKED_상태로_반환한다() {
             // given
-            LocalDate pastDate = LocalDate.now(fixedClock).minusDays(1);
+            LocalDate pastDate = LocalDate.now().minusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
@@ -170,7 +162,7 @@ class ReservationServiceTest {
         @Test
         void 삭제된_시간이나_테마가_있는_예약은_EDIT_RECOMMENDED_상태로_반환한다() {
             // given
-            LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate date = LocalDate.now().plusDays(1);
             Time deletedTime = Time.reconstruct(1L, LocalTime.of(10, 0), EntityStatus.DELETED);
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
@@ -379,7 +371,7 @@ class ReservationServiceTest {
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
             ReservationUpdateCommand command = new ReservationUpdateCommand(
-                new ReserverName("예약자"), LocalDate.now(fixedClock).plusDays(1), 1L, 1L);
+                new ReserverName("예약자"), LocalDate.now().plusDays(1), 1L, 1L);
             when(reservationRepository.findReservationByIdAndNotDeleted(999L))
                 .thenReturn(Optional.empty());
 
@@ -392,7 +384,7 @@ class ReservationServiceTest {
         @Test
         void 예약자_이름이_다르면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
@@ -413,7 +405,7 @@ class ReservationServiceTest {
         @Test
         void 활성_예약이_아니면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
@@ -478,7 +470,7 @@ class ReservationServiceTest {
         @Test
         void 변경할_timeId가_존재하지_않으면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time existingTime = timeWithId(1L);
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
@@ -498,7 +490,7 @@ class ReservationServiceTest {
         @Test
         void 변경할_themeId가_존재하지_않으면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time existingTime = timeWithId(1L);
             Theme existingTheme = themeWithId(1L);
             Reservation existing = Reservation.reconstruct(
@@ -580,7 +572,7 @@ class ReservationServiceTest {
         @Test
         void 예약자_이름이_다르면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
@@ -597,7 +589,7 @@ class ReservationServiceTest {
         @Test
         void 활성_예약이_아니면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
@@ -614,7 +606,7 @@ class ReservationServiceTest {
         @Test
         void 지난_날짜의_예약이면_예외가_발생한다() {
             // given
-            LocalDate pastDate = LocalDate.now(fixedClock).minusDays(1);
+            LocalDate pastDate = LocalDate.now().minusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
@@ -668,7 +660,7 @@ class ReservationServiceTest {
         @Test
         void 예약자_이름이_다르면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
@@ -685,7 +677,7 @@ class ReservationServiceTest {
         @Test
         void 대기_예약이_아니면_예외가_발생한다() {
             // given
-            LocalDate futureDate = LocalDate.now(fixedClock).plusDays(1);
+            LocalDate futureDate = LocalDate.now().plusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation active = Reservation.reconstruct(
@@ -702,7 +694,7 @@ class ReservationServiceTest {
         @Test
         void 지난_날짜의_대기_예약이면_예외가_발생한다() {
             // given
-            LocalDate pastDate = LocalDate.now(fixedClock).minusDays(1);
+            LocalDate pastDate = LocalDate.now().minusDays(1);
             Time time = timeWithId(1L);
             Theme theme = themeWithId(1L);
             Reservation pastWaiting = Reservation.reconstruct(

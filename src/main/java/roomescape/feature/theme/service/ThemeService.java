@@ -1,6 +1,5 @@
 package roomescape.feature.theme.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,12 +18,10 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ThemeMapper themeMapper;
-    private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository, ThemeMapper themeMapper, Clock clock) {
+    public ThemeService(ThemeRepository themeRepository, ThemeMapper themeMapper) {
         this.themeRepository = themeRepository;
         this.themeMapper = themeMapper;
-        this.clock = clock;
     }
 
     public List<ThemeResponseDto> getThemes() {
@@ -38,7 +35,7 @@ public class ThemeService {
     }
 
     public List<ThemeResponseDto> getPopularThemes() {
-        LocalDate today = LocalDate.now(clock);
+        LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);
 

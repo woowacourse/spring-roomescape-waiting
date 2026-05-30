@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -34,14 +31,10 @@ class ThemeServiceTest {
     @Mock
     private ThemeRepository themeRepository;
     private ThemeService themeService;
-    private final Clock fixedClock = Clock.fixed(
-        Instant.parse("2026-05-08T00:00:00Z"),
-        ZoneId.of("Asia/Seoul")
-    );
 
     @BeforeEach
     void setUp() {
-        themeService = new ThemeService(themeRepository, new ThemeMapper(), fixedClock);
+        themeService = new ThemeService(themeRepository, new ThemeMapper());
     }
 
     @Nested
@@ -76,7 +69,7 @@ class ThemeServiceTest {
         @Test
         void 오늘을_제외하고_직전_7일_기준으로_인기_테마를_조회한다() {
             // given
-            LocalDate today = LocalDate.now(fixedClock);
+            LocalDate today = LocalDate.now();
             LocalDate startDate = today.minusDays(7);
             LocalDate endDate = today.minusDays(1);
             Theme popular = Theme.reconstruct(1L, "인기 테마", "설명", "https://example.com/popular.png", EntityStatus.ACTIVE);
@@ -94,7 +87,7 @@ class ThemeServiceTest {
         @Test
         void 인기_테마가_없으면_빈_목록을_반환한다() {
             // given
-            LocalDate today = LocalDate.now(fixedClock);
+            LocalDate today = LocalDate.now();
             when(themeRepository.findPopularThemesDateBetween(today.minusDays(7), today.minusDays(1), 10))
                 .thenReturn(List.of());
 
