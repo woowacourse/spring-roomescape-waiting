@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -177,6 +178,37 @@ class WaitingRepositoryTest {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
             List<MyWaitingResult> result = waitingRepository.findByName("없는유저");
+
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("id로 대기 조회")
+    class FindById {
+
+        @Test
+        void 존재하는_id면_대기와_시간_테마를_함께_반환한다() {
+            Waiting saved = waitingRepository.save(
+                Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
+            );
+
+            Optional<Waiting> result = waitingRepository.findById(saved.getId());
+
+            assertAll(
+                () -> assertThat(result).isPresent(),
+                () -> assertThat(result.get().getName()).isEqualTo("유저1"),
+                () -> assertThat(result.get().getDate()).isEqualTo(LocalDate.of(2099, 12, 31)),
+                () -> assertThat(result.get().getTime().getId()).isEqualTo(time.getId()),
+                () -> assertThat(result.get().getTime().getFinishAt()).isEqualTo(LocalTime.of(11, 0)),
+                () -> assertThat(result.get().getTheme().getId()).isEqualTo(theme.getId()),
+                () -> assertThat(result.get().getTheme().getDescription()).isEqualTo("설명")
+            );
+        }
+
+        @Test
+        void 존재하지_않는_id면_빈_Optional을_반환한다() {
+            Optional<Waiting> result = waitingRepository.findById(999L);
 
             assertThat(result).isEmpty();
         }
