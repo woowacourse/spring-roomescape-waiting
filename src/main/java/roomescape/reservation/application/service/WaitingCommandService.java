@@ -41,9 +41,7 @@ public class WaitingCommandService {
         ReservationSlot slot = request.toSlot(time.getStartAt());
         Waiting waiting = request.toWaiting(slot);
 
-        if (!reservationRepository.existsBySlot(slot)) {
-            throw new RoomEscapeException("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다.");
-        }
+        validateNoReservationConflict(waiting.getUser().name(), slot);
 
         try {
             Waiting savedWaiting = waitingRepository.save(waiting);
@@ -67,6 +65,16 @@ public class WaitingCommandService {
 
         if (waitingRepository.delete(id) == 0) {
             throw new NotFoundException("존재하지 않는 대기입니다.");
+        }
+    }
+
+    private void validateNoReservationConflict(String username, ReservationSlot slot) {
+        if (!reservationRepository.existsBySlot(slot)) {
+            throw new RoomEscapeException("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다.");
+        }
+
+        if (reservationRepository.existsByUserAndSlot(username, slot)) {
+            throw new ConflictException("이미 예약한 날짜와 시간에는 대기를 신청할 수 없습니다.");
         }
     }
 }

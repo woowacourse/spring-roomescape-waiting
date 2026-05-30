@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     Boolean existsBySlot(ReservationSlot slot);
 
+    Boolean existsByUserAndSlot(String username, ReservationSlot slot);
+
     Boolean existsDuplicateExcluding(Reservation reservation);
 
     Boolean existsByTheme(Long themeId);

@@ -164,6 +164,29 @@ class WaitingApiTest {
                 .body("errorMessage", equalTo("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다."));
     }
 
+    @DisplayName("동일한 사용자가 이미 예약한 날짜와 시간으로 대기 예약 생성 시 409 응답 반환을 테스트합니다.")
+    @Test
+    void save_waiting_with_confirmed_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(409)
+                .body("errorMessage", equalTo("이미 예약한 날짜와 시간에는 대기를 신청할 수 없습니다."));
+    }
+
     @DisplayName("사용자 이름으로 대기 예약 목록 조회 API를 테스트합니다.")
     @Test
     void find_waitings_by_name() {

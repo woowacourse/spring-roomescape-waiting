@@ -111,6 +111,40 @@ class JdbcReservationRepositoryTest {
         assertThat(reservationRepository.delete(reservationId)).isEqualTo(1);
     }
 
+    @DisplayName("사용자와 슬롯이 동일한 예약 존재 여부 확인을 테스트합니다.")
+    @Test
+    void exists_by_user_and_slot() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                nineTimeId
+        );
+
+        ReservationSlot sameSlot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(nineTimeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        ReservationSlot differentSlot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(tenTimeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservationRepository.existsByUserAndSlot("스타크", sameSlot)).isTrue();
+            softly.assertThat(reservationRepository.existsByUserAndSlot("카야", sameSlot)).isFalse();
+            softly.assertThat(reservationRepository.existsByUserAndSlot("스타크", differentSlot)).isFalse();
+        });
+    }
+
     @DisplayName("특정 ID를 제외하고 테마, 날짜, 시간이 동일한 예약이 있는지 확인을 테스트합니다.")
     @Test
     void check_exist_by_theme_date_time_exclude_id() {

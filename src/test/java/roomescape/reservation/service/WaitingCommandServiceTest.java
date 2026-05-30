@@ -130,6 +130,25 @@ class WaitingCommandServiceTest {
                 .hasMessage("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
     }
 
+    @DisplayName("동일한 사용자가 이미 예약한 날짜와 시간으로 대기 예약 생성 시 예외를 테스트합니다.")
+    @Test
+    void save_waiting_with_confirmed_reservation_exception() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        ReservationApplicationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+
+        assertThatThrownBy(() -> waitingCommandService.save(request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약한 날짜와 시간에는 대기를 신청할 수 없습니다.");
+    }
+
     @DisplayName("예약 대기 삭제를 테스트합니다.")
     @Test
     void delete_waiting_reservation() {

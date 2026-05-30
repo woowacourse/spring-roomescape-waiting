@@ -110,6 +110,26 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Boolean existsByUserAndSlot(String username, ReservationSlot slot) {
+        return jdbcTemplate.queryForObject(
+                """
+                        SELECT EXISTS(
+                            SELECT 1
+                            FROM reservation
+                            WHERE name = ?
+                              AND date = ?
+                              AND theme_id = ?
+                              AND time_id = ?
+                        )
+                        """,
+                Boolean.class,
+                username,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
+    }
+
+    @Override
     public Boolean existsDuplicateExcluding(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
         return jdbcTemplate.queryForObject(
