@@ -1,117 +1,110 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.PastTimeCancelException;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.ReservationUpdateRequest;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    @Autowired
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationTimeService reservationTimeService;
+    @Mock
+    private ThemeService themeService;
+    @Mock
+    private ReservationFactory reservationFactory;
+
+    @InjectMocks
     private ReservationService reservationService;
 
-    @Autowired
-    private ReservationTimeService reservationTimeService;
+    private final Member member = Member.restore(1L, "user1", "test@test.com", "1234");
+    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+    private final LocalDate futureDate = LocalDate.now().plusDays(1);
+    private final LocalDate pastDate = LocalDate.now().minusDays(1);
 
     @Test
     @DisplayName("예약 생성 성공")
     void 예약_생성_성공() {
-        ReservationResponse response = reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 1L, 1L));
-        assertThat(response.id()).isNotNull();
+        Reservation reservation = Reservation.restore(1L, member, futureDate, time, theme);
+        when(reservationTimeService.getById(1L)).thenReturn(time);
+        when(themeService.getById(1L)).thenReturn(theme);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(false);
+        when(reservationFactory.create(any(), any(), any(), any())).thenReturn(reservation);
+        when(reservationRepository.save(any())).thenReturn(reservation);
+
+        ReservationResponse response = reservationService.createReservation(member, new ReservationRequest(futureDate, 1L, 1L));
+        assertThat(response.id()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("존재하지 않는 timeId로 예약 생성 시 예외 발생")
-    void 존재하지_않는_timeId_예외() {
-        assertThatThrownBy(() -> reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 999L, 1L)))
+    @DisplayName("중복 예약 생성 시 예외 발생")
+    void 중복_예약_예외() {
+        when(reservationTimeService.getById(1L)).thenReturn(time);
+        when(themeService.getById(1L)).thenReturn(theme);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(true);
+
+        assertThatThrownBy(() -> reservationService.createReservation(member, new ReservationRequest(futureDate, 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.TIME_NOT_FOUND))
-                .hasMessage(ErrorCode.TIME_NOT_FOUND.getMessage());
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_RESERVATION));
     }
 
     @Test
-    @DisplayName("존재하지 않는 themeId로 예약 생성 시 예외 발생")
-    void 존재하지_않는_themeId_예외() {
-        assertThatThrownBy(() -> reservationService.createReservation(
-                new ReservationRequest("현미밥", LocalDate.now().plusDays(1), 1L, 999L)))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_NOT_FOUND))
-                .hasMessage(ErrorCode.THEME_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    @DisplayName("예약 삭제 후 해당 시간 예약 가능")
+    @DisplayName("예약 삭제 성공")
     void 예약_삭제_성공() {
-        LocalDate date = LocalDate.now().plusDays(11);
-        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(2);
+        Reservation reservation = Reservation.restore(1L, member, futureDate, time, theme);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-        reservationService.deleteReservation(11L);
-
-        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(3);
+        reservationService.deleteReservation(1L, 1L);
+        verify(reservationRepository).deleteById(1L);
     }
 
     @Test
     @DisplayName("이미 지난 예약은 취소할 수 없다")
     void 과거_예약_취소_불가() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(PastTimeCancelException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_RESERVATION_CANCEL))
-                .hasMessage(ErrorCode.PAST_RESERVATION_CANCEL.getMessage());
+        Reservation pastReservation = Reservation.restore(1L, member, pastDate, time, theme);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation));
+
+        assertThatThrownBy(() -> reservationService.deleteReservation(1L, 1L))
+                .isInstanceOf(PastTimeCancelException.class);
     }
 
     @Test
-    @DisplayName("예약 수정 성공")
-    void 예약_수정_성공() {
-        ReservationResponse response = reservationService.updateReservation(
-                11L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L));
-        assertThat(response.date()).isEqualTo(LocalDate.of(2099, 12, 2));
-    }
+    @DisplayName("다른 사람의 예약은 삭제할 수 없다")
+    void 타인_예약_삭제_불가() {
+        Reservation reservation = Reservation.restore(1L, member, futureDate, time, theme);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
-    @Test
-    @DisplayName("이미 지난 예약은 수정할 수 없다")
-    void 과거_예약_수정_불가() {
-        assertThatThrownBy(() -> reservationService.updateReservation(
-                1L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
+        assertThatThrownBy(() -> reservationService.deleteReservation(1L, 2L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_RESERVATION_UPDATE))
-                .hasMessage(ErrorCode.PAST_RESERVATION_UPDATE.getMessage());
-    }
-
-    @Test
-    @DisplayName("변경하려는 날짜·시간이 과거면 수정 불가")
-    void 새시간_과거면_수정_불가() {
-        assertThatThrownBy(() -> reservationService.updateReservation(
-                11L, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_RESERVATION))
-                .hasMessage(ErrorCode.PAST_TIME_RESERVATION.getMessage());
-    }
-
-    @Test
-    @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
-    void 중복_예약_수정_불가() {
-        LocalDate date = LocalDate.now().plusDays(11);
-        assertThatThrownBy(() -> reservationService.updateReservation(
-                12L, new ReservationUpdateRequest(date, 1L)))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_RESERVATION))
-                .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
     }
 }

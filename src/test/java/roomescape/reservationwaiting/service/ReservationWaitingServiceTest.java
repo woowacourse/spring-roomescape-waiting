@@ -1,77 +1,119 @@
 package roomescape.reservationwaiting.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.business.BusinessException;
-import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
-import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationWaitingServiceTest {
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.business.BusinessException;
+import roomescape.member.domain.Member;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationwaiting.domain.ReservationWaiting;
+import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
+import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
+import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 
-    @Autowired
+@ExtendWith(MockitoExtension.class)
+class ReservationWaitingServiceTest {
+
+    @Mock
+    private ReservationWaitingRepository waitingRepository;
+    @Mock
+    private ReservationWaitingFactory waitingFactory;
+    @Mock
+    private ReservationTimeService reservationTimeService;
+    @Mock
+    private ThemeService themeService;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationService reservationService;
+
+    @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
-    private ReservationWaitingRequest reservationWaitingRequest;
-    private ReservationWaitingResponse response;
+    private final Member member = Member.restore(1L, "user1", "test@test.com", "1234");
+    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+    private final LocalDate futureDate = LocalDate.now().plusDays(1);
 
-    @BeforeEach
-    void setUp() {
-        reservationWaitingRequest = new ReservationWaitingRequest("현미밥", 12L);
-        response = reservationWaitingService.createWaiting(reservationWaitingRequest);
+    @Test
+    @DisplayName("대기 생성 성공")
+    void 대기_생성_성공() {
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, member, futureDate, time, theme);
+        when(reservationTimeService.getById(1L)).thenReturn(time);
+        when(themeService.getById(1L)).thenReturn(theme);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(true);
+        when(waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(anyLong(), any(), anyLong(), anyLong())).thenReturn(false);
+        when(waitingFactory.create(any(), any(), any(), any())).thenReturn(waiting);
+        when(waitingRepository.save(any())).thenReturn(waiting);
+
+        ReservationWaitingResponse response = reservationWaitingService.createWaiting(member,
+                new ReservationWaitingRequest(futureDate, 1L, 1L));
+        assertThat(response.id()).isEqualTo(1L);
     }
 
     @Test
     @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
-    void 예약_대기_생성_성공() {
-        assertThat(response.id()).isNotNull();
-    }
+    void 중복_대기_예외() {
+        when(reservationTimeService.getById(1L)).thenReturn(time);
+        when(themeService.getById(1L)).thenReturn(theme);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong())).thenReturn(true);
+        when(waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(anyLong(), any(), anyLong(), anyLong())).thenReturn(true);
 
-    @Test
-    @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
-    void 예약_대기_생성_실패() {
-        ReservationWaitingRequest reservationWaitingRequest2 = new ReservationWaitingRequest("현미밥", 12L);
-
-        assertThatThrownBy(() -> reservationWaitingService.createWaiting(
-                reservationWaitingRequest2))
+        assertThatThrownBy(() -> reservationWaitingService.createWaiting(member,
+                new ReservationWaitingRequest(futureDate, 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(
-                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING))
-                .hasMessage(ErrorCode.DUPLICATE_WAITING.getMessage());
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING));
     }
 
     @Test
-    @DisplayName("예약 대기를 삭제할 수 있다.")
-    void 예약_대기_삭제_성공() {
-        reservationWaitingService.deleteWaiting(response.id());
-        assertThat(reservationWaitingService.getWaitingByName("현미밥").size()).isEqualTo(0);
+    @DisplayName("대기 삭제 성공")
+    void 대기_삭제_성공() {
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, member, futureDate, time, theme);
+        when(waitingRepository.findById(1L)).thenReturn(Optional.of(waiting));
+
+        reservationWaitingService.deleteWaiting(1L, 1L);
+        verify(waitingRepository).deleteById(1L);
     }
 
     @Test
-    @DisplayName("지난 예약 대기는 삭제할 수 없다.")
-    void 예약_대기_삭제_실패() {
-        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(1L))
+    @DisplayName("다른 사람의 대기는 삭제할 수 없다")
+    void 타인_대기_삭제_불가() {
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, member, futureDate, time, theme);
+        when(waitingRepository.findById(1L)).thenReturn(Optional.of(waiting));
+
+        assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(1L, 2L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(
-                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
-                                ErrorCode.PAST_WAITING_CANCEL))
-                .hasMessage(ErrorCode.PAST_WAITING_CANCEL.getMessage());
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
     }
 
     @Test
-    @DisplayName("사용자의 이름으로 대기 현황을 조회한다.")
-    void 예약_대기_조회() {
-        reservationWaitingRequest = new ReservationWaitingRequest("현미밥", 11L);
-        response = reservationWaitingService.createWaiting(reservationWaitingRequest);
-        assertThat(reservationWaitingService.getWaitingByName("현미밥").size()).isEqualTo(2);
+    @DisplayName("멤버 id로 대기 목록을 조회한다.")
+    void 대기_목록_조회() {
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, member, futureDate, time, theme);
+        when(waitingRepository.findByMemberId(1L)).thenReturn(List.of(waiting));
+        when(waitingRepository.calculateTurn(anyLong(), any(), anyLong(), anyLong())).thenReturn(1L);
+
+        assertThat(reservationWaitingService.getWaitingByMemberId(1L)).hasSize(1);
     }
 }
