@@ -1,8 +1,9 @@
 package roomescape.reservation.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcReservationRepository implements ReservationRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public Optional<Reservation> findById(Long id) {
@@ -48,10 +48,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
-                WHERE r.id = ?
+                WHERE r.id = :id
                 """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper, id).stream()
+        return jdbcTemplate.query(sql, new MapSqlParameterSource("id", id), reservationRowMapper).stream()
                 .findFirst();
     }
 
@@ -88,9 +88,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                             INNER JOIN theme th
                                 ON r.theme_id = th.id
                         ) x
-                        WHERE x.reservation_id = ?
+                        WHERE x.reservation_id = :id
                         """,
-                reservationWaitingDtoRowMapper, id
+                new MapSqlParameterSource("id", id), reservationWaitingDtoRowMapper
         ).stream().findFirst();
     }
 
@@ -120,8 +120,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.theme_id = th.id
                 WHERE r.status != 'CANCELED'
                 ORDER BY r.date, t.start_at
-                LIMIT ? OFFSET ?
-                """, reservationRowMapper, size, (page - 1) * size);
+                LIMIT :size OFFSET :offset
+                """,
+                new MapSqlParameterSource()
+                        .addValue("size", size)
+                        .addValue("offset", (page - 1) * size),
+                reservationRowMapper);
     }
 
     @Override
@@ -156,8 +160,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     INNER JOIN theme th
                         ON r.theme_id = th.id
                 ) x
-                WHERE x.guest_name = ?
-                """, reservationWaitingDtoRowMapper, guestName);
+                WHERE x.guest_name = :guestName
+                """,
+                new MapSqlParameterSource("guestName", guestName),
+                reservationWaitingDtoRowMapper);
 
     }
 
@@ -193,12 +199,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                             INNER JOIN theme th
                                 ON r.theme_id = th.id
                         ) x
-                        WHERE date = ?
-                          AND time_id = ?
-                          AND theme_id = ?
+                        WHERE date = :date
+                          AND time_id = :timeId
+                          AND theme_id = :themeId
                           AND status = 'WAITING'
                           AND wait_number = 1
-                        """, reservationRowMapper, date, timeId, themeId)
+                        """,
+                        new MapSqlParameterSource()
+                                .addValue("date", Date.valueOf(date))
+                                .addValue("timeId", timeId)
+                                .addValue("themeId", themeId),
+                        reservationRowMapper)
                 .stream().findFirst();
     }
 
@@ -206,22 +217,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            """,
-                    new String[]{"id"}
-            );
-            preparedStatement.setString(1, reservation.getGuestName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTime().getId());
-            preparedStatement.setLong(4, reservation.getTheme().getId());
-            preparedStatement.setString(5, reservation.getStatus().toString());
-            preparedStatement.setTimestamp(6, Timestamp.valueOf(reservation.getLastModifiedAt()));
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
+                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("guestName", reservation.getGuestName())
+                        .addValue("date", Date.valueOf(reservation.getDate()))
+                        .addValue("timeId", reservation.getTime().getId())
+                        .addValue("themeId", reservation.getTheme().getId())
+                        .addValue("status", reservation.getStatus().toString())
+                        .addValue("lastModifiedAt", Timestamp.valueOf(reservation.getLastModifiedAt())),
+                keyHolder,
+                new String[]{"id"});
 
         return reservation.withId(keyHolder.getKey().longValue());
     }
@@ -231,23 +239,25 @@ public class JdbcReservationRepository implements ReservationRepository {
             Long id, LocalDate date, Long timeId, Status status, LocalDateTime lastModifiedAt) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?, status = ?, last_modified_at = ?
-                WHERE id = ?
+                SET date = :date, time_id = :timeId, status = :status, last_modified_at = :lastModifiedAt
+                WHERE id = :id
                 """;
 
-        int count = jdbcTemplate.update(sql,
-                date,
-                timeId,
-                status.toString(),
-                lastModifiedAt,
-                id);
+        int count = jdbcTemplate.update(sql, new MapSqlParameterSource()
+                .addValue("date", Date.valueOf(date))
+                .addValue("timeId", timeId)
+                .addValue("status", status.toString())
+                .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt))
+                .addValue("id", id));
         return count == 1;
     }
 
     @Override
     public boolean updateStatus(Long id, Status status) {
-        String sql = "UPDATE reservation SET status = ? WHERE id = ?";
-        int count = jdbcTemplate.update(sql, status.toString(), id);
+        String sql = "UPDATE reservation SET status = :status WHERE id = :id";
+        int count = jdbcTemplate.update(sql, new MapSqlParameterSource()
+                .addValue("status", status.toString())
+                .addValue("id", id));
         return count == 1;
     }
 
@@ -255,9 +265,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET cancel_token = ?, status = 'CANCELED'
-                WHERE id = ?
-                """, id, id);
+                SET cancel_token = :id, status = 'CANCELED'
+                WHERE id = :id
+                """, new MapSqlParameterSource("id", id));
 
         return rowCount == 1;
     }
@@ -268,8 +278,18 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != 'CANCELED'
-                """, Integer.class, date, timeId, themeId, guestName);
+                WHERE date = :date
+                  AND time_id = :timeId
+                  AND theme_id = :themeId
+                  AND guest_name = :guestName
+                  AND status != 'CANCELED'
+                """,
+                new MapSqlParameterSource()
+                        .addValue("date", Date.valueOf(date))
+                        .addValue("timeId", timeId)
+                        .addValue("themeId", themeId)
+                        .addValue("guestName", guestName),
+                Integer.class);
         return count != null && count > 0;
     }
 
@@ -278,8 +298,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'CONFIRMED';
-                """, Integer.class, date, timeId, themeId);
+                WHERE date = :date
+                  AND time_id = :timeId
+                  AND theme_id = :themeId
+                  AND status = 'CONFIRMED';
+                """,
+                new MapSqlParameterSource()
+                        .addValue("date", Date.valueOf(date))
+                        .addValue("timeId", timeId)
+                        .addValue("themeId", themeId),
+                Integer.class);
         return count != null && count > 0;
     }
 
@@ -288,12 +316,18 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE date = ?
-                  AND time_id = ?
-                  AND theme_id = ?
+                WHERE date = :date
+                  AND time_id = :timeId
+                  AND theme_id = :themeId
                   AND status = 'CONFIRMED'
-                  AND id != ?
-                """, Integer.class, date, timeId, themeId, excludedId);
+                  AND id != :excludedId
+                """,
+                new MapSqlParameterSource()
+                        .addValue("date", Date.valueOf(date))
+                        .addValue("timeId", timeId)
+                        .addValue("themeId", themeId)
+                        .addValue("excludedId", excludedId),
+                Integer.class);
         return count != null && count > 0;
     }
 
@@ -302,8 +336,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE time_id = ? AND status != 'CANCELED'
-                """, Integer.class, timeId);
+                WHERE time_id = :timeId AND status != 'CANCELED'
+                """, new MapSqlParameterSource("timeId", timeId), Integer.class);
         return count != null && count > 0;
     }
 
@@ -312,8 +346,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE theme_id = ? AND status != 'CANCELED'
-                """, Integer.class, themeId);
+                WHERE theme_id = :themeId AND status != 'CANCELED'
+                """, new MapSqlParameterSource("themeId", themeId), Integer.class);
         return count != null && count > 0;
     }
 

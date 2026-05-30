@@ -1,15 +1,16 @@
 package roomescape.reservationtime.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Optional;
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
@@ -38,7 +39,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 SELECT id, start_at, deleted_at
                 FROM reservation_time
                 WHERE deleted_at IS NULL
-                """, reservationTimeRowMapper);
+                """, new MapSqlParameterSource(), reservationTimeRowMapper);
     }
 
     @Override
@@ -46,8 +47,8 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         return jdbcTemplate.query("""
                         SELECT id, start_at, deleted_at
                         FROM reservation_time
-                        WHERE id = ? AND deleted_at IS NULL
-                        """, reservationTimeRowMapper, id)
+                        WHERE id = :id AND deleted_at IS NULL
+                        """, new MapSqlParameterSource("id", id), reservationTimeRowMapper)
                 .stream()
                 .findFirst();
     }
@@ -57,8 +58,8 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation_time
-                WHERE start_at = ? AND deleted_at IS NULL
-                """, Integer.class, startAt.toString());
+                WHERE start_at = :startAt AND deleted_at IS NULL
+                """, new MapSqlParameterSource("startAt", Time.valueOf(startAt)), Integer.class);
         return count != null && count > 0;
     }
 
@@ -66,24 +67,22 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     public boolean cancelById(Long id, LocalDateTime now) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation_time
-                SET deleted_at = ?, delete_token = ?
-                WHERE id = ? AND deleted_at IS NULL
-                """, now, id, id);
+                SET deleted_at = :deletedAt, delete_token = :id
+                WHERE id = :id AND deleted_at IS NULL
+                """, new MapSqlParameterSource()
+                .addValue("deletedAt", Timestamp.valueOf(now))
+                .addValue("id", id));
         return rowCount > 0;
     }
 
     private void insert(ReservationTime reservationTime, KeyHolder keyHolder) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    """
-                            INSERT INTO reservation_time (start_at)
-                            VALUES (?)
-                            """,
-                    new String[]{"id"}
-            );
-            preparedStatement.setString(1, reservationTime.getStartAt().toString());
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_time (start_at)
+                        VALUES (:startAt)
+                        """,
+                new MapSqlParameterSource("startAt", Time.valueOf(reservationTime.getStartAt())),
+                keyHolder,
+                new String[]{"id"});
     }
 
     private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->

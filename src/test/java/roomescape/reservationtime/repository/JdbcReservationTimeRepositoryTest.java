@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.test_config.fixture.SQLFixtureGenerator;
 
@@ -27,7 +28,7 @@ class JdbcReservationTimeRepositoryTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
     private SQLFixtureGenerator sqlFixtureGenerator;
@@ -147,7 +148,7 @@ class JdbcReservationTimeRepositoryTest {
         return jdbcTemplate.queryForMap("""
                 SELECT deleted_at, delete_token
                 FROM reservation_time
-                WHERE id = ?
-                """, id);
+                WHERE id = :id
+                """, new MapSqlParameterSource("id", id));
     }
 }

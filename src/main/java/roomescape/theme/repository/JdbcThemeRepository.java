@@ -1,14 +1,15 @@
 package roomescape.theme.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 
-import java.sql.PreparedStatement;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     toLocalDateTime(resultSet.getTimestamp("deleted_at"))
             );
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public Theme save(Theme theme) {
@@ -45,7 +46,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 SELECT id, name, description, thumbnail, deleted_at
                 FROM theme
                 WHERE deleted_at IS NULL
-                """, themeRowMapper);
+                """, new MapSqlParameterSource(), themeRowMapper);
     }
 
     @Override
@@ -53,8 +54,8 @@ public class JdbcThemeRepository implements ThemeRepository {
         return jdbcTemplate.query("""
                         SELECT id, name, description, thumbnail, deleted_at
                         FROM theme
-                        WHERE id = ? AND deleted_at IS NULL
-                        """, themeRowMapper, id)
+                        WHERE id = :id AND deleted_at IS NULL
+                        """, new MapSqlParameterSource("id", id), themeRowMapper)
                 .stream()
                 .findFirst();
     }
@@ -72,13 +73,17 @@ public class JdbcThemeRepository implements ThemeRepository {
                         INNER JOIN reservation r
                             ON r.theme_id = t.id
                             AND r.status != 'CANCELED'
-                        WHERE r.date BETWEEN ? AND ?
+                        WHERE r.date BETWEEN :startDate AND :endDate
                             AND t.deleted_at IS NULL
                         GROUP BY t.id, t.name, t.description, t.thumbnail, t.deleted_at
                         ORDER BY COUNT(r.id) DESC
-                        LIMIT ?
+                        LIMIT :limit
                         """,
-                themeRowMapper, startDate, endDate, limit);
+                new MapSqlParameterSource()
+                        .addValue("startDate", Date.valueOf(startDate))
+                        .addValue("endDate", Date.valueOf(endDate))
+                        .addValue("limit", limit),
+                themeRowMapper);
     }
 
     @Override
@@ -86,8 +91,8 @@ public class JdbcThemeRepository implements ThemeRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM theme
-                WHERE id = ? AND deleted_at IS NULL
-                """, Integer.class, id);
+                WHERE id = :id AND deleted_at IS NULL
+                """, new MapSqlParameterSource("id", id), Integer.class);
         return count != null && count > 0;
     }
 
@@ -95,26 +100,25 @@ public class JdbcThemeRepository implements ThemeRepository {
     public boolean cancelById(Long id, LocalDateTime now) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE theme
-                SET deleted_at = ?
-                WHERE id = ? AND deleted_at IS NULL
-                """, now, id);
+                SET deleted_at = :deletedAt
+                WHERE id = :id AND deleted_at IS NULL
+                """, new MapSqlParameterSource()
+                .addValue("deletedAt", Timestamp.valueOf(now))
+                .addValue("id", id));
         return rowCount > 0;
     }
 
     private void insert(Theme theme, KeyHolder keyHolder) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    """
-                            INSERT INTO theme (name, description, thumbnail)
-                            VALUES (?, ?, ?)
-                            """,
-                    new String[]{"id"}
-            );
-            preparedStatement.setString(1, theme.getName());
-            preparedStatement.setString(2, theme.getDescription());
-            preparedStatement.setString(3, theme.getThumbnail());
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO theme (name, description, thumbnail)
+                        VALUES (:name, :description, :thumbnail)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("name", theme.getName())
+                        .addValue("description", theme.getDescription())
+                        .addValue("thumbnail", theme.getThumbnail()),
+                keyHolder,
+                new String[]{"id"});
     }
 
     private LocalDateTime toLocalDateTime(Timestamp timestamp) {

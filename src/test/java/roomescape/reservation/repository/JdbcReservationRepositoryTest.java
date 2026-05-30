@@ -7,7 +7,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
@@ -37,7 +38,7 @@ class JdbcReservationRepositoryTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
     private SQLFixtureGenerator sqlFixtureGenerator;
@@ -453,7 +454,7 @@ class JdbcReservationRepositoryTest {
 
     private Map<String, Object> findReservationById(Long id) {
         return jdbcTemplate.queryForMap("""
-                SELECT * FROM reservation r WHERE r.id = ?
-                """, id);
+                SELECT * FROM reservation r WHERE r.id = :id
+                """, new MapSqlParameterSource("id", id));
     }
 }

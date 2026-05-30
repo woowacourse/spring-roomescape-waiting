@@ -1,6 +1,7 @@
 package roomescape.test_config.fixture;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -10,8 +11,8 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -19,9 +20,9 @@ import java.time.LocalTime;
 @Component
 public class SQLFixtureGenerator {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public SQLFixtureGenerator(JdbcTemplate jdbcTemplate) {
+    public SQLFixtureGenerator(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -42,19 +43,19 @@ public class SQLFixtureGenerator {
     ) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, guestName);
-            preparedStatement.setDate(2, Date.valueOf(date));
-            preparedStatement.setLong(3, time.getId());
-            preparedStatement.setLong(4, theme.getId());
-            preparedStatement.setString(5, status.toString());
-            preparedStatement.setString(6, lastModifiedAt.toString());
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
+                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("guestName", guestName)
+                        .addValue("date", Date.valueOf(date))
+                        .addValue("timeId", time.getId())
+                        .addValue("themeId", theme.getId())
+                        .addValue("status", status.toString())
+                        .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt)),
+                keyHolder,
+                new String[]{"id"});
 
         return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme, status, lastModifiedAt);
     }
@@ -66,14 +67,13 @@ public class SQLFixtureGenerator {
     public ReservationTime insertReservationTime(LocalTime startAt) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_time (start_at)
+                        VALUES (:startAt)
+                        """,
+                new MapSqlParameterSource("startAt", Time.valueOf(startAt)),
+                keyHolder,
+                new String[]{"id"});
 
         return ReservationTime.of(getGeneratedId(keyHolder), startAt);
     }
@@ -81,15 +81,15 @@ public class SQLFixtureGenerator {
     public ReservationTime insertDeletedReservationTime(LocalTime startAt) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at, deleted_at)
-                    VALUES (?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_time (start_at, deleted_at)
+                        VALUES (:startAt, :deletedAt)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("startAt", Time.valueOf(startAt))
+                        .addValue("deletedAt", Timestamp.valueOf(LocalDateTime.now())),
+                keyHolder,
+                new String[]{"id"});
 
         return ReservationTime.of(getGeneratedId(keyHolder), startAt);
     }
@@ -97,16 +97,16 @@ public class SQLFixtureGenerator {
     public Theme insertTheme(String name, String description, String thumbnail) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO theme (name, description, thumbnail)
+                        VALUES (:name, :description, :thumbnail)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("name", name)
+                        .addValue("description", description)
+                        .addValue("thumbnail", thumbnail),
+                keyHolder,
+                new String[]{"id"});
 
         return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }
@@ -114,17 +114,17 @@ public class SQLFixtureGenerator {
     public Theme insertDeletedTheme(String name, String description, String thumbnail) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail, deleted_at)
-                    VALUES (?, ?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-            return preparedStatement;
-        }, keyHolder);
+        jdbcTemplate.update("""
+                        INSERT INTO theme (name, description, thumbnail, deleted_at)
+                        VALUES (:name, :description, :thumbnail, :deletedAt)
+                        """,
+                new MapSqlParameterSource()
+                        .addValue("name", name)
+                        .addValue("description", description)
+                        .addValue("thumbnail", thumbnail)
+                        .addValue("deletedAt", Timestamp.valueOf(LocalDateTime.now())),
+                keyHolder,
+                new String[]{"id"});
 
         return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }

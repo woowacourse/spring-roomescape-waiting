@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -31,7 +32,7 @@ class JdbcThemeRepositoryTest {
     private JdbcThemeRepository jdbcThemeRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcTemplate;
 
     @Autowired
     private SQLFixtureGenerator sqlFixtureGenerator;
@@ -243,7 +244,7 @@ class JdbcThemeRepositoryTest {
         return jdbcTemplate.queryForMap("""
                 SELECT deleted_at
                 FROM theme
-                WHERE id = ?
-                """, id);
+                WHERE id = :id
+                """, new MapSqlParameterSource("id", id));
     }
 }
