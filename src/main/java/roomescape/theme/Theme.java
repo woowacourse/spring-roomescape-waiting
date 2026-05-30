@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Theme {
     private final Long id;
-    private String name;
-    private String description;
-    private String thumbnailUrl;
+    private final String name;
+    private final String description;
+    private final String thumbnailUrl;
 }

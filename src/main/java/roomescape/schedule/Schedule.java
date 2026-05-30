@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Schedule {
     private final Long id;
-    private LocalDate date;
-    private Long timeId;
-    private Long themeId;
+    private final LocalDate date;
+    private final Long timeId;
+    private final Long themeId;
 }

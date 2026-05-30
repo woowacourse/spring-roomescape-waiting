@@ -7,9 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class Member {
     private final Long id;
-    private String name;
-    private String password;
-    private Role role;
+    private final String name;
+    private final String password;
+    private final Role role;
 
     public boolean isSamePassword(String otherPassword) {
         return this.password.equals(otherPassword);
