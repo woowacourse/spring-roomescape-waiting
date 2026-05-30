@@ -1,16 +1,5 @@
 package roomescape.theme.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +14,16 @@ import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeSaveServiceRequest;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceImplTest {
@@ -65,7 +64,7 @@ class ThemeServiceImplTest {
     void create_테마_생성() {
         ThemeSaveServiceRequest dto = new ThemeSaveServiceRequest("이름", "설명", "https://url");
         Theme persisted = new Theme("이름", "설명", "https://url").withId(10L);
-        when(themeRepository.save(any(Theme.class))).thenReturn(persisted);
+        when(themeRepository.save(any())).thenReturn(persisted);
 
         Theme result = themeService.create(dto);
 

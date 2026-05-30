@@ -1,20 +1,18 @@
 package roomescape.time.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-
-import roomescape.time.domain.ReservationTime;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -22,9 +20,6 @@ class JdbcTimeRepositoryTest {
 
     @Autowired
     private JdbcTimeRepository jdbcTimeRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @DisplayName("시간 슬롯을 저장하면 PK가 부여된 객체를 반환한다.")
     @Test
