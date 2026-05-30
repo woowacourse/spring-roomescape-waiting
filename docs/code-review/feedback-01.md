@@ -80,11 +80,53 @@ private Reservation findReservationOrThrow(Waiting waiting) {
 
 ---
 
-### Review 0
+### Review 03
 
+> ### 예약의 날짜/시간에 대한 검증
 >
+> validNotPast가 기존 예약 날짜를 기준으로 검증하고 있는데, reschedule 이후의 날짜로 검사해야하지 않나요?
 
-### Feedback 0
+### Feedback 03
+
+`validNotPast` / `validDateTime` 의 이름이 혼동을 주기 쉬운 것 같네요!  
+`validNotPast` 는 해당 예약이 조작 가능한 현재 ~ 미래의 예약인지를 검증하고  
+`validDateTime` 은 예약하려는 날짜/시간이 현재 ~ 미래인지를 검증하고 있습니다.
+
+```java
+
+@Transactional
+public void patchReservation(long id, String userName, ReservationPatchRequest request) {
+    Reservation reservation = validModifiable(id, userName);
+    reservation.reschedule(
+            request.name(),
+            request.date(),
+            findOptionalTime(request.timeId()),
+            findOptionalTheme(request.themeId())
+    );
+    validDateTime(request.date(), reservation.getTimeSlot().getStartAt());
+    validDuplicatedReservation(reservation);
+    reservationRepository.update(reservation);
+}
+
+private void validUpcoming(Reservation reservation) {
+    LocalDate date = reservation.getDate();
+    LocalTime startTime = reservation.getTimeSlot().getStartAt();
+    if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && startTime.isBefore(LocalTime.now()))) {
+        throw new PastReservationControlException();
+    }
+}
+
+private void validDateTime(LocalDate date, LocalTime time) {
+    if (date.isBefore(LocalDate.now())) {
+        throw new PastTimeException("지난 날짜로 예약하실 수 없습니다.");
+    }
+    if (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now())) {
+        throw new PastTimeException("지난 시간으로 예약하실 수 없습니다.");
+    }
+}
+```
+
+`validNotPast` -> `validUpcoming` 로 수정하고 누락된 검증을 추가했습니다!
 
 ---
 

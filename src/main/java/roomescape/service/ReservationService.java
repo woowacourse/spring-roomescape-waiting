@@ -77,13 +77,13 @@ public class ReservationService {
 
     @Transactional
     public void removeReservation(long reservationId, String userName) {
-        existsAndModifiableReservation(reservationId, userName);
+        validModifiable(reservationId, userName);
         reservationRepository.deleteById(reservationId);
     }
 
     @Transactional
     public void putReservation(long id, String userName, ReservationRequest request) {
-        existsAndModifiableReservation(id, userName);
+        validModifiable(id, userName);
         Reservation transientReservation = createTransientWithValidField(request);
         Reservation reservation = new Reservation(
                 id,
@@ -98,27 +98,29 @@ public class ReservationService {
 
     @Transactional
     public void patchReservation(long id, String userName, ReservationPatchRequest request) {
-        Reservation reservation = findReservationById(id);
-        reservation.validateModifiable(userName);
-        validNotPast(reservation.getDate(), reservation.getTimeSlot().getStartAt());
+        Reservation reservation = validModifiable(id, userName);
         reservation.reschedule(
                 request.name(),
                 request.date(),
                 findOptionalTime(request.timeId()),
                 findOptionalTheme(request.themeId())
         );
+        validDateTime(request.date(), reservation.getTimeSlot().getStartAt());
         validDuplicatedReservation(reservation);
         reservationRepository.update(reservation);
     }
 
-    private void existsAndModifiableReservation(long id, String userName) {
+    private Reservation validModifiable(long id, String userName) {
         Reservation existingReservation = findReservationById(id);
         existingReservation.validateModifiable(userName);
-        validNotPast(existingReservation.getDate(), existingReservation.getTimeSlot().getStartAt());
+        validUpcoming(existingReservation);
+        return existingReservation;
     }
 
-    private void validNotPast(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
+    private void validUpcoming(Reservation reservation) {
+        LocalDate date = reservation.getDate();
+        LocalTime startTime = reservation.getTimeSlot().getStartAt();
+        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && startTime.isBefore(LocalTime.now()))) {
             throw new PastReservationControlException();
         }
     }
