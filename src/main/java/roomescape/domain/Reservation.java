@@ -13,13 +13,14 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime deletedAt;
 
-    private Reservation(Builder builder) {
-        this.id = builder.id;
-        this.member = builder.member;
-        this.slot = builder.slot;
-        this.status = builder.status;
-        this.deletedAt = builder.deletedAt;
-        this.version = builder.version;
+    private Reservation(Long id, Member member, Slot slot, ReservationStatus status,
+                        LocalDateTime deletedAt, long version) {
+        this.id = id;
+        this.member = member;
+        this.slot = slot;
+        this.status = status;
+        this.deletedAt = deletedAt;
+        this.version = version;
     }
 
     public static Reservation createByUser(Member member, LocalDate date, Time time, Theme theme,
@@ -28,32 +29,18 @@ public class Reservation {
         if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 생성은 불가능합니다.");
         }
-        return new Builder()
-                .member(member).slot(slot)
-                .build();
-    }
-
-    public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme) {
-        return createByAdmin(member, date, time, theme, null);
+        return new Reservation(null, member, slot, ReservationStatus.BOOKED, null, 0L);
     }
 
     public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
-        return new Builder()
-                .member(member).slot(new Slot(date, time, theme, storeId))
-                .build();
+        return new Reservation(null, member, new Slot(date, time, theme, storeId),
+                ReservationStatus.BOOKED, null, 0L);
     }
 
     public static Reservation reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme,
                                           ReservationStatus status, LocalDateTime deletedAt, long version,
                                           Long storeId) {
-        return new Builder()
-                .id(id).member(member).slot(new Slot(date, time, theme, storeId))
-                .status(status).deletedAt(deletedAt).version(version)
-                .build();
-    }
-
-    public static Reservation reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme) {
-        return reconstruct(id, member, date, time, theme, ReservationStatus.BOOKED, null, 0L, null);
+        return new Reservation(id, member, new Slot(date, time, theme, storeId), status, deletedAt, version);
     }
 
     public void cancelByUser(LocalDateTime now) {
@@ -112,47 +99,4 @@ public class Reservation {
     public ReservationStatus getStatus() { return status; }
     public long getVersion() { return version; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
-
-    private static class Builder {
-        private Long id;
-        private Member member;
-        private Slot slot;
-        private ReservationStatus status = ReservationStatus.BOOKED;
-        private LocalDateTime deletedAt;
-        private long version = 0L;
-
-        Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        Builder member(Member member) {
-            this.member = member;
-            return this;
-        }
-
-        Builder slot(Slot slot) {
-            this.slot = slot;
-            return this;
-        }
-
-        Builder status(ReservationStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        Builder deletedAt(LocalDateTime deletedAt) {
-            this.deletedAt = deletedAt;
-            return this;
-        }
-
-        Builder version(long version) {
-            this.version = version;
-            return this;
-        }
-
-        Reservation build() {
-            return new Reservation(this);
-        }
-    }
 }
