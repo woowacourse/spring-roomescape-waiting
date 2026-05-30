@@ -7,6 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
+import roomescape.reservation.dao.ReservationDao;
+import roomescape.theme.Theme;
+import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
 import roomescape.waiting.ReservationWaiting;
@@ -27,6 +30,12 @@ public class ReservationWaitingServiceTest {
     @Mock
     private ReservationWaitingDao reservationWaitingDao;
 
+    @Mock
+    private ReservationDao reservationDao;
+
+    @Mock
+    private ThemeDao themeDao;
+
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
@@ -40,6 +49,10 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong())).thenReturn(true);
 
         assertThatThrownBy(() ->reservationWaitingService.add(name, themeId, date, timeId))
@@ -55,9 +68,15 @@ public class ReservationWaitingServiceTest {
         Long timeId = 1L;
         ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
 
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(
                 name, themeId, date, timeId
         )).thenReturn(false);
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
 
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(reservationTime));
 
@@ -79,9 +98,15 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(
                 name, themeId, date, timeId
         )).thenReturn(false);
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
 
         when(timeDao.selectById(timeId))
                 .thenReturn(Optional.empty());
@@ -89,6 +114,96 @@ public class ReservationWaitingServiceTest {
         assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 존재하지_않는_예약에_대기_신청하는_경우_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.RESERVATION_NOT_EXISTS.getMessage());
+
+        verify(reservationDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
+        verify(reservationWaitingDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
+        verify(timeDao, never()).selectById(anyLong());
+    }
+
+    @Test
+    void 본인_예약에_대기_신청하는_경우_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.DUPLICATED_RESERVATION.getMessage());
+
+        verify(reservationWaitingDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
+        verify(timeDao, never()).selectById(anyLong());
+    }
+
+    @Test
+    void 존재하지_않는_테마로_예약_대기_신청하는_경우_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.THEME_NOT_FOUND.getMessage());
+
+        verify(timeDao, never()).selectById(anyLong());
+        verify(reservationWaitingDao, never()).insert(any(ReservationWaiting.class));
+    }
+
+    @Test
+    void 과거_시간으로_예약_대기_신청하는_경우_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().minusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().minusHours(1));
+
+        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
+        when(timeDao.selectById(timeId))
+                .thenReturn(Optional.of(reservationTime));
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.CANNOT_CANCEL_PAST_RESERVATION_WAITING.getMessage());
+
+        verify(reservationWaitingDao, never()).findNextWaitingNumber(anyLong(), any(LocalDate.class), anyLong());
+        verify(reservationWaitingDao, never()).insert(any(ReservationWaiting.class));
     }
 
     @Test
