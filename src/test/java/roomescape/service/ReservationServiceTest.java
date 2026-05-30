@@ -67,7 +67,7 @@ class ReservationServiceTest {
     void 예약_취소_성공() {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
 
-        reservationService.cancel(1L, NAME, LocalDateTime.MIN);
+        reservationService.cancel(1L, LocalDateTime.MIN);
 
         verify(reservationRepository).deleteById(1L);
     }
@@ -76,7 +76,7 @@ class ReservationServiceTest {
     void 존재하지_않는_예약_취소시_예외_발생() {
         given(reservationRepository.findById(999L)).willReturn(Optional.empty());
 
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, NAME, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -108,7 +108,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
         Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
 
-        ReservationCreateRequest request = new ReservationCreateRequest(NAME, LocalDate.of(2026,4,5), 1L, 1L);
+        ReservationCreateRequest request = new ReservationCreateRequest(NAME, LocalDate.of(2026, 4, 5), 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.save(any())).willReturn(DUMMY);
@@ -207,23 +207,12 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_삭제_시_이름이_다르면_예외가_발생한다() {
-        // given
-        Reservation reservation = RoomEscapeFixture.reservation();
-        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
-        // when
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff", TODAY))
-                .isInstanceOf(RoomEscapeException.class);
-    }
-
-    @Test
     void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
         // given
         Reservation reservation = RoomEscapeFixture.reservation();
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
 
-        assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue(),
-                TODAY)).doesNotThrowAnyException();
+        assertThatCode(() -> reservationService.cancel(EXISTS_ID, TODAY)).doesNotThrowAnyException();
     }
 
     @Test

@@ -143,14 +143,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancel(long reservationId, String name, LocalDateTime now) {
+    public void cancel(long reservationId, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
         reservation.ensureNotPast(now);
-
-        if (!reservation.isSameName(name)) {
-            throw new RoomEscapeException(ErrorCode.UNAUTHORIZED_SAME_NAME);
-        }
-
         reservationRepository.deleteById(reservationId);
     }
 

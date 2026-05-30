@@ -49,10 +49,6 @@ public class Reservation {
         }
     }
 
-    public boolean isSameName(String name) {
-        return reservationName.isSame(name);
-    }
-
     public long getId() {
         return id;
     }

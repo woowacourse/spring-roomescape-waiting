@@ -1,5 +1,8 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,9 +22,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 
 @JdbcTest
@@ -48,16 +48,18 @@ class ReservationRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
-    private ReservationTime giveTime(int hour){
+    private ReservationTime giveTime(int hour) {
         return timeRepository.save(ReservationTime.of(LocalTime.of(hour, 0)));
     }
 
-    private Theme giveTheme(String name){
-        return themeRepository.save(Theme.create(new ThemeName(name), name + "테마에 관한 설명 입니다.", new ThumbnailUrl("https://test-theme.com")));
+    private Theme giveTheme(String name) {
+        return themeRepository.save(
+                Theme.create(new ThemeName(name), name + "테마에 관한 설명 입니다.", new ThumbnailUrl("https://test-theme.com")));
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme,
+                LocalDateTime.now(FIXED_CLOCK));
     }
 
     @Nested
@@ -302,7 +304,8 @@ class ReservationRepositoryTest {
             String name = "달수";
             reservationRepository.save(reservation(name, TODAY, time, theme));
 
-            assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time.getId(), theme.getId(), TODAY, name)).isTrue();
+            assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time.getId(), theme.getId(),
+                    TODAY, name)).isTrue();
         }
 
         @Test
@@ -317,9 +320,14 @@ class ReservationRepositoryTest {
 
             assertSoftly(soft -> {
                 soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(), TODAY, "other")).isFalse();
-                soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme2.getId(), TODAY, name)).isFalse();
-                soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time2.getId(), theme1.getId(), TODAY, name)).isFalse();
-                soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(), TODAY.plusDays(1), name)).isFalse();
+                soft.assertThat(
+                                reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme2.getId(), TODAY, name))
+                        .isFalse();
+                soft.assertThat(
+                                reservationRepository.existsByTimeAndThemeAndDateAndName(time2.getId(), theme1.getId(), TODAY, name))
+                        .isFalse();
+                soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(),
+                        TODAY.plusDays(1), name)).isFalse();
             });
         }
     }

@@ -20,10 +20,7 @@ public enum ErrorCode {
 
     // 비즈니스 규칙 위반 (UNPROCESSABLE_ENTITY),
     PAST_DATE_NOT_ALLOWED("기준 날짜는 과거일 수 없습니다. 오늘 이후 날짜를 입력해 주세요", HttpStatus.UNPROCESSABLE_ENTITY),
-    PAST_RESERVATION_NOT_ALLOWED("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요", HttpStatus.UNPROCESSABLE_ENTITY),
-
-    // 인가 위반
-    UNAUTHORIZED_SAME_NAME("예약자명이 다릅니다.", HttpStatus.UNAUTHORIZED);
+    PAST_RESERVATION_NOT_ALLOWED("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요", HttpStatus.UNPROCESSABLE_ENTITY);
 
     private final String message;
     private final HttpStatus httpStatus;

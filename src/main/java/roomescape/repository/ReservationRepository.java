@@ -120,7 +120,8 @@ public class ReservationRepository {
         jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
                 target.getTheme().getId(), target.getDateTime(), id);
 
-        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(), target.getDateTime());
+        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(),
+                target.getDateTime());
     }
 
     public void deleteById(Long id) {
@@ -140,26 +141,27 @@ public class ReservationRepository {
 
     public boolean existsByTimeAndThemeAndDateAndName(Long timeId, Long themeId, LocalDate date, String name) {
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId, themeId, name));
+                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId,
+                        themeId, name));
     }
 
     public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
         String sql = """
-            SELECT r.id   AS reservation_id,
-                   r.name,
-                   r.date,
-                   r.created_at,
-                   rt.id  AS time_id,
-                   rt.start_at,
-                   t.id   AS theme_id,
-                   t.name AS theme_name,
-                   t.description,
-                   t.thumbnail_url
-            FROM reservation r
-            INNER JOIN reservation_time rt ON r.time_id  = rt.id
-            INNER JOIN theme             t  ON r.theme_id = t.id
-            WHERE date = ? AND t.id = ? AND rt.id = ?
-            """;
+                SELECT r.id   AS reservation_id,
+                       r.name,
+                       r.date,
+                       r.created_at,
+                       rt.id  AS time_id,
+                       rt.start_at,
+                       t.id   AS theme_id,
+                       t.name AS theme_name,
+                       t.description,
+                       t.thumbnail_url
+                FROM reservation r
+                INNER JOIN reservation_time rt ON r.time_id  = rt.id
+                INNER JOIN theme             t  ON r.theme_id = t.id
+                WHERE date = ? AND t.id = ? AND rt.id = ?
+                """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
     }

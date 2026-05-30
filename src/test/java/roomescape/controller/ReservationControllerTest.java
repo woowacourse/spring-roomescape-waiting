@@ -2,9 +2,7 @@ package roomescape.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.request.ReservationCreateRequest;
-import roomescape.controller.dto.request.ReservationDeleteDto;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.Reservation;
@@ -179,32 +176,8 @@ class ReservationControllerTest {
 
     @Test
     void 예약_삭제_성공시_200을_반환한다() throws Exception {
-        ReservationDeleteDto dto = new ReservationDeleteDto("zeze");
-
-        mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+        mockMvc.perform(delete("/reservations/1"))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void 예약_삭제시_이름이_다르면_401을_반환한다() throws Exception {
-        ReservationDeleteDto dto = new ReservationDeleteDto("other");
-        willThrow(new RoomEscapeException(ErrorCode.UNAUTHORIZED_SAME_NAME))
-                .given(reservationService).cancel(anyLong(), anyString(), any());
-
-        mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void 예약_삭제시_이름_body가_없으면_400을_반환한다() throws Exception {
-        mockMvc.perform(delete("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

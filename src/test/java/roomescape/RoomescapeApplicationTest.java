@@ -226,32 +226,13 @@ class RoomescapeApplicationTest {
     void 예약_삭제_성공한다() {
         int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
 
-        Map<String, Object> deleteBody = new HashMap<>();
-        deleteBody.put("name", "zeze");
-
         RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(deleteBody)
                 .when().delete("/reservations/" + id)
                 .then().statusCode(200);
 
         RestAssured.given()
                 .when().get("/reservations/" + id)
                 .then().statusCode(404);
-    }
-
-    @Test
-    void 예약_삭제시_이름이_다르면_401을_반환한다() {
-        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
-
-        Map<String, Object> deleteBody = new HashMap<>();
-        deleteBody.put("name", "other");
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(deleteBody)
-                .when().delete("/reservations/" + id)
-                .then().statusCode(401);
     }
 
     @Test
