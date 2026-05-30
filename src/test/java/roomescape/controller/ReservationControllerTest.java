@@ -101,6 +101,42 @@ class ReservationControllerTest extends ControllerTest {
                 .body("message", equalTo("과거 날짜로는 예약할 수 없습니다."));
     }
 
+    @DisplayName("예약 요청에 시간이 없으면 400")
+    @Test
+    void 예약_요청에_시간이_없으면_400() {
+        assertBadRequestWhenCreateReservation(
+                reservationParamsWithout("timeId"),
+                "timeId 널이어서는 안됩니다"
+        );
+    }
+
+    @DisplayName("예약 요청에 이름이 없으면 400")
+    @Test
+    void 예약_요청에_이름이_없으면_400() {
+        assertBadRequestWhenCreateReservation(
+                reservationParamsWithout("name"),
+                "name 공백일 수 없습니다"
+        );
+    }
+
+    @DisplayName("예약 요청에 날짜가 없으면 400")
+    @Test
+    void 예약_요청에_날짜가_없으면_400() {
+        assertBadRequestWhenCreateReservation(
+                reservationParamsWithout("date"),
+                "date 널이어서는 안됩니다"
+        );
+    }
+
+    @DisplayName("예약 요청에 테마가 없으면 400")
+    @Test
+    void 예약_요청에_테마가_없으면_400() {
+        assertBadRequestWhenCreateReservation(
+                reservationParamsWithout("themeId"),
+                "themeId 널이어서는 안됩니다"
+        );
+    }
+
     @DisplayName("예약 변경 성공")
     @Test
     void 예약_변경_성공() {
@@ -258,6 +294,42 @@ class ReservationControllerTest extends ControllerTest {
                 .body("message", equalTo("존재하지 않는 테마입니다."));
     }
 
+    @DisplayName("대기 요청에 시간이 없으면 400")
+    @Test
+    void 대기_요청에_시간이_없으면_400() {
+        assertBadRequestWhenCreateReservationWaiting(
+                reservationParamsWithout("timeId"),
+                "timeId 널이어서는 안됩니다"
+        );
+    }
+
+    @DisplayName("대기 요청에 이름이 없으면 400")
+    @Test
+    void 대기_요청에_이름이_없으면_400() {
+        assertBadRequestWhenCreateReservationWaiting(
+                reservationParamsWithout("name"),
+                "name 공백일 수 없습니다"
+        );
+    }
+
+    @DisplayName("대기 요청에 날짜가 없으면 400")
+    @Test
+    void 대기_요청에_날짜가_없으면_400() {
+        assertBadRequestWhenCreateReservationWaiting(
+                reservationParamsWithout("date"),
+                "date 널이어서는 안됩니다"
+        );
+    }
+
+    @DisplayName("대기 요청에 테마가 없으면 400")
+    @Test
+    void 대기_요청에_테마가_없으면_400() {
+        assertBadRequestWhenCreateReservationWaiting(
+                reservationParamsWithout("themeId"),
+                "themeId 널이어서는 안됩니다"
+        );
+    }
+
     @DisplayName("대기 취소 성공")
     @Test
     void 대기_취소_성공() {
@@ -329,6 +401,32 @@ class ReservationControllerTest extends ControllerTest {
                 .when().post("/reservations/waiting")
                 .then().statusCode(201)
                 .extract().jsonPath().getLong("id");
+    }
+
+    private void assertBadRequestWhenCreateReservation(Map<String, Object> params, String message) {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", equalTo(message));
+    }
+
+    private void assertBadRequestWhenCreateReservationWaiting(Map<String, Object> params, String message) {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", equalTo(message));
+    }
+
+    private Map<String, Object> reservationParamsWithout(String field) {
+        Map<String, Object> params = reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
+        params.remove(field);
+        return params;
     }
 
     private Map<String, Object> reservationParams(String name, String date, long timeId, long themeId) {
