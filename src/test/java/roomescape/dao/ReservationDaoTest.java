@@ -99,6 +99,16 @@ class ReservationDaoTest {
     }
 
     @Test
+    void existsByTimeId_대기에만_사용중이면_true() {
+        ReservationTime time = new ReservationTime(12L, java.time.LocalTime.of(21, 0));
+        Theme theme = new Theme(1L, "공포", "설명", "https://example.com/img.jpg");
+        Reservation waiting = new Reservation("이든", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+        reservationDao.saveWaiting(waiting);
+
+        assertThat(reservationDao.existsByTimeId(12L)).isTrue();
+    }
+
+    @Test
     void existsByTimeId_미사용이면_false() {
         assertThat(reservationDao.existsByTimeId(12L)).isFalse();
     }
@@ -106,6 +116,24 @@ class ReservationDaoTest {
     @Test
     void existsByThemeId_사용중이면_true() {
         assertThat(reservationDao.existsByThemeId(1L)).isTrue();
+    }
+
+    @Test
+    void existsByThemeId_대기에만_사용중이면_true() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "대기 전용 테마",
+                "설명",
+                "https://example.com/img.jpg"
+        );
+        Long themeId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM theme", Long.class);
+        ReservationTime time = new ReservationTime(12L, java.time.LocalTime.of(21, 0));
+        Theme theme = new Theme(themeId, "대기 전용 테마", "설명", "https://example.com/img.jpg");
+        Reservation waiting = new Reservation("이든", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+        reservationDao.saveWaiting(waiting);
+
+        assertThat(reservationDao.existsByThemeId(themeId)).isTrue();
     }
 
     @Test

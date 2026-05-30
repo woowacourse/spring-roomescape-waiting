@@ -32,12 +32,12 @@ class ThemeServiceTest {
     }
 
     @Test
-    void delete_예약에_사용중인_테마이면_예외() {
+    void delete_예약_또는_대기에_사용중인_테마이면_예외() {
         given(reservationDao.existsByThemeId(1L)).willReturn(true);
 
         assertThatThrownBy(() -> themeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)
-                .hasMessage("예약에 사용 중인 테마는 삭제할 수 없습니다.");
+                .hasMessage("예약 또는 대기에 사용 중인 테마는 삭제할 수 없습니다.");
     }
 
     @Test

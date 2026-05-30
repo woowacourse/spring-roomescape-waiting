@@ -44,7 +44,7 @@ public class ThemeService {
     @Transactional
     public void delete(long id) {
         if (reservationDao.existsByThemeId(id)) {
-            throw new ReservationConflictException("예약에 사용 중인 테마는 삭제할 수 없습니다.");
+            throw new ReservationConflictException("예약 또는 대기에 사용 중인 테마는 삭제할 수 없습니다.");
         }
         if (themeDao.delete(id) == 0) {
             throw new ThemeNotFoundException("존재하지 않는 테마입니다.");

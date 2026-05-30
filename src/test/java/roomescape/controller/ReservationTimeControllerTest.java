@@ -77,14 +77,14 @@ class ReservationTimeControllerTest extends ControllerTest {
                 .body("message", equalTo("이미 존재하는 예약 시간입니다."));
     }
 
-    @DisplayName("예약에 사용 중인 시간 삭제하면 409")
+    @DisplayName("예약 또는 대기에 사용 중인 시간 삭제하면 409")
     @Test
     void 예약에_사용중인_시간_삭제하면_400() {
         RestAssured.given().log().all()
                 .when().delete("/times/3")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("예약에 사용 중인 시간은 삭제할 수 없습니다."));
+                .body("message", equalTo("예약 또는 대기에 사용 중인 시간은 삭제할 수 없습니다."));
     }
 
     private long createReservationTime(String startAt) {

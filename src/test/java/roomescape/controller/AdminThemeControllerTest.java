@@ -50,7 +50,7 @@ class AdminThemeControllerTest extends ControllerTest {
                 .body("message", equalTo("존재하지 않는 테마입니다."));
     }
 
-    @DisplayName("예약에 사용 중인 테마 삭제하면 409")
+    @DisplayName("예약 또는 대기에 사용 중인 테마 삭제하면 409")
     @Test
     void 예약에_사용중인_테마_삭제하면_400() {
         RestAssured.given().log().all()
@@ -58,7 +58,7 @@ class AdminThemeControllerTest extends ControllerTest {
                 .when().delete("/admin/themes/{id}")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("예약에 사용 중인 테마는 삭제할 수 없습니다."));
+                .body("message", equalTo("예약 또는 대기에 사용 중인 테마는 삭제할 수 없습니다."));
     }
 
     private long createTheme(String name, String description, String thumbnailUrl) {

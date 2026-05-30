@@ -36,7 +36,7 @@ public class ReservationTimeService {
     @Transactional
     public void delete(long id) {
         if (reservationDao.existsByTimeId(id)) {
-            throw new ReservationConflictException("예약에 사용 중인 시간은 삭제할 수 없습니다.");
+            throw new ReservationConflictException("예약 또는 대기에 사용 중인 시간은 삭제할 수 없습니다.");
         }
         if (reservationTimeDao.delete(id) == 0) {
             throw new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다.");

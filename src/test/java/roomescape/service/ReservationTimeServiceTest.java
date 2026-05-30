@@ -43,12 +43,12 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void delete_예약에_사용중인_시간이면_예외() {
+    void delete_예약_또는_대기에_사용중인_시간이면_예외() {
         given(reservationDao.existsByTimeId(1L)).willReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.delete(1L))
                 .isInstanceOf(ReservationConflictException.class)
-                .hasMessage("예약에 사용 중인 시간은 삭제할 수 없습니다.");
+                .hasMessage("예약 또는 대기에 사용 중인 시간은 삭제할 수 없습니다.");
     }
 
     @Test

@@ -109,13 +109,35 @@ public class ReservationDao {
     }
 
     public boolean existsByTimeId(long timeId) {
-        return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE time_id = ?", Integer.class, timeId), 0) > 0;
+        String sql = """
+            SELECT (
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE time_id = ?
+            ) + (
+                SELECT COUNT(*)
+                FROM reservation_waiting
+                WHERE time_id = ?
+            )
+            """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId, timeId);
+        return Objects.requireNonNullElse(count, 0) > 0;
     }
 
     public boolean existsByThemeId(long themeId) {
-        return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE theme_id = ?", Integer.class, themeId), 0) > 0;
+        String sql = """
+                SELECT (
+                    SELECT COUNT(*)
+                    FROM reservation
+                    WHERE theme_id = ?
+                ) + (
+                    SELECT COUNT(*)
+                    FROM reservation_waiting
+                    WHERE theme_id = ?
+                )
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId, themeId);
+        return Objects.requireNonNullElse(count, 0) > 0;
     }
 
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
