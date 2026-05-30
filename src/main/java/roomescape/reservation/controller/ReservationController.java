@@ -57,16 +57,9 @@ public class ReservationController {
     }
 
     @DeleteMapping("/my")
-    public ResponseEntity<Void> deleteMyReservation(@RequestParam String name,
+    public ResponseEntity<Void> deleteMyReservationById(@RequestParam String name,
         @RequestParam Long reservationId) {
-        reservationFacade.deleteReservedByNameAndReservationId(name, reservationId);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/my/waiting")
-    public ResponseEntity<Void> deleteMyWaiting(@RequestParam String name,
-        @RequestParam Long reservationId) {
-        reservationFacade.deleteWaitingByNameAndReservationId(name, reservationId);
+        reservationFacade.deleteReservationByNameAndReservationId(name, reservationId);
         return ResponseEntity.ok().build();
     }
 

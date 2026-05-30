@@ -158,7 +158,7 @@ public class ReservationApiTest {
         .extract().path("[0].id");
 
     RestAssured.given().log().all()
-        .when().delete("/reservations/my/waiting?name=일번대기&reservationId=" + firstWaitingId)
+        .when().delete("/reservations/my?name=일번대기&reservationId=" + firstWaitingId)
         .then().log().all()
         .statusCode(200);
 
@@ -183,7 +183,7 @@ public class ReservationApiTest {
         .extract().path("[0].id");
 
     RestAssured.given().log().all()
-        .when().delete("/reservations/my/waiting?name=누누&reservationId=" + reservationId)
+        .when().delete("/reservations/my?name=누누&reservationId=" + reservationId)
         .then().log().all()
         .statusCode(200);
 
