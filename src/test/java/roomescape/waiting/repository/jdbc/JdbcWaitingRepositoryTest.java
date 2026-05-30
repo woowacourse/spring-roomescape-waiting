@@ -69,10 +69,11 @@ class JdbcWaitingRepositoryTest {
             );
 
             //when
-            final Optional<Long> savedWaitingId = jdbcWaitingRepository.save(waiting);
+            final Waiting saved = jdbcWaitingRepository.save(waiting).get();
 
             //then
-            assertThat(savedWaitingId).isPresent();
+            assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getCreatedAt()).isNotNull();
         }
 
         @Test
@@ -89,7 +90,7 @@ class JdbcWaitingRepositoryTest {
             );
 
             //when
-            final Optional<Long> result = jdbcWaitingRepository.save(waiting);
+            final Optional<Waiting> result = jdbcWaitingRepository.save(waiting);
 
             //then
             assertThat(result).isEmpty();

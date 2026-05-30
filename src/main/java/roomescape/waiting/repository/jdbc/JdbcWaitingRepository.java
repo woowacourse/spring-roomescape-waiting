@@ -44,7 +44,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<Long> save(final Waiting waiting) {
+    public Optional<Waiting> save(final Waiting waiting) {
         final String sql = """
             INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
             SELECT ?, ?, ?, ?
@@ -71,9 +71,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
         Number key = keyHolder.getKey();
         if (key == null) {
-            throw new IllegalStateException("INSERT 성공 후 generated key를 가져올 수 없습니다.");
+            throw new IllegalStateException("insert 성공 후 generated key를 가져올 수 없습니다.");
         }
-        return Optional.of(key.longValue());
+        final long id = key.longValue();
+        return Optional.of(findById(id)
+            .orElseThrow(() -> new IllegalStateException("insert 성공 후 waiting 조회에 실패했습니다")));
     }
 
     @Override

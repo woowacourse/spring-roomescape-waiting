@@ -43,9 +43,9 @@ public class WaitingService {
             LocalDateTime.now(clock)
         );
         try {
-            final Long id = waitingRepository.save(waiting)
-                    .orElseThrow(NoReservationForWaitingException::new);
-            return new WaitingCreateResponse(id);
+            final Waiting saved = waitingRepository.save(waiting)
+                .orElseThrow(NoReservationForWaitingException::new);
+            return new WaitingCreateResponse(saved.getId());
         } catch (DuplicateKeyException exception) {
             throw new WaitingSlotDuplicateException();
         }

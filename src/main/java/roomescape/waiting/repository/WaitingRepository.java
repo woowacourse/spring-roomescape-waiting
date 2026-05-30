@@ -8,7 +8,7 @@ import roomescape.waiting.domain.Waiting;
 
 public interface WaitingRepository {
 
-    Optional<Long> save(Waiting waiting);
+    Optional<Waiting> save(Waiting waiting);
 
     boolean deleteById(long id);
 
