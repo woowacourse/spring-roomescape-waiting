@@ -1,7 +1,7 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
 import roomescape.service.dto.command.ReservationTimeCommand;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -21,11 +22,15 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("정상 시간을 생성하면 통과한다.")
     void 정상_시간_생성_테스트() {
+        String time = "19:00";
         ReservationTimeCommand command = new ReservationTimeCommand(
-                LocalTime.parse("19:00")
+                LocalTime.parse(time)
         );
 
-        assertDoesNotThrow(() -> reservationTimeService.registerReservationTime(command));
+        ReservationTimeResult saved = reservationTimeService.registerReservationTime(command);
+
+        assertThat(saved.id()).isNotNull();
+        assertThat(saved.startAt()).isEqualTo(time);
     }
 
     @Test
