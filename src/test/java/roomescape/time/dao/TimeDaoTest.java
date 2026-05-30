@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.time.ReservationTime;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJdbcTest
+@Import(TimeDao.class)
 public class TimeDaoTest {
     private static final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) ->
             new ReservationTime(rs.getLong("id")
