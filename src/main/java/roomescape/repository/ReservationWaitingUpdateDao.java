@@ -1,6 +1,8 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -36,5 +38,9 @@ public class ReservationWaitingUpdateDao {
     public void delete(Long id) {
         String sql = "delete from waiting where id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    public void deleteByDateAndTimeAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update("delete from waiting where date = ? and time_id = ? and theme_id = ?", date, timeId, themeId);
     }
 }

@@ -13,6 +13,7 @@ import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationUpdateDao;
+import roomescape.repository.ReservationWaitingUpdateDao;
 import roomescape.repository.ThemeQueryDao;
 
 import java.time.LocalDate;
@@ -26,12 +27,14 @@ public class ReservationService {
     private final ReservationUpdateDao reservationUpdatingDao;
     private final ReservationTimeQueryDao reservationTimeQueryingDao;
     private final ThemeQueryDao themeQueryingDao;
+    private final ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
-    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao) {
+    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.themeQueryingDao = themeQueryingDao;
+        this.reservationWaitingUpdateDao = reservationWaitingUpdateDao;
     }
 
     public ReservationResponse read(Long id) {
@@ -81,6 +84,9 @@ public class ReservationService {
         validateDuplicatedReservation(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
 
         Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
+
+        reservationWaitingUpdateDao.deleteByDateAndTimeAndThemeId(
+                existedReservation.getDate(), existedReservation.getTime().getId(), existedReservation.getTheme().getId());
         reservationUpdatingDao.update(id, updatedReservation);
         return ReservationResponse.from(updatedReservation);
     }
@@ -88,7 +94,7 @@ public class ReservationService {
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
         reservation.validatePastDateTime();
-
+        reservationWaitingUpdateDao.deleteByDateAndTimeAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         reservationUpdatingDao.delete(id);
     }
 
