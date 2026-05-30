@@ -110,15 +110,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
-
-        if (reservation.isReserved()) {
-            reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
-                    .ifPresent(waitingId -> {
-                        if (!reservationRepository.promoteToReserved(waitingId)) {
-                            throw new ReservationNotFoundException(id);
-                        }
-                    });
-        }
+        promoteNextWaiting(reservation);
         reservationRepository.deleteById(id);
     }
 
@@ -128,16 +120,27 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.getTime().validateUpdatableReservation();
+        promoteNextWaiting(reservation);
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
-        if (reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime)) {
-            throw new DuplicateReservationException();
-        }
-        boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now());
+        Status status = Status.from(
+                reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime));
+        boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now(), status);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
 
         }
-        return reservation.withTime(newTime);
+        return reservation.withTimeAndStatus(newTime, status);
+    }
+
+    private void promoteNextWaiting(Reservation reservation) {
+        if (reservation.isReserved()) {
+            reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
+                    .ifPresent(waitingId -> {
+                        if (!reservationRepository.promoteToReserved(waitingId)) {
+                            throw new ReservationNotFoundException(reservation.getId());
+                        }
+                    });
+        }
     }
 }

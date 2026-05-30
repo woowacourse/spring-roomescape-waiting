@@ -32,8 +32,8 @@ public class Reservation {
         return new Reservation(id, this.name, this.time, this.theme, this.status, this.createdAt);
     }
 
-    public Reservation withTime(ReservationTime time) {
-        return new Reservation(this.id, this.name, time, this.theme, this.status, this.createdAt);
+    public Reservation withTimeAndStatus(ReservationTime time, Status status) {
+        return new Reservation(this.id, this.name, time, this.theme, status, this.createdAt);
     }
 
     public Long getId() {
