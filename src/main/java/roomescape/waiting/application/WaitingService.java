@@ -3,6 +3,7 @@ package roomescape.waiting.application;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -20,6 +21,7 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
