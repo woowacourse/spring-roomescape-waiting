@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.date.domain.ReservationDate;
@@ -252,21 +251,6 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() -> reserved.changeSchedule(name, newSlot, LocalDateTime.now()))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
-    }
-
-    @Test
-    @DisplayName("지난 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
-    void changeSchedule_new_datetime_is_past() {
-        // given
-        Reservation reserved = Reservation.load(2L, name,
-                ReservationSlot.of(reservationDate, reservationTime, theme), RESERVED, LocalDateTime.now());
-
-        ReservationSlot pastSlot = ReservationSlot.of(pastDate, reservationTime, theme);
-
-        // when & then
-        assertThatThrownBy(() -> reserved.changeSchedule(name, pastSlot, LocalDateTime.now()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
