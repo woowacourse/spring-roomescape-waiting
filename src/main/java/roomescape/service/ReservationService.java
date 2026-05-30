@@ -1,11 +1,15 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
-import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
@@ -18,12 +22,6 @@ import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -85,11 +83,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse update(Long reservationId, UpdateReservationCommand command, LocalDateTime now) {
-        getReservation(reservationId);
+        Reservation reservation = getReservation(reservationId);
 
         ReservationTime time = getTime(command.timeId());
-        validateUniqueExcludingSelf(command.date(), command.timeId(),
-                getReservation(reservationId).getTheme().getId(), reservationId);
+        validateUniqueExcludingSelf(command.date(), command.timeId(), reservation.getTheme().getId(), reservationId);
         validatePastDatetime(command.date(), now, time);
 
         Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
