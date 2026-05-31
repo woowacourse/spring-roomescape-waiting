@@ -10,6 +10,7 @@ import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
+import roomescape.dto.WaitingListRow;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -30,12 +31,9 @@ public class WaitingListService {
     private final ReservationRepository reservationRepository;
 
     public List<WaitingListResult> getWaitingListByName(String name) {
-        List<WaitingList> waitingLists = waitingListRepository.findByName(name);
-        return waitingLists.stream()
-                .map(waitingList -> WaitingListResult.from(
-                        waitingList, waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(waitingList)
-                        )
-                ).toList();
+        return waitingListRepository.findByName(name).stream()
+                .map(row -> WaitingListResult.from(row.waitingList(), row.waitingOrder()))
+                .toList();
     }
 
     @Transactional

@@ -11,6 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
+import roomescape.dto.WaitingListRow;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -63,17 +64,17 @@ class WaitingListRepositoryTest {
             waitingListRepository.save(waitingList);
 
             // when
-            List<WaitingList> result = waitingListRepository.findByName("오리");
+            List<WaitingListRow> result = waitingListRepository.findByName("오리");
 
             // then
             assertThat(result).hasSize(1);
-            assertThat(result.getFirst().getName()).isEqualTo("오리");
+            assertThat(result.getFirst().waitingList().getName()).isEqualTo("오리");
         }
 
         @Test
         void 없는_이름이면_빈_목록을_반환() {
             // when
-            List<WaitingList> result = waitingListRepository.findByName("없는사람");
+            List<WaitingListRow> result = waitingListRepository.findByName("없는사람");
 
             // then
             assertThat(result).isEmpty();

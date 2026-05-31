@@ -319,8 +319,9 @@ class WaitingListServiceTest {
             // given
             ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
             WaitingList waitingList = WaitingList.createWithId(1L, NAME, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
+            WaitingListRow waitingListRow = new WaitingListRow(waitingList, 1);
 
-            given(waitingListRepository.findByName(NAME)).willReturn(List.of(waitingList));
+            given(waitingListRepository.findByName(NAME)).willReturn(List.of(waitingListRow));
 
             // when
             List<WaitingListResult> responses = waitingListService.getWaitingListByName(NAME);

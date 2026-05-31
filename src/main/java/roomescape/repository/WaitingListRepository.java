@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
+import roomescape.dto.WaitingListRow;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.KeyGenerationException;
 
@@ -54,7 +55,7 @@ public class WaitingListRepository {
         }
     }
 
-    public List<WaitingList> findByName(String name) {
+    public List<WaitingListRow> findByName(String name) {
         final String sql = """
                 SELECT
                     w.id AS waiting_list_id,
@@ -67,14 +68,27 @@ public class WaitingListRepository {
                     t.end_at AS time_end_at,
                     h.name AS theme_name,
                     h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
+                    h.thumbnail_url AS theme_thumbnail_url,
+                    wc.waiting_order
                 FROM waiting_list w
                 JOIN reservation_time t ON w.time_id = t.id
                 JOIN theme h ON w.theme_id = h.id 
+                JOIN (
+                    SELECT 
+                        w1.id,
+                        COUNT(w2.id) AS waiting_order
+                    FROM waiting_list w1
+                    JOIN waiting_list w2
+                        ON w1.theme_id = w2.theme_id
+                               AND w1.date = w2.date
+                               AND w1.time_id = w2.time_id
+                               AND w2.created_at <= w1.created_at
+                    GROUP BY w1.id
+                ) wc ON w.id = wc.id
                 WHERE w.name = ?
                 """;
 
-        return jdbcTemplate.query(sql, this::mapToDomain, name).stream().toList();
+        return jdbcTemplate.query(sql, this::mapToRow, name).stream().toList();
     }
 
     public int findWaitingOrderByIdAndThemeAndDateAndTime(final WaitingList waitingList) {
@@ -184,5 +198,12 @@ public class WaitingListRepository {
                 reservationTime,
                 resultSet.getTimestamp("created_at").toLocalDateTime()
         );
+    }
+
+    private WaitingListRow mapToRow(final ResultSet resultSet, final int rowNum) throws SQLException {
+        WaitingList waitingList = mapToDomain(resultSet, rowNum);
+        int waitingOrder = resultSet.getInt("waiting_order");
+
+        return new WaitingListRow(waitingList, waitingOrder);
     }
 }
