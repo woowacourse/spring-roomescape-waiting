@@ -2,6 +2,7 @@ package roomescape.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.ReservationResult;
 
 public record ReservationResponse(
@@ -10,7 +11,8 @@ public record ReservationResponse(
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        Long waitingOrder
+        long waitingOrder,
+        ReservationStatus status
 ) {
     public static ReservationResponse from(ReservationResult result) {
         return new ReservationResponse(
@@ -19,7 +21,8 @@ public record ReservationResponse(
                 result.date(),
                 ReservationTimeResponse.from(result.time()),
                 ThemeResponse.from(result.theme()),
-                result.waitingOrder()
+                result.waitingOrder(),
+                result.status()
         );
     }
 }

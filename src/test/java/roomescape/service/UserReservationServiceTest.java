@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
@@ -107,7 +108,7 @@ class UserReservationServiceTest {
     @DisplayName("이름으로 예약 목록을 조회한다")
     void 이름으로_예약_목록을_조회한다() {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
-                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, 2L);
+                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, new WaitingOrder(2));
         given(reservationRepository.findByReserverName(OWNER)).willReturn(List.of(reservation));
 
         List<ReservationResult> results = userReservationService.findByReserverName(OWNER);
@@ -188,7 +189,7 @@ class UserReservationServiceTest {
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
-                    r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(), 0L);
+                    r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(), new WaitingOrder(0));
         });
 
         ReservationResult result = userReservationService.update(command);

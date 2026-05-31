@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingOrder;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -81,7 +82,7 @@ class ReservationServiceTest {
     @DisplayName("충돌이 없으면 정상적으로 예약을 생성한다")
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
         ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L);
+                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
@@ -167,7 +168,7 @@ class ReservationServiceTest {
                     1L))
                     .willReturn(false);
             given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L));
+                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0)));
 
             assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
@@ -207,14 +208,14 @@ class ReservationServiceTest {
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
                 ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                        1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L);
+                        1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
                 given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                         1L))
                         .willReturn(false);
                 given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 1L));
+                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(1)));
 
                 assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 

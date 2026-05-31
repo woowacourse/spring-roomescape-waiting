@@ -19,6 +19,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingOrder;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @JdbcTest
@@ -171,17 +172,17 @@ class JdbcReservationRepositoryTest {
         assertThat(reservationRepository.findByReserverName("루드비코"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(first.getId(), "루드비코", DATE, time, theme, 0L));
+                        new ReservationWithWaitingOrder(first.getId(), "루드비코", DATE, time, theme, new WaitingOrder(0)));
 
         assertThat(reservationRepository.findByReserverName("모아"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(second.getId(), "모아", DATE, time, theme, 1L));
+                        new ReservationWithWaitingOrder(second.getId(), "모아", DATE, time, theme, new WaitingOrder(1)));
 
         assertThat(reservationRepository.findByReserverName("브라운"))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
-                        new ReservationWithWaitingOrder(third.getId(), "브라운", DATE, time, theme, 2L));
+                        new ReservationWithWaitingOrder(third.getId(), "브라운", DATE, time, theme, new WaitingOrder(2)));
     }
 
     @Test
@@ -208,14 +209,14 @@ class JdbcReservationRepositoryTest {
         insertReservationWithCreatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
 
         List<ReservationWithWaitingOrder> list = reservationRepository.findByReserverName("브라운");
-        Long waitingOrder = list.getFirst().waitingOrder();
+        long waitingOrder = list.getFirst().waitingOrder().value();
         assertThat(waitingOrder).isEqualTo(2L);
 
         reservationRepository.deleteById(reservation1.getId());
         assertThat(reservationRepository.findById(reservation1.getId())).isEmpty();
 
         List<ReservationWithWaitingOrder> list2 = reservationRepository.findByReserverName("브라운");
-        Long waitingOrder2 = list2.getFirst().waitingOrder();
+        long waitingOrder2 = list2.getFirst().waitingOrder().value();
         assertThat(waitingOrder2).isEqualTo(1L);
 
     }

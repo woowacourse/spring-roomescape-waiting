@@ -305,11 +305,11 @@
         container.querySelectorAll('.res-card').forEach(setupCard);
     }
 
-    function statusBadge(waitingOrder, past) {
+    function statusBadge(status, waitingOrder, past) {
         if (past) {
             return '<span class="status-badge status-past">지난 예약</span>';
         }
-        if (waitingOrder === 0) {
+        if (status === 'CONFIRMED') {
             return '<span class="status-badge status-confirmed">예약 완료</span>';
         }
         return `<span class="status-badge status-waiting">대기 ${waitingOrder}번</span>`;
@@ -340,7 +340,7 @@
             <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
                 <div class="res-head">
                     <div>
-                        <p class="res-theme">${r.theme.name} ${statusBadge(r.waitingOrder, past)}</p>
+                        <p class="res-theme">${r.theme.name} ${statusBadge(r.status, r.waitingOrder, past)}</p>
                         <p class="res-when">${r.date} · ${r.time.startAt}</p>
                     </div>${actions}
                 </div>${editForm}

@@ -1,6 +1,8 @@
 package roomescape.service.dto;
 
 import java.time.LocalDate;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.WaitingOrder;
 
 public record ReservationResult(
         Long id,
@@ -8,16 +10,19 @@ public record ReservationResult(
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
-        Long waitingOrder
+        long waitingOrder,
+        ReservationStatus status
 ) {
     public static ReservationResult from(ReservationWithWaitingOrder reservation) {
+        WaitingOrder waitingOrder = reservation.waitingOrder();
         return new ReservationResult(
                 reservation.id(),
                 reservation.reserverName(),
                 reservation.date(),
                 ReservationTimeResult.from(reservation.time()),
                 ThemeResult.from(reservation.theme()),
-                reservation.waitingOrder()
+                waitingOrder.value(),
+                waitingOrder.status()
         );
     }
 }

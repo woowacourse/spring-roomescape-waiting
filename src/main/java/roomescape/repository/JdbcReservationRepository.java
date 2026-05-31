@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingOrder;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @Repository
@@ -87,7 +88,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rs.getString("theme_description"),
                     rs.getString("theme_thumbnail")
             ),
-            rs.getLong("waiting_order")
+            new WaitingOrder(rs.getLong("waiting_order"))
     );
 
     private final JdbcTemplate jdbcTemplate;
