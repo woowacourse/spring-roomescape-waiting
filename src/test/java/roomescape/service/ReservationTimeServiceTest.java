@@ -6,18 +6,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
@@ -25,13 +20,11 @@ import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 public class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
     private ReservationTimeRepository reservationTimeRepository;
-    private Clock clock;
 
     @BeforeEach
     void beforeEach() {
         reservationTimeRepository = Mockito.mock(ReservationTimeRepository.class);
-        clock = Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneId.of("Asia/Seoul"));
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, clock);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository);
     }
 
     @Test
@@ -67,14 +60,6 @@ public class ReservationTimeServiceTest {
         when(reservationTimeRepository.findAll()).thenReturn(reservationTimes);
 
         assertThat(reservationTimeService.findAll()).isEqualTo(reservationTimes);
-    }
-
-    @Test
-    void validateNotPastDateExceptionTest() {
-        LocalDate date = LocalDate.of(2026, 5, 1);
-
-        assertThatThrownBy(() -> reservationTimeService.validateNotPastDate(date))
-                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test

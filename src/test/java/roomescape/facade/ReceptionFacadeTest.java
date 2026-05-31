@@ -3,7 +3,6 @@ package roomescape.facade;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -107,8 +106,6 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        doThrow(new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE))
-                .when(reservationTimeService).validateNotPastSlotForCreate(any(), any());
 
         assertThatThrownBy(() -> receptionFacade.save(request))
                 .isInstanceOf(RoomEscapeException.class)
@@ -211,8 +208,6 @@ public class ReceptionFacadeTest {
         Reservation reservation = new Reservation(1L, "fizz", pastReservationDate, reservationTime, theme);
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
-        doThrow(new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE))
-                .when(reservationTimeService).validateNotPastSlotForDelete(any(), any());
 
         assertThatThrownBy(() -> receptionFacade.deleteReservation(reservation.getId()))
                 .isInstanceOf(RoomEscapeException.class)

@@ -3,9 +3,8 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-
-import roomescape.domain.exception.DomainPreconditions;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.DomainPreconditions;
 
 public class Wait {
 
@@ -57,6 +56,16 @@ public class Wait {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        if (reservationDate.isBefore(now.toLocalDate())) {
+            return true;
+        }
+        if (reservationDate.isAfter(now.toLocalDate())) {
+            return false;
+        }
+        return time.isPast(now.toLocalTime());
     }
 
     private void validate(LocalDateTime createAt, String name, LocalDate date, ReservationTime time, Theme theme) {

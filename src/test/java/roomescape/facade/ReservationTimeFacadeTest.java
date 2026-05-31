@@ -5,8 +5,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,7 @@ public class ReservationTimeFacadeTest {
     private ReservationTimeService reservationTimeService;
     private ReservationService reservationService;
     private ThemeService themeService;
+    private Clock clock;
     private ReservationTimeFacade reservationTimeFacade;
 
     private LocalDate reservationDate;
@@ -41,7 +45,8 @@ public class ReservationTimeFacadeTest {
         reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         theme = new Theme(1L, "피즈의 모험", "모험 이야기", "url.jpg");
 
-        reservationTimeFacade = new ReservationTimeFacade(reservationTimeService, reservationService, themeService);
+        clock = Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneId.of("Asia/Seoul"));
+        reservationTimeFacade = new ReservationTimeFacade(reservationTimeService, reservationService, themeService, clock);
     }
 
     @Test

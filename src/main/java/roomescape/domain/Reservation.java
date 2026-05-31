@@ -1,10 +1,10 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
-
-import roomescape.domain.exception.DomainPreconditions;
 import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.DomainPreconditions;
 
 public class Reservation {
 
@@ -56,6 +56,16 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        if (date.isBefore(now.toLocalDate())) {
+            return true;
+        }
+        if (date.isAfter(now.toLocalDate())) {
+            return false;
+        }
+        return time.isPast(now.toLocalTime());
     }
 
     @Override

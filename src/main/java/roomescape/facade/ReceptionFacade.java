@@ -13,7 +13,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.service.ReservationService;
@@ -45,8 +44,11 @@ public class ReceptionFacade {
     public ReceptionResponse save(ServiceReservationCreateRequest request) {
         ReservationTime reservationTime = reservationTimeService.findReservationTime(request.timeId());
         Theme theme = themeService.findTheme(request.themeId());
+        Reservation newReservation = new Reservation(request.name(), request.reservationDate(), reservationTime, theme);
 
-        reservationTimeService.validateNotPastSlotForCreate(request.reservationDate(), reservationTime);
+        if (newReservation.isPast(LocalDateTime.now(clock))) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE);
+        }
 
         return saveReservationOrWait(request, reservationTime, theme);
     }
@@ -82,7 +84,9 @@ public class ReceptionFacade {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = reservationService.findReservation(id);
-        reservationTimeService.validateNotPastSlotForDelete(reservation.getDate(), reservation.getTime());
+        if (reservation.isPast(LocalDateTime.now(clock))) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
+        }
         reservationService.delete(id);
 
         List<Wait> waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
@@ -96,20 +100,21 @@ public class ReceptionFacade {
     @Transactional
     public void deleteWait(Long id) {
         Wait wait = waitService.findWait(id);
-        reservationTimeService.validateNotPastSlotForDelete(wait.getReservationDate(), wait.getTime());
-
+        if (wait.isPast(LocalDateTime.now(clock))) {
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
+        }
         waitService.delete(id);
     }
 
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
                                                     ReservationTime reservationTime, Theme theme) {
-        Optional<Reservation> reservation = reservationService.findBySlot(request.reservationDate(), request.timeId(),
+        Optional<Reservation> existing = reservationService.findBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
-        if (reservation.isEmpty()) {
-            Reservation newReservation = reservationService.save(request, reservationTime, theme);
-            return ReceptionResponse.from(newReservation, 0L, ReservationStatus.CONFIRMED.name());
+        if (existing.isEmpty()) {
+            Reservation saved = reservationService.save(request, reservationTime, theme);
+            return ReceptionResponse.from(saved, 0L, ReservationStatus.CONFIRMED.name());
         }
-        if (reservation.get().getName().equals(request.name())) {
+        if (existing.get().getName().equals(request.name())) {
             throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
         }
 
