@@ -44,8 +44,8 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{waitingId}")
-    public ResponseEntity<Void> delete(@PathVariable("waitingId") long waitingId) {
-        waitingService.delete(waitingId);
+    public ResponseEntity<Void> delete(@PathVariable("waitingId") long waitingId, @RequestParam("name") String name) {
+        waitingService.delete(waitingId, name);
         return ResponseEntity.noContent()
                 .build();
     }

@@ -70,11 +70,13 @@ public class WaitingService {
                 .toList();
     }
 
-    public void delete(long waitingId) {
-        int affectedRows = waitingDao.delete(waitingId);
+    public void delete(long waitingId, String name) {
+        Waiting waiting = waitingDao.findById(waitingId)
+                .orElseThrow(() -> new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND));
 
-        if (affectedRows == 0) {
+        if (!waiting.getName().equals(name)) {
             throw new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND);
         }
+        waitingDao.delete(waitingId);
     }
 }

@@ -203,7 +203,7 @@
                                         <small class="text-muted d-block">신청자: ${wait.name}</small>
                                     </div>
                                     <div class="d-flex flex-column flex-sm-row gap-2">
-                                        <button class="btn btn-outline-danger btn-sm px-3" onclick="deleteWaiting(${wait.id})">대기 취소</button>
+                                        <button class="btn btn-outline-danger btn-sm px-3" onclick="deleteWaiting(${wait.id}, '${wait.name}')">대기 취소</button>
                                     </div>
                                 </div>
                             </div>
@@ -213,10 +213,10 @@
                 .catch(handleError);
         }
 
-        function deleteWaiting(id) {
+        function deleteWaiting(id, name) {
             if (!confirm('정말 대기 신청을 취소하시겠습니까?')) return;
 
-            fetch(`/waitings/${id}`, { method: 'DELETE' })
+            fetch(`/waitings/${id}?name=${encodeURIComponent(name)}`, { method: 'DELETE' })
                 .then(response => {
                     if (response.ok) {
                         alert('✅ 대기 신청이 취소되었습니다.');

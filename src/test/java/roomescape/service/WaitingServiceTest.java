@@ -135,14 +135,35 @@ WaitingServiceTest extends ServiceTest {
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
         saveReservation("기존예약자", theme, reservationTime, reservationDate);
 
-        WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "대기신청자");
+        String name = "대기신청자";
+        WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), name);
         WaitingResponse waitingResponse = waitingService.create(request, currentDateTime);
 
         // when
-        waitingService.delete(waitingResponse.id());
+        waitingService.delete(waitingResponse.id(), name);
 
         // then
-        assertThatThrownBy(() -> waitingService.delete(waitingResponse.id()))
+        assertThatThrownBy(() -> waitingService.delete(waitingResponse.id(), name))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 대기_삭제_시_이름이_일치하지_않으면_예외가_발생한다() {
+        // given
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
+        LocalDate reservationDate = currentDateTime.toLocalDate();
+
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+
+        String name = "대기신청자";
+        WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), name);
+        WaitingResponse waitingResponse = waitingService.create(request, currentDateTime);
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.delete(waitingResponse.id(), "다른사람"))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
