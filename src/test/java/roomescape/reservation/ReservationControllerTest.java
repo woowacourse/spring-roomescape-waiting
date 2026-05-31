@@ -1,202 +1,109 @@
 package roomescape.reservation;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.config.TestTimeConfig;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import roomescape.common.api.ApiResponse;
+import roomescape.member.AuthenticatedMember;
+import roomescape.member.Role;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.ReservationSaveResponse;
+import roomescape.reservation.presentation.ManagerReservationController;
+import roomescape.reservation.presentation.UserReservationController;
+import roomescape.reservationtime.dto.response.TimeInformation;
+import roomescape.theme.dto.response.ThemeFindResponse;
 
-import java.util.HashMap;
-import java.util.Map;
+@ExtendWith(MockitoExtension.class)
+class ReservationControllerTest {
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+    @Mock
+    private ReservationService reservationService;
 
-@Import(TestTimeConfig.class)
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class ReservationControllerTest {
+    private UserReservationController userReservationController;
+    private ManagerReservationController managerReservationController;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = 8080;
-    }
-
-    private String loginUser() {
-        return login("a", "test1");
-    }
-
-    private String loginManager() {
-        return login("d", "test4");
-    }
-
-    private String login(String name, String password) {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", name);
-        loginRequest.put("password", password);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
-    }
-
-    private Map<String, Object> reservationRequest() {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("memberId", 1);
-        reservation.put("date", "2026-05-05");
-        reservation.put("timeId", 4);
-        reservation.put("themeId", 4);
-        return reservation;
-    }
-
-    private Map<String, Object> waitingRequest() {
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("date", "2026-05-05");
-        waiting.put("timeId", 1);
-        waiting.put("themeId", 1);
-        return waiting;
+        userReservationController = new UserReservationController(reservationService);
+        managerReservationController = new ManagerReservationController(reservationService);
     }
 
     @Test
-    void 예약_생성() {
-        String accessToken = loginUser();
+    void 유저_예약_생성_응답_테스트() {
+        ReservationSaveRequest request = new ReservationSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+        AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
+        ReservationSaveResponse serviceResponse = new ReservationSaveResponse(5L, 1L, 4L);
+        when(reservationService.save(request, member.id())).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(reservationRequest())
-                .when().post("/api/user/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", is(5))
-                .body("data.memberId", is(1))
-                .body("data.slotId", is(4));
+        ResponseEntity<ApiResponse<ReservationSaveResponse>> response = userReservationController.save(request, member);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 나의_특정_예약_삭제_및_나의_예약_목록_조회() {
-        String accessToken = loginUser();
+    void 유저_예약_삭제_응답_테스트() {
+        AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/user/reservations/me")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4));
+        ResponseEntity<ApiResponse<Void>> response = userReservationController.deleteByUser(1L, member);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .pathParam("id", 1)
-                .when().delete("/api/user/reservations/{id}")
-                .then().log().all()
-                .statusCode(204);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/user/reservations/me")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(3));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(reservationService).deleteByIdForUser(1L, member.id());
     }
 
     @Test
-    void 양수가_아닌_예약_id로_삭제를_요청하면_400을_응답한다() {
-        String accessToken = loginUser();
+    void 매니저_예약_목록_조회_응답_테스트() {
+        List<ReservationDetailFindResponse> serviceResponse = List.of(reservationDetailResponse());
+        when(reservationService.findReservationDetails()).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .pathParam("id", -1)
-                .when().delete("/api/user/reservations/{id}")
-                .then().log().all()
-                .statusCode(400)
-                .body("success", is(false))
-                .body("error.code", is("INVALID_INPUT_400"));
+        ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> response =
+                managerReservationController.findReservationDetails();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 나의_예약_목록에서_대기도_함께_조회한다() {
-        String accessToken = login("b", "test2");
+    void 매니저_예약_수정_응답_테스트() {
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 5, 6), 2L);
+        ReservationSaveResponse serviceResponse = new ReservationSaveResponse(1L, 1L, 5L);
+        when(reservationService.update(request, 1L)).thenReturn(serviceResponse);
 
-        Integer waitingId = RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(waitingRequest())
-                .when().post("/api/user/waitings")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", notNullValue())
-                .extract()
-                .path("data.id");
+        ResponseEntity<ApiResponse<ReservationSaveResponse>> response =
+                managerReservationController.updateByManager(request, 1L);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/user/reservations/me")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(1))
-                .body("data[0].id", is(waitingId))
-                .body("data[0].status", is("WAITING"))
-                .body("data[0].waitingOrder", is(1));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
-    @Test
-    void 매니저_예약_목록_조회() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4));
-    }
-
-    @Test
-    void 매니저_예약_삭제() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .pathParam("id", 1)
-                .when().delete("/api/manager/reservations/{id}")
-                .then().log().all()
-                .statusCode(204);
-    }
-
-    @Test
-    void 매니저_예약_수정() {
-        String accessToken = loginManager();
-
-        Map<String, Object> updateRequest = new HashMap<>();
-        updateRequest.put("date", "2026-05-05");
-        updateRequest.put("timeId", 1);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(updateRequest)
-                .pathParam("id", 1)
-                .when().patch("/api/manager/reservations/{id}")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.id", is(1))
-                .body("data.memberId", is(1));
+    private ReservationDetailFindResponse reservationDetailResponse() {
+        return new ReservationDetailFindResponse(
+                1L,
+                "a",
+                LocalDate.of(2026, 5, 5),
+                new ThemeFindResponse(1L, "theme", "description", "thumbnail"),
+                new TimeInformation(1L, java.time.LocalTime.of(10, 0)),
+                ReservationStatus.RESERVED,
+                null
+        );
     }
 }

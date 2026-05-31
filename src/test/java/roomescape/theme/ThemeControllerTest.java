@@ -1,168 +1,79 @@
 package roomescape.theme;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.config.TestTimeConfig;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestTimeConfig.class)
-@Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class ThemeControllerTest {
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import roomescape.common.api.ApiResponse;
+import roomescape.theme.application.ThemeService;
+import roomescape.theme.dto.request.ThemeSaveRequest;
+import roomescape.theme.dto.response.ThemeFindResponse;
+import roomescape.theme.dto.response.ThemeSaveResponse;
+import roomescape.theme.presentation.ManagerThemeController;
+import roomescape.theme.presentation.UserThemeController;
 
-    @LocalServerPort
-    int port;
+@ExtendWith(MockitoExtension.class)
+class ThemeControllerTest {
 
-    @MockitoBean
-    private Clock clock;
+    @Mock
+    private ThemeService themeService;
+
+    private UserThemeController userThemeController;
+    private ManagerThemeController managerThemeController;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
-    }
-
-    private String login() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "a");
-        loginRequest.put("password", "test1");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
-    }
-
-    private String loginManager() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "d");
-        loginRequest.put("password", "test4");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
+        userThemeController = new UserThemeController(themeService);
+        managerThemeController = new ManagerThemeController(themeService);
     }
 
     @Test
-    void 각_날짜에_존재하는_모든_테마_조회_API_테스트() {
-        String accessToken = login();
+    void 날짜별_테마_목록_조회_응답_테스트() {
+        LocalDate date = LocalDate.of(2026, 5, 5);
+        List<ThemeFindResponse> serviceResponse = List.of(themeFindResponse());
+        when(themeService.findThemesBySlotDate(date)).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .queryParam("date", "2026-05-05")
-                .when().get("/api/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4))
-                .body("data[0].id", is(1))
-                .body("data[1].id", is(2))
-                .body("data[2].id", is(3))
-                .body("data[3].id", is(4));
+        ResponseEntity<ApiResponse<List<ThemeFindResponse>>> response =
+                userThemeController.findThemesBySlotDate(date);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 최근_7일_예약_개수에_따른_인기_테마_조회_API_테스트() {
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 7)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
+    void 테마_생성_응답_테스트() {
+        ThemeSaveRequest request = new ThemeSaveRequest("theme", "description", "thumbnail");
+        ThemeSaveResponse serviceResponse = new ThemeSaveResponse(1L, "theme", "description", "thumbnail");
+        when(themeService.save(request)).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .when().get("/api/themes/popular")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(3))
-                .body("data[0].id", is(2))
-                .body("data[1].id", is(1))
-                .body("data[2].id", is(3));
+        ResponseEntity<ApiResponse<ThemeSaveResponse>> response = managerThemeController.save(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 매니저_테마_저장_API_테스트() {
-        String accessToken = loginManager();
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "무서운게 딱 좋아");
-        params.put("description", "무서운 분위기의 방탈출");
-        params.put("thumbnailUrl", "https://example.com/theme.jpg");
+    void 테마_삭제_응답_테스트() {
+        ResponseEntity<ApiResponse<Void>> response = managerThemeController.delete(1L);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(themeService).delete(1L);
     }
 
-    @Test
-    void 매니저_테마_전체_조회_API_테스트() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4))
-                .body("data[0].id", is(1))
-                .body("data[1].id", is(2))
-                .body("data[2].id", is(3))
-                .body("data[3].id", is(4));
-    }
-
-    @Test
-    void 매니저_테마_추가_및_삭제_API_테스트() {
-        String accessToken = loginManager();
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "무서운게 딱 좋아");
-        params.put("description", "무서운 분위기의 방탈출");
-        params.put("thumbnailUrl", "https://example.com/theme.jpg");
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", is(5));
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/themes/5")
-                .then().log().all()
-                .statusCode(204);
+    private ThemeFindResponse themeFindResponse() {
+        return new ThemeFindResponse(1L, "theme", "description", "thumbnail");
     }
 }

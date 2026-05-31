@@ -1,159 +1,94 @@
 package roomescape.reservationtime;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.config.TestTimeConfig;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import roomescape.common.api.ApiResponse;
+import roomescape.reservationtime.application.ReservationTimeService;
+import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
+import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
+import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
+import roomescape.reservationtime.dto.response.TimeInformation;
+import roomescape.reservationtime.dto.response.TimeSlotStatus;
+import roomescape.reservationtime.presentation.ManagerReservationTimeController;
+import roomescape.reservationtime.presentation.UserReservationTimeController;
 
-import java.util.HashMap;
-import java.util.Map;
+@ExtendWith(MockitoExtension.class)
+class ReservationTimeControllerTest {
 
-import static org.hamcrest.Matchers.is;
+    @Mock
+    private ReservationTimeService reservationTimeService;
 
-@Import(TestTimeConfig.class)
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class ReservationTimeControllerTest {
+    private UserReservationTimeController userReservationTimeController;
+    private ManagerReservationTimeController managerReservationTimeController;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = 8080;
-    }
-
-    private String loginUser() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "a");
-        loginRequest.put("password", "test1");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
-    }
-
-    private String loginManager() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "d");
-        loginRequest.put("password", "test4");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
+        userReservationTimeController = new UserReservationTimeController(reservationTimeService);
+        managerReservationTimeController = new ManagerReservationTimeController(reservationTimeService);
     }
 
     @Test
-    void 특정날짜와_테마에_예약_가능_시간들_조회_API() {
-        String accessToken = loginUser();
+    void 예약_가능_시간_조회_응답_테스트() {
+        LocalDate date = LocalDate.of(2026, 5, 5);
+        List<AvailableTimeFindResponse> serviceResponse = List.of(
+                new AvailableTimeFindResponse(new TimeInformation(1L, LocalTime.of(10, 0)), TimeSlotStatus.RESERVABLE)
+        );
+        when(reservationTimeService.findTimesByDateAndThemeId(date, 1L)).thenReturn(serviceResponse);
 
-        Map<String, Object> options = new HashMap<>();
-        options.put("date", "2026-05-05");
-        options.put("themeId", 1);
+        ResponseEntity<ApiResponse<List<AvailableTimeFindResponse>>> response =
+                userReservationTimeController.findTimesByDateAndThemeId(date, 1L);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .params(options)
-                .when().get("/api/user/times/availability")
-                .then().log().all()
-                .body("success", is(true))
-                .body("data.size()", is(1))
-                .body("data[0].status", is("WAITABLE"))
-                .statusCode(200);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    @DisplayName("예약 가능 시간 조회 및 예약 생성 이후 예약 가능 시간을 재조회를 할 수 있다.")
-    void 정상_흐름_테스트() {
-        String userToken = loginUser();
+    void 시간_생성_응답_테스트() {
+        ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(10, 0));
+        ReservationTimeSaveResponse serviceResponse = new ReservationTimeSaveResponse(1L, LocalTime.of(10, 0));
+        when(reservationTimeService.save(request)).thenReturn(serviceResponse);
 
-        Map<String, Object> options = new HashMap<>();
-        options.put("date", "2026-05-05");
-        options.put("themeId", 4);
+        ResponseEntity<ApiResponse<ReservationTimeSaveResponse>> response = managerReservationTimeController.save(request);
 
-        // 2026-05-05 4번 테마 조회
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + userToken)
-                .params(options)
-                .when().get("/api/user/times/availability")
-                .then().log().all()
-                .body("success", is(true))
-                .body("data.size()", is(1))
-                .body("data[0].status", is("RESERVABLE"))
-                .statusCode(200);
-
-        // 예약 생성
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-05-05");
-        reservation.put("timeId", 4);
-        reservation.put("themeId", 4);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + userToken)
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/user/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        // 특정날짜와_테마에_예약_가능_시간을_조회
-        Map<String, Object> options1 = new HashMap<>();
-        options1.put("date", "2026-05-05");
-        options1.put("themeId", 4);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + userToken)
-                .params(options1)
-                .when().get("/api/user/times/availability")
-                .then().log().all()
-                .body("success", is(true))
-                .body("data.size()", is(1))
-                .body("data[0].status", is("WAITABLE"))
-                .statusCode(200);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 매니저_시간_관리_API() {
-        String accessToken = loginManager();
+    void 시간_삭제_응답_테스트() {
+        ResponseEntity<ApiResponse<Void>> response = managerReservationTimeController.delete(1L);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", "14:00");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(reservationTimeService).delete(1L);
+    }
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/times")
-                .then().log().all()
-                .statusCode(201);
+    @Test
+    void 시간_목록_조회_응답_테스트() {
+        List<ReservationTimeFindResponse> serviceResponse = List.of(
+                new ReservationTimeFindResponse(1L, LocalTime.of(10, 0))
+        );
+        when(reservationTimeService.findAll()).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(5));
+        ResponseEntity<ApiResponse<List<ReservationTimeFindResponse>>> response = managerReservationTimeController.findAll();
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/times/5")
-                .then().log().all()
-                .statusCode(204);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 }

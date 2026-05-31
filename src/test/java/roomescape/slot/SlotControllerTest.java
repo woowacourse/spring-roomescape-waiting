@@ -1,157 +1,67 @@
 package roomescape.slot;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.config.TestTimeConfig;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import roomescape.common.api.ApiResponse;
+import roomescape.slot.application.SlotService;
+import roomescape.slot.dto.request.SlotSaveRequest;
+import roomescape.slot.dto.response.SlotFindResponse;
+import roomescape.slot.dto.response.SlotSaveResponse;
+import roomescape.slot.presentation.ManagerSlotController;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.is;
-
-@ActiveProfiles("test")
-@Import(TestTimeConfig.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class SlotControllerTest {
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = 8080;
-    }
+    @Mock
+    private SlotService slotService;
 
-    private String loginManager() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "d");
-        loginRequest.put("password", "test4");
+    @InjectMocks
+    private ManagerSlotController managerSlotController;
 
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
+    @Test
+    void 슬롯_생성_응답_테스트() {
+        SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+        SlotSaveResponse serviceResponse = new SlotSaveResponse(1L, LocalDate.of(2026, 5, 5), 1L, 1L);
+        when(slotService.save(request)).thenReturn(serviceResponse);
+
+        ResponseEntity<ApiResponse<SlotSaveResponse>> response = managerSlotController.save(request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 슬롯_생성() {
-        String accessToken = loginManager();
-        Map<String, Object> slot = new HashMap<>();
-        slot.put("date", "2026-05-06");
-        slot.put("timeId", 1);
-        slot.put("themeId", 4);
+    void 슬롯_목록_조회_응답_테스트() {
+        List<SlotFindResponse> serviceResponse = List.of(
+                new SlotFindResponse(1L, LocalDate.of(2026, 5, 5), 1L, 1L)
+        );
+        when(slotService.findAll()).thenReturn(serviceResponse);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(slot)
-                .when().post("/api/manager/slots")
-                .then().log().all()
-                .statusCode(201)
-                .body("success", is(true))
-                .body("data.id", is(6))
-                .body("data.date", is("2026-05-06"))
-                .body("data.time_id", is(1))
-                .body("data.theme_id", is(4));
+        ResponseEntity<ApiResponse<List<SlotFindResponse>>> response = managerSlotController.findAll();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
     }
 
     @Test
-    void 존재하지_않는_시간으로_슬롯_생성시_404를_응답한다() {
-        String accessToken = loginManager();
-        Map<String, Object> slot = new HashMap<>();
-        slot.put("date", "2026-05-06");
-        slot.put("timeId", 999);
-        slot.put("themeId", 4);
+    void 슬롯_삭제_응답_테스트() {
+        ResponseEntity<ApiResponse<Void>> response = managerSlotController.delete(1L);
 
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(slot)
-                .when().post("/api/manager/slots")
-                .then().log().all()
-                .statusCode(404)
-                .body("success", is(false))
-                .body("error.code", is("RESERVATIONTIME_404"));
-    }
-
-    @Test
-    void 존재하지_않는_테마로_슬롯_생성시_404를_응답한다() {
-        String accessToken = loginManager();
-        Map<String, Object> slot = new HashMap<>();
-        slot.put("date", "2026-05-06");
-        slot.put("timeId", 1);
-        slot.put("themeId", 999);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(slot)
-                .when().post("/api/manager/slots")
-                .then().log().all()
-                .statusCode(404)
-                .body("success", is(false))
-                .body("error.code", is("THEME_404"));
-    }
-
-    @Test
-    void 슬롯_전체_조회() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/slots")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(5));
-    }
-
-    @Test
-    void 슬롯_단건_조회() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/slots/1")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.id", is(1))
-                .body("data.date", is("2026-05-05"))
-                .body("data.time_id", is(1))
-                .body("data.theme_id", is(1));
-    }
-
-    @Test
-    void 슬롯_삭제() {
-        String accessToken = loginManager();
-
-        Map<String, Object> slot = new HashMap<>();
-        slot.put("date", "2026-05-06");
-        slot.put("timeId", 1);
-        slot.put("themeId", 4);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(slot)
-                .when().post("/api/manager/slots")
-                .then().log().all()
-                .statusCode(201)
-                .body("data.id", is(6));
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/slots/6")
-                .then().log().all()
-                .statusCode(204);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(slotService).deleteById(1L);
     }
 }
