@@ -48,10 +48,34 @@ class ReservationLookupServiceTest {
         assertAll(
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).extracting(ReservationStatus::id)
-                        .containsExactly(1L, 2L),
+                        .containsExactly(2L, 1L),
                 () -> assertThat(result).extracting(ReservationStatus::status)
-                        .containsExactly(Status.RESERVED, Status.WAITING),
+                        .containsExactly(Status.WAITING, Status.RESERVED),
                 () -> assertThat(result).extracting(ReservationStatus::turn)
-                        .containsExactly(null, 1L));
+                        .containsExactly(1L, null));
+    }
+
+    @Test
+    void 예약과_예약_대기를_날짜와_시간_내림차순으로_조회한다() {
+        // given
+        String name = "브라운";
+        ReservationTime earlyTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        ReservationTime lateTime = new ReservationTime(2L, LocalTime.parse("12:00"));
+
+        Reservation earlyReservation = new Reservation(1L, name, date, earlyTime, theme);
+        Reservation lateReservation = new Reservation(2L, name, date, lateTime, theme);
+        WaitingResult futureWaiting = new WaitingResult(3L, name, date.plusDays(1), earlyTime, theme, 1L);
+
+        when(reservationService.findByName(name))
+                .thenReturn(List.of(earlyReservation, lateReservation));
+        when(reservationWaitingService.findByName(name))
+                .thenReturn(List.of(futureWaiting));
+
+        // when
+        List<ReservationStatus> result = service.findByName(name);
+
+        // then
+        assertThat(result).extracting(ReservationStatus::id)
+                .containsExactly(3L, 2L, 1L);
     }
 }

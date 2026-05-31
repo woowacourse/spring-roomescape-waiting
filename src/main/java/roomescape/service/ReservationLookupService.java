@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.service.dto.ReservationStatus;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -21,10 +22,13 @@ public class ReservationLookupService {
 
     public List<ReservationStatus> findByName(String name) {
         return Stream.concat(
-                reservationService.findByName(name).stream()
-                        .map(ReservationStatus::reserved),
-                reservationWaitingService.findByName(name).stream()
-                        .map(ReservationStatus::waiting)
-        ).toList();
+                        reservationService.findByName(name).stream()
+                                .map(ReservationStatus::reserved),
+                        reservationWaitingService.findByName(name).stream()
+                                .map(ReservationStatus::waiting))
+                .sorted(Comparator
+                        .comparing(ReservationStatus::date, Comparator.reverseOrder())
+                        .thenComparing(status -> status.time().getStartAt(), Comparator.reverseOrder()))
+                .toList();
     }
 }

@@ -311,12 +311,10 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("[0].name", is("브라운"))
-                .body("[0].status", is("RESERVED"))
-                .body("[0].turn", nullValue())
-                .body("[1].name", is("브라운"))
-                .body("[1].status", is("WAITING"))
-                .body("[1].turn", is(1));
+                .body("name", everyItem(is("브라운")))
+                .body("status", containsInAnyOrder("RESERVED", "WAITING"))
+                .body("find { it.status == 'RESERVED' }.turn", nullValue())
+                .body("find { it.status == 'WAITING' }.turn", is(1));
     }
 
     @Test

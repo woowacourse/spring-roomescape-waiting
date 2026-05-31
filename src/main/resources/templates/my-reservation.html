@@ -321,15 +321,15 @@
     }
 
     function compareDefaultReservation(a, b) {
-        const dateResult = String(a.date).localeCompare(String(b.date), 'ko', { numeric: true });
+        const dateResult = String(b.date).localeCompare(String(a.date), 'ko', { numeric: true });
         if (dateResult !== 0) {
             return dateResult;
         }
-        const timeResult = String(a.time?.startAt || '').localeCompare(String(b.time?.startAt || ''), 'ko', { numeric: true });
+        const timeResult = String(b.time?.startAt || '').localeCompare(String(a.time?.startAt || ''), 'ko', { numeric: true });
         if (timeResult !== 0) {
             return timeResult;
         }
-        return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
+        return String(b.id).localeCompare(String(a.id), 'ko', { numeric: true });
     }
 
     function getSortValue(reservation, key) {
