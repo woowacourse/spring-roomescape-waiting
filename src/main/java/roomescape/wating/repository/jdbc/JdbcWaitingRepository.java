@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -93,14 +94,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return key.longValue();
     }
 
-    private WaitingEntity toEntity(final Waiting waiting) {
-        return new WaitingEntity(
-                waiting.getId(),
-                waiting.getCustomerName().name(),
-                waiting.getSlotId()
-        );
-    }
-
     @Override
     public boolean deleteById(final long id) {
         final String sql = """
@@ -125,8 +118,16 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 JOIN theme th ON s.theme_id = th.id
                 WHERE w.id = ?
                 """;
-        return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, id).stream()
-                .findFirst();
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(
+                    sql,
+                    WAITING_ROW_MAPPER,
+                    id
+            ));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -144,9 +145,16 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 ORDER BY w.created_at ASC, w.id ASC
                 LIMIT 1
                 """;
-        return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, slotId)
-                .stream()
-                .findFirst();
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(
+                    sql,
+                    WAITING_ROW_MAPPER,
+                    slotId
+            ));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -195,6 +203,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 Date.valueOf(now.toLocalDate()),
                 Date.valueOf(now.toLocalDate()),
                 Time.valueOf(now.toLocalTime())
+        );
+    }
+
+    private WaitingEntity toEntity(final Waiting waiting) {
+        return new WaitingEntity(
+                waiting.getId(),
+                waiting.getCustomerName().name(),
+                waiting.getSlotId()
         );
     }
 }
