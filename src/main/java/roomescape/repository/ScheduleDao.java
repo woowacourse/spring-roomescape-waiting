@@ -17,15 +17,20 @@ import roomescape.domain.Theme;
 @Repository
 public class ScheduleDao {
 
+    private static final RowMapper<Schedule> scheduleRowMapper = (rs, rowNum) -> new Schedule(
+            rs.getLong("id"),
+            new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail")
+            ),
+            rs.getDate("date").toLocalDate(),
+            new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime())
+    );
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
-
-    private final RowMapper<Schedule> scheduleRowMapper = (rs, rowNum) -> new Schedule(
-            rs.getLong("id"),
-            rs.getDate("date").toLocalDate(),
-            new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
-            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
-    );
 
     public ScheduleDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -42,54 +47,67 @@ public class ScheduleDao {
         )).longValue();
     }
 
-    public Schedule findById(Long id) {
+    public Optional<Schedule> findById(Long id) {
         String sql = """
-                SELECT s.id,
-                       s.date,
-                       t.id   AS time_id,
-                       t.start_at AS time_value,
-                       th.id  AS theme_id,
-                       th.name AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail_url AS theme_thumbnail
-                FROM schedule AS s
-                INNER JOIN reservation_time AS t  ON s.time_id  = t.id
-                INNER JOIN theme            AS th ON s.theme_id = th.id
-                WHERE s.id = ?
-                """;
-        return jdbcTemplate.queryForObject(sql, scheduleRowMapper, id);
+            SELECT s.id,
+                   s.date,
+                   t.id   AS time_id,
+                   t.start_at AS time_value,
+                   th.id  AS theme_id,
+                   th.name AS theme_name,
+                   th.description AS theme_description,
+                   th.thumbnail_url AS theme_thumbnail
+            FROM schedule AS s
+            INNER JOIN reservation_time AS t  ON s.time_id  = t.id
+            INNER JOIN theme            AS th ON s.theme_id = th.id
+            WHERE s.id = ?
+            """;
+        List<Schedule> results = jdbcTemplate.query(sql, scheduleRowMapper, id);
+        return results.stream().findFirst();
     }
 
-    public Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Schedule> findByDateAndTimeIdAndThemeId(
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    ) {
         String sql = """
-                SELECT s.id
-                FROM schedule s
-                WHERE s.date     = ?
-                  AND s.time_id  = ?
-                  AND s.theme_id = ?
-                """;
-        List<Long> result = jdbcTemplate.query(
+            SELECT s.id,
+                   s.date,
+                   t.id AS time_id,
+                   t.start_at AS time_value,
+                   th.id AS theme_id,
+                   th.name AS theme_name,
+                   th.description AS theme_description,
+                   th.thumbnail_url AS theme_thumbnail
+            FROM schedule AS s
+            INNER JOIN reservation_time AS t
+                    ON s.time_id = t.id
+            INNER JOIN theme AS th
+                    ON s.theme_id = th.id
+            WHERE s.date = ?
+              AND s.time_id = ?
+              AND s.theme_id = ?
+            """;
+
+        List<Schedule> result = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> rs.getLong("id"),
-                date, timeId, themeId
+                scheduleRowMapper,
+                date,
+                timeId,
+                themeId
         );
+
         return result.stream().findFirst();
     }
 
-    public List<Schedule> findAll() {
-        String sql = """
-                SELECT s.id,
-                       s.date,
-                       t.id   AS time_id,
-                       t.start_at AS time_value,
-                       th.id  AS theme_id,
-                       th.name AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail_url AS theme_thumbnail
-                FROM schedule AS s
-                INNER JOIN reservation_time AS t  ON s.time_id  = t.id
-                INNER JOIN theme            AS th ON s.theme_id = th.id
-                """;
-        return jdbcTemplate.query(sql, scheduleRowMapper);
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "select exists (select 1 from schedule where time_id = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class, timeId);
+    }
+
+    public boolean existsByThemeId(Long themeId) {
+        String sql = "select exists (select 1 from schedule where theme_id = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 }

@@ -1,7 +1,7 @@
 package roomescape.repository;
 
+import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -10,29 +10,21 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
-import roomescape.dto.AvailableTimeResponse;
 
 @Repository
 public class ThemeDao {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcInsert jdbcInsert;
-
-    private final RowMapper<Theme> themeRowMapper = (rs, rowNum) -> new Theme(
+    private static final RowMapper<Theme> themeRowMapper = (rs, rowNum) -> new Theme(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),
             rs.getString("thumbnail_url")
     );
 
-    private final RowMapper<AvailableTimeResponse> availableReservationTimeRowMapper =
-            (rs, rowNum) -> new AvailableTimeResponse(
-                    rs.getLong("id"),
-                    rs.getObject("start_at", LocalTime.class),
-                    rs.getBoolean("available"),
-                    rs.getInt("waiting_count")
-            );
+    private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert jdbcInsert;
 
     public ThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -49,58 +41,57 @@ public class ThemeDao {
         )).longValue();
     }
 
-    public List<Theme> findPopularThemes(int size, LocalDate from, LocalDate to) {
-        final String sql = """
-                SELECT
-                    th.id,
-                    th.name,
-                    th.description,
-                    th.thumbnail_url
-                FROM schedule AS s
-                INNER JOIN theme AS th ON s.theme_id = th.id
-                WHERE s.date BETWEEN ? AND ?
-                GROUP BY
-                    th.id,
-                    th.name,
-                    th.description,
-                    th.thumbnail_url
-                ORDER BY COUNT(s.id) DESC
-                LIMIT ?
-                """;
-        return jdbcTemplate.query(sql, themeRowMapper, from, to, size);
-    }
-
-    public List<AvailableTimeResponse> findAvailableTimeById(long themeId, String date) {
-        final String sql = """
-                SELECT
-                    rt.id,
-                    rt.start_at,
-                    CASE WHEN COUNT(CASE WHEN r.status = 'RESERVED' THEN 1 END) = 0
-                         THEN TRUE
-                         ELSE FALSE
-                    END AS available,
-                    CASE WHEN COUNT(CASE WHEN r.status = 'RESERVED' THEN 1 END) > 1
-                         THEN COUNT(CASE WHEN r.status = 'RESERVED' THEN 1 END) - 1
-                         ELSE 0
-                    END AS waiting_count
-                FROM reservation_time rt
-                LEFT JOIN schedule s
-                    ON rt.id       = s.time_id
-                    AND s.theme_id = ?
-                    AND s.date     = ?
-                LEFT JOIN reservation r
-                    ON r.schedule_id = s.id
-                GROUP BY rt.id, rt.start_at
-                ORDER BY rt.start_at
-                """;
-        return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
+    public void delete(long id) {
+        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }
 
     public List<Theme> findAll() {
         return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
     }
 
-    public void delete(long id) {
-        jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+    public List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, ReservationStatus status, int limit) {
+        String sql = """
+            SELECT
+                th.id,
+                th.name,
+                th.description,
+                th.thumbnail_url
+            FROM reservation r
+            INNER JOIN schedule s ON r.schedule_id = s.id
+            INNER JOIN theme th ON s.theme_id = th.id
+            WHERE s.date >= ?
+                 AND s.date < ?
+                 AND r.status = ?
+             GROUP BY
+                th.id,
+                th.name,
+                th.description,
+                th.thumbnail_url
+            ORDER BY COUNT(r.id) DESC, th.id ASC
+            LIMIT ?
+            """;
+
+        return jdbcTemplate.query(
+                sql,
+                themeRowMapper,
+                Date.valueOf(startDate),
+                Date.valueOf(endDate),
+                status.name(),
+                limit
+        );
+    }
+
+    public boolean existsByName(String name) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM theme
+                WHERE name = ?
+            )
+            """;
+
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, name)
+        );
     }
 }
