@@ -84,11 +84,11 @@ public class WaitingDao {
                 .addValue("date", slot.date())
                 .addValue("time_id", slot.time().id())
                 .addValue("theme_id", slot.theme().id())
-                .addValue("created_at", waiting.createAt());
+                .addValue("created_at", waiting.createdAt());
 
         long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return Waiting.create(id, waiting.owner(), slot, waiting.createAt());
+        return Waiting.create(id, waiting.owner(), slot, waiting.createdAt());
     }
 
     public void deleteById(long id) {
@@ -124,7 +124,7 @@ public class WaitingDao {
         return jdbcTemplate.query(sql, Map.of("name", member.name()), rowMapper);
     }
 
-    public boolean existsBySlotAndName(Slot slot, Member member) {
+    public boolean existsBySlotAndOwner(Slot slot, Member member) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1 FROM waiting

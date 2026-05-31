@@ -1,17 +1,15 @@
 package roomescape.domain;
 
-import lombok.RequiredArgsConstructor;
 import roomescape.exception.ForbiddenException;
 import roomescape.exception.PastReservationException;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
-public class Reservation {
+public record Reservation(Long id, Member owner, Slot slot) {
 
-    private final Long id;
-    private final Member owner;
-    private final Slot slot;
+    public static Reservation forNew(Member owner, Slot slot) {
+        return new Reservation(null, owner, slot);
+    }
 
     public static Reservation create(long id, Member owner, Slot slot) {
         return new Reservation(id, owner, slot);
@@ -33,23 +31,11 @@ public class Reservation {
         return new Reservation(id, owner, newSlot);
     }
 
-    public Member owner() {
-        return owner;
-    }
-
-    public Slot slot() {
-        return slot;
-    }
-
-    public Long id() {
-        return id;
+    public boolean isOwnedBy(Member member) {
+        return owner.equals(member);
     }
 
     private boolean isPast(LocalDateTime now) {
         return slot.isPast(now);
-    }
-
-    public boolean isOwnedBy(Member member) {
-        return this.owner.equals(member);
     }
 }

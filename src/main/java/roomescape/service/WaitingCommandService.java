@@ -43,16 +43,17 @@ public class WaitingCommandService {
         validateNoDuplicateWaiting(slot, member);
 
         try {
-            return waitingDao.save(new Waiting(null, member, slot, now));
+            return waitingDao.save(Waiting.forNew(member, slot, now));
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
     }
 
     public void cancel(long waitingId, String name) {
+        Member member = new Member(name);
         Waiting waiting = findWaitingReference(waitingId);
 
-        waiting.validateOwnedBy(new Member(name));
+        waiting.validateOwnedBy(member);
         waiting.validateNotStarted(LocalDateTime.now(clock));
 
         waitingDao.deleteById(waitingId);
@@ -70,7 +71,7 @@ public class WaitingCommandService {
     }
 
     private void validateNoDuplicateWaiting(Slot slot, Member member) {
-        if (waitingDao.existsBySlotAndName(slot, member)) {
+        if (waitingDao.existsBySlotAndOwner(slot, member)) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
     }

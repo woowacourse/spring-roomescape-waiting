@@ -1,17 +1,15 @@
 package roomescape.domain;
 
-import lombok.RequiredArgsConstructor;
 import roomescape.exception.ForbiddenException;
 import roomescape.exception.PastReservationException;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
-public class Waiting {
-    private final Long id;
-    private final Member owner;
-    private final Slot slot;
-    private final LocalDateTime createdAt;
+public record Waiting(Long id, Member owner, Slot slot, LocalDateTime createdAt) {
+
+    public static Waiting forNew(Member owner, Slot slot, LocalDateTime createdAt) {
+        return new Waiting(null, owner, slot, createdAt);
+    }
 
     public static Waiting create(long id, Member owner, Slot slot, LocalDateTime createdAt) {
         return new Waiting(id, owner, slot, createdAt);
@@ -29,22 +27,6 @@ public class Waiting {
         }
     }
 
-    public Long id() {
-        return id;
-    }
-
-    public Member owner() {
-        return owner;
-    }
-
-    public Slot slot() {
-        return slot;
-    }
-
-    public LocalDateTime createAt() {
-        return createdAt;
-    }
-
     public boolean isSameSlot(Waiting other) {
         return slot.isSameSlot(other.slot);
     }
@@ -58,7 +40,7 @@ public class Waiting {
     }
 
     public boolean isOwnedBy(Member member) {
-        return this.owner.equals(member);
+        return owner.equals(member);
     }
 
     private boolean isPast(LocalDateTime now) {

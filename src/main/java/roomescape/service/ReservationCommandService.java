@@ -32,8 +32,9 @@ public class ReservationCommandService {
 
     public Reservation create(String name, LocalDate date, long timeId, long themeId) {
         LocalDateTime now = LocalDateTime.now(clock);
+        Member member = new Member(name);
         Slot slot = new Slot(date, findTimeReference(timeId), findThemeReference(themeId));
-        Reservation reservation = new Reservation(null, new Member(name), slot);
+        Reservation reservation = Reservation.forNew(member, slot);
 
         slot.validateNotPast(now);
         validateNoDuplicate(slot);
@@ -50,9 +51,10 @@ public class ReservationCommandService {
     }
 
     public void cancel(long reservationId, String name) {
+        Member member = new Member(name);
         Reservation reservation = findReservation(reservationId);
 
-        reservation.validateOwnedBy(new Member(name));
+        reservation.validateOwnedBy(member);
         reservation.validateNotStarted(LocalDateTime.now(clock));
 
         reservationDao.deleteById(reservationId);
@@ -60,10 +62,11 @@ public class ReservationCommandService {
 
     public Reservation update(long reservationId, String name, LocalDate newDate, long newTimeId) {
         LocalDateTime now = LocalDateTime.now(clock);
+        Member member = new Member(name);
         Reservation oldReservation = findReservation(reservationId);
         Slot newSlot = new Slot(newDate, findTimeReference(newTimeId), oldReservation.slot().theme());
 
-        oldReservation.validateOwnedBy(new Member(name));
+        oldReservation.validateOwnedBy(member);
         oldReservation.validateNotStarted(now);
         newSlot.validateNotPast(now);
         validateNoDuplicateExcluding(newSlot, reservationId);
