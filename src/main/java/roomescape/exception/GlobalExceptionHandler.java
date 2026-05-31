@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -15,13 +16,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import roomescape.controller.dto.ErrorResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    public ResponseEntity<ProblemDetail> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         String detail = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException e) {
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(ConstraintViolationException e) {
         String detail = e.getConstraintViolations()
                 .stream()
                 .findFirst()
@@ -42,17 +42,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable() {
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable() {
         return invalidInput("요청 본문 형식이 올바르지 않습니다.");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
         return invalidInput(e.getName() + " 형식이 올바르지 않습니다.");
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
+    public ResponseEntity<ProblemDetail> handleMissingServletRequestParameter(
             MissingServletRequestParameterException e) {
         return invalidInput(e.getParameterName() + "는 필수입니다.");
     }
@@ -70,26 +70,29 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+    public ResponseEntity<ProblemDetail> handleBusinessException(BusinessException e) {
         return error(e.getErrorCode(), e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException() {
+    public ResponseEntity<ProblemDetail> handleException() {
         return error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<ErrorResponse> invalidInput(String detail) {
+    private ResponseEntity<ProblemDetail> invalidInput(String detail) {
         return error(ErrorCode.INVALID_INPUT, detail);
     }
 
-    private ResponseEntity<ErrorResponse> error(ErrorCode errorCode) {
+    private ResponseEntity<ProblemDetail> error(ErrorCode errorCode) {
         return error(errorCode, errorCode.getMessage());
     }
 
-    private ResponseEntity<ErrorResponse> error(ErrorCode errorCode, String detail) {
+    private ResponseEntity<ProblemDetail> error(ErrorCode errorCode, String detail) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(errorCode.getStatus(), detail);
+        problemDetail.setTitle(errorCode.getMessage());
+        problemDetail.setProperty("code", errorCode.name());
         return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode, detail));
+                .body(problemDetail);
     }
 
     private boolean isHtmlRequest(HttpServletRequest request) {
