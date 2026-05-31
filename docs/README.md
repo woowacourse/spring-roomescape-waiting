@@ -99,3 +99,38 @@ theme + date + time 조합을 ReservationSlot으로 관리하고 있습니다.
 2) 현재처럼 조회 시 계산하는 방식
 ```
   중 어떤 설계를 더 선호하시는지 궁금합니다.
+  
+-----
+
+안녕하세요 매트 🙂
+정성스러운 리뷰 너무 감사합니다.
+달아주신 리뷰에 대해 저의 생각을 커멘트로 달아두었습니다!
+잘 부탁드립니다:)
+
+### 변경사항 (260531)
+- [x] test: 컨트롤러 테스트의 Context 초기화 범위를 메서드 단위로 변경
+- @DirtiesContext를 클래스 레벨에서 메서드 레벨로 변경
+- [x] 서비스 테스트에 @Transactional 적용
+- 테스트 종료 후 자동 롤백되도록 수정
+- @DirtiesContext 제거
+- [x] Validation 별로 에러 메세지 띄우도록 수정
+- [x] 자바 컨벤션에 따른 수정
+- 불필요한 공백 제거
+- 코드 포맷팅 적용
+- [x] Reservation에 대한 단위 테스트
+- [x] Optional.get() 제거 및 orElseGet 적용
+
+### 질문     
+추가 질문은 커멘트에 작성해두었습니다!     
+
+1. 도메인 객체의 equals()와 hashCode() 기준     
+https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r3329806804
+
+2. Reservation 단위 테스트     
+   https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r3329860389
+
+3. DAO에서 Optional 처리     
+https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r3329888651
+
+4. Repository와 DAO, Entity와 Domain     
+https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r3329982595
