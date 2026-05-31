@@ -35,9 +35,9 @@ public class UserReservationController {
 
     @GetMapping
     public List<ReservationResponse> list(
-            @RequestParam @NotBlank(message = "name은 필수입니다.") String name
+            @RequestParam @NotBlank(message = "reserverName은 필수입니다.") String reserverName
     ) {
-        return userReservationService.findByName(name).stream()
+        return userReservationService.findByReserverName(reserverName).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -61,8 +61,8 @@ public class UserReservationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancel(
             @PathVariable @Positive(message = "id는 0보다 커야합니다.") Long id,
-            @RequestParam @NotBlank(message = "name은 필수입니다.") String name
+            @RequestParam @NotBlank(message = "reserverName은 필수입니다.") String reserverName
     ) {
-        userReservationService.cancel(id, name);
+        userReservationService.cancel(id, reserverName);
     }
 }

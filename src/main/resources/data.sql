@@ -47,66 +47,66 @@ VALUES (' 이름 8', '설명8', 'https://picsum.photos/seed/roomescape14/800/600
 -- 기대 결과: 무인도(theme_id=1) 5건, 도시(theme_id=2) 4건, 열기구(theme_id=3) 1건
 
 -- 무인도(theme_id=1): 어제 3건 + 5일 전 2건 = 5건
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user2', DATEADD('DAY', -1, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user2', DATEADD('DAY', -1, CURRENT_DATE), 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user3', DATEADD('DAY', -1, CURRENT_DATE), 3, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user4', DATEADD('DAY', -5, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user5', DATEADD('DAY', -5, CURRENT_DATE), 2, 1);
 
 -- 도시(theme_id=2): 5일 전 4건 = 4건  + 8일 전 2건
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user6', DATEADD('DAY', -5, CURRENT_DATE), 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user7', DATEADD('DAY', -5, CURRENT_DATE), 2, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user8', DATEADD('DAY', -5, CURRENT_DATE), 3, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user9', DATEADD('DAY', -5, CURRENT_DATE), 4, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user10', DATEADD('DAY', -8, CURRENT_DATE), 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user11', DATEADD('DAY', -8, CURRENT_DATE), 2, 2);
 
 -- 열기구(theme_id=3): 어제 1건 = 1건
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user12', DATEADD('DAY', -1, CURRENT_DATE), 1, 3);
 
 -- 추가: 무인도(theme_id=1) 오늘 5건
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user13', CURRENT_DATE, 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user14', CURRENT_DATE, 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user15', CURRENT_DATE, 3, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user16', CURRENT_DATE, 4, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user17', CURRENT_DATE, 5, 1);
 
 
 -- 총 11개의 테마가 예약됨. 하지만 10개만 인기 테마로 나와야함.
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user18', DATEADD('DAY', -1, CURRENT_DATE), 6, 9);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user19', DATEADD('DAY', -1, CURRENT_DATE), 6, 10);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user20', DATEADD('DAY', -1, CURRENT_DATE), 6, 11);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user21', DATEADD('DAY', -1, CURRENT_DATE), 6, 12);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user22', DATEADD('DAY', -1, CURRENT_DATE), 6, 5);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user23', DATEADD('DAY', -1, CURRENT_DATE), 6, 6);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user24', DATEADD('DAY', -1, CURRENT_DATE), 6, 7);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user25', DATEADD('DAY', -1, CURRENT_DATE), 6, 8);
 
 
@@ -115,63 +115,63 @@ VALUES ('user25', DATEADD('DAY', -1, CURRENT_DATE), 6, 8);
 -- ============================================
 
 -- 내일: 인기 시간대(저녁) + 인기 테마
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', 1, CURRENT_DATE), 5, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user3', DATEADD('DAY', 1, CURRENT_DATE), 6, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user5', DATEADD('DAY', 1, CURRENT_DATE), 4, 3);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user7', DATEADD('DAY', 1, CURRENT_DATE), 3, 4);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user10', DATEADD('DAY', 1, CURRENT_DATE), 2, 5);
 
 -- 3일 후: 골고루 분포
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user2', DATEADD('DAY', 3, CURRENT_DATE), 1, 6);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user4', DATEADD('DAY', 3, CURRENT_DATE), 2, 7);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user6', DATEADD('DAY', 3, CURRENT_DATE), 3, 8);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user8', DATEADD('DAY', 3, CURRENT_DATE), 4, 9);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user9', DATEADD('DAY', 3, CURRENT_DATE), 5, 10);
 
 -- 일주일 후
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user11', DATEADD('DAY', 7, CURRENT_DATE), 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user12', DATEADD('DAY', 7, CURRENT_DATE), 2, 12);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user13', DATEADD('DAY', 7, CURRENT_DATE), 3, 13);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user14', DATEADD('DAY', 7, CURRENT_DATE), 4, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user15', DATEADD('DAY', 7, CURRENT_DATE), 5, 2);
 
 -- 2주 후
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user16', DATEADD('DAY', 14, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user17', DATEADD('DAY', 14, CURRENT_DATE), 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user18', DATEADD('DAY', 14, CURRENT_DATE), 2, 5);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user19', DATEADD('DAY', 14, CURRENT_DATE), 3, 6);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user20', DATEADD('DAY', 14, CURRENT_DATE), 4, 7);
 
 -- 한 달 후
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user21', DATEADD('DAY', 30, CURRENT_DATE), 5, 8);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user22', DATEADD('DAY', 30, CURRENT_DATE), 6, 9);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user23', DATEADD('DAY', 30, CURRENT_DATE), 1, 10);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user24', DATEADD('DAY', 30, CURRENT_DATE), 2, 11);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user25', DATEADD('DAY', 30, CURRENT_DATE), 3, 12);
 
 
@@ -180,27 +180,27 @@ VALUES ('user25', DATEADD('DAY', 30, CURRENT_DATE), 3, 12);
 -- ============================================
 
 -- user1: 총 6개 예약 (과거 1 + 미래 5)
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', 5, CURRENT_DATE), 3, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', 10, CURRENT_DATE), 4, 5);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', 20, CURRENT_DATE), 2, 8);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', 25, CURRENT_DATE), 6, 11);
 
 -- user13: 총 5개 예약
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user13', DATEADD('DAY', 2, CURRENT_DATE), 6, 7);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user13', DATEADD('DAY', 9, CURRENT_DATE), 1, 9);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user13', DATEADD('DAY', 21, CURRENT_DATE), 4, 12);
 
 -- user5: 총 4개 예약
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user5', DATEADD('DAY', 6, CURRENT_DATE), 1, 13);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user5', DATEADD('DAY', 12, CURRENT_DATE), 5, 1);
 
 
@@ -209,25 +209,25 @@ VALUES ('user5', DATEADD('DAY', 12, CURRENT_DATE), 5, 1);
 -- ============================================
 
 -- 슬롯 A: 내일 15:00 무인도 탈출 (theme_id=1)
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user2', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user6', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user11', DATEADD('DAY', 1, CURRENT_DATE), 6, 1);
 
 -- 슬롯 B: 7일 후 14:00 도시 탈출 (theme_id=2)
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user3', DATEADD('DAY', 7, CURRENT_DATE), 5, 2);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user8', DATEADD('DAY', 7, CURRENT_DATE), 5, 2);
 
 -- 슬롯 C: 3일 후 15:00 열기구 탈출 (theme_id=3)
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user14', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user17', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user20', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id)
+INSERT INTO reservation (reserver_name, date, time_id, theme_id)
 VALUES ('user24', DATEADD('DAY', 3, CURRENT_DATE), 6, 3);

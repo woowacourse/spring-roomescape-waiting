@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record ReservationUpdateCommand(
         Long id,
-        String name,
+        String reserverName,
         LocalDate date,
         Long timeId
 ) {

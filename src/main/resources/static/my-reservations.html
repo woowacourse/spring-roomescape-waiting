@@ -287,7 +287,7 @@
         currentName = name;
         container.innerHTML = '<p class="empty">불러오는 중...</p>';
         try {
-            const res = await fetch(`/user/reservations?name=${encodeURIComponent(name)}`);
+            const res = await fetch(`/user/reservations?reserverName=${encodeURIComponent(name)}`);
             if (!res.ok) throw new Error(await errorMessage(res));
             render(await res.json());
         } catch (e) {
@@ -366,7 +366,7 @@
     async function cancel(id) {
         if (!confirm('이 예약을 취소하시겠습니까?')) return;
         try {
-            const res = await fetch(`/user/reservations/${id}?name=${encodeURIComponent(currentName)}`, {
+            const res = await fetch(`/user/reservations/${id}?reserverName=${encodeURIComponent(currentName)}`, {
                 method: 'DELETE'
             });
             if (!res.ok) throw new Error(await errorMessage(res));
@@ -431,7 +431,7 @@
                 method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    name: currentName,
+                    reserverName: currentName,
                     date: date,
                     timeId: Number(timeId)
                 })

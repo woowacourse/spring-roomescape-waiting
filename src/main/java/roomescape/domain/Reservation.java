@@ -7,33 +7,33 @@ public class Reservation {
     private static final int MAX_NAME_LENGTH = 30;
 
     private final Long id;
-    private final String name;
+    private final String reserverName;
     private final LocalDate date;
     private final ReservationTime time;
 
     private final Theme theme;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
+    public Reservation(Long id, String reserverName, LocalDate date, ReservationTime time, Theme theme) {
+        validate(reserverName, date, time, theme);
         this.id = id;
-        this.name = name;
+        this.reserverName = reserverName;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    private static void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validateName(name);
+    private static void validate(String reserverName, LocalDate date, ReservationTime time, Theme theme) {
+        validateReserverName(reserverName);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
     }
 
-    private static void validateName(String name) {
-        if (name == null || name.isBlank()) {
+    private static void validateReserverName(String reserverName) {
+        if (reserverName == null || reserverName.isBlank()) {
             throw new DomainValidationException("예약자 이름은 비어 있을 수 없습니다.");
         }
-        if (name.length() > MAX_NAME_LENGTH) {
+        if (reserverName.length() > MAX_NAME_LENGTH) {
             throw new DomainValidationException(
                     "예약자 이름은 " + MAX_NAME_LENGTH + "자를 초과할 수 없습니다."
             );
@@ -62,8 +62,8 @@ public class Reservation {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getReserverName() {
+        return reserverName;
     }
 
     public LocalDate getDate() {

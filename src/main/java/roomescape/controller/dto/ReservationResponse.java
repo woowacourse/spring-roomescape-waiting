@@ -6,7 +6,7 @@ import roomescape.service.dto.ReservationResult;
 
 public record ReservationResponse(
         Long id,
-        String name,
+        String reserverName,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
@@ -15,7 +15,7 @@ public record ReservationResponse(
     public static ReservationResponse from(ReservationResult result) {
         return new ReservationResponse(
                 result.id(),
-                result.name(),
+                result.reserverName(),
                 result.date(),
                 ReservationTimeResponse.from(result.time()),
                 ThemeResponse.from(result.theme()),

@@ -42,12 +42,12 @@ class UserReservationControllerTest {
     @Test
     @DisplayName("GET /user/reservations - 이름으로 예약 목록을 반환한다")
     void list() throws Exception {
-        given(userReservationService.findByName("브라운")).willReturn(List.of(sampleResult()));
+        given(userReservationService.findByReserverName("브라운")).willReturn(List.of(sampleResult()));
 
-        mockMvc.perform(get("/user/reservations").param("name", "브라운"))
+        mockMvc.perform(get("/user/reservations").param("reserverName", "브라운"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].name").value("브라운"));
+                .andExpect(jsonPath("$[0].reserverName").value("브라운"));
     }
 
     @Test
@@ -60,7 +60,7 @@ class UserReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("브라운"));
+                .andExpect(jsonPath("$.reserverName").value("브라운"));
     }
 
     @Test
@@ -84,13 +84,13 @@ class UserReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("브라운"));
+                .andExpect(jsonPath("$.reserverName").value("브라운"));
     }
 
     @Test
     @DisplayName("DELETE /user/reservations/{id} - 예약을 취소하면 204를 반환한다")
     void cancel() throws Exception {
-        mockMvc.perform(delete("/user/reservations/1").param("name", "브라운"))
+        mockMvc.perform(delete("/user/reservations/1").param("reserverName", "브라운"))
                 .andExpect(status().isNoContent());
     }
 

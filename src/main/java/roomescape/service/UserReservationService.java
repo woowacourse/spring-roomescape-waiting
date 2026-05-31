@@ -50,14 +50,14 @@ public class UserReservationService {
         return reservationService.create(command);
     }
 
-    public List<ReservationResult> findByName(String name) {
-        return reservationRepository.findByName(name).stream()
+    public List<ReservationResult> findByReserverName(String reserverName) {
+        return reservationRepository.findByReserverName(reserverName).stream()
                 .map(ReservationResult::from)
                 .toList();
     }
-    public void cancel(Long id, String name) {
+    public void cancel(Long id, String reserverName) {
         Reservation reservation = findReservation(id);
-        validateOwner(reservation, name);
+        validateOwner(reservation, reserverName);
         validateNotPast(
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
@@ -68,7 +68,7 @@ public class UserReservationService {
 
     public ReservationResult update(ReservationUpdateCommand command) {
         Reservation reservation = findReservation(command.id());
-        validateOwner(reservation, command.name());
+        validateOwner(reservation, command.reserverName());
         validateNotPast(
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
@@ -86,7 +86,7 @@ public class UserReservationService {
 
         Reservation updated = new Reservation(
                 reservation.getId(),
-                reservation.getName(),
+                reservation.getReserverName(),
                 command.date(),
                 newTime,
                 reservation.getTheme()
@@ -103,8 +103,8 @@ public class UserReservationService {
                 });
     }
 
-    private void validateOwner(Reservation reservation, String name) {
-        if (!reservation.getName().equals(name)) {
+    private void validateOwner(Reservation reservation, String reserverName) {
+        if (!reservation.getReserverName().equals(reserverName)) {
             throw new UnauthorizedReservationException("본인의 예약이 아닙니다");
         }
     }

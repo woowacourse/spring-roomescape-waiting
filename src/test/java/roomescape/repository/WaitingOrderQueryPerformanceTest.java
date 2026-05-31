@@ -46,7 +46,7 @@ class WaitingOrderQueryPerformanceTest {
     private static final String QUERY_UNIFIED = """
             SELECT
                 r.id           AS id,
-                r.name         AS name,
+                r.reserver_name AS name,
                 (SELECT COUNT(*)
                    FROM reservation r2
                   WHERE r2.date = r.date
@@ -61,7 +61,7 @@ class WaitingOrderQueryPerformanceTest {
     private static final String QUERY_SEPARATED = """
             SELECT
                 rc.id   AS id,
-                rc.name AS name,
+                rc.reserver_name AS name,
                 0       AS waiting_order
             FROM reservation_confirmed rc
             INNER JOIN reservation_time t ON rc.time_id = t.id
@@ -69,7 +69,7 @@ class WaitingOrderQueryPerformanceTest {
             UNION ALL
             SELECT
                 w.id   AS id,
-                w.name AS name,
+                w.reserver_name AS name,
                 1 + (SELECT COUNT(*)
                        FROM waiting w2
                       WHERE w2.date = w.date
@@ -223,7 +223,7 @@ class WaitingOrderQueryPerformanceTest {
 
     private void insertBatch(String table, List<SlotRow> rows, Long minTimeId, Long minThemeId,
                              LocalDate baseDate, Instant baseInstant) {
-        String sql = "INSERT INTO " + table + " (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + table + " (reserver_name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {

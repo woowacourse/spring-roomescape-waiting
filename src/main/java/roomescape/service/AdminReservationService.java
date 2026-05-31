@@ -61,16 +61,16 @@ public class AdminReservationService {
 
         validateNoConflict(command);
 
-        Reservation reservation = new Reservation(null, command.name(), command.date(), time, theme);
+        Reservation reservation = new Reservation(null, command.reserverName(), command.date(), time, theme);
         ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
-        log.info("예약 생성 완료: reservationId={}, name={}, date={}, timeId={}, themeId={}",
-                saved.id(), saved.name(), saved.date(), command.timeId(), command.themeId());
+        log.info("예약 생성 완료: reservationId={}, reserverName={}, date={}, timeId={}, themeId={}",
+                saved.id(), saved.reserverName(), saved.date(), command.timeId(), command.themeId());
         return ReservationResult.from(saved);
     }
 
     private void validateNoConflict(ReservationCreateCommand command) {
-        boolean conflict = reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
-                command.name(), command.date(), command.timeId(), command.themeId());
+        boolean conflict = reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
+                command.reserverName(), command.date(), command.timeId(), command.themeId());
         if (conflict) {
             throw new ReservationConflictException(
                     "이미 본인이 예약 또는 대기중인 시간입니다: %s, timeId=%d, themeId=%d"

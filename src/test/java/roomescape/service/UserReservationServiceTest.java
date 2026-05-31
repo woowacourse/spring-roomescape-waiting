@@ -108,14 +108,14 @@ class UserReservationServiceTest {
     void 이름으로_예약_목록을_조회한다() {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
                 1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, 2L);
-        given(reservationRepository.findByName(OWNER)).willReturn(List.of(reservation));
+        given(reservationRepository.findByReserverName(OWNER)).willReturn(List.of(reservation));
 
-        List<ReservationResult> results = userReservationService.findByName(OWNER);
+        List<ReservationResult> results = userReservationService.findByReserverName(OWNER);
 
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).name()).isEqualTo(OWNER);
+        assertThat(results.get(0).reserverName()).isEqualTo(OWNER);
         assertThat(results.get(0).waitingOrder()).isEqualTo(2L);
-        verify(reservationRepository, times(1)).findByName(OWNER);
+        verify(reservationRepository, times(1)).findByReserverName(OWNER);
         verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
@@ -188,7 +188,7 @@ class UserReservationServiceTest {
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
-                    r.getId(), r.getName(), r.getDate(), r.getTime(), r.getTheme(), 0L);
+                    r.getId(), r.getReserverName(), r.getDate(), r.getTime(), r.getTheme(), 0L);
         });
 
         ReservationResult result = userReservationService.update(command);

@@ -5,7 +5,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 public record ReservationWithWaitingOrder(Long id,
-                                          String name,
+                                          String reserverName,
                                           LocalDate date,
                                           ReservationTime time,
                                           Theme theme,

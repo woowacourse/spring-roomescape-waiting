@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record ReservationResult(
         Long id,
-        String name,
+        String reserverName,
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
@@ -13,7 +13,7 @@ public record ReservationResult(
     public static ReservationResult from(ReservationWithWaitingOrder reservation) {
         return new ReservationResult(
                 reservation.id(),
-                reservation.name(),
+                reservation.reserverName(),
                 reservation.date(),
                 ReservationTimeResult.from(reservation.time()),
                 ThemeResult.from(reservation.theme()),

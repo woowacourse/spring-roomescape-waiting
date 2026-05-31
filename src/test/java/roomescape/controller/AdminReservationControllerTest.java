@@ -45,7 +45,7 @@ class AdminReservationControllerTest {
         mockMvc.perform(get("/admin/reservations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$[0].name").value("브라운"));
+                .andExpect(jsonPath("$[0].reserverName").value("브라운"));
     }
 
     @Test
@@ -58,7 +58,7 @@ class AdminReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("브라운"));
+                .andExpect(jsonPath("$.reserverName").value("브라운"));
     }
 
     @Test

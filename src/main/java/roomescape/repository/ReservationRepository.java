@@ -9,7 +9,7 @@ import roomescape.service.dto.ReservationWithWaitingOrder;
 public interface ReservationRepository {
     List<ReservationWithWaitingOrder> findAll();
 
-    List<ReservationWithWaitingOrder> findByName(String name);
+    List<ReservationWithWaitingOrder> findByReserverName(String reserverName);
 
     Optional<Reservation> findById(Long id);
 
@@ -21,7 +21,7 @@ public interface ReservationRepository {
 
     boolean existsById(Long id);
 
-    boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
+    boolean existsByReserverNameAndDateAndTimeIdAndThemeId(String reserverName, LocalDate date, Long timeId, Long themeId);
 
     boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id);
 

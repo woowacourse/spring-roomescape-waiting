@@ -20,7 +20,7 @@ CREATE TABLE theme (
 
 CREATE TABLE reservation (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    reserver_name VARCHAR(30) NOT NULL,
     date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
@@ -28,12 +28,12 @@ CREATE TABLE reservation (
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    UNIQUE (name, date, time_id, theme_id)
+    UNIQUE (reserver_name, date, time_id, theme_id)
 );
 
 CREATE TABLE reservation_confirmed (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    reserver_name VARCHAR(30) NOT NULL,
     date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE reservation_confirmed (
 
 CREATE TABLE waiting (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    reserver_name VARCHAR(30) NOT NULL,
     date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,

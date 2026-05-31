@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import roomescape.service.dto.ReservationCreateCommand;
 
 public record ReservationRequest(
-        @NotBlank(message = "예약자 이름은 필수입니다") String name,
+        @NotBlank(message = "예약자 이름은 필수입니다") String reserverName,
         @NotNull(message = "예약 날짜는 필수입니다")
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @NotNull(message = "시간 ID는 필수입니다")
@@ -17,6 +17,6 @@ public record ReservationRequest(
         @Positive(message = "테마 ID는 1 이상이여야 합니다") Long themeId
 ) {
     public ReservationCreateCommand toCommand() {
-        return new ReservationCreateCommand(name, date, timeId, themeId);
+        return new ReservationCreateCommand(reserverName, date, timeId, themeId);
     }
 }
