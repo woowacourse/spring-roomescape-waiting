@@ -3,6 +3,7 @@ package roomescape.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import roomescape.common.DomainAssert;
 import roomescape.common.exception.InvalidInputException;
 
 public class Member {
@@ -30,20 +31,21 @@ public class Member {
     }
 
     private void validate(String name, String email, String password, MemberRole role) {
-        if (name == null || name.isBlank()) {
+        DomainAssert.notNull(name, "이름은 비어 있을 수 없습니다.");
+        DomainAssert.notNull(email, "이메일 형식이 올바르지 않습니다.");
+        DomainAssert.notNull(password, "비밀번호는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(role, "역할은 비어 있을 수 없습니다.");
+        if (name.isBlank()) {
             throw new InvalidInputException("이름은 비어 있을 수 없습니다.");
         }
         if (name.length() > NAME_MAX_LENGTH) {
             throw new InvalidInputException("이름은 " + NAME_MAX_LENGTH + "자 이하여야 합니다.");
         }
-        if (email == null || email.isBlank() || !email.contains("@")) {
+        if (email.isBlank() || !email.contains("@")) {
             throw new InvalidInputException("이메일 형식이 올바르지 않습니다.");
         }
-        if (password == null || password.isBlank()) {
+        if (password.isBlank()) {
             throw new InvalidInputException("비밀번호는 비어 있을 수 없습니다.");
-        }
-        if (role == null) {
-            throw new InvalidInputException("역할은 비어 있을 수 없습니다.");
         }
     }
 

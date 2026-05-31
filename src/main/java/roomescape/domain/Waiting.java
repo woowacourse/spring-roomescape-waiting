@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 
 public class Waiting {
@@ -10,6 +12,8 @@ public class Waiting {
     private final Long rank;
 
     private Waiting(Long id, Member member, Slot slot, Long rank) {
+        DomainAssert.notNull(member, "대기자는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(slot, "슬롯은 비어 있을 수 없습니다.");
         this.id = id;
         this.member = member;
         this.slot = slot;
@@ -25,6 +29,14 @@ public class Waiting {
 
     public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store, Long rank) {
         return new Waiting(id, member, new Slot(date, time, theme, store), rank);
+    }
+
+    public boolean isSameMember(Member member) {
+        return Objects.equals(this.member.getId(), member.getId());
+    }
+
+    public boolean isInStore(Store store) {
+        return slot.getStore().equals(store);
     }
 
     public Long getId() {
