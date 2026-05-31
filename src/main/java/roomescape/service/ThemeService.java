@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
@@ -18,6 +19,7 @@ import roomescape.service.dto.result.ReservationTimeDetailResult;
 import roomescape.service.dto.result.ThemeResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ReservationDao reservationDao;
@@ -55,6 +57,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ThemeResult registerTheme(ThemeCommand command) {
         String imageUrl = fileUploader.upload(command.file());
 
@@ -69,6 +72,7 @@ public class ThemeService {
         return ThemeResult.from(saved);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTheme(Long id) {
         if (reservationDao.existsByThemeId(id)) {
             throw new ConflictException("예약이 존재하는 테마는 삭제할 수 없습니다.");

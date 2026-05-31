@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
@@ -18,6 +19,7 @@ import roomescape.service.dto.command.WaitingCommand;
 import roomescape.service.dto.result.WaitingResult;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
     private final ReservationDao reservationDao;
     private final WaitingDao waitingDao;
@@ -39,6 +41,7 @@ public class WaitingService {
         this.clock = clock;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public WaitingResult registerWaiting(WaitingCommand command) {
         ReservationTime time = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
@@ -77,6 +80,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteWaiting(Long id, String userName) {
         Waiting origin = waitingDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 대기가 존재하지 않습니다."));

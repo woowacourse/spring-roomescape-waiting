@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ReservationDao;
@@ -23,6 +24,7 @@ import roomescape.service.dto.result.ReservationResult;
 import roomescape.service.dto.result.WaitingDetailResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -69,6 +71,7 @@ public class ReservationService {
         );
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ReservationResult registerReservation(ReservationCommand command) {
         ReservationTime time = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
@@ -91,6 +94,7 @@ public class ReservationService {
         return ReservationResult.from(saved.confirm());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ReservationResult changeDateTime(Long id, ReservationCommand command) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
@@ -126,6 +130,7 @@ public class ReservationService {
         return ReservationResult.from(modified.confirm());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteReservation(Long id) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
@@ -136,6 +141,7 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteReservation(Long id, String userName) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
