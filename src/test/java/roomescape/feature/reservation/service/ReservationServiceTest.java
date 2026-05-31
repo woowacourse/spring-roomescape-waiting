@@ -52,7 +52,7 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
-        reservationService = new ReservationServiceImpl(
+        reservationService = new ReservationManagementService(
             reservationRepository, timeRepository, themeRepository, mapper);
     }
 

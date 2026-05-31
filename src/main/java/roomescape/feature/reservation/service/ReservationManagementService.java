@@ -25,14 +25,14 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
-public class ReservationServiceImpl implements ReservationService, WaitingService {
+public class ReservationManagementService implements ReservationService, WaitingService {
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationMapper reservationMapper;
 
-    public ReservationServiceImpl(ReservationRepository reservationRepository, TimeRepository timeRepository,
+    public ReservationManagementService(ReservationRepository reservationRepository, TimeRepository timeRepository,
         ThemeRepository themeRepository, ReservationMapper reservationMapper) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;

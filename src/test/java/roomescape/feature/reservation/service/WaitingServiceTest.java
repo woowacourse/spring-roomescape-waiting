@@ -48,7 +48,7 @@ class WaitingServiceTest {
     @BeforeEach
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
-        waitingService = new ReservationServiceImpl(
+        waitingService = new ReservationManagementService(
             reservationRepository, timeRepository, themeRepository, mapper);
     }
 
