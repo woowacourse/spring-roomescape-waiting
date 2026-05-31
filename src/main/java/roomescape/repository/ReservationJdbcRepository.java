@@ -27,20 +27,6 @@ import roomescape.domain.User;
 @Repository
 public class ReservationJdbcRepository implements ReservationRepository {
 
-    private static final String SELECT_BASE = """
-            select r.id, r.date, r.status,
-                   u.id as u_id, u.username as u_username, u.password as u_password,
-                   u.name as u_name, u.role as u_role,
-                   t.id as time_id, t.start_at,
-                   th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
-                   s.id as store_id, s.name as store_name
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_time t on r.time_id = t.id
-            join theme th on r.theme_id = th.id
-            join store s on r.store_id = s.id
-            """;
-
     private final JdbcTemplate jdbcTemplate;
 
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
@@ -88,9 +74,21 @@ public class ReservationJdbcRepository implements ReservationRepository {
         if (storeIds.isEmpty()) {
             return List.of();
         }
-        String sql = SELECT_BASE
-                + " where s.id in (" + placeholders(storeIds.size()) + ")"
-                + " order by r.id limit ? offset ?";
+        String sql = """
+                select r.id, r.date, r.status,
+                       u.id as u_id, u.username as u_username, u.password as u_password,
+                       u.name as u_name, u.role as u_role,
+                       t.id as time_id, t.start_at,
+                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                       s.id as store_id, s.name as store_name
+                from reservation r
+                join users u on r.user_id = u.id
+                join reservation_time t on r.time_id = t.id
+                join theme th on r.theme_id = th.id
+                join store s on r.store_id = s.id
+                where s.id in (%s)
+                order by r.id limit ? offset ?
+                """.formatted(placeholders(storeIds.size()));
         List<Object> args = new ArrayList<>(storeIds);
         args.add(limit);
         args.add(offset);
@@ -102,9 +100,21 @@ public class ReservationJdbcRepository implements ReservationRepository {
         if (storeIds.isEmpty()) {
             return List.of();
         }
-        String sql = SELECT_BASE
-                + " where s.id in (" + placeholders(storeIds.size()) + ") and u.name = ?"
-                + " order by r.id limit ? offset ?";
+        String sql = """
+                select r.id, r.date, r.status,
+                       u.id as u_id, u.username as u_username, u.password as u_password,
+                       u.name as u_name, u.role as u_role,
+                       t.id as time_id, t.start_at,
+                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                       s.id as store_id, s.name as store_name
+                from reservation r
+                join users u on r.user_id = u.id
+                join reservation_time t on r.time_id = t.id
+                join theme th on r.theme_id = th.id
+                join store s on r.store_id = s.id
+                where s.id in (%s) and u.name = ?
+                order by r.id limit ? offset ?
+                """.formatted(placeholders(storeIds.size()));
         List<Object> args = new ArrayList<>(storeIds);
         args.add(name);
         args.add(limit);
@@ -114,18 +124,28 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByUserId(Long userId) {
-        String sql = SELECT_BASE
-                + """
-                 where u.id = ?
-                 order by case r.status
-                              when 'RESERVED' then 0
-                              when 'WAITING' then 1
-                              else 2
-                          end,
-                          r.date,
-                          t.start_at,
-                          r.created_at,
-                          r.id
+        String sql = """
+                select r.id, r.date, r.status,
+                       u.id as u_id, u.username as u_username, u.password as u_password,
+                       u.name as u_name, u.role as u_role,
+                       t.id as time_id, t.start_at,
+                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                       s.id as store_id, s.name as store_name
+                from reservation r
+                join users u on r.user_id = u.id
+                join reservation_time t on r.time_id = t.id
+                join theme th on r.theme_id = th.id
+                join store s on r.store_id = s.id
+                where u.id = ?
+                order by case r.status
+                             when 'RESERVED' then 0
+                             when 'WAITING' then 1
+                             else 2
+                         end,
+                         r.date,
+                         t.start_at,
+                         r.created_at,
+                         r.id
                 """;
         return jdbcTemplate.query(sql, rowMapper, userId);
     }
@@ -166,7 +186,20 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = SELECT_BASE + " where r.id = ?";
+        String sql = """
+                select r.id, r.date, r.status,
+                       u.id as u_id, u.username as u_username, u.password as u_password,
+                       u.name as u_name, u.role as u_role,
+                       t.id as time_id, t.start_at,
+                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                       s.id as store_id, s.name as store_name
+                from reservation r
+                join users u on r.user_id = u.id
+                join reservation_time t on r.time_id = t.id
+                join theme th on r.theme_id = th.id
+                join store s on r.store_id = s.id
+                where r.id = ?
+                """;
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, id));
         } catch (EmptyResultDataAccessException e) {
