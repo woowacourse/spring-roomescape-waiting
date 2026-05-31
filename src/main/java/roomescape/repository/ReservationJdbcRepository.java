@@ -133,6 +133,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return results.stream().findFirst();
     }
 
+    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?";
+        List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId);
+        return results.stream().findFirst();
+    }
+
     public List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId) {
         String sql = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?";
         return jdbcTemplate.queryForList(sql, Long.class, date, themeId);

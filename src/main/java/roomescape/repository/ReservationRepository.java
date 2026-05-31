@@ -17,6 +17,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId);
+
     List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findByName(String name);

@@ -25,6 +25,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationWaitingQueryRepository;
@@ -71,13 +72,30 @@ class ReservationWaitingUseCaseMockTest {
     void save는_저장소에_위임하고_저장된_대기를_반환한다() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", reservation.getId());
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        Reservation reservation = new Reservation(1L, "티뉴", date, time, theme);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                date,
+                time.getId(),
+                theme.getId()
+        );
         ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
-        given(reservationQueryService.getById(reservation.getId())).willReturn(reservation);
+        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId())).willReturn(Optional.of(reservation));
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
 
         assertThat(reservationWaitingCommandService.save(request)).isEqualTo(saved);
+    }
+
+    @Test
+    void save는_예약되지_않은_슬롯이면_ConflictException을_던진다() {
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", date, 1L, 1L);
+        given(reservationQueryService.findBySlot(date, 1L, 1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> reservationWaitingCommandService.save(request))
+                .isInstanceOf(ConflictException.class);
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
 
     @Test

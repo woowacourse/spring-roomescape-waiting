@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationResponses;
 import roomescape.domain.Reservation;
+import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationQueryService {
+
+    private static final String WAITING_REQUIRES_RESERVED_SLOT = "예약된 슬롯에만 대기를 신청할 수 있습니다.";
 
     private final ReservationRepository reservationRepository;
 
@@ -32,6 +35,11 @@ public class ReservationQueryService {
     public Reservation getById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약입니다. Id: " + id));
+    }
+
+    public Reservation findBySlot(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findBySlot(date, timeId, themeId)
+                .orElseThrow(() -> new ConflictException(WAITING_REQUIRES_RESERVED_SLOT));
     }
 
     public ReservationResponses findMine(String name) {

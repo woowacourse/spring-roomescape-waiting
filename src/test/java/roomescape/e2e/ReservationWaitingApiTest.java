@@ -26,9 +26,9 @@ class ReservationWaitingApiTest {
     void 예약된_슬롯에_대기를_신청한다() {
         Integer timeId = createTime("11:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
 
-        Map<String, Object> request = waitingRequest("민욱", reservationId);
+        Map<String, Object> request = waitingRequest("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -49,13 +49,13 @@ class ReservationWaitingApiTest {
     void 같은_예약에_대기를_신청한_순서대로_순번을_반환한다() {
         Integer timeId = createTime("12:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
 
-        createWaiting("민욱", reservationId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(waitingRequest("브라운", reservationId))
+                .body(waitingRequest("브라운", "2026-08-05", timeId, themeId))
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
@@ -66,12 +66,12 @@ class ReservationWaitingApiTest {
     void 같은_예약에_이미_대기를_신청했으면_409를_반환한다() {
         Integer timeId = createTime("12:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
-        createWaiting("민욱", reservationId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createWaiting("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(waitingRequest("민욱", reservationId))
+                .body(waitingRequest("민욱", "2026-08-05", timeId, themeId))
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(409)
@@ -83,10 +83,10 @@ class ReservationWaitingApiTest {
     void 내_대기_목록_조회시_대기_순번을_함께_반환한다() {
         Integer timeId = createTime("12:30");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
 
-        createWaiting("브라운", reservationId);
-        Integer waitingId = createWaiting("민욱", reservationId);
+        createWaiting("브라운", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("name", "민욱")
@@ -104,25 +104,29 @@ class ReservationWaitingApiTest {
     }
 
     @Test
-    void 존재하지_않는_예약에는_대기를_신청할_수_없다() {
+    void 예약되지_않은_슬롯에는_대기를_신청할_수_없다() {
+        Integer timeId = createTime("13:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(waitingRequest("민욱", 9999))
+                .body(waitingRequest("민욱", "2026-08-05", timeId, themeId))
                 .when().post("/waitings")
                 .then().log().all()
-                .statusCode(404)
-                .body("type", is(ProblemType.NOT_FOUND.uri().toString()));
+                .statusCode(409)
+                .body("type", is(ProblemType.CONFLICT.uri().toString()))
+                .body("detail", is("예약된 슬롯에만 대기를 신청할 수 있습니다."));
     }
 
     @Test
     void 지난_예약에는_대기를_신청할_수_없다() {
         Integer timeId = createTime("13:30");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
-        Long reservationId = insertPastReservation("티뉴", "2020-01-01", timeId, themeId);
+        insertPastReservation("티뉴", "2020-01-01", timeId, themeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(waitingRequest("민욱", reservationId))
+                .body(waitingRequest("민욱", "2020-01-01", timeId, themeId))
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(422)
@@ -134,8 +138,8 @@ class ReservationWaitingApiTest {
     void 본인_대기를_취소하면_204를_반환한다() {
         Integer timeId = createTime("14:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
-        Integer waitingId = createWaiting("민욱", reservationId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("name", "민욱")
@@ -148,8 +152,8 @@ class ReservationWaitingApiTest {
     void 다른_사람_이름으로_대기를_취소하면_403을_반환한다() {
         Integer timeId = createTime("15:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
-        Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
-        Integer waitingId = createWaiting("민욱", reservationId);
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("name", "브라운")
@@ -167,10 +171,10 @@ class ReservationWaitingApiTest {
                 .statusCode(404);
     }
 
-    private Integer createWaiting(String name, Integer reservationId) {
+    private Integer createWaiting(String name, String date, Integer timeId, Integer themeId) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(waitingRequest(name, reservationId))
+                .body(waitingRequest(name, date, timeId, themeId))
                 .when().post("/waitings")
                 .then().statusCode(201)
                 .extract().jsonPath().get("id");
@@ -228,10 +232,12 @@ class ReservationWaitingApiTest {
                 .extract().jsonPath().get("id");
     }
 
-    private Map<String, Object> waitingRequest(String name, Number reservationId) {
+    private Map<String, Object> waitingRequest(String name, String date, Integer timeId, Integer themeId) {
         Map<String, Object> request = new HashMap<>();
         request.put("name", name);
-        request.put("reservationId", reservationId);
+        request.put("date", date);
+        request.put("timeId", timeId);
+        request.put("themeId", themeId);
         return request;
     }
 }

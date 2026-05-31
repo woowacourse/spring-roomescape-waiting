@@ -31,7 +31,12 @@ public class ReservationWaitingCommandService {
 
     @Transactional
     public ReservationWaiting save(ReservationWaitingRequest request) {
-        Reservation reservation = reservationQueryService.getById(request.reservationId());
+        Reservation reservation = reservationQueryService.findBySlot(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        );
+
         ReservationWaiting reservationWaiting = ReservationWaiting.createWith(
                 request.name(),
                 LocalDateTime.now(clock),

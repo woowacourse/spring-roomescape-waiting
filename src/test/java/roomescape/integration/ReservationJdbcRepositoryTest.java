@@ -105,6 +105,18 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
+    void findBySlot은_해당_슬롯의_예약을_반환한다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        LocalDate date = LocalDate.of(2026, 8, 5);
+        Reservation saved = repository.save(new Reservation("브라운", date, time, theme));
+
+        Optional<Reservation> result = repository.findBySlot(date, timeId, themeId);
+
+        assertThat(result).contains(saved);
+    }
+
+    @Test
     void existsByDateAndTimeIdAndThemeId는_해당_슬롯에_예약이_있으면_true를_반환한다() {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");

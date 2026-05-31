@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.api.dto.ReservationTimeRequest;
 import roomescape.api.dto.ReservationTimeResponse;
 import roomescape.api.dto.ReservationTimeResponses;
-import roomescape.api.dto.TimeWithStatusResponse;
-import roomescape.api.dto.TimeWithStatusResponses;
+import roomescape.api.dto.SlotAvailabilityResponse;
+import roomescape.api.dto.SlotAvailabilityResponses;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.projection.ReservationTimeAvailability;
 import roomescape.service.ReservationTimeCommandService;
@@ -58,18 +58,18 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<TimeWithStatusResponses> searchAvailableReservationTime(
+    public ResponseEntity<SlotAvailabilityResponses> searchAvailableReservationTime(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
         List<ReservationTimeAvailability> availabilities
                 = reservationTimeQueryService.findWithAvailability(date, themeId);
-        List<TimeWithStatusResponse> responses = availabilities.stream()
-                .map(TimeWithStatusResponse::from)
+        List<SlotAvailabilityResponse> responses = availabilities.stream()
+                .map(SlotAvailabilityResponse::from)
                 .toList();
 
         return ResponseEntity.ok()
-                .body(TimeWithStatusResponses.of(responses));
+                .body(SlotAvailabilityResponses.of(responses));
     }
 
     @DeleteMapping("/{id}")
