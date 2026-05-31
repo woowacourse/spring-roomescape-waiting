@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -42,7 +43,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
                     return Reservation.builder()
                             .id(rs.getLong("id"))
-                            .name(rs.getString("name"))
+                            .memberName(new MemberName(rs.getString("name")))
                             .slot(slot)
                             .build();
                 }
@@ -71,7 +72,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.getName())
+                .addValue("name", reservation.getMemberName().name())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());

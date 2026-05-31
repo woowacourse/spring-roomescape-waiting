@@ -11,20 +11,20 @@ import roomescape.global.exception.RoomEscapeException;
 public class Reservation {
 
     private final Long id;
-    private final String name;
+    private final MemberName memberName;
     private final ReservationSlot slot;
 
     @Builder
-    public Reservation(Long id, String name, ReservationSlot slot) {
+    public Reservation(Long id, MemberName memberName, ReservationSlot slot) {
         this.id = id;
-        this.name = requireName(name);
+        this.memberName = memberName;
         this.slot = slot;
     }
 
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
                 .id(generatedId)
-                .name(this.name)
+                .memberName(this.memberName)
                 .slot(this.slot)
                 .build();
     }
@@ -35,7 +35,7 @@ public class Reservation {
 
         return Reservation.builder()
                 .id(this.id)
-                .name(this.name)
+                .memberName(this.memberName)
                 .slot(updatedSlot)
                 .build();
     }
@@ -54,12 +54,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    private static String requireName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new RoomEscapeException("이름은 비어있을 수 없습니다.");
-        }
-        return name;
     }
 }

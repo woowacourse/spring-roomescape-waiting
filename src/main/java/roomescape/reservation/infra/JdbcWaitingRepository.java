@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -55,7 +56,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                         (rs, rowNum) ->
                                 Waiting.builder()
                                         .id(rs.getLong("id"))
-                                        .name(rs.getString("name"))
+                                        .memberName(new MemberName(rs.getString("name")))
                                         .slot(slot)
                                         .build(),
                         slot.date(),
@@ -68,7 +69,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", waiting.getName())
+                .addValue("name", waiting.getMemberName().name())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
                 .addValue("time_id", slot.timeId());

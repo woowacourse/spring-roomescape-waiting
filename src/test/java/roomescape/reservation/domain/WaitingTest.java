@@ -26,7 +26,7 @@ class WaitingTest {
                     .build();
 
             Waiting.builder()
-                    .name(name)
+                    .memberName(new MemberName(name))
                     .slot(slot)
                     .build();
         })

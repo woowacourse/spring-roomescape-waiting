@@ -262,7 +262,7 @@ class ReservationCommandServiceTest {
         Reservation promoteReservation = testHelper.findReservationBySlot(slot);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(promoteReservation.getMemberName().name()).isEqualTo("스타크");
             softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });
@@ -309,8 +309,8 @@ class ReservationCommandServiceTest {
         Reservation changeReservation = testHelper.findReservationBySlot(updatedSlot);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(changeReservation.getName()).isEqualTo("피노");
-            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(changeReservation.getMemberName().name()).isEqualTo("피노");
+            softly.assertThat(promoteReservation.getMemberName().name()).isEqualTo("스타크");
         });
     }
 }

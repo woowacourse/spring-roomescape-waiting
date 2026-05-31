@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.reservation.domain.MemberName;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 

@@ -3,6 +3,7 @@ package roomescape.reservation.application.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
@@ -16,14 +17,14 @@ public record ReservationApplicationCreateCommand(
 ) {
     public Reservation toReservation(ReservationSlot slot) {
         return Reservation.builder()
-                .name(name)
+                .memberName(new MemberName(name))
                 .slot(slot)
                 .build();
     }
 
     public Waiting toWaiting(ReservationSlot slot) {
         return Waiting.builder()
-                .name(name)
+                .memberName(new MemberName(name))
                 .slot(slot)
                 .build();
     }

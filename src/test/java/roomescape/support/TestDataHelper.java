@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.application.dto.ThemeCreateCommand;
@@ -80,7 +81,7 @@ public class TestDataHelper {
                         """,
                 (rs, rowNum) -> Reservation.builder()
                         .id(rs.getLong("id"))
-                        .name(rs.getString("name"))
+                        .memberName(new MemberName(rs.getString("name")))
                         .slot(ReservationSlot.builder()
                                 .date(rs.getDate("date").toLocalDate())
                                 .themeId(rs.getLong("theme_id"))

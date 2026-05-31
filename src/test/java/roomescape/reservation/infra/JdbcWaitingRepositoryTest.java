@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -64,7 +65,7 @@ class JdbcWaitingRepositoryTest {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
 
         Waiting waiting = Waiting.builder()
-                .name("name")
+                .memberName(new MemberName("피노"))
                 .slot(ReservationSlot.builder()
                         .date(LocalDate.of(2026, 5, 4))
                         .themeId(themeId)
@@ -76,7 +77,7 @@ class JdbcWaitingRepositoryTest {
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(savedWaiting.getName()).isEqualTo("name");
+            assertSoftly.assertThat(savedWaiting.getMemberName().name()).isEqualTo("피노");
             assertSoftly.assertThat(savedWaiting.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 4));
             assertSoftly.assertThat(savedWaiting.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedWaiting.getSlot().timeId()).isEqualTo(timeId);
@@ -129,7 +130,7 @@ class JdbcWaitingRepositoryTest {
 
         Waiting waiting = Waiting.builder()
                 .id(thirdWaitingId)
-                .name("네오")
+                .memberName(new MemberName("네오"))
                 .slot(slot)
                 .build();
 

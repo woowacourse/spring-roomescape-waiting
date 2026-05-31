@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -52,7 +53,7 @@ class JdbcReservationRepositoryTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservation.getId()).isEqualTo(reservationId);
-            softly.assertThat(reservation.getName()).isEqualTo("스타크");
+            softly.assertThat(reservation.getMemberName().name()).isEqualTo("스타크");
             softly.assertThat(reservation.getSlot().date()).isEqualTo(date);
             softly.assertThat(reservation.getSlot().themeId()).isEqualTo(themeId);
             softly.assertThat(reservation.getSlot().timeId()).isEqualTo(timeId);
@@ -72,7 +73,7 @@ class JdbcReservationRepositoryTest {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
 
         Reservation reservation = Reservation.builder()
-                .name("name")
+                .memberName(new MemberName("name"))
                 .slot(ReservationSlot.builder()
                         .date(LocalDate.of(2026, 5, 4))
                         .themeId(themeId)
@@ -84,7 +85,7 @@ class JdbcReservationRepositoryTest {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(savedReservation.getName()).isEqualTo("name");
+            assertSoftly.assertThat(savedReservation.getMemberName().name()).isEqualTo("name");
             assertSoftly.assertThat(savedReservation.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 4));
             assertSoftly.assertThat(savedReservation.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedReservation.getSlot().timeId()).isEqualTo(timeId);
@@ -123,7 +124,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation reservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .memberName(new MemberName( "스타크"))
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -134,7 +135,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation differentIdReservation = Reservation.builder()
                 .id(100L)
-                .name("스타크")
+                .memberName(new MemberName("스타크"))
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -145,7 +146,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation differentTimeReservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .memberName(new MemberName("스타크"))
                 .slot(ReservationSlot.builder()
                         .date(date)
                         .themeId(themeId)
@@ -179,7 +180,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation updateReservation = Reservation.builder()
                 .id(reservationId)
-                .name("스타크")
+                .memberName(new MemberName("스타크"))
                 .slot(ReservationSlot.builder()
                         .date(newDate)
                         .themeId(themeId)
