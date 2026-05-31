@@ -15,7 +15,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import java.util.List;
@@ -132,6 +131,46 @@ class ReservationWaitingServiceTest {
     @Test
     void 존재하지_않는_대기열_삭제_시_예외없이_무시된다() {
         assertThatCode(() -> service.delete(999L)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void 대기열이_없을_때_전체_조회하면_빈_리스트가_반환된다() {
+        List<ReservationWaitingResponse> result = service.readAll();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 이름으로_조회_시_일치하는_항목이_없으면_빈_리스트가_반환된다() {
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
+
+        List<ReservationWaitingResponse> result = service.readByName("없는사람");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 서로_다른_예약의_대기_순번은_독립적으로_계산된다() {
+        Reservation reservation1 = Reservation.restore(1L, "예약자A", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation2 = Reservation.restore(2L, "예약자B", tomorrow.plusDays(1), reservationTime, theme, LocalDateTime.now());
+        reservationQueryingDao.save(reservation1);
+        reservationQueryingDao.save(reservation2);
+
+        waitingDao.create(ReservationWaiting.restore(1L, "대기1", reservation1, null, LocalDateTime.now()));
+        waitingDao.create(ReservationWaiting.restore(2L, "대기2", reservation1, null, LocalDateTime.now().plusSeconds(1)));
+        waitingDao.create(ReservationWaiting.restore(3L, "대기3", reservation2, null, LocalDateTime.now()));
+
+        List<ReservationWaitingResponse> reservation1Waitings = service.readAll().stream()
+                .filter(r -> r.date().equals(tomorrow))
+                .toList();
+        List<ReservationWaitingResponse> reservation2Waitings = service.readAll().stream()
+                .filter(r -> r.date().equals(tomorrow.plusDays(1)))
+                .toList();
+
+        assertThat(reservation1Waitings).hasSize(2);
+        assertThat(reservation2Waitings).hasSize(1);
+        assertThat(reservation2Waitings.get(0).sequence()).isEqualTo(1L);
     }
 
 }

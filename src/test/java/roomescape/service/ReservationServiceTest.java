@@ -1,8 +1,10 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.context.annotation.Import;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -26,7 +28,6 @@ import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -53,6 +54,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationWaitingDao reservationWaitingDao;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void 예약_생성_성공() {
@@ -245,6 +249,68 @@ class ReservationServiceTest {
         reservationService.delete(created.id());
 
         assertThat(reservationService.readAll()).isEmpty();
+        assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
+    }
+
+    @Test
+    void 이름으로_예약_조회() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+        reservationService.create(new ReservationRequest("네오", LocalDate.now().plusDays(2), timeId, themeId));
+
+        List<ReservationResponse> result = reservationService.readByName("브라운");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).name()).isEqualTo("브라운");
+    }
+
+    @Test
+    void 슬롯_변경_없이_이름만_변경하면_예약자가_바뀐다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        ReservationRequest sameSlotNewName = new ReservationRequest("네오", created.date(), timeId, themeId);
+        ReservationResponse updated = reservationService.update(created.id(), sameSlotNewName);
+
+        assertThat(updated.name()).isEqualTo("네오");
+        assertThat(updated.date()).isEqualTo(created.date());
+        assertThat(updated.id()).isEqualTo(created.id());
+    }
+
+    @Test
+    void 만료된_예약_삭제시_예외가_발생한다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+
+        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at) values (?, ?, ?, ?, ?)",
+                "브라운", LocalDate.now().minusDays(1), timeId, themeId, LocalDateTime.now());
+        Long expiredId = jdbcTemplate.queryForObject("select max(id) from reservation", Long.class);
+
+        assertThatThrownBy(() -> reservationService.delete(expiredId))
+                .isInstanceOf(roomescape.exception.ExpiredDateTimeException.class);
+    }
+
+    @Test
+    void 슬롯_변경_시_대기열이_있으면_대기자가_기존_슬롯에_승격된다() {
+        Long timeId1 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId1, themeId));
+
+        Reservation reservation = Reservation.restore(
+                created.id(), "브라운", created.date(),
+                new ReservationTime(timeId1, LocalTime.of(10, 0)),
+                new Theme(themeId, "테마", "설명", "http://example.com"),
+                LocalDateTime.now());
+        reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
+
+        ReservationRequest newSlot = new ReservationRequest("브라운", LocalDate.now().plusDays(2), timeId2, themeId);
+        reservationService.update(created.id(), newSlot);
+
+        ReservationResponse promoted = reservationService.read(created.id());
+        assertThat(promoted.name()).isEqualTo("네오");
         assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
     }
 
