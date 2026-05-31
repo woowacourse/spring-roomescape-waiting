@@ -82,7 +82,7 @@ public class WaitingDao {
         return jdbcTemplate.query(sql, RANK_MAPPER, name);
     }
 
-    public boolean existsByCreatedAtAndSlotAndName(long slotId, String name) {
+    public boolean existsBySlotAndName(long slotId, String name) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
