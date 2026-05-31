@@ -63,7 +63,7 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 
-        validateNotPast(findWaitingList);
+        findWaitingList.validateNotPast();
         
         waitingListRepository.deleteById(deleteCommand.waitingListId());
     }
@@ -79,18 +79,10 @@ public class WaitingListService {
     }
 
     private void validateWaitingList(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {
-        validateNotPast(waitingList);
+        waitingList.validateNotPast();
+
         validateReservationExists(waitingList, findReservationTime, findTheme);
         validateNotDuplicated(waitingList, findTheme, findReservationTime);
-    }
-
-    private static void validateNotPast(WaitingList waitingList) {
-        if (waitingList.getReservationDate().isPast()) {
-            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
-        }
-        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore()) {
-            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
-        }
     }
 
     private void validateReservationExists(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {

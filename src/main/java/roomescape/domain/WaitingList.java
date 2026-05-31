@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,11 +37,20 @@ public class WaitingList {
         return new WaitingList(id, new PersonName(name), new ReservationDate(date), theme, reservationTime, createdAt);
     }
 
-    public String getName() {
-        return name.getName();
-    }
-
     public WaitingList withId(long waitingListId) {
         return new WaitingList(waitingListId, name, reservationDate, theme, reservationTime, createdAt);
+    }
+
+    public void validateNotPast() {
+        if (reservationDate.isPast()) {
+            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
+        }
+        if (reservationDate.isToday() && reservationTime.isBefore()) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
+        }
+    }
+
+    public String getName() {
+        return name.getName();
     }
 }
