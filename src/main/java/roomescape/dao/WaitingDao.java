@@ -139,28 +139,6 @@ public class WaitingDao {
         );
     }
 
-    public boolean exists(Waiting waiting) {
-        String sql = """
-                SELECT EXISTS(
-                            SELECT 1
-                            FROM waiting
-                            WHERE name = ? AND date = ? AND
-                                  time_id = ? AND theme_id = ?
-                )
-                """;
-
-        Boolean result = jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                waiting.getName().value(),
-                waiting.getSlot().date(),
-                waiting.getSlot().time().getId(),
-                waiting.getSlot().theme().getId()
-        );
-
-        return Boolean.TRUE.equals(result);
-    }
-
     public boolean existsByUserNameAndSlot(String userName, EventSlot eventSlot) {
         String sql = """
                 SELECT EXISTS(

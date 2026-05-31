@@ -104,24 +104,6 @@ public class ReservationDao {
         );
     }
 
-    public boolean existsById(Long id) {
-        String sql = """
-                SELECT EXISTS(
-                    SELECT 1
-                    FROM reservation
-                    WHERE id = ?
-                )
-                """;
-
-        Boolean result = jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                id
-        );
-
-        return Boolean.TRUE.equals(result);
-    }
-
     public boolean existsByTimeId(Long timeId) {
         String sql = """
                 SELECT EXISTS(
