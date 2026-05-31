@@ -33,12 +33,8 @@ public class ReservationWaitingService {
             throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
         }
 
-        try {
-            Long id = reservationWaitingDao.create(reservationWaitingCommand);
-            return ReservationWaitingResponse.from(reservationWaitingDao.findReservationWaitingById(id).get());
-        } catch (DataIntegrityViolationException e) {
-            throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
-        }
+        Long id = reservationWaitingDao.create(reservationWaitingCommand);
+        return ReservationWaitingResponse.from(reservationWaitingDao.findReservationWaitingById(id).get());
     }
 
     public void delete(Long id) {
