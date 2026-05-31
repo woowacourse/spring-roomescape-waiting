@@ -6,4 +6,4 @@ spring:
   datasource:
     url: jdbc:h2:mem:database
 
-팅token: ${ADMIN_TOKEN:sanwhale0192}
+token: ${ADMIN_TOKEN:sanwhale0192}
