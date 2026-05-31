@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.exception.ProblemType;
+import roomescape.global.exception.ProblemType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -63,7 +63,7 @@ class ReservationWaitingApiTest {
     }
 
     @Test
-    void 같은_예약에_이미_대기를_신청했으면_422를_반환한다() {
+    void 같은_예약에_이미_대기를_신청했으면_409를_반환한다() {
         Integer timeId = createTime("12:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
@@ -74,8 +74,8 @@ class ReservationWaitingApiTest {
                 .body(waitingRequest("민욱", reservationId))
                 .when().post("/waitings")
                 .then().log().all()
-                .statusCode(422)
-                .body("type", is(ProblemType.BUSINESS_RULE_VIOLATION.uri().toString()))
+                .statusCode(409)
+                .body("type", is(ProblemType.CONFLICT.uri().toString()))
                 .body("detail", is("이미 대기를 신청한 예약입니다."));
     }
 

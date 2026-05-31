@@ -17,7 +17,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 
 @Repository
@@ -27,12 +27,13 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
 
     private static final String SELECT_BASE = """
-            SELECT rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
-                   r.id as reservation_id, r.name as reservation_name, r.date,
-                   t.id as time_id, t.start_at as time_value,
-                   th.id as theme_id, th.name as theme_name,
-                   th.description as theme_description,
-                   th.thumbnail_image_url as theme_thumbnail
+            SELECT 
+                rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
+                r.id as reservation_id, r.name as reservation_name, r.date,
+                t.id as time_id, t.start_at as time_value,
+                th.id as theme_id, th.name as theme_name,
+                th.description as theme_description,
+                th.thumbnail_image_url as theme_thumbnail
             FROM reservation_waiting as rw
             INNER JOIN reservation as r ON rw.reservation_id = r.id
             INNER JOIN reservation_time as t ON r.time_id = t.id
@@ -45,14 +46,13 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
-        return new ReservationWaiting(
-                rs.getLong("waiting_id"),
-                rs.getString("waiting_name"),
-                rs.getTimestamp("created_at").toLocalDateTime(),
-                mapReservation(rs)
-        );
-    };
+    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) ->
+            new ReservationWaiting(
+                    rs.getLong("waiting_id"),
+                    rs.getString("waiting_name"),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    mapReservation(rs)
+            );
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         ReservationTime time = new ReservationTime(
@@ -88,7 +88,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 return ps;
             }, keyHolder);
         } catch (DuplicateKeyException e) {
-            throw new BusinessRuleViolationException(ALREADY_WAITING, e);
+            throw new ConflictException(ALREADY_WAITING, e);
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException(
                     String.format(RESERVATION_NOT_FOUND_FORMAT, reservationWaiting.getReservation().getId()),

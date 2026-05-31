@@ -18,9 +18,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
-import roomescape.exception.NotFoundException;
-import roomescape.projection.ReservationWaitingWithOrder;
+import roomescape.domain.exception.ConflictException;
+import roomescape.domain.exception.NotFoundException;
+import roomescape.domain.projection.ReservationWaitingWithOrder;
 import roomescape.repository.ReservationWaitingJdbcRepository;
 import roomescape.repository.ReservationWaitingQueryJdbcRepository;
 import roomescape.repository.ReservationWaitingQueryRepository;
@@ -73,7 +73,7 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void 같은_예약에_같은_이름으로_대기를_저장하면_BusinessRuleViolationException을_던진다() {
+    void 같은_예약에_같은_이름으로_대기를_저장하면_ConflictException을_던진다() {
         repository.save(new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
 
@@ -81,7 +81,7 @@ class ReservationWaitingJdbcRepositoryTest {
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation);
 
         assertThatThrownBy(() -> repository.save(duplicated))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("이미 대기");
     }
 

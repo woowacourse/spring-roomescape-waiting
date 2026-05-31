@@ -15,25 +15,20 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
     private static final String SELECT_BASE = """
             WITH ordered_waiting AS (
                 SELECT rw.id as waiting_id, rw.name as waiting_name, rw.reservation_id,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY rw.reservation_id
-                        ORDER BY rw.id
-                    ) as waiting_order
+                    ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
                 FROM reservation_waiting as rw
             )
-            SELECT ow.waiting_id, ow.waiting_name, ow.waiting_order,
-                   r.date,
-                   t.id as time_id, t.start_at as time_value,
-                   th.id as theme_id, th.name as theme_name,
-                   th.description as theme_description,
-                   th.thumbnail_image_url as theme_thumbnail
+            SELECT 
+                ow.waiting_id, ow.waiting_name, ow.waiting_order,
+                r.date,
+                t.id as time_id, t.start_at as time_value,
+                th.id as theme_id, th.name as theme_name,
+                th.description as theme_description,
+                th.thumbnail_image_url as theme_thumbnail
             FROM ordered_waiting as ow
-            INNER JOIN reservation as r
-                ON ow.reservation_id = r.id
-            INNER JOIN reservation_time as t
-                ON r.time_id = t.id
-            INNER JOIN theme as th
-                ON r.theme_id = th.id
+            INNER JOIN reservation as r ON ow.reservation_id = r.id
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
             """;
 
     private final JdbcTemplate jdbcTemplate;
