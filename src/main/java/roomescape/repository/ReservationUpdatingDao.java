@@ -26,8 +26,7 @@ public class ReservationUpdatingDao {
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
                 reservation.getCreatedAt(),
-                id,
-                reservation.getCreatedAt()
+                id
         );
     }
 
