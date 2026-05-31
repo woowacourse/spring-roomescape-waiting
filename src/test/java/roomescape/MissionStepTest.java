@@ -261,6 +261,85 @@ public class MissionStepTest {
     }
 
     @Test
+    @DisplayName("예약 날짜와 시간을 변경하면 새 예약 ID가 응답된다.")
+    void updateReservationDateTime_returnsNewReservationId() {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "21:00");
+
+        Map<String, String> newTime = new HashMap<>();
+        newTime.put("startAt", "22:00");
+
+        Map<String, String> theme = new HashMap<>();
+        theme.put("name", "예약 변경 테스트");
+        theme.put("description", "예약 변경 테스트용 테마");
+        theme.put("thumbnail", "https://example.com/update-theme.png");
+
+        String date = LocalDate.now().plusDays(1).toString();
+        String newDate = LocalDate.now().plusDays(2).toString();
+
+        int timeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        int newTimeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(newTime)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        int themeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", date);
+        reservation.put("timeId", timeId);
+        reservation.put("themeId", themeId);
+
+        int reservationId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Map<String, Object> updateRequest = new HashMap<>();
+        updateRequest.put("name", "브라운");
+        updateRequest.put("date", newDate);
+        updateRequest.put("timeId", newTimeId);
+
+        int updatedReservationId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(updateRequest)
+                .when().patch("/reservations/" + reservationId)
+                .then().log().all()
+                .statusCode(200)
+                .body("status", is("RESERVED"))
+                .body("date", is(newDate))
+                .body("time.id", is(newTimeId))
+                .extract()
+                .path("id");
+
+        assertThat(updatedReservationId).isNotEqualTo(reservationId);
+    }
+
+    @Test
     @DisplayName("컨트롤러는 JdbcTemplate을 직접 의존하지 않는다.")
     void controllerDoesNotDependOnJdbcTemplate() {
         boolean isJdbcTemplateInjected = false;

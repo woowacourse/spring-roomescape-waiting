@@ -270,16 +270,18 @@ class ReservationServiceTest {
         );
 
         // then
+        assertThat(updatedReservation.getId()).isNotEqualTo(reservation.getId());
         assertThat(updatedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
         assertThat(updatedReservation.getTime()).isEqualTo(newTime);
+        assertThat(countHistoryByReservationId(reservation.getId())).isEqualTo(1);
 
-        Reservation savedReservation = reservationService.findAll().get(0);
-        assertThat(savedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
-        assertThat(savedReservation.getTime()).isEqualTo(newTime);
-
-        assertThat(reservationService.findByName(NAME))
-                .extracting(Reservation::getStatus)
-                .containsExactly(ReservationStatus.CANCELED, ReservationStatus.RESERVED);
+        assertThat(reservationService.findAll())
+                .singleElement()
+                .satisfies(savedReservation -> {
+                    assertThat(savedReservation.getId()).isEqualTo(updatedReservation.getId());
+                    assertThat(savedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
+                    assertThat(savedReservation.getTime()).isEqualTo(newTime);
+                });
     }
 
     @Test
