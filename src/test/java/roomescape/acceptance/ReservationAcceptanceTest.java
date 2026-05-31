@@ -95,12 +95,12 @@ class ReservationAcceptanceTest extends AcceptanceTest {
     }
 
     @Nested
-    @DisplayName("에러 응답의 형식 일관성 (사용자 관점)")
-    class ErrorContract {
+    @DisplayName("에러가 사용자에게 올바른 메시지로 도달한다 (사용자 관점)")
+    class ErrorResponseToUser {
 
         @Test
-        @DisplayName("비즈니스 규칙 위반 에러도 {\"message\":...} 단일 형식으로 온다")
-        void 비즈니스_에러_형식() {
+        @DisplayName("이미 예약된 슬롯에 예약하면 400과 안내 메시지가 사용자에게 도달한다")
+        void 중복_예약_메시지_도달() {
             fixture.insertReservation("브라운", FUTURE, timeId10, themeId);  // 중복 유발
 
             RestAssured.given().log().all()
@@ -114,8 +114,8 @@ class ReservationAcceptanceTest extends AcceptanceTest {
         }
 
         @Test
-        @DisplayName("리소스 부재 에러도 같은 형식으로 404로 온다")
-        void 리소스_부재_형식() {
+        @DisplayName("존재하지 않는 예약을 취소하면 404와 안내 메시지가 도달한다")
+        void 리소스_부재_메시지_도달() {
             RestAssured.given().log().all()
                     .when().delete("/user/reservations/9999?name=브라운")
                     .then().log().all()
