@@ -48,7 +48,12 @@ public class ReservationWaitingServiceTest {
         Long themeId = 1L;
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
 
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
+        when(timeDao.selectById(timeId))
+                .thenReturn(Optional.of(reservationTime));
         when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
                 .thenReturn(false);
         when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
@@ -98,13 +103,6 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
-        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(
-                name, themeId, date, timeId
-        )).thenReturn(false);
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
 
@@ -122,7 +120,12 @@ public class ReservationWaitingServiceTest {
         Long themeId = 1L;
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
 
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
+        when(timeDao.selectById(timeId))
+                .thenReturn(Optional.of(reservationTime));
         when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
                 .thenReturn(true);
 
@@ -130,9 +133,9 @@ public class ReservationWaitingServiceTest {
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.RESERVATION_NOT_EXISTS.getMessage());
 
-        verify(reservationDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
+        verify(reservationDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(),
+                any(LocalDate.class), anyLong());
         verify(reservationWaitingDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
-        verify(timeDao, never()).selectById(anyLong());
     }
 
     @Test
@@ -141,7 +144,12 @@ public class ReservationWaitingServiceTest {
         Long themeId = 1L;
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
 
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
+        when(timeDao.selectById(timeId))
+                .thenReturn(Optional.of(reservationTime));
         when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
                 .thenReturn(false);
         when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
@@ -152,7 +160,6 @@ public class ReservationWaitingServiceTest {
                 .hasMessage(ErrorCode.DUPLICATED_RESERVATION.getMessage());
 
         verify(reservationWaitingDao, never()).existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong());
-        verify(timeDao, never()).selectById(anyLong());
     }
 
     @Test
@@ -162,12 +169,6 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
-        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
-                .thenReturn(false);
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.empty());
 
@@ -187,12 +188,6 @@ public class ReservationWaitingServiceTest {
         Long timeId = 1L;
         ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().minusHours(1));
 
-        when(reservationDao.notExistsByDateAndThemeIdAndTimeId(themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
-                .thenReturn(false);
-        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
-                .thenReturn(false);
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.of(new Theme(themeId, "theme", "description", "image")));
         when(timeDao.selectById(timeId))

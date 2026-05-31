@@ -36,14 +36,15 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {
-        validateNotExistsReservation(themeId, date, timeId);
-        validateDuplicatedReservation(name, themeId, date, timeId);
-        validateDuplicatedWaiting(name, themeId, date, timeId);
         validateThemeExists(themeId);
-
         ReservationTime reservationTime = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
         validateDateTime(date, reservationTime);
+
+        validateNotExistsReservation(themeId, date, timeId);
+        validateDuplicatedReservation(name, themeId, date, timeId);
+        validateDuplicatedWaiting(name, themeId, date, timeId);
+
 
         Long nextWaitingNumber = reservationWaitingDao.findNextWaitingNumber(themeId, date, timeId);
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, nextWaitingNumber);
@@ -80,8 +81,9 @@ public class ReservationWaitingService {
     }
 
     private void validateThemeExists(Long themeId) {
-        themeDao.selectById(themeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+        if (themeDao.selectById(themeId).isEmpty()) {
+            throw new RoomescapeException(ErrorCode.THEME_NOT_FOUND);
+        }
     }
 
     private void validateDateTime(LocalDate date, ReservationTime time) {
