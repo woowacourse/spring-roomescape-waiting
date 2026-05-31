@@ -8,12 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Component;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 
 @Component
 public class SlotManager {
 
-    private final ConcurrentHashMap<Slot, Boolean> confirmedSlots = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<EventSlot, Boolean> confirmedSlots = new ConcurrentHashMap<>();
     private final ReservationDao reservationDao;
     private final Clock clock;
 
@@ -27,7 +27,7 @@ public class SlotManager {
         List<Reservation> confirmedReservations = reservationDao.findByAfterDateTime(LocalDateTime.now(clock));
         for (Reservation reservation : confirmedReservations) {
             confirmedSlots.put(
-                    Slot.from(
+                    EventSlot.from(
                             reservation.getDate(),
                             reservation.getTime(),
                             reservation.getTheme()
@@ -36,20 +36,20 @@ public class SlotManager {
         }
     }
 
-    public boolean tryAcquire(Slot slot) {
-        return confirmedSlots.putIfAbsent(slot, Boolean.TRUE) == null;
+    public boolean tryAcquire(EventSlot eventSlot) {
+        return confirmedSlots.putIfAbsent(eventSlot, Boolean.TRUE) == null;
     }
 
-    public boolean tryChange(Slot originSlot, Slot modifiedSlot) {
-        if (confirmedSlots.putIfAbsent(modifiedSlot, Boolean.TRUE) == null) {
-            confirmedSlots.remove(originSlot);
+    public boolean tryChange(EventSlot originEventSlot, EventSlot modifiedEventSlot) {
+        if (confirmedSlots.putIfAbsent(modifiedEventSlot, Boolean.TRUE) == null) {
+            confirmedSlots.remove(originEventSlot);
             return true;
         }
 
         return false;
     }
 
-    public void release(Slot slot) {
-        confirmedSlots.remove(slot);
+    public void release(EventSlot eventSlot) {
+        confirmedSlots.remove(eventSlot);
     }
 }

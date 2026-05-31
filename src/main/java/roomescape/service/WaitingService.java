@@ -10,7 +10,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 import roomescape.domain.waiting.Waiting;
@@ -46,15 +46,15 @@ public class WaitingService {
         Theme theme = themeDao.findThemeById(command.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        Slot slot = Slot.from(command.date(), time, theme);
+        EventSlot eventSlot = EventSlot.from(command.date(), time, theme);
 
-        slot.verifyBookable(LocalDateTime.now(clock));
+        eventSlot.verifyBookable(LocalDateTime.now(clock));
 
-        validateWaitingPolicy(command.name(), slot);
+        validateWaitingPolicy(command.name(), eventSlot);
 
         Waiting waiting = new Waiting(
                 UserName.parse(command.name()),
-                slot,
+                eventSlot,
                 LocalDateTime.now(clock)
         );
 
@@ -63,16 +63,16 @@ public class WaitingService {
         return WaitingResult.from(saved);
     }
 
-    private void validateWaitingPolicy(String userName, Slot slot) {
-        if (!reservationDao.existsBySlot(slot)) {
+    private void validateWaitingPolicy(String userName, EventSlot eventSlot) {
+        if (!reservationDao.existsBySlot(eventSlot)) {
             throw new UnprocessableEntityException("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다.");
         }
 
-        if (reservationDao.existsByUserNameAndSlot(userName, slot)) {
+        if (reservationDao.existsByUserNameAndSlot(userName, eventSlot)) {
             throw new UnprocessableEntityException("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다.");
         }
 
-        if (waitingDao.existsByUserNameAndSlot(userName, slot)) {
+        if (waitingDao.existsByUserNameAndSlot(userName, eventSlot)) {
             throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
         }
     }

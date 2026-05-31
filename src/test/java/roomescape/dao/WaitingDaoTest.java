@@ -15,7 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -45,19 +45,19 @@ public class WaitingDaoTest {
     @Test
     void 예약_대기를_생성할_수_있다() {
         // given
-        Slot originSlot = Slot.from(date, time, theme);
-        Waiting waiting = new Waiting(userName, originSlot, createdAt);
+        EventSlot originEventSlot = EventSlot.from(date, time, theme);
+        Waiting waiting = new Waiting(userName, originEventSlot, createdAt);
 
         // when
         Waiting saved = waitingDao.save(waiting);
-        Slot savedSlot = saved.getSlot();
+        EventSlot savedEventSlot = saved.getSlot();
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo(waiting.getName());
         assertThat(saved.getCreatedAt()).isEqualTo(waiting.getCreatedAt());
-        assertThat(savedSlot.date()).isEqualTo(originSlot.date());
-        assertThat(savedSlot.time()).isEqualTo(originSlot.time());
-        assertThat(savedSlot.theme()).isEqualTo(originSlot.theme());
+        assertThat(savedEventSlot.date()).isEqualTo(originEventSlot.date());
+        assertThat(savedEventSlot.time()).isEqualTo(originEventSlot.time());
+        assertThat(savedEventSlot.theme()).isEqualTo(originEventSlot.theme());
     }
 
     @Test

@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -161,7 +161,7 @@ public class WaitingDao {
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsByUserNameAndSlot(String userName, Slot slot) {
+    public boolean existsByUserNameAndSlot(String userName, EventSlot eventSlot) {
         String sql = """
                 SELECT EXISTS(
                             SELECT 1
@@ -175,9 +175,9 @@ public class WaitingDao {
                 sql,
                 Boolean.class,
                 userName,
-                slot.date(),
-                slot.time().getId(),
-                slot.theme().getId()
+                eventSlot.date(),
+                eventSlot.time().getId(),
+                eventSlot.theme().getId()
         );
 
         return Boolean.TRUE.equals(result);

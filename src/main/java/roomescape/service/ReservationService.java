@@ -13,7 +13,7 @@ import roomescape.dao.WaitingDao;
 import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 import roomescape.infrastructure.SlotManager;
@@ -80,8 +80,8 @@ public class ReservationService {
 
         reservation.verifyBookable(LocalDateTime.now(clock));
 
-        Slot slot = new Slot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
-        if (!slotManager.tryAcquire(slot)) {
+        EventSlot eventSlot = new EventSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        if (!slotManager.tryAcquire(eventSlot)) {
             reservation.reject();
             throw new ConflictException("이미 존재하는 예약 건입니다.");
         }
@@ -98,14 +98,14 @@ public class ReservationService {
         ReservationTime newTime = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        Slot originSlot = Slot.from(origin.getDate(), origin.getTime(), origin.getTheme());
-        Slot modifiedSlot = Slot.from(command.date(), newTime, origin.getTheme());
+        EventSlot originEventSlot = EventSlot.from(origin.getDate(), origin.getTime(), origin.getTheme());
+        EventSlot modifiedEventSlot = EventSlot.from(command.date(), newTime, origin.getTheme());
 
-        if (originSlot.equals(modifiedSlot)) {
+        if (originEventSlot.equals(modifiedEventSlot)) {
             return ReservationResult.from(origin);
         }
 
-        if (!slotManager.tryChange(originSlot, modifiedSlot)) {
+        if (!slotManager.tryChange(originEventSlot, modifiedEventSlot)) {
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
@@ -119,7 +119,7 @@ public class ReservationService {
         boolean isSuccessful = reservationDao.update(modified);
 
         if (!isSuccessful) {
-            slotManager.tryChange(modifiedSlot, originSlot);
+            slotManager.tryChange(modifiedEventSlot, originEventSlot);
             throw new NotFoundException("예약 변경 중 문제가 발생했습니다. (이미 취소된 예약일 수 있습니다.)");
         }
 

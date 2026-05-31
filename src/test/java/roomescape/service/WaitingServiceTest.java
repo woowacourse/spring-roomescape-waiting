@@ -26,7 +26,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -52,7 +52,7 @@ class WaitingServiceTest {
     private final ThumbnailUrl url = ThumbnailUrl.parse("/images/cursed-mansion");
     private final Theme theme = new Theme(themeId, themeName, description, url);
 
-    private final Slot slot = new Slot(date, time, theme);
+    private final EventSlot eventSlot = new EventSlot(date, time, theme);
 
     private final Clock fixedClock = new FixedClockConfig().testClock();
     private final LocalDateTime createAt = LocalDateTime.now(fixedClock);
@@ -88,14 +88,14 @@ class WaitingServiceTest {
         Waiting saved = new Waiting(
                 waitingId,
                 UserName.parse(userName),
-                slot,
+                eventSlot,
                 createAt
         );
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.save(any())).willReturn(saved);
-        given(reservationDao.existsBySlot(slot)).willReturn(true);
+        given(reservationDao.existsBySlot(eventSlot)).willReturn(true);
 
         WaitingResult result = waitingService.registerWaiting(command);
         assertThat(result.id()).isEqualTo(saved.getId());
@@ -150,7 +150,7 @@ class WaitingServiceTest {
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBySlot(slot)).willReturn(false);
+        given(reservationDao.existsBySlot(eventSlot)).willReturn(false);
 
         assertThatThrownBy(() -> waitingService.registerWaiting(command))
                 .isInstanceOf(UnprocessableEntityException.class)
@@ -168,8 +168,8 @@ class WaitingServiceTest {
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBySlot(slot)).willReturn(true);
-        given(reservationDao.existsByUserNameAndSlot(userName, slot)).willReturn(true);
+        given(reservationDao.existsBySlot(eventSlot)).willReturn(true);
+        given(reservationDao.existsByUserNameAndSlot(userName, eventSlot)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.registerWaiting(command))
                 .isInstanceOf(UnprocessableEntityException.class)
@@ -187,8 +187,8 @@ class WaitingServiceTest {
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBySlot(slot)).willReturn(true);
-        given(waitingDao.existsByUserNameAndSlot(userName, slot)).willReturn(true);
+        given(reservationDao.existsBySlot(eventSlot)).willReturn(true);
+        given(waitingDao.existsByUserNameAndSlot(userName, eventSlot)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.registerWaiting(command))
                 .isInstanceOf(UnprocessableEntityException.class)

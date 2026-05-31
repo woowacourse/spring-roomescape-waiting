@@ -6,14 +6,14 @@ import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 
-public record Slot(
+public record EventSlot(
         LocalDate date,
         ReservationTime time,
         Theme theme
 ) {
 
-    public static Slot from(LocalDate date, ReservationTime time, Theme theme) {
-        return new Slot(date, time, theme);
+    public static EventSlot from(LocalDate date, ReservationTime time, Theme theme) {
+        return new EventSlot(date, time, theme);
     }
 
     public void verifyBookable(LocalDateTime now) {

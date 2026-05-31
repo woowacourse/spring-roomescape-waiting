@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 
 @Repository
 public class ReservationDao {
@@ -158,7 +158,7 @@ public class ReservationDao {
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsBySlot(Slot slot) {
+    public boolean existsBySlot(EventSlot eventSlot) {
         Boolean result = jdbcTemplate.queryForObject("""
                         SELECT EXISTS(
                             SELECT *
@@ -169,14 +169,14 @@ public class ReservationDao {
                         ) 
                         """,
                 Boolean.class,
-                slot.date(),
-                slot.time().getId(),
-                slot.theme().getId()
+                eventSlot.date(),
+                eventSlot.time().getId(),
+                eventSlot.theme().getId()
         );
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsByUserNameAndSlot(String userName, Slot slot) {
+    public boolean existsByUserNameAndSlot(String userName, EventSlot eventSlot) {
         String sql = """
                 SELECT EXISTS(
                     SELECT 1
@@ -191,9 +191,9 @@ public class ReservationDao {
                 sql,
                 Boolean.class,
                 userName,
-                slot.date(),
-                slot.time().getId(),
-                slot.theme().getId()
+                eventSlot.date(),
+                eventSlot.time().getId(),
+                eventSlot.theme().getId()
         );
         return Boolean.TRUE.equals(result);
     }

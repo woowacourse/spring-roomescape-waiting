@@ -28,7 +28,7 @@ import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -50,7 +50,7 @@ public class ReservationServiceTest {
     private final Long themeId = 1L;
     private final Theme theme = new Theme(themeId, ThemeName.parse("테마1"), Description.parse("설명1"),
             ThumbnailUrl.parse("/images/thumbnail"));
-    private final Slot slot = new Slot(futureDate, time, theme);
+    private final EventSlot eventSlot = new EventSlot(futureDate, time, theme);
     private final Clock clock = new FixedClockConfig().testClock();
 
     private ReservationService reservationService;
@@ -80,7 +80,7 @@ public class ReservationServiceTest {
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(slotManager.tryAcquire(any(Slot.class))).willReturn(true);
+        given(slotManager.tryAcquire(any(EventSlot.class))).willReturn(true);
         given(reservationDao.save(any(Reservation.class))).willReturn(reservation);
 
         ReservationResult saved = reservationService.registerReservation(command);
@@ -126,7 +126,7 @@ public class ReservationServiceTest {
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(slotManager.tryAcquire(any(Slot.class))).willReturn(false);
+        given(slotManager.tryAcquire(any(EventSlot.class))).willReturn(false);
 
         assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(ConflictException.class)

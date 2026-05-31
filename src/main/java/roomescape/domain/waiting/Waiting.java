@@ -5,26 +5,26 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.domain.reservation.UserName;
-import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 
 public class Waiting {
     private final Long id;
     private final UserName userName;
-    private final Slot slot;
+    private final EventSlot eventSlot;
     private final LocalDateTime createdAt;
 
     public Waiting(UserName userName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
         this(null, userName, date, time, theme, createdAt);
     }
 
-    public Waiting(UserName userName, Slot slot, LocalDateTime createdAt) {
-        this(null, userName, slot.date(), slot.time(), slot.theme(), createdAt);
+    public Waiting(UserName userName, EventSlot eventSlot, LocalDateTime createdAt) {
+        this(null, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), createdAt);
     }
 
-    public Waiting(Long id, UserName userName, Slot slot, LocalDateTime createdAt) {
-        this(id, userName, slot.date(), slot.time(), slot.theme(), createdAt);
+    public Waiting(Long id, UserName userName, EventSlot eventSlot, LocalDateTime createdAt) {
+        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), createdAt);
     }
 
     public Waiting(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme,
@@ -32,7 +32,7 @@ public class Waiting {
         this.id = id;
         validate(userName, date, time, theme, createdAt);
         this.userName = userName;
-        this.slot = Slot.from(date, time, theme);
+        this.eventSlot = EventSlot.from(date, time, theme);
         this.createdAt = createdAt;
     }
 
@@ -63,8 +63,8 @@ public class Waiting {
         return userName;
     }
 
-    public Slot getSlot() {
-        return slot;
+    public EventSlot getSlot() {
+        return eventSlot;
     }
 
     public LocalDateTime getCreatedAt() {
