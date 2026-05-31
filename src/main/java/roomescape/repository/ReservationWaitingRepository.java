@@ -102,6 +102,12 @@ public class ReservationWaitingRepository {
         return count != null && count > 0;
     }
 
+    public boolean existsByThemeId(Long themeId) {
+        String sql = "SELECT count(*) FROM reservation_waiting WHERE theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
+        return count != null && count > 0;
+    }
+
     public Optional<ReservationWaiting> findById(Long id) {
         String sql = """
                 SELECT

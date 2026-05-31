@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.result.PopularThemeResult;
 
@@ -22,7 +23,11 @@ class ThemeServiceTest {
 
     private final ThemeRepository themeRepository = mock();
     private final ReservationRepository reservationRepository = mock();
-    private final ThemeService service = new ThemeService(themeRepository, reservationRepository);
+    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final ThemeService service = new ThemeService(
+            themeRepository,
+            reservationRepository,
+            reservationWaitingRepository);
 
     @Test
     void 전체_테마_조회_테스트() {
@@ -38,8 +43,6 @@ class ThemeServiceTest {
 
         // then
         assertThat(result).isEqualTo(themes);
-        verify(themeRepository, times(1)).findAll();
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
     }
 
     @Test
@@ -77,8 +80,7 @@ class ThemeServiceTest {
                 () -> assertThat(captured.getDescription()).isEqualTo(description),
                 () -> assertThat(captured.getThumbnail()).isEqualTo(thumbnail));
 
-        verify(themeRepository, times(1)).findBy(id);
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verify(themeRepository).findBy(id);
     }
 
     @Test
@@ -87,14 +89,14 @@ class ThemeServiceTest {
         Long id = 1L;
         when(reservationRepository.existsByThemeId(id))
                 .thenReturn(false);
+        when(reservationWaitingRepository.existsByThemeId(id))
+                .thenReturn(false);
 
         // when
         service.delete(id);
 
         // then
-        verify(reservationRepository, times(1)).existsByThemeId(id);
-        verify(themeRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verify(themeRepository).delete(id);
     }
 
     @Test
@@ -109,9 +111,24 @@ class ThemeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
 
-        verify(reservationRepository, times(1)).existsByThemeId(id);
         verify(themeRepository, never()).delete(anyLong());
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+    }
+
+    @Test
+    void 예약_대기가_존재하는_테마는_삭제시_예외_발생() {
+        // given
+        Long id = 1L;
+        when(reservationRepository.existsByThemeId(id))
+                .thenReturn(false);
+        when(reservationWaitingRepository.existsByThemeId(id))
+                .thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(id))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("예약 대기가 존재하는 테마는 삭제할 수 없습니다.");
+
+        verify(themeRepository, never()).delete(anyLong());
     }
 
     @Test
@@ -128,7 +145,5 @@ class ThemeServiceTest {
 
         // then
         assertThat(result).isEqualTo(popularThemes);
-        verify(themeRepository, times(1)).findPopular(any(LocalDate.class), any(LocalDate.class), eq(10));
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
     }
 }

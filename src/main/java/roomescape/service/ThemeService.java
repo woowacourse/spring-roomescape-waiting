@@ -6,6 +6,7 @@ import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.result.PopularThemeResult;
 
@@ -18,10 +19,14 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository,
+                        ReservationRepository reservationRepository,
+                        ReservationWaitingRepository reservationWaitingRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public List<Theme> findAll() {
@@ -52,6 +57,9 @@ public class ThemeService {
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다.");
+        }
+        if (reservationWaitingRepository.existsByThemeId(id)) {
+            throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약 대기가 존재하는 테마는 삭제할 수 없습니다.");
         }
     }
 }
