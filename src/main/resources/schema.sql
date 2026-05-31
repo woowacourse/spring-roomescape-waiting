@@ -8,9 +8,9 @@ CREATE TABLE reservation_time
 CREATE TABLE theme
 (
     id          BIGINT       NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(30)  NOT NULL,
-    description VARCHAR(100) NOT NULL,
-    thumbnail   VARCHAR(100) NOT NULL,
+    name        VARCHAR(50)  NOT NULL,
+    description VARCHAR(1000) NOT NULL,
+    thumbnail   VARCHAR(2048) NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE waiting
     id         BIGINT      NOT NULL AUTO_INCREMENT,
     created_at TIMESTAMP   NOT NULL,
     slot_id    BIGINT,
-    name       VARCHAR(10) NOT NULL,
+    name       VARCHAR(50) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
@@ -38,7 +38,7 @@ CREATE TABLE waiting
 CREATE TABLE reservation
 (
     id      BIGINT      NOT NULL AUTO_INCREMENT,
-    name    VARCHAR(10) NOT NULL,
+    name    VARCHAR(50) NOT NULL,
     slot_id BIGINT,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
