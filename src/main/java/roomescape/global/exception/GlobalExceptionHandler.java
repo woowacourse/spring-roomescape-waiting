@@ -18,8 +18,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ConflictException;
+import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.domain.exception.UnauthorizedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -36,9 +36,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildProblem(HttpStatus.NOT_FOUND, ProblemType.NOT_FOUND, ex, request);
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ProblemDetail handleUnauthorized(UnauthorizedException ex, WebRequest request) {
-        return buildProblem(HttpStatus.UNAUTHORIZED, ProblemType.UNAUTHORIZED, ex, request);
+    @ExceptionHandler(ForbiddenException.class)
+    public ProblemDetail handleForbidden(ForbiddenException ex, WebRequest request) {
+        return buildProblem(HttpStatus.FORBIDDEN, ProblemType.FORBIDDEN, ex, request);
     }
 
     @ExceptionHandler(ConflictException.class)

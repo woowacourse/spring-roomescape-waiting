@@ -18,8 +18,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
-import roomescape.domain.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
@@ -74,12 +74,12 @@ class ReservationUseCaseMockTest {
     }
 
     @Test
-    void deleteMine은_본인_예약이_아니면_UnauthorizedException을_던진다() {
+    void deleteMine은_본인_예약이_아니면_ForbiddenException을_던진다() {
         Reservation reservation = new Reservation(1L, "티뉴", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationCommandService.deleteMine(1L, "민욱"))
-                .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test

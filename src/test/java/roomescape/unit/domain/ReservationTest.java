@@ -12,7 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
-import roomescape.domain.exception.UnauthorizedException;
+import roomescape.domain.exception.ForbiddenException;
 
 class ReservationTest {
 
@@ -90,7 +90,7 @@ class ReservationTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 13, 0);
 
         assertThatThrownBy(() -> reservation.cancelBy("티뉴", now))
-                .isInstanceOf(UnauthorizedException.class);
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test

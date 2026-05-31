@@ -3,7 +3,7 @@ package roomescape.domain;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.BusinessRuleViolationException;
-import roomescape.domain.exception.UnauthorizedException;
+import roomescape.domain.exception.ForbiddenException;
 
 public class ReservationWaiting {
 
@@ -93,7 +93,7 @@ public class ReservationWaiting {
 
     private void validateOwner(String name) {
         if (!this.name.equals(name)) {
-            throw new UnauthorizedException(NOT_OWNER);
+            throw new ForbiddenException(NOT_OWNER);
         }
     }
 }

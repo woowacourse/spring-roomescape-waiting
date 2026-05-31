@@ -5,7 +5,7 @@ import java.net.URI;
 public enum ProblemType {
 
     NOT_FOUND("not-found", "리소스를 찾을 수 없음"),
-    UNAUTHORIZED("unauthorized", "본인 확인 실패"),
+    FORBIDDEN("forbidden", "접근 권한 없음"),
     CONFLICT("conflict", "요청이 현재 상태와 충돌함"),
     BUSINESS_RULE_VIOLATION("business-rule-violation", "비즈니스 정책 위반"),
     VALIDATION_ERROR("validation-error", "요청 본문 검증 실패"),

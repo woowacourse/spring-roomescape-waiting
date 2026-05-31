@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.exception.BusinessRuleViolationException;
-import roomescape.domain.exception.UnauthorizedException;
+import roomescape.domain.exception.ForbiddenException;
 
 public class Reservation {
 
@@ -135,7 +135,7 @@ public class Reservation {
 
     private void validateOwner(String name) {
         if (!name.equals(this.name)) {
-            throw new UnauthorizedException(NOT_OWNER);
+            throw new ForbiddenException(NOT_OWNER);
         }
     }
 

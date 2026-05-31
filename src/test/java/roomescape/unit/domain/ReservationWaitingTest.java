@@ -12,7 +12,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
-import roomescape.domain.exception.UnauthorizedException;
+import roomescape.domain.exception.ForbiddenException;
 
 class ReservationWaitingTest {
 
@@ -66,7 +66,7 @@ class ReservationWaitingTest {
         ReservationWaiting waiting = new ReservationWaiting("민욱", LocalDateTime.of(2026, 8, 1, 10, 0), RESERVATION);
 
         assertThatThrownBy(() -> waiting.cancelBy("브라운"))
-                .isInstanceOf(UnauthorizedException.class)
+                .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("본인의 예약 대기");
     }
 

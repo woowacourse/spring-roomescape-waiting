@@ -145,7 +145,7 @@ class ReservationWaitingApiTest {
     }
 
     @Test
-    void 다른_사람_이름으로_대기를_취소하면_401을_반환한다() {
+    void 다른_사람_이름으로_대기를_취소하면_403을_반환한다() {
         Integer timeId = createTime("15:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer reservationId = createReservation("티뉴", "2026-08-05", timeId, themeId);
@@ -155,7 +155,7 @@ class ReservationWaitingApiTest {
                 .queryParam("name", "브라운")
                 .when().delete("/waitings/me/" + waitingId)
                 .then().log().all()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
