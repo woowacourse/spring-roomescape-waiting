@@ -47,7 +47,6 @@ public class UserReservationController {
                 .toList();
     }
 
-
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancel(@PathVariable Long id, @NotBlank(message = "이름은 비어 있을 수 없습니다.") @RequestParam String name) {

@@ -437,17 +437,23 @@ public class MyReservationStepTest extends IntegrationTest {
     @Test
     @DisplayName("내 예약 + 내 대기를 함께 조회한다 (status로 구분)")
     void 예약과_대기_함께_조회() {
-        helper.insertReservation("브라운", FUTURE_DATE_1, timeId10, themeId);
+        helper.insertReservation("브라운", FUTURE_DATE_1, timeId10, themeId); // 예약
         helper.insertReservation("콘", FUTURE_DATE_2, timeId10, themeId);
-        helper.insertWaiting("브라운", FUTURE_DATE_2, timeId10, themeId, 1);
+        helper.insertWaiting("브라운", FUTURE_DATE_2, timeId10, themeId, 1); // 대기
 
         RestAssured.given().log().all()
                 .when().get("/user/reservations?name=브라운")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
+                .body("[0].date", is(FUTURE_DATE_1.toString())) // 예약
+                .body("[0].time.id", is(timeId10.intValue()))
+                .body("[0].theme.id", is(themeId.intValue()))
                 .body("[0].status", is("RESERVED"))
                 .body("[0].waitingOrder", nullValue())
+                .body("[1].date", is(FUTURE_DATE_2.toString())) // 대기
+                .body("[1].time.id", is(timeId10.intValue()))
+                .body("[1].theme.id", is(themeId.intValue()))
                 .body("[1].status", is("WAITING"))
                 .body("[1].waitingOrder", is(1));
     }
