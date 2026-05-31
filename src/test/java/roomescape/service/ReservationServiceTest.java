@@ -31,8 +31,10 @@ import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.domain.Member;
+import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
@@ -59,11 +61,13 @@ class ReservationServiceTest {
     private JdbcTemplate jdbcTemplate;
 
     private Member member;
+    private Member otherMember;
     private Time savedTime1;
     private Time savedTime2;
     private Theme savedTheme1;
     private Theme savedTheme2;
     private Long storeId;
+    private Store store;
     private ReservationRequestDto requestDto1;
     private ReservationRequestDto requestDto2;
 
@@ -72,11 +76,13 @@ class ReservationServiceTest {
         jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
         storeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
+        store = new Store(storeId, "강남점");
         jdbcTemplate.update(
                 "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
                 "유저", "user@test.com", "password", "USER"
         );
         member = memberDao.findByEmail("user@test.com").orElseThrow();
+        otherMember = new Member(-1L, "타인", "other@test.com", "password", MemberRole.USER);
         savedTime1 = timeDao.insert(new Time(LocalTime.of(13, 0)));
         savedTime2 = timeDao.insert(new Time(LocalTime.of(14, 0)));
         savedTheme1 = themeDao.insert(new Theme(new Name("방탈출 이름1"), "http://thumbnail_url", "방탈출을 할 수 있다."));
@@ -151,8 +157,8 @@ class ReservationServiceTest {
         @DisplayName("CANCELED 예약을 조회하면 예외를 반환한다")
         void throwsWhenCanceled() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, null));
-            reservationService.cancel(saved.getId(), member.getId());
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, store));
+            reservationService.cancel(saved.getId(), member);
 
             assertThatThrownBy(() -> reservationService.findActiveById(saved.getId()))
                     .isInstanceOf(EntityNotFoundException.class);
@@ -176,8 +182,8 @@ class ReservationServiceTest {
         @DisplayName("취소된 예약도 반환한다")
         void includesCanceledReservations() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, null));
-            reservationService.cancel(saved.getId(), member.getId());
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, store));
+            reservationService.cancel(saved.getId(), member);
 
             assertThat(reservationService.findAllByMemberId(member.getId())).hasSize(1);
         }
@@ -199,7 +205,7 @@ class ReservationServiceTest {
             LocalDate newDate = LocalDate.now().plusDays(3);
             ReservationPatchDto updateDto = new ReservationPatchDto(newDate, savedTime2.getId());
 
-            Reservation updated = reservationService.updateByUser(saved.getId(), member.getId(), updateDto);
+            Reservation updated = reservationService.updateByUser(saved.getId(), member, updateDto);
 
             assertThat(updated.getDate()).isEqualTo(newDate);
             assertThat(updated.getTime()).isEqualTo(savedTime2);
@@ -211,7 +217,7 @@ class ReservationServiceTest {
             Reservation saved = reservationService.create(member, requestDto1);
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime2.getId());
 
-            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
+            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), otherMember, updateDto))
                     .isInstanceOf(HiddenResourceException.class);
         }
 
@@ -221,7 +227,7 @@ class ReservationServiceTest {
             Reservation saved = reservationService.create(member, requestDto1);
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), -1L);
 
-            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
+            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), otherMember, updateDto))
                     .isInstanceOf(HiddenResourceException.class);
         }
 
@@ -230,7 +236,7 @@ class ReservationServiceTest {
         void throwsWhenIdNotFound() {
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime1.getId());
 
-            assertThatThrownBy(() -> reservationService.updateByUser(-1L, member.getId(), updateDto))
+            assertThatThrownBy(() -> reservationService.updateByUser(-1L, member, updateDto))
                     .isInstanceOf(EntityNotFoundException.class);
         }
     }
@@ -242,9 +248,9 @@ class ReservationServiceTest {
         @DisplayName("미래 예약을 취소하면 상태가 CANCELED로 변경된다")
         void cancelsReservation() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, null));
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, store));
 
-            reservationService.cancel(saved.getId(), member.getId());
+            reservationService.cancel(saved.getId(), member);
 
             Reservation canceled = reservationDao.findById(saved.getId()).orElseThrow();
             assertThat(canceled.getStatus()).isEqualTo(ReservationStatus.CANCELED);
@@ -253,7 +259,7 @@ class ReservationServiceTest {
         @Test
         @DisplayName("존재하지 않는 id를 취소하면 예외를 반환한다")
         void throwsWhenIdNotFound() {
-            assertThatThrownBy(() -> reservationService.cancel(-1L, member.getId()))
+            assertThatThrownBy(() -> reservationService.cancel(-1L, member))
                     .isInstanceOf(EntityNotFoundException.class);
         }
 
@@ -261,9 +267,9 @@ class ReservationServiceTest {
         @DisplayName("이미 지난 예약을 취소하면 예외를 반환한다")
         void throwsWhenPastReservation() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1, null));
+                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1, store));
 
-            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), member.getId()))
+            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), member))
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
 
@@ -271,9 +277,9 @@ class ReservationServiceTest {
         @DisplayName("다른 사람의 예약을 취소하면 예외를 반환한다")
         void throwsWhenNotOwner() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, null));
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, store));
 
-            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), -1L))
+            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), otherMember))
                     .isInstanceOf(HiddenResourceException.class);
         }
     }

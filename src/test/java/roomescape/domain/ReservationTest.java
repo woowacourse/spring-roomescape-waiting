@@ -17,11 +17,13 @@ class ReservationTest {
 
     private Member member;
     private Theme theme;
+    private Store store;
 
     @BeforeEach
     void setUp() {
         member = new Member(1L, "유저", "user@test.com", "password", MemberRole.USER);
         theme = new Theme(1L, new Name("테마"), "http://thumbnail", "설명");
+        store = new Store(1L, "강남점");
     }
 
     @Nested
@@ -34,7 +36,7 @@ class ReservationTest {
             LocalDate futureDate = LocalDate.now().plusDays(1);
             LocalDateTime now = LocalDateTime.now();
 
-            Reservation reservation = Reservation.createByUser(member, futureDate, time, theme, null, now);
+            Reservation reservation = Reservation.createByUser(member, futureDate, time, theme, store, now);
 
             assertThat(reservation.isActive()).isTrue();
         }
@@ -46,7 +48,7 @@ class ReservationTest {
             LocalDate pastDate = LocalDate.now().minusDays(1);
             LocalDateTime now = LocalDateTime.now();
 
-            assertThatThrownBy(() -> Reservation.createByUser(member, pastDate, time, theme, null, now))
+            assertThatThrownBy(() -> Reservation.createByUser(member, pastDate, time, theme, store, now))
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
     }
@@ -105,7 +107,7 @@ class ReservationTest {
             Time time = new Time(1L, LocalTime.of(10, 0));
             Reservation reservation = Reservation.reconstruct(
                     1L, member, LocalDate.now().plusDays(1), time, theme,
-                    ReservationStatus.CANCELED, LocalDateTime.now(), 0L, null);
+                    ReservationStatus.CANCELED, LocalDateTime.now(), 0L, store);
 
             assertThat(reservation.isActive()).isFalse();
         }
@@ -163,6 +165,6 @@ class ReservationTest {
 
     private Reservation bookedReservation(LocalDate date) {
         Time time = new Time(1L, LocalTime.of(10, 0));
-        return Reservation.createByAdmin(member, date, time, theme, null);
+        return Reservation.createByAdmin(member, date, time, theme, store);
     }
 }

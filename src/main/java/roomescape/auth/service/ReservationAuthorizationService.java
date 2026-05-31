@@ -1,13 +1,14 @@
 package roomescape.auth.service;
 
-import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.ReservationDao;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Store;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,19 +19,20 @@ public class ReservationAuthorizationService {
         this.reservationDao = reservationDao;
     }
 
-    public void validateMemberCanAccess(Long memberId, Long reservationId) {
+    public void validateMemberCanAccess(Member member, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
-        if (!reservation.getMember().getId().equals(memberId)) {
+        if (!reservation.isSameMember(member)) {
             throw new HiddenResourceException();
         }
     }
 
-    public void validateManagerCanAccess(Long storeId, Long reservationId) {
-        if (storeId == null) {
+    public void validateManagerCanAccess(Member manager, Long reservationId) {
+        Store store = manager.getStore();
+        if (store == null) {
             throw new UnauthorizedException();
         }
         Reservation reservation = findReservation(reservationId);
-        if (!Objects.equals(storeId, reservation.getStoreId())) {
+        if (!reservation.isInStore(store)) {
             throw new UnauthorizedException();
         }
     }

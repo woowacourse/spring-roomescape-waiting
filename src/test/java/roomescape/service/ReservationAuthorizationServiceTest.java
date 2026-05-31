@@ -84,14 +84,15 @@ class ReservationAuthorizationServiceTest {
         @Test
         @DisplayName("예약 소유자는 예약에 접근할 수 있다")
         void allowsOwner() {
-            assertThatCode(() -> authorizationService.validateMemberCanAccess(member.getId(), reservation.getId()))
+            assertThatCode(() -> authorizationService.validateMemberCanAccess(member, reservation.getId()))
                     .doesNotThrowAnyException();
         }
 
         @Test
         @DisplayName("예약 소유자가 아니면 숨김 예외를 반환한다")
         void throwsWhenNotOwner() {
-            assertThatThrownBy(() -> authorizationService.validateMemberCanAccess(-1L, reservation.getId()))
+            Member other = new Member(-1L, "타인", "other@test.com", "password", MemberRole.USER);
+            assertThatThrownBy(() -> authorizationService.validateMemberCanAccess(other, reservation.getId()))
                     .isInstanceOf(HiddenResourceException.class);
         }
     }
@@ -102,7 +103,7 @@ class ReservationAuthorizationServiceTest {
         @Test
         @DisplayName("매니저는 자신의 매장 예약에 접근할 수 있다")
         void allowsSameStoreManager() {
-            assertThatCode(() -> authorizationService.validateManagerCanAccess(manager.getStoreId(), reservation.getId()))
+            assertThatCode(() -> authorizationService.validateManagerCanAccess(manager, reservation.getId()))
                     .doesNotThrowAnyException();
         }
 
@@ -112,7 +113,7 @@ class ReservationAuthorizationServiceTest {
             Member otherStoreManager = new Member(99L, "홍대매니저", "manager2@test.com", "password",
                     MemberRole.MANAGER, new Store(storeId + 1, "홍대점"));
 
-            assertThatThrownBy(() -> authorizationService.validateManagerCanAccess(otherStoreManager.getStoreId(), reservation.getId()))
+            assertThatThrownBy(() -> authorizationService.validateManagerCanAccess(otherStoreManager, reservation.getId()))
                     .isInstanceOf(UnauthorizedException.class);
         }
     }

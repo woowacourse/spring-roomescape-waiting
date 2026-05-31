@@ -38,7 +38,7 @@ public class ManagerWaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @LoginMember Member manager) {
-        waitingAuthorizationService.validateManagerCanAccess(manager.getStoreId(), id);
+        waitingAuthorizationService.validateManagerCanAccess(manager, id);
         waitingService.delete(id);
         return ResponseEntity.noContent().build();
     }

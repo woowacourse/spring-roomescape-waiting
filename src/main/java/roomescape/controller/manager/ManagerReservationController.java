@@ -47,14 +47,14 @@ public class ManagerReservationController {
             @LoginMember Member manager,
             @Valid @RequestBody ReservationPatchDto request
     ) {
-        authorizationService.validateManagerCanAccess(manager.getStoreId(), id);
+        authorizationService.validateManagerCanAccess(manager, id);
         Reservation updated = reservationService.update(id, request);
         return ResponseEntity.ok(AdminReservationResponseDto.from(updated));
     }
 
     @DeleteMapping("/{id}/cancel")
     public ResponseEntity<Void> cancel(@PathVariable Long id, @LoginMember Member manager) {
-        authorizationService.validateManagerCanAccess(manager.getStoreId(), id);
+        authorizationService.validateManagerCanAccess(manager, id);
         reservationService.cancelByAdmin(id);
         return ResponseEntity.noContent().build();
     }

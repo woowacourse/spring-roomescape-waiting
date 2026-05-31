@@ -58,7 +58,7 @@ public class ReservationController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationPatchDto request
     ) {
-        Reservation reservation = reservationService.updateByUser(id, member.getId(), request);
+        Reservation reservation = reservationService.updateByUser(id, member, request);
         return ResponseEntity.ok(ReservationResponseDto.from(reservation));
     }
 
@@ -67,7 +67,7 @@ public class ReservationController {
             @LoginMember Member member,
             @PathVariable Long id
     ) {
-        reservationService.cancel(id, member.getId());
+        reservationService.cancel(id, member);
         return ResponseEntity.noContent().build();
     }
 }

@@ -30,6 +30,7 @@ import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
@@ -208,7 +209,7 @@ class AdminReservationServiceTest {
         @DisplayName("과거 예약도 취소할 수 있다")
         void cancelsPastReservation() {
             Reservation saved = reservationDao.insert(
-                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1, null));
+                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1, new Store(storeId, "강남점")));
 
             adminReservationService.cancelByAdmin(saved.getId());
 

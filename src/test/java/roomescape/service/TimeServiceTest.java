@@ -32,6 +32,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
+import roomescape.domain.Store;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.TimeRequestDto;
 
@@ -153,7 +154,9 @@ class TimeServiceTest {
         void throwsWhenTimeHasReservation() {
             Time savedTime = timeService.create(timeRequestDto1);
             Theme savedTheme = themeDao.insert(new Theme(new Name("테마"), "http://thumbnail_url", "설명"));
-            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, savedTheme, null));
+            jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
+            Long storeId = jdbcTemplate.queryForObject("SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
+            reservationDao.insert(Reservation.createByAdmin(member, LocalDate.now(), savedTime, savedTheme, new Store(storeId, "강남점")));
 
             Long id = savedTime.getId();
             assertThatThrownBy(() -> timeService.delete(id))

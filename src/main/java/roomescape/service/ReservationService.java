@@ -68,8 +68,8 @@ public class ReservationService {
         }
     }
 
-    public Reservation updateByUser(Long id, Long memberId, ReservationPatchDto request) {
-        authorizationService.validateMemberCanAccess(memberId, id);
+    public Reservation updateByUser(Long id, Member member, ReservationPatchDto request) {
+        authorizationService.validateMemberCanAccess(member, id);
         Reservation reservation = findActiveById(id);
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
@@ -77,8 +77,8 @@ public class ReservationService {
         return reservationDao.update(reservation);
     }
 
-    public void cancel(Long id, Long memberId) {
-        authorizationService.validateMemberCanAccess(memberId, id);
+    public void cancel(Long id, Member member) {
+        authorizationService.validateMemberCanAccess(member, id);
         Reservation reservation = findActiveById(id);
         reservation.cancelByUser(LocalDateTime.now());
         reservationDao.update(reservation);
