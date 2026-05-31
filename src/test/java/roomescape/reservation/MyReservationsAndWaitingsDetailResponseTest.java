@@ -3,7 +3,7 @@ package roomescape.reservation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.application.readmodel.ReservationReadModel;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.theme.dto.response.ThemeFindResponse;
 import roomescape.waiting.application.readmodel.WaitingReadModel;
@@ -13,7 +13,7 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ReservationDetailFindResponseTest {
+class MyReservationsAndWaitingsDetailResponseTest {
 
     @Test
     @DisplayName("status가 RESERVED이면 waitingOrder는 null이고 id는 reservation id를 사용한다.")
@@ -22,13 +22,11 @@ class ReservationDetailFindResponseTest {
                 101L,
                 "member",
                 LocalDate.of(2026, 5, 5),
-                new ThemeFindResponse(1L, "theme", "desc", "thumb"),
-                new TimeInformation(1L, LocalTime.of(10, 0)),
-                ReservationStatus.RESERVED,
-                null
+                1L, "theme", "desc", "thumb",
+                1L, LocalTime.of(10, 0)
         );
 
-        ReservationDetailFindResponse response = ReservationDetailFindResponse.from(readModel);
+        MyReservationsAndWaitingsDetailResponse response = MyReservationsAndWaitingsDetailResponse.from(readModel);
 
         assertThat(response.status()).isEqualTo(ReservationStatus.RESERVED);
         assertThat(response.id()).isEqualTo(101L);
@@ -42,13 +40,12 @@ class ReservationDetailFindResponseTest {
                 202L,
                 "member",
                 LocalDate.of(2026, 5, 5),
-                new ThemeFindResponse(1L, "theme", "desc", "thumb"),
-                new TimeInformation(1L, LocalTime.of(10, 0)),
-                ReservationStatus.WAITING,
+                1L, "theme", "desc", "thumb",
+                1L, LocalTime.of(10, 0),
                 3L
         );
 
-        ReservationDetailFindResponse response = ReservationDetailFindResponse.from(readModel);
+        MyReservationsAndWaitingsDetailResponse response = MyReservationsAndWaitingsDetailResponse.from(readModel);
 
         assertThat(response.status()).isEqualTo(ReservationStatus.WAITING);
         assertThat(response.id()).isEqualTo(202L);

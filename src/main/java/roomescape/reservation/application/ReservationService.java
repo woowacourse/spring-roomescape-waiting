@@ -11,7 +11,7 @@ import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.application.readmodel.ReservationReadModel;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
@@ -45,10 +45,10 @@ public class ReservationService {
         return ReservationSaveResponse.from(reservation);
     }
 
-    public List<ReservationDetailFindResponse> findReservationDetails() {
+    public List<MyReservationsAndWaitingsDetailResponse> findReservationDetails() {
         List<ReservationReadModel> reservationReadModels = ReservationReadModel.from(reservationRepository.findAll());
 
-        return ReservationDetailFindResponse.from(reservationReadModels);
+        return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
     }
 
     @Transactional
@@ -86,7 +86,7 @@ public class ReservationService {
         deleteReservationAndPromoteWaiting(reservationId, scheduleId);
     }
 
-    public List<ReservationDetailFindResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
+    public List<MyReservationsAndWaitingsDetailResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
         if (period == null) {
             period = ReservationPeriod.UPCOMING;
         }
@@ -101,8 +101,8 @@ public class ReservationService {
         }
 
         return Stream.concat(
-                        reservations.stream().map(ReservationDetailFindResponse::from),
-                        waitings.stream().map(ReservationDetailFindResponse::from)
+                        reservations.stream().map(MyReservationsAndWaitingsDetailResponse::from),
+                        waitings.stream().map(MyReservationsAndWaitingsDetailResponse::from)
                 ).sorted(reservationOrderComparator(period))
                 .toList();
     }
@@ -144,13 +144,13 @@ public class ReservationService {
         }
     }
 
-    private Comparator<ReservationDetailFindResponse> reservationOrderComparator(ReservationPeriod period) {
-        Comparator<ReservationDetailFindResponse> comparator =
-                Comparator.comparing(ReservationDetailFindResponse::date)
+    private Comparator<MyReservationsAndWaitingsDetailResponse> reservationOrderComparator(ReservationPeriod period) {
+        Comparator<MyReservationsAndWaitingsDetailResponse> comparator =
+                Comparator.comparing(MyReservationsAndWaitingsDetailResponse::date)
                         .thenComparing(response -> response.time().time());
 
         if (period == ReservationPeriod.HISTORY) {
-            comparator = Comparator.comparing(ReservationDetailFindResponse::date, Comparator.reverseOrder())
+            comparator = Comparator.comparing(MyReservationsAndWaitingsDetailResponse::date, Comparator.reverseOrder())
                     .thenComparing((a, b) -> b.time().time().compareTo(a.time().time()));
         }
 

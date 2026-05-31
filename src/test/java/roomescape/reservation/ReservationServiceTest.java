@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
@@ -244,7 +244,7 @@ class ReservationServiceTest {
         when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(waiting));
 
-        List<ReservationDetailFindResponse> result =
+        List<MyReservationsAndWaitingsDetailResponse> result =
                 reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
         assertThat(result).hasSize(2);
@@ -279,7 +279,7 @@ class ReservationServiceTest {
         when(waitingRepository.findPastWaitingDetailsByMemberId(1L, now))
                 .thenReturn(java.util.List.of(waiting));
 
-        List<ReservationDetailFindResponse> result =
+        List<MyReservationsAndWaitingsDetailResponse> result =
                 reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.HISTORY);
 
         assertThat(result).hasSize(2);
@@ -307,10 +307,10 @@ class ReservationServiceTest {
         when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting));
 
-        List<ReservationDetailFindResponse> result =
+        List<MyReservationsAndWaitingsDetailResponse> result =
                 reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
-        assertThat(result).extracting(ReservationDetailFindResponse::status)
+        assertThat(result).extracting(MyReservationsAndWaitingsDetailResponse::status)
                 .containsExactly(ReservationStatus.RESERVED, ReservationStatus.WAITING);
     }
 
@@ -341,10 +341,10 @@ class ReservationServiceTest {
         when(waitingRepository.findUpcomingWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting1, waiting2));
 
-        List<ReservationDetailFindResponse> result =
+        List<MyReservationsAndWaitingsDetailResponse> result =
                 reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.UPCOMING);
 
-        assertThat(result).extracting(ReservationDetailFindResponse::id)
+        assertThat(result).extracting(MyReservationsAndWaitingsDetailResponse::id)
                 .containsExactly(201L, 102L, 202L, 101L);
     }
 
@@ -379,10 +379,10 @@ class ReservationServiceTest {
         when(waitingRepository.findPastWaitingDetailsByMemberId(1L, now))
                 .thenReturn(List.of(waiting1, waiting2));
 
-        List<ReservationDetailFindResponse> result =
+        List<MyReservationsAndWaitingsDetailResponse> result =
                 reservationService.findMyReservationsAndWaitingsByPeriod(1L, ReservationPeriod.HISTORY);
 
-        assertThat(result).extracting(ReservationDetailFindResponse::id)
+        assertThat(result).extracting(MyReservationsAndWaitingsDetailResponse::id)
                 .containsExactly(401L, 301L, 302L, 402L);
     }
 

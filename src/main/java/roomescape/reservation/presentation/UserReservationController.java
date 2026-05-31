@@ -22,7 +22,7 @@ import roomescape.reservation.ReservationPeriod;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 
 import java.util.List;
@@ -54,11 +54,11 @@ public class UserReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findMyReservations(
+    public ResponseEntity<ApiResponse<List<MyReservationsAndWaitingsDetailResponse>>> findMyReservations(
             @LoginMember AuthenticatedMember member,
             @RequestParam(defaultValue = "UPCOMING") ReservationPeriod period
     ) {
-        List<ReservationDetailFindResponse> response = reservationService.findMyReservationsAndWaitingsByPeriod(member.id(), period);
+        List<MyReservationsAndWaitingsDetailResponse> response = reservationService.findMyReservationsAndWaitingsByPeriod(member.id(), period);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
-import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 
 import java.util.List;
@@ -28,8 +28,8 @@ public class ManagerReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findReservationDetails() {
-        List<ReservationDetailFindResponse> responses = reservationService.findReservationDetails();
+    public ResponseEntity<ApiResponse<List<MyReservationsAndWaitingsDetailResponse>>> findReservationDetails() {
+        List<MyReservationsAndWaitingsDetailResponse> responses = reservationService.findReservationDetails();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 

@@ -1,20 +1,21 @@
 package roomescape.waiting.application.readmodel;
 
-import roomescape.reservation.ReservationStatus;
-import roomescape.reservationtime.dto.response.TimeInformation;
-import roomescape.theme.dto.response.ThemeFindResponse;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public record WaitingReadModel(
         Long id,
         String memberName,
         LocalDate date,
-        ThemeFindResponse theme,
-        TimeInformation time,
-        ReservationStatus status,
+        Long themeId,
+        String themeName,
+        String themeDescription,
+        String themeThumbnailUrl,
+        Long timeId,
+        LocalTime startAt,
         Long waitingOrder
 ) {
     public static List<WaitingReadModel> from(List<WaitingDetailProjection> projections) {
@@ -28,17 +29,12 @@ public record WaitingReadModel(
                 projection.id(),
                 projection.memberName(),
                 projection.date(),
-                new ThemeFindResponse(
-                        projection.themeId(),
-                        projection.themeName(),
-                        projection.themeDescription(),
-                        projection.thumbnailUrl()
-                ),
-                new TimeInformation(
-                        projection.timeId(),
-                        projection.startAt()
-                ),
-                ReservationStatus.WAITING,
+                projection.themeId(),
+                projection.themeName(),
+                projection.themeDescription(),
+                projection.thumbnailUrl(),
+                projection.timeId(),
+                projection.startAt(),
                 projection.waitingOrder()
         );
     }
