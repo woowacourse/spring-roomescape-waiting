@@ -35,6 +35,7 @@ public class WaitingService {
         Slot slot = slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
                 .orElseThrow(() -> new SlotException(SlotErrorCode.SLOT_NOT_FOUND));
 
+        validateReservationExists(slot.getId());
         validateNotOwnReservation(slot.getId(), request.name());
 
         Waiting waiting = new Waiting(currentDateTime, slot.getId(), request.name());
@@ -43,15 +44,22 @@ public class WaitingService {
         return WaitingResponse.from(savedWaiting);
     }
 
-    private void validateUniqueWaiting(long slotId, String name) {
-        if (waitingDao.existsByCreatedAtAndSlotAndName(slotId, name)) {
-            throw new WaitingException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
+    private void validateReservationExists(long slotId) {
+        boolean exists = reservationDao.existsBySlot(slotId);
+        if (!exists) {
+            throw new WaitingException(WaitingErrorCode.RESERVATION_REQUIRED_FOR_WAITING);
         }
     }
 
     private void validateNotOwnReservation(long slotId, String name) {
         if (reservationDao.existsBySlotIdAndName(slotId, name)) {
             throw new WaitingException(WaitingErrorCode.CANNOT_WAIT_OWN_RESERVATION);
+        }
+    }
+
+    private void validateUniqueWaiting(long slotId, String name) {
+        if (waitingDao.existsByCreatedAtAndSlotAndName(slotId, name)) {
+            throw new WaitingException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
         }
     }
 
@@ -71,6 +79,10 @@ public class WaitingService {
     }
 
     public void delete(long waitingId) {
-        waitingDao.delete(waitingId);
+        int affectedRows = waitingDao.delete(waitingId);
+
+        if (affectedRows == 0) {
+            throw new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND);
+        }
     }
 }

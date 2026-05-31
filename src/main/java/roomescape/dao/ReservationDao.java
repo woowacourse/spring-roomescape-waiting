@@ -210,6 +210,18 @@ public class ReservationDao {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId, name));
     }
 
+    public boolean existsBySlot(long slotId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    INNER JOIN slot s ON r.slot_id=s.id
+                    WHERE s.id=?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId));
+    }
+
     public void update(Reservation reservation) {
         String sql = """
                 UPDATE reservation

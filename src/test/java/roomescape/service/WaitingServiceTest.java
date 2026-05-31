@@ -20,6 +20,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.response.WaitingResponse;
 import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.WaitingException;
@@ -41,6 +42,24 @@ WaitingServiceTest extends ServiceTest {
 
     @Autowired
     private SlotDao slotDao;
+
+    @Test
+    void 예약이_없는_상태에서_대기를_신청한_경우_예외가_발생한다() {
+        // given
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
+        LocalDate reservationDate = currentDateTime.toLocalDate();
+
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        Theme theme = saveTheme("테마1");
+        saveSlot(reservationDate, reservationTime, theme);
+
+        WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "대기신청자");
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.create(request, currentDateTime))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.RESERVATION_REQUIRED_FOR_WAITING.getMessage());
+    }
 
     @Test
     void 이미_동일한_날짜와_테마에_대기를_신청한_경우_예외가_발생한다() {
@@ -104,6 +123,28 @@ WaitingServiceTest extends ServiceTest {
                     assertThat(waiting.rank()).isEqualTo(1);
                     assertThat(waiting.name()).isEqualTo(testUser);
                 });
+    }
+
+    @Test
+    void 대기를_삭제할_수_있다() {
+        // given
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
+        LocalDate reservationDate = currentDateTime.toLocalDate();
+
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+
+        WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "대기신청자");
+        WaitingResponse waitingResponse = waitingService.create(request, currentDateTime);
+
+        // when
+        waitingService.delete(waitingResponse.id());
+
+        // then
+        assertThatThrownBy(() -> waitingService.delete(waitingResponse.id()))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
 
     private Theme saveTheme(String name) {
