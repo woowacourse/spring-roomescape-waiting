@@ -104,7 +104,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation createWaitingReservation(CreateReservationCommand command) {
-        validateReservationIsFullyBooked(command);
+        validateReservationAlreadyExists(command);
 
         Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
 
@@ -176,7 +176,7 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationIsFullyBooked(CreateReservationCommand command) {
+    private void validateReservationAlreadyExists(CreateReservationCommand command) {
         Boolean isReservedExist = reservationRepository.existsByDateAndTimeAndThemeAndStoreAndStatus(
                 command.date(), command.timeId(), command.themeId(), command.storeId(), ReservationStatus.RESERVED
         );
