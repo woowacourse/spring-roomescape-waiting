@@ -79,6 +79,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public ReservationResponse update(Long id, ReservationRequest reservationReq) {
         Reservation existedReservation = getReservation(id);
 
@@ -90,7 +91,7 @@ public class ReservationService {
         Reservation reservation = existedReservation.update(reservationReq.name(), reservationReq.date(), newTime, theme);
         validateDuplicatedReservation(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
 
-        long updatedRows = reservationUpdatingDao.update(id, reservation);
+        long updatedRows = reservationUpdatingDao.updateIfVersion(id, existedReservation.getCreatedAt(), reservation);
 
         if (updatedRows == 0) {
             throw new ResourceNotFoundException(id + "번 예약을 찾을 수 없습니다.");
