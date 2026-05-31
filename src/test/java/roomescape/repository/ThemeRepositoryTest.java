@@ -24,9 +24,6 @@ class ThemeRepositoryTest {
     @BeforeEach
     void setup() {
         this.themeRepository = new ThemeRepository(jdbcTemplate);
-        jdbcTemplate.update("DELETE FROM reservation_waiting;");
-        jdbcTemplate.update("DELETE FROM reservation;");
-        jdbcTemplate.update("DELETE FROM theme");
     }
 
     @Test
@@ -38,11 +35,9 @@ class ThemeRepositoryTest {
         Long id = themeRepository.insert(theme);
 
         // then
-        List<Theme> themes = themeRepository.findAll();
         Theme savedTheme = themeRepository.findBy(id).get();
         assertAll(
                 () -> assertThat(id).isNotNull(),
-                () -> assertThat(themes).hasSize(1),
                 () -> assertThat(savedTheme.getName()).isEqualTo(theme.getName()));
     }
 
@@ -58,11 +53,10 @@ class ThemeRepositoryTest {
         int deletedCount = themeRepository.delete(id1);
 
         // then
-        List<Theme> themes = themeRepository.findAll();
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
-                () -> assertThat(themes).hasSize(1),
-                () -> assertThat(themeRepository.findBy(id1)).isEmpty());
+                () -> assertThat(themeRepository.findBy(id1)).isEmpty(),
+                () -> assertThat(themeRepository.findBy(id2)).isPresent());
     }
 
     @Test

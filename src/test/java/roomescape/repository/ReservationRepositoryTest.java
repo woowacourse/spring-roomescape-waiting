@@ -28,8 +28,6 @@ class ReservationRepositoryTest {
     @BeforeEach
     void setup() {
         this.reservationRepository = new ReservationRepository(jdbcTemplate);
-        jdbcTemplate.update("DELETE FROM reservation;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
     }
 
     @Test

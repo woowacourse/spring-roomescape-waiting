@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 
 import java.time.LocalTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -22,9 +21,6 @@ class ReservationTimeRepositoryTest {
 
     @BeforeEach
     void setup() {
-        jdbcTemplate.update("DELETE FROM reservation_waiting;");
-        jdbcTemplate.update("DELETE FROM reservation;");
-        jdbcTemplate.update("DELETE FROM reservation_time;");
         this.dao = new ReservationTimeRepository(jdbcTemplate);
     }
 
@@ -37,11 +33,9 @@ class ReservationTimeRepositoryTest {
         Long id = dao.insert(time);
 
         // then
-        List<ReservationTime> times = dao.findAll();
         ReservationTime savedTime = dao.findBy(id).get();
         assertAll(
                 () -> assertThat(id).isNotNull(),
-                () -> assertThat(times).hasSize(1),
                 () -> assertThat(savedTime.getStartAt()).isEqualTo(time.getStartAt()));
     }
 
@@ -57,10 +51,9 @@ class ReservationTimeRepositoryTest {
         int deletedCount = dao.delete(id1);
 
         // then
-        List<ReservationTime> times = dao.findAll();
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
-                () -> assertThat(times).hasSize(1),
-                () -> assertThat(dao.findBy(id1)).isEmpty());
+                () -> assertThat(dao.findBy(id1)).isEmpty(),
+                () -> assertThat(dao.findBy(id2)).isPresent());
     }
 }

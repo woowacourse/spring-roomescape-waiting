@@ -2,11 +2,8 @@ package roomescape;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.time.LocalDate;
@@ -18,17 +15,6 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class MissionStepTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void setup() {
-        jdbcTemplate.update("DELETE FROM reservation_waiting;");
-        jdbcTemplate.update("DELETE FROM reservation;");
-        jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1;");
-        jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
-    }
 
     @Test
     void 예약_추가_및_삭제() {
@@ -321,27 +307,28 @@ public class MissionStepTest {
 
     @Test
     void 시간_관리_API() {
-        jdbcTemplate.update("DELETE FROM reservation_time;");
-        jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
         Map<String, String> params = new HashMap<>();
-        params.put("startAt", "10:00");
+        params.put("startAt", "21:00");
 
-        RestAssured.given().log().all()
+        String location = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201)
-                .header("Location", endsWith("/admin/times/1"));
+                .header("Location", matchesPattern(".*/admin/times/\\d+"))
+                .extract()
+                .header("Location");
+        int timeId = extractId(location);
 
         RestAssured.given().log().all()
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("find { it.id == " + timeId + " }.startAt", is("21:00:00"));
 
         RestAssured.given().log().all()
-                .when().delete("/admin/times/1")
+                .when().delete("/admin/times/{id}", timeId)
                 .then().log().all()
                 .statusCode(204);
     }
@@ -394,34 +381,35 @@ public class MissionStepTest {
 
     @Test
     void 테마_관리_API() {
-        jdbcTemplate.update("DELETE FROM theme;");
-        jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
         Map<String, String> params = new HashMap<>();
         params.put("name", "테마 이름");
         params.put("description", "테마 설명");
         params.put("thumbnail", "썸네일 주소");
 
-        RestAssured.given().log().all()
+        String location = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201)
-                .header("Location", endsWith("/admin/themes/1"));
+                .header("Location", matchesPattern(".*/admin/themes/\\d+"))
+                .extract()
+                .header("Location");
+        int themeId = extractId(location);
 
         RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("find { it.id == " + themeId + " }.name", is("테마 이름"));
 
         RestAssured.given().log().all()
-                .when().delete("/admin/themes/1")
+                .when().delete("/admin/themes/{id}", themeId)
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/themes/1/times?date=2026-05-05")
+                .when().get("/themes/99999/times?date=2026-05-05")
                 .then().log().all()
                 .statusCode(404)
                 .body("code", is("NOT_FOUND"))
@@ -431,6 +419,10 @@ public class MissionStepTest {
                 .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    private int extractId(String location) {
+        return Integer.parseInt(location.substring(location.lastIndexOf("/") + 1));
     }
 
     @Test
