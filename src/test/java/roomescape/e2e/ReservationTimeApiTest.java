@@ -88,7 +88,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 사용중인_시간을_삭제하면_422() {
+    void 사용중인_시간을_삭제하면_409() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer timeId = createTime("10:00");
         createReservation("브라운", "2026-08-05", timeId, themeId);
@@ -96,7 +96,7 @@ class ReservationTimeApiTest {
         RestAssured.given().log().all()
                 .when().delete("/times/" + timeId)
                 .then().log().all()
-                .statusCode(422);
+                .statusCode(409);
     }
 
     @Test

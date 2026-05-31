@@ -182,7 +182,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 사용중인_테마를_삭제하면_422() {
+    void 사용중인_테마를_삭제하면_409() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer timeId = createTime("10:00");
         createReservation("브라운", "2026-08-05", timeId, themeId);
@@ -190,7 +190,7 @@ class ThemeApiTest {
         RestAssured.given().log().all()
                 .when().delete("/themes/" + themeId)
                 .then().log().all()
-                .statusCode(422);
+                .statusCode(409);
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {

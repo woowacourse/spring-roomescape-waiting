@@ -13,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ConflictException;
 import roomescape.repository.ReservationTimeJdbcRepository;
 
@@ -88,7 +87,7 @@ class ReservationTimeJdbcRepositoryTest {
     }
 
     @Test
-    void 예약에서_사용_중인_시간을_삭제하면_BusinessRuleViolationException을_던진다() {
+    void 예약에서_사용_중인_시간을_삭제하면_ConflictException을_던진다() {
         ReservationTime saved = repository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         jdbcTemplate.update(
                 "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
@@ -101,7 +100,7 @@ class ReservationTimeJdbcRepositoryTest {
         );
 
         assertThatThrownBy(() -> repository.deleteById(saved.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("사용 중인 예약");
     }
 }

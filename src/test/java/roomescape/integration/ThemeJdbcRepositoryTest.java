@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ConflictException;
 import roomescape.repository.ThemeJdbcRepository;
 
 @JdbcTest
@@ -44,12 +44,12 @@ class ThemeJdbcRepositoryTest {
     }
 
     @Test
-    void 예약에서_사용_중인_테마를_삭제하면_BusinessRuleViolationException을_던진다() {
+    void 예약에서_사용_중인_테마를_삭제하면_ConflictException을_던진다() {
         Theme saved = repository.save(new Theme(null, "공포", "무서운 테마", "https://example.com/horror.jpg"));
         insertReservation("브라운", LocalDate.of(2026, 8, 5), saved.getId());
 
         assertThatThrownBy(() -> repository.deleteById(saved.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("사용 중인 예약");
     }
 

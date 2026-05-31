@@ -11,7 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ConflictException;
 
 @Repository
 public class ThemeJdbcRepository implements ThemeRepository {
@@ -62,7 +62,7 @@ public class ThemeJdbcRepository implements ThemeRepository {
         try {
             jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_THEME_IN_USE, id), e);
+            throw new ConflictException(String.format(CANNOT_DELETE_THEME_IN_USE, id), e);
         }
     }
 

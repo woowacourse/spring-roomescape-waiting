@@ -11,7 +11,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ConflictException;
 
 @Repository
@@ -61,7 +60,7 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
         try {
             jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessRuleViolationException(String.format(CANNOT_DELETE_TIME_IN_USE, id), e);
+            throw new ConflictException(String.format(CANNOT_DELETE_TIME_IN_USE, id), e);
         }
     }
 
