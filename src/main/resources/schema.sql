@@ -46,11 +46,11 @@ CREATE TABLE members
 CREATE TABLE reservations
 (
     id         BIGINT      NOT NULL AUTO_INCREMENT,
-    member_id  BIGINT,
+    member_id  BIGINT      NOT NULL,
     date       DATE        NOT NULL,
-    time_id    BIGINT,
-    theme_id   BIGINT,
-    store_id   BIGINT,
+    time_id    BIGINT      NOT NULL,
+    theme_id   BIGINT      NOT NULL,
+    store_id   BIGINT      NOT NULL,
     status     VARCHAR(20) NOT NULL DEFAULT 'BOOKED',
     deleted_at TIMESTAMP   NOT NULL DEFAULT '9999-12-31 00:00:00',
     version    BIGINT      NOT NULL DEFAULT 0,

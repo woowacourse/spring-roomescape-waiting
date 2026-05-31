@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.common.DomainAssert;
 import roomescape.common.exception.InvalidInputException;
 
 public class Time {
@@ -21,6 +22,7 @@ public class Time {
     }
 
     private void validate(LocalTime startAt) {
+        DomainAssert.notNull(startAt, "시작 시간은 비어 있을 수 없습니다.");
         if (startAt.isBefore(LocalTime.of(10, 0)) || startAt.isAfter(LocalTime.of(22, 0))) {
             throw new InvalidInputException("영업 시간은 10시부터 22시 사이입니다.");
         }

@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 
 public class Reservation {
@@ -15,6 +16,9 @@ public class Reservation {
 
     private Reservation(Long id, Member member, Slot slot, ReservationStatus status,
                         LocalDateTime deletedAt, long version) {
+        DomainAssert.notNull(member, "예약자는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(slot, "슬롯은 비어 있을 수 없습니다.");
+        DomainAssert.notNull(status, "예약 상태는 비어 있을 수 없습니다.");
         this.id = id;
         this.member = member;
         this.slot = slot;
@@ -73,6 +77,10 @@ public class Reservation {
 
     public boolean isSameMember(Member member) {
         return Objects.equals(this.member.getId(), member.getId());
+    }
+
+    public boolean isInStore(Store store) {
+        return slot.getStore().equals(store);
     }
 
     @Override

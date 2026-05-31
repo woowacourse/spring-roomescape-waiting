@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.util.Objects;
+import roomescape.common.DomainAssert;
 import roomescape.domain.vo.Name;
 
 public class Theme {
@@ -10,6 +11,7 @@ public class Theme {
     private final String description;
 
     public Theme(Long id, Name name, String thumbnailUrl, String description) {
+        DomainAssert.notNull(name, "테마 이름은 비어 있을 수 없습니다.");
         this.id = id;
         this.name = name;
         this.thumbnailUrl = thumbnailUrl;
