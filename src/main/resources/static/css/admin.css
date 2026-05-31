@@ -1,0 +1,371 @@
+:root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --line: #e5e7ef;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --blue: #2563eb;
+    --blue-soft: #eff6ff;
+    --red: #dc2626;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Noto Sans KR", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--line);
+}
+
+.admin-topbar-inner,
+.admin-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.admin-topbar-inner {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.admin-brand {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--blue);
+}
+
+.admin-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-nav-button {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.admin-nav-button.active {
+    color: var(--blue);
+    border-color: #bfd1ff;
+    background: var(--blue-soft);
+}
+
+.admin-shell {
+    padding-top: 28px;
+    padding-bottom: 48px;
+}
+
+.admin-hero,
+.admin-panel,
+.admin-modal-dialog {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+}
+
+.admin-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 24px;
+    padding: 28px;
+}
+
+.admin-kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.admin-hero h1,
+.panel-header h2 {
+    margin: 10px 0 0;
+    font-size: 1.8rem;
+}
+
+.admin-hero-description,
+.helper-text,
+.panel-header p,
+.form-message,
+.item-subtext {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.token-form,
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.token-form label,
+.admin-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.token-row,
+.form-actions,
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.token-row input,
+.admin-form input {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid #cfd8e6;
+    border-radius: 12px;
+    outline: none;
+    background: #fff;
+}
+
+.token-row input:focus,
+.admin-form input:focus {
+    border-color: var(--blue);
+}
+
+.admin-panel {
+    margin-top: 18px;
+    padding: 24px;
+}
+
+.field-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.field-grid-theme {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field-grid-single {
+    grid-template-columns: minmax(0, 280px);
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+    min-height: 44px;
+    padding: 0 16px;
+    min-width: 88px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    word-break: keep-all;
+    flex-shrink: 0;
+}
+
+.primary-button {
+    background: var(--blue);
+    color: #fff;
+}
+
+.secondary-button {
+    background: #fff;
+    color: var(--text);
+    border-color: #cfd8e6;
+}
+
+.danger-button {
+    background: #fff;
+    color: var(--red);
+    border-color: #fecaca;
+}
+
+.card-list,
+.simple-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.card-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.theme-item {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+.reservation-item-admin {
+    align-items: flex-start;
+}
+
+.theme-thumb {
+    width: 88px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #f3f6fb;
+}
+
+.item-main {
+    min-width: 0;
+}
+
+.item-title {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.item-subtext {
+    margin: 6px 0 0;
+    font-size: 0.92rem;
+    word-break: break-word;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.form-message.error,
+.helper-text.error {
+    color: var(--red);
+}
+
+.form-message.success,
+.helper-text.success {
+    color: #047857;
+}
+
+.admin-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal[hidden] {
+    display: none;
+}
+
+.admin-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+}
+
+.admin-modal-dialog {
+    position: relative;
+    width: min(420px, 100%);
+    padding: 20px;
+}
+
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.admin-modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.admin-modal-message {
+    margin: 16px 0 0;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+@media (max-width: 980px) {
+    .admin-hero,
+    .field-grid-theme,
+    .card-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .admin-topbar-inner,
+    .panel-header,
+    .token-row,
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-shell {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .admin-hero,
+    .admin-panel {
+        padding: 18px;
+    }
+
+    .field-grid-single {
+        grid-template-columns: 1fr;
+    }
+}
