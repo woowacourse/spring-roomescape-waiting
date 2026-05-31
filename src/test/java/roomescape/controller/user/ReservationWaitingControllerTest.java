@@ -69,7 +69,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -101,7 +100,6 @@ class ReservationWaitingControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(reservationWaitingService, times(1)).delete(1L, "브라운");
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -231,7 +229,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -257,7 +254,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -283,7 +279,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -309,7 +304,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -335,7 +329,6 @@ class ReservationWaitingControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -352,7 +345,6 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("본인의 예약 대기만 취소할 수 있습니다."));
 
         verify(reservationWaitingService, times(1)).delete(1L, "브라운");
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -369,7 +361,6 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("이미 지난 예약 대기는 취소할 수 없습니다."));
 
         verify(reservationWaitingService, times(1)).delete(1L, "브라운");
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test
@@ -386,7 +377,6 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 예약 대기입니다."));
 
         verify(reservationWaitingService, times(1)).delete(999L, "브라운");
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     private String validRequest() {

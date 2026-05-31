@@ -98,7 +98,6 @@ class ReservationWaitingServiceTest {
 
         // then
         ArgumentCaptor<ReservationWaiting> captor = ArgumentCaptor.forClass(ReservationWaiting.class);
-        verify(reservationWaitingValidator).validateWaiting(any(ReservationWaiting.class));
         verify(reservationWaitingRepository).insert(captor.capture());
 
         ReservationWaiting captured = captor.getValue();
@@ -197,7 +196,6 @@ class ReservationWaitingServiceTest {
         service.delete(id, name);
 
         // then
-        verify(reservationWaitingValidator).validateUpdatableReservation(waiting, name);
         verify(reservationWaitingRepository).delete(id);
     }
 

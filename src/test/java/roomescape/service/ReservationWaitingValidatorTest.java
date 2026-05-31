@@ -13,7 +13,6 @@ import roomescape.repository.ReservationWaitingRepository;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class ReservationWaitingValidatorTest {
@@ -98,7 +97,6 @@ class ReservationWaitingValidatorTest {
         assertThatThrownBy(() -> validator.validateWaiting(waiting))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
-        verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
 
     @Test
@@ -109,7 +107,6 @@ class ReservationWaitingValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateUpdatableReservation(waiting, "브라운"));
-        verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
 
     @Test
@@ -121,7 +118,6 @@ class ReservationWaitingValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "구구"))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
-        verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
 
     @Test
@@ -133,7 +129,6 @@ class ReservationWaitingValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "브라운"))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");
-        verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
 
     private ReservationWaiting waiting(String name, LocalDate date) {

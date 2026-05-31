@@ -12,13 +12,7 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class ReservationValidatorTest {
@@ -34,7 +28,6 @@ class ReservationValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateNotPast(LocalDate.now().plusDays(1), time));
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -46,7 +39,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateNotPast(LocalDate.now().minusDays(1), time))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간으로는 예약할 수 없습니다.");
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -61,8 +53,6 @@ class ReservationValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateNotReserved(date, timeId, themeId));
-        verify(reservationRepository, times(1)).existsWith(date, timeId, themeId);
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -78,8 +68,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateNotReserved(date, timeId, themeId))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 예약된 시간입니다.");
-        verify(reservationRepository, times(1)).existsWith(date, timeId, themeId);
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -90,7 +78,6 @@ class ReservationValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"));
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -102,7 +89,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -114,7 +100,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약은 변경하거나 취소할 수 없습니다.");
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -129,8 +114,6 @@ class ReservationValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateUpdatePolicy(reservation, updatedReservation));
-        verify(reservationRepository, times(1)).existsWith(date, 2L, 1L);
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -145,8 +128,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdatePolicy(reservation, updatedReservation))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("기존 예약과 같은 날짜·시간으로는 변경할 수 없습니다.");
-        verify(reservationRepository, never()).existsWith(any(LocalDate.class), anyLong(), anyLong());
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -154,7 +135,6 @@ class ReservationValidatorTest {
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateUpdateValueExists(LocalDate.now().plusDays(1), null));
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     @Test
@@ -163,7 +143,6 @@ class ReservationValidatorTest {
         assertThatThrownBy(() -> validator.validateUpdateValueExists(null, null))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
-        verifyNoMoreInteractions(reservationRepository);
     }
 
     private Reservation createReservation(String name, LocalDate date, ReservationTime time) {

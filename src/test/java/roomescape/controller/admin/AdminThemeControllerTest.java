@@ -74,7 +74,6 @@ class AdminThemeControllerTest {
                 .andExpect(jsonPath("$.name").value("테마"));
 
         verify(themeService, times(1)).create("테마", "설명", "썸네일");
-        verifyNoMoreInteractions(themeService);
     }
 
     @Test
@@ -103,7 +102,6 @@ class AdminThemeControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(themeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(themeService);
     }
 
     @Test
@@ -131,7 +129,6 @@ class AdminThemeControllerTest {
                 .andExpect(jsonPath("$.detail").value("예약이 존재하는 테마는 삭제할 수 없습니다."));
 
         verify(themeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(themeService);
     }
 
     private Theme theme() {

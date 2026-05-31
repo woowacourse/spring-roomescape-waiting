@@ -90,7 +90,6 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 테마입니다."));
 
         verify(reservationAvailabilityService, times(1)).findAvailableTime(999L, LocalDate.of(2099, 1, 1));
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test

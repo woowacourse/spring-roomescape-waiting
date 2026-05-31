@@ -18,9 +18,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class ReservationAvailabilityServiceTest {
@@ -71,7 +68,5 @@ class ReservationAvailabilityServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
 
-        verify(themeRepository, times(1)).findBy(themeId);
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 }

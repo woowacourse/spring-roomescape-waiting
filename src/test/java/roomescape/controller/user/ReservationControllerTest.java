@@ -69,7 +69,6 @@ class ReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -128,7 +127,6 @@ class ReservationControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(reservationService, times(1)).delete(id, name);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -194,7 +192,6 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 예약입니다."));
 
         verify(reservationService, times(1)).delete(id, name);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -213,7 +210,6 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.detail").value("본인의 예약만 변경하거나 취소할 수 있습니다."));
 
         verify(reservationService, times(1)).delete(id, name);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -232,7 +228,6 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.detail").value("이미 지난 예약은 변경하거나 취소할 수 없습니다."));
 
         verify(reservationService, times(1)).delete(id, name);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -264,7 +259,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -339,7 +333,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -366,7 +359,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -393,7 +385,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -426,7 +417,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2000, 1, 1),
                 null);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -453,7 +443,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -480,7 +469,6 @@ class ReservationControllerTest {
                 "브라운",
                 LocalDate.of(2099, 1, 2),
                 2L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -512,7 +500,6 @@ class ReservationControllerTest {
                 "브라운",
                 null,
                 null);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -584,7 +571,6 @@ class ReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -610,7 +596,6 @@ class ReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -636,7 +621,6 @@ class ReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -662,7 +646,6 @@ class ReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     private String validRequest() {

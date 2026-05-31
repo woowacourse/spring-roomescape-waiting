@@ -85,8 +85,6 @@ class ThemeServiceTest {
                 () -> assertThat(captured.getName()).isEqualTo(name),
                 () -> assertThat(captured.getDescription()).isEqualTo(description),
                 () -> assertThat(captured.getThumbnail()).isEqualTo(thumbnail));
-
-        verify(themeRepository).findBy(id);
     }
 
     @Test

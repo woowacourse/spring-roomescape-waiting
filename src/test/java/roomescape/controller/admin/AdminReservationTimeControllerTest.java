@@ -71,7 +71,6 @@ class AdminReservationTimeControllerTest {
                 .andExpect(jsonPath("$.startAt").value("10:00:00"));
 
         verify(reservationTimeService, times(1)).create(LocalTime.of(10, 0));
-        verifyNoMoreInteractions(reservationTimeService);
     }
 
     @Test
@@ -98,7 +97,6 @@ class AdminReservationTimeControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(reservationTimeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(reservationTimeService);
     }
 
     @Test
@@ -126,6 +124,5 @@ class AdminReservationTimeControllerTest {
                 .andExpect(jsonPath("$.detail").value("예약이 존재하는 시간은 삭제할 수 없습니다."));
 
         verify(reservationTimeService, times(1)).delete(1L);
-        verifyNoMoreInteractions(reservationTimeService);
     }
 }

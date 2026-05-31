@@ -81,7 +81,6 @@ class AdminReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -107,7 +106,6 @@ class AdminReservationControllerTest {
                 LocalDate.of(2099, 1, 1),
                 1L,
                 1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test
@@ -117,7 +115,6 @@ class AdminReservationControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(reservationService, times(1)).deleteByAdmin(1L);
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test

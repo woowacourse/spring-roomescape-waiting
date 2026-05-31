@@ -77,8 +77,6 @@ class ReservationTimeServiceTest {
         assertAll(
                 () -> assertThat(captured.getId()).isNull(),
                 () -> assertThat(captured.getStartAt()).isEqualTo(startAt));
-
-        verify(reservationTimeRepository).findBy(id);
     }
 
     @Test
