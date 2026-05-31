@@ -137,7 +137,7 @@ public class ReservationService {
     }
 
     private void validateReservationOwner(Long memberId, Reservation reservation) {
-        if (!reservation.getMemberId().equals(memberId)) {
+        if (!reservation.isReservedBy(memberId)) {
             throw new ReservationOwnerMismatchException();
         }
     }

@@ -98,4 +98,8 @@ public class Reservation {
             throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
         }
     }
+
+    public boolean isReservedBy(long memberId) {
+        return this.memberId.equals(memberId);
+    }
 }
