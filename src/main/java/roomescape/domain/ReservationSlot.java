@@ -92,7 +92,7 @@ public class ReservationSlot {
     }
 
     private void validateDuplicateReservation(String name) {
-        if (reservations.hasActiveReservationByName(name)) {
+        if (reservations.hasReservationByName(name)) {
             throw new DuplicateEntityException("이미 예약 또는 대기가 존재합니다. (%s)", name);
         }
     }

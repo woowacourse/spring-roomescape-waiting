@@ -27,9 +27,8 @@ public class Reservations {
         return reservation;
     }
 
-    public boolean hasActiveReservationByName(String name) {
+    public boolean hasReservationByName(String name) {
         return reservations.stream()
-                .filter(reservation -> !reservation.isDeleted())
                 .anyMatch(reservation -> reservation.hasSameName(name));
     }
 

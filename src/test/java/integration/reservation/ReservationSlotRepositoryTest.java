@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import integration.BaseIntegrationTest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +68,26 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
         assertThatThrownBy(() -> reservationRepository.save(second))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약이 존재하는 시간입니다");
+    }
+
+    @Test
+    void 같은_슬롯에_같은_이름의_예약_엔트리를_저장하면_DB_제약조건_에러가_발생한다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                null,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(
+                        new Reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
+                        new Reservation(null, "이프", ReservationStatus.WAITING, LocalDateTime.now())
+                )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationRepository.save(slot))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
     }
 
     @Test

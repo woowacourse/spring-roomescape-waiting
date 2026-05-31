@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.persistence.jdbc.mapper.ReservationRowMapper;
+import roomescape.persistence.util.RepositoryExceptionTranslator;
 
 @Repository
 @RequiredArgsConstructor
@@ -38,14 +39,15 @@ public class ReservationDao {
                 VALUES (?, ?, ?, ?)
                 """;
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setLong(2, slotId);
-            ps.setString(3, reservation.getStatus().name());
-            ps.setTimestamp(4, Timestamp.valueOf(reservation.getCreatedAt()));
-            return ps;
-        }, keyHolder);
+        RepositoryExceptionTranslator.execute(() ->
+                jdbcTemplate.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+                    ps.setString(1, reservation.getName());
+                    ps.setLong(2, slotId);
+                    ps.setString(3, reservation.getStatus().name());
+                    ps.setTimestamp(4, Timestamp.valueOf(reservation.getCreatedAt()));
+                    return ps;
+                }, keyHolder), "이미 예약 또는 대기가 존재합니다.");
 
         return new Reservation(
                 keyHolder.getKey().longValue(),
