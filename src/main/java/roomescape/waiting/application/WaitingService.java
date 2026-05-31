@@ -24,7 +24,7 @@ public class WaitingService {
     @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
+        long scheduleId = scheduleService.resolveScheduleId(body.date(), body.timeId(), body.themeId());
 
         validateReservedByMemberNotExists(memberId, scheduleId);
         validateWaitingByMemberNotExists(memberId, scheduleId);

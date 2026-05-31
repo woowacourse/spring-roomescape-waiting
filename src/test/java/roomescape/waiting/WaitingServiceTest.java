@@ -50,7 +50,7 @@ class WaitingServiceTest {
         long scheduleId = 1L;
         Waiting savedWaiting = new Waiting(10L, MEMBER_ID, scheduleId);
 
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
         when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
@@ -80,7 +80,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long scheduleId = 1L;
 
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
         when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
                 .thenReturn(true);
@@ -90,7 +90,7 @@ class WaitingServiceTest {
                         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST)
                 );
 
-        verify(scheduleService).findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
+        verify(scheduleService).resolveScheduleId(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
 
@@ -100,7 +100,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long scheduleId = 1L;
 
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(true);
@@ -119,7 +119,7 @@ class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
         long scheduleId = 4L;
 
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);

@@ -122,7 +122,7 @@ class ReservationServiceTest {
         Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
@@ -145,7 +145,7 @@ class ReservationServiceTest {
         Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
@@ -184,7 +184,7 @@ class ReservationServiceTest {
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
         when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(true);
 
@@ -204,7 +204,7 @@ class ReservationServiceTest {
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
         when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
         when(waitingRepository.existsByScheduleId(newScheduleId)).thenReturn(true);

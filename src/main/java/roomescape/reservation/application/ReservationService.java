@@ -27,7 +27,7 @@ public class ReservationService {
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(),
+        long scheduleId = scheduleService.resolveScheduleId(body.date(), body.timeId(),
                 body.themeId());
         validateScheduleAvailableForReservation(scheduleId);
         Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
@@ -119,7 +119,7 @@ public class ReservationService {
 
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId,
+        long scheduleId = scheduleService.resolveScheduleId(newDate, newTimeId,
                 oldReservation.getThemeId());
         scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
         validateScheduleAvailableForUpdate(reservationId, scheduleId);

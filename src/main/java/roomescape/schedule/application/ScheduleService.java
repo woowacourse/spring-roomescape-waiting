@@ -26,7 +26,7 @@ public class ScheduleService {
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public long findScheduleIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public long resolveScheduleId(LocalDate date, long timeId, long themeId) {
         return getScheduleIdOrThrow(date, timeId, themeId);
     }
 
