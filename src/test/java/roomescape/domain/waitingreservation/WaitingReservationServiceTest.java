@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationRepository;
@@ -25,6 +26,8 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeService;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
 import roomescape.support.exception.RoomescapeException;
 
 class WaitingReservationServiceTest {
@@ -130,5 +133,29 @@ class WaitingReservationServiceTest {
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)
             .hasMessageContaining("과거 시간에는 예약 대기를 신청할 수 없습니다.");
+    }
+
+    @Test
+    void 이름으로_예약_대기와_순번을_조회할_수_있다() {
+        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 10));
+        ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
+        WaitingReservation waiting = WaitingReservation.of(
+            10L, "이산", date, time, theme, LocalDateTime.of(2026, 5, 5, 14, 0)
+        );
+        WaitingReservationWithRank withRank = new WaitingReservationWithRank(waiting, 5L);
+
+        when(waitingReservationRepository.findAllByNameWithRank("이산")).thenReturn(List.of(withRank));
+
+        List<WaitingReservationWithRankResponse> result = waitingReservationService
+            .getWaitingReservationsWithRankByName("이산");
+        WaitingReservationWithRankResponse response = result.get(0);
+
+        assertThat(response.id()).isEqualTo(10L);
+        assertThat(response.name()).isEqualTo("이산");
+        assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 10));
+        assertThat(response.time().startAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(response.theme().id()).isEqualTo(3L);
+        assertThat(response.rank()).isEqualTo(5L);
     }
 }
