@@ -40,7 +40,7 @@ public class ReservationService {
         validateDateAndTimeNotPast(now, time);
 
         try {
-            Long reservationSlotId = getOrCreateReservationSlotId(request).get();
+            Long reservationSlotId = getOrCreateReservationSlotId(request);
             ReservationSlot reservationSlot = reservationSlotDao.findById(reservationSlotId);
             validateSameReservation(request.name(), reservationSlotId);
 
@@ -60,15 +60,13 @@ public class ReservationService {
             LocalDateTime targetDateTime = LocalDateTime.of(request.date(), time.getStartAt());
             validateDateAndTimeNotPast(now, targetDateTime);
 
-
             Reservation reservation = reservationDao.findById(reservationId);
             ReservationSlot reservationSlot = reservationSlotDao.findById(reservation.getReservationSlotId());
-            Optional<Long> newReservationSlotId = getOrCreateReservationSlotId(request);
-            validateSameReservation(request.name(), newReservationSlotId.get());
+            Long newReservationSlotId = getOrCreateReservationSlotId(request);
+            validateSameReservation(request.name(), newReservationSlotId);
 
-            ReservationSlot newReservationSlot = reservationSlotDao.findById(newReservationSlotId.get());
+            ReservationSlot newReservationSlot = reservationSlotDao.findById(newReservationSlotId);
             validateSameTheme(reservationSlot.getTheme(), newReservationSlot.getTheme());
-
 
             reservationDao.update(reservation.getId(), newReservationSlot.getId());
         } catch (DuplicateKeyException e) {
@@ -98,13 +96,10 @@ public class ReservationService {
         }
     }
 
-    private Optional<Long> getOrCreateReservationSlotId(ReservationRequest request) {
+    private Long getOrCreateReservationSlotId(ReservationRequest request) {
         try {
             Optional<Long> reservationSlotId = reservationSlotDao.findIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
-            if (reservationSlotId.isEmpty()) {
-                reservationSlotId = Optional.of(reservationSlotDao.save(request.date(), request.timeId(), request.themeId()));
-            }
-            return reservationSlotId;
+            return reservationSlotId.orElseGet(() -> reservationSlotDao.save(request.date(), request.timeId(), request.themeId()));
         } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }
