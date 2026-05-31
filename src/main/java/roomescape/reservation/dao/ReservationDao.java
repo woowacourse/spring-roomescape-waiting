@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -17,7 +17,7 @@ import roomescape.reservation.dto.response.ThemeSimpleResponse;
 import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
-@Component
+@Repository
 public class ReservationDao {
 
   private JdbcTemplate jdbcTemplate;
