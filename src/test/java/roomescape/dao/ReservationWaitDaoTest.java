@@ -210,4 +210,22 @@ class ReservationWaitDaoTest {
                         tuple(3L, 1L)
                 );
     }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL,
+            """
+                    INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+                    VALUES (1, 1, 1, '2026-05-01 10:00:00'),
+                           (2, 1, 2, '2026-05-01 10:00:01');
+                    """
+    })
+    void 대기ID로_같은_슬롯_안에서의_순번을_조회한다() {
+        assertThat(dao.findWaitOrder(1L)).isEqualTo(1L);
+        assertThat(dao.findWaitOrder(2L)).isEqualTo(2L);
+    }
 }

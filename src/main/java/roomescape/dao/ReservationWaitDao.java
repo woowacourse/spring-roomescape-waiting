@@ -77,6 +77,23 @@ public class ReservationWaitDao {
         ), memberId);
     }
 
+    public Long findWaitOrder(Long waitId) {
+        String sql = """
+                SELECT ranked.order_num
+                FROM (
+                    SELECT
+                        id,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY reservation_id
+                            ORDER BY created_at
+                        ) AS order_num
+                    FROM reservation_wait
+                ) AS ranked
+                WHERE ranked.id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, Long.class, waitId);
+    }
+
     public void deleteByReservationIdAndMemberId(Long reservationId, Long memberId) {
         String sql = "DELETE FROM reservation_wait WHERE reservation_id = ? AND member_id = ?";
         jdbcTemplate.update(sql, reservationId, memberId);

@@ -12,6 +12,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.dto.CreatedWaitResult;
 import roomescape.exception.auth.WrongStoreAccessException;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
@@ -425,8 +426,10 @@ public class ReservationServiceTest {
                 .thenReturn(id);
         when(reservationWaitDao.findReservationWaitById(id))
                 .thenReturn(Optional.of(reservationWait));
-        ReservationWait result = reservationService.createWait(BROWN_ID, 1L);
-        assertThat(reservationWait).usingRecursiveComparison().isEqualTo(result);
+        when(reservationWaitDao.findWaitOrder(id)).thenReturn(1L);
+        CreatedWaitResult result = reservationService.createWait(BROWN_ID, 1L);
+        assertThat(reservationWait).usingRecursiveComparison().isEqualTo(result.reservationWait());
+        assertThat(result.order()).isEqualTo(1L);
         verify(reservationWaitDao).createReservationWait(BROWN_ID, 1L);
     }
 

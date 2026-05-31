@@ -11,6 +11,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.dto.CreatedWaitResult;
 import roomescape.dto.WaitingResponseResult;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
@@ -64,13 +65,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationWait createWait(Long memberId, Long reservationId) {
+    public CreatedWaitResult createWait(Long memberId, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
         validatePastReservationWaitCreate(reservation.getDate(), reservation.getTime().getStartAt());
         validateIfSelfReserved(memberId, reservation);
         try {
             Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
-            return reservationWaitDao.findReservationWaitById(waitId).get();
+            ReservationWait wait = reservationWaitDao.findReservationWaitById(waitId).get();
+            Long order = reservationWaitDao.findWaitOrder(waitId);
+            return new CreatedWaitResult(wait, order);
         } catch (DuplicateKeyException e) {
             throw new ReservationWaitAlreadyExistsException();
         }
