@@ -2,21 +2,23 @@ package roomescape.controller;
 
 import static org.hamcrest.core.Is.is;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeControllerTest {
 
+    @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
     @Test
     @DisplayName("전체 테마 조회 API")
     void 전체_테마_조회_API() {
@@ -25,17 +27,18 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()",is(4))
-                .body("[0].id",is(1))
-                .body("[0].name",is("공포의 저택"))
-                .body("[0].description",is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
-                .body("[0].thumbnailUrl",is("https://picsum.photos/seed/haunted/400/250"));
+                .body("size()", is(4))
+                .body("[0].id", is(1))
+                .body("[0].name", is("공포의 저택"))
+                .body("[0].description", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
+                .body("[0].thumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"));
     }
 
+    @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
     @Test
     @DisplayName("Top 10 테마 조회 API")
     void Top_10_테마_조회_API() {
-        Map<String,Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("size", "10");
 
         RestAssured.given().log().all()
@@ -44,10 +47,10 @@ class ThemeControllerTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id",is(1))
-                .body("[0].name",is("공포의 저택"))
-                .body("[0].description",is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
-                .body("[0].thumbnailUrl",is("https://picsum.photos/seed/haunted/400/250"));
+                .body("[0].id", is(1))
+                .body("[0].name", is("공포의 저택"))
+                .body("[0].description", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
+                .body("[0].thumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"));
     }
 
     @Test

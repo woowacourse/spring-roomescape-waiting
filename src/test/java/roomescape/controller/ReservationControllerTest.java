@@ -8,21 +8,18 @@ import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationControllerTest {
-    @Autowired
-    private ReservationController reservationController;
 
+    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
     @DisplayName("사용자 예약 추가 API")
     @Test
     void 사용자_예약_추가_API() {
@@ -65,6 +62,7 @@ class ReservationControllerTest {
                 .statusCode(400);
     }
 
+    @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
     @DisplayName("사용자 예약 삭제 API")
     @Test
     void 사용자_예약_삭제_API() {
@@ -94,6 +92,7 @@ class ReservationControllerTest {
                 .statusCode(204);
     }
 
+    @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
     @DisplayName("사용자 예약 조회 API")
     @Test
     void 사용자_예약_조회_API() {
@@ -149,6 +148,7 @@ class ReservationControllerTest {
                 .statusCode(400);
     }
 
+    @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
     @DisplayName("사용자 예약 대기 - 정상 테스트")
     @Test
     void 사용자_예약_대기_정상_테스트() {
@@ -188,6 +188,7 @@ class ReservationControllerTest {
                 .body("order", is(1));
     }
 
+    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
     @DisplayName("사용자 예약 대기 삭제 API")
     @Test
     void 사용자_예약_대기_삭제_API() {

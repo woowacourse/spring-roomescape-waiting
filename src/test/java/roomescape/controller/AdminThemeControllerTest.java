@@ -1,24 +1,26 @@
 package roomescape.controller;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminThemeControllerTest {
 
+    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
     @DisplayName("관리자 테마 추가")
     @Test
-    void 관리자_테마_추가_API(){
-        Map<String,Object> params = new HashMap<>();
+    void 관리자_테마_추가_API() {
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "공포의 폐병원");
         params.put("description", "공포의 폐병원");
         params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
@@ -33,8 +35,8 @@ class AdminThemeControllerTest {
 
     @DisplayName("관리자 테마 추가 - 유효하지 않은 입력값")
     @Test
-    void 관리자_테마_추가_API_예외_테스트(){
-        Map<String,Object> params = new HashMap<>();
+    void 관리자_테마_추가_API_예외_테스트() {
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "");
         params.put("description", "공포의 폐병원");
         params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
@@ -47,11 +49,11 @@ class AdminThemeControllerTest {
                 .statusCode(400);
     }
 
-
+    @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
     @DisplayName("API - 관리자 테마 삭제")
     @Test
     void API_관리자_테마_삭제() {
-        Map<String,Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("name", "공포의 폐병원");
         params.put("description", "공포의 폐병원");
         params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
