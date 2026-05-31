@@ -163,34 +163,58 @@ public class ReservationService {
             long reservationId,
             ReservationDetailProjection oldReservation
     ) {
-        long oldScheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.timeId(),
-                oldReservation.themeId()
-        );
+        long oldScheduleId = resolveScheduleId(oldReservation.date(), oldReservation.timeId(), oldReservation.themeId());
+        validateUpdatable(oldReservation, body);
 
+        Waiting firstWaiting = popFirstWaiting(oldScheduleId);
+        long newScheduleId = resolveNewScheduleId(body, oldReservation, reservationId);
+
+        updateReservationSchedule(reservationId, newScheduleId);
+        promoteWaitingIfPresent(firstWaiting, oldScheduleId);
+
+        return ReservationSaveResponse.from(getReservationOrThrow(reservationId));
+    }
+
+    private void validateUpdatable(ReservationDetailProjection oldReservation, ReservationUpdateRequest body) {
         validateNotPast(oldReservation);
         validateNotEmptyUpdateRequest(body);
+    }
 
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(oldScheduleId)
-                .orElse(null);
+    private long resolveNewScheduleId(
+            ReservationUpdateRequest body,
+            ReservationDetailProjection oldReservation,
+            long reservationId
+    ) {
+        LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
+        long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
+        long newScheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId, oldReservation.getThemeId());
+
+        scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
+        validateDuplicatedReservationNot(reservationId, newScheduleId);
+        return newScheduleId;
+    }
+
+    private Waiting popFirstWaiting(long scheduleId) {
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(scheduleId).orElse(null);
         if (firstWaiting != null) {
             waitingRepository.deleteById(firstWaiting.getId());
         }
+        return firstWaiting;
+    }
 
-        LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
-        long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId, oldReservation.getThemeId());
-        scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
-        validateDuplicatedReservationNot(reservationId, scheduleId);
-
-        int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
+    private void updateReservationSchedule(long reservationId, long newScheduleId) {
+        int affectedRow = reservationRepository.updateScheduleById(reservationId, newScheduleId);
         validateReservationUpdated(affectedRow);
-        if (firstWaiting != null) {
-            reservationRepository.save(new Reservation(null, firstWaiting.getMemberId(), oldScheduleId));
-        }
+    }
 
-        return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
+    private void promoteWaitingIfPresent(Waiting waiting, long oldScheduleId) {
+        if (waiting != null) {
+            reservationRepository.save(new Reservation(null, waiting.getMemberId(), oldScheduleId));
+        }
+    }
+
+    private long resolveScheduleId(LocalDate date, long timeId, long themeId) {
+        return scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     private void deleteReservationAndPromoteWaiting(long reservationId, long scheduleId) {
@@ -206,7 +230,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    private Reservation getNewReservationOrThrow(long reservationId) {
+    private Reservation getReservationOrThrow(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
     }
