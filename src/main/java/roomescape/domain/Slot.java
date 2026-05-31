@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.common.DomainAssert;
 
 public class Slot {
@@ -43,5 +44,21 @@ public class Slot {
 
     public Long getStoreId() {
         return store.getId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Slot slot)) {
+            return false;
+        }
+        return Objects.equals(date, slot.date)
+                && Objects.equals(time, slot.time)
+                && Objects.equals(theme, slot.theme)
+                && Objects.equals(store, slot.store);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, time, theme, store);
     }
 }

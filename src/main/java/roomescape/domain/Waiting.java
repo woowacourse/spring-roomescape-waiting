@@ -27,8 +27,12 @@ public class Waiting {
         return new Waiting(null, member, reservation.getSlot(), null);
     }
 
-    public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store, Long rank) {
-        return new Waiting(id, member, new Slot(date, time, theme, store), rank);
+    public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store) {
+        return new Waiting(id, member, new Slot(date, time, theme, store), null);
+    }
+
+    public Waiting withRank(Long rank) {
+        return new Waiting(id, member, slot, rank);
     }
 
     public boolean isSameMember(Member member) {
