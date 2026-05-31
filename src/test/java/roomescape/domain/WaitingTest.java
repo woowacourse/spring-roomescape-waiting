@@ -13,10 +13,10 @@ import roomescape.domain.exception.InvalidDomainException;
 class WaitingTest {
 
     private static final LocalDate DATE = LocalDate.of(2050, 12, 31);
-    private static final ReservationTime TIME =
-            ReservationTime.withId(1L, LocalTime.of(10, 0));
-    private static final Theme THEME =
-            Theme.withId(1L, "테마A", "설명", "url");
+    public static final long TIME_ID = 1L;
+    private static final ReservationTime TIME = ReservationTime.withId(TIME_ID, LocalTime.of(10, 0));
+    public static final long THEME_ID = 1L;
+    private static final Theme THEME = Theme.withId(THEME_ID, "테마A", "설명", "url");
 
     @Nested
     @DisplayName("Waiting 객체 생성 시 도메인 제약 검증")
@@ -66,22 +66,20 @@ class WaitingTest {
             assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, null, 1))
                     .isInstanceOf(InvalidDomainException.class);
         }
-
     }
 
     @Nested
     @DisplayName("동작")
     class Behavior {
 
-        //TODO Slot 값 객체로 분리할 신호
-        // 1. 도메인 언어가 생김 -> 파라미터 실수 컴파이단에서 발 + 차후 미래 규칙관련 모을수잇음
         @Test
         @DisplayName("같은 슬롯인지 비교한다")
         void 슬롯_비교() {
             Waiting w = Waiting.create("브라운", DATE, TIME, THEME, 1);
-            assertThat(w.isSameSlot(DATE, 1L, 1L)).isTrue();
-            assertThat(w.isSameSlot(DATE, 1L, 2L)).isFalse();
-            assertThat(w.isSameSlot(DATE.plusDays(1), 1L, 1L)).isFalse();
+            assertThat(w.isSameSlot(DATE, TIME_ID, THEME_ID)).isTrue();
+            long anotherThemeId = 2L;
+            assertThat(w.isSameSlot(DATE, TIME_ID, anotherThemeId)).isFalse();
+            assertThat(w.isSameSlot(DATE.plusDays(1), TIME_ID, THEME_ID)).isFalse();
         }
 
         @Test
@@ -98,9 +96,13 @@ class WaitingTest {
             Waiting w = Waiting.withId(100L, "브라운", DATE, TIME, THEME, 3);
             Waiting reordered = w.withOrderIndex(2);
 
-            assertThat(w.getOrderIndex()).isEqualTo(3);           // 원본 불변
+            assertThat(w.getOrderIndex()).isEqualTo(3);
             assertThat(reordered.getOrderIndex()).isEqualTo(2);
-            assertThat(reordered.getId()).isEqualTo(100L);   // 다른 필드 보존
+            assertThat(reordered.getId()).isEqualTo(100L);
+            assertThat(reordered.getName()).isEqualTo("브라운");
+            assertThat(reordered.getDate()).isEqualTo(DATE);
+            assertThat(reordered.getTime()).isEqualTo(TIME);
+            assertThat(reordered.getTheme()).isEqualTo(THEME);
         }
     }
 }
