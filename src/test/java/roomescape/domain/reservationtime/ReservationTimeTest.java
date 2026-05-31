@@ -25,13 +25,12 @@ class ReservationTimeTest {
 
     @Test
     void 예약_날짜는_같지만_시간이_미래면_정상_처리() {
-        ReservationTime time = ReservationTime.of(
-                1L,
-                LocalTime.now().plusHours(1),
-                LocalTime.now().plusHours(2)
-        );
+        LocalTime futureStart = LocalTime.now().plusHours(1);
+        LocalDate date = futureStart.isAfter(LocalTime.now()) ? LocalDate.now() : LocalDate.now().plusDays(1);
 
-        assertThatCode(() -> time.validateIfTimePast(LocalDate.now()))
+        ReservationTime time = ReservationTime.of(1L, futureStart, futureStart.plusHours(1));
+
+        assertThatCode(() -> time.validateIfTimePast(date))
                 .doesNotThrowAnyException();
     }
 
