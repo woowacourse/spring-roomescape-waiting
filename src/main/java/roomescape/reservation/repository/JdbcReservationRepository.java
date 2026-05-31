@@ -67,10 +67,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         String query = """
-                SELECT r.id as reservation_id, r.date,
-                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                SELECT r.id AS reservation_id, r.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r
                 JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
@@ -83,10 +83,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByMemberId(Long memberId) {
         String query = """
-                SELECT r.id as reservation_id, r.date,
-                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                SELECT r.id AS reservation_id, r.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r
                 JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
@@ -105,14 +105,14 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String query = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
+        String query = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
         return count != null && count > 0;
     }
 
     @Override
     public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId) {
-        String query = "SELECT count(*) FROM reservation WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ?";
+        String query = "SELECT COUNT(*) FROM reservation WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, memberId, date, timeId, themeId);
         return count != null && count > 0;
     }

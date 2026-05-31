@@ -71,10 +71,10 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     @Override
     public List<ReservationWaiting> findByMemberId(Long memberId) {
         String query = """
-                SELECT rw.id as waiting_id, rw.date,
-                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                SELECT rw.id AS waiting_id, rw.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation_waiting rw
                 JOIN member m ON rw.member_id = m.id
                 JOIN reservation_time rt ON rw.time_id = rt.id
@@ -88,10 +88,10 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     @Override
     public Optional<ReservationWaiting> findById(Long id) {
         String query = """
-                SELECT rw.id as waiting_id, rw.date,
-                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                SELECT rw.id AS waiting_id, rw.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation_waiting rw
                 JOIN member m ON rw.member_id = m.id
                 JOIN reservation_time rt ON rw.time_id = rt.id
@@ -105,7 +105,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId,
                                                               Long themeId) {
         String query = """
-                SELECT count(*) FROM reservation_waiting
+                SELECT COUNT(*) FROM reservation_waiting
                 WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ?
                 """;
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, memberId, date, timeId, themeId);
@@ -116,7 +116,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public Long calculateTurn(Long waitingId, LocalDate date, Long timeId, Long themeId) {
         String query = """
                 SELECT turn FROM (
-                    SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at) as turn
+                    SELECT id, ROW_NUMBER() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at) AS turn
                     FROM reservation_waiting
                     WHERE date = ? AND time_id = ? AND theme_id = ?
                 ) sub
