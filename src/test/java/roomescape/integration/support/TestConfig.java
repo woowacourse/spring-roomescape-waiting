@@ -1,9 +1,12 @@
 package roomescape.integration.support;
 
+import io.restassured.RestAssured;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -21,5 +24,10 @@ public class TestConfig {
                 Instant.parse("2026-05-01T09:00:00+09:00"),
                 ZoneId.of("Asia/Seoul")
         );
+    }
+
+    @Bean
+    public ApplicationListener<WebServerInitializedEvent> restAssuredPortInitializer() {
+        return event -> RestAssured.port = event.getWebServer().getPort();
     }
 }
