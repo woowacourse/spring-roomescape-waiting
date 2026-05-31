@@ -121,7 +121,7 @@ public class ReservationService {
             return;
         }
 
-        deleteWaitingOrAbortPromotion(id, waiting.getId());
+        deleteWaitingOrAbortPromotion(waiting.getId());
     }
 
     private Reservation getReservation(Long id) {
@@ -136,11 +136,11 @@ public class ReservationService {
         }
     }
 
-    private void deleteWaitingOrAbortPromotion(long promotedReservationId, long waitingId) {
+    private void deleteWaitingOrAbortPromotion(long waitingId) {
         long deletedRow = reservationWaitingDao.delete(waitingId);
 
         if(deletedRow == 0) {
-            reservationUpdatingDao.delete(promotedReservationId);
+            throw new DataIntegrityViolationException("예약 데이터를 삭제할 수 없습니다.");
         }
     }
 }
