@@ -11,26 +11,40 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.reservationdate.JdbcReservationDateRepository;
 import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationdate.ReservationDateRepository;
+import roomescape.domain.reservationtime.JdbcReservationTimeRepository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.theme.JdbcThemeRepository;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 @JdbcTest
 @Sql("/truncate.sql")
+@Import({JdbcReservationDateRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class})
 class JdbcWaitingReservationRepositoryTest {
 
-    private static final long DATE_ID = 101L;
-    private static final long TIME_ID = 201L;
-    private static final long THEME_ID = 301L;
     private static final LocalDate PLAY_DAY = LocalDate.of(2026, 5, 10);
     private static final LocalTime START_AT = LocalTime.of(10, 0);
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ReservationDateRepository reservationDateRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     private WaitingReservationRepository waitingReservationRepository;
     private ReservationDate date;
@@ -41,16 +55,9 @@ class JdbcWaitingReservationRepositoryTest {
     void setUp() {
         waitingReservationRepository = new JdbcWaitingReservationRepository(jdbcTemplate);
 
-        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", DATE_ID, PLAY_DAY.toString());
-        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", TIME_ID, START_AT.toString());
-        jdbcTemplate.update(
-                "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
-                THEME_ID, "공포", "테마 내용", "/themes/scary"
-        );
-
-        date = ReservationDate.of(DATE_ID, PLAY_DAY);
-        time = ReservationTime.of(TIME_ID, START_AT);
-        theme = Theme.of(THEME_ID, "공포", "테마 내용", "/themes/scary");
+        date = reservationDateRepository.save(ReservationDate.createWithoutId(PLAY_DAY));
+        time = reservationTimeRepository.save(ReservationTime.createWithoutId(START_AT));
+        theme = themeRepository.save(Theme.createWithoutId("공포", "테마 내용", "/themes/scary"));
     }
 
     @Test
@@ -75,11 +82,11 @@ class JdbcWaitingReservationRepositoryTest {
         ).orElseThrow();
 
         assertThat(oldest.getName()).isEqualTo("이산");
-        assertThat(oldest.getDate().getId()).isEqualTo(DATE_ID);
+        assertThat(oldest.getDate().getId()).isEqualTo(date.getId());
         assertThat(oldest.getDate().getPlayDay()).isEqualTo(PLAY_DAY);
-        assertThat(oldest.getTime().getId()).isEqualTo(TIME_ID);
+        assertThat(oldest.getTime().getId()).isEqualTo(time.getId());
         assertThat(oldest.getTime().getStartAt()).isEqualTo(START_AT);
-        assertThat(oldest.getTheme().getId()).isEqualTo(THEME_ID);
+        assertThat(oldest.getTheme().getId()).isEqualTo(theme.getId());
         assertThat(oldest.getTheme().getName()).isEqualTo("공포");
         assertThat(oldest.getCreatedAt()).isEqualTo(LocalDateTime.of(2026, 5, 7, 10, 0));
     }
@@ -96,17 +103,13 @@ class JdbcWaitingReservationRepositoryTest {
 
     @Test
     void 특정_슬롯에서_가장_먼저_신청한_예약_대기를_가져온다() {
-        Slot otherSlot = insertSlot(
-                102L, LocalDate.of(2026, 5, 11),
-                202L, LocalTime.of(11, 0),
-                302L, "스릴러"
-        );
+        Slot otherSlot = insertSlot(LocalDate.of(2026, 5, 11), LocalTime.of(11, 0), "스릴러");
         waitingReservationRepository.save(waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 6, 10, 0)));
         waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 7, 10, 0)));
         waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 8, 10, 0)));
 
         WaitingReservation oldest = waitingReservationRepository
-                .findOldestBySlot(DATE_ID, TIME_ID, THEME_ID)
+                .findOldestBySlot(date.getId(), time.getId(), theme.getId())
                 .orElseThrow();
 
         assertThat(oldest.getName()).isEqualTo("이산");
@@ -117,19 +120,11 @@ class JdbcWaitingReservationRepositoryTest {
         waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
         waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 8, 10, 0)));
 
-        Slot secondSlot = insertSlot(
-                102L, LocalDate.of(2026, 5, 11),
-                202L, LocalTime.of(11, 0),
-                302L, "스릴러"
-        );
+        Slot secondSlot = insertSlot(LocalDate.of(2026, 5, 11), LocalTime.of(11, 0), "스릴러");
         waitingReservationRepository.save(waiting("이산", secondSlot, LocalDateTime.of(2026, 5, 7, 11, 0)));
         waitingReservationRepository.save(waiting("브리", secondSlot, LocalDateTime.of(2026, 5, 8, 11, 0)));
 
-        Slot thirdSlot = insertSlot(
-                103L, LocalDate.of(2026, 5, 12),
-                203L, LocalTime.of(13, 0),
-                303L, "미스터리"
-        );
+        Slot thirdSlot = insertSlot(LocalDate.of(2026, 5, 12), LocalTime.of(13, 0), "미스터리");
         waitingReservationRepository.save(waiting("나무", thirdSlot, LocalDateTime.of(2026, 5, 7, 12, 0)));
         waitingReservationRepository.save(waiting("고래", thirdSlot, LocalDateTime.of(2026, 5, 8, 12, 0)));
         waitingReservationRepository.save(waiting("이산", thirdSlot, LocalDateTime.of(2026, 5, 9, 12, 0)));
@@ -140,7 +135,7 @@ class JdbcWaitingReservationRepositoryTest {
         assertThat(waitings).extracting(result -> result.waitingReservation().getName())
                 .containsOnly("이산");
         assertThat(waitings).extracting(result -> result.waitingReservation().getDate().getId())
-                .containsExactly(DATE_ID, 102L, 103L);
+                .containsExactly(date.getId(), secondSlot.date().getId(), thirdSlot.date().getId());
         assertThat(waitings).extracting(WaitingReservationWithRank::rank)
                 .containsExactly(2L, 1L, 3L);
     }
@@ -163,19 +158,11 @@ class JdbcWaitingReservationRepositoryTest {
         return WaitingReservation.createWithoutId(name, slot.date(), slot.time(), slot.theme(), createdAt);
     }
 
-    private Slot insertSlot(long dateId, LocalDate playDay, long timeId, LocalTime startAt, long themeId,
-                            String themeName) {
-        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", dateId, playDay.toString());
-        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", timeId, startAt.toString());
-        jdbcTemplate.update(
-                "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
-                themeId, themeName, "테마 내용", "/themes/" + themeId
-        );
-        return new Slot(
-                ReservationDate.of(dateId, playDay),
-                ReservationTime.of(timeId, startAt),
-                Theme.of(themeId, themeName, "테마 내용", "/themes/" + themeId)
-        );
+    private Slot insertSlot(LocalDate playDay, LocalTime startAt, String themeName) {
+        ReservationDate savedDate = reservationDateRepository.save(ReservationDate.createWithoutId(playDay));
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.createWithoutId(startAt));
+        Theme savedTheme = themeRepository.save(Theme.createWithoutId(themeName, "테마 내용", "/themes/" + themeName));
+        return new Slot(savedDate, savedTime, savedTheme);
     }
 
     private record Slot(
@@ -184,5 +171,4 @@ class JdbcWaitingReservationRepositoryTest {
             Theme theme
     ) {
     }
-
 }

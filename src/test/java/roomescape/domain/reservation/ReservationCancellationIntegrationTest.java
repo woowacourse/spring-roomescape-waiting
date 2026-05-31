@@ -9,12 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 
@@ -32,17 +33,19 @@ class ReservationCancellationIntegrationTest {
     private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ReservationDateRepository reservationDateRepository;
+
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
 
     private Slot cancelledSlot;
 
     @BeforeEach
     void setUp() {
-        cancelledSlot = insertSlot(
-            101L, LocalDate.now().plusDays(2),
-            201L, LocalTime.of(10, 0),
-            301L, "공포"
-        );
+        cancelledSlot = insertSlot(LocalDate.now().plusDays(2), LocalTime.of(10, 0), "공포");
     }
 
     @Test
@@ -55,11 +58,7 @@ class ReservationCancellationIntegrationTest {
                 cancelledSlot.theme()
             )
         );
-        Slot otherSlot = insertSlot(
-            102L, LocalDate.now().plusDays(3),
-            202L, LocalTime.of(11, 0),
-            302L, "스릴러"
-        );
+        Slot otherSlot = insertSlot(LocalDate.now().plusDays(3), LocalTime.of(11, 0), "스릴러");
         WaitingReservation otherSlotOldest = waitingReservationRepository.save(
             waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 5, 10, 0))
         );
@@ -84,19 +83,11 @@ class ReservationCancellationIntegrationTest {
         return WaitingReservation.createWithoutId(name, slot.date(), slot.time(), slot.theme(), createdAt);
     }
 
-    private Slot insertSlot(long dateId, LocalDate playDay, long timeId, LocalTime startAt, long themeId,
-        String themeName) {
-        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", dateId, playDay.toString());
-        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", timeId, startAt.toString());
-        jdbcTemplate.update(
-            "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
-            themeId, themeName, "테마 내용", "/themes/" + themeId
-        );
-        return new Slot(
-            ReservationDate.of(dateId, playDay),
-            ReservationTime.of(timeId, startAt),
-            Theme.of(themeId, themeName, "테마 내용", "/themes/" + themeId)
-        );
+    private Slot insertSlot(LocalDate playDay, LocalTime startAt, String themeName) {
+        ReservationDate date = reservationDateRepository.save(ReservationDate.createWithoutId(playDay));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(startAt));
+        Theme theme = themeRepository.save(Theme.createWithoutId(themeName, "테마 내용", "/themes/" + themeName));
+        return new Slot(date, time, theme);
     }
 
     private record Slot(
