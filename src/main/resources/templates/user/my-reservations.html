@@ -134,7 +134,7 @@
                 if (!confirm('이 예약을 취소하시겠습니까?')) return;
                 const id = btn.dataset.id;
                 try {
-                    const res = await fetch(`/reservations/my?name=${encodeURIComponent(name)}&reservationId=${id}`, {
+                    const res = await fetch(`/reservations/my/${id}?name=${encodeURIComponent(name)}`, {
                         method: 'DELETE'
                     });
                     if (!res.ok) {

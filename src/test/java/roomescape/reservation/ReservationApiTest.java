@@ -113,7 +113,7 @@ public class ReservationApiTest {
         .extract().path("[0].id");
 
     RestAssured.given().log().all()
-        .when().delete("/reservations/my?name=누누&reservationId=" + reservationId)
+        .when().delete("/reservations/my/" + reservationId + "?name=누누")
         .then().log().all()
         .statusCode(200);
 

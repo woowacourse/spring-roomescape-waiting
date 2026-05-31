@@ -56,18 +56,18 @@ public class ReservationController {
         return ResponseEntity.ok(reservationFacade.findReservationsByName(name));
     }
 
-    @DeleteMapping("/my")
+    @DeleteMapping("/my/{reservationId}")
     public ResponseEntity<Void> deleteMyReservationById(@RequestParam String name,
-        @RequestParam Long reservationId) {
+        @PathVariable Long reservationId) {
         reservationFacade.deleteReservationByNameAndReservationId(name, reservationId);
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping
+    @PatchMapping("/my/{reservationId}")
     public ResponseEntity<Void> updateMyReservation(
         @RequestBody UpdateMyReservation updateMyReservation,
         @RequestParam String name,
-        @RequestParam Long reservationId) {
+        @PathVariable Long reservationId) {
         reservationFacade.updateMyReservation(updateMyReservation, name, reservationId);
         return ResponseEntity.ok().build();
     }
