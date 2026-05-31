@@ -556,6 +556,43 @@
       color: white;
     }
 
+    .message-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(2, 6, 23, 0.72);
+      z-index: 1200;
+    }
+
+    .message-modal-backdrop.show { display: flex; }
+
+    .message-modal {
+      width: min(420px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .message-modal h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .message-modal p {
+      margin-bottom: 22px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
     /* Spinner */
     .spinner {
       display: inline-block;
@@ -749,6 +786,13 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="message-modal-backdrop" id="message-modal" onclick="closeMessageModal(event)">
+  <div class="message-modal" role="dialog" aria-modal="true" aria-labelledby="message-modal-title" onclick="event.stopPropagation()">
+    <h3 id="message-modal-title">알림</h3>
+    <p id="message-modal-text"></p>
+    <button class="btn btn-accent" onclick="closeMessageModal()">확인</button>
+  </div>
+</div>
 
 <script>
   const API = '';
@@ -781,6 +825,17 @@
     t.textContent = msg;
     t.className = `toast ${type} show`;
     setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  function showMessageModal(title, message) {
+    document.getElementById('message-modal-title').textContent = title;
+    document.getElementById('message-modal-text').textContent = message;
+    document.getElementById('message-modal').classList.add('show');
+  }
+
+  function closeMessageModal(event) {
+    if (event && event.target.id !== 'message-modal') return;
+    document.getElementById('message-modal').classList.remove('show');
   }
 
   async function readErrorMessage(res, fallback) {
@@ -1098,10 +1153,10 @@
       } else {
         const response = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
         cachedAdminReservations = null;
-        if (response.order > 1) {
+        if (response.order !== 0) {
           showWaitingComplete(response);
         } else {
-          showToast('예약이 완료되었습니다!');
+          showMessageModal('예약 완료', '예약이 완료되었습니다!');
           showReservationComplete(response);
           resetBookingState();
         }
@@ -1173,12 +1228,12 @@
   }
 
   async function submitWaiting() {
-    // 대기도 동일한 POST /reservations 엔드포인트 사용 (order > 1이면 대기)
+    // 대기도 동일한 POST /reservations 엔드포인트 사용 (order가 0이 아니면 대기)
     await submitReservation();
   }
 
   function showWaitingComplete(reservation) {
-    const waitingOrder = reservation.order - 1;
+    const waitingOrder = reservation.order;
     document.getElementById('booking-title').textContent = '예약 대기 완료';
     document.getElementById('booking-desc').textContent = '예약 대기가 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 대기 완료';
@@ -1195,7 +1250,7 @@
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
       <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
     `;
-    showToast(`예약 대기가 등록되었습니다. 대기 ${waitingOrder}번`);
+    showMessageModal('예약 대기 완료', `해당 시간대에 예약이 마감되었습니다.\n예약 대기 ${waitingOrder}번으로 등록되었습니다.`);
     resetBookingState();
     goToStep(4);
   }
