@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSchedule;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -32,38 +34,43 @@ public class WaitingReservationService {
     private final Clock clock;
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
-        validateDuplicationOfWaitingReservation(request);
         ReservationDate date = reservationDateService.findById(request.dateId());
         ReservationTime time = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
-        validateNotPast(date, time);
-        validateSlotIsReserved(request);
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        validateNotPast(slot.schedule());
+        validateSlotIsReserved(slot);
+        validateDuplicationOfWaitingReservation(request.name(), slot);
 
         WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
     }
 
-    private void validateDuplicationOfWaitingReservation(WaitingReservationCreationRequest request) {
-        if (waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(request.name(), request.dateId(), request.timeId(), request.themeId())) {
+    private void validateDuplicationOfWaitingReservation(String name, ReservationSlot slot) {
+        if (waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(
+            name,
+            slot.dateId(),
+            slot.timeId(),
+            slot.themeId()
+        )) {
             throw new RoomescapeException(WaitingReservationErrorCode.DUPLICATE_WAITING_RESERVATION);
         }
     }
 
-    private void validateSlotIsReserved(WaitingReservationCreationRequest request) {
+    private void validateSlotIsReserved(ReservationSlot slot) {
         boolean reserved = reservationRepository.existsByDateIdAndTimeIdAndThemeId(
-            request.dateId(),
-            request.timeId(),
-            request.themeId()
+            slot.dateId(),
+            slot.timeId(),
+            slot.themeId()
         );
         if (!reserved) {
             throw new RoomescapeException(WaitingReservationErrorCode.AVAILABLE_SLOT_NOT_WAITABLE);
         }
     }
 
-    private void validateNotPast(ReservationDate date, ReservationTime time) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date.getPlayDay(), time.getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now(clock))) {
+    private void validateNotPast(ReservationSchedule schedule) {
+        if (schedule.isPast(clock)) {
             throw new RoomescapeException(WaitingReservationErrorCode.PAST_TIME_NOT_ALLOWED);
         }
     }

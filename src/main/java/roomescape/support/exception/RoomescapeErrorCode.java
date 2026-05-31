@@ -27,6 +27,8 @@ public enum RoomescapeErrorCode implements ErrorCode {
         "처리되지 않은 서버 내부 오류가 발생했습니다.", "서버 로그의 Trace ID를 확인하여 백엔드 팀에 문의하십시오."),
     INVALID_GENERATED_KEY(HttpStatus.INTERNAL_SERVER_ERROR,
         "데이터베이스에서 생성된 식별자(PK)를 조회할 수 없습니다.", "DB 설정 및 엔티티 매핑 상태를 확인하십시오."),
+    DATA_CONSISTENCY_VIOLATION(HttpStatus.INTERNAL_SERVER_ERROR,
+        "데이터 정합성이 깨질 수 있는 내부 처리 실패가 발생했습니다.", "서버 로그를 확인하여 트랜잭션 처리 상태를 점검하십시오."),
     ;
 
     private final HttpStatus httpStatus;

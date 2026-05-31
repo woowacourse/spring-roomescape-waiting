@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import roomescape.support.exception.RoomescapeException;
 
 class ReservationServiceTest {
 
+    private static final Clock CLOCK = Clock.systemDefaultZone();
+
     private ReservationService reservationService;
     private FakeReservationRepository reservationRepository;
     private FakeReservationDateRepository reservationDateRepository;
@@ -60,7 +63,8 @@ class ReservationServiceTest {
                 reservationDateService,
                 reservationTimeService,
                 themeService,
-                waitingReservationRepository
+                waitingReservationRepository,
+                CLOCK
         );
     }
 

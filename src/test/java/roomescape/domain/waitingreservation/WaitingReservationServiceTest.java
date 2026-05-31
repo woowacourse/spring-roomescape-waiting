@@ -107,8 +107,15 @@ class WaitingReservationServiceTest {
 
     @Test
     void 같은_사용자가_같은_슬롯에_중복_대기할_수_없다() {
+        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 10));
+        ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
+        when(reservationDateService.findById(1L)).thenReturn(date);
+        when(reservationTimeService.findById(2L)).thenReturn(time);
+        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId("고래", 1L, 2L, 3L)).thenReturn(true);
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
