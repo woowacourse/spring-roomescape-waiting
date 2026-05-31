@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS reservation
     updated_at     DATETIME        NOT NULL,
     PRIMARY KEY    (id),
 
-    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','CANCELED')),
+    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED', 'WAITING', 'CANCELED')),
     FOREIGN KEY (schedule_id) REFERENCES schedule (id)
 );
+
+CREATE INDEX idx_reservation_schedule_id
+    ON reservation(schedule_id);
