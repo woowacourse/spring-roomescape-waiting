@@ -57,14 +57,13 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name) && Objects.equals(description, theme.description) && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
+        return Objects.equals(name, theme.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, thumbnailUrl);
+        return Objects.hashCode(name);
     }
 }
