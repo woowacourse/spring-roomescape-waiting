@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
@@ -16,41 +17,34 @@ public class Waitings {
     public Waitings(Slot slot, List<Waiting> waitings) {
         DomainAssert.notNull(slot, "슬롯은 비어 있을 수 없습니다.");
         DomainAssert.notNull(waitings, "대기 목록은 비어 있을 수 없습니다.");
-        validateSameSlot(slot, waitings);
+        validateAllBelongToSlot(slot, waitings);
         this.slot = slot;
-        this.waitings = waitings.stream()
+        this.waitings = assignRanks(waitings);
+    }
+
+    public Waiting enqueue(Member member, Reservation reservation) {
+        validateReservationMatchesSlot(reservation);
+        validateCanCreate(member);
+        Waiting created = Waiting.create(member, reservation);
+        return created.withRank((long) waitings.size() + 1);
+    }
+
+    public List<Waiting> getAll() {
+        return waitings;
+    }
+
+    public List<Waiting> ofMember(Long memberId) {
+        return waitings.stream()
+                .filter(waiting -> Objects.equals(waiting.getMember().getId(), memberId))
+                .toList();
+    }
+
+    private List<Waiting> assignRanks(List<Waiting> waitings) {
+        List<Waiting> sorted = waitings.stream()
                 .sorted(Comparator.comparing(Waiting::getId, Comparator.nullsLast(Long::compareTo)))
                 .toList();
-    }
-
-    public Waiting create(Member member, Reservation reservation) {
-        validateSameSlot(reservation);
-        validateCanCreate(member);
-        return Waiting.create(member, reservation);
-    }
-
-    public Long nextRank() {
-        return (long) waitings.size() + 1;
-    }
-
-    public Waiting assignRank(Waiting waiting) {
-        for (int i = 0; i < waitings.size(); i++) {
-            if (Objects.equals(waitings.get(i).getId(), waiting.getId())) {
-                return waiting.withRank((long) i + 1);
-            }
-        }
-        return waiting;
-    }
-
-    public List<Waiting> assignRanks() {
-        return waitings.stream()
-                .map(this::assignRank)
-                .toList();
-    }
-
-    public List<Waiting> assignRanksOfMember(Long memberId) {
-        return assignRanks().stream()
-                .filter(waiting -> Objects.equals(waiting.getMember().getId(), memberId))
+        return IntStream.range(0, sorted.size())
+                .mapToObj(i -> sorted.get(i).withRank((long) i + 1))
                 .toList();
     }
 
@@ -63,13 +57,13 @@ public class Waitings {
         }
     }
 
-    private void validateSameSlot(Reservation reservation) {
+    private void validateReservationMatchesSlot(Reservation reservation) {
         if (!Objects.equals(reservation.getSlot(), slot)) {
             throw new BusinessRuleViolationException("같은 슬롯의 예약에만 대기를 생성할 수 있습니다.");
         }
     }
 
-    private void validateSameSlot(Slot slot, List<Waiting> waitings) {
+    private void validateAllBelongToSlot(Slot slot, List<Waiting> waitings) {
         boolean hasDifferentSlot = waitings.stream()
                 .map(Waiting::getSlot)
                 .anyMatch(waitingSlot -> !Objects.equals(waitingSlot, slot));

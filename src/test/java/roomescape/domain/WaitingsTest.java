@@ -42,7 +42,7 @@ class WaitingsTest {
         Slot otherSlot = new Slot(LocalDate.now().plusDays(1), time, theme, store);
         Waitings waitings = new Waitings(otherSlot, new ArrayList<>());
 
-        assertThatThrownBy(() -> waitings.create(waitingMember, reservation))
+        assertThatThrownBy(() -> waitings.enqueue(waitingMember, reservation))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 }
