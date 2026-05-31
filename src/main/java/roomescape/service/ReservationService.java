@@ -73,15 +73,14 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         validateOwned(reservation, username);
         reservation.validateCancellable(LocalDateTime.now(clock));
-        reservationDao.delete(id);
+        reservationDao.delete(reservation.getId());
     }
 
     @Transactional
     public void delete(long id) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
-        reservation.validateCancellable(LocalDateTime.now(clock));
-        reservationDao.delete(id);
+        reservationDao.delete(reservation.getId());
     }
 
     public List<Reservation> findAllByName(String username) {

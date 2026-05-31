@@ -33,6 +33,15 @@ class AdminReservationControllerTest extends ControllerTest {
                 .statusCode(204);
     }
 
+    @DisplayName("관리자는 지난 예약도 id만으로 삭제할 수 있다")
+    @Test
+    void 관리자_지난_예약_삭제_API() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/reservations/{id}", 1)
+                .then().log().all()
+                .statusCode(204);
+    }
+
     @DisplayName("존재하지 않는 예약을 관리자 삭제하면 404")
     @Test
     void 존재하지_않는_예약_관리자_삭제하면_404() {

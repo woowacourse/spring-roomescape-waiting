@@ -128,6 +128,17 @@ class ReservationServiceTest {
     }
 
     @Test
+    void delete_지난_예약도_삭제() {
+        LocalDate pastDate = fixedNow.toLocalDate().minusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", pastDate, fixedNow.minusDays(2), sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+
+        reservationService.delete(1L);
+
+        then(reservationDao).should().delete(1L);
+    }
+
+    @Test
     void delete_본인_예약이_아니면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
