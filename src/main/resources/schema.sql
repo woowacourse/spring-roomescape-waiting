@@ -7,19 +7,23 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role     VARCHAR(127) NOT NULL,
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(255) NOT NULL,
+    username   VARCHAR(255) NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    role       VARCHAR(127) NOT NULL,
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE (username)
 );
 
 CREATE TABLE store
 (
-    id   BIGINT       NOT NULL AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(255) NOT NULL,
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
@@ -29,26 +33,31 @@ CREATE TABLE theme
     name                VARCHAR(255) NOT NULL,
     description         TEXT         NOT NULL,
     thumbnail_image_url VARCHAR(512) NOT NULL,
+    created_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE reservation_time
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    start_at TIME NOT NULL,
+    id         BIGINT   NOT NULL AUTO_INCREMENT,
+    start_at   TIME     NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE reservation
 (
-    id       BIGINT NOT NULL AUTO_INCREMENT,
-    user_id  BIGINT NOT NULL,
-    theme_id BIGINT,
-    date     DATE   NOT NULL,
-    time_id  BIGINT,
-    store_id BIGINT NOT NULL,
-    status   VARCHAR(30) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    user_id    BIGINT      NOT NULL,
+    theme_id   BIGINT,
+    date       DATE        NOT NULL,
+    time_id    BIGINT,
+    store_id   BIGINT      NOT NULL,
+    status     VARCHAR(30) NOT NULL,
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -60,8 +69,10 @@ CREATE INDEX idx_reservation_user_id ON reservation (user_id);
 
 CREATE TABLE store_managers
 (
-    store_id BIGINT NOT NULL,
-    user_id  BIGINT NOT NULL,
+    store_id   BIGINT   NOT NULL,
+    user_id    BIGINT   NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (store_id, user_id),
     FOREIGN KEY (store_id) REFERENCES store (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
