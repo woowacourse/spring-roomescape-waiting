@@ -1,11 +1,14 @@
 package roomescape.auth;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.support.ControllerTestSupport;
 
-public class AuthenticationIntegrationTest extends AuthApiTestSupport {
+public class AuthenticationIntegrationTest extends ControllerTestSupport {
 
     @Test
     @DisplayName("헤더에 인증된 토큰이 있다면 보호된 url에 접근할 수 있다.")
@@ -47,5 +50,18 @@ public class AuthenticationIntegrationTest extends AuthApiTestSupport {
                 .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(401);
+    }
+
+    @Test
+    @DisplayName("일반 사용자가 관리자 API에 접근하면 403 예외가 발생한다.")
+    void 인증_테스트_5() {
+        RestAssured.given().log().all()
+                .header("Authorization", bearer(loginUserToken()))
+                .contentType(ContentType.JSON)
+                .when().get("/api/manager/reservations")
+                .then().log().all()
+                .statusCode(403)
+                .body("success", is(false))
+                .body("error.code", is("FORBIDDEN_403"));
     }
 }
