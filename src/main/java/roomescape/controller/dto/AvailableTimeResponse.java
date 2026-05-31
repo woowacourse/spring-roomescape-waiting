@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.controller.dto;
 
 import java.time.LocalTime;
 
@@ -9,5 +9,6 @@ public record AvailableTimeResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt,
         boolean isAvailable,
-        int waitNumber) {
+        int waitNumber
+) {
 }

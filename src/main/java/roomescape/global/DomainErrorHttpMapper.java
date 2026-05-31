@@ -9,10 +9,11 @@ public class DomainErrorHttpMapper {
 
     public HttpStatus statusOf(DomainErrorCode code) {
         return switch (code) {
-            case INVALID_INPUT, PAST_RESERVATION -> HttpStatus.BAD_REQUEST;
-            case NOT_FOUND_RESERVATION -> HttpStatus.NOT_FOUND;
-            case DUPLICATE_RESERVATION, DUPLICATE_RESERVATION_TIME,
-                 DUPLICATE_THEME_NAME, REFERENTIAL_INTEGRITY -> HttpStatus.CONFLICT;
+            case INVALID_INPUT -> HttpStatus.BAD_REQUEST;
+            case UNAUTHORIZED_RESERVATION -> HttpStatus.FORBIDDEN;
+            case NOT_FOUND_RESERVATION, NOT_FOUND_RESERVATION_TIME, NOT_FOUND_THEME -> HttpStatus.NOT_FOUND;
+            case PAST_RESERVATION, REFERENTIAL_INTEGRITY -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case DUPLICATE_RESERVATION, DUPLICATE_RESERVATION_TIME, DUPLICATE_THEME_NAME  -> HttpStatus.CONFLICT;
         };
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.domain.exception.RoomescapeException;
 
 @RestControllerAdvice
@@ -44,6 +45,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(
             HttpMessageNotReadableException e
+    ) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse(
+                        "INVALID_REQUEST",
+                        "잘못된 요청 형식입니다."
+                ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException e
     ) {
         return ResponseEntity.badRequest()
                 .body(new ErrorResponse(

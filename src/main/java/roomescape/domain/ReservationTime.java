@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 
-import roomescape.domain.exception.DomainErrorCode;
-import roomescape.domain.exception.RoomescapeException;
+import static roomescape.domain.exception.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.exception.DomainPreconditions.requireNonNull;
 
 public class ReservationTime {
 
@@ -11,15 +11,8 @@ public class ReservationTime {
     private final LocalTime startAt;
 
     public ReservationTime(Long id, LocalTime startAt) {
-        validateStartAt(startAt);
         this.id = id;
-        this.startAt = startAt;
-    }
-
-    private void validateStartAt(LocalTime startAt) {
-        if (startAt == null) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 시간은 null일 수 없습니다.");
-        }
+        this.startAt = requireNonNull(startAt, INVALID_INPUT, "시작 시각은 비어있을 수 없습니다.");
     }
 
     public Long getId() {

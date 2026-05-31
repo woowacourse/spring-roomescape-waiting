@@ -1,6 +1,7 @@
-package roomescape.dto;
+package roomescape.controller.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -13,7 +14,7 @@ import roomescape.domain.ReservationTime;
 public record ReservationResponse(
         Long reservationId,
         String name,
-        String status,
+        DisplayStatus status,
         LocalDate date,
         String themeName,
         String themeDescription,
@@ -23,14 +24,26 @@ public record ReservationResponse(
         int order
 ) {
 
-    public static ReservationResponse from(Reservation reservation, Schedule schedule, int order) {
+    public static ReservationResponse from(Reservation reservation, int order) {
+        Schedule schedule = reservation.getSchedule();
         Theme theme = schedule.getTheme();
         ReservationTime reservationTime = schedule.getTime();
 
+        LocalDateTime reservationDateTime = LocalDateTime.of(
+                schedule.getDate(),
+                reservationTime.getStartAt()
+        );
+
+        DisplayStatus displayStatus = DisplayStatus.from(
+                reservation.getStatus(),
+                LocalDateTime.now(),
+                reservationDateTime
+        );
+
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getName(),
-                reservation.getStatus().toString(),
+                reservation.getReserver().getName(),
+                displayStatus,
                 schedule.getDate(),
                 theme.getName(),
                 theme.getDescription(),

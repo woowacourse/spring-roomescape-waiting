@@ -2,42 +2,21 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 
-import roomescape.domain.exception.DomainErrorCode;
-import roomescape.domain.exception.RoomescapeException;
+import static roomescape.domain.exception.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.exception.DomainPreconditions.requireNonNull;
 
 public class Schedule {
 
     private final Long id;
+    private final Theme theme;
     private final LocalDate date;
     private final ReservationTime reservationTime;
-    private final Theme theme;
 
-    public Schedule(Long id, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        validateDate(date);
-        validateTime(reservationTime);
-        validateTheme(theme);
+    public Schedule(Long id, Theme theme, LocalDate date, ReservationTime time) {
         this.id = id;
-        this.date = date;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-    }
-
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 날짜는 null일 수 없습니다.");
-        }
-    }
-
-    private void validateTime(ReservationTime reservationTime) {
-        if (reservationTime == null) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 시간은 null일 수 없습니다.");
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 테마는 null일 수 없습니다.");
-        }
+        this.theme = requireNonNull(theme, INVALID_INPUT, "예약 테마는 비어있을 수 없습니다.");
+        this.date = requireNonNull(date, INVALID_INPUT, "예약 날짜는 비어있을 수 없습니다.");
+        this.reservationTime = requireNonNull(time, INVALID_INPUT, "예약 시간은 비어있을 수 없습니다.");
     }
 
     public Long getId() {

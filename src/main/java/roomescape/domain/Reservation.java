@@ -1,51 +1,97 @@
 package roomescape.domain;
 
-import java.time.LocalDateTime;
-
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import static roomescape.domain.exception.DomainErrorCode.INVALID_INPUT;
+import static roomescape.domain.exception.DomainPreconditions.requireNonNull;
 
 public class Reservation {
 
     private final Long id;
-    private final String name;
-    private final Long scheduleId;
-    private final Status status;
+    private final Reserver reserver;
+    private final Schedule schedule;
+    private final ReservationStatus status;
     private final LocalDateTime updateAt;
 
-    public Reservation(Long id, String name, Long scheduleId, Status status, LocalDateTime updateAt) {
-        validateName(name);
-
+    public Reservation(Long id, Reserver reserver, Schedule schedule, ReservationStatus status, LocalDateTime updateAt) {
         this.id = id;
-        this.name = name;
-        this.scheduleId = scheduleId;
-        this.status = status;
-        this.updateAt = updateAt;
+        this.reserver = requireNonNull(reserver, INVALID_INPUT, "예약자는 비어있을 수 없습니다.");
+        this.schedule = requireNonNull(schedule, INVALID_INPUT, "예약 스케줄은 비어있을 수 없습니다.");
+        this.status = requireNonNull(status, INVALID_INPUT, "예약 상태는 비어있을 수 없습니다.");
+        this.updateAt = requireNonNull(updateAt, INVALID_INPUT, "기준 일시는 비어있을 수 없습니다.");
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약자 이름은 비거나 공백일 수 없습니다.");
-        }
+    public static Reservation createBy(
+            Reserver reserver,
+            Schedule schedule,
+            ReservationStatus status,
+            LocalDateTime now
+    ) {
+        validateNotPast(schedule, now);
+        return new Reservation(null, reserver, schedule, status, now);
+    }
 
-        if (name.length() > 255) {
-            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약자 이름은 255자를 초과할 수 없습니다.");
+    public Reservation updateBy(
+            Reserver reserver,
+            Schedule targetSchedule,
+            ReservationStatus status,
+            LocalDateTime now
+    ) {
+        reserver.validateSameReserver(this.reserver);
+        validateNotPast(targetSchedule, now);
+        return new Reservation(this.id, this.reserver, targetSchedule, status, now);
+    }
+
+    public Reservation changeBy(
+            Reserver reserver,
+            Schedule schedule,
+            LocalDateTime now
+    ) {
+        reserver.validateSameReserver(this.reserver);
+        validateNotPast(schedule, now);
+        return new Reservation(this.id, this.reserver, schedule, ReservationStatus.CANCELED, now);
+    }
+
+    public boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
+    }
+
+    public boolean isAlreadyCanceled() {
+        return this.status == ReservationStatus.CANCELED;
+    }
+
+    private static void validateNotPast(Schedule schedule, LocalDateTime now) {
+        requireNonNull(schedule, INVALID_INPUT, "예약 스케줄은 비어있을 수 없습니다.");
+        requireNonNull(now, INVALID_INPUT, "기준 일시는 비어있을 수 없습니다.");
+        if (isPast(schedule, now)) {
+            throw new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "과거 시각으로는 수정 및 예약할 수 없습니다.");
         }
+    }
+
+    private static boolean isPast(Schedule schedule, LocalDateTime now) {
+        LocalDate date = schedule.getDate();
+        ReservationTime time = schedule.getTime();
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        return !reservationDateTime.isAfter(now);
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public Reserver getReserver() {
+        return reserver;
     }
 
-    public Long getScheduleId() {
-        return scheduleId;
+    public Schedule getSchedule() {
+        return schedule;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 
