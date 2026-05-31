@@ -86,6 +86,17 @@ public class ReservationWaitingDao {
         );
     };
 
+    public Optional<ReservationWaiting> findFirstByReservationId(Long reservationId) {
+        String sql = SELECT_RESERVATION_WAITING_SQL + """
+                WHERE w.reservation_id = ?
+                ORDER BY w.created_at, w.id
+                LIMIT 1
+                """;
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, reservationId)
+                .stream()
+                .findFirst();
+    }
+
     public boolean isExistByNameAndReservationId(String name, Long reservationId) {
         String sql = """
             SELECT EXISTS (

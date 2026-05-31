@@ -32,8 +32,7 @@ public class ReservationService {
     private final ReservationWaitingDao reservationWaitingDao;
 
     public ReservationService(ReservationQueryingDao reservationQueryingDao, ReservationUpdatingDao reservationUpdatingDao,
-                              ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao,
-                              ReservationWaitingDao reservationWaitingDao) {
+                              ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao, ReservationWaitingDao reservationWaitingDao) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
@@ -91,15 +90,23 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long id) {
-        reservationUpdatingDao.delete(id);
+        Optional<Reservation> optionalReservation = reservationQueryingDao.findReservationById(id);
 
-        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findSharedFirstByReservationId(id);
-
-        if(optionalReservationWaiting.isPresent()) {
-            ReservationWaiting reservationWaiting = optionalReservationWaiting.get();
-            Reservation reservation = Reservation.create(reservationWaiting.getName(), reservationWaiting.getDate(), reservationWaiting.getTime(), reservationWaiting.getTheme());
-            reservationUpdatingDao.insert(reservation);
+        if(optionalReservation.isEmpty()) {
+            return;
         }
+
+        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findFirstByReservationId(id);
+
+        if(optionalReservationWaiting.isEmpty()) {
+            reservationUpdatingDao.delete(id);
+            return;
+        }
+
+        ReservationWaiting reservationWaiting = optionalReservationWaiting.get();
+
+        reservationUpdatingDao.updateName(id, reservationWaiting.getName());
+        reservationWaitingDao.delete(reservationWaiting.getId());
     }
 
     private Reservation getReservation(Long id) {
