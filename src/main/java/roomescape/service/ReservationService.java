@@ -76,7 +76,7 @@ public class ReservationService {
 
         Reservation reservation = existedReservation.update(reservationRequest.name(), existedReservation.getDate(), existedReservation.getTime(), existedReservation.getTheme());
 
-        long updatedRows = reservationUpdatingDao.updateIfVersion(id, existedReservation.getCreatedAt(), reservation);
+        long updatedRows = reservationUpdatingDao.updateIfVersion(id, existedReservation.getVersion(), reservation);
         if (updatedRows == 0) {
             throw new DataIntegrityViolationException("동시 수정으로 인해 예약을 변경할 수 없습니다. 다시 시도해주세요.");
         }
@@ -134,7 +134,7 @@ public class ReservationService {
         }
 
         ReservationWaiting waiting = firstWaiting.get();
-        long updatedRow = reservationUpdatingDao.updateIfVersion(existedReservation.getId(), existedReservation.getCreatedAt(), waiting.promote());
+        long updatedRow = reservationUpdatingDao.updateIfVersion(existedReservation.getId(), existedReservation.getVersion(), waiting.promote());
         if (updatedRow == 0) {
             return false;
         }

@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.time.LocalDateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -19,24 +18,24 @@ public class ReservationUpdatingDao {
     }
 
     public long update(Long id, Reservation reservation) {
-        String sql = "update reservation set name = ?, date = ?, time_id = ?, theme_id = ?, created_at = ? where id = ?";
+        String sql = "update reservation set name = ?, date = ?, time_id = ?, theme_id = ?, version = ? where id = ?";
         return jdbcTemplate.update(sql,
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
-                reservation.getCreatedAt(),
+                reservation.getVersion(),
                 id
         );
     }
 
-    public long updateIfVersion(Long id, LocalDateTime originalCreatedAt, Reservation reservation) {
-        String sql = "update reservation set name=?, date=?, time_id=?, theme_id=?, created_at=? " +
-                "where id=? and created_at=?";
+    public long updateIfVersion(Long id, String currentVersion, Reservation reservation) {
+        String sql = "update reservation set name=?, date=?, time_id=?, theme_id=?, version=? " +
+                "where id=? and version=?";
         return jdbcTemplate.update(sql,
                 reservation.getName(), reservation.getDate(),
                 reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getCreatedAt(), id, originalCreatedAt);
+                reservation.getVersion(), id, currentVersion);
     }
 
     public void delete(Long id) {
@@ -45,7 +44,7 @@ public class ReservationUpdatingDao {
     }
 
     public Long insert(Reservation reservation) {
-        String sql = "insert into reservation(name, date, time_id, theme_id, created_at) values(?, ?, ?, ?, ?)";
+        String sql = "insert into reservation(name, date, time_id, theme_id, created_at, version) values(?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -55,6 +54,7 @@ public class ReservationUpdatingDao {
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
             ps.setObject(5, reservation.getCreatedAt());
+            ps.setString(6, reservation.getVersion());
             return ps;
         }, keyHolder);
 

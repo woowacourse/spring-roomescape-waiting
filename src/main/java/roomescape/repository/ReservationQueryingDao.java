@@ -42,13 +42,14 @@ public class ReservationQueryingDao {
                 resultSet.getObject("reservation_date", LocalDate.class),
                 reservationTime,
                 theme,
-                resultSet.getObject("reservation_created_at", LocalDateTime.class)
+                resultSet.getObject("reservation_created_at", LocalDateTime.class),
+                resultSet.getString("reservation_version")
         );
     };
 
     public Optional<Reservation> findReservationById(long id) {
         String sql = """
-                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
+                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, r.version as reservation_version, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
                 from reservation as r
                 inner join reservation_time as t on r.time_id = t.id
                 inner join theme as th on th.id = r.theme_id
@@ -64,7 +65,7 @@ public class ReservationQueryingDao {
 
     public List<Reservation> findAllReservations() {
         String sql = """
-                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
+                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, r.version as reservation_version, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
                 from reservation as r
                 inner join reservation_time as t on r.time_id = t.id
                 inner join theme as th on th.id = r.theme_id
@@ -74,7 +75,7 @@ public class ReservationQueryingDao {
 
     public List<Reservation> findAllByName(String name) {
         String sql = """
-                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
+                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, r.version as reservation_version, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
                 from reservation as r
                 inner join reservation_time as t on r.time_id = t.id
                 inner join theme as th on th.id = r.theme_id
@@ -85,7 +86,7 @@ public class ReservationQueryingDao {
 
     public Optional<Reservation> findReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
         String sql = """
-                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
+                select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, r.version as reservation_version, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
                 from reservation as r
                 inner join reservation_time as t on r.time_id = t.id
                 inner join theme as th on th.id = r.theme_id
