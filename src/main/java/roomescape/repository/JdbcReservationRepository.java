@@ -15,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.ReservationWithWaitingOrder;
+import roomescape.service.exception.ResourceNotFoundException;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -122,10 +123,15 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public ReservationWithWaitingOrder save(Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+        String sql = """
+                INSERT INTO reservation (name, date, time_id, theme_id)
+                SELECT ?, ?, t.id, th.id
+                FROM reservation_time t, theme th
+                WHERE t.id = ? AND th.id = ?
+                """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
+        int affectedRows = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
             ps.setDate(2, Date.valueOf(reservation.getDate()));
@@ -133,6 +139,10 @@ public class JdbcReservationRepository implements ReservationRepository {
             ps.setLong(4, reservation.getTheme().getId());
             return ps;
         }, keyHolder);
+
+        if (affectedRows == 0) {
+            throw new ResourceNotFoundException("시간 또는 테마가 존재하지 않아 예약을 생성할 수 없습니다.");
+        }
 
         Long id = keyHolder.getKey().longValue();
         return findWithWaitingOrderById(id);
