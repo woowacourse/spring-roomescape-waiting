@@ -7,6 +7,7 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -17,11 +18,14 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationRepository reservationRepository,
+                                  ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public List<ReservationTime> findAll() {
@@ -44,6 +48,9 @@ public class ReservationTimeService {
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
+        }
+        if (reservationWaitingRepository.existsByTimeId(id)) {
+            throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약 대기가 존재하는 시간은 삭제할 수 없습니다.");
         }
     }
 }

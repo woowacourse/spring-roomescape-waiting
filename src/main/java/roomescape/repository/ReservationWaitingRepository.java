@@ -96,6 +96,12 @@ public class ReservationWaitingRepository {
         return count != null && count > 0;
     }
 
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "SELECT count(*) FROM reservation_waiting WHERE time_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+        return count != null && count > 0;
+    }
+
     public Optional<ReservationWaiting> findById(Long id) {
         String sql = """
                 SELECT

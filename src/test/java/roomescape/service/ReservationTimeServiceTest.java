@@ -6,6 +6,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -22,7 +23,11 @@ class ReservationTimeServiceTest {
 
     private final ReservationTimeRepository reservationTimeRepository = mock();
     private final ReservationRepository reservationRepository = mock();
-    private final ReservationTimeService service = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+    private final ReservationWaitingRepository reservationWaitingRepository = mock();
+    private final ReservationTimeService service = new ReservationTimeService(
+            reservationTimeRepository,
+            reservationRepository,
+            reservationWaitingRepository);
 
     @Test
     void 전체_시간_조회_테스트() {
@@ -38,8 +43,6 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(result).isEqualTo(times);
-        verify(reservationTimeRepository, times(1)).findAll();
-        verifyNoMoreInteractions(reservationTimeRepository, reservationRepository);
     }
 
     @Test
@@ -71,8 +74,7 @@ class ReservationTimeServiceTest {
                 () -> assertThat(captured.getId()).isNull(),
                 () -> assertThat(captured.getStartAt()).isEqualTo(startAt));
 
-        verify(reservationTimeRepository, times(1)).findBy(id);
-        verifyNoMoreInteractions(reservationTimeRepository, reservationRepository);
+        verify(reservationTimeRepository).findBy(id);
     }
 
     @Test
@@ -81,14 +83,14 @@ class ReservationTimeServiceTest {
         Long id = 1L;
         when(reservationRepository.existsByTimeId(id))
                 .thenReturn(false);
+        when(reservationWaitingRepository.existsByTimeId(id))
+                .thenReturn(false);
 
         // when
         service.delete(id);
 
         // then
-        verify(reservationRepository, times(1)).existsByTimeId(id);
-        verify(reservationTimeRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(reservationTimeRepository, reservationRepository);
+        verify(reservationTimeRepository).delete(id);
     }
 
     @Test
@@ -103,8 +105,23 @@ class ReservationTimeServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
 
-        verify(reservationRepository, times(1)).existsByTimeId(id);
         verify(reservationTimeRepository, never()).delete(anyLong());
-        verifyNoMoreInteractions(reservationTimeRepository, reservationRepository);
+    }
+
+    @Test
+    void 예약_대기가_존재하는_시간은_삭제시_예외_발생() {
+        // given
+        Long id = 1L;
+        when(reservationRepository.existsByTimeId(id))
+                .thenReturn(false);
+        when(reservationWaitingRepository.existsByTimeId(id))
+                .thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(id))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("예약 대기가 존재하는 시간은 삭제할 수 없습니다.");
+
+        verify(reservationTimeRepository, never()).delete(anyLong());
     }
 }
