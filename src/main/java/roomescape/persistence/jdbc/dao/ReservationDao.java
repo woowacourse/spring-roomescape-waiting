@@ -77,7 +77,7 @@ public class ReservationDao {
                 SELECT id AS reservation_id, name AS reservation_name, status AS reservation_status, created_at AS reservation_created_at
                 FROM reservation
                 WHERE slot_id = ?
-                ORDER BY id
+                ORDER BY created_at
                 """;
         return jdbcTemplate.query(sql, ReservationRowMapper.RESERVATION_ROW_MAPPER, slotId);
     }
