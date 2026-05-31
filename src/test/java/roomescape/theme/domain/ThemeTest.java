@@ -1,6 +1,6 @@
 package roomescape.theme.domain;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
@@ -11,8 +11,11 @@ class ThemeTest {
     @Test
     @DisplayName("정상 테마 생성")
     void 정상_테마_생성() {
-        assertThatCode(() -> Theme.of("테마1", "설명", "https://image.com"))
-                .doesNotThrowAnyException();
+        Theme theme = Theme.of("테마1", "설명", "https://image.com");
+
+        assertThat(theme.getName()).isEqualTo("테마1");
+        assertThat(theme.getDescription()).isEqualTo("설명");
+        assertThat(theme.getImageUrl()).isEqualTo("https://image.com");
     }
 
     @Test

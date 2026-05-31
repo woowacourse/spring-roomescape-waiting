@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,12 @@ class AdminThemeServiceTest {
     @InjectMocks
     private AdminThemeService adminThemeService;
 
-    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+    private Theme theme;
+
+    @BeforeEach
+    void setUp() {
+        theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+    }
 
     @Test
     @DisplayName("테마 생성 성공")

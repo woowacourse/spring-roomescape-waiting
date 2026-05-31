@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,11 +41,20 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationService reservationService;
 
-    private final Member member = Member.restore(1L, "user1", "test@test.com", "1234");
-    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
-    private final LocalDate futureDate = LocalDate.now().plusDays(1);
-    private final LocalDate pastDate = LocalDate.now().minusDays(1);
+    private Member member;
+    private ReservationTime time;
+    private Theme theme;
+    private LocalDate futureDate;
+    private LocalDate pastDate;
+
+    @BeforeEach
+    void setUp() {
+        member = Member.restore(1L, "user1", "test@test.com", "1234");
+        time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+        futureDate = LocalDate.now().plusDays(1);
+        pastDate = LocalDate.now().minusDays(1);
+    }
 
     @Test
     @DisplayName("예약 생성 성공")

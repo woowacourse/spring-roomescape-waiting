@@ -1,6 +1,6 @@
 package roomescape.reservationtime.domain;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
@@ -12,8 +12,10 @@ class ReservationTimeTest {
     @Test
     @DisplayName("정상 시간 생성")
     void 정상_시간_생성() {
-        assertThatCode(() -> ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0)))
-                .doesNotThrowAnyException();
+        ReservationTime time = ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0));
+
+        assertThat(time.getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(time.getFinishAt()).isEqualTo(LocalTime.of(11, 0));
     }
 
     @Test

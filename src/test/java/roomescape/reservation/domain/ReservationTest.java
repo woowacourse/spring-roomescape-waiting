@@ -1,11 +1,11 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.business.BusinessException;
@@ -15,16 +15,28 @@ import roomescape.theme.domain.Theme;
 
 class ReservationTest {
 
-    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-    private final Theme theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
-    private final Member member = Member.restore(1L, "현미밥", "test@test.com", "1234");
-    private final LocalDate futureDate = LocalDate.now().plusDays(1);
+    private ReservationTime time;
+    private Theme theme;
+    private Member member;
+    private LocalDate futureDate;
+
+    @BeforeEach
+    void setUp() {
+        time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
+        member = Member.restore(1L, "현미밥", "test@test.com", "1234");
+        futureDate = LocalDate.now().plusDays(1);
+    }
 
     @Test
     @DisplayName("정상 예약 생성")
     void 정상_예약_생성() {
-        assertThatCode(() -> Reservation.of(member, futureDate, time, theme))
-                .doesNotThrowAnyException();
+        Reservation reservation = Reservation.of(member, futureDate, time, theme);
+
+        assertThat(reservation.getMember()).isEqualTo(member);
+        assertThat(reservation.getDate()).isEqualTo(futureDate);
+        assertThat(reservation.getTime()).isEqualTo(time);
+        assertThat(reservation.getTheme()).isEqualTo(theme);
     }
 
     @Test

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +29,16 @@ class ThemeServiceTest {
     @InjectMocks
     private ThemeService themeService;
 
-    private final Theme themeA = Theme.restore(1L, "테마A", "설명A", "https://a.com");
-    private final Theme themeB = Theme.restore(2L, "테마B", "설명B", "https://b.com");
-    private final Theme themeC = Theme.restore(3L, "테마C", "설명C", "https://c.com");
+    private Theme themeA;
+    private Theme themeB;
+    private Theme themeC;
+
+    @BeforeEach
+    void setUp() {
+        themeA = Theme.restore(1L, "테마A", "설명A", "https://a.com");
+        themeB = Theme.restore(2L, "테마B", "설명B", "https://b.com");
+        themeC = Theme.restore(3L, "테마C", "설명C", "https://c.com");
+    }
 
     @Test
     @DisplayName("인기 테마 조회")

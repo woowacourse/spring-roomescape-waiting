@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,12 @@ class ReservationTimeServiceTest {
     @InjectMocks
     private ReservationTimeService reservationTimeService;
 
-    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    private ReservationTime time;
+
+    @BeforeEach
+    void setUp() {
+        time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    }
 
     @Test
     @DisplayName("시간 생성 성공")
