@@ -17,8 +17,7 @@ import roomescape.support.AcceptanceTest;
  * 사용자(user) API와 분리된 관리자(admin) 경로의 핵심 시나리오를 대표로 검증한다.
  *
  * <p>삭제 거부 같은 세부 규칙은 ReservationTimeServiceTest/ThemeServiceTest가 이미 검증했으므로,
- * 여기서는 "관리자 흐름이 HTTP로 끝까지 이어지는가"의 대표 경로와, 삭제 거부가 사용자에게
- * 의미 있는 에러로 도달하는지만 본다.
+ * 여기서는 "관리자 흐름이 HTTP로 끝까지 이어지는가"의 대표 경로와, 삭제 거부가 사용자에게 의미 있는 에러로 도달하는지만 본다.
  */
 class AdminAcceptanceTest extends AcceptanceTest {
 
@@ -51,6 +50,7 @@ class AdminAcceptanceTest extends AcceptanceTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201)
+                .body("name", is("브라운"))
                 .extract().jsonPath().getLong("id");
 
         // 4) 예약 목록에 1건 보인다
