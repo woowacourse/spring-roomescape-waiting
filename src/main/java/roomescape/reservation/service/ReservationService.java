@@ -26,7 +26,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.service.dto.response.WaitingResponse;
 
@@ -58,18 +57,16 @@ public class ReservationService {
     public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
         final LocalDateTime now = LocalDateTime.now(clock);
 
-        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName(customerName), now);
-        final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(customerName, now);
-
-        final List<WaitingResponse> waitingsWithRank = waitings.stream()
-                .map(waiting -> {
-                    int rank = waitingRepository.countEarlierWaitingsInSlot(
-                            waiting.getSlotId(),
-                            waiting.getCreatedAt(),
-                            waiting.getId()
-                    ) + 1;
-                    return WaitingResponse.of(waiting, rank);
-                })
+        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+                new CustomerName(customerName),
+                now
+        );
+        final List<WaitingResponse> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+                        customerName,
+                        now
+                )
+                .stream()
+                .map(WaitingResponse::from)
                 .toList();
 
         return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);

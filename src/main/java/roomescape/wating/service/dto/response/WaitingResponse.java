@@ -2,6 +2,7 @@ package roomescape.wating.service.dto.response;
 
 import roomescape.theme.service.dto.response.ThemeWithoutIdResponse;
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.repository.dto.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,5 +25,9 @@ public record WaitingResponse(
                 ThemeWithoutIdResponse.from(waiting.getTheme()),
                 rank
         );
+    }
+
+    public static WaitingResponse from(final WaitingWithRank waitingWithRank) {
+        return of(waitingWithRank.waiting(), waitingWithRank.rank());
     }
 }

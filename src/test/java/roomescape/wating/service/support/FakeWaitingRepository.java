@@ -4,6 +4,7 @@ import roomescape.wating.domain.Waiting;
 import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
+import roomescape.wating.repository.dto.WaitingWithRank;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -51,20 +52,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int countEarlierWaitingsInSlot(
-            final Long slotId,
-            final LocalDateTime createdAt,
-            final long waitingId
-    ) {
-        return (int) waitings.stream()
-                .filter(w -> Objects.equals(w.getSlotId(), slotId))
-                .filter(w -> w.getCreatedAt().isBefore(createdAt)
-                        || (w.getCreatedAt().equals(createdAt) && w.getId() < waitingId))
-                .count();
-    }
-
-    @Override
-    public List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
+    public List<WaitingWithRank> findAllWithRankByCustomerNameAndReservationDateTimeAfter(
             final String customerName,
             final LocalDateTime now
     ) {
@@ -74,7 +62,17 @@ public class FakeWaitingRepository implements WaitingRepository {
                         waiting.getReservationDate(),
                         waiting.getTime().getStartAt()
                 ).isAfter(now))
+                .map(waiting -> new WaitingWithRank(waiting, calculateRank(waiting)))
                 .toList();
+    }
+
+    private int calculateRank(final Waiting waiting) {
+        return (int) waitings.stream()
+                .filter(candidate -> Objects.equals(candidate.getSlotId(), waiting.getSlotId()))
+                .filter(candidate -> candidate.getCreatedAt().isBefore(waiting.getCreatedAt())
+                        || (candidate.getCreatedAt().equals(waiting.getCreatedAt())
+                        && candidate.getId() < waiting.getId()))
+                .count() + 1;
     }
 
     public void add(final Waiting waiting) {

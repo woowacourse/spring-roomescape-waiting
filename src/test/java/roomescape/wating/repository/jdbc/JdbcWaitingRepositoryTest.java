@@ -29,6 +29,7 @@ import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.domain.exception.NoReservationForWaitingException;
+import roomescape.wating.repository.dto.WaitingWithRank;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -141,15 +142,18 @@ class JdbcWaitingRepositoryTest {
         final String customerName = "재키";
 
         //when
-        List<Waiting> waitings = jdbcWaitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
                 customerName,
                 NOW
         );
 
         //then
         assertThat(waitings).hasSize(2);
-        assertThat(waitings).extracting(waiting ->
-                        LocalDateTime.of(waiting.getReservationDate(), waiting.getTime().getStartAt()))
+        assertThat(waitings).extracting(waitingWithRank ->
+                        LocalDateTime.of(
+                                waitingWithRank.waiting().getReservationDate(),
+                                waitingWithRank.waiting().getTime().getStartAt()
+                        ))
                 .allMatch(dateTime -> dateTime.isAfter(NOW));
 
     }
@@ -188,16 +192,14 @@ class JdbcWaitingRepositoryTest {
         insertWaiting(targetWaitingId, "재키", reservationDate, time.getId(), theme.getId(), sameCreatedAt);
 
         // when
-        Long slotId = insertReservationSlot(reservationDate, time.getId(), theme.getId());
-
-        final int count = jdbcWaitingRepository.countEarlierWaitingsInSlot(
-                slotId,
-                sameCreatedAt,
-                targetWaitingId
+        List<WaitingWithRank> waitings = jdbcWaitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
+                "재키",
+                NOW
         );
 
         // then
-        assertThat(count).isEqualTo(1);
+        assertThat(waitings).extracting(WaitingWithRank::rank)
+                .containsExactly(2);
     }
 
     private ReservationTime insertReservationTime(final String startAt) {
