@@ -19,6 +19,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
+    Optional<Reservation> findByDateAndTimeAndThemeWithLock(LocalDate date, ReservationTime time, Theme theme);
+
     Reservation update(Long id, LocalDate date, ReservationTime time);
 
     void delete(Long id);
