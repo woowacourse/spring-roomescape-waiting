@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -22,7 +20,7 @@ class ReservationDateControllerTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ReservationDateRepository reservationDateRepository;
 
     @BeforeEach
     void setUp() {
@@ -32,13 +30,13 @@ class ReservationDateControllerTest {
     @Test
     @DisplayName("사용자 권한으로 가능한 모든 예약 날짜를 조회한다.")
     void getAllReservationDates() {
-        String farFutureDate = LocalDate.now().plusYears(10).toString();
-        jdbcTemplate.update("insert into reservation_date(play_day) values (?)", farFutureDate);
+        LocalDate farFutureDate = LocalDate.now().plusYears(10);
+        reservationDateRepository.save(ReservationDate.createWithoutId(farFutureDate));
 
         RestAssured.given().log().all()
-            .when().get("/reservation-dates")
-            .then().log().all()
-            .statusCode(200)
-            .body("any { it.playDay == '" + farFutureDate + "' }", is(true));
+                .when().get("/reservation-dates")
+                .then().log().all()
+                .statusCode(200)
+                .body("any { it.playDay == '" + farFutureDate + "' }", is(true));
     }
 }
