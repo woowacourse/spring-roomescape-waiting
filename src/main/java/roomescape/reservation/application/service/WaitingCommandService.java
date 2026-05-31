@@ -64,9 +64,6 @@ public class WaitingCommandService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 
         slot.validateDeletable(now);
-
-        if (waitingRepository.delete(id) == 0) {
-            throw new NotFoundException("존재하지 않는 대기입니다.");
-        }
+        waitingRepository.delete(id);
     }
 }
