@@ -1,6 +1,7 @@
 package roomescape.controller.dto;
 
 import java.time.LocalDate;
+import roomescape.service.dto.ReservationAndWaiting;
 
 public record ReservationAndWaitingResponse(
         Long id,
@@ -11,4 +12,16 @@ public record ReservationAndWaitingResponse(
         boolean isReserved,
         Integer waitingNumber
 ) {
+
+    public static ReservationAndWaitingResponse from(ReservationAndWaiting reservationAndWaiting) {
+        return new ReservationAndWaitingResponse(
+                reservationAndWaiting.id(),
+                reservationAndWaiting.name(),
+                reservationAndWaiting.date(),
+                TimeResponse.from(reservationAndWaiting.timeSlot()),
+                ThemeResponse.from(reservationAndWaiting.theme()),
+                reservationAndWaiting.isReserved(),
+                reservationAndWaiting.waitingNumber()
+        );
+    }
 }

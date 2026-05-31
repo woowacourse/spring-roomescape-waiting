@@ -725,7 +725,8 @@
     window.onload = function () {
         fetch('/themes')
             .then(res => res.json())
-            .then(themes => {
+            .then(data => {
+                const themes = data.themeResponses ?? [];
                 allThemes = themes;
                 renderThemes(themes);
 
@@ -795,7 +796,7 @@
 
         fetch(`/times?themeId=${selectedThemeId}&date=${date}`)
             .then(res => res.json())
-            .then(times => renderTimes(times))
+            .then(data => renderTimes(data.timeResponses ?? []))
             .catch(() => {
                 renderTimes([
                     { id: 1, startAt: '10:00', available: true },

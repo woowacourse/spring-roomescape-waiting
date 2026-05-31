@@ -621,11 +621,12 @@
         const tbody = document.getElementById('reservation-tbody');
         try {
             const data = await api('GET', '/reservations');
-            if (!data.length) {
+            const reservations = data.reservationResponses ?? [];
+            if (!reservations.length) {
                 tbody.innerHTML = `<tr class="empty-row"><td colspan="6">예약이 없습니다</td></tr>`;
                 return;
             }
-            tbody.innerHTML = data.map(r => `
+            tbody.innerHTML = reservations.map(r => `
                 <tr>
                     <td>${r.id}</td>
                     <td class="primary">${r.name}</td>
@@ -679,11 +680,12 @@
         const themeSelect = document.getElementById('res-theme');
         try {
             const data = await api('GET', '/themes');
+            const themes = data.themeResponses ?? [];
 
-            if (!data.length) {
+            if (!themes.length) {
                 tbody.innerHTML = `<tr class="empty-row"><td colspan="5">테마가 없습니다</td></tr>`;
             } else {
-                tbody.innerHTML = data.map(t => `
+                tbody.innerHTML = themes.map(t => `
                     <tr>
                         <td>${t.id}</td>
                         <td class="primary">${t.name}</td>
@@ -696,7 +698,7 @@
                 `).join('');
             }
 
-            themeSelect.innerHTML = data.map(t =>
+            themeSelect.innerHTML = themes.map(t =>
                 `<option value="${t.id}">${t.name}</option>`
             ).join('');
         } catch (error) {
@@ -739,11 +741,12 @@
         const timeSelect = document.getElementById('res-time');
         try {
             const data = await api('GET', '/times');
+            const times = data.timeResponses ?? [];
 
-            if (!data.length) {
+            if (!times.length) {
                 tbody.innerHTML = `<tr class="empty-row"><td colspan="3">등록된 시간이 없습니다</td></tr>`;
             } else {
-                tbody.innerHTML = data.map(t => `
+                tbody.innerHTML = times.map(t => `
                     <tr>
                         <td>${t.id}</td>
                         <td class="primary">${t.startAt?.slice(0,5)}</td>
@@ -752,7 +755,7 @@
                 `).join('');
             }
 
-            timeSelect.innerHTML = data.map(t =>
+            timeSelect.innerHTML = times.map(t =>
                 `<option value="${t.id}">${t.startAt?.slice(0,5)}</option>`
             ).join('');
         } catch (error) {

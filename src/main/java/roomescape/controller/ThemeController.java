@@ -2,7 +2,6 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +17,7 @@ import roomescape.controller.dto.ThemePatchRequest;
 import roomescape.controller.dto.ThemePutRequest;
 import roomescape.controller.dto.ThemeRequest;
 import roomescape.controller.dto.ThemeResponse;
+import roomescape.controller.dto.ThemeResponses;
 import roomescape.domain.Theme;
 import roomescape.service.ThemeService;
 
@@ -32,8 +32,8 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> themes() {
-        return ResponseEntity.ok(convertToThemeResponses(themeService.allTheme()));
+    public ResponseEntity<ThemeResponses> themes() {
+        return ResponseEntity.ok(ThemeResponses.from(themeService.allTheme()));
     }
 
     @GetMapping("/{id}")
@@ -43,11 +43,11 @@ public class ThemeController {
     }
 
     @GetMapping(params = {"topCount", "during"})
-    public ResponseEntity<List<ThemeResponse>> popularThemes(
+    public ResponseEntity<ThemeResponses> popularThemes(
             @RequestParam("topCount") Long topCount,
             @RequestParam("during") Long during
     ) {
-        return ResponseEntity.ok(convertToThemeResponses(themeService.findPopularThemes(topCount, during)));
+        return ResponseEntity.ok(ThemeResponses.from(themeService.findPopularThemes(topCount, during)));
     }
 
     @PostMapping
@@ -79,11 +79,5 @@ public class ThemeController {
     ) {
         themeService.patchTheme(id, request.name(), request.description(), request.thumbnailUrl());
         return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
-    }
-
-    private List<ThemeResponse> convertToThemeResponses(List<Theme> themes) {
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 }

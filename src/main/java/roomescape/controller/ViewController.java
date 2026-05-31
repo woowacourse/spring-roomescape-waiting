@@ -11,11 +11,6 @@ public class ViewController {
         return "home";
     }
 
-    @GetMapping("/home")
-    public String homeAlias() {
-        return "home";
-    }
-
     @GetMapping("/reservation")
     public String reservation() {
         return "reservation";

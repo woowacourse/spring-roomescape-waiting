@@ -725,7 +725,7 @@
 
         try {
             const data = await api('GET', `/reservations?userName=${encodeURIComponent(name)}`);
-            renderReservations(data, name);
+            renderReservations(data.reservationAndWaitingResponses, name);
         } catch (error) {
             showErrorAlert(error);
             container.innerHTML = '';
@@ -733,6 +733,7 @@
     }
 
     function renderReservations(reservations, name) {
+        reservations = reservations ?? [];
         const container = document.getElementById('result-container');
         const header = document.getElementById('result-header');
         const countEl = document.getElementById('result-count');

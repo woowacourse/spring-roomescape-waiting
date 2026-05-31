@@ -919,12 +919,12 @@
 
     fetch('/themes')
         .then(res => res.json())
-        .then(themes => renderThemeIntroGrid(themes))
+        .then(data => renderThemeIntroGrid(data.themeResponses ?? []))
         .catch(() => renderThemeIntroGrid(dummyThemes));
 
     fetch('/themes?topCount=10&during=7')
         .then(res => res.json())
-        .then(themes => renderPopularList(themes))
+        .then(data => renderPopularList(data.themeResponses ?? []))
         .catch(() => renderPopularList(dummyThemes));
 </script>
 </body>
