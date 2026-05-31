@@ -2,19 +2,17 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -32,15 +30,8 @@ class ReservationServiceTest {
   @Mock
   ReservationDao reservationDao;
 
-  @Mock
-  ReservationTimeDao reservationTimeDao;
-
+  @InjectMocks
   ReservationService reservationService;
-
-  @BeforeEach
-  void setUp() {
-    reservationService = new ReservationService(reservationDao, reservationTimeDao);
-  }
 
   @Nested
   class 예약하기 {
@@ -56,14 +47,13 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationTimeDao.findById(any())).thenReturn(null);
       when(reservationDao.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(false);
-      when(reservationDao.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.RESERVED))
+      when(reservationDao.insert(NAME, LocalDate.parse(DATE), DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED))
           .thenReturn(
               Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED));
 
       // when
-      ReservationCreateResponse response = reservationService.create(request);
+      ReservationCreateResponse response = reservationService.create(request, DEFAULT_TIME, DEFAULT_THEME);
 
       // then
       assertThat(response.status()).isEqualTo(ReservationStatus.RESERVED);
@@ -75,13 +65,12 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationTimeDao.findById(any())).thenReturn(null);
       when(reservationDao.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(true);
-      when(reservationDao.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.WAITING))
+      when(reservationDao.insert(NAME, LocalDate.parse(DATE), DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING))
           .thenReturn(Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING));
 
       // when
-      ReservationCreateResponse response = reservationService.create(request);
+      ReservationCreateResponse response = reservationService.create(request, DEFAULT_TIME, DEFAULT_THEME);
 
       // then
       assertThat(response.status()).isEqualTo(ReservationStatus.WAITING);
@@ -93,11 +82,10 @@ class ReservationServiceTest {
       ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
-      when(reservationTimeDao.findById(any())).thenReturn(null);
       when(reservationDao.findByNameAndDateAndTimeAndTheme(NAME, DATE, TIME_ID, THEME_ID)).thenReturn(true);
 
       // when // then
-      assertThatThrownBy(() -> reservationService.create(request))
+      assertThatThrownBy(() -> reservationService.create(request, DEFAULT_TIME, DEFAULT_THEME))
           .isInstanceOf(IllegalStateException.class);
     }
   }

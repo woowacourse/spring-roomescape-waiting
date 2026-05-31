@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.dao.ReservationDao;
-import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
 import roomescape.reservation.dto.response.MyReservationResponse;
@@ -15,23 +15,21 @@ import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ThemeSimpleResponse;
 import roomescape.reservation.dto.response.TimeResponse;
+import roomescape.theme.domain.Theme;
 
 @Service
 public class ReservationService {
 
     private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao) {
+    public ReservationService(ReservationDao reservationDao) {
         this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
     }
 
-    public ReservationCreateResponse create(ReservationRequest request) {
-        reservationTimeDao.findById(request.timeId());
-        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), request.timeId(), request.themeId());
+    public ReservationCreateResponse create(ReservationRequest request, ReservationTime time, Theme theme) {
+        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
-        boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), request.timeId(), request.themeId());
+        boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), time.getId(), theme.getId());
         if (isAlreadyExist) {
             throw new IllegalStateException("[ERROR] 이미 예약된 예약을 중복 예약할 수 없습니다.");
         }
@@ -40,7 +38,7 @@ public class ReservationService {
         if (isExistSlot) {
             status = ReservationStatus.WAITING;
         }
-        Reservation reservation = reservationDao.insert(request.name(), LocalDate.parse(request.date()), request.timeId(), request.themeId(), status);
+        Reservation reservation = reservationDao.insert(request.name(), LocalDate.parse(request.date()), time, theme, status);
 
         return ReservationCreateResponse.from(reservation);
     }

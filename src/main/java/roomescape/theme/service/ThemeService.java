@@ -24,6 +24,10 @@ public class ThemeService {
         return ThemeResponse.from(themeDao.insert(request));
     }
 
+    public Theme findById(Long id) {
+        return themeDao.findById(id);
+    }
+
     public void delete(long id) {
         boolean deleted = themeDao.delete(id);
         if (!deleted) {

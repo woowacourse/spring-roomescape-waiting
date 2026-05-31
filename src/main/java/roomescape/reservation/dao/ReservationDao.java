@@ -20,13 +20,13 @@ import roomescape.theme.domain.Theme;
 @Repository
 public class ReservationDao {
 
-  private JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
   public ReservationDao(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-  public Reservation insert(String name, LocalDate date, Long timeId, Long themeId,
+  public Reservation insert(String name, LocalDate date, ReservationTime time, Theme theme,
       ReservationStatus status) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -38,36 +38,11 @@ public class ReservationDao {
       PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
       ps.setString(1, name);
       ps.setObject(2, date);
-      ps.setLong(3, timeId);
-      ps.setLong(4, themeId);
+      ps.setLong(3, time.getId());
+      ps.setLong(4, theme.getId());
       ps.setString(5, status.name());
       return ps;
     }, keyHolder);
-
-    String findTimeSql = """
-        select id, start_at
-        from reservation_time
-        where id = ?
-        """;
-    ReservationTime time = jdbcTemplate.queryForObject(
-        findTimeSql,
-        (resultSet, rowNum) -> ReservationTime.of(resultSet.getLong("id"),
-            LocalTime.parse(resultSet.getString("start_at"))),
-        timeId
-    );
-
-    String findThemeSql = """
-        select *
-        from theme
-        where id = ?
-        """;
-    Theme theme = jdbcTemplate.queryForObject(
-        findThemeSql,
-        (resultSet, rowNum) -> Theme.of(resultSet.getLong("id"),
-            resultSet.getString("name"), resultSet.getString("description"),
-            resultSet.getString("image_url")),
-        themeId
-    );
 
     return Reservation.of(keyHolder.getKey().longValue(), name, date, time, theme, status);
   }
@@ -115,15 +90,7 @@ public class ReservationDao {
     jdbcTemplate.update(sql, id);
   }
 
-  public void deleteByIdAndName(Long id, String name) {
-    String sql = """
-        delete from reservation
-        where id = ? and name = ?
-        """;
-    jdbcTemplate.update(sql, id, name);
-  }
-
-  public boolean existsByTimeId(Long timeId) {
+public boolean existsByTimeId(Long timeId) {
     String sql = """
         select count(*)
         from reservation
