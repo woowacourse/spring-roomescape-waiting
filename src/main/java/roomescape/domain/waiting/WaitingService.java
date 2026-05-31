@@ -38,7 +38,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
-        ReservationTime reservationTime = reservationTimeRepository.findByIdForUpdate(waitingRequest.timeId())
+        ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));

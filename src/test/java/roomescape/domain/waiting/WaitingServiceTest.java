@@ -69,7 +69,7 @@ class WaitingServiceTest {
         void 정상_생성() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             Waiting saved = Waiting.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
@@ -91,7 +91,7 @@ class WaitingServiceTest {
         @Test
         void 시간_id가_없으면_예외() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 99L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+            when(reservationTimeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
@@ -101,7 +101,7 @@ class WaitingServiceTest {
         @Test
         void 테마_id가_없으면_예외() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 99L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
@@ -112,7 +112,7 @@ class WaitingServiceTest {
         @Test
         void 중복_대기이면_예외() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(true);
@@ -125,7 +125,7 @@ class WaitingServiceTest {
         @Test
         void 예약이_없는_슬롯이면_예외() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
@@ -140,7 +140,7 @@ class WaitingServiceTest {
         @Test
         void 이미_예약한_사람이면_대기_신청_예외() {
             WaitingRequest request = new WaitingRequest("예약자", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
@@ -155,7 +155,7 @@ class WaitingServiceTest {
         @Test
         void save_시_DuplicateKeyException_발생하면_DUPLICATE_WAITING_NAME_예외로_변환() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
