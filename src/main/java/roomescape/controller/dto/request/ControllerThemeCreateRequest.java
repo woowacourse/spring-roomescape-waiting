@@ -1,7 +1,8 @@
 package roomescape.controller.dto.request;
 
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
 public record ControllerThemeCreateRequest(
@@ -20,13 +21,13 @@ public record ControllerThemeCreateRequest(
 
     private void validate(String name, String description, String thumbnailUrl) {
         if (name == null || name.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_NAME_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
         if (description == null || description.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_DESCRIPTION_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_THUMBNAIL_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
     }
 }

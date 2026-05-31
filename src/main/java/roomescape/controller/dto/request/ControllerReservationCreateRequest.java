@@ -1,8 +1,9 @@
 package roomescape.controller.dto.request;
 
 import java.time.LocalDate;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
 public record ControllerReservationCreateRequest(
@@ -22,16 +23,16 @@ public record ControllerReservationCreateRequest(
 
     private void validate(String name, LocalDate date, Long timeId, Long themeId) {
         if (name == null || name.isBlank()) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_NAME_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
         if (date == null) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_DATE_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
         if (timeId == null) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_TIME_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
         if (themeId == null) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_THEME_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
     }
 }

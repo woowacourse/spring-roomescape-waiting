@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 
@@ -54,7 +54,7 @@ public class ReservationTimeServiceTest {
         when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.save(request))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ReservationTimeServiceTest {
         LocalDate date = LocalDate.of(2026, 5, 1);
 
         assertThatThrownBy(() -> reservationTimeService.validateNotPastDate(date))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -98,6 +98,6 @@ public class ReservationTimeServiceTest {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationTimeService.findReservationTime(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 }

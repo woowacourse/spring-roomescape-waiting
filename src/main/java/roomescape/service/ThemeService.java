@@ -7,8 +7,9 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
@@ -48,12 +49,12 @@ public class ThemeService {
 
     public Theme findTheme(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_THEME));
     }
 
     public void validateExistTheme(Long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME);
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_THEME);
         }
     }
 
@@ -61,13 +62,13 @@ public class ThemeService {
         LocalDate localDate = LocalDate.now(clock);
 
         if (startDate.isAfter(localDate) || endDate.isAfter(localDate)) {
-            throw new CustomInvalidRequestException(ErrorCode.FUTURE_RANKING_PERIOD);
+            throw new RoomEscapeException(DomainErrorCode.FUTURE_RANKING_PERIOD);
         }
         if (startDate.isAfter(endDate)) {
-            throw new CustomInvalidRequestException(ErrorCode.INVALID_RANKING_PERIOD);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_RANKING_PERIOD);
         }
         if (ChronoUnit.DAYS.between(startDate, endDate) > MAX_RANKING_PERIOD) {
-            throw new CustomInvalidRequestException(ErrorCode.LONG_RANKING_PERIOD);
+            throw new RoomEscapeException(DomainErrorCode.LONG_RANKING_PERIOD, MAX_RANKING_PERIOD);
         }
     }
 }

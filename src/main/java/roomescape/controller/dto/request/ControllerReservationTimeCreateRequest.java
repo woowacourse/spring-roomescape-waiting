@@ -1,8 +1,9 @@
 package roomescape.controller.dto.request;
 
 import java.time.LocalTime;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 
 public record ControllerReservationTimeCreateRequest(
@@ -19,7 +20,7 @@ public record ControllerReservationTimeCreateRequest(
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_TIME_NULL);
+            throw new RoomEscapeException(DomainErrorCode.INVALID_INPUT);
         }
     }
 }

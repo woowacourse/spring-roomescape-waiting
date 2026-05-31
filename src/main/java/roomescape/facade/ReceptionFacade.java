@@ -13,8 +13,9 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -109,7 +110,7 @@ public class ReceptionFacade {
             return ReceptionResponse.from(newReservation, 0L, ReservationStatus.CONFIRMED.name());
         }
         if (reservation.get().getName().equals(request.name())) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
+            throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
         }
 
         Wait newWait = waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));

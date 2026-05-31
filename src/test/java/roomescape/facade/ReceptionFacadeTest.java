@@ -24,8 +24,8 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -107,12 +107,12 @@ public class ReceptionFacadeTest {
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
-        doThrow(new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE))
+        doThrow(new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE))
                 .when(reservationTimeService).validateNotPastSlotForCreate(any(), any());
 
         assertThatThrownBy(() -> receptionFacade.save(request))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(DomainErrorCode.PAST_RESERVATION_CREATE));
     }
 
     @Test
@@ -127,8 +127,8 @@ public class ReceptionFacadeTest {
                 Optional.of(beforeReservation));
 
         assertThatThrownBy(() -> receptionFacade.save(request))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.DUPLICATED_RESERVATION.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(DomainErrorCode.DUPLICATED_RESERVATION));
     }
 
     @Test
@@ -211,12 +211,12 @@ public class ReceptionFacadeTest {
         Reservation reservation = new Reservation(1L, "fizz", pastReservationDate, reservationTime, theme);
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
-        doThrow(new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE))
+        doThrow(new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE))
                 .when(reservationTimeService).validateNotPastSlotForDelete(any(), any());
 
         assertThatThrownBy(() -> receptionFacade.deleteReservation(reservation.getId()))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(DomainErrorCode.PAST_RESERVATION_DELETE));
     }
 
     @Test

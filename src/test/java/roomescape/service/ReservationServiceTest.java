@@ -17,8 +17,8 @@ import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
+import roomescape.domain.exception.DomainErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
@@ -91,7 +91,7 @@ public class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.findReservation(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -121,19 +121,19 @@ public class ReservationServiceTest {
 
     @Test
     void validateReferencedThemeExceptionTest() {
-        doThrow(new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME))
+        doThrow(new RoomEscapeException(DomainErrorCode.REFERENCED_THEME))
                 .when(reservationRepository).existsByThemeId(1L);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void validateReferencedTimeExceptionTest() {
-        doThrow(new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME))
+        doThrow(new RoomEscapeException(DomainErrorCode.REFERENCED_TIME))
                 .when(reservationRepository).existsByTimeId(1L);
 
         assertThatThrownBy(() -> reservationService.validateReferencedTime(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 }

@@ -2,8 +2,9 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainPreconditions;
+import roomescape.domain.exception.DomainErrorCode;
 
 public class Reservation {
 
@@ -31,18 +32,10 @@ public class Reservation {
     }
 
     private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
-        }
-        if (date == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_NULL);
-        }
-        if (time == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_TIME_NULL);
-        }
-        if (theme == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
-        }
+        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
+        DomainPreconditions.requireNonNull(date, DomainErrorCode.INVALID_INPUT, "date");
+        DomainPreconditions.requireNonNull(time, DomainErrorCode.INVALID_INPUT, "time");
+        DomainPreconditions.requireNonNull(theme, DomainErrorCode.INVALID_INPUT, "theme");
     }
 
     public Long getId() {

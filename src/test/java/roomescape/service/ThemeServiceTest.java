@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static roomescape.exception.ErrorCode.FUTURE_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.INVALID_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.LONG_RANKING_PERIOD;
-import static roomescape.exception.ErrorCode.NOT_FOUND_THEME;
+import static roomescape.domain.exception.DomainErrorCode.FUTURE_RANKING_PERIOD;
+import static roomescape.domain.exception.DomainErrorCode.INVALID_RANKING_PERIOD;
+import static roomescape.domain.exception.DomainErrorCode.LONG_RANKING_PERIOD;
+import static roomescape.domain.exception.DomainErrorCode.NOT_FOUND_THEME;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
@@ -84,8 +84,8 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 5, 4);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(FUTURE_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(FUTURE_RANKING_PERIOD));
     }
 
     @Test
@@ -94,8 +94,8 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 4, 3);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(INVALID_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(INVALID_RANKING_PERIOD));
     }
 
     @Test
@@ -104,8 +104,8 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2025, 4, 30);
 
         assertThatThrownBy(() -> themeService.findRanking(startDate, endDate))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(LONG_RANKING_PERIOD.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(LONG_RANKING_PERIOD));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ThemeServiceTest {
         when(themeRepository.findById(theme.getId())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> themeService.findTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class);
+                .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ThemeServiceTest {
         when(themeRepository.existsById(1L)).thenReturn(false);
 
         assertThatThrownBy(() -> themeService.validateExistTheme(1L))
-                .isInstanceOf(CustomInvalidRequestException.class)
-                .hasMessage(NOT_FOUND_THEME.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(NOT_FOUND_THEME));
     }
 }

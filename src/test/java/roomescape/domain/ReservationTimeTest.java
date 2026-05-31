@@ -1,20 +1,20 @@
 package roomescape.domain;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
+import roomescape.domain.exception.DomainErrorCode;
 
 public class ReservationTimeTest {
 
     @Test
     void timeNullExceptionTest() {
         assertThatThrownBy(() -> new ReservationTime(1L, null))
-                .isInstanceOf(CustomInvalidDomainException.class)
-                .hasMessage(ErrorCode.NOT_ALLOW_TIME_NULL.getMessage());
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(e -> assertThat(((RoomEscapeException) e).code()).isEqualTo(DomainErrorCode.INVALID_INPUT));
     }
 
     @Test

@@ -8,8 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
@@ -39,7 +40,7 @@ public class ReservationService {
 
     public Reservation findReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION));
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_RESERVATION));
     }
 
     @Transactional
@@ -53,13 +54,13 @@ public class ReservationService {
 
     public void validateReferencedTheme(Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+            throw new RoomEscapeException(DomainErrorCode.REFERENCED_THEME);
         }
     }
 
     public void validateReferencedTime(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+            throw new RoomEscapeException(DomainErrorCode.REFERENCED_TIME);
         }
     }
 }

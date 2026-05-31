@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Wait;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.WaitRepository;
 
 @Component
@@ -28,12 +29,12 @@ public class WaitService {
 
         for (Wait wait : waits) {
             if (wait.getName().equals(waitWithoutId.getName())) {
-                throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_WAIT);
+                throw new RoomEscapeException(DomainErrorCode.DUPLICATED_WAIT);
             }
         }
 
         if (waits.size() >= 3) {
-            throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
+            throw new RoomEscapeException(DomainErrorCode.WAIT_IS_FULL);
         }
 
         return waitRepository.save(waitWithoutId);
@@ -57,7 +58,7 @@ public class WaitService {
 
     public Wait findWait(Long waitId) {
         return waitRepository.findById(waitId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_WAIT));
     }
 
     public Long calculateOrder(Wait wait) {

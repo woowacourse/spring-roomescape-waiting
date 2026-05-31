@@ -3,8 +3,9 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainPreconditions;
+import roomescape.domain.exception.DomainErrorCode;
 
 public class Wait {
 
@@ -59,21 +60,11 @@ public class Wait {
     }
 
     private void validate(LocalDateTime createAt, String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (createAt == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_TIME_NULL);
-        }
-        if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
-        }
-        if (date == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_NULL);
-        }
-        if (time == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_TIME_NULL);
-        }
-        if (theme == null) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
-        }
+        DomainPreconditions.requireNonNull(createAt, DomainErrorCode.INVALID_INPUT, "createdAt");
+        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
+        DomainPreconditions.requireNonNull(date, DomainErrorCode.INVALID_INPUT, "date");
+        DomainPreconditions.requireNonNull(time, DomainErrorCode.INVALID_INPUT, "time");
+        DomainPreconditions.requireNonNull(theme, DomainErrorCode.INVALID_INPUT, "theme");
     }
 
     @Override

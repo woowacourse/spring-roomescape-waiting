@@ -1,8 +1,9 @@
 package roomescape.domain;
 
 import java.util.Objects;
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainPreconditions;
+import roomescape.domain.exception.DomainErrorCode;
 
 public class Theme {
 
@@ -29,15 +30,9 @@ public class Theme {
     }
 
     private void validate(String name, String description, String thumbnailUrl) {
-        if (name == null || name.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_NAME_NULL);
-        }
-        if (description == null || description.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DESCRIPTION_NULL);
-        }
-        if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THUMBNAIL_NULL);
-        }
+        DomainPreconditions.requireNonBlank(name, DomainErrorCode.INVALID_INPUT, "name");
+        DomainPreconditions.requireNonBlank(description, DomainErrorCode.INVALID_INPUT, "description");
+        DomainPreconditions.requireNonBlank(thumbnailUrl, DomainErrorCode.INVALID_INPUT, "thumbnailUrl");
     }
 
     public Long getId() {

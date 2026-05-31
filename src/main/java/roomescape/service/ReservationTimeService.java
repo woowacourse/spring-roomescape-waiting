@@ -8,8 +8,9 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.CustomInvalidRequestException;
-import roomescape.exception.ErrorCode;
+
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 
@@ -41,19 +42,19 @@ public class ReservationTimeService {
 
     public void validateNotPastDate(LocalDate date) {
         if (date.isBefore(LocalDate.now(clock))) {
-            throw new CustomInvalidRequestException(ErrorCode.PAST_RESERVATION_TIME_READ);
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_TIME_READ);
         }
     }
 
     public void validateNotPastSlotForCreate(LocalDate date, ReservationTime time) {
         if (isPastSlot(date, time)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_CREATE);
         }
     }
 
     public void validateNotPastSlotForDelete(LocalDate date, ReservationTime time) {
         if (isPastSlot(date, time)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE);
+            throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
         }
     }
 
@@ -64,7 +65,7 @@ public class ReservationTimeService {
 
     public ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_RESERVATION_TIME));
     }
 
     private boolean isPastSlot(LocalDate date, ReservationTime time) {
@@ -83,7 +84,7 @@ public class ReservationTimeService {
 
     private void validateDuplicatedReservationTime(LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION_TIME);
+            throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION_TIME);
         }
     }
 }
