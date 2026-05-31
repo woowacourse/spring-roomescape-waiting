@@ -24,8 +24,15 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ReservationTime that)) {
+    public boolean equals(Object other) {
+        if(this == other){
+            return true;
+        }
+
+        if (!(other instanceof ReservationTime that)) {
+            return false;
+        }
+        if (id == null || that.id == null) {
             return false;
         }
         return Objects.equals(id, that.id);
