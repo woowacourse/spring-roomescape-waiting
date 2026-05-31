@@ -35,26 +35,44 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return makeResponse(e, HttpStatus.BAD_REQUEST);
+    }
 
-        if (e instanceof DuplicateException || e instanceof DeleteFailedException) {
-            status = HttpStatus.CONFLICT;
-        }
-        if (e instanceof InvalidRequestValueException) {
-            status = HttpStatus.UNPROCESSABLE_ENTITY;
-        }
-        if (e instanceof NotFoundException) {
-            status = HttpStatus.NOT_FOUND;
-        }
-        if (e instanceof AuthenticationException) {
-            status = HttpStatus.UNAUTHORIZED;
-        }
-        if (e instanceof AuthorizationException) {
-            status = HttpStatus.FORBIDDEN;
-        }
-
+    private ResponseEntity<ErrorResponse> makeResponse(
+            BusinessException e,
+            HttpStatus status) {
         return ResponseEntity
                 .status(status)
                 .body(ErrorResponse.of(e));
+    }
+
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateException(DuplicateException e) {
+        return makeResponse(e, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(DeleteFailedException.class)
+    public ResponseEntity<ErrorResponse> handleDeleteFailedException(DeleteFailedException e) {
+        return makeResponse(e, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidRequestValueException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequestValueException(InvalidRequestValueException e) {
+        return makeResponse(e, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException e) {
+        return makeResponse(e, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
+        return makeResponse(e, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException e) {
+        return makeResponse(e, HttpStatus.FORBIDDEN);
     }
 }
