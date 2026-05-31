@@ -2,169 +2,307 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
+import roomescape.controller.dto.DisplayStatus;
+import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.ReservationResponse;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Reserver;
+import roomescape.domain.Schedule;
+import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
+import roomescape.repository.ReservationDao;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    @Autowired
+    @Mock
+    private ReservationDao reservationDao;
+
+    @Mock
+    private ScheduleService scheduleService;
+
+    @InjectMocks
     private ReservationService reservationService;
 
-    @DisplayName("예약 정상 테스트")
+    @DisplayName("빈 슬롯에 예약을 생성하면 RESERVED 상태로 저장한다.")
     @Test
-    void 예약_정상_테스트() {
-        LocalDateTime mockToday = LocalDateTime.now();
-        ReservationRequest request = new ReservationRequest("김철수", mockToday.toLocalDate().plusDays(1), 1L, 1L);
-        assertThatCode(() -> reservationService.save(mockToday, request)).doesNotThrowAnyException();
+    void saveReservedReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
+        given(reservationDao.save(any(Reservation.class))).willReturn(1L);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+
+        Long reservationId = reservationService.saveReservation(request);
+
+        assertThat(reservationId).isEqualTo(1L);
+        verify(reservationDao).save(reservationCaptor.capture());
+        Reservation saved = reservationCaptor.getValue();
+        assertThat(saved.getReserver().getName()).isEqualTo("러로");
+        assertThat(saved.getSchedule()).isEqualTo(schedule);
+        assertThat(saved.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
-    @DisplayName("지나간 날짜·시간에 대한 예약 생성은 불가능하다.")
+    @DisplayName("이미 예약이 있는 슬롯에 다른 사용자가 신청하면 WAITING 상태로 저장한다.")
     @Test
-    void 지나간_날짜_예약_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        ReservationRequest request = new ReservationRequest("김철수", now.toLocalDate().minusDays(1), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.save(now, request))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.PAST_DATE_RESERVATION.getMessage());
+    void saveWaitingReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest("현미밥", schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByNameAndScheduleId("현미밥", schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
+        given(reservationDao.save(any(Reservation.class))).willReturn(2L);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
+
+        reservationService.saveReservation(request);
+
+        verify(reservationDao).save(reservationCaptor.capture());
+        assertThat(reservationCaptor.getValue().getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
-    @DisplayName("지나간 시간에 대한 예약 생성은 불가능하다.")
+    @DisplayName("같은 사용자가 같은 슬롯에 취소되지 않은 예약을 가지고 있으면 생성할 수 없다.")
     @Test
-    void 지나간_시간_예약_예외_테스트() {
-        LocalDateTime mockToday= LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
-        ReservationRequest request = new ReservationRequest("김철수", mockToday.toLocalDate(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.save(mockToday, request))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.PAST_DATE_RESERVATION.getMessage());
+    void saveDuplicateReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.saveReservation(request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
+
+        verify(reservationDao, never()).save(any());
     }
 
-    @DisplayName("지나간 날짜/시간에 대한 예약 취소는 불가능하다.")
+    @DisplayName("과거 스케줄로는 예약을 생성할 수 없다.")
     @Test
-    void 지나간_시간_예약_취소_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        assertThatThrownBy(() -> reservationService.delete(now,1L,"김철수"))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
+    void savePastReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(false);
+        given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
+
+        assertThatThrownBy(() -> reservationService.saveReservation(request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.PAST_RESERVATION);
     }
 
-    @DisplayName("이미 날짜가 지난 예약 대기는 취소할 수 없다.")
+    @DisplayName("RESERVED 예약을 취소하면 취소 시각을 기록하고 첫 번째 대기를 승격한다.")
     @Test
-    void 지나간_시간_예약_대기_취소_예외_테스트() {
-        LocalDateTime now = LocalDateTime.of(2026, 5, 27, 0, 0);
-        ReservationResponse waiting = reservationService.findAllByName("과거대기").get(0);
+    void cancelReservedReservationPromotesFirstWaiting() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Reservation reserved = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
+        Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reserved));
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        given(reservationDao.findFirstByScheduleIdAndStatus(schedule.getId(), ReservationStatus.WAITING))
+                .willReturn(Optional.of(waiting));
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        assertThatThrownBy(() -> reservationService.delete(now, waiting.reservationId(), "과거대기"))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
+        reservationService.cancelReservation(1L, "러로");
+
+        verify(reservationDao).changeStatusWithUpdateAt(reservationCaptor.capture());
+        Reservation changed = reservationCaptor.getValue();
+        assertThat(changed.getId()).isEqualTo(1L);
+        assertThat(changed.getReserver().getName()).isEqualTo("러로");
+        assertThat(changed.getSchedule()).isEqualTo(schedule);
+        assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        assertThat(changed.getUpdateAt()).isAfter(reserved.getUpdateAt());
+        verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
     }
 
-    @DisplayName("이미 예약된 슬롯에 다른 사용자가 예약하면 대기 순번을 가진 예약으로 등록된다.")
+    @DisplayName("WAITING 예약을 취소하면 다른 대기를 승격하지 않는다.")
     @Test
-    void 예약된_슬롯_대기_등록_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate reservationDate = now.toLocalDate().plusDays(2);
-        ReservationRequest firstRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
-        ReservationRequest secondRequest = new ReservationRequest("이영희", reservationDate, 2L, 1L);
+    void cancelWaitingReservationDoesNotPromote() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findById(2L)).willReturn(Optional.of(waiting));
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        ReservationResponse firstResponse = reservationService.save(now, firstRequest);
-        ReservationResponse secondResponse = reservationService.save(now.plusSeconds(1), secondRequest);
+        reservationService.cancelReservation(2L, "현미밥");
 
-        assertThat(firstResponse.order()).isZero();
-        assertThat(secondResponse.order()).isEqualTo(1);
+        verify(reservationDao).changeStatusWithUpdateAt(reservationCaptor.capture());
+        Reservation changed = reservationCaptor.getValue();
+        assertThat(changed.getId()).isEqualTo(2L);
+        assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        verify(reservationDao, never()).findFirstByScheduleIdAndStatus(anyLong(), any(ReservationStatus.class));
+        verify(reservationDao, never()).changeStatusOnly(any(Long.class), any(ReservationStatus.class));
     }
 
-    @DisplayName("같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
+    @DisplayName("이미 취소된 예약은 추가 변경 없이 반환한다.")
     @Test
-    void 같은_사용자_중복_대기_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate reservationDate = now.toLocalDate().plusDays(2);
-        ReservationRequest request = new ReservationRequest("브브브", reservationDate, 2L, 1L);
+    void cancelAlreadyCanceledReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Reservation canceled = reservation(1L, "러로", schedule, ReservationStatus.CANCELED, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findById(1L)).willReturn(Optional.of(canceled));
 
-        reservationService.save(now, request);
+        reservationService.cancelReservation(1L, "러로");
 
-        assertThatThrownBy(() -> reservationService.save(now.plusSeconds(1), request))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
+        verify(scheduleService, never()).getById(any());
+        verify(reservationDao, never()).changeStatusWithUpdateAt(any(Reservation.class));
+        verify(reservationDao, never()).changeStatusOnly(any(), any());
     }
 
-    @DisplayName("사용자는 본인의 예약을 취소할 수 있고 취소 상태로 조회된다.")
+    @DisplayName("본인 예약이 아니면 취소할 수 없다.")
     @Test
-    void 본인_예약_취소_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        ReservationRequest request = new ReservationRequest("김철수", now.toLocalDate().plusDays(2), 2L, 1L);
-        ReservationResponse response = reservationService.save(now, request);
+    void cancelOtherUserReservation() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
 
-        reservationService.delete(now, response.reservationId(),"김철수");
+        assertThatThrownBy(() -> reservationService.cancelReservation(1L, "다른사람"))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.UNAUTHORIZED_RESERVATION);
 
-        List<ReservationResponse> reservations = reservationService.findAllByName("김철수");
-        assertThat(reservations)
-                .anySatisfy(reservation -> {
-                    assertThat(reservation.reservationId()).isEqualTo(response.reservationId());
-                    assertThat(reservation.status()).isEqualTo("CANCELED");
-                });
+        verify(reservationDao, never()).changeStatusWithUpdateAt(any(Reservation.class));
+        verify(reservationDao, never()).changeStatusOnly(any(), any());
     }
 
-    @DisplayName("본인 예약이 아니면 예약 대기를 취소할 수 없다.")
+    @DisplayName("존재하지 않는 예약을 취소하면 예외를 던진다.")
     @Test
-    void 본인_예약이_아니면_예약_대기_취소_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate reservationDate = now.toLocalDate().plusDays(2);
-        ReservationRequest ownerRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
-        ReservationRequest waitingRequest = new ReservationRequest("이영희", reservationDate, 2L, 1L);
+    void cancelNotFoundReservation() {
+        given(reservationDao.findById(404L)).willReturn(Optional.empty());
 
-        reservationService.save(now, ownerRequest);
-        ReservationResponse waitingResponse = reservationService.save(now.plusSeconds(1), waitingRequest);
-
-        assertThatThrownBy(() -> reservationService.delete(now, waitingResponse.reservationId(),"김철수"))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.COMMON_UNAUTHORIZED.getMessage());
+        assertThatThrownBy(() -> reservationService.cancelReservation(404L, "러로"))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.NOT_FOUND_RESERVATION);
     }
 
-    @DisplayName("수정하려는 날짜/시간에 예약이 없으면 예약 수정된다.")
+    @DisplayName("RESERVED 예약을 다른 슬롯으로 수정하면 기존 슬롯의 첫 대기를 승격한다.")
     @Test
-    void 예약_수정_정상_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate reservationDate = now.toLocalDate().plusDays(30);
-        ReservationRequest request = new ReservationRequest("김철수", reservationDate, 2L, 1L);
-        ReservationRequest updateRequest = new ReservationRequest("김철수", reservationDate, 3L, 1L);
+    void updateReservedReservationPromotesPreviousSlot() {
+        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
+        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
+        Reservation waiting = reservation(2L, "현미밥", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(target);
+        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
+        given(reservationDao.countReservationByScheduleId(target.getId())).willReturn(0);
+        given(reservationDao.findFirstByScheduleIdAndStatus(origin.getId(), ReservationStatus.WAITING))
+                .willReturn(Optional.of(waiting));
+        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        ReservationResponse response = reservationService.save(now, request);
+        reservationService.updateReservation(1L, request);
 
-        assertThatCode(() -> reservationService.update(response.reservationId(), now, updateRequest))
-                .doesNotThrowAnyException();
+        verify(reservationDao).update(reservationCaptor.capture());
+        Reservation updated = reservationCaptor.getValue();
+        assertThat(updated.getId()).isEqualTo(1L);
+        assertThat(updated.getSchedule()).isEqualTo(target);
+        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
     }
 
-    @DisplayName("예약 수정 시에도 같은 사용자가 같은 슬롯에 중복 대기할 수 없다.")
+    @DisplayName("WAITING 예약을 수정하면 기존 슬롯에서 승격하지 않는다.")
     @Test
-    void 예약_수정_같은_사용자_중복_대기_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate reservationDate = now.toLocalDate().plusDays(2);
-        ReservationRequest firstRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
-        ReservationRequest secondRequest = new ReservationRequest("김철수", reservationDate, 3L, 1L);
-        ReservationRequest updateRequest = new ReservationRequest("김철수", reservationDate, 2L, 1L);
+    void updateWaitingReservationDoesNotPromote() {
+        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
+        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(target);
+        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
+        given(reservationDao.countReservationByScheduleId(target.getId())).willReturn(1);
 
-        reservationService.save(now, firstRequest);
-        ReservationResponse secondResponse = reservationService.save(now.plusSeconds(1), secondRequest);
+        reservationService.updateReservation(1L, request);
 
-        assertThatThrownBy(() -> reservationService.update(secondResponse.reservationId(), now, updateRequest))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
+        verify(reservationDao).update(any(Reservation.class));
+        verify(reservationDao, never()).findFirstByScheduleIdAndStatus(anyLong(), any(ReservationStatus.class));
+        verify(reservationDao, never()).changeStatusOnly(any(Long.class), any(ReservationStatus.class));
+    }
+
+    @DisplayName("수정 대상 슬롯에 같은 사용자의 예약이 있으면 수정할 수 없다.")
+    @Test
+    void updateDuplicateReservation() {
+        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
+        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+                .willReturn(target);
+        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("code")
+                .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
+
+        verify(reservationDao, never()).findById(anyLong());
+        verify(reservationDao, never()).update(any());
+    }
+
+    @DisplayName("내 예약 목록은 예약별 대기 순번을 포함해 응답으로 변환한다.")
+    @Test
+    void findByName() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findByName("러로")).willReturn(List.of(reservation));
+        given(reservationDao.findOrderByReservationId(1L)).willReturn(2);
+
+        List<ReservationResponse> responses = reservationService.findByName("러로");
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).reservationId()).isEqualTo(1L);
+        assertThat(responses.get(0).name()).isEqualTo("러로");
+        assertThat(responses.get(0).status()).isEqualTo(DisplayStatus.WAITING);
+        assertThat(responses.get(0).order()).isEqualTo(2);
+    }
+
+    private Reservation reservation(
+            Long id,
+            String name,
+            Schedule schedule,
+            ReservationStatus status,
+            LocalDateTime updatedAt
+    ) {
+        return new Reservation(id, new Reserver(name), schedule, status, updatedAt);
+    }
+
+    private Schedule futureSchedule(Long id, LocalDate date, LocalTime time) {
+        return new Schedule(
+                id,
+                new Theme(1L, "테마", "설명", "https://example.com/theme.jpg"),
+                date,
+                new ReservationTime(1L, time)
+        );
     }
 }

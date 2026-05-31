@@ -1,8 +1,10 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -11,9 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
-import roomescape.dto.AvailableTimeResponse;
 import roomescape.repository.ThemeDao;
 
 @JdbcTest
@@ -23,89 +27,107 @@ class ThemeDaoTest {
     @Autowired
     private ThemeDao themeDao;
 
-    @DisplayName("테마를 저장하면 생성된 ID를 반환한다.")
-    @Test
-    void 테마_저장() {
-        Long id = themeDao.save("테스트 테마", "테스트 설명", "https://example.com/image.jpg");
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-        assertThat(id).isNotNull().isPositive();
-    }
-
-    @DisplayName("전체 테마 목록을 조회하면 초기 데이터 4건이 반환된다.")
+    @DisplayName("테마를 저장하고 전체 조회하면 도메인 객체로 매핑된다.")
     @Test
-    void 전체_테마_조회() {
+    void saveAndFindAll() {
+        Long id = themeDao.save("잠긴 방", "닫힌 문을 여는 테마", "https://example.com/theme.jpg");
+
         List<Theme> themes = themeDao.findAll();
 
-        assertThat(themes).hasSize(4);
+        assertThat(id).isNotNull().isPositive();
+        assertThat(themes).hasSize(1);
+        assertThat(themes.get(0).getName()).isEqualTo("잠긴 방");
+        assertThat(themes.get(0).getDescription()).isEqualTo("닫힌 문을 여는 테마");
+        assertThat(themes.get(0).getThumbnailUrl()).isEqualTo("https://example.com/theme.jpg");
     }
 
-    @DisplayName("인기 테마를 예약 수 내림차순으로 조회한다.")
+    @DisplayName("테마 이름은 유니크 제약조건을 가진다.")
     @Test
-    void 인기_테마_조회() {
-        // data.sql 기준 2026-04-22 ~ 2026-05-26 구간 스케줄 수:
-        //   공포의 저택(1) 4건 / 탐정 사무소(4) 4건 / 마법사의 연구실(3) 3건 / 우주 정거장(2) 2건
-        LocalDate from = LocalDate.of(2026, 4, 22);
-        LocalDate to = LocalDate.of(2026, 5, 26);
+    void uniqueName() {
+        themeDao.save("중복 테마", "설명", "https://example.com/theme.jpg");
 
-        List<Theme> popularThemes = themeDao.findPopularThemes(4, from, to);
+        assertThatThrownBy(() -> themeDao.save("중복 테마", "다른 설명", "https://example.com/other.jpg"))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
 
-        assertThat(popularThemes).hasSize(4);
-        // 3위: 마법사의 연구실 (3건)
-        assertThat(popularThemes.get(2).getName()).isEqualTo("마법사의 연구실");
-        // 4위: 우주 정거장 (2건)
-        assertThat(popularThemes.get(3).getName()).isEqualTo("우주 정거장");
-        // 1·2위는 공포의 저택·탐정 사무소 동점 (DB 반환 순서 비결정)
-        assertThat(popularThemes.subList(0, 2))
+    @DisplayName("이름으로 테마 존재 여부를 조회한다.")
+    @Test
+    void existsByName() {
+        themeDao.save("탐정 사무소", "사건을 해결하는 테마", "https://example.com/detective.jpg");
+
+        assertThat(themeDao.existsByName("탐정 사무소")).isTrue();
+        assertThat(themeDao.existsByName("없는 테마")).isFalse();
+    }
+
+    @DisplayName("인기 테마는 기간 내 RESERVED 예약 수 내림차순, 동률이면 ID 오름차순으로 조회한다.")
+    @Test
+    void findPopularThemes() {
+        Long firstThemeId = insertTheme("첫 번째 테마");
+        Long secondThemeId = insertTheme("두 번째 테마");
+        Long thirdThemeId = insertTheme("세 번째 테마");
+        Long timeId = insertReservationTime(LocalTime.of(10, 0));
+        Long firstScheduleId = insertSchedule(LocalDate.of(2026, 7, 1), timeId, firstThemeId);
+        Long secondScheduleId = insertSchedule(LocalDate.of(2026, 7, 2), timeId, secondThemeId);
+        Long thirdScheduleId = insertSchedule(LocalDate.of(2026, 7, 3), timeId, thirdThemeId);
+
+        insertReservation("예약1", firstScheduleId, ReservationStatus.RESERVED);
+        insertReservation("예약2", firstScheduleId, ReservationStatus.RESERVED);
+        insertReservation("예약3", secondScheduleId, ReservationStatus.RESERVED);
+        insertReservation("취소", secondScheduleId, ReservationStatus.CANCELED);
+        insertReservation("기간밖", thirdScheduleId, ReservationStatus.RESERVED);
+
+        List<Theme> popularThemes = themeDao.findPopularThemes(
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 3),
+                ReservationStatus.RESERVED,
+                10
+        );
+
+        assertThat(popularThemes)
                 .extracting(Theme::getName)
-                .containsExactlyInAnyOrder("공포의 저택", "탐정 사무소");
+                .containsExactly("첫 번째 테마", "두 번째 테마");
     }
 
-    @DisplayName("size 제한을 적용하면 그 수만큼만 반환된다.")
+    @DisplayName("테마를 삭제하면 조회 결과에서 제외된다.")
     @Test
-    void 인기_테마_size_제한() {
-        LocalDate from = LocalDate.of(2026, 4, 22);
-        LocalDate to = LocalDate.of(2026, 5, 26);
-
-        List<Theme> popularThemes = themeDao.findPopularThemes(2, from, to);
-
-        assertThat(popularThemes).hasSize(2);
-    }
-
-    @DisplayName("예약이 있는 시간대는 isAvailable=false이고 대기 수가 표시된다.")
-    @Test
-    void 이용_가능_시간_조회_예약_있음() {
-        // schedule ID 1: 2026-04-29 / theme 1 / time_id=3(12:00)
-        // reservation 1·23 모두 RESERVED → available=false, waitNumber=1(= 2-1)
-        List<AvailableTimeResponse> times = themeDao.findAvailableTimeById(1L, "2026-04-29");
-
-        assertThat(times).hasSize(13);
-
-        AvailableTimeResponse bookedSlot = times.stream()
-                .filter(t -> t.startAt().equals(LocalTime.of(12, 0)))
-                .findFirst()
-                .orElseThrow();
-
-        assertThat(bookedSlot.isAvailable()).isFalse();
-        assertThat(bookedSlot.waitNumber()).isEqualTo(1);
-    }
-
-    @DisplayName("예약이 없는 날짜는 모든 시간이 이용 가능하고 대기 수는 0이다.")
-    @Test
-    void 이용_가능_시간_조회_예약_없음() {
-        List<AvailableTimeResponse> times = themeDao.findAvailableTimeById(1L, "2099-12-31");
-
-        assertThat(times).hasSize(13)
-                .allMatch(AvailableTimeResponse::isAvailable)
-                .allMatch(t -> t.waitNumber() == 0);
-    }
-
-    @DisplayName("테마를 삭제하면 전체 목록에서 제거된다.")
-    @Test
-    void 테마_삭제() {
-        Long id = themeDao.save("삭제용 테마", "설명", "https://example.com/image.jpg");
+    void delete() {
+        Long id = themeDao.save("삭제할 테마", "설명", "https://example.com/delete.jpg");
 
         themeDao.delete(id);
 
-        assertThat(themeDao.findAll()).hasSize(4);
+        assertThat(themeDao.findAll()).isEmpty();
+    }
+
+    private Long insertTheme(String name) {
+        return themeDao.save(name, name + " 설명", "https://example.com/" + name + ".jpg");
+    }
+
+    private Long insertReservationTime(LocalTime startAt) {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt);
+        return jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt);
+    }
+
+    private Long insertSchedule(LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update("INSERT INTO schedule (date, time_id, theme_id) VALUES (?, ?, ?)", date, timeId, themeId);
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM schedule WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
+                date,
+                timeId,
+                themeId
+        );
+    }
+
+    private void insertReservation(String name, Long scheduleId, ReservationStatus status) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, schedule_id, status, updated_at) VALUES (?, ?, ?, ?)",
+                name,
+                scheduleId,
+                status.name(),
+                LocalDateTime.of(2026, 6, 1, 10, 0)
+        );
     }
 }

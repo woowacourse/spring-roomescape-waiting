@@ -1,17 +1,18 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import roomescape.domain.Schedule;
 import roomescape.repository.ScheduleDao;
@@ -23,49 +24,80 @@ class ScheduleDaoTest {
     @Autowired
     private ScheduleDao scheduleDao;
 
-    @DisplayName("스케줄을 저장하면 생성된 ID를 반환한다.")
-    @Test
-    void 스케줄_저장() {
-        Long id = scheduleDao.save(LocalDate.of(2026, 7, 1), 1L, 1L);
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-        assertThat(id).isNotNull().isPositive();
+    @DisplayName("스케줄을 저장하고 ID로 조회하면 날짜, 시간, 테마를 함께 매핑한다.")
+    @Test
+    void saveAndFindById() {
+        Long timeId = insertReservationTime(LocalTime.of(10, 0));
+        Long themeId = insertTheme("잠긴 방");
+        Long scheduleId = scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId);
+
+        Schedule schedule = scheduleDao.findById(scheduleId).orElseThrow();
+
+        assertThat(schedule.getId()).isEqualTo(scheduleId);
+        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2026, 7, 1));
+        assertThat(schedule.getTime().getId()).isEqualTo(timeId);
+        assertThat(schedule.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(schedule.getTheme().getId()).isEqualTo(themeId);
+        assertThat(schedule.getTheme().getName()).isEqualTo("잠긴 방");
     }
 
-    @DisplayName("ID로 스케줄을 조회하면 날짜·시간·테마 정보가 포함된다.")
+    @DisplayName("날짜, 시간, 테마 조합으로 스케줄을 조회한다.")
     @Test
-    void ID로_스케줄_조회() {
-        // data.sql: schedule ID 1 = 2026-04-29 / time_id=3(12:00) / theme_id=1
-        Schedule schedule = scheduleDao.findById(1L);
+    void findByDateAndTimeIdAndThemeId() {
+        Long timeId = insertReservationTime(LocalTime.of(11, 0));
+        Long themeId = insertTheme("우주선");
+        Long scheduleId = scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId);
 
-        assertThat(schedule.getId()).isEqualTo(1L);
-        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2026, 4, 29));
-        assertThat(schedule.getTime().getStartAt()).isEqualTo(LocalTime.of(12, 0));
-        assertThat(schedule.getTheme().getId()).isEqualTo(1L);
+        assertThat(scheduleDao.findByDateAndTimeIdAndThemeId(LocalDate.of(2026, 7, 1), timeId, themeId))
+                .isPresent()
+                .get()
+                .extracting(Schedule::getId)
+                .isEqualTo(scheduleId);
+        assertThat(scheduleDao.findByDateAndTimeIdAndThemeId(LocalDate.of(2099, 1, 1), timeId, themeId))
+                .isEmpty();
     }
 
-    @DisplayName("날짜·시간·테마로 스케줄 ID를 조회한다.")
+    @DisplayName("날짜, 시간, 테마 조합은 유니크 제약조건을 가진다.")
     @Test
-    void 날짜_시간_테마로_스케줄_ID_조회() {
-        Optional<Long> scheduleId = scheduleDao.findIdByDateAndTimeIdAndThemeId(
-                LocalDate.of(2026, 4, 29), 3L, 1L);
+    void uniqueSchedule() {
+        Long timeId = insertReservationTime(LocalTime.of(12, 0));
+        Long themeId = insertTheme("마법 학교");
+        scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId);
 
-        assertThat(scheduleId).isPresent().hasValue(1L);
+        assertThatThrownBy(() -> scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    @DisplayName("존재하지 않는 조건이면 빈 Optional을 반환한다.")
+    @DisplayName("시간 또는 테마를 참조하는 스케줄 존재 여부를 조회한다.")
     @Test
-    void 없는_스케줄_조회_시_빈_Optional() {
-        Optional<Long> scheduleId = scheduleDao.findIdByDateAndTimeIdAndThemeId(
-                LocalDate.of(2099, 12, 31), 1L, 1L);
+    void existsByTimeIdAndThemeId() {
+        Long timeId = insertReservationTime(LocalTime.of(13, 0));
+        Long unusedTimeId = insertReservationTime(LocalTime.of(14, 0));
+        Long themeId = insertTheme("탐정 사무소");
+        Long unusedThemeId = insertTheme("빈 테마");
+        scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId);
 
-        assertThat(scheduleId).isEmpty();
+        assertThat(scheduleDao.existsByTimeId(timeId)).isTrue();
+        assertThat(scheduleDao.existsByTimeId(unusedTimeId)).isFalse();
+        assertThat(scheduleDao.existsByThemeId(themeId)).isTrue();
+        assertThat(scheduleDao.existsByThemeId(unusedThemeId)).isFalse();
     }
 
-    @DisplayName("전체 스케줄 목록을 조회하면 초기 데이터 22건이 반환된다.")
-    @Test
-    void 전체_스케줄_조회() {
-        List<Schedule> schedules = scheduleDao.findAll();
+    private Long insertReservationTime(LocalTime startAt) {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt);
+        return jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt);
+    }
 
-        assertThat(schedules).hasSize(22);
+    private Long insertTheme(String name) {
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                name,
+                name + " 설명",
+                "https://example.com/" + name + ".jpg"
+        );
+        return jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, name);
     }
 }
