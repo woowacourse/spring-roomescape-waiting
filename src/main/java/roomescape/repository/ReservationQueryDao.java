@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -83,7 +84,7 @@ public class ReservationQueryDao {
         return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
 
-    public Optional<Reservation> findReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
+    public Optional<Reservation> findReservationBySlot(ReservationSlot slot) {
         String sql = """
                 select r.id as reservation_id, r.name as reservation_name, r.date as reservation_date, r.time_id, r.created_at as reservation_created_at, t.start_at, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.url as theme_url
                 from reservation as r
@@ -92,7 +93,7 @@ public class ReservationQueryDao {
                 where r.theme_id = ? and r.date = ? and r.time_id = ?
                 """;
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(sql, reservationRowMapper, themeId, date, timeId);
+            Reservation reservation = jdbcTemplate.queryForObject(sql, reservationRowMapper, slot.getThemeId(), slot.getDate(), slot.getTimeId());
             return Optional.of(reservation);
         } catch (EmptyResultDataAccessException ex) {
             return Optional.empty();

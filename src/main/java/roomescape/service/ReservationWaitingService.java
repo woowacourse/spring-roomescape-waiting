@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
@@ -42,10 +43,12 @@ public class ReservationWaitingService {
         Theme themeById = themeQueryingDao.findThemeById(reservationWaitingReq.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationWaitingReq.themeId()));
 
-        Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
+        ReservationSlot reservationSlot = new ReservationSlot(reservationWaitingReq.date(), reservationTimeById, themeById);
+
+        Reservation reservation = getReservationBySlot(reservationSlot);
         reservation.validateWaitable(reservationWaitingReq.name());
 
-        if(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingReq.name(), reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())) {
+        if(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingReq.name(), reservationSlot)) {
             throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
         }
 
@@ -72,8 +75,8 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
-        return reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId).stream()
+    private Reservation getReservationBySlot(ReservationSlot reservationSlot) {
+        return reservationQueryingDao.findReservationBySlot(reservationSlot).stream()
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
     }

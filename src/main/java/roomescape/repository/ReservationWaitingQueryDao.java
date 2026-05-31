@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -72,7 +73,7 @@ public class ReservationWaitingQueryDao {
         );
     };
 
-    public boolean isExistByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean isExistByNameAndSlot(String name, ReservationSlot slot) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
@@ -83,7 +84,7 @@ public class ReservationWaitingQueryDao {
                     AND theme_id = ?
             )
             """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId()));
     }
 
     public Optional<ReservationWaiting> findReservationWaitingById(long id) {

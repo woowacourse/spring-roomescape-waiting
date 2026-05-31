@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.reservation.ReservationSlot;
 
 @JdbcTest
 public class ReservationWaitingQueryDaoTest {
@@ -35,8 +36,8 @@ public class ReservationWaitingQueryDaoTest {
 
     @Test
     void 예약_대기가_제대로_존재하는_지_조회한다() {
-        assertThat(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId("테스트", LocalDate.parse("2027-05-27"), 1L, 1L)).isTrue();
-        assertThat(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId("테스트", LocalDate.parse("2027-05-26"), 1L, 1L)).isFalse();
+        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-27"), 1L, 1L))).isTrue();
+        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-26"), 1L, 1L))).isFalse();
     }
 
     @Test

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -15,10 +16,8 @@ import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationUpdateDao;
 import roomescape.repository.ReservationWaitingQueryDao;
-import roomescape.repository.ReservationWaitingUpdateDao;
 import roomescape.repository.ThemeQueryDao;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +75,7 @@ public class ReservationService {
         Reservation reservationCommand = reservationReq.to(reservationTimeById, themeById);
         reservationCommand.validatePastDateTime();
 
-        validateDuplicatedReservation(themeById.getId(), reservationReq.date(), reservationTimeById.getId());
+        validateDuplicatedReservation(new ReservationSlot(reservationReq.date(), reservationTimeById, themeById));
 
         Reservation reservation = reservationReq.to(reservationTimeById, themeById);
         Long generatedId = reservationUpdatingDao.insert(reservation);
@@ -92,7 +91,7 @@ public class ReservationService {
 
         Reservation reservationCommand = reservationReq.to(newTime, null);
         reservationCommand.validatePastDateTime();
-        validateDuplicatedReservation(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
+        validateDuplicatedReservation(new ReservationSlot(reservationReq.date(), newTime, existedReservation.getTheme()));
 
         Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
 
@@ -111,8 +110,8 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약이 존재하지 않습니다."));
     }
 
-    private void validateDuplicatedReservation(Long themeId, LocalDate date, Long timeId) {
-        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId);
+    private void validateDuplicatedReservation(ReservationSlot reservationSlot) {
+        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationBySlot(reservationSlot);
         if (duplicateReservation.isPresent()) {
             throw new ReservationAlreadyExistException();
         }

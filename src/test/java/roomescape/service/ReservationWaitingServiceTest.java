@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
@@ -64,8 +65,8 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId())).thenReturn(false);
-        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
+        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(false);
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
                 Optional.of(new Reservation("test2", now, reservationTime, theme))
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
@@ -107,7 +108,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(1L, pastDate, 1L)).thenReturn(Optional.of(pastReservation));
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(pastDate, 1L, 1L))).thenReturn(Optional.of(pastReservation));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ExpiredDateTimeException.class);
@@ -119,7 +120,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
                 Optional.empty()
         );
 
@@ -133,7 +134,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(1L, now, 1L))
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(now, 1L, 1L)))
                 .thenReturn(Optional.of(new Reservation("테스트", now, reservationTime, theme)));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
@@ -171,10 +172,10 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
                 Optional.of(new Reservation("test2", now, reservationTime, theme))
         );
-        when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.timeId())).thenReturn(true);
+        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(true);
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest)).isInstanceOf(
                 InvalidInputException.class);
