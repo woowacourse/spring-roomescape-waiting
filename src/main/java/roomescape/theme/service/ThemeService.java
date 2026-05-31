@@ -2,6 +2,7 @@ package roomescape.theme.service;
 
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
@@ -34,7 +35,7 @@ public class ThemeService {
                             command.thumbnailUrl()
                     )
             );
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new DuplicateThemeException();
         }
     }

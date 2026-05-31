@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
@@ -40,7 +41,7 @@ public class ReservationTimeService {
 
         try {
             return reservationTimeRepository.save(reservationTime);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new DuplicateTimeException();
         }
     }

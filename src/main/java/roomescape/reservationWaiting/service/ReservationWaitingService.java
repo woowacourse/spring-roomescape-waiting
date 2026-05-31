@@ -3,7 +3,7 @@ package roomescape.reservationWaiting.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AuthorizationException;
@@ -79,7 +79,7 @@ public class ReservationWaitingService {
                             theme
                     )
             );
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new DuplicateReservationWaitingException();
         }
     }
