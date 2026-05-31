@@ -1,6 +1,7 @@
 package roomescape;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.exception.client.ResourceNotFoundException;
+import roomescape.service.WaitingService;
 import roomescape.support.ReservationTestHelper;
 
 public class WaitingStepTest extends IntegrationTest {
@@ -23,6 +26,9 @@ public class WaitingStepTest extends IntegrationTest {
 
     @Autowired
     private ReservationTestHelper helper;
+
+    @Autowired
+    private WaitingService waitingService;
 
     private Long timeId;
     private Long themeId;
@@ -136,19 +142,18 @@ public class WaitingStepTest extends IntegrationTest {
         void 본인_취소() {
             Long waitingId = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
 
-            RestAssured.given()
-                    .when().delete("/user/waitings/" + waitingId + "?name=콘")
-                    .then().statusCode(204);
+            waitingService.cancelByOwner(waitingId, "콘");
+            assertThat(helper.existsWaiting(waitingId)).isFalse();
         }
 
         @Test
-        @DisplayName("다른 사람의 대기를 취소하려 하면 404")
+        @DisplayName("다른 사람의 대기를 취소하려 하면 에러 반환")
         void 타인_취소_거부() {
             Long waitingId = helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
 
-            RestAssured.given()
-                    .when().delete("/user/waitings/" + waitingId + "?name=모카")
-                    .then().statusCode(404);
+            assertThatThrownBy(() -> waitingService.cancelByOwner(waitingId, "모카"))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("존재하지 않는 대기입니다.");
         }
 
         @Test
@@ -158,9 +163,7 @@ public class WaitingStepTest extends IntegrationTest {
             Long w2 = helper.insertWaiting("모카", FUTURE_DATE, timeId, themeId, 2);
             Long w3 = helper.insertWaiting("핀", FUTURE_DATE, timeId, themeId, 3);
 
-            RestAssured.given()
-                    .when().delete("/user/waitings/" + w2 + "?name=모카")
-                    .then().statusCode(204);
+            waitingService.cancelByOwner(w2, "모카");
 
             assertThat(helper.findWaitingOrder(w1)).isEqualTo(1);
             assertThat(helper.findWaitingOrder(w3)).isEqualTo(2);
