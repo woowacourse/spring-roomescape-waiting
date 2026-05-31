@@ -62,28 +62,6 @@ public class WaitingService {
         return WaitingResponseDTO.from(savedWaiting);
     }
 
-    private Long generateNextWaitingNumber(WaitingRequestDTO request, ReservationTime time, Theme theme) {
-        Long maxWaitingNumber = waitingRepository.findMaxWaitingNumberBy(
-                request.date(),
-                time,
-                theme
-        ).orElse(0L);
-
-        return maxWaitingNumber + 1L;
-    }
-
-    private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
-        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
-                request.name(),
-                request.date(),
-                time,
-                theme
-        );
-        if (isDuplicateWaiting) {
-            throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
-        }
-    }
-
     private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time,
             Theme theme) {
         Reservation existReservation = reservationRepository.findByDateAndTimeAndThemeWithLock(
@@ -99,6 +77,23 @@ public class WaitingService {
         }
     }
 
+    private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time,
+            Theme theme) {
+        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
+                request.name(), request.date(), time, theme);
+        if (isDuplicateWaiting) {
+            throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
+        }
+    }
+
+    private Long generateNextWaitingNumber(WaitingRequestDTO request, ReservationTime time,
+            Theme theme) {
+        Long maxWaitingNumber = waitingRepository.findMaxWaitingNumberBy(request.date(), time,
+                theme).orElse(0L);
+
+        return maxWaitingNumber + 1L;
+    }
+
     public List<WaitingResponseDTO> findWaitingsByName(String name) {
         return waitingRepository.findByName(name).stream()
                 .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
@@ -111,5 +106,12 @@ public class WaitingService {
         );
         existWaiting.validateNotPastTime(LocalDateTime.now());
         waitingRepository.delete(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingResponseDTO> readAllWaiting() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponseDTO::from)
+                .toList();
     }
 }

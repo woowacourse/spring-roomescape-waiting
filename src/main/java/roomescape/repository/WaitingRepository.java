@@ -6,6 +6,7 @@ import java.util.Optional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.dto.WaitingResponseDTO;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
@@ -13,6 +14,8 @@ public interface WaitingRepository {
     Optional<Waiting> findById(Long id);
 
     List<Waiting> findByName(String name);
+
+    List<Waiting> findAll();
 
     boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme);
 

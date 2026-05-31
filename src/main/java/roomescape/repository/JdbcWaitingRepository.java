@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.dto.WaitingResponseDTO;
 
 @Repository
 public class JdbcWaitingRepository implements WaitingRepository {
@@ -112,6 +113,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findAll() {
+        String sql = """
+                SELECT w.id AS id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                    FROM waiting AS w
+                    INNER JOIN reservation_time AS t
+                      ON w.time_id = t.id
+                    INNER JOIN theme AS th
+                      ON w.theme_id = th.id
+                """;
+
+        return jdbcTemplate.query(sql, getWaitingRowMapper());
+    }
+
+    @Override
     public Optional<Waiting> findById(Long id) {
         String sql = """
                     SELECT w.id AS id,
@@ -140,7 +164,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
-                                                      ReservationTime time, Theme theme) {
+            ReservationTime time, Theme theme) {
         String sql = """
                     SELECT EXISTS (
                       SELECT 1
