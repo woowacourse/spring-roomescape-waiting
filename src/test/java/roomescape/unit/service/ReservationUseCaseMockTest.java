@@ -2,11 +2,15 @@ package roomescape.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.api.dto.ReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -31,8 +36,14 @@ class ReservationUseCaseMockTest {
 
     private static final ReservationTime TIME = new ReservationTime(1L, LocalTime.of(10, 0));
     private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
-    private static final LocalDate FUTURE = LocalDate.of(2999, 1, 1);
-    private static final LocalDate PAST = LocalDate.of(2020, 1, 1);
+
+    private static final Clock FIXED_CLOCK = Clock.fixed(
+            Instant.parse("2026-08-05T01:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+    );
+    private static final LocalDate TODAY = LocalDate.now(FIXED_CLOCK);
+    private static final LocalDate FUTURE = TODAY.plusDays(1);
+    private static final LocalDate PAST = TODAY.minusDays(1);
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -53,8 +64,43 @@ class ReservationUseCaseMockTest {
                 reservationRepository,
                 reservationQueryService,
                 reservationTimeQueryService,
-                themeQueryService
+                themeQueryService,
+                FIXED_CLOCK
         );
+    }
+
+    @Test
+    void save는_현재_시각_직전_예약이면_BusinessRuleViolationException을_던진다() {
+        ReservationTime pastTime = new ReservationTime(1L, LocalTime.of(9, 59));
+        given(reservationTimeQueryService.getById(pastTime.getId())).willReturn(pastTime);
+        given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
+
+        assertThatThrownBy(() -> reservationCommandService.save(
+                new ReservationRequest(
+                        "민욱",
+                        TODAY,
+                        pastTime.getId(),
+                        THEME.getId()
+                )
+        )).isInstanceOf(BusinessRuleViolationException.class);
+    }
+
+    @Test
+    void save는_현재_시각과_같은_예약을_과거로_판단하지_않는다() {
+        ReservationTime currentTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationRequest request = new ReservationRequest(
+                "민욱",
+                TODAY,
+                currentTime.getId(),
+                THEME.getId()
+        );
+        Reservation saved = new Reservation(1L, request.name(), request.date(), currentTime, THEME);
+        given(reservationTimeQueryService.getById(currentTime.getId())).willReturn(currentTime);
+        given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
+        given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
+
+        assertThat(reservationCommandService.save(request)).isEqualTo(saved);
+        verify(reservationRepository).save(any(Reservation.class));
     }
 
     @Test

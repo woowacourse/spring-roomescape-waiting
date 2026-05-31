@@ -8,9 +8,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,11 @@ import roomescape.service.ReservationWaitingQueryService;
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingUseCaseMockTest {
 
+    private static final Clock FIXED_CLOCK = Clock.fixed(
+            Instant.parse("2026-08-05T01:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+    );
+
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
 
@@ -54,7 +62,8 @@ class ReservationWaitingUseCaseMockTest {
         reservationWaitingCommandService = new ReservationWaitingCommandService(
                 reservationWaitingRepository,
                 reservationQueryService,
-                reservationWaitingQueryService
+                reservationWaitingQueryService,
+                FIXED_CLOCK
         );
     }
 

@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,17 +18,20 @@ public class ReservationCommandService {
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
+    private final Clock clock;
 
     public ReservationCommandService(
             ReservationRepository reservationRepository,
             ReservationQueryService reservationQueryService,
             ReservationTimeQueryService reservationTimeQueryService,
-            ThemeQueryService themeQueryService
+            ThemeQueryService themeQueryService,
+            Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationQueryService = reservationQueryService;
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.themeQueryService = themeQueryService;
+        this.clock = clock;
     }
 
     @Transactional
@@ -39,7 +43,7 @@ public class ReservationCommandService {
                 request.date(),
                 reservationTime,
                 theme,
-                LocalDateTime.now()
+                now()
         );
 
         return reservationRepository.save(reservation);
@@ -53,7 +57,7 @@ public class ReservationCommandService {
                 name,
                 request.date(),
                 newTime,
-                LocalDateTime.now()
+                now()
         );
 
         return reservationRepository.update(updated);
@@ -67,8 +71,12 @@ public class ReservationCommandService {
     @Transactional
     public void deleteMine(Long id, String name) {
         Reservation reservation = reservationQueryService.getById(id);
-        reservation.cancelBy(name, LocalDateTime.now());
+        reservation.cancelBy(name, now());
 
         reservationRepository.deleteById(id);
+    }
+
+    private LocalDateTime now() {
+        return LocalDateTime.now(clock);
     }
 }

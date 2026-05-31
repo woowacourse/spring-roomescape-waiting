@@ -131,3 +131,7 @@ RFC 9457 Problem Details 형식. `Content-Type: application/problem+json`.
 | 415 | `media-type-not-supported` | 지원하지 않는 요청 미디어 타입                                    |
 | 422 | `business-rule-violation`  | 지난 시각 예약/변경, 예약이 존재하는 시간·테마 삭제                       |
 | 500 | `internal-error`           | 처리되지 않은 예외                                           |
+
+## Development Conventions
+
+- [Time Handling Convention](docs/conventions/time-handling.md)

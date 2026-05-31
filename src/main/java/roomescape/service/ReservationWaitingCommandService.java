@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,15 +15,18 @@ public class ReservationWaitingCommandService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationQueryService reservationQueryService;
     private final ReservationWaitingQueryService reservationWaitingQueryService;
+    private final Clock clock;
 
     public ReservationWaitingCommandService(
             ReservationWaitingRepository reservationWaitingRepository,
             ReservationQueryService reservationQueryService,
-            ReservationWaitingQueryService reservationWaitingQueryService
+            ReservationWaitingQueryService reservationWaitingQueryService,
+            Clock clock
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationQueryService = reservationQueryService;
         this.reservationWaitingQueryService = reservationWaitingQueryService;
+        this.clock = clock;
     }
 
     @Transactional
@@ -30,7 +34,7 @@ public class ReservationWaitingCommandService {
         Reservation reservation = reservationQueryService.getById(request.reservationId());
         ReservationWaiting reservationWaiting = ReservationWaiting.createWith(
                 request.name(),
-                LocalDateTime.now(),
+                LocalDateTime.now(clock),
                 reservation
         );
 
