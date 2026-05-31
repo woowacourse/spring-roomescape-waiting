@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +25,7 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> apply(@RequestBody WaitingRequest waitingRequest) {
+    public ResponseEntity<Void> apply(@RequestBody @Valid WaitingRequest waitingRequest) {
         Waiting waiting = Waiting.transientOf(waitingRequest.name(), waitingRequest.date(), waitingRequest.timeId(),
                 waitingRequest.themeId());
         waitingService.saveWaiting(waiting);
