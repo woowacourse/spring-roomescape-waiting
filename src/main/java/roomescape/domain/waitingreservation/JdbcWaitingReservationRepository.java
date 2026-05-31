@@ -33,20 +33,6 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
                     );
                     """;
 
-    private static final String FIND_OLDEST_SQL =
-            """
-                    select wr.id, wr.name, wr.created_at,
-                           rd.id as date_id, rd.play_day,
-                           rt.id as time_id, rt.start_at,
-                           th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-                    from waiting_reservation wr
-                    join reservation_date rd on wr.date_id = rd.id
-                    join reservation_time rt on wr.time_id = rt.id
-                    join theme th on wr.theme_id = th.id
-                    order by wr.created_at asc, wr.id asc
-                    limit 1
-                    """;
-
     private static final String FIND_OLDEST_BY_SLOT_SQL =
             """
                     select wr.id, wr.name, wr.created_at,
