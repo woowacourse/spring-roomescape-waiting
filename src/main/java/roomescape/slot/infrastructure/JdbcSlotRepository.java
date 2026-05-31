@@ -123,7 +123,7 @@ public class JdbcSlotRepository implements SlotRepository {
     }
 
     @Override
-    public boolean existsAlreadySlot(LocalDate date, long themeId, long timeId) {
+    public boolean existsByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId) {
         String sql = "SELECT EXISTS (SELECT 1 FROM slot WHERE date = :date AND time_id = :timeId AND theme_id = :themeId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()

@@ -71,14 +71,14 @@ class JdbcSlotRepositoryTest {
 
     @Test
     @DisplayName("이미 존재하는 슬롯이면 true를 반환한다.")
-    void existsAlreadySlot_테스트_1() {
+    void existsByDateAndThemeIdAndTimeId_테스트_1() {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
         long themeId = 1L;
         long timeId = 1L;
 
         // when
-        boolean result = repository.existsAlreadySlot(date, themeId, timeId);
+        boolean result = repository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId);
 
         // then
         assertThat(result).isTrue();
@@ -86,14 +86,14 @@ class JdbcSlotRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 슬롯이면 false를 반환한다.")
-    void existsAlreadySlot_테스트_2() {
+    void existsByDateAndThemeIdAndTimeId_테스트_2() {
         // given
         LocalDate date = LocalDate.of(2026, 5, 5);
         long themeId = 1L;
         long timeId = 99L;
 
         // when
-        boolean result = repository.existsAlreadySlot(date, themeId, timeId);
+        boolean result = repository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId);
 
         // then
         assertThat(result).isFalse();

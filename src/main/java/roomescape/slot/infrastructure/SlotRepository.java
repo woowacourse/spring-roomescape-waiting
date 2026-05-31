@@ -21,5 +21,5 @@ public interface SlotRepository {
 
     void deleteById(long id);
 
-    boolean existsAlreadySlot(LocalDate date, long themeId, long timeId);
+    boolean existsByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
 }

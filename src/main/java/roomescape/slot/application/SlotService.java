@@ -42,7 +42,7 @@ public class SlotService {
 
     public SlotSaveResponse save(SlotSaveRequest body) {
         validateSlot(body.date(), body.timeId(), body.themeId());
-        validateAlreadyExistsNot(body.date(), body.themeId(), body.timeId());
+        throwIfSlotAlreadyExists(body.date(), body.themeId(), body.timeId());
         return SlotSaveResponse.from(slotRepository.save(body.toDomain()));
     }
 
@@ -84,8 +84,8 @@ public class SlotService {
         }
     }
 
-    private void validateAlreadyExistsNot(LocalDate date, long themeId, long timeId) {
-        if (slotRepository.existsAlreadySlot(date, themeId, timeId)) {
+    private void throwIfSlotAlreadyExists(LocalDate date, long themeId, long timeId) {
+        if (slotRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
             throw new EscapeRoomException(ErrorCode.SLOT_ALREADY_EXIST);
         }
     }
