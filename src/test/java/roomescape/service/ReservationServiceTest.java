@@ -215,6 +215,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("대기 예약이 빈 슬롯으로 변경되면 확정 예약이 된다.")
+    void confirmPendingReservationWhenModifiedToEmptyThemeSlot() {
+        reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+
+        Reservation modifiedReservation = reservationService.modifyReservation(pendingReservation.getId(), savedThemeSlot2.getId());
+
+        ThemeSlot previousThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
+        ThemeSlot modifiedThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot2.getId()).orElseThrow();
+        assertThat(modifiedReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+        assertThat(previousThemeSlot.isReserved()).isTrue();
+        assertThat(modifiedThemeSlot.isReserved()).isTrue();
+    }
+
+    @Test
     @DisplayName("이미 CANCELLED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCancelledReservation(){
         Reservation cancelledReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());

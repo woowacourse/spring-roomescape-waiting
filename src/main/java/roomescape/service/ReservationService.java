@@ -138,6 +138,7 @@ public class ReservationService {
                 reservation.getReservationStatus()
         );
         reservationRepository.updateThemeSlot(updateReservation);
+        reservationRepository.updateStatus(updateReservation);
         return updateReservation;
     }
 
@@ -152,7 +153,9 @@ public class ReservationService {
             return;
         }
 
-        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+        if (reservation.isPendingStatus()) {
+            reservation.confirm();
+        }
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
