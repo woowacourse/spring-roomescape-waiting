@@ -17,7 +17,7 @@ public record ReservationPendingInfo(
         Status status,
         Long pendingOrder
 ) {
-    public static ReservationPendingInfo from(final ReservationQueryResult result){
+    public static ReservationPendingInfo from(ReservationQueryResult result){
         return ReservationPendingInfo.builder()
                 .id(result.id())
                 .name(result.name())

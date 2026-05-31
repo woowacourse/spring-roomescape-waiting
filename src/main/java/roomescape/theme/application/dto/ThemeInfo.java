@@ -12,7 +12,7 @@ public record ThemeInfo(
         String description,
         LocalTime durationTime
 ) {
-    public static ThemeInfo from(final Theme theme) {
+    public static ThemeInfo from(Theme theme) {
         return ThemeInfo.builder()
                 .id(theme.getId())
                 .name(theme.getName())

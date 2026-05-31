@@ -18,7 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 class GlobalExceptionHandlerTest {
 
     @BeforeEach
-    void setUp(final WebApplicationContext webApplicationContext) {
+    void setUp(WebApplicationContext webApplicationContext) {
         RestAssuredMockMvc.webAppContextSetup(webApplicationContext);
     }
 

@@ -10,7 +10,7 @@ public record AvailableReservationTimeResponse(
         ThemeResponse theme,
         List<ReservationTimeResponse> times
 ) {
-    public static AvailableReservationTimeResponse from(final AvailableReservationTimeInfo info) {
+    public static AvailableReservationTimeResponse from(AvailableReservationTimeInfo info) {
         return AvailableReservationTimeResponse.builder()
                 .times(info.times().stream().map(ReservationTimeResponse::from).toList())
                 .theme(ThemeResponse.from(info.theme()))

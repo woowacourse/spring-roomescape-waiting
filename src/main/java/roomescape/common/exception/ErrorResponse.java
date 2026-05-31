@@ -5,7 +5,7 @@ public record ErrorResponse(
         String message
 ) {
 
-    public static ErrorResponse of(final String code, final String message) {
+    public static ErrorResponse of(String code, String message) {
         return new ErrorResponse(code, message);
     }
 }

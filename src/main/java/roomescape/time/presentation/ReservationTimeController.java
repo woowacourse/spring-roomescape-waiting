@@ -31,7 +31,7 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<AvailableReservationTimeResponse> getAvailableReservationTime(@Valid @ModelAttribute final AvailableReservationTimeRequest request) {
+    public ResponseEntity<AvailableReservationTimeResponse> getAvailableReservationTime(@Valid @ModelAttribute AvailableReservationTimeRequest request) {
         AvailableReservationTimeInfo reservationTimeInfo = service.getAvailableReservationTime(
                 request.toCommand());
         return ResponseEntity.ok(AvailableReservationTimeResponse.from(reservationTimeInfo));

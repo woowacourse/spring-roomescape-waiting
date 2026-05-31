@@ -11,7 +11,7 @@ public record AvailableReservationTimeInfo(
         ThemeInfo theme,
         List<ReservationTimeInfo> times
 ) {
-    public static AvailableReservationTimeInfo from(final Theme theme, final List<ReservationTime> times) {
+    public static AvailableReservationTimeInfo from(Theme theme, List<ReservationTime> times) {
         return AvailableReservationTimeInfo.builder()
                 .theme(ThemeInfo.from(theme))
                 .times(times.stream().map(ReservationTimeInfo::from).toList())

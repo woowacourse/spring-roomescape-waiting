@@ -13,7 +13,7 @@ public interface ThemeRepository {
     List<Theme> findByReservationCountWithLimit(LocalDate startDate, LocalDate endDate, int limit);
     boolean existsByName(String name);
 
-    default Theme getById(final Long id) {
+    default Theme getById(Long id) {
         return findById(id)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않은 테마입니다."));
     }

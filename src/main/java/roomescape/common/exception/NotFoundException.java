@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class NotFoundException extends CustomException {
 
-    public NotFoundException(final String message) {
+    public NotFoundException(String message) {
         super("NOT_FOUND", HttpStatus.NOT_FOUND, message);
     }
 }

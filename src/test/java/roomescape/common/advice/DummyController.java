@@ -21,12 +21,12 @@ import roomescape.common.exception.NotFoundException;
 class DummyController {
 
     @PostMapping("/dummy")
-    Map<String, String> dummy(@Valid @RequestBody final DummyDto request) {
+    Map<String, String> dummy(@Valid @RequestBody DummyDto request) {
         return Map.of("testField", request.testField());
     }
 
     @PostMapping("/dummy/{id}")
-    void dummyPath(@PathVariable @Positive(message = "양수가 아님") final Long id) {
+    void dummyPath(@PathVariable @Positive(message = "양수가 아님") Long id) {
     }
 
     @GetMapping("/dummy/business")
@@ -50,7 +50,7 @@ class DummyController {
     }
 
     @GetMapping("/dummy/param")
-    void param(@RequestParam final String test) {
+    void param(@RequestParam String test) {
     }
 
     @GetMapping("/dummy/internal")
@@ -60,7 +60,7 @@ class DummyController {
 
     static class BusinessException extends CustomException {
 
-        BusinessException(final String message) {
+        BusinessException(String message) {
             super("BUSINESS_EXCEPTION", HttpStatus.BAD_REQUEST, message);
         }
     }

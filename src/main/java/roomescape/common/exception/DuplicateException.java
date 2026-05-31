@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class DuplicateException extends CustomException {
 
-    public DuplicateException(final String message) {
+    public DuplicateException(String message) {
         super("DUPLICATE", HttpStatus.CONFLICT, message);
     }
 }

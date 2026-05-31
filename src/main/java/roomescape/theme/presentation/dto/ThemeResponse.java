@@ -12,7 +12,7 @@ public record ThemeResponse(
         String description,
         LocalTime durationTime
 ) {
-    public static ThemeResponse from(final ThemeInfo theme) {
+    public static ThemeResponse from(ThemeInfo theme) {
         return ThemeResponse.builder()
                 .id(theme.id())
                 .name(theme.name())

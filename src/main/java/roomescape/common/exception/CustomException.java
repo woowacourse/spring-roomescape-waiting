@@ -9,7 +9,7 @@ public abstract class CustomException extends RuntimeException {
     private final String code;
     private final HttpStatus httpStatus;
 
-    protected CustomException(final String code, final HttpStatus httpStatus, final String message) {
+    protected CustomException(String code, HttpStatus httpStatus, String message) {
         super(message);
         this.code = code;
         this.httpStatus = httpStatus;

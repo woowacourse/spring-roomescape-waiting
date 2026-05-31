@@ -38,7 +38,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public ReservationTimeInfo addReservationTime(final ReservationTimeCommand timeCommand) {
+    public ReservationTimeInfo addReservationTime(ReservationTimeCommand timeCommand) {
         if (reservationTimeRepository.existsByStartAt(timeCommand.startAt())) {
             throw new DuplicateReservationTimeException("이미 존재하는 시간입니다.");
         }
@@ -46,7 +46,7 @@ public class ReservationTimeService {
         return ReservationTimeInfo.from(time);
     }
 
-    public void deleteReservationTime(final Long id) {
+    public void deleteReservationTime(Long id) {
         if (reservationRepository.existsByReservationTime(id)) {
             throw new ReservationTimeInUseException("해당 시간에 예약이 존재합니다.");
         }
@@ -56,7 +56,7 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public AvailableReservationTimeInfo getAvailableReservationTime(final AvailableReservationTimeFindCommand command) {
+    public AvailableReservationTimeInfo getAvailableReservationTime(AvailableReservationTimeFindCommand command) {
         Theme theme = themeRepository.getById(command.themeId());
         List<Reservation> reservations = reservationRepository.findByThemeAndDate(
                 command.themeId(), command.date());

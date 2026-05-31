@@ -9,7 +9,7 @@ public record ReservationTimeInfo(
         Long id,
         LocalTime startAt
 ) {
-    public static ReservationTimeInfo from(final ReservationTime time) {
+    public static ReservationTimeInfo from(ReservationTime time) {
         return ReservationTimeInfo.builder()
                 .id(time.getId())
                 .startAt(time.getStartAt())

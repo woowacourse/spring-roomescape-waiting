@@ -18,7 +18,7 @@ public class PageController {
     private final ReservationTimeService reservationTimeService;
 
     @GetMapping({"/", "/reservation"})
-    public String reservationPage(final Model model) {
+    public String reservationPage(Model model) {
         model.addAttribute("themes", themeService.getThemes());
         model.addAttribute("popularThemes", themeService.getWeeksTopThemes());
         model.addAttribute("today", LocalDate.now());
@@ -26,7 +26,7 @@ public class PageController {
     }
 
     @GetMapping("/admin")
-    public String adminPage(final Model model) {
+    public String adminPage(Model model) {
         model.addAttribute("themes", themeService.getThemes());
         model.addAttribute("times", reservationTimeService.getReservationTimes());
         model.addAttribute("reservations", reservationService.getReservations());

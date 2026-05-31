@@ -16,7 +16,7 @@ public record ReservationCreateCommand(
         Long timeId,
         Long themeId
 ) {
-    public Reservation toEntity(final ReservationTime time, final Theme theme, final Clock clock) {
+    public Reservation toEntity(ReservationTime time, Theme theme, Clock clock) {
         return Reservation.builder()
                 .name(name)
                 .date(date)

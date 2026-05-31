@@ -16,7 +16,7 @@ public record ReservationResponse(
         ThemeResponse theme,
         Status status
 ) {
-    public static ReservationResponse from(final ReservationInfo reservation) {
+    public static ReservationResponse from(ReservationInfo reservation) {
         return ReservationResponse.builder()
                 .id(reservation.id())
                 .name(reservation.name())

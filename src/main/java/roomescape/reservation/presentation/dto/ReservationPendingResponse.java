@@ -18,7 +18,7 @@ public record ReservationPendingResponse(
         Long pendingOrder
 
 ) {
-    public static ReservationPendingResponse from(final ReservationPendingInfo reservation) {
+    public static ReservationPendingResponse from(ReservationPendingInfo reservation) {
         return ReservationPendingResponse.builder()
                 .id(reservation.id())
                 .name(reservation.name())

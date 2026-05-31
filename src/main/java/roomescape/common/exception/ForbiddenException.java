@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends CustomException {
 
-    public ForbiddenException(final String message) {
+    public ForbiddenException(String message) {
         super("FORBIDDEN", HttpStatus.FORBIDDEN, message);
     }
 }

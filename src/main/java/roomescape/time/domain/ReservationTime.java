@@ -18,14 +18,14 @@ public class ReservationTime {
     private LocalTime startAt;
     private LocalDateTime deletedAt;
 
-    public ReservationTime withId(final Long id) {
+    public ReservationTime withId(Long id) {
         return ReservationTime.builder()
                 .id(id)
                 .startAt(this.startAt)
                 .build();
     }
 
-    public ReservationTime delete(final Clock clock) {
+    public ReservationTime delete(Clock clock) {
         return ReservationTime.builder()
                 .id(id)
                 .startAt(startAt)
@@ -33,7 +33,7 @@ public class ReservationTime {
                 .build();
     }
 
-    public void checkValidDateTime(final LocalDate date, final Clock clock) {
+    public void checkValidDateTime(LocalDate date, Clock clock) {
         LocalDateTime time = LocalDateTime.of(date, startAt);
         if (time.isBefore(LocalDateTime.now(clock))) {
             throw new IllegalReservationDateTimeException("과거의 시간으로 예약을 변경, 등록 할 수 없습니다.");
