@@ -107,7 +107,7 @@ public class ReservationWaitingDaoTest {
 
     @Test
     void 첫_번째_대기자를_조회한다() {
-        Optional<ReservationWaiting> first = reservationWaitingDao.findFirstReservationWaitingByReservationId(1L);
+        Optional<ReservationWaiting> first = reservationWaitingDao.findFirstByReservationId(1L);
 
         assertThat(first).isPresent();
         assertThat(first.get().getName()).isEqualTo("테스트");
