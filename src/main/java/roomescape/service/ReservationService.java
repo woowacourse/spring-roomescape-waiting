@@ -11,6 +11,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
+import roomescape.exception.ReferencedDataException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -129,7 +130,11 @@ public class ReservationService {
     private boolean deleteReservation(Reservation existedReservation) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstByReservationId(existedReservation.getId());
         if (firstWaiting.isEmpty()) {
-            reservationUpdatingDao.delete(existedReservation.getId());
+            try {
+                reservationUpdatingDao.delete(existedReservation.getId());
+            } catch (DataIntegrityViolationException e) {
+                throw new ReferencedDataException("대기자가 생겨 예약을 삭제할 수 없습니다. 다시 시도해주세요.");
+            }
             return true;
         }
 
