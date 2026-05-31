@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,5 +92,43 @@ public class ReservationWaitingDaoTest {
         reservationWaitingDao.delete(1L);
 
         assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isFalse();
+    }
+
+    @Test
+    void 여러_대기열_중_가장_먼저_등록된_대기자를_반환한다() {
+        jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('두번째', 1, '2026-05-16 10:30:00')");
+
+        Optional<ReservationWaiting> first = reservationWaitingDao.findFirstByReservationId(1L);
+
+        assertThat(first).isPresent();
+        assertThat(first.get().getName()).isEqualTo("테스트");
+        assertThat(first.get().getSequence()).isEqualTo(1L);
+    }
+
+    @Test
+    void 첫_번째_대기자를_조회한다() {
+        Optional<ReservationWaiting> first = reservationWaitingDao.findFirstReservationWaitingByReservationId(1L);
+
+        assertThat(first).isPresent();
+        assertThat(first.get().getName()).isEqualTo("테스트");
+    }
+
+    @Test
+    void 존재하지_않는_예약의_대기열_조회시_빈_값을_반환한다() {
+        Optional<ReservationWaiting> result = reservationWaitingDao.findFirstByReservationId(999L);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 대기열_순번이_등록_순서대로_계산된다() {
+        jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('두번째', 1, '2026-05-16 10:30:00')");
+
+        List<ReservationWaiting> all = reservationWaitingDao.findAllReservationWaiting();
+        ReservationWaiting first = all.stream().filter(w -> w.getName().equals("테스트")).findFirst().orElseThrow();
+        ReservationWaiting second = all.stream().filter(w -> w.getName().equals("두번째")).findFirst().orElseThrow();
+
+        assertThat(first.getSequence()).isEqualTo(1L);
+        assertThat(second.getSequence()).isEqualTo(2L);
     }
 }
