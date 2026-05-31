@@ -51,6 +51,16 @@ class ScheduleServiceTest {
     void save_성공_테스트() {
         ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
         Schedule savedSchedule = new Schedule(10L, LocalDate.of(2026, 5, 10), 1L, 2L);
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 6)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        when(reservationTimeRepository.findById(request.timeId()))
+                .thenReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
+        when(themeRepository.findById(request.themeId()))
+                .thenReturn(Optional.of(new Theme(request.themeId(), "test", "testDescription", "testUrl")));
         when(scheduleRepository.save(any(Schedule.class))).thenReturn(savedSchedule);
 
         ScheduleSaveResponse response = scheduleService.save(request);
@@ -59,6 +69,40 @@ class ScheduleServiceTest {
         assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 10));
         assertThat(response.time_id()).isEqualTo(1L);
         assertThat(response.theme_id()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("스케줄 저장 시 요청으로 들어온 timeId가 시간 목록에 존재하지 않는다면 예외가 발생한다.")
+    void save_존재하지_않는_시간_실패_테스트() {
+        ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 999L, 2L);
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 6)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        when(reservationTimeRepository.findById(request.timeId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> scheduleService.save(request))
+                .isInstanceOf(EscapeRoomException.class);
+    }
+
+    @Test
+    @DisplayName("스케줄 저장 시 요청으로 들어온 themeId가 테마 목록에 존재하지 않는다면 예외가 발생한다.")
+    void save_존재하지_않는_테마_실패_테스트() {
+        ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 1L, 999L);
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 6)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        when(reservationTimeRepository.findById(request.timeId()))
+                .thenReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
+        when(themeRepository.findById(request.themeId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> scheduleService.save(request))
+                .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test

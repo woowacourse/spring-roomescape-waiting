@@ -64,6 +64,44 @@ class ScheduleControllerTest {
     }
 
     @Test
+    void 존재하지_않는_시간으로_스케줄_생성시_404를_응답한다() {
+        String accessToken = loginManager();
+        Map<String, Object> schedule = new HashMap<>();
+        schedule.put("date", "2026-05-06");
+        schedule.put("timeId", 999);
+        schedule.put("themeId", 4);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(schedule)
+                .when().post("/api/manager/schedules")
+                .then().log().all()
+                .statusCode(404)
+                .body("success", is(false))
+                .body("error.code", is("RESERVATIONTIME_404"));
+    }
+
+    @Test
+    void 존재하지_않는_테마로_스케줄_생성시_404를_응답한다() {
+        String accessToken = loginManager();
+        Map<String, Object> schedule = new HashMap<>();
+        schedule.put("date", "2026-05-06");
+        schedule.put("timeId", 1);
+        schedule.put("themeId", 999);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(schedule)
+                .when().post("/api/manager/schedules")
+                .then().log().all()
+                .statusCode(404)
+                .body("success", is(false))
+                .body("error.code", is("THEME_404"));
+    }
+
+    @Test
     void 스케줄_전체_조회() {
         String accessToken = loginManager();
 

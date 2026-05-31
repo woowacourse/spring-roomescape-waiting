@@ -41,6 +41,7 @@ public class ScheduleService {
     }
 
     public ScheduleSaveResponse save(ScheduleSaveRequest body) {
+        validateSchedule(body.date(), body.timeId(), body.themeId());
         validateAlreadyExistsNot(body.date(), body.themeId(), body.timeId());
         return ScheduleSaveResponse.from(scheduleRepository.save(body.toDomain()));
     }

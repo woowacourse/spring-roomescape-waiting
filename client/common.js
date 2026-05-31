@@ -31,7 +31,6 @@ const editReservationThemeEl = document.getElementById("edit-reservation-theme")
 const editAvailableTimesEl = document.getElementById("edit-available-times");
 const editReservationCancelEl = document.getElementById("edit-reservation-cancel");
 const AUTH_TOKEN_KEY = "roomescapeAccessToken";
-const DEMO_DATE = "2026-05-05";
 let selectedThemeId = null;
 let selectedTimeId = null;
 let selectedTimeLabel = null;
@@ -655,8 +654,17 @@ document.addEventListener("click", (e) => {
   }
 });
 
-function setTodayDefault() {
-  document.getElementById("theme-date").value = DEMO_DATE;
+function getDefaultDate() {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function setDefaultDate() {
+  document.getElementById("theme-date").value = getDefaultDate();
 }
 
 loginFormEl.addEventListener("submit", async (e) => {
@@ -720,7 +728,7 @@ loginCancelEl.addEventListener("click", () => {
   loginModalEl.classList.add("hidden");
 });
 
-setTodayDefault();
+setDefaultDate();
 setCommonAuthState(Boolean(getAccessToken()));
 if (getAccessToken()) {
   authStatusEl.textContent = "로그인 상태입니다.";
