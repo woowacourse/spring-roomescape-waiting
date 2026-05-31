@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -81,7 +82,7 @@ class ReservationWaitingUseCaseMockTest {
                 theme.getId()
         );
         ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
-        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId())).willReturn(Optional.of(reservation));
+        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId())).willReturn(reservation);
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
 
         assertThat(reservationWaitingCommandService.save(request)).isEqualTo(saved);
@@ -91,7 +92,9 @@ class ReservationWaitingUseCaseMockTest {
     void save는_예약되지_않은_슬롯이면_ConflictException을_던진다() {
         LocalDate date = LocalDate.of(2026, 8, 5);
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", date, 1L, 1L);
-        given(reservationQueryService.findBySlot(date, 1L, 1L)).willReturn(Optional.empty());
+        willThrow(new ConflictException("예약된 슬롯에만 대기를 신청할 수 있습니다."))
+                .given(reservationQueryService)
+                .findBySlot(date, 1L, 1L);
 
         assertThatThrownBy(() -> reservationWaitingCommandService.save(request))
                 .isInstanceOf(ConflictException.class);
