@@ -1,0 +1,33 @@
+### [Admin] 1. 테마 목록 전체 조회
+GET http://localhost:8080/admin/themes
+Accept: application/json
+
+### [Admin] 2. 인기 테마 조회 (예약수 포함 O)
+GET http://localhost:8080/admin/themes/popular?top=3
+Accept: application/json
+
+### [Admin] 3. 테마 생성
+POST http://localhost:8080/admin/themes
+Content-Type: application/json
+
+{
+  "name": "공포의 인형공장",
+  "description": "버려진 인형공장에서 탈출해야 합니다.",
+  "thumbnailUrl": "https://example.com/image.png"
+}
+
+### [Admin] 4. 테마 활성화 상태 수정
+PATCH http://localhost:8080/admin/themes/1
+Content-Type: application/json
+
+{
+  "isActive": true
+}
+
+### [Member] 5. 활성화된 테마 목록 조회
+GET http://localhost:8080/member/themes
+Accept: application/json
+
+### [Member] 6. 인기 테마 조회 (예약수 포함 X)
+GET http://localhost:8080/member/themes/popular?top=3
+Accept: application/json

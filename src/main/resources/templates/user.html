@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ENIGMA ROOMS - 예약하기</title>
+    <link rel="stylesheet" th:href="@{/css/user.css}">
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="/">ENIGMA ROOMS</a>
+
+    <nav class="nav">
+        <a href="/reservation">예약하기</a>
+        <a href="/reservation-lookup">예약 조회</a>
+        <button class="logout-button" type="button" onclick="logout()">로그아웃</button>
+    </nav>
+</header>
+
+<main class="container">
+    <!-- 1단계: 인기 테마 + 날짜 + 테마 선택 -->
+    <section id="select-section">
+        <section class="hero">
+            <h1>어둠 속의 진실을 마주하라</h1>
+            <p>선택된 자만이 진실에 다가갈 수 있습니다. 날짜와 테마를 선택하고 미지의 세계로 발을 들이세요.</p>
+        </section>
+
+        <section class="popular-section">
+            <div class="popular-heading">
+                <p>POPULAR THEMES</p>
+                <h2>인기 테마 TOP 10</h2>
+            </div>
+
+            <div id="popular-theme-list" class="popular-theme-list"></div>
+        </section>
+
+        <section class="step-section">
+            <h2><span>01.</span> 날짜 선택</h2>
+            <div id="date-list" class="date-list"></div>
+        </section>
+
+        <section id="theme-select-section" class="step-section">
+            <h2><span>02.</span> 테마 선택</h2>
+            <div id="theme-list" class="theme-list"></div>
+        </section>
+
+        <div class="next-button-area">
+            <button class="primary-button small" type="button" onclick="goToReservationStep()">
+                다음 단계로
+            </button>
+        </div>
+    </section>
+
+    <!-- 2단계: 시간 입력 -->
+    <section id="confirm-section" class="confirm-section hidden">
+        <button class="back-button" type="button" onclick="goBackToSelectStep()">← 뒤로 가기</button>
+
+        <article class="confirm-card">
+            <div class="confirm-header">
+                <h1>예약 확정</h1>
+                <p>마지막 단계를 완료하고 예약을 확정하세요.</p>
+            </div>
+
+            <div class="confirm-body">
+                <section class="form-group">
+                    <h2>방문 시간</h2>
+                    <div id="time-list" class="time-list"></div>
+                </section>
+
+                <button class="primary-button full" type="button" onclick="createReservation()">
+                    예약 확정하기
+                </button>
+            </div>
+        </article>
+    </section>
+</main>
+
+<script th:src="@{/js/user.js}"></script>
+</body>
+</html>

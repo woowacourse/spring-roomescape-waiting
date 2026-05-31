@@ -1,0 +1,17 @@
+### [Member] 1. 회원가입
+POST http://localhost:8080/member/members
+Content-Type: application/json
+
+{
+  "name": "송송",
+  "password": "1234"
+}
+
+### [Member] 2. 로그인
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "name": "송송",
+  "password": "1234"
+}

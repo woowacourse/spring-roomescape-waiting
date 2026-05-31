@@ -1,0 +1,23 @@
+### [Admin] 1. 예약 시간 목록 조회
+GET http://localhost:8080/admin/times
+Accept: application/json
+
+### [Admin] 2. 예약 시간 생성
+POST http://localhost:8080/admin/times
+Content-Type: application/json
+
+{
+  "startAt": "14:00"
+}
+
+### [Admin] 3. 예약 시간 활성화 상태 수정
+PATCH http://localhost:8080/admin/times/1/status
+Content-Type: application/json
+
+{
+  "isActive": true
+}
+
+### [Member] 4. 예약 가능한 시간 목록 조회
+GET http://localhost:8080/member/times?dateId=1&themeId=1
+Accept: application/json
