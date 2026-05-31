@@ -19,7 +19,7 @@ public class ReservationTest {
     @MethodSource("nullCases")
     void 매개변수에_NULL이_포함되면_예외가_발생한다(ReservationName reservationName, ReservationDate date, ReservationTime time,
                                    Theme theme) {
-        assertThatThrownBy(() -> Reservation.reserve(reservationName, date, time, theme, LocalDateTime.MIN, Status.APPROVED))
+        assertThatThrownBy(() -> Reservation.create(reservationName, date, time, theme, LocalDateTime.MIN, Status.APPROVED))
                 .isInstanceOf(NullPointerException.class);
     }
 

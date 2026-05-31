@@ -26,6 +26,6 @@ public class RoomEscapeFixture {
     private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
 
     public static Reservation reservation() {
-        return Reservation.reserve(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
+        return Reservation.create(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
     }
 }

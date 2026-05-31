@@ -46,7 +46,7 @@ public class ReservationService {
                 request.getTimeId(), request.getThemeId(), request.getDate());
         Status status = hasApproved ? Status.WAITING : Status.APPROVED;
 
-        Reservation reservation = Reservation.reserve(
+        Reservation reservation = Reservation.create(
                 new ReservationName(request.getName()),
                 new ReservationDate(request.getDate()), reservationTime,
                 theme,
@@ -83,7 +83,7 @@ public class ReservationService {
                 newTime.getId(), newTheme.getId(), newDate.getDate());
         Status newStatus = hasApprovedInNewSlot ? Status.WAITING : Status.APPROVED;
 
-        Reservation target = Reservation.reserve(new ReservationName(request.getName()), newDate, newTime,
+        Reservation target = Reservation.create(new ReservationName(request.getName()), newDate, newTime,
                 newTheme, now, newStatus);
 
         Reservation updated = reservationRepository.update(id, target);
@@ -100,6 +100,10 @@ public class ReservationService {
     @Transactional
     public void cancel(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
+
+        if (reservation.isPast(now)) {
+            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED);
+        }
 
         if (!reservation.isSameName(name)) {
             throw new RoomEscapeException(ReservationErrorCode.UNAUTHORIZED_SAME_NAME);

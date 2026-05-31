@@ -58,7 +58,7 @@ class ReservationRepositoryTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
+        return Reservation.create(new ReservationName(name), new ReservationDate(date), time, theme, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
     }
 
     @Nested

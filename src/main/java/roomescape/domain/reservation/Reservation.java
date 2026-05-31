@@ -37,7 +37,7 @@ public class Reservation {
         return new Reservation(id, reservationName, date, time, theme, status, rank);
     }
 
-    public static Reservation reserve(
+    public static Reservation create(
             ReservationName reservationName,
             ReservationDate date, ReservationTime time,
             Theme theme,
@@ -55,6 +55,10 @@ public class Reservation {
         if (requestDateTime.isBefore(now)) {
             throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED);
         }
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date.getDate(), time.getStartAt()).isBefore(now);
     }
 
     public boolean isSameName(String name) {
