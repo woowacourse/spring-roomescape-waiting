@@ -20,11 +20,12 @@ public class Store {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Store that)) {
+    public final boolean equals(Object o) {
+        if (!(o instanceof Store store)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+
+        return Objects.equals(id, store.id) && Objects.equals(name, store.name);
     }
 
     @Override
