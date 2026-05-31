@@ -124,11 +124,23 @@ class AcceptanceTest {
         assertThat(userBMyList).extracting(item -> item.get("status"))
                 .contains("RESERVED", "WAITING");
 
+        // 테스트 더미데이터
         assertThat(userBMyList)
-                .anySatisfy(item -> {
-                    if (!"WAITING".equals(item.get("status"))) {
-                        return;
-                    }
+                .filteredOn(item -> "RESERVED".equals(item.get("status")))
+                .singleElement()
+                .satisfies(item -> {
+                    assertThat(item.get("date")).isEqualTo("2026-05-06");
+                    Map<String, Object> theme = (Map<String, Object>) item.get("theme");
+                    Map<String, Object> time = (Map<String, Object>) item.get("time");
+                    assertThat(theme.get("id")).isEqualTo(2);
+                    assertThat(time.get("id")).isEqualTo(3);
+                    assertThat(item.get("waitingOrder")).isNull();
+                });
+
+        assertThat(userBMyList)
+                .filteredOn(item -> "WAITING".equals(item.get("status")))
+                .singleElement()
+                .satisfies(item -> {
                     assertThat(item.get("date")).isEqualTo("2026-05-05");
                     Map<String, Object> theme = (Map<String, Object>) item.get("theme");
                     Map<String, Object> time = (Map<String, Object>) item.get("time");
