@@ -98,4 +98,15 @@ public class ReservationQueryingDao {
             return Optional.empty();
         }
     }
+
+    public boolean isExistById(Long id) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1
+                    FROM reservation
+                    WHERE id = ?
+            )
+            """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, id);
+    }
 }

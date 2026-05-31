@@ -90,9 +90,7 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long id) {
-        Optional<Reservation> optionalReservation = reservationQueryingDao.findReservationById(id);
-
-        if(optionalReservation.isEmpty()) {
+        if(!reservationQueryingDao.isExistById(id)) {
             return;
         }
 
@@ -104,6 +102,7 @@ public class ReservationService {
         }
 
         ReservationWaiting waiting = optionalReservationWaiting.get();
+        
         reservationUpdatingDao.update(id, waiting.promote());
         reservationWaitingDao.delete(waiting.getId());
     }
