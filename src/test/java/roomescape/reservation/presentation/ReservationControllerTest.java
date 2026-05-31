@@ -52,9 +52,8 @@ class ReservationControllerTest {
                 .extract().jsonPath().getLong("id");
         ThemeRequest themeRequest = ThemeRequest.builder()
                 .name("판타지")
-                .durationTime(LocalTime.now(clock))
                 .description("판타지래요")
-                .thumbnailImageUrl("https://~~~")
+                .thumbnailImageUrl("https://example.com/theme.png")
                 .build();
         long themeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -108,9 +107,8 @@ class ReservationControllerTest {
                 .extract().jsonPath().getLong("id");
         ThemeRequest themeRequest = ThemeRequest.builder()
                 .name("판타지")
-                .durationTime(LocalTime.now(clock))
                 .description("판타지래요")
-                .thumbnailImageUrl("https://~~~")
+                .thumbnailImageUrl("https://example.com/theme.png")
                 .build();
         long themeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

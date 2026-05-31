@@ -49,18 +49,11 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         savedTime = timeRepository.save(
-                ReservationTime.builder()
-                        .startAt(LocalTime.of(14, 0))
-                        .build()
+                ReservationTime.create(LocalTime.of(14, 0))
         );
 
         savedTheme = themeRepository.save(
-                Theme.builder()
-                        .name("판타지 테마")
-                        .description("진짜 재밌는 방탈출")
-                        .durationTime(LocalTime.of(1, 0))
-                        .thumbnailImageUrl("https://example.com/image.png")
-                        .build()
+                Theme.create("판타지 테마", "https://example.com/image.png", "진짜 재밌는 방탈출")
         );
         targetDate = LocalDate.now(clock).plusDays(3);
     }
@@ -80,7 +73,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("해당 타겟 시간에 이미 예약이 존재하면, 동일 인물이 아닐 때 PENDING(대기) 상태로 DB에 정상 저장된다.")
+    @DisplayName("해당 타겟 시간에 이미 예약이 존재하면, 동일 인물이 아닐 때 WAITING(대기) 상태로 DB에 정상 저장된다.")
     void addReservation_success_pending() {
         ReservationCreateCommand firstCommand = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
@@ -93,7 +86,7 @@ class ReservationServiceTest {
 
         ReservationInfo result = reservationService.addReservation(secondCommand);
 
-        assertThat(result.status()).isEqualTo(Status.PENDING);
+        assertThat(result.status()).isEqualTo(Status.WAITING);
         assertThat(result.name()).isEqualTo("리사");
     }
 
@@ -117,7 +110,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("Active인 예약을 취소하면 Pending 상태인 예약중 첫번째 예약이 Active로 바뀐다.")
-    void updatePendingReservationToActive() {
+    void modifyPendingReservationToActive() {
         ReservationCreateCommand activeCommand = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         );
@@ -146,9 +139,7 @@ class ReservationServiceTest {
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         ));
         ReservationTime anotherTime = timeRepository.save(
-                ReservationTime.builder()
-                        .startAt(LocalTime.of(15, 0))
-                        .build()
+                ReservationTime.create(LocalTime.of(15, 0))
         );
 
         ReservationInfo changedReservation = reservationService.changeReservation(

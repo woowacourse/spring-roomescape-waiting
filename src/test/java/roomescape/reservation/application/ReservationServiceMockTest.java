@@ -64,31 +64,14 @@ class ReservationServiceMockTest {
                 .name("포비")
                 .timeId(1L)
                 .themeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime mockTime = mockTime();
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme mockTheme = mockTheme();
 
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.PENDING)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
+        Reservation mockReservation = mockReservation(Status.WAITING, mockTime, mockTheme);
 
         when(reservationTimeRepository.getById(command.timeId()))
                 .thenReturn(mockTime);
@@ -100,7 +83,7 @@ class ReservationServiceMockTest {
                 .thenReturn(false);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(mockReservation);
 
-        Assertions.assertThat(reservationService.addReservation(command).status()).isEqualTo(Status.PENDING);
+        Assertions.assertThat(reservationService.addReservation(command).status()).isEqualTo(Status.WAITING);
         verify(reservationRepository, times(1)).save(any(Reservation.class));
     }
 
@@ -111,31 +94,14 @@ class ReservationServiceMockTest {
                 .username("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime mockTime = mockTime();
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme mockTheme = mockTheme();
 
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
+        Reservation mockReservation = mockReservation(Status.ACTIVE, mockTime, mockTheme);
 
 
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
@@ -158,7 +124,7 @@ class ReservationServiceMockTest {
         ReservationInfo reservationInfo = reservationService.changeReservationPendingStatus(
                 mockReservation.getId(),
                 changeCommand);
-        Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.PENDING);
+        Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.WAITING);
     }
 
     @Test
@@ -168,31 +134,14 @@ class ReservationServiceMockTest {
                 .username("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime mockTime = mockTime();
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme mockTheme = mockTheme();
 
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
+        Reservation mockReservation = mockReservation(Status.ACTIVE, mockTime, mockTheme);
 
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
@@ -215,31 +164,14 @@ class ReservationServiceMockTest {
                 .username("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime mockTime = mockTime();
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme mockTheme = mockTheme();
 
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
+        Reservation mockReservation = mockReservation(Status.ACTIVE, mockTime, mockTheme);
 
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
@@ -260,5 +192,25 @@ class ReservationServiceMockTest {
 
         Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
                 .isInstanceOf(DuplicatedReservationException.class);
+    }
+
+    private ReservationTime mockTime() {
+        return ReservationTime.restore(1L, LocalTime.now(clock).plusHours(1), true);
+    }
+
+    private Theme mockTheme() {
+        return Theme.restore(1L, "판타지", "https://example.com/theme.png", "설명", true);
+    }
+
+    private Reservation mockReservation(Status status, ReservationTime time, Theme theme) {
+        return Reservation.restore(
+                1L,
+                "포비",
+                LocalDate.now(clock).plusDays(1),
+                time,
+                theme,
+                status,
+                LocalDateTime.now(clock)
+        );
     }
 }

@@ -1,6 +1,5 @@
 package roomescape.time.application;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ import roomescape.time.domain.ReservationTimeRepository;
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
-    private final Clock clock;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
@@ -51,7 +49,7 @@ public class ReservationTimeService {
             throw new ReservationTimeInUseException("해당 시간에 예약이 존재합니다.");
         }
         ReservationTime time = reservationTimeRepository.getById(id)
-                .delete(clock);
+                .deactivate();
         reservationTimeRepository.delete(time);
     }
 

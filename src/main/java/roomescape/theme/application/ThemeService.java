@@ -39,7 +39,7 @@ public class ThemeService {
             throw new ThemeInUseException("해당 테마의 예약이 존재합니다.");
         }
         Theme theme = themeRepository.getById(id)
-                .delete(clock);
+                .deactivate();
         themeRepository.delete(theme);
     }
 

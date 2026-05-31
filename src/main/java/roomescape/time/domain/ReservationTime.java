@@ -4,39 +4,56 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import roomescape.common.exception.InactiveException;
+import roomescape.common.exception.ValidationException;
 import roomescape.reservation.domain.exception.IllegalReservationDateTimeException;
 
 @Getter
-@Builder
 @EqualsAndHashCode
 public class ReservationTime {
 
-    private Long id;
-    private LocalTime startAt;
-    private LocalDateTime deletedAt;
+    private final Long id;
+    private final LocalTime startAt;
+    private final boolean isActive;
 
-    public ReservationTime withId(Long id) {
-        return ReservationTime.builder()
-                .id(id)
-                .startAt(this.startAt)
-                .build();
+    private ReservationTime(Long id, LocalTime startAt, boolean isActive) {
+        this.id = id;
+        this.startAt = startAt;
+        this.isActive = isActive;
     }
 
-    public ReservationTime delete(Clock clock) {
-        return ReservationTime.builder()
-                .id(id)
-                .startAt(startAt)
-                .deletedAt(LocalDateTime.now(clock))
-                .build();
+    public static ReservationTime create(LocalTime startAt) {
+        validateStartAt(startAt);
+        return new ReservationTime(null, startAt, true);
     }
 
-    public void checkValidDateTime(LocalDate date, Clock clock) {
-        LocalDateTime time = LocalDateTime.of(date, startAt);
-        if (time.isBefore(LocalDateTime.now(clock))) {
-            throw new IllegalReservationDateTimeException("과거의 시간으로 예약을 변경, 등록 할 수 없습니다.");
+    public static ReservationTime restore(Long id, LocalTime startAt, boolean isActive) {
+        return new ReservationTime(id, startAt, isActive);
+    }
+
+    public ReservationTime deactivate() {
+        return restore(id, startAt, false);
+    }
+
+    private static void validateStartAt(LocalTime startAt) {
+        if (startAt == null) {
+            throw new ValidationException("시간은 필수 값입니다.");
         }
+    }
+
+    public void validateInactive() {
+        if (!isActive()) {
+            throw new InactiveException("비활성화 된 시간대입니다.");
+        }
+    }
+
+    public LocalDateTime convertToDateTime(LocalDate date) {
+        return LocalDateTime.of(date, startAt);
+    }
+
+    public boolean isAvailableAt(LocalDate date, Clock clock) {
+        return !convertToDateTime(date).isBefore(LocalDateTime.now(clock));
     }
 }

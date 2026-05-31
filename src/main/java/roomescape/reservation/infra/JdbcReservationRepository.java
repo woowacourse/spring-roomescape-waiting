@@ -27,42 +27,45 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
-        Theme theme = Theme.builder()
-                .id(resultSet.getLong("t_id"))
-                .name(resultSet.getString("t_name"))
-                .thumbnailImageUrl(resultSet.getString("t_thumbnail_image_url"))
-                .description(resultSet.getString("t_description"))
-                .durationTime(resultSet.getTime("t_duration_time").toLocalTime())
-                .build();
+        Theme theme = Theme.restore(
+                resultSet.getLong("t_id"),
+                resultSet.getString("t_name"),
+                resultSet.getString("t_thumbnail_image_url"),
+                resultSet.getString("t_description"),
+                resultSet.getBoolean("t_is_active")
+        );
 
-        ReservationTime time = ReservationTime.builder()
-                .id(resultSet.getLong("rt_id"))
-                .startAt(resultSet.getTime("rt_start_at").toLocalTime())
-                .build();
+        ReservationTime time = ReservationTime.restore(
+                resultSet.getLong("rt_id"),
+                resultSet.getTime("rt_start_at").toLocalTime(),
+                resultSet.getBoolean("rt_is_active")
+        );
 
-        return Reservation.builder()
-                .id(resultSet.getLong("r_id"))
-                .name(resultSet.getString("r_name"))
-                .date(resultSet.getDate("r_date").toLocalDate())
-                .status(Status.valueOf(resultSet.getString("r_status")))
-                .time(time)
-                .theme(theme)
-                .build();
+        return Reservation.restore(
+                resultSet.getLong("r_id"),
+                resultSet.getString("r_name"),
+                resultSet.getDate("r_date").toLocalDate(),
+                time,
+                theme,
+                Status.valueOf(resultSet.getString("r_status")),
+                resultSet.getTimestamp("r_created_at").toLocalDateTime()
+        );
     };
 
     private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum)->{
-        Theme theme = Theme.builder()
-                .id(resultSet.getLong("t_id"))
-                .name(resultSet.getString("t_name"))
-                .thumbnailImageUrl(resultSet.getString("t_thumbnail_image_url"))
-                .description(resultSet.getString("t_description"))
-                .durationTime(resultSet.getTime("t_duration_time").toLocalTime())
-                .build();
+        Theme theme = Theme.restore(
+                resultSet.getLong("t_id"),
+                resultSet.getString("t_name"),
+                resultSet.getString("t_thumbnail_image_url"),
+                resultSet.getString("t_description"),
+                resultSet.getBoolean("t_is_active")
+        );
 
-        ReservationTime time = ReservationTime.builder()
-                .id(resultSet.getLong("rt_id"))
-                .startAt(resultSet.getTime("rt_start_at").toLocalTime())
-                .build();
+        ReservationTime time = ReservationTime.restore(
+                resultSet.getLong("rt_id"),
+                resultSet.getTime("rt_start_at").toLocalTime(),
+                resultSet.getBoolean("rt_is_active")
+        );
 
         return  ReservationQueryResult.builder()
                 .id(resultSet.getLong("r_id"))
@@ -90,16 +93,24 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(sql, params, keyHolder);
+        jdbcTemplate.update(sql, params, keyHolder, new String[]{"id"});
         long generatedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
-        return reservation.withId(generatedId);
+        return Reservation.restore(
+                generatedId,
+                reservation.getName(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getStatus(),
+                reservation.getCreatedAt()
+        );
     }
 
     @Override
     public void updateById(Long id, Reservation reservation) {
         String sql = "UPDATE reservation "
                 + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status "
-                + "WHERE id = :id AND is_deleted = 0";
+                + "WHERE id = :id AND status IN ('ACTIVE', 'PENDING')";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", reservation.getDate())
@@ -114,28 +125,28 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = "SELECT "
-                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, "
+                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
                 + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "t.description AS t_description, t.is_active AS t_is_active, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at, rt.is_active AS rt_is_active "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.id = :id AND r.status IN ('ACTIVE', 'PENDING') AND r.is_deleted = 0 ";
+                + "WHERE r.id = :id AND r.status IN ('ACTIVE', 'PENDING') ";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
     }
 
     @Override
     public List<Reservation> findAll() {
         String sql = "SELECT "
-                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, "
+                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
                 + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "t.description AS t_description, t.is_active AS t_is_active, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at, rt.is_active AS rt_is_active "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.status = 'ACTIVE' AND r.is_deleted = 0 "
+                + "WHERE r.status = 'ACTIVE' "
                 + "ORDER BY r.date ASC, rt.start_at ASC";
 
         return jdbcTemplate.query(sql, rowMapper);
@@ -144,14 +155,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByThemeAndDate(Long themeId, LocalDate date) {
         String sql = "SELECT "
-                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, "
+                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
                 + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "t.description AS t_description, t.is_active AS t_is_active, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at, rt.is_active AS rt_is_active "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.theme_id = :themeId AND r.date = :date AND r.status = 'ACTIVE' AND r.is_deleted = 0";
+                + "WHERE r.theme_id = :themeId AND r.date = :date AND r.status = 'ACTIVE'";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("themeId", themeId)
@@ -172,9 +183,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "    t.name AS t_name, "
                 + "    t.thumbnail_image_url AS t_thumbnail_image_url, "
                 + "    t.description AS t_description, "
-                + "    t.duration_time AS t_duration_time, "
+                + "    t.is_active AS t_is_active, "
                 + "    rt.id AS rt_id, "
                 + "    rt.start_at AS rt_start_at, "
+                + "    rt.is_active AS rt_is_active, "
                 + "    p.pending_index AS pending_index "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
@@ -188,10 +200,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "        ) AS pending_index "
                 + "    FROM reservation "
                 + "    WHERE status = 'PENDING' "
-                + "      AND is_deleted = 0 "
                 + ") p ON r.id = p.id "
                 + "WHERE r.name = :username "
-                + "  AND r.is_deleted = 0 "
+                + "  AND r.status IN ('ACTIVE', 'PENDING') "
                 + "ORDER BY r.created_at DESC";
 
         return jdbcTemplate.query(sql, Map.of("username", username), queryResultRowMapper);
@@ -199,13 +210,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByReservationTime(Long timeId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND status='ACTIVE')";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId), Boolean.class));
     }
 
     @Override
     public boolean existsByReservationTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE')";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId, "themeId", themeId, "date", date),
                         Boolean.class));
@@ -213,7 +224,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByIdAndUsernameAndActiveOrPending(Long reservationId, String username) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status IN ('ACTIVE', 'PENDING') AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status IN ('ACTIVE', 'PENDING'))";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("reservationId", reservationId, "username", username),
                         Boolean.class));
@@ -222,7 +233,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean existsByReservationTimeAndThemeAndDateAndIdNot(Long id, Long timeId, Long themeId,
                                                                   LocalDate date) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id != :id AND time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id != :id AND time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE')";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("id", id, "timeId", timeId, "themeId", themeId, "date", date),
                         Boolean.class));
@@ -230,7 +241,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByTheme(Long themeId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND status IN ('ACTIVE', 'PENDING'))";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId), Boolean.class));
     }
 
@@ -259,7 +270,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void cancel(Reservation reservation) {
-        String sql = "UPDATE reservation SET status = 'CANCELED', is_deleted=:id WHERE id = :id AND (status='ACTIVE' OR status='PENDING')";
+        String sql = "UPDATE reservation SET status = 'CANCELED' WHERE id = :id AND status IN ('ACTIVE', 'PENDING')";
         jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
     }
 
@@ -267,14 +278,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
         String sql = "SELECT r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
                 + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "t.description AS t_description, t.is_active AS t_is_active, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at, rt.is_active AS rt_is_active "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
                 + "WHERE r.date = :date AND r.time_id = :timeId AND r.theme_id = :themeId "
-                + "AND r.status = 'PENDING' AND r.is_deleted = 0 "
-                + "ORDER BY r.created_at ASC " // 👈 가장 먼저 대기 건 사람 순서대로 줄 세우기
+                + "AND r.status = 'PENDING' "
+                + "ORDER BY r.created_at ASC "
                 + "LIMIT 1";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)

@@ -43,36 +43,23 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("사용자 이름으로 예약 조회시 Pending 상태인 예약이 1개 있으면 대기 순번이 2번으로 조회된다.")
     void findReservationByNameTest() {
-        Theme theme = Theme.builder()
-                .name("판타지")
-                .description("판타지래요")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme theme = Theme.create("판타지", "https://example.com/theme.png", "판타지래요");
 
         Theme savedTheme = themeRepository.save(theme);
 
-        ReservationTime reservationTime = ReservationTime.builder()
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime reservationTime = ReservationTime.create(LocalTime.now(clock).plusHours(1));
 
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
 
-        Reservation pobi = Reservation.builder()
-                .name("포비")
-                .status(Status.PENDING)
-                .date(LocalDate.now(clock))
-                .theme(savedTheme)
-                .time(savedTime)
-                .createdAt(LocalDateTime.now(clock)).build();
+        Reservation pobi = Reservation.restore(
+                null, "포비", LocalDate.now(clock).plusDays(1), savedTime, savedTheme,
+                Status.WAITING, LocalDateTime.now(clock)
+        );
 
-        Reservation lisa = Reservation.builder()
-                .name("리사")
-                .status(Status.PENDING)
-                .date(LocalDate.now(clock))
-                .theme(savedTheme)
-                .time(savedTime)
-                .createdAt(LocalDateTime.now(clock)).build();
+        Reservation lisa = Reservation.restore(
+                null, "리사", LocalDate.now(clock).plusDays(1), savedTime, savedTheme,
+                Status.WAITING, LocalDateTime.now(clock).plusSeconds(1)
+        );
 
         reservationRepository.save(pobi);
         reservationRepository.save(lisa);

@@ -3,7 +3,6 @@ package roomescape.reservation.domain;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,58 +20,32 @@ class ReservationTest {
     @Test
     @DisplayName("Active 상태인 예약을 대기 상태로 변경하면 pending 상태로 변한다.")
     void pendingTest() {
-        Theme theme = Theme.builder()
-                .name("판타지")
-                .thumbnailImageUrl("https://~~~~")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .build();
-        ReservationTime time = ReservationTime.builder()
-                .startAt(LocalTime.now(clock).plusHours(1))
-                .build();
+        Theme theme = Theme.create("판타지", "https://example.com/theme.png", "설명");
+        ReservationTime time = ReservationTime.create(LocalDateTime.now(clock).plusHours(1).toLocalTime());
 
-        Reservation reservation = Reservation.builder()
-                .name("포비")
-                .date(LocalDate.now().plusDays(1))
-                .theme(theme)
-                .status(Status.ACTIVE).time(time)
-                .build();
+        Reservation reservation = Reservation.create("포비", LocalDate.now(clock).plusDays(1), time, theme, clock);
 
-        Reservation pendingReservation = reservation.pending(
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
+        Reservation pendingReservation = reservation.modify(
+                LocalDate.now(clock).plusDays(2),
+                time,
                 theme,
+                Status.WAITING,
                 clock
         );
-        Assertions.assertThat(pendingReservation.getStatus()).isEqualTo(Status.PENDING);
+
+        Assertions.assertThat(pendingReservation.getStatus()).isEqualTo(Status.WAITING);
     }
 
     @Test
     @DisplayName("대기 상태인 예약을 취소한다.")
     void cancelTest() {
-        ReservationTime time = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationTime time = ReservationTime.restore(1L, LocalDateTime.now(clock).plusHours(1).toLocalTime(), true);
 
-        Theme theme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        Theme theme = Theme.restore(1L, "판타지", "https://example.com/theme.png", "설명", true);
 
-        Reservation reservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.PENDING)
-                .date(LocalDate.now(clock))
-                .time(time)
-                .theme(theme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
+        Reservation reservation = Reservation.restore(
+                1L, "포비", LocalDate.now(clock).plusDays(1), time, theme, Status.WAITING, LocalDateTime.now(clock)
+        );
 
         Reservation canceledReservation = reservation.cancel();
         Assertions.assertThat(canceledReservation.getStatus()).isEqualTo(Status.CANCELED);

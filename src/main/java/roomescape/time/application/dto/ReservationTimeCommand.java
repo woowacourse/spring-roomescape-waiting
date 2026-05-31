@@ -9,8 +9,6 @@ public record ReservationTimeCommand(
         LocalTime startAt
 ) {
     public ReservationTime toEntity() {
-        return ReservationTime.builder()
-                .startAt(startAt)
-                .build();
+        return ReservationTime.create(startAt);
     }
 }

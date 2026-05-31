@@ -59,16 +59,15 @@ public class ReservationService {
 
     public ReservationInfo addReservation(ReservationCreateCommand command) {
         ReservationTime time = timeRepository.getById(command.timeId());
-        time.checkValidDateTime(command.date(), clock);
         Theme theme = themeRepository.getById(command.themeId());
         Reservation reservation = command.toEntity(time, theme, clock);
         if (reservationRepository.existsByReservationTimeAndThemeAndDate(time.getId(), theme.getId(), command.date())) {
             checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
-            reservation = reservation.pending(
-                    command.name(),
+            reservation = reservation.modify(
                     command.date(),
                     time,
                     theme,
+                    Status.WAITING,
                     clock
             );
         }
@@ -110,7 +109,7 @@ public class ReservationService {
                 command.date())) {
             throw new ReservationInUseException("이미 다른 예약이 존재합니다.");
         }
-        Reservation changedReservation = reservation.changeTime(command.username(), command.date(), time, theme, clock);
+        Reservation changedReservation = reservation.modify(command.date(), time, theme, Status.ACTIVE, clock);
         reservationRepository.updateById(id, changedReservation);
         return ReservationInfo.from(changedReservation);
     }
@@ -127,7 +126,7 @@ public class ReservationService {
 
         checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
 
-        Reservation pendingReservation = reservation.pending(command.username(), command.date(), time, theme, clock);
+        Reservation pendingReservation = reservation.modify(command.date(), time, theme, Status.WAITING, clock);
         reservationRepository.updateById(id, pendingReservation);
         return ReservationInfo.from(pendingReservation);
     }

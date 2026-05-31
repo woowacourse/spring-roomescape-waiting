@@ -1,6 +1,5 @@
 package roomescape.theme.application.dto;
 
-import java.time.LocalTime;
 import lombok.Builder;
 import roomescape.theme.domain.Theme;
 
@@ -10,7 +9,7 @@ public record ThemeInfo(
         String name,
         String thumbnailImageUrl,
         String description,
-        LocalTime durationTime
+        boolean isActive
 ) {
     public static ThemeInfo from(Theme theme) {
         return ThemeInfo.builder()
@@ -18,7 +17,7 @@ public record ThemeInfo(
                 .name(theme.getName())
                 .thumbnailImageUrl(theme.getThumbnailImageUrl())
                 .description(theme.getDescription())
-                .durationTime(theme.getDurationTime())
+                .isActive(theme.isActive())
                 .build();
     }
 }
