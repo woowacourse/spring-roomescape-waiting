@@ -12,6 +12,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -25,18 +26,21 @@ public class ReservationRepository {
             ReservationTime.of(resultSet.getLong("time_id"), resultSet.getTime("start_at").toLocalTime()),
             Theme.load(resultSet.getLong("theme_id"), new ThemeName(resultSet.getString("theme_name")),
                     resultSet.getString("description"), new ThumbnailUrl(resultSet.getString("thumbnail_url"))),
-            resultSet.getTimestamp("created_at").toLocalDateTime());
+            Status.valueOf(resultSet.getString("status")),
+            resultSet.getInt("rank"));
+
     private static final String SELECT_ALL = """
             SELECT r.id   AS reservation_id,
                    r.name,
                    r.date,
-                   r.created_at,
+                   r.status,
                    rt.id  AS time_id,
                    rt.start_at,
                    t.id   AS theme_id,
                    t.name AS theme_name,
                    t.description,
-                   t.thumbnail_url
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (PARTITION BY r.date, r.time_id, r.theme_id, r.status ORDER BY r.id) AS rank
             FROM reservation r
             INNER JOIN reservation_time rt ON r.time_id  = rt.id
             INNER JOIN theme             t  ON r.theme_id = t.id
@@ -48,7 +52,7 @@ public class ReservationRepository {
                     date = ?,
                     time_id = ?,
                     theme_id = ?,
-                    created_at = ?
+                    status = ?
             WHERE id = ?
             """;
     private static final String SELECT_BY_ID = SELECT_ALL + "WHERE r.id = ?";
@@ -62,14 +66,14 @@ public class ReservationRepository {
             """;
     private static final String EXISTS_BY_TIME_ID = """
             SELECT EXISTS (
-                SELECT 1 
+                SELECT 1
                     FROM reservation
                     WHERE time_id = ?
                     )
             """;
     private static final String EXISTS_BY_THEME_ID = """
             SELECT EXISTS (
-                SELECT 1 
+                SELECT 1
                     FROM reservation
                     WHERE theme_id = ?
                     )
@@ -104,28 +108,25 @@ public class ReservationRepository {
                 "date", reservation.getDate().getDate(),
                 "time_id", reservation.getTime().getId(),
                 "theme_id", reservation.getTheme().getId(),
-                "created_at", reservation.getDateTime()
+                "status", reservation.getStatus().name()
         );
-
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-
-        return Reservation.load(generatedKey,
-                reservation.getName(),
-                reservation.getDate(), reservation.getTime(),
-                reservation.getTheme()
-                , reservation.getDateTime());
+        return findById(generatedKey).orElseThrow();
     }
 
     public Reservation update(long id, Reservation target) {
-        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
-                target.getTheme().getId(), target.getDateTime(), id);
+        jdbcTemplate.update(UPDATE,
+                target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
+                target.getTheme().getId(), target.getStatus().name(), id);
+        return findById(id).orElseThrow();
+    }
 
-        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(), target.getDateTime());
+    public void updateStatusById(long id, Status status) {
+        jdbcTemplate.update("UPDATE reservation SET status = ? WHERE id = ?", status.name(), id);
     }
 
     public void deleteById(Long id) {
-        String sql = "delete from reservation where id = ?";
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
 
     public boolean existsByTimeId(long reservationTimeId) {
@@ -143,24 +144,24 @@ public class ReservationRepository {
                 jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId, themeId, name));
     }
 
-    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
+    public boolean existsApprovedByTimeAndThemeAndDate(long timeId, long themeId, LocalDate date) {
         String sql = """
-            SELECT r.id   AS reservation_id,
-                   r.name,
-                   r.date,
-                   r.created_at,
-                   rt.id  AS time_id,
-                   rt.start_at,
-                   t.id   AS theme_id,
-                   t.name AS theme_name,
-                   t.description,
-                   t.thumbnail_url
-            FROM reservation r
-            INNER JOIN reservation_time rt ON r.time_id  = rt.id
-            INNER JOIN theme             t  ON r.theme_id = t.id
-            WHERE date = ? AND t.id = ? AND rt.id = ?
-            """;
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation
+                    WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'APPROVED'
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId));
+    }
 
+    public Optional<Reservation> findFirstWaitingByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
+        String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ? AND r.status = 'WAITING' ORDER BY r.id ASC LIMIT 1";
+        List<Reservation> result = jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
+        return result.stream().findFirst();
+    }
+
+    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
+        String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ? ORDER BY r.id ASC";
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
     }
 }

@@ -1,12 +1,10 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.ErrorCode;
 import roomescape.common.exception.ReservationErrorCode;
 import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import roomescape.common.exception.ThemeErrorCode;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
@@ -15,36 +13,43 @@ public class Reservation {
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
-    private final LocalDateTime dateTime;
+    private final Status status;
+    private final Integer rank;
 
-    private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                        Theme theme, LocalDateTime dateTime) {
+    private Reservation(Long id,
+                        ReservationName reservationName,
+                        ReservationDate date, ReservationTime time,
+                        Theme theme,
+                        Status status, Integer rank) {
         this.id = id;
         this.reservationName = Objects.requireNonNull(reservationName);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
         this.theme = Objects.requireNonNull(theme);
-        this.dateTime = Objects.requireNonNull(dateTime);
+        this.status = Objects.requireNonNull(status);
+        this.rank = rank;
     }
 
-    public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                   Theme theme, LocalDateTime dateTime) {
-        return new Reservation(id, reservationName, date, time, theme, dateTime);
+    public static Reservation load(Long id,
+                                   ReservationName reservationName,
+                                   ReservationDate date, ReservationTime time,
+                                   Theme theme, Status status, int rank) {
+        return new Reservation(id, reservationName, date, time, theme, status, rank);
     }
 
     public static Reservation reserve(
             ReservationName reservationName,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme, LocalDateTime now
+            ReservationDate date, ReservationTime time,
+            Theme theme,
+            LocalDateTime now,
+            Status status
     ) {
-        Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(null, reservationName, date, time, theme, now);
+        Reservation reservation = new Reservation(null, reservationName, date, time, theme, status, null);
         reservation.ensureNotPast(now);
         return reservation;
     }
 
-    public void ensureNotPast(LocalDateTime now) {
+    private void ensureNotPast(LocalDateTime now) {
         LocalDateTime requestDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
 
         if (requestDateTime.isBefore(now)) {
@@ -54,6 +59,10 @@ public class Reservation {
 
     public boolean isSameName(String name) {
         return reservationName.isSame(name);
+    }
+
+    public boolean isApproved() {
+        return status == Status.APPROVED;
     }
 
     public long getId() {
@@ -76,21 +85,19 @@ public class Reservation {
         return theme;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
+    public Status getStatus() {
+        return status;
+    }
+
+    public Integer getRank() {
+        return rank;
     }
 
     @Override
     public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
+        if (this == o) return true;
         if (!(o instanceof Reservation that)) return false;
-
-        if (id == null || that.id == null)
-            return false;
-
+        if (id == null || that.id == null) return false;
         return id.equals(that.id);
     }
 
@@ -98,5 +105,4 @@ public class Reservation {
     public int hashCode() {
         return id != null ? id.hashCode() : System.identityHashCode(this);
     }
-
 }

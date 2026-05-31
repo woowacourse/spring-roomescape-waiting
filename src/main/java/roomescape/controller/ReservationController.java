@@ -17,7 +17,7 @@ import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationResponses;
-import roomescape.domain.reservation.ReservationResult;
+import roomescape.domain.reservation.Reservation;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -31,21 +31,21 @@ public class ReservationController {
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse create(@Valid @RequestBody ReservationCreateRequest request) {
-        ReservationResult reservation = reservationService.reserve(request, LocalDateTime.now());
+        Reservation reservation = reservationService.reserve(request, LocalDateTime.now());
         return ReservationResponse.toDto(reservation);
     }
 
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponses findList(@RequestParam(required = false) String name) {
-        List<ReservationResult> reservations = reservationService.findList(name);
+        List<Reservation> reservations = reservationService.findList(name);
         return ReservationResponses.toDto(reservations);
     }
 
     @GetMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse find(@PathVariable long id) {
-        ReservationResult reservation = reservationService.find(id);
+        Reservation reservation = reservationService.find(id);
         return ReservationResponse.toDto(reservation);
     }
 
@@ -58,7 +58,7 @@ public class ReservationController {
     @PutMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
-        ReservationResult updated = reservationService.update(request, id, LocalDateTime.now());
+        Reservation updated = reservationService.update(request, id, LocalDateTime.now());
         return ReservationResponse.toDto(updated);
     }
 }

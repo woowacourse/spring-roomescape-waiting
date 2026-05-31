@@ -10,6 +10,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -25,8 +26,6 @@ public class RoomEscapeFixture {
     private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
 
     public static Reservation reservation() {
-        return Reservation.reserve(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.reserve(NAME, DATE, TIME, THEME, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
     }
-
-
 }

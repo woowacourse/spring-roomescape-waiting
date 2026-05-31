@@ -22,9 +22,12 @@ class RoomescapeApplicationTest {
     private static final String AVAILABLE_DATE = "2099-06-01";
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @org.springframework.boot.test.web.server.LocalServerPort
+    private int port;
 
     @BeforeEach
     void init() {
+        RestAssured.port = port;
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");
@@ -197,7 +200,7 @@ class RoomescapeApplicationTest {
                 .when().get("/reservations/" + waitingId)
                 .then().statusCode(200)
                 .body("state", org.hamcrest.Matchers.equalTo("대기"))
-                .body("rank", org.hamcrest.Matchers.equalTo(2));
+                .body("rank", org.hamcrest.Matchers.equalTo(1));
     }
 
     @Test

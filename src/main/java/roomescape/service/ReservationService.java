@@ -1,27 +1,22 @@
 package roomescape.service;
 
-import roomescape.common.exception.ErrorCode;
 import roomescape.common.exception.ReservationErrorCode;
 import roomescape.common.exception.ReservationTimeErrorCode;
 import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ThemeErrorCode;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
-import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -41,74 +36,33 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult reserve(ReservationCreateRequest request, LocalDateTime now) {
+    public Reservation reserve(ReservationCreateRequest request, LocalDateTime now) {
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
         Theme theme = findThemeByThemeId(request.getThemeId());
 
-        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()),
-                new ReservationDate(request.getDate()), reservationTime, theme, now);
-
         validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
-        Reservation saved = reservationRepository.save(reservation);
 
-        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
-                saved.getTime(), saved.getTheme(), saved.getDate());
+        boolean hasApproved = reservationRepository.existsApprovedByTimeAndThemeAndDate(
+                request.getTimeId(), request.getThemeId(), request.getDate());
+        Status status = hasApproved ? Status.WAITING : Status.APPROVED;
 
-        List<Reservation> list = by.stream()
-                .sorted(Comparator.comparing(Reservation::getDateTime))
-                .toList();
-
-        int rank = IntStream.range(0, list.size())
-                .filter(i -> list.get(i).equals(saved))
-                .findFirst()
-                .orElseThrow();
-
-        return new ReservationResult(new Rank(rank + 1), saved);
+        Reservation reservation = Reservation.reserve(
+                new ReservationName(request.getName()),
+                new ReservationDate(request.getDate()), reservationTime,
+                theme,
+                now, status);
+        return reservationRepository.save(reservation);
     }
 
-    public ReservationResult find(long reservationId) {
-        Reservation reservation = findReservationById(reservationId);
-
-        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
-                reservation.getTime(), reservation.getTheme(), reservation.getDate());
-
-        List<Reservation> list = by.stream()
-                .sorted(Comparator.comparing(Reservation::getDateTime))
-                .toList();
-
-        int rank = IntStream.range(0, list.size())
-                .filter(i -> list.get(i).equals(reservation))
-                .findFirst()
-                .orElseThrow();
-
-        return new ReservationResult(new Rank(rank + 1), reservation);
+    public Reservation find(long id) {
+        return findReservationById(id);
     }
 
-    public List<ReservationResult> findList(String name) {
-        List<Reservation> reservations = handler(name);
-        List<ReservationResult> reservationResults = new ArrayList<>();
-
-        for (Reservation reservation : reservations) { // reservations는 name으로 검색한 결과들
-            List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
-                    reservation.getTime(), reservation.getTheme(), reservation.getDate());
-
-            List<Reservation> list = by.stream()
-                    .sorted(Comparator.comparing(Reservation::getDateTime))
-                    .toList();
-
-            int rank = IntStream.range(0, list.size())
-                    .filter(i -> list.get(i).equals(reservation))
-                    .findFirst()
-                    .orElseThrow();
-
-            ReservationResult result = new ReservationResult(new Rank(rank + 1), reservation);
-            reservationResults.add(result);
-        }
-
-        return reservationResults;
+    public List<Reservation> findList(String name) {
+        return findByNameOrAll(name);
     }
 
-    private List<Reservation> handler(String name) {
+    private List<Reservation> findByNameOrAll(String name) {
         if (name != null) {
             return reservationRepository.findAllByName(name);
         }
@@ -116,54 +70,57 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult update(ReservationUpdateRequest request, long id, LocalDateTime now) {
+    public Reservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation reservation = findReservationById(id);
-        reservation.ensureNotPast(now);
 
-        ReservationDate reservationDate = new ReservationDate(request.getDate());
-        ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
+        ReservationDate newDate = new ReservationDate(request.getDate());
+        ReservationTime newTime = findReservationTimeByTimeId(request.getTimeId());
+        Theme newTheme = findThemeByThemeId(request.getThemeId());
 
         validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
 
-        Reservation target = Reservation.reserve(reservation.getName(), reservationDate, reservationTime,
-                reservation.getTheme(), now);
-        target.ensureNotPast(now);
+        boolean hasApprovedInNewSlot = reservationRepository.existsApprovedByTimeAndThemeAndDate(
+                newTime.getId(), newTheme.getId(), newDate.getDate());
+        Status newStatus = hasApprovedInNewSlot ? Status.WAITING : Status.APPROVED;
+
+        Reservation target = Reservation.reserve(new ReservationName(request.getName()), newDate, newTime,
+                newTheme, now, newStatus);
+
         Reservation updated = reservationRepository.update(id, target);
 
-        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
-                updated.getTime(), updated.getTheme(), updated.getDate());
+        if (reservation.isApproved()) {
+            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
+                            reservation.getTime(), reservation.getTheme(), reservation.getDate())
+                    .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
+        }
 
-        List<Reservation> list = by.stream()
-                .sorted(Comparator.comparing(Reservation::getDateTime))
-                .toList();
-
-        int rank = IntStream.range(0, list.size())
-                .filter(i -> list.get(i).equals(updated))
-                .findFirst()
-                .orElseThrow();
-
-        return new ReservationResult(new Rank(rank + 1), updated);
+        return updated;
     }
 
     @Transactional
     public void cancel(long reservationId, String name, LocalDateTime now) {
         Reservation reservation = findReservationById(reservationId);
-        reservation.ensureNotPast(now);
 
         if (!reservation.isSameName(name)) {
             throw new RoomEscapeException(ReservationErrorCode.UNAUTHORIZED_SAME_NAME);
         }
 
         reservationRepository.deleteById(reservationId);
+
+        if (reservation.isApproved()) {
+            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
+                            reservation.getTime(), reservation.getTheme(), reservation.getDate())
+                    .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
+        }
     }
 
-    private ReservationTime findReservationTimeByTimeId(long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
+    private ReservationTime findReservationTimeByTimeId(long id) {
+        return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
     }
 
-    private Theme findThemeByThemeId(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(
+    private Theme findThemeByThemeId(long id) {
+        return themeRepository.findById(id).orElseThrow(
                 () -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
     }
 
@@ -173,8 +130,8 @@ public class ReservationService {
         }
     }
 
-    private Reservation findReservationById(long reservationId) {
-        return reservationRepository.findById(reservationId).orElseThrow(
+    private Reservation findReservationById(long id) {
+        return reservationRepository.findById(id).orElseThrow(
                 () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 }

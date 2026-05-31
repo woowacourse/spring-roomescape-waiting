@@ -16,6 +16,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -57,7 +58,7 @@ class ReservationRepositoryTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme, LocalDateTime.now(FIXED_CLOCK), Status.APPROVED);
     }
 
     @Nested

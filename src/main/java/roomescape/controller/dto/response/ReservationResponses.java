@@ -1,8 +1,6 @@
 package roomescape.controller.dto.response;
 
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationResult;
-
 import java.util.List;
 
 public class ReservationResponses {
@@ -13,8 +11,8 @@ public class ReservationResponses {
         this.reservations = reservations;
     }
 
-    public static ReservationResponses toDto(List<ReservationResult> reservationResultss) {
-        return new ReservationResponses(reservationResultss.stream()
+    public static ReservationResponses toDto(List<Reservation> reservations) {
+        return new ReservationResponses(reservations.stream()
                 .map(ReservationResponse::toDto)
                 .toList());
     }
