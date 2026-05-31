@@ -2,7 +2,6 @@ package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -82,38 +81,9 @@ class JdbcReservationTimeRepositoryTest {
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0))).isFalse();
     }
 
-    @Test
-    @DisplayName("예약된 시간도 포함해 모든 가용 시간을 반환한다")
-    void findAvailable() {
-        long bookedTimeId = insertTime(LocalTime.of(10, 0));
-        long freeTimeId = insertTime(LocalTime.of(11, 0));
-        long themeId = insertTheme("무인도 탈출");
-        LocalDate date = LocalDate.of(2099, 12, 31);
-        insertReservation("브라운", date, bookedTimeId, themeId);
-
-        List<ReservationTime> available = reservationTimeRepository.findAvailable(date, themeId);
-
-        assertThat(available).extracting(ReservationTime::getId)
-                .containsExactlyInAnyOrder(bookedTimeId, freeTimeId);
-    }
-
     private long insertTime(LocalTime startAt) {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt.toString());
         return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_time", Long.class);
     }
 
-    private long insertTheme(String name) {
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                name, "설명", "https://example.com/thumb.jpg"
-        );
-        return jdbcTemplate.queryForObject("SELECT MAX(id) FROM theme", Long.class);
-    }
-
-    private void insertReservation(String name, LocalDate date, long timeId, long themeId) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation (reserver_name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date.toString(), timeId, themeId
-        );
-    }
 }
