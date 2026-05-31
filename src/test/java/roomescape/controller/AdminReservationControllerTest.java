@@ -74,7 +74,7 @@ class AdminReservationControllerTest {
     @DisplayName("DELETE /admin/reservations/{id} - 예약을 삭제한다")
     void delete_() throws Exception {
         mockMvc.perform(delete("/admin/reservations/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private ReservationResult sampleResult() {

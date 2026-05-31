@@ -70,7 +70,7 @@ class AdminThemeControllerTest {
     @DisplayName("DELETE /admin/themes/{id} - 테마를 삭제한다")
     void delete_() throws Exception {
         mockMvc.perform(delete("/admin/themes/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private ThemeResult sampleResult() {
