@@ -138,4 +138,13 @@ class WaitingReservationServiceTest {
             .isInstanceOf(RoomescapeException.class)
             .hasMessageContaining("과거 시간에는 예약 대기를 신청할 수 없습니다.");
     }
+
+    @Test
+    void 존재하지_않는_예약_대기를_취소하면_예외가_발생한다() {
+        when(waitingReservationRepository.deleteById(999L)).thenReturn(0);
+
+        assertThatThrownBy(() -> waitingReservationService.cancelWaitingReservation(999L))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessageContaining("해당하는 예약 대기를 찾을 수 없습니다.");
+    }
 }

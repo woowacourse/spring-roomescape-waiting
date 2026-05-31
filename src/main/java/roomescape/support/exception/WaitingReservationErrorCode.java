@@ -13,6 +13,8 @@ public enum WaitingReservationErrorCode implements ErrorCode {
         "예약 가능한 시간에는 대기를 신청할 수 없습니다.", "예약된 날짜, 시간, 테마에만 대기를 신청하십시오."),
     PAST_TIME_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
         "과거 시간에는 예약 대기를 신청할 수 없습니다.", "예약 대기 날짜와 시간이 현재 이후인지 확인하십시오."),
+    WAITING_RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND,
+        "해당하는 예약 대기를 찾을 수 없습니다.", "요청한 예약 대기 ID의 유효성 및 DB 존재 여부를 확인하십시오."),
     DUPLICATE_WAITING_RESERVATION(HttpStatus.CONFLICT,
         "중복으로 대기 신청을 할 수 없습니다.", "동일한 이름으로 신청된 예약 대기가 있는지 확인하세요.");
 

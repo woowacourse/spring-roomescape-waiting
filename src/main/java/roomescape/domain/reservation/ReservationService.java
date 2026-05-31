@@ -5,7 +5,6 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.ReservationCreationRequest;
@@ -26,7 +25,6 @@ import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.RoomescapeErrorCode;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -59,7 +57,7 @@ public class ReservationService {
     public void deleteReservation(Long id) {
         int deletedCount = reservationRepository.deleteById(id);
         if (deletedCount == 0) {
-            log.warn("이미 삭제된 예약 삭제 요청이 들어왔습니다. reservationId={}", id);
+            throw new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
@@ -94,10 +92,7 @@ public class ReservationService {
             validateNotDuplicated(newSlot);
         }
 
-        int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
-        if (updatedCount == 0) {
-            log.warn(" 수정할 예약 건이 없습니다. reservationId={}", id);
-        }
+        updateReservationOrThrow(id, request);
         if (slotChanged) {
             promoteOldestWaiting(currentSlot);
         }
@@ -127,7 +122,6 @@ public class ReservationService {
     private void deleteReservationOrThrow(Long id) {
         int deletedCount = reservationRepository.deleteById(id);
         if (deletedCount == 0) {
-            log.error("예약 삭제에 실패했습니다. reservationId={}", id);
             throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
         }
     }
@@ -135,7 +129,13 @@ public class ReservationService {
     private void deleteWaitingReservationOrThrow(Long id) {
         int deletedCount = waitingReservationRepository.deleteById(id);
         if (deletedCount == 0) {
-            log.error("예약 대기 삭제에 실패했습니다. waitingReservationId={}", id);
+            throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
+        }
+    }
+
+    private void updateReservationOrThrow(Long id, ReservationUpdateRequest request) {
+        int updatedCount = reservationRepository.updateReservation(id, request.dateId(), request.timeId());
+        if (updatedCount == 0) {
             throw new RoomescapeException(RoomescapeErrorCode.DATA_CONSISTENCY_VIOLATION);
         }
     }

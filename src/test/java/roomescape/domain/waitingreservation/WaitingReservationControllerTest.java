@@ -108,6 +108,16 @@ class WaitingReservationControllerTest {
     }
 
     @Test
+    void 존재하지_않는_예약_대기를_취소하면_404를_반환한다() {
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .when()
+            .delete("/waiting-reservations/" + 999)
+            .then().log().all()
+            .statusCode(404);
+    }
+
+    @Test
     void 예약_대기_목록과_순번을_조회한다() {
         RestAssured.given().log().all()
             .param("name", "고래")

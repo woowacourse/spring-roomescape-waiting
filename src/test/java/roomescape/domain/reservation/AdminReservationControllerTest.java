@@ -108,6 +108,16 @@ class AdminReservationControllerTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 예약을 삭제하면 404 에러가 발생한다.")
+    void deleteNotFoundReservation() {
+        RestAssured.given().log().all()
+            .header(ADMIN_HEADER, adminToken)
+            .when().delete("/admin/reservations/" + 999)
+            .then().log().all()
+            .statusCode(404);
+    }
+
+    @Test
     @DisplayName("관리자 토큰 없이 접근할 경우 401 에러가 발생한다.")
     void unauthorizedAccess() {
         RestAssured.given().log().all()
