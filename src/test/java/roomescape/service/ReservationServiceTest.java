@@ -207,7 +207,8 @@ class ReservationServiceTest {
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(true);
         given(reservationRepository.save(any())).willReturn(waitingSaved);
-        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY, waitingSaved));
+        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(
+                List.of(DUMMY, waitingSaved));
 
         ReservationResult result = reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59));
 
@@ -274,7 +275,7 @@ class ReservationServiceTest {
 
     @Test
     void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
-        Reservation reservation = RoomEscapeFixture.reservation();
+        Reservation reservation = RoomEscapeFixture.reservationWithApproved();
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
         given(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(anyLong(), anyLong(), any()))
                 .willReturn(Optional.empty());

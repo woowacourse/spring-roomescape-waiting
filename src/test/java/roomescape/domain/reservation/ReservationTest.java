@@ -2,16 +2,13 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import roomescape.RoomEscapeFixture;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
 
 public class ReservationTest {
     @ParameterizedTest
@@ -23,15 +20,10 @@ public class ReservationTest {
     }
 
     static Stream<Arguments> nullCases() {
-        ReservationName name = new ReservationName("zeze");
-        ReservationDate date = new ReservationDate(LocalDate.of(2099, 1, 1));
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Theme theme = Theme.load(
-                1L,
-                new ThemeName("공포의 방"),
-                "설명",
-                new ThumbnailUrl("https://zeze.com/thumb.jpg")
-        );
+        ReservationName name = RoomEscapeFixture.reservationName();
+        ReservationDate date = RoomEscapeFixture.reservationDate();
+        ReservationTime time = RoomEscapeFixture.reservationTime();
+        Theme theme = RoomEscapeFixture.theme();
 
         return Stream.of(
                 Arguments.of(null, date, time, theme, Status.APPROVED),

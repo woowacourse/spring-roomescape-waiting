@@ -19,6 +19,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
@@ -58,11 +59,11 @@ class ReservationRepositoryTest {
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservation(name, date, time, theme, roomescape.domain.reservation.Status.APPROVED);
+        return reservation(name, date, time, theme, Status.APPROVED);
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme,
-                                    roomescape.domain.reservation.Status status) {
+                                    Status status) {
         return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme,
                 status, LocalDateTime.now(FIXED_CLOCK));
     }
@@ -324,12 +325,16 @@ class ReservationRepositoryTest {
             reservationRepository.save(reservation(name, TODAY, time1, theme1));
 
             assertSoftly(soft -> {
-                soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(), TODAY, "other")).isFalse();
                 soft.assertThat(
-                                reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme2.getId(), TODAY, name))
+                        reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(), TODAY,
+                                "other")).isFalse();
+                soft.assertThat(
+                                reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme2.getId(), TODAY,
+                                        name))
                         .isFalse();
                 soft.assertThat(
-                                reservationRepository.existsByTimeAndThemeAndDateAndName(time2.getId(), theme1.getId(), TODAY, name))
+                                reservationRepository.existsByTimeAndThemeAndDateAndName(time2.getId(), theme1.getId(), TODAY,
+                                        name))
                         .isFalse();
                 soft.assertThat(reservationRepository.existsByTimeAndThemeAndDateAndName(time1.getId(), theme1.getId(),
                         TODAY.plusDays(1), name)).isFalse();
@@ -346,9 +351,10 @@ class ReservationRepositoryTest {
             Theme theme = giveTheme("테마1");
             ReservationTime time = giveTime(14);
 
-            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
+            reservationRepository.save(reservation("달수", TODAY, time, theme, Status.APPROVED));
 
-            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isTrue();
+            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(),
+                    TODAY)).isTrue();
         }
 
         @Test
@@ -356,9 +362,10 @@ class ReservationRepositoryTest {
             Theme theme = giveTheme("테마1");
             ReservationTime time = giveTime(14);
 
-            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+            reservationRepository.save(reservation("달수", TODAY, time, theme, Status.WAITING));
 
-            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isFalse();
+            assertThat(reservationRepository.existsApprovedByTimeAndThemeAndDate(time.getId(), theme.getId(),
+                    TODAY)).isFalse();
         }
     }
 
@@ -371,9 +378,9 @@ class ReservationRepositoryTest {
             Theme theme = giveTheme("테마1");
             ReservationTime time = giveTime(14);
 
-            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
-            Reservation first = reservationRepository.save(reservation("민구", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
-            reservationRepository.save(reservation("철수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
+            reservationRepository.save(reservation("달수", TODAY, time, theme, Status.APPROVED));
+            Reservation first = reservationRepository.save(reservation("민구", TODAY, time, theme, Status.WAITING));
+            reservationRepository.save(reservation("철수", TODAY, time, theme, Status.WAITING));
 
             assertThat(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY))
                     .isPresent()
@@ -387,9 +394,10 @@ class ReservationRepositoryTest {
             Theme theme = giveTheme("테마1");
             ReservationTime time = giveTime(14);
 
-            reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.APPROVED));
+            reservationRepository.save(reservation("달수", TODAY, time, theme, Status.APPROVED));
 
-            assertThat(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(time.getId(), theme.getId(), TODAY)).isEmpty();
+            assertThat(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(time.getId(), theme.getId(),
+                    TODAY)).isEmpty();
         }
     }
 
@@ -402,14 +410,14 @@ class ReservationRepositoryTest {
             Theme theme = giveTheme("테마1");
             ReservationTime time = giveTime(14);
 
-            Reservation saved = reservationRepository.save(reservation("달수", TODAY, time, theme, roomescape.domain.reservation.Status.WAITING));
-            reservationRepository.updateStatus(saved.getId(), roomescape.domain.reservation.Status.APPROVED);
+            Reservation saved = reservationRepository.save(reservation("달수", TODAY, time, theme, Status.WAITING));
+            reservationRepository.updateStatus(saved.getId(), Status.APPROVED);
 
             assertThat(reservationRepository.findById(saved.getId()))
                     .isPresent()
                     .get()
                     .extracting(r -> r.getStatus())
-                    .isEqualTo(roomescape.domain.reservation.Status.APPROVED);
+                    .isEqualTo(Status.APPROVED);
         }
     }
 }
