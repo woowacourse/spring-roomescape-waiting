@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,6 @@ import roomescape.controller.dto.ThemeResponse;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 
-@Validated
 @RestController
 @RequestMapping("/user/themes")
 public class UserThemeController {
@@ -55,5 +53,4 @@ public class UserThemeController {
                 .map(PopularThemeResponse::from)
                 .toList();
     }
-
 }

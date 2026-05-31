@@ -17,7 +17,6 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.service.AdminReservationService;
 import roomescape.service.dto.ReservationResult;
 
-@Validated
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
@@ -28,20 +27,21 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping()
+    @GetMapping
     public List<ReservationResponse> list() {
         return reservationService.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    @PostMapping()
+    @PostMapping
     public ReservationResponse create(@RequestBody @Valid ReservationRequest request) {
         ReservationResult saved = reservationService.create(request.toCommand());
         return ReservationResponse.from(saved);
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable
                        @Positive(message = "id는 0보다 커야합니다.")
                        Long id) {
