@@ -55,7 +55,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatNoException()
-                .isThrownBy(() -> validator.validateAlreadyReserved(date, timeId, themeId));
+                .isThrownBy(() -> validator.validateNotReserved(date, timeId, themeId));
         verify(reservationRepository, times(1)).existsWith(date, timeId, themeId);
         verifyNoMoreInteractions(reservationRepository);
     }
@@ -70,7 +70,7 @@ class ReservationValidatorTest {
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateAlreadyReserved(date, timeId, themeId))
+        assertThatThrownBy(() -> validator.validateNotReserved(date, timeId, themeId))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 예약된 시간입니다.");
         verify(reservationRepository, times(1)).existsWith(date, timeId, themeId);

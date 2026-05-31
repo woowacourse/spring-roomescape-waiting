@@ -23,7 +23,7 @@ public class ReservationWaitingValidator {
 
     public void validateWaiting(ReservationWaiting waiting) {
         validateNotPastDateAndTime(waiting);
-        validateAlreadyReserved(waiting);
+        validateReservedSlot(waiting);
         validateNotOwnReservationSlot(waiting);
         validateNotDuplicateWaiting(waiting);
     }
@@ -43,7 +43,7 @@ public class ReservationWaitingValidator {
         }
     }
 
-    private void validateAlreadyReserved(ReservationWaiting waiting) {
+    private void validateReservedSlot(ReservationWaiting waiting) {
         if (!reservationRepository.existsWith(
                 waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다.");

@@ -113,7 +113,7 @@ public class ReservationService {
 
     private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId,
                                           ReservationTime time) {
-        reservationValidator.validateAlreadyReserved(date, timeId, themeId);
+        reservationValidator.validateNotReserved(date, timeId, themeId);
         Theme theme = findTheme(themeId);
 
         Reservation reservation = new Reservation(null, name, date, time, theme);

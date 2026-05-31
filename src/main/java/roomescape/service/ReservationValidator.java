@@ -26,7 +26,7 @@ public class ReservationValidator {
         }
     }
 
-    public void validateAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
+    public void validateNotReserved(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsWith(date, timeId, themeId)) {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다.");
         }
@@ -40,7 +40,7 @@ public class ReservationValidator {
     public void validateUpdatePolicy(Reservation reservation, Reservation updatedReservation) {
         validateScheduleChanged(reservation, updatedReservation);
         validateNotPast(updatedReservation.getDate(), updatedReservation.getTime());
-        validateAlreadyReserved(
+        validateNotReserved(
                 updatedReservation.getDate(),
                 updatedReservation.getTime().getId(),
                 updatedReservation.getTheme().getId());
