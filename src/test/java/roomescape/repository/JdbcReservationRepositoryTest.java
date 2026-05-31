@@ -122,25 +122,31 @@ public class JdbcReservationRepositoryTest {
 
     @Test
     void existsByTimeIdTest() {
-        boolean exist = reservationRepository.existsByTimeId(1L);
+        String insertReservationTimeSql = "INSERT INTO `reservation_time` (`id`, `start_at`) VALUES (?, ?)";
+        jdbcTemplate.update(insertReservationTimeSql, 100L, "13:00");
+
+        boolean exist = reservationRepository.existsByTimeId(100L);
         assertThat(exist).isFalse();
 
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 1L);
+        jdbcTemplate.update(sql, "fizz", "2026-05-02", 100L, 1L);
 
-        exist = reservationRepository.existsByTimeId(1L);
+        exist = reservationRepository.existsByTimeId(100L);
         assertThat(exist).isTrue();
     }
 
     @Test
     void existsByThemeIdTest() {
-        boolean exist = reservationRepository.existsByThemeId(1L);
+        String insertThemeSql = "INSERT INTO `theme` (`id`, `name`, `description`, `thumbnail_url`) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(insertThemeSql, 100L, "방탈출1", "방탈출1 설명", "url.jpg");
+
+        boolean exist = reservationRepository.existsByThemeId(100L);
         assertThat(exist).isFalse();
 
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 1L);
+        jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 100L);
 
-        exist = reservationRepository.existsByThemeId(1L);
+        exist = reservationRepository.existsByThemeId(100L);
         assertThat(exist).isTrue();
     }
 
