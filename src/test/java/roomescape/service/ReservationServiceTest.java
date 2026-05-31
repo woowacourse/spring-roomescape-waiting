@@ -12,7 +12,7 @@ import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationStatus;
+import roomescape.domain.ReservationStatus;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.domain.ReservationWaiting;
 import roomescape.dao.ReservationTimeDao;

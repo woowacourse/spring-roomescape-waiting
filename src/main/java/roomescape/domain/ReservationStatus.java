@@ -1,4 +1,4 @@
-package roomescape.dto.response;
+package roomescape.domain;
 
 public enum ReservationStatus {
     RESERVED,
