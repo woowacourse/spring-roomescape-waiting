@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.reservationtime.CreateReservationTimeRequest;
-import roomescape.dto.reservationtime.ReservationTimeResponses;
+import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
+import roomescape.dto.reservationtime.response.ReservationTimeResponses;
 import roomescape.exception.ReservationTimeInUseException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationRepository;
@@ -38,8 +38,8 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTime createReservationTime(CreateReservationTimeRequest request) {
-        ReservationTime newReservationTime = new ReservationTime(null, request.startAt());
+    public ReservationTime createReservationTime(CreateReservationTimeCommand command) {
+        ReservationTime newReservationTime = new ReservationTime(null, command.startAt());
         Long newReservationTimeId = reservationTimeRepository.save(newReservationTime);
         return newReservationTime.withId(newReservationTimeId);
     }

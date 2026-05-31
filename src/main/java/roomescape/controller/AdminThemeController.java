@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.CreateThemeRequest;
-import roomescape.dto.theme.ThemeResponse;
+import roomescape.dto.theme.command.CreateThemeCommand;
+import roomescape.dto.theme.request.CreateThemeRequest;
+import roomescape.dto.theme.response.ThemeResponse;
 import roomescape.service.ThemeService;
 
 @RestController
@@ -26,7 +27,7 @@ public class AdminThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody CreateThemeRequest createThemeRequest) {
-        Theme createdTheme = themeService.createTheme(createThemeRequest);
+        Theme createdTheme = themeService.createTheme(CreateThemeCommand.from(createThemeRequest));
         URI location = URI.create("/themes/" + createdTheme.getId());
         return ResponseEntity.created(location).body(ThemeResponse.from(createdTheme));
     }

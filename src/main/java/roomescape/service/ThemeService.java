@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.PopularTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.CreateThemeRequest;
-import roomescape.dto.theme.ThemeReservationTimeResponse;
-import roomescape.dto.theme.ThemeResponses;
+import roomescape.dto.theme.command.CreateThemeCommand;
+import roomescape.dto.theme.response.ThemeReservationTimeResponse;
+import roomescape.dto.theme.response.ThemeResponses;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -48,8 +48,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme createTheme(CreateThemeRequest request) {
-        Theme theme = new Theme(null, request.name(), request.description(), request.thumbnailImageUrl());
+    public Theme createTheme(CreateThemeCommand command) {
+        Theme theme = new Theme(null, command.name(), command.description(), command.thumbnailImageUrl());
         Long newThemeId = themeRepository.save(theme);
         return theme.withId(newThemeId);
     }

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.user.CreateUserRequest;
+import roomescape.dto.user.command.CreateUserCommand;
 import roomescape.exception.DuplicateUsernameException;
 import roomescape.repository.UserRepository;
 
@@ -17,10 +17,10 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User register(CreateUserRequest createUserRequest) {
-        String username = createUserRequest.username();
-        String plainPassword = createUserRequest.password();
-        String name = createUserRequest.name();
+    public User register(CreateUserCommand command) {
+        String username = command.username();
+        String plainPassword = command.password();
+        String name = command.name();
 
         validatePossibleUsername(username);
 

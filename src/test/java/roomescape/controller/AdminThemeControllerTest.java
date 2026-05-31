@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.CreateThemeRequest;
+import roomescape.dto.theme.command.CreateThemeCommand;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
@@ -45,7 +45,7 @@ class AdminThemeControllerTest {
 
     @Test
     void POST_admin_themes_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
-        given(themeService.createTheme(any(CreateThemeRequest.class)))
+        given(themeService.createTheme(any(CreateThemeCommand.class)))
                 .willReturn(new Theme(7L, "공포", "무서움", "https://thumbnail.url"));
 
         Map<String, Object> body = Map.of(

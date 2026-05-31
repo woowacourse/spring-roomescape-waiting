@@ -22,7 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.reservationtime.CreateReservationTimeRequest;
+import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
 import roomescape.exception.ReservationTimeInUseException;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
@@ -47,7 +47,7 @@ class AdminReservationTimeControllerTest {
 
     @Test
     void POST_admin_times_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
-        given(reservationTimeService.createReservationTime(any(CreateReservationTimeRequest.class)))
+        given(reservationTimeService.createReservationTime(any(CreateReservationTimeCommand.class)))
                 .willReturn(new ReservationTime(5L, LocalTime.of(10, 0)));
 
         Map<String, Object> body = Map.of("startAt", "10:00");

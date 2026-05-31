@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.theme.PopularThemeResponses;
-import roomescape.dto.theme.ThemeReservationTimeResponses;
-import roomescape.dto.theme.ThemeResponse;
-import roomescape.dto.theme.ThemeResponses;
+import roomescape.dto.theme.response.PopularThemeResponses;
+import roomescape.dto.theme.response.ThemeReservationTimeResponses;
+import roomescape.dto.theme.response.ThemeResponse;
+import roomescape.dto.theme.response.ThemeResponses;
 import roomescape.service.ThemeService;
 
 @Validated

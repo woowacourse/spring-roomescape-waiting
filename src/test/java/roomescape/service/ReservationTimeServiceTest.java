@@ -11,8 +11,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.reservationtime.CreateReservationTimeRequest;
-import roomescape.dto.reservationtime.ReservationTimeResponses;
+import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
+import roomescape.dto.reservationtime.response.ReservationTimeResponses;
 import roomescape.exception.ReservationTimeInUseException;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.fake.FakeReservationRepository;
@@ -33,7 +33,7 @@ class ReservationTimeServiceTest {
 
     @Test
     void createReservationTime_저장된_시간을_id와_함께_반환한다() {
-        CreateReservationTimeRequest request = new CreateReservationTimeRequest(LocalTime.of(10, 0));
+        CreateReservationTimeCommand request = new CreateReservationTimeCommand(LocalTime.of(10, 0));
 
         ReservationTime created = service.createReservationTime(request);
 

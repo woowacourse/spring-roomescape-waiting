@@ -1,23 +1,26 @@
-package roomescape.dto.reservation;
+package roomescape.dto.reservation.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
 
-public record ReservationResponse(
+public record WaitingReservationResponse(
         Long id,
         String name,
         String themeName,
         LocalDate date,
-        LocalTime time
+        LocalTime time,
+        int waitingOrder
 ) {
-    public static ReservationResponse from(Reservation reservation) {
-        return new ReservationResponse(
+    public static WaitingReservationResponse from(Reservation reservation, int waitingOrder) {
+        return new WaitingReservationResponse(
                 reservation.getId(),
                 reservation.getUser().getName(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
-                reservation.getTime().getStartAt()
+                reservation.getTime().getStartAt(),
+                waitingOrder
         );
     }
 }
+

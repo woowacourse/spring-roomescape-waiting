@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.User;
-import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.auth.command.LoginCommand;
 import roomescape.exception.InvalidLoginException;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.repository.UserRepository;
@@ -18,9 +18,9 @@ public class AuthService {
         this.jwtProvider = jwtProvider;
     }
 
-    public String login(LoginRequest loginRequest) {
-        String username = loginRequest.username();
-        String password = loginRequest.password();
+    public String login(LoginCommand command) {
+        String username = command.username();
+        String password = command.password();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(InvalidLoginException::new);

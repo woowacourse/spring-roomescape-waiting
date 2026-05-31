@@ -13,9 +13,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.theme.CreateThemeRequest;
-import roomescape.dto.theme.ThemeReservationTimeResponse;
-import roomescape.dto.theme.ThemeResponses;
+import roomescape.dto.theme.command.CreateThemeCommand;
+import roomescape.dto.theme.response.ThemeReservationTimeResponse;
+import roomescape.dto.theme.response.ThemeResponses;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.fake.FakeReservationRepository;
 import roomescape.repository.fake.FakeReservationTimeRepository;
@@ -39,7 +39,7 @@ class ThemeServiceTest {
 
     @Test
     void createTheme_id가_채워진_도메인을_반환한다() {
-        CreateThemeRequest request = new CreateThemeRequest("공포", "무서움", "https://thumbnail.url");
+        CreateThemeCommand request = new CreateThemeCommand("공포", "무서움", "https://thumbnail.url");
 
         Theme created = service.createTheme(request);
 

@@ -1,6 +1,7 @@
-package roomescape.dto.reservation;
+package roomescape.dto.reservation.command;
 
 import java.time.LocalDate;
+import roomescape.dto.reservation.request.UpdateReservationRequest;
 
 public record UpdateReservationCommand(
         Long reservationId,

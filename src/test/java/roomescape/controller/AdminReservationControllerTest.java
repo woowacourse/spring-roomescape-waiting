@@ -23,7 +23,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;

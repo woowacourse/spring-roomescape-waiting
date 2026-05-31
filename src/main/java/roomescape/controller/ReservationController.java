@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Reservation;
-import roomescape.dto.reservation.CancelReservationCommand;
-import roomescape.dto.reservation.CreateReservationCommand;
-import roomescape.dto.reservation.CreateReservationRequest;
-import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.ReservationWithStatusResponses;
-import roomescape.dto.reservation.UpdateReservationCommand;
-import roomescape.dto.reservation.UpdateReservationRequest;
-import roomescape.dto.reservation.WaitingReservationResponse;
+import roomescape.dto.reservation.command.CancelReservationCommand;
+import roomescape.dto.reservation.command.CreateReservationCommand;
+import roomescape.dto.reservation.request.CreateReservationRequest;
+import roomescape.dto.reservation.response.ReservationResponse;
+import roomescape.dto.reservation.response.ReservationWithStatusResponses;
+import roomescape.dto.reservation.command.UpdateReservationCommand;
+import roomescape.dto.reservation.request.UpdateReservationRequest;
+import roomescape.dto.reservation.response.WaitingReservationResponse;
 import roomescape.infrastructure.LoginUserId;
 import roomescape.service.ReservationService;
 
@@ -81,7 +81,7 @@ public class ReservationController {
     public ResponseEntity<Void> cancelReservation(
             @PathVariable Long id,
             @LoginUserId Long userId) {
-        reservationService.cancelOwnReservation(new CancelReservationCommand(id, userId));
+        reservationService.cancelOwnReservation(CancelReservationCommand.of(id, userId));
         return ResponseEntity.ok().build();
     }
 }
