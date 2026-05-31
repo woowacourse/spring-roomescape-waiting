@@ -1,85 +1,88 @@
 package roomescape.controller;
 
-import static org.hamcrest.core.Is.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+import roomescape.controller.dto.AvailableTimeResponse;
+import roomescape.controller.dto.ThemeResponse;
+import roomescape.global.DomainErrorHttpMapper;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
+
+@WebMvcTest(ThemeController.class)
+@Import(DomainErrorHttpMapper.class)
 class ThemeControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private ThemeService themeService;
+
+    @MockitoBean
+    private ReservationTimeService reservationTimeService;
+
+    @DisplayName("전체 테마 목록을 조회한다.")
     @Test
-    @DisplayName("전체 테마 조회 API")
-    void 전체_테마_조회_API() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()",is(4))
-                .body("[0].id",is(1))
-                .body("[0].name",is("공포의 저택"))
-                .body("[0].description",is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
-                .body("[0].thumbnailUrl",is("https://picsum.photos/seed/haunted/400/250"));
+    void findAll() throws Exception {
+        given(themeService.findAll()).willReturn(List.of(
+                new ThemeResponse(1L, "잠긴 방", "설명", "https://example.com/theme.jpg")
+        ));
+
+        mockMvc.perform(get("/themes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("잠긴 방"))
+                .andExpect(jsonPath("$[0].thumbnailUrl").value("https://example.com/theme.jpg"));
     }
 
+    @DisplayName("인기 테마 목록을 조회한다.")
     @Test
-    @DisplayName("Top 10 테마 조회 API")
-    void Top_10_테마_조회_API() {
-        Map<String,Object> params = new HashMap<>();
-        params.put("size", "10");
+    void findPopularThemes() throws Exception {
+        given(themeService.findPopularThemes()).willReturn(List.of(
+                new ThemeResponse(1L, "인기 테마", "설명", "https://example.com/theme.jpg")
+        ));
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .params(params)
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("[0].id",is(1))
-                .body("[0].name",is("공포의 저택"))
-                .body("[0].description",is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
-                .body("[0].thumbnailUrl",is("https://picsum.photos/seed/haunted/400/250"));
+        mockMvc.perform(get("/themes/popular"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("인기 테마"));
     }
 
+    @DisplayName("특정 테마의 이용 가능 시간을 조회한다.")
     @Test
-    @DisplayName("특정 id의 테마 시간 조회_API")
-    void 특정_id의_테마_시간_조회_API() {
+    void findAvailableTimes() throws Exception {
+        LocalDate date = LocalDate.of(2026, 7, 1);
+        given(reservationTimeService.findAvailableTimes(1L, date)).willReturn(List.of(
+                new AvailableTimeResponse(1L, LocalTime.of(10, 0), true, 0),
+                new AvailableTimeResponse(2L, LocalTime.of(11, 0), false, 1)
+        ));
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .pathParam("id", 1)
-                .queryParam("date", "2026-04-29")
-                .when().get("/themes/{id}/available-times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(13))
-                .body("[0].id", is(1))
-                .body("[0].startAt", is("10:00"))
-                .body("[0].isAvailable", is(true))
-                .body("[2].id", is(3))
-                .body("[2].startAt", is("12:00"))
-                .body("[2].isAvailable", is(false));
+        mockMvc.perform(get("/themes/1/available-times").param("date", "2026-07-01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].startAt").value("10:00"))
+                .andExpect(jsonPath("$[0].isAvailable").value(true))
+                .andExpect(jsonPath("$[1].startAt").value("11:00"))
+                .andExpect(jsonPath("$[1].waitNumber").value(1));
     }
 
+    @DisplayName("이용 가능 시간 조회의 날짜 형식이 잘못되면 400을 반환한다.")
     @Test
-    @DisplayName("특정 id의 테마 시간 조회_API - 정상 테스트")
-    void 특정_id의_테마_시간_조회_API_정상_테스트() {
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .pathParam("id", 1)
-                .queryParam("date", "2026-04-29")
-                .when().get("/themes/{id}/available-times")
-                .then().log().all()
-                .statusCode(200);
+    void findAvailableTimesInvalidDate() throws Exception {
+        mockMvc.perform(get("/themes/1/available-times").param("date", "2026-99-99"))
+                .andExpect(status().isBadRequest());
     }
 }

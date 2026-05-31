@@ -1,98 +1,93 @@
 package roomescape.controller;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
+import roomescape.global.DomainErrorHttpMapper;
+import roomescape.service.ThemeService;
+
+@WebMvcTest(AdminThemeController.class)
+@Import(DomainErrorHttpMapper.class)
 class AdminThemeControllerTest {
 
-    @DisplayName("관리자 테마 추가")
-    @Test
-    void 관리자_테마_추가_API(){
-        Map<String,Object> params = new HashMap<>();
-        params.put("name", "공포의 폐병원");
-        params.put("description", "공포의 폐병원");
-        params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
+    @Autowired
+    private MockMvc mockMvc;
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201);
+    @MockitoBean
+    private ThemeService themeService;
+
+    @DisplayName("관리자는 테마를 생성한다.")
+    @Test
+    void create() throws Exception {
+        given(themeService.saveTheme(any())).willReturn(1L);
+
+        mockMvc.perform(post("/admin/themes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "잠긴 방",
+                                  "description": "설명",
+                                  "thumbnailUrl": "https://example.com/theme.jpg"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/themes/1"));
     }
 
-    @DisplayName("관리자 테마 추가 - 유효하지 않은 입력값")
+    @DisplayName("테마 생성 요청 값이 올바르지 않으면 400을 반환한다.")
     @Test
-    void 관리자_테마_추가_API_예외_테스트(){
-        Map<String,Object> params = new HashMap<>();
-        params.put("name", "");
-        params.put("description", "공포의 폐병원");
-        params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(400);
+    void createInvalidRequest() throws Exception {
+        mockMvc.perform(post("/admin/themes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "",
+                                  "description": "설명",
+                                  "thumbnailUrl": "https://example.com/theme.jpg"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
-
-    @DisplayName("API - 관리자 테마 삭제")
+    @DisplayName("관리자는 테마를 삭제한다.")
     @Test
-    void API_관리자_테마_삭제() {
-        Map<String,Object> params = new HashMap<>();
-        params.put("name", "공포의 폐병원");
-        params.put("description", "공포의 폐병원");
-        params.put("thumbnailUrl", "https://images.unsplash.com/photo-1505635552518-3448ff116af3?w=300&q=80");
+    void deleteTheme() throws Exception {
+        mockMvc.perform(delete("/admin/themes/1"))
+                .andExpect(status().isNoContent());
 
-        final String location = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .header("Location");
-
-        final long id = Long.parseLong(location.split("/")[2]);
-
-        RestAssured.given().log().all()
-                .pathParam("id", id)
-                .when().delete("/admin/themes/{id}")
-                .then().log().all()
-                .statusCode(204);
+        verify(themeService).deleteTheme(1L);
     }
 
-    @DisplayName("관리자 테마 삭제 API - 참조되고 있는 값은 삭제 불가능")
+    @DisplayName("참조 중인 테마 삭제는 422를 반환한다.")
     @Test
-    void 관리자_테마_삭제_API_예외() {
+    void deleteReferencedTheme() throws Exception {
+        org.mockito.Mockito.doThrow(new RoomescapeException(
+                        DomainErrorCode.REFERENTIAL_INTEGRITY,
+                        "이 테마를 참조하는 예약이 있어 삭제할 수 없습니다."
+                ))
+                .when(themeService)
+                .deleteTheme(1L);
 
-        RestAssured.given().log().all()
-                .pathParam("id", 1)
-                .when().delete("/admin/themes/{id}")
-                .then().log().all()
-                .statusCode(409);
-    }
-
-    @DisplayName("관리자 테마 삭제 API - parameter가 이상값일 때")
-    @Test
-    void 관리자_테_API_예외() {
-
-        RestAssured.given().log().all()
-                .pathParam("id", "sdfakj")
-                .when().delete("/admin/themes/{id}")
-                .then().log().all()
-                .statusCode(400);
+        mockMvc.perform(delete("/admin/themes/1"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("REFERENTIAL_INTEGRITY"));
     }
 }
