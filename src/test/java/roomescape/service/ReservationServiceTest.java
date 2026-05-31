@@ -483,6 +483,18 @@ class ReservationServiceTest {
     }
 
     @Test
+    void createWaitingReservation_존재하지_않는_themeId이면_ResourceNotFoundException() {
+        User charles = buildUser("샤를");
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+
+        assertThatThrownBy(() -> service.createWaitingReservation(
+                Fixtures.createCommand(charles.getId(), 9999L, LocalDate.of(2026, 6, 1), timeId)))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("테마")
+                .hasMessageContaining("9999");
+    }
+
+    @Test
     void createWaitingReservation_이미_본인_예약_대기가_존재하면_예외() {
         User brown = buildUser("브라운");
         User charles = buildUser("샤를");

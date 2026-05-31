@@ -115,9 +115,9 @@ public class ReservationService {
 
     @Transactional
     public WaitingReservationResponse createWaitingReservation(CreateReservationCommand command) {
-        validateReservationIsFullyBooked(command);
-
         Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
+
+        validateReservationIsFullyBooked(command);
 
         validateNotPastDateTime(newWaitingReservation);
 
