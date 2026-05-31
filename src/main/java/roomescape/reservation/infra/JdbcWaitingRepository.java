@@ -100,4 +100,15 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Integer delete(Long id) {
         return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
     }
+
+    @Override
+    public Boolean existsByMemberNameAndSlot(MemberName name, ReservationSlot slot) {
+        return jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM waiting WHERE name = ? AND date = ? AND theme_id = ? AND time_id = ?)",
+                Boolean.class,
+                name.name(),
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
+    }
 }

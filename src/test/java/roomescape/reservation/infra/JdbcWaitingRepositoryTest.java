@@ -137,4 +137,30 @@ class JdbcWaitingRepositoryTest {
         Long rank = waitingRepository.getRank(waiting);
         assertThat(rank).isEqualTo(3L);
     }
+
+    @DisplayName("멤버 이름과 슬롯을 기준으로 예약 대기가 이미 존재하는지 여부를 판단합니다.")
+    @Test
+    void exists_by_member_name_and_slot() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(waitingRepository.existsByMemberNameAndSlot(new MemberName("스타크"), slot)).isTrue();
+            softly.assertThat(waitingRepository.existsByMemberNameAndSlot(new MemberName("피노"), slot)).isFalse();
+        });
+    }
 }

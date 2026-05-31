@@ -2,7 +2,6 @@ package roomescape.reservation.application.service;
 
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
@@ -45,19 +44,19 @@ public class WaitingCommandService {
             throw new RoomEscapeException("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다.");
         }
 
-        try {
-            Waiting waiting = request.toWaiting(slot);
-            Waiting savedWaiting = waitingRepository.save(waiting);
-            Long rank = waitingRepository.getRank(savedWaiting);
-            return ReservationApplicationResult.waiting(
-                    savedWaiting,
-                    ThemeResult.from(theme),
-                    ReservationTimeResult.from(time),
-                    rank
-            );
-        } catch (DataIntegrityViolationException e) {
+        Waiting waiting = request.toWaiting(slot);
+        if (waitingRepository.existsByMemberNameAndSlot(waiting.getMemberName(), slot)) {
             throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
         }
+
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        Long rank = waitingRepository.getRank(savedWaiting);
+        return ReservationApplicationResult.waiting(
+                savedWaiting,
+                ThemeResult.from(theme),
+                ReservationTimeResult.from(time),
+                rank
+        );
     }
 
     public void delete(Long id, LocalDateTime now) {

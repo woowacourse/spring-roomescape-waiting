@@ -1,6 +1,7 @@
 package roomescape.reservation.domain.repository;
 
 import java.util.Optional;
+import roomescape.reservation.domain.MemberName;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 
@@ -14,4 +15,6 @@ public interface WaitingRepository {
     Long getRank(Waiting waiting);
 
     Integer delete(Long id);
+
+    Boolean existsByMemberNameAndSlot(MemberName name, ReservationSlot slot);
 }
