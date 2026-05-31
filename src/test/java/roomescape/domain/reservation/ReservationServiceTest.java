@@ -118,7 +118,7 @@ class ReservationServiceTest {
         }
 
         @Test
-        void save_중_동시_요청으로_중복이_발생하면_예외() {
+        void save_시_DuplicateKeyException_발생하면_DUPLICATE_RESERVATION_NAME_예외로_변환() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
@@ -276,7 +276,7 @@ class ReservationServiceTest {
         }
 
         @Test
-        void updateDateAndTime_중_동시_요청으로_중복이_발생하면_예외() {
+        void updateDateAndTime_시_DuplicateKeyException_발생하면_DUPLICATE_RESERVATION_NAME_예외로_변환() {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
