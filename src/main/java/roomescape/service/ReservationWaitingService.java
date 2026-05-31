@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
@@ -24,6 +25,7 @@ public class ReservationWaitingService {
         this.reservationQueryingDao = reservationQueryingDao;
     }
 
+    @Transactional
     public ReservationWaitingResponse create(ReservationWaitingRequest reservationWaitingReq) {
         Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
 
@@ -34,7 +36,12 @@ public class ReservationWaitingService {
         }
 
         Long id = reservationWaitingDao.create(reservationWaitingCommand);
-        return ReservationWaitingResponse.from(reservationWaitingDao.findReservationWaitingById(id).get());
+        ReservationWaiting reservationWaiting = reservationWaitingDao.findReservationWaitingById(id)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new DataIntegrityViolationException("대기열 생성 과정에서 오류가 발생했습니다."));
+
+        return ReservationWaitingResponse.from(reservationWaiting);
     }
 
     public void delete(Long id) {
