@@ -79,7 +79,7 @@ class ReservationAcceptanceTest {
                 .body("waitingReservations[0].waitingOrder", equalTo(2))
                 .body("hasNext", equalTo(false));
     }
-    
+
     @Test
     void GET_reservations_mine_앞_대기자가_취소되면_재조회시_대기_순번이_줄어든다() {
         // 주인공 - 브라운
@@ -382,7 +382,9 @@ class ReservationAcceptanceTest {
                 .save();
         long otherTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
         Scenario.reservation(jdbcTemplate)
-                .member("다른사람").onTheme(reserved.themeId()).onTime(otherTimeId).date("2026-06-02").save();
+                .member("다른사람").onTheme(reserved.themeId()).onTime(otherTimeId).onStore(reserved.storeId())
+                .date("2026-06-02").save();
+
         Map<String, Object> body = Map.of(
                 "date", "2026-06-02",
                 "themeId", reserved.themeId(),
