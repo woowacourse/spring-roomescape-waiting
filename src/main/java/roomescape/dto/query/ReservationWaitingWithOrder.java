@@ -2,7 +2,7 @@ package roomescape.dto.query;
 
 import roomescape.domain.ReservationWaiting;
 
-public record ReservationWaitingWIthOrder(
+public record ReservationWaitingWithOrder(
         ReservationWaiting reservationWaiting,
         int order
 ) {

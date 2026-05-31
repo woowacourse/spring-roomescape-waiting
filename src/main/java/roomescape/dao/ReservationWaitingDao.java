@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.query.ReservationWaitingWIthOrder;
+import roomescape.dto.query.ReservationWaitingWithOrder;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class ReservationWaitingDao {
         );
     };
 
-    private static final RowMapper<ReservationWaitingWIthOrder> WITH_ORDER_ROW_MAPPER = (resultSet, rowNum) -> {
+    private static final RowMapper<ReservationWaitingWithOrder> WITH_ORDER_ROW_MAPPER = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("start_at").toLocalTime()
@@ -61,7 +61,7 @@ public class ReservationWaitingDao {
                 theme
         );
 
-        return new ReservationWaitingWIthOrder(
+        return new ReservationWaitingWithOrder(
                 reservationWaiting,
                 resultSet.getInt("waiting_order")
         );
@@ -134,7 +134,7 @@ public class ReservationWaitingDao {
         return jdbcTemplate.query(sql, ROW_MAPPER, name);
     }
 
-    public List<ReservationWaitingWIthOrder> selectByNameWithOrder(String name) {
+    public List<ReservationWaitingWithOrder> selectByNameWithOrder(String name) {
         String sql = """
                 SELECT *
                 FROM (
