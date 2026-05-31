@@ -56,6 +56,8 @@ CREATE TABLE reservation
     FOREIGN KEY (store_id) REFERENCES store (id)
 );
 
+CREATE INDEX idx_reservation_user_id ON reservation (user_id);
+
 CREATE TABLE store_managers
 (
     store_id BIGINT NOT NULL,
