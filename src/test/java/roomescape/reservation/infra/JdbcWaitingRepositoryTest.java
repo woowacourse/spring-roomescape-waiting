@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,6 +57,62 @@ class JdbcWaitingRepositoryTest {
             assertSoftly.assertThat(slot.timeId()).isEqualTo(timeId);
             assertSoftly.assertThat(slot.startAt()).isEqualTo(LocalTime.of(9, 0));
         });
+    }
+
+    @DisplayName("특정 슬롯의 첫 번째 대기를 조회합니다.")
+    @Test
+    void find_first_by_slot() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피노",
+                date,
+                themeId,
+                timeId
+        );
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        Optional<Waiting> waiting = waitingRepository.findFirstBySlot(slot);
+
+        SoftAssertions.assertSoftly(assertSoftly -> {
+            assertSoftly.assertThat(waiting).isPresent();
+            assertSoftly.assertThat(waiting.get().getMemberName().name()).isEqualTo("스타크");
+            assertSoftly.assertThat(waiting.get().getSlot().date()).isEqualTo(date);
+            assertSoftly.assertThat(waiting.get().getSlot().themeId()).isEqualTo(themeId);
+            assertSoftly.assertThat(waiting.get().getSlot().timeId()).isEqualTo(timeId);
+        });
+    }
+
+    @DisplayName("대기가 존재하지 않는 슬롯의 첫 번째 대기 조회 시 빈 Optional을 반환합니다.")
+    @Test
+    void find_first_by_slot_empty() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        Optional<Waiting> waiting = waitingRepository.findFirstBySlot(slot);
+
+        assertThat(waiting).isEmpty();
     }
 
     @DisplayName("방탈출 예약 대기 추가를 테스트합니다.")
