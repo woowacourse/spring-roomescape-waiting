@@ -102,9 +102,9 @@ public class ReservationService {
         }
 
         ReservationWaiting waiting = optionalReservationWaiting.get();
-        
+
         reservationUpdatingDao.update(id, waiting.promote());
-        reservationWaitingDao.delete(waiting.getId());
+        deleteWaitingOrAbortPromotion(id, waiting.getId());
     }
 
     private Reservation getReservation(Long id) {
@@ -116,6 +116,14 @@ public class ReservationService {
         Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date,timeId);
         if (duplicateReservation.isPresent()) {
             throw new ReservationAlreadyExistException();
+        }
+    }
+
+    private void deleteWaitingOrAbortPromotion(long promotedReservationId, long waitingId) {
+        long deletedRow = reservationWaitingDao.delete(waitingId);
+
+        if(deletedRow == 0) {
+            reservationUpdatingDao.delete(promotedReservationId);
         }
     }
 }
