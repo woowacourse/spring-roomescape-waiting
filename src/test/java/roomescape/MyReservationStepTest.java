@@ -26,10 +26,6 @@ import roomescape.domain.policy.ReservationPolicy;
 import roomescape.support.ReservationTestHelper;
 import roomescape.support.TestFutureOnlyPolicy;
 
-/*
- * 미션2 사이클2 - 내 예약 관리 API 통합 테스트.
- * 조회/취소/변경을 본인 검증과 함께 검증한다.
- */
 public class MyReservationStepTest extends IntegrationTest {
 
     private static final LocalDate FUTURE_DATE_1 = LocalDate.of(2050, 5, 15);
@@ -73,10 +69,8 @@ public class MyReservationStepTest extends IntegrationTest {
         @Test
         @DisplayName("내 이름으로 된 예약 목록을 날짜, 시간 순으로 반환한다")
         void 내_예약_조회() {
-            // 브라운 다른 날짜로 2개 예약
             helper.insertReservation("브라운", FUTURE_DATE_2, timeId10, themeId);
             helper.insertReservation("브라운", FUTURE_DATE_1, timeId11, themeId);
-            // 다른 사람의 예약 1개 (필터링 검증용)
             helper.insertReservation("콘", FUTURE_DATE_1, timeId10, themeId);
 
             ExtractableResponse<Response> response = RestAssured.given().log().all()
@@ -196,7 +190,6 @@ public class MyReservationStepTest extends IntegrationTest {
         @Test
         @DisplayName("이미 지난 예약 취소 시도 → 400")
         void 이미_지난_예약() {
-            // 고정 Clock 기준 어제 (2026-05-12)
             LocalDate yesterday = TODAY.minusDays(1);
             Long reservationId = helper.insertReservationAndReturnId("브라운", yesterday, timeId10, themeId);
 
@@ -341,16 +334,14 @@ public class MyReservationStepTest extends IntegrationTest {
         @Test
         @DisplayName("변경하려는 시간이 다른 사람에 의해 예약됨 → 400")
         void 시간_충돌() {
-            // 같은 테마에 두 예약 (다른 시간)
             Long myReservation = helper.insertReservationAndReturnId("브라운", FUTURE_DATE_1, timeId10, themeId);
             helper.insertReservationAndReturnId("콘", FUTURE_DATE_1, timeId11, themeId);
 
-            // 브라운이 자기 예약을 콘의 시간으로 변경 시도
+            // 예약 변경 시도 : 실패
             Map<String, Object> body = new HashMap<>();
             body.put("name", "브라운");
             body.put("date", FUTURE_DATE_1.toString());
             body.put("timeId", timeId11);
-
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
                     .body(body)
@@ -387,13 +378,12 @@ public class MyReservationStepTest extends IntegrationTest {
         @Test
         @DisplayName("예약 → 조회 → 변경 → 조회 → 취소 → 조회 흐름이 자연스럽게 이어진다")
         void 예약_생애주기() {
-            // 1) 예약 생성
+            // 예약
             Map<String, Object> createBody = new HashMap<>();
             createBody.put("name", "브라운");
             createBody.put("date", FUTURE_DATE_1.toString());
             createBody.put("timeId", timeId10);
             createBody.put("themeId", themeId);
-
             Long reservationId = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
                     .body(createBody)
@@ -402,7 +392,7 @@ public class MyReservationStepTest extends IntegrationTest {
                     .statusCode(201)
                     .extract().jsonPath().getLong("id");
 
-            // 2) 조회 → 1건 보임
+            // 조회
             RestAssured.given()
                     .when().get("/user/reservations?name=브라운")
                     .then().statusCode(200)
@@ -410,12 +400,11 @@ public class MyReservationStepTest extends IntegrationTest {
                     .body("[0].date", is(FUTURE_DATE_1.toString()))
                     .body("[0].time.startAt", is("10:00"));
 
-            // 3) 변경 (date, time)
+            // 예약 변경
             Map<String, Object> updateBody = new HashMap<>();
             updateBody.put("name", "브라운");
             updateBody.put("date", FUTURE_DATE_2.toString());
             updateBody.put("timeId", timeId11);
-
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
                     .body(updateBody)
@@ -423,7 +412,7 @@ public class MyReservationStepTest extends IntegrationTest {
                     .then().log().all()
                     .statusCode(200);
 
-            // 4) 다시 조회 → 변경된 정보로 보임
+            // 조회
             RestAssured.given()
                     .when().get("/user/reservations?name=브라운")
                     .then().statusCode(200)
@@ -431,13 +420,13 @@ public class MyReservationStepTest extends IntegrationTest {
                     .body("[0].date", is(FUTURE_DATE_2.toString()))
                     .body("[0].time.startAt", is("11:00"));
 
-            // 5) 취소
+            // 예약 취소
             RestAssured.given().log().all()
                     .when().delete("/user/reservations/" + reservationId + "?name=브라운")
                     .then().log().all()
                     .statusCode(204);
 
-            // 6) 다시 조회 → 빈 목록
+            // 조회
             RestAssured.given()
                     .when().get("/user/reservations?name=브라운")
                     .then().statusCode(200)
@@ -445,13 +434,10 @@ public class MyReservationStepTest extends IntegrationTest {
         }
     }
 
-    //TODO 헬퍼 메서드 뿐만 아니라 존재하는 API로 데이터 넣는 방법 비교해보기
     @Test
     @DisplayName("내 예약 + 내 대기를 함께 조회한다 (status로 구분)")
     void 예약과_대기_함께_조회() {
-        // 브라운의 예약 1건
         helper.insertReservation("브라운", FUTURE_DATE_1, timeId10, themeId);
-        // 브라운의 대기 1건 (다른 슬롯)
         helper.insertReservation("콘", FUTURE_DATE_2, timeId10, themeId);
         helper.insertWaiting("브라운", FUTURE_DATE_2, timeId10, themeId, 1);
 
@@ -460,11 +446,9 @@ public class MyReservationStepTest extends IntegrationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("[0].status", is("RESERVED"))      // FUTURE_DATE_1
+                .body("[0].status", is("RESERVED"))
                 .body("[0].waitingOrder", nullValue())
-                .body("[1].status", is("WAITING"))       // FUTURE_DATE_2
+                .body("[1].status", is("WAITING"))
                 .body("[1].waitingOrder", is(1));
     }
-
-
 }

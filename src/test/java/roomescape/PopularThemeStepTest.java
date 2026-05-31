@@ -1,5 +1,6 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
@@ -22,19 +23,6 @@ import roomescape.domain.policy.PopularThemePolicy;
 import roomescape.support.ReservationTestHelper;
 import roomescape.support.TestRecentWeekPopularPolicy;
 
-
-/*
- * 미션2 사이클1 - 인기 테마 조회 API 요구사항 테스트.
- * IntegrationTest 상속으로 매 테스트 빈 DB 보장.
- * 시간 의존성을 풀기 위해 @TestConfiguration으로 고정 Clock을 주입.
- * 각 테스트가 @BeforeEach에서 자기 데이터(테마 + 예약)를 직접 준비.
- *
- * 비즈니스 규칙:
- *  1) 7일 이내 예약만 집계 (8일 이전은 제외)
- *  2) 오늘 예약은 제외
- *  3) 예약 건수 내림차순 정렬
- *  4) 최대 10개
- */
 public class PopularThemeStepTest extends IntegrationTest {
 
     private static final LocalDate TODAY = LocalDate.of(2026, 5, 9);
@@ -61,7 +49,6 @@ public class PopularThemeStepTest extends IntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // 시간 슬롯 8개
         Long time1 = helper.insertTime(LocalTime.of(10, 0));
         Long time2 = helper.insertTime(LocalTime.of(11, 0));
         Long time3 = helper.insertTime(LocalTime.of(12, 0));
@@ -71,7 +58,6 @@ public class PopularThemeStepTest extends IntegrationTest {
         Long time7 = helper.insertTime(LocalTime.of(16, 0));
         Long time8 = helper.insertTime(LocalTime.of(17, 0));
 
-        //핵심테마 3개
         islandThemeId = helper.insertTheme("무인도 탈출", "...", "https://example.com/island.jpg");
         cityThemeId = helper.insertTheme("도시 탈출", "...", "https://example.com/city.jpg");
         balloonThemeId = helper.insertTheme("열기구 탈출", "...", "https://example.com/balloon.jpg");
@@ -80,14 +66,12 @@ public class PopularThemeStepTest extends IntegrationTest {
         LocalDate fiveDaysAgo = TODAY.minusDays(5);
         LocalDate eightDaysAgo = TODAY.minusDays(8);
 
-        // 무인도: 어제 3건 + 5일 전 2건 = 5건 (1등)
         helper.insertReservation("user1", yesterday, time1, islandThemeId);
         helper.insertReservation("user2", yesterday, time2, islandThemeId);
         helper.insertReservation("user3", yesterday, time3, islandThemeId);
         helper.insertReservation("user4", fiveDaysAgo, time1, islandThemeId);
         helper.insertReservation("user5", fiveDaysAgo, time2, islandThemeId);
 
-        // 도시: 5일 전 4건 + 8일 전 2건 = 집계상 4건 (2등)
         helper.insertReservation("user6", fiveDaysAgo, time3, cityThemeId);
         helper.insertReservation("user7", fiveDaysAgo, time4, cityThemeId);
         helper.insertReservation("user8", fiveDaysAgo, time5, cityThemeId);
@@ -95,10 +79,8 @@ public class PopularThemeStepTest extends IntegrationTest {
         helper.insertReservation("user10", eightDaysAgo, time1, cityThemeId);
         helper.insertReservation("user11", eightDaysAgo, time2, cityThemeId);
 
-        // 열기구: 어제 1건
         helper.insertReservation("user12", yesterday, time4, balloonThemeId);
 
-        // 무인도 오늘 5건 (오늘이라 집계 제외 검증용)
         helper.insertReservation("user13", TODAY, time1, islandThemeId);
         helper.insertReservation("user14", TODAY, time2, islandThemeId);
         helper.insertReservation("user15", TODAY, time3, islandThemeId);
@@ -119,18 +101,15 @@ public class PopularThemeStepTest extends IntegrationTest {
         List<String> names = response.jsonPath().getList("name");
         List<Integer> counts = response.jsonPath().getList("reservationCount");
 
-        // 1등은 무인도(5건), 2등은 도시(4건)
-        assert names.get(0).equals("무인도 탈출") : "1등은 무인도여야 함, 실제: " + names.get(0);
-        assert counts.get(0) == 5 : "1등 건수는 5여야 함, 실제: " + counts.get(0);
-        assert names.get(1).equals("도시 탈출") : "2등은 도시여야 함, 실제: " + names.get(1);
-        assert counts.get(1) == 4 : "2등 건수는 4여야 함, 실제: " + counts.get(1);
+        assertThat(names.get(0)).isEqualTo("무인도 탈출");
+        assertThat(counts.get(0)).isEqualTo(5);
+        assertThat(names.get(1)).isEqualTo("도시 탈출");
+        assertThat(counts.get(1)).isEqualTo(4);
     }
 
     @Test
     @DisplayName("8일 전 예약은 집계에서 제외된다")
     void 기간_밖_예약_제외() {
-        // 도시 테마는 5일전 4건 + 8일전 2건 = 총 6건 예약이지만,
-        // 8일전이 제외되면 4건이 집계되어야 함
         ExtractableResponse<Response> response = RestAssured.given()
                 .when().get("/user/themes/popular")
                 .then().statusCode(200).extract();
@@ -139,16 +118,13 @@ public class PopularThemeStepTest extends IntegrationTest {
         List<Integer> counts = response.jsonPath().getList("reservationCount");
 
         int cityIndex = names.indexOf("도시 탈출");
-        assert cityIndex >= 0 : "도시 테마가 응답에 있어야 함";
-        assert counts.get(cityIndex) == 4
-                : "도시 테마 건수는 4여야 함 (8일전 2건 제외), 실제: " + counts.get(cityIndex);
+        assertThat(cityIndex).isGreaterThanOrEqualTo(0);
+        assertThat(counts.get(cityIndex)).isEqualTo(4);
     }
 
     @Test
     @DisplayName("오늘 예약은 집계에서 제외된다")
     void 오늘_예약_제외() {
-        // 무인도 테마는 어제 3 + 5일전 2 + 오늘 5 = 총 10건이지만,
-        // 오늘이 제외되면 5건만 집계되어야 함
         ExtractableResponse<Response> response = RestAssured.given()
                 .when().get("/user/themes/popular")
                 .then().statusCode(200).extract();
@@ -157,9 +133,8 @@ public class PopularThemeStepTest extends IntegrationTest {
         List<Integer> counts = response.jsonPath().getList("reservationCount");
 
         int islandIndex = names.indexOf("무인도 탈출");
-        assert islandIndex >= 0 : "무인도 테마가 응답에 있어야 함";
-        assert counts.get(islandIndex) == 5
-                : "무인도 테마 건수는 5여야 함 (오늘 5건 제외), 실제: " + counts.get(islandIndex);
+        assertThat(islandIndex).isGreaterThanOrEqualTo(0);
+        assertThat(counts.get(islandIndex)).isEqualTo(5);
     }
 
     @Test
@@ -182,5 +157,4 @@ public class PopularThemeStepTest extends IntegrationTest {
                 .body("[0].name", is("무인도 탈출"))
                 .body("[0].reservationCount", is(5));
     }
-
 }

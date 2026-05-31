@@ -14,21 +14,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.controller.AdminReservationController;
 
-
-/*
- * 미션 1 요구사항 테스트.
- * IntegrationTest를 상속받아 매 테스트 시작 시,
- * 빈 DB 상태에서 시작하여 각 테스트가 자기 데이터를 직접 준비한다.
- */
 public class MissionStepTest extends IntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private AdminReservationController reservationController;
-
 
     @Test
     void 예약_조회() {
@@ -51,7 +40,7 @@ public class MissionStepTest extends IntegrationTest {
     }
 
     @Test
-    void 시간_관리_API() { // 시간 1개 등록 → 조회 시 1개 → 삭제
+    void 시간_관리_API() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "17:00");
 
@@ -76,7 +65,6 @@ public class MissionStepTest extends IntegrationTest {
     }
 
     @Test
-        // 시간 1개, 테마 1개를 직접 준비한 뒤 예약 1건 추가 → 1건 확인
     void 예약과_시간_연결() {
 
         Long timeId = insertTime(LocalTime.of(10, 0));
@@ -120,5 +108,4 @@ public class MissionStepTest extends IntegrationTest {
                 "SELECT id FROM theme WHERE name = ?",
                 Long.class, name);
     }
-
 }

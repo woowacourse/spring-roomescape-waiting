@@ -22,14 +22,7 @@ import roomescape.domain.policy.ReservationPolicy;
 import roomescape.support.ReservationTestHelper;
 import roomescape.support.TestFutureOnlyPolicy;
 
-/*
- * 미션2 사이클2 - 에러 응답 명세 통합 테스트.
- *
- *  실제 HTTP 응답 차원에서 작동하는지 검증한다:
- *   - 모든 에러 응답이 {"message": "..."} 단일 필드 형식인가
- *   - 상태 코드가 400/404/500 정책대로인가
- *   - 메시지가 명세대로인가
- */
+// 에러 응답 명세 통합 테스트
 public class ErrorResponseStepTest extends IntegrationTest {
 
     private static final LocalDate TODAY = LocalDate.of(2026, 5, 13);
@@ -86,7 +79,6 @@ public class ErrorResponseStepTest extends IntegrationTest {
         @Test
         @DisplayName("중복 예약 시도 → 400 + 메시지")
         void 중복_예약() {
-            // 첫 예약
             helper.insertReservation("브라운", FUTURE_DATE, timeId10, themeId);
 
             Map<String, Object> body = new HashMap<>();
@@ -94,7 +86,6 @@ public class ErrorResponseStepTest extends IntegrationTest {
             body.put("date", FUTURE_DATE.toString());
             body.put("timeId", timeId10);
             body.put("themeId", themeId);
-
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
                     .body(body)
@@ -183,7 +174,6 @@ public class ErrorResponseStepTest extends IntegrationTest {
             body.put("name", "브라운");
             body.put("date", FUTURE_DATE.toString());
             body.put("themeId", themeId);
-            // timeId 누락
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -201,7 +191,6 @@ public class ErrorResponseStepTest extends IntegrationTest {
             body.put("name", "브라운");
             body.put("date", FUTURE_DATE.toString());
             body.put("timeId", timeId10);
-            // themeId 누락
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)

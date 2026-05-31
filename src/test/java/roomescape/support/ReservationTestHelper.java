@@ -47,7 +47,6 @@ public class ReservationTestHelper {
                 Long.class, name, Date.valueOf(date), timeId, themeId);
     }
 
-    // 미션 3 부터 추가됨
     public Long insertWaiting(String name, LocalDate date, Long timeId, Long themeId, int order) {
         jdbcTemplate.update(
                 "INSERT INTO waiting (name, date, time_id, theme_id, order_index) VALUES (?, ?, ?, ?, ?)",
@@ -80,5 +79,4 @@ public class ReservationTestHelper {
                 Integer.class, date.toString(), timeId, themeId);
         return count == null ? 0 : count;
     }
-
 }

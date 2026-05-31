@@ -1,5 +1,7 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -33,24 +35,16 @@ public class WaitingPromotionStepTest extends IntegrationTest {
         Long w2 = helper.insertWaiting("모카", FUTURE_DATE, timeId, themeId, 2);
         Long w3 = helper.insertWaiting("핀", FUTURE_DATE, timeId, themeId, 3);
 
-        // when - 브라운이 예약 취소
+        // when
         RestAssured.given()
                 .when().delete("/user/reservations/" + reservationId + "?name=브라운")
                 .then().statusCode(204);
 
         // then
-        // 1) 콘이 예약자가 됐다
-        assert helper.findReservationOwner(FUTURE_DATE, timeId, themeId).equals("콘")
-                : "콘이 예약자가 되어야 함";
-
-        // 2) 콘의 대기는 삭제됐다
-        assert !helper.existsWaiting(w1) : "콘의 대기는 사라져야 함";
-
-        // 3) 모카는 순번 1
-        assert helper.findWaitingOrder(w2) == 1 : "모카의 순번이 1";
-
-        // 4) 핀은 순번 2
-        assert helper.findWaitingOrder(w3) == 2 : "핀의 순번이 2";
+        assertThat(helper.findReservationOwner(FUTURE_DATE, timeId, themeId)).isEqualTo("콘");
+        assertThat(helper.existsWaiting(w1)).isFalse();
+        assertThat(helper.findWaitingOrder(w2)).isEqualTo(1);
+        assertThat(helper.findWaitingOrder(w3)).isEqualTo(2);
     }
 
     @Test
@@ -62,7 +56,6 @@ public class WaitingPromotionStepTest extends IntegrationTest {
                 .when().delete("/user/reservations/" + reservationId + "?name=브라운")
                 .then().statusCode(204);
 
-        // 예약은 없어졌다
-        assert helper.findReservationCount(FUTURE_DATE, timeId, themeId) == 0;
+        assertThat(helper.findReservationCount(FUTURE_DATE, timeId, themeId)).isEqualTo(0);
     }
 }

@@ -1,5 +1,6 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
@@ -27,9 +28,9 @@ public class WaitingStepTest extends IntegrationTest {
 
     @BeforeEach
     void setUp() {
+        // 시간, 테마, 예약을 하나씩 생성
         timeId = helper.insertTime(LocalTime.of(10, 0));
         themeId = helper.insertTheme("테마A", "설명", "url");
-        // 슬롯에 예약을 미리 1건 넣어둠
         helper.insertReservation("브라운", FUTURE_DATE, timeId, themeId);
     }
 
@@ -143,11 +144,9 @@ public class WaitingStepTest extends IntegrationTest {
             RestAssured.given()
                     .when().delete("/user/waitings/" + w2 + "?name=모카")
                     .then().statusCode(204);
-
-            // 핀의 순번이 3 → 2
-            assert helper.findWaitingOrder(w3) == 2 : "핀의 순번이 2가 되어야 함";
-            // 콘은 1 그대로
-            assert helper.findWaitingOrder(w1) == 1 : "콘의 순번은 1 유지";
+            
+            assertThat(helper.findWaitingOrder(w1)).isEqualTo(1);
+            assertThat(helper.findWaitingOrder(w3)).isEqualTo(2);
         }
     }
 }
