@@ -54,7 +54,7 @@ class WaitingServiceTest {
                 .willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(theme));
-        given(reservationRepository.findByDateAndTimeAndTheme(date, reservationTime, theme))
+        given(reservationRepository.findByDateAndTimeAndThemeWithLock(date, reservationTime, theme))
                 .willReturn(Optional.of(Reservation.of(1L, "name", date, reservationTime, theme)));
         given(waitingRepository.findMaxWaitingNumberBy(date, reservationTime, theme))
                 .willReturn(Optional.of(1L));
@@ -109,7 +109,7 @@ class WaitingServiceTest {
         given(reservationTimeRepository.findById(1L))
                 .willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(reservationRepository.findByDateAndTimeAndTheme(date, reservationTime, theme))
+        given(reservationRepository.findByDateAndTimeAndThemeWithLock(date, reservationTime, theme))
                 .willReturn(Optional.empty());
 
         WaitingRequestDTO waitingRequestDTO = new WaitingRequestDTO(
@@ -138,7 +138,7 @@ class WaitingServiceTest {
                 .willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L))
                 .willReturn(Optional.of(theme));
-        given(reservationRepository.findByDateAndTimeAndTheme(date, reservationTime, theme))
+        given(reservationRepository.findByDateAndTimeAndThemeWithLock(date, reservationTime, theme))
                 .willReturn(Optional.of(Reservation.of(1L, "name", date, reservationTime, theme)));
 
         given(waitingRepository.existsByNameAndDateAndTimeAndTheme(
@@ -175,7 +175,7 @@ class WaitingServiceTest {
         given(reservationTimeRepository.findById(1L))
                 .willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(reservationRepository.findByDateAndTimeAndTheme(date, reservationTime, theme))
+        given(reservationRepository.findByDateAndTimeAndThemeWithLock(date, reservationTime, theme))
                 .willReturn(Optional.of(Reservation.of(1L, name, date, reservationTime, theme)));
 
         WaitingRequestDTO waitingRequestDTO = new WaitingRequestDTO(
