@@ -3,7 +3,6 @@ package roomescape.controller;
 import java.net.URI;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,41 +11,40 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.dto.TimeRequest;
-import roomescape.dto.TimeResponse;
-import roomescape.service.AdminReservationTimeService;
+import roomescape.controller.dto.ReservationTimeRequest;
+import roomescape.controller.dto.ReservationTimeResponse;
+import roomescape.service.ReservationTimeService;
 
 @RequestMapping("/admin/times")
 @RestController
 @Validated
 public class AdminReservationTimeController {
 
-    private final AdminReservationTimeService adminReservationTimeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public AdminReservationTimeController(AdminReservationTimeService adminReservationTimeService) {
-        this.adminReservationTimeService = adminReservationTimeService;
+    public AdminReservationTimeController(ReservationTimeService reservationTimeService) {
+        this.reservationTimeService = reservationTimeService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<TimeResponse> getTimes() {
-        return adminReservationTimeService.findAll();
+    public ResponseEntity<List<ReservationTimeResponse>> findAll() {
+        return ResponseEntity.ok(reservationTimeService.findAll());
     }
 
     @PostMapping
-    public ResponseEntity<TimeResponse> createTime(@Valid @RequestBody TimeRequest request) {
-        TimeResponse response = adminReservationTimeService.save(request);
-        URI location = URI.create("/times/" + response.id());
-        return ResponseEntity.created(location).body(response);
+    public ResponseEntity<Void> create(@Valid @RequestBody ReservationTimeRequest request) {
+        Long timeId = reservationTimeService.saveReservationTime(request);
+        return ResponseEntity
+                .created(URI.create("/times/" + timeId))
+                .build();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteTime(@PathVariable Long id) {
-        adminReservationTimeService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        reservationTimeService.deleteReservationTime(id);
+        return ResponseEntity.noContent().build();
     }
 }

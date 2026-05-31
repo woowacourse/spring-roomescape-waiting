@@ -1,14 +1,14 @@
 package roomescape.controller;
 
+import java.net.URI;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import roomescape.dto.AdminReservationResponse;
+import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/admin/reservations")
@@ -21,9 +21,35 @@ public class AdminReservationController {
         this.reservationService = reservationService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<AdminReservationResponse> getAllReservations() {
-        return reservationService.getAllReservations();
+    public ResponseEntity<List<ReservationResponse>> findAll() {
+        return ResponseEntity.ok(reservationService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> create(@Valid @RequestBody ReservationRequest request) {
+        Long reservationId = reservationService.saveReservation(request);
+        URI location = URI.create("/reservations/" + reservationId);
+        return ResponseEntity
+                .created(location)
+                .build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable long id,
+            @Valid @RequestBody ReservationRequest request
+    ) {
+        reservationService.updateReservation(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancel(
+            @PathVariable Long id,
+            @RequestParam String name
+    ) {
+        reservationService.cancelReservation(id, name);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,18 +3,18 @@ package roomescape.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.constraints.NotBlank;
-import roomescape.dto.AvailableTimeResponse;
-import roomescape.dto.ThemeResponse;
+import roomescape.controller.dto.AvailableTimeResponse;
+import roomescape.controller.dto.ThemeResponse;
+import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 
 @RequestMapping("/themes")
@@ -23,31 +23,29 @@ import roomescape.service.ThemeService;
 public class ThemeController {
 
     private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public ThemeController(ThemeService themeService) {
+    public ThemeController(ThemeService themeService, ReservationTimeService reservationTimeService) {
         this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ThemeResponse> getAllThemes() {
-        return themeService.getAllThemes();
+    public ResponseEntity<List<ThemeResponse>> findAll() {
+        return ResponseEntity.ok(themeService.findAll());
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
-    public List<ThemeResponse> getPopularThemes(
-            @RequestParam(defaultValue = "10") int size) {
-        LocalDate today = LocalDate.now();
-        return themeService.getPopularThemes(today, size);
+    public ResponseEntity<List<ThemeResponse>> findPopularThemes() {
+        return ResponseEntity.ok(themeService.findPopularThemes());
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}/available-times")
-    public List<AvailableTimeResponse> getReservationTimes(
+    public ResponseEntity<List<AvailableTimeResponse>> findAvailableTimes(
             @PathVariable long id,
-            @NotBlank(message = "날짜를 입력해주세요.")
-            @RequestParam String date) {
-        return themeService.getAvailableTimeResponses(id, date);
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date) {
+        return ResponseEntity.ok(reservationTimeService.findAvailableTimes(id, date));
     }
 }

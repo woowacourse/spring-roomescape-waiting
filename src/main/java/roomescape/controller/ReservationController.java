@@ -1,10 +1,8 @@
 package roomescape.controller;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,12 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
+import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.ReservationResponse;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")
@@ -34,38 +31,35 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<ReservationResponse>> findByName(@RequestParam String name) {
+        return ResponseEntity.ok(reservationService.findByName(name));
+    }
+
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
-        LocalDateTime now = LocalDateTime.now();
-        ReservationResponse response = reservationService.save(now, request);
-        URI location = URI.create("/reservations/" + response.reservationId());
+    public ResponseEntity<Void> create(@Valid @RequestBody ReservationRequest request) {
+        Long reservationId = reservationService.saveReservation(request);
+        URI location = URI.create("/reservations/" + reservationId);
         return ResponseEntity
                 .created(location)
-                .body(response);
+                .build();
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping
-    public List<ReservationResponse> getReservations(@RequestParam String username) {
-        return reservationService.findAllByName(username);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/{reservationId}")
-    public void updateReservation(
-            @PathVariable long reservationId,
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable long id,
             @Valid @RequestBody ReservationRequest request
     ) {
-        LocalDateTime now = LocalDateTime.now();
-        reservationService.update(reservationId, now, request);
+        reservationService.updateReservation(id, request);
+        return ResponseEntity.ok().build();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{reservationId}")
-    public void cancelReservation(
-            @PathVariable Long reservationId
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancel(
+            @PathVariable Long id,
+            @RequestParam String name
     ) {
-        LocalDateTime now = LocalDateTime.now();
-        reservationService.cancel(now, reservationId);
+        reservationService.cancelReservation(id, name);
+        return ResponseEntity.noContent().build();
     }
 }
