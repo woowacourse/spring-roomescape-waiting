@@ -78,7 +78,7 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("특정 대기 id까지의 순번을 조회할 수 있다.")
-    void countByScheduleIdAndIdLessThanEqual_테스트() {
+    void countByScheduleIdAndIdLessThanEqual_테스트_1() {
         waitingRepository.save(new Waiting(null, 3L, SCHEDULE_ID));
         waitingRepository.save(new Waiting(null, 2L, SCHEDULE_ID));
         Waiting myWaiting = waitingRepository.save(new Waiting(null, MEMBER_ID, SCHEDULE_ID));
@@ -89,4 +89,17 @@ class JdbcWaitingRepositoryTest {
         assertThat(count).isEqualTo(3L);
     }
 
+    @Test
+    @DisplayName("앞 쪽 대기 삭제 시 뒤에 있던 대기의 순번이 1 감소한다.")
+    void countByScheduleIdAndIdLessThanEqual_테스트_2() {
+        Waiting firstWaiting = waitingRepository.save(new Waiting(null, 3L, SCHEDULE_ID));
+        Waiting myWaiting = waitingRepository.save(new Waiting(null, MEMBER_ID, SCHEDULE_ID));
+        waitingRepository.save(new Waiting(null, 2L, SCHEDULE_ID));
+        waitingRepository.save(new Waiting(null, 4L, SCHEDULE_ID));
+        waitingRepository.deleteById(firstWaiting.getId());
+
+        long count = waitingRepository.countByScheduleIdAndIdLessThanEqual(SCHEDULE_ID, myWaiting.getId());
+
+        assertThat(count).isEqualTo(1L);
+    }
 }

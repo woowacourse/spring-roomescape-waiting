@@ -25,11 +25,6 @@ import static org.hamcrest.Matchers.notNullValue;
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class AcceptanceTest {
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = 8080;
-    }
-
     private String login(String name, String password) {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", name);
@@ -55,6 +50,19 @@ class AcceptanceTest {
 
     private String managerToken() {
         return login("d", "test4");
+    }
+
+    private Map<String, Object> waitingRequest() {
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("date", "2026-05-05");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        return waiting;
+    }
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = 8080;
     }
 
     @Test
@@ -250,5 +258,50 @@ class AcceptanceTest {
                 });
         assertThat(myReservations)
                 .noneSatisfy(item -> assertThat(item.get("status")).isEqualTo("WAITING"));
+    }
+
+    @Test
+    void 앞_대기_취소_후_내_예약_조회시_뒤_대기의_순번이_1로_조회된다() {
+        String firstUserToken = login("b", "test2");
+        String secondUserToken = login("c", "test3");
+
+        Integer firstWaitingId = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + firstUserToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.waitingOrder", is(1))
+                .extract()
+                .path("data.id");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + secondUserToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.waitingOrder", is(2));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + firstUserToken)
+                .pathParam("id", firstWaitingId)
+                .when().delete("/api/user/waitings/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + secondUserToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(1))
+                .body("data[0].status", is("WAITING"))
+                .body("data[0].waitingOrder", is(1));
     }
 }
