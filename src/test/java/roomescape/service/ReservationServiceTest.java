@@ -237,6 +237,18 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 예약_삭제_시_대기열이_없으면_예약이_삭제된다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        reservationService.delete(created.id());
+
+        assertThat(reservationService.readAll()).isEmpty();
+        assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
+    }
+
+    @Test
     void 예약_삭제_시_대기열이_여러_개면_가장_먼저_등록된_대기자가_승격된다() {
         Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
