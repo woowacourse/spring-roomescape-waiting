@@ -68,14 +68,14 @@ class WaitingServiceTest {
         when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.empty());
         Waiting saved = new Waiting(1L, "레서", futureDate, time, theme);
         when(waitingRepository.save(any())).thenReturn(saved);
-        when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(1L, theme, futureDate, time))
+        when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(1L, theme, futureDate, time))
                 .thenReturn(2L);
 
         WaitingResult result = waitingService.createWaiting("레서", futureDate, 1L, 1L);
 
         assertThat(result.waiting().getId()).isEqualTo(1L);
         assertThat(result.waiting().getName()).isEqualTo("레서");
-        assertThat(result.order()).isEqualTo(3L);
+        assertThat(result.order()).isEqualTo(2L);
         verify(waitingRepository).save(any());
     }
 

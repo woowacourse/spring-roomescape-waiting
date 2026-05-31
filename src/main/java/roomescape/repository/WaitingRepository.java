@@ -99,13 +99,13 @@ public class WaitingRepository {
         }
     }
 
-    public Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time) {
+    public Long countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(Long id, Theme theme, LocalDate date, ReservationTime time) {
         String sql = """
             SELECT COUNT(*) FROM waiting
             WHERE theme_id = ?
               AND date = ?
               AND time_id = ?
-              AND id < ?
+              AND id <= ?
             """;
         return jdbcTemplate.queryForObject(
                 sql,

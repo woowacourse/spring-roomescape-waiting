@@ -47,7 +47,7 @@ public class WaitingService {
         checkDuplicatedReservation(waiting);
 
         waiting = waitingRepository.save(waiting);
-        Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime()) + 1;
+        Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime());
 
         return WaitingResult.of(waiting, order);
     }

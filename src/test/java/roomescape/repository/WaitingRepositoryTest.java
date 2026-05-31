@@ -109,13 +109,13 @@ class WaitingRepositoryTest {
         waitingRepository.save(new Waiting(null, "밍구", date, time, theme));
         Waiting third = waitingRepository.save(new Waiting(null, "브라운", date, time, theme));
 
-        Long firstOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(
+        Long firstOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(
                 first.getId(), theme, date, time);
-        Long thirdOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(
+        Long thirdOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(
                 third.getId(), theme, date, time);
 
-        assertThat(firstOrder).isEqualTo(0L);
-        assertThat(thirdOrder).isEqualTo(2L);
+        assertThat(firstOrder).isEqualTo(1L);
+        assertThat(thirdOrder).isEqualTo(3L);
     }
 
     @Test
