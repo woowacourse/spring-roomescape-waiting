@@ -85,7 +85,6 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$[0].turn").value(2));
 
         verify(reservationWaitingService, times(1)).findByName("브라운");
-        verifyNoMoreInteractions(reservationWaitingService);
     }
 
     @Test

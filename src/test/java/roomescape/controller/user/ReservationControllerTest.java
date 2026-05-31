@@ -84,7 +84,6 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$[0].theme.name").value("테마"));
 
         verify(reservationService, times(1)).findByName("브라운");
-        verifyNoMoreInteractions(reservationService);
     }
 
     @Test

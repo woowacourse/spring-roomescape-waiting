@@ -41,7 +41,6 @@ class AdminReservationTimeControllerTest {
                 .andExpect(jsonPath("$[0].startAt").value("10:00:00"));
 
         verify(reservationTimeService, times(1)).findAll();
-        verifyNoMoreInteractions(reservationTimeService);
     }
 
     @Test

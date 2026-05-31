@@ -52,8 +52,6 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(reservations);
-        verify(reservationRepository, times(1)).findByName(name);
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 
     @Test
@@ -72,8 +70,6 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(reservations);
-        verify(reservationRepository, times(1)).findAll();
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 
     @Test

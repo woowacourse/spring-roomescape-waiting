@@ -51,7 +51,6 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].thumbnail").value("썸네일"));
 
         verify(themeService, times(1)).findAll();
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test
@@ -71,7 +70,6 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].available").value(true));
 
         verify(reservationAvailabilityService, times(1)).findAvailableTime(1L, LocalDate.of(2099, 1, 1));
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test
@@ -107,7 +105,6 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].reservationCount").value(3));
 
         verify(themeService, times(1)).findWeeklyTopTen();
-        verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test

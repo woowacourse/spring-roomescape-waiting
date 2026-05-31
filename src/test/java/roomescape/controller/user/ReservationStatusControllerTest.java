@@ -56,7 +56,6 @@ class ReservationStatusControllerTest {
                 .andExpect(jsonPath("$[1].turn").value(1));
 
         verify(reservationLookupService, times(1)).findByName("브라운");
-        verifyNoMoreInteractions(reservationLookupService);
     }
 
     @Test

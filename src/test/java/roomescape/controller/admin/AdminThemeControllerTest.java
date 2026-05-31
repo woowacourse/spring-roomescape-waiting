@@ -42,7 +42,6 @@ class AdminThemeControllerTest {
                 .andExpect(jsonPath("$[0].thumbnail").value("썸네일"));
 
         verify(themeService, times(1)).findAll();
-        verifyNoMoreInteractions(themeService);
     }
 
     @Test

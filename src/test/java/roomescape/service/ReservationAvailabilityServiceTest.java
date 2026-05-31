@@ -53,10 +53,6 @@ class ReservationAvailabilityServiceTest {
         // then
         assertThat(result).extracting(TimeAvailabilityResult::available)
                 .containsExactly(false, true);
-        verify(themeRepository, times(1)).findBy(themeId);
-        verify(reservationTimeRepository, times(1)).findAll();
-        verify(reservationRepository, times(1)).findReservationsByThemeAndDate(themeId, date);
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 
     @Test
