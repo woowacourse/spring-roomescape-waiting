@@ -5,7 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class AuthenticationIntegrationTest extends AuthApiTestSupport {
+public class AuthenticationTest extends AuthApiTestSupport {
 
     @Test
     @DisplayName("헤더에 인증된 토큰이 있다면 보호된 url에 접근할 수 있다.")

@@ -17,11 +17,6 @@ import java.util.Map;
 @ActiveProfiles("test")
 abstract class AuthApiTestSupport {
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = 8080;
-    }
-
     protected String loginToken(String name, String password) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -37,7 +32,16 @@ abstract class AuthApiTestSupport {
         return loginToken("a", "test1");
     }
 
+    protected String loginManagerToken() {
+        return loginToken("d", "test4");
+    }
+
     protected String bearer(String token) {
         return "Bearer " + token;
+    }
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = 8080;
     }
 }
