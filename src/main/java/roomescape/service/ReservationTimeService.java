@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -20,6 +21,7 @@ import roomescape.exception.domain.ReservationTimeException;
 import roomescape.exception.domain.ThemeException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeDao reservationTimeDao;
@@ -33,6 +35,7 @@ public class ReservationTimeService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         validateUniqueTime(reservationTime.getStartAt());
@@ -70,6 +73,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void delete(long reservationTimeId) {
         validateReservationNotExistsBy(reservationTimeId);
         int affectedRows = reservationTimeDao.delete(reservationTimeId);

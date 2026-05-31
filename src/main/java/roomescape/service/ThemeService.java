@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
@@ -12,6 +13,7 @@ import roomescape.exception.code.ThemeErrorCode;
 import roomescape.exception.domain.ThemeException;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int POPULAR_THEME_PERIOD_DAYS = 7;
@@ -25,6 +27,7 @@ public class ThemeService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         validateUniqueTheme(request.name());
         Theme savedTheme = themeDao.save(request.toTheme());
@@ -53,6 +56,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(long themeId) {
         validateReservationNotExistsBy(themeId);
         int affectedRows = themeDao.delete(themeId);

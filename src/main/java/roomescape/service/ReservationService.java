@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.SlotDao;
@@ -23,6 +24,7 @@ import roomescape.exception.domain.ReservationTimeException;
 import roomescape.exception.domain.ThemeException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationDao reservationDao;
@@ -37,6 +39,7 @@ public class ReservationService {
         this.slotDao = slotDao;
     }
 
+    @Transactional
     public ReservationResponse create(ReservationRequest request, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
@@ -85,6 +88,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse update(long reservationId, ReservationRequest request, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation, currentDateTime);
@@ -123,6 +127,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(long reservationId, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation, currentDateTime);

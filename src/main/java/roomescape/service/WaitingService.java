@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.WaitingDao;
@@ -19,6 +20,7 @@ import roomescape.exception.domain.WaitingException;
 
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingDao waitingDao;
@@ -31,6 +33,7 @@ public class WaitingService {
         this.slotDao = slotDao;
     }
 
+    @Transactional
     public WaitingResponse create(WaitingRequest request, LocalDateTime currentDateTime) {
         Slot slot = slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
                 .orElseThrow(() -> new SlotException(SlotErrorCode.SLOT_NOT_FOUND));
@@ -70,6 +73,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public void delete(long waitingId, String name) {
         Waiting waiting = waitingDao.findById(waitingId)
                 .orElseThrow(() -> new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND));
