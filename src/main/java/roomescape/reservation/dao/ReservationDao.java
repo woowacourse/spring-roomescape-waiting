@@ -202,7 +202,7 @@ public boolean existsByTimeId(Long timeId) {
   public List<MyReservationResponse> findAllByName(String name) {
     String sql = """
         with waiting_rank as (
-            select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank
+            select id, row_number() over (partition by date, time_id, theme_id order by id) as wait_rank
             from reservation
             where status = 'WAITING'
         )
