@@ -11,3 +11,5 @@ MERGE INTO theme(name, description, thumbnail) KEY (name, description, thumbnail
     ('명탐정의 마지막 조각', '미해결 사건의 결정적 증거가 숨겨진 서재를 탐색하라.', '/images/themes/11.png'),
     ('인공지능의 반란', '통제 불능이 된 메인 프레임을 셧다운하고 기지를 탈출하라.', '/images/themes/12.png'),
     ('한밤중의 도서관', '자정의 종이 울리면 책 속에 갇힌 유령들이 깨어난다.', '/images/themes/13.png');
+
+ALTER TABLE theme ALTER COLUMN id RESTART WITH 13;
