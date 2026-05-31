@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS waiting
     CONSTRAINT unique_waiting_slot_customer_name UNIQUE (slot_id, customer_name)
 );
 
+CREATE INDEX IF NOT EXISTS idx_waiting_customer_name
+    ON waiting (customer_name);
+
 CREATE TABLE IF NOT EXISTS reservation
 (
     id      BIGINT       NOT NULL AUTO_INCREMENT,
@@ -50,3 +53,6 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
     CONSTRAINT unique_reservation_slot UNIQUE (slot_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_reservation_customer_name
+    ON reservation (customer_name);
