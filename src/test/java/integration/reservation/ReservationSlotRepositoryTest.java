@@ -139,8 +139,8 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 .containsExactly("이프", ReservationStatus.RESERVED);
         assertThat(result.getReservations())
                 .singleElement()
-                .extracting(Reservation::getSlot)
-                .isSameAs(result);
+                .extracting(Reservation::getId)
+                .isNotNull();
     }
 
     @Test

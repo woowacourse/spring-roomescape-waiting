@@ -36,7 +36,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                 .map(reservation -> new Reservation(
                         reservation.getId() == null ? reservationCounter.getAndIncrement() : reservation.getId(),
                         reservation.getName(),
-                        reservation.getSlot(),
                         reservation.getStatus(),
                         reservation.getCreatedAt()
                 ))

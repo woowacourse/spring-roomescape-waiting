@@ -1,10 +1,8 @@
 package roomescape.persistence.jdbc;
 
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.persistence.ReservationSlotRepository;
 import roomescape.persistence.dto.ReservationCondition;
@@ -21,14 +19,14 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     @Override
     public ReservationSlot save(ReservationSlot slot) {
         Long slotId = saveReservationSlot(slot);
-        List<Reservation> savedReservations = reservationDao.saveAll(slotId, slot.getReservations());
+        reservationDao.saveAll(slotId, slot.getReservations());
         return findById(slotId)
                 .orElseGet(() -> new ReservationSlot(
                         slotId,
                         slot.getDate(),
                         slot.getTheme(),
                         slot.getTime(),
-                        savedReservations
+                        slot.getReservations()
                 ));
     }
 
@@ -63,7 +61,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 slot.getDate(),
                 slot.getTheme(),
                 slot.getTime(),
-                reservationDao.findBySlot(slot)
+                reservationDao.findBySlotId(slot.getId())
         );
     }
 }

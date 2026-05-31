@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
 import roomescape.persistence.jdbc.mapper.ReservationRowMapper;
 
 @Repository
@@ -51,7 +50,6 @@ public class ReservationDao {
         return new Reservation(
                 keyHolder.getKey().longValue(),
                 reservation.getName(),
-                reservation.getSlot(),
                 reservation.getStatus(),
                 reservation.getCreatedAt()
         );
@@ -73,13 +71,13 @@ public class ReservationDao {
         );
     }
 
-    public List<Reservation> findBySlot(ReservationSlot slot) {
+    public List<Reservation> findBySlotId(Long slotId) {
         String sql = """
                 SELECT id AS reservation_id, name AS reservation_name, status AS reservation_status, created_at AS reservation_created_at
                 FROM reservation
                 WHERE slot_id = ?
                 ORDER BY created_at
                 """;
-        return jdbcTemplate.query(sql, ReservationRowMapper.reservationRowMapper(slot), slot.getId());
+        return jdbcTemplate.query(sql, ReservationRowMapper.RESERVATION_ROW_MAPPER, slotId);
     }
 }

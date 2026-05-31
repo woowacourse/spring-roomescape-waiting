@@ -3,45 +3,40 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.fixture.ReservationTimeFixture;
-import roomescape.domain.fixture.ThemeFixture;
 
 class ReservationsTest {
 
     @Test
     void 예약_엔트리를_추가한다() {
         // given
-        ReservationSlot slot = slot();
         Reservations reservations = new Reservations(List.of());
 
         // when
-        reservations.addReserved("이프", slot);
+        reservations.addReserved("이프");
 
         // then
         assertThat(reservations.getReservations())
                 .singleElement()
-                .extracting(Reservation::getName, Reservation::getSlot, Reservation::getStatus)
-                .containsExactly("이프", slot, ReservationStatus.RESERVED);
+                .extracting(Reservation::getName, Reservation::getStatus)
+                .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
     void 대기_엔트리를_추가한다() {
         // given
-        ReservationSlot slot = slot();
         Reservations reservations = new Reservations(List.of());
 
         // when
-        reservations.addWaiting("이프", slot);
+        reservations.addWaiting("이프");
 
         // then
         assertThat(reservations.getReservations())
                 .singleElement()
-                .extracting(Reservation::getName, Reservation::getSlot, Reservation::getStatus)
-                .containsExactly("이프", slot, ReservationStatus.WAITING);
+                .extracting(Reservation::getName, Reservation::getStatus)
+                .containsExactly("이프", ReservationStatus.WAITING);
     }
 
     @Test
@@ -157,15 +152,7 @@ class ReservationsTest {
                 );
     }
 
-    private ReservationSlot slot() {
-        return ReservationSlot.createSlot(
-                LocalDate.now().plusDays(1),
-                ThemeFixture.createDefaultTheme(),
-                ReservationTimeFixture.createDefault()
-        );
-    }
-
     private Reservation reservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new Reservation(id, name, null, status, createdAt);
+        return new Reservation(id, name, status, createdAt);
     }
 }

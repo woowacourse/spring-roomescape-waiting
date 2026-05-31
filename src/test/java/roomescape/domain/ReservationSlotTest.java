@@ -57,8 +57,8 @@ class ReservationSlotTest {
         // then
         assertThat(slot.getReservations())
                 .singleElement()
-                .extracting(Reservation::getName, Reservation::getSlot, Reservation::getStatus)
-                .containsExactly("이프", slot, ReservationStatus.RESERVED);
+                .extracting(Reservation::getName, Reservation::getStatus)
+                .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
     @Test
@@ -244,6 +244,6 @@ class ReservationSlotTest {
     }
 
     private Reservation reservation(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new Reservation(id, name, null, status, createdAt);
+        return new Reservation(id, name, status, createdAt);
     }
 }

@@ -2,51 +2,40 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.fixture.ReservationTimeFixture;
-import roomescape.domain.fixture.ThemeFixture;
 
 class ReservationTest {
 
     @Test
     void 예약_엔트리를_생성한다() {
-        // given
-        ReservationSlot slot = slot();
-
         // when
-        Reservation reservation = Reservation.reserve("이프", slot);
+        Reservation reservation = Reservation.reserve("이프");
 
         // then
         assertThat(reservation)
                 .extracting(
                         Reservation::getId,
                         Reservation::getName,
-                        Reservation::getSlot,
                         Reservation::getStatus
                 )
-                .containsExactly(null, "이프", slot, ReservationStatus.RESERVED);
+                .containsExactly(null, "이프", ReservationStatus.RESERVED);
         assertThat(reservation.getCreatedAt()).isNotNull();
     }
 
     @Test
     void 대기_엔트리를_생성한다() {
-        // given
-        ReservationSlot slot = slot();
-
         // when
-        Reservation reservation = Reservation.waiting("이프", slot);
+        Reservation reservation = Reservation.waiting("이프");
 
         // then
         assertThat(reservation)
                 .extracting(
                         Reservation::getId,
                         Reservation::getName,
-                        Reservation::getSlot,
                         Reservation::getStatus
                 )
-                .containsExactly(null, "이프", slot, ReservationStatus.WAITING);
+                .containsExactly(null, "이프", ReservationStatus.WAITING);
         assertThat(reservation.getCreatedAt()).isNotNull();
     }
 
@@ -110,15 +99,7 @@ class ReservationTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
-    private ReservationSlot slot() {
-        return ReservationSlot.createSlot(
-                LocalDate.now().plusDays(1),
-                ThemeFixture.createDefaultTheme(),
-                ReservationTimeFixture.createDefault()
-        );
-    }
-
     private Reservation reservation(Long id, ReservationStatus status) {
-        return new Reservation(id, "이프", null, status, LocalDateTime.now());
+        return new Reservation(id, "이프", status, LocalDateTime.now());
     }
 }
