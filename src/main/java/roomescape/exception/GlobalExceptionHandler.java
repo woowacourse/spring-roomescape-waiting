@@ -1,5 +1,6 @@
 package roomescape.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,8 +53,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PessimisticLockingFailureException.class)
-    public ResponseEntity<ErrorResponse> handle(PessimisticLockingFailureException e) {
+    public ResponseEntity<ErrorResponse> handlePessimisticLockingFailureException() {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("LOCK_CONFLICT", "일시적 충돌이 발생했습니다. 다시 시도해주세요."));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "데이터 충돌이 발생했습니다. 다시 시도해주세요."));
     }
 }
