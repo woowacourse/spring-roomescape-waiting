@@ -58,7 +58,7 @@ public class WaitingController {
             @LoginMember Member member,
             @PathVariable Long id
     ) {
-        waitingAuthorizationService.validateMemberCanAccess(member.getId(), id);
+        waitingAuthorizationService.validateMemberCanAccess(member, id);
         waitingService.delete(id);
         return ResponseEntity.noContent().build();
     }

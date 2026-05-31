@@ -1,11 +1,12 @@
 package roomescape.auth.service;
 
-import java.util.Objects;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.WaitingDao;
+import roomescape.domain.Member;
+import roomescape.domain.Store;
 import roomescape.domain.Waiting;
 
 @Service
@@ -16,27 +17,25 @@ public class WaitingAuthorizationService {
         this.waitingDao = waitingDao;
     }
 
-    public void validateMemberCanAccess(Long memberId, Long waitingId
-    ) {
+    public void validateMemberCanAccess(Member member, Long waitingId) {
         Waiting waiting = findWaiting(waitingId);
-        if (!waiting.getMember().getId().equals(memberId)) {
+        if (!waiting.isSameMember(member)) {
             throw new HiddenResourceException();
         }
     }
 
-    public void validateManagerCanAccess(Long storeId, Long waitingId
-    ) {
-        if (storeId == null) {
+    public void validateManagerCanAccess(Member manager, Long waitingId) {
+        Store store = manager.getStore();
+        if (store == null) {
             throw new UnauthorizedException();
         }
         Waiting waiting = findWaiting(waitingId);
-        if (!Objects.equals(storeId, waiting.getStoreId())) {
+        if (!waiting.isInStore(store)) {
             throw new UnauthorizedException();
         }
     }
 
-    private Waiting findWaiting(Long waitingId
-    ) {
+    private Waiting findWaiting(Long waitingId) {
         return waitingDao.findById(waitingId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 대기입니다."));
     }

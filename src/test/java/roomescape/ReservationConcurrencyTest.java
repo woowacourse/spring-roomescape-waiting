@@ -134,7 +134,7 @@ class ReservationConcurrencyTest {
             new Thread(() -> {
                 try {
                     startLatch.await();
-                    reservationService.updateByUser(savedReservation.getId(), member.getId(), request);
+                    reservationService.updateByUser(savedReservation.getId(), member, request);
                     successCount.incrementAndGet();
                 } catch (DuplicateEntityException e) {
                     conflictCount.incrementAndGet();

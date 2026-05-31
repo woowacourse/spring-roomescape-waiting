@@ -85,7 +85,8 @@ public class Member {
     }
 
     public Long getStoreId() {
-        return store == null ? null : store.getId();
+        if(store == null) return null;
+        return store.getId();
     }
 
     @Override

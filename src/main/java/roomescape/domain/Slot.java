@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.common.DomainAssert;
 
 public class Slot {
     private final LocalDate date;
@@ -10,6 +11,10 @@ public class Slot {
     private final Store store;
 
     public Slot(LocalDate date, Time time, Theme theme, Store store) {
+        DomainAssert.notNull(date, "예약 날짜는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(time, "시간은 비어 있을 수 없습니다.");
+        DomainAssert.notNull(theme, "테마는 비어 있을 수 없습니다.");
+        DomainAssert.notNull(store, "매장은 비어 있을 수 없습니다.");
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -37,6 +42,6 @@ public class Slot {
     }
 
     public Long getStoreId() {
-        return store == null ? null : store.getId();
+        return store.getId();
     }
 }
