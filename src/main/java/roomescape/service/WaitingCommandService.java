@@ -60,7 +60,7 @@ public class WaitingCommandService {
     }
 
     private Reservation findReservationBySlot(Slot slot) {
-        return reservationDao.findBySlot(slot)
+        return reservationDao.findBySlotForUpdate(slot)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
     }
 

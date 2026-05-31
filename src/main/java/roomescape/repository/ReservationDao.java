@@ -133,6 +133,21 @@ public class ReservationDao {
                 .findFirst();
     }
 
+    public Optional<Reservation> findBySlotForUpdate(Slot slot) {
+        String sql = SELECT_BASE + " WHERE reservation.date = :date AND reservation.time_id = :timeId AND reservation.theme_id = :themeId FOR UPDATE";
+        SqlParameterSource params = slotParams(slot);
+        return jdbcTemplate.query(sql, params, rowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    public Optional<Reservation> findByIdForUpdate(long id) {
+        String sql = SELECT_BASE + " WHERE reservation.id = :id FOR UPDATE";
+        return jdbcTemplate.query(sql, Map.of("id", id), rowMapper)
+                .stream()
+                .findFirst();
+    }
+
     public boolean existsBySlot(Slot slot) {
         String sql = """
         SELECT EXISTS (

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 @TestConfiguration
-class FixedClockConfig {
+public class FixedClockConfig {
     @Bean
     @Primary
     public Clock testClock() {

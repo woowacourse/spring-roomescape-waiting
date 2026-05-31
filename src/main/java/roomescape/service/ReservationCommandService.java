@@ -63,7 +63,7 @@ public class ReservationCommandService {
     public Reservation update(long reservationId, String name, LocalDate newDate, long newTimeId) {
         LocalDateTime now = LocalDateTime.now(clock);
         Member member = new Member(name);
-        Reservation oldReservation = findReservation(reservationId);
+        Reservation oldReservation = findReservationForUpdate(reservationId);
         Slot newSlot = new Slot(newDate, findTimeReference(newTimeId), oldReservation.slot().theme());
 
         oldReservation.validateOwnedBy(member);
@@ -104,6 +104,11 @@ public class ReservationCommandService {
 
     private Reservation findReservation(long reservationId) {
         return reservationDao.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
+    }
+
+    private Reservation findReservationForUpdate(long reservationId) {
+        return reservationDao.findByIdForUpdate(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
     }
 }
