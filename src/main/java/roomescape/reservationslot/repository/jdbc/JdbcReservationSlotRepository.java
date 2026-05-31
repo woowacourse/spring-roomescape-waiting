@@ -86,6 +86,41 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 WHERE s.reservation_date = ? AND s.time_id = ? AND s.theme_id = ?
                 """;
 
+        return findByDateAndTimeIdAndThemeId(date, timeId, themeId, sql);
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByDateAndTimeIdAndThemeIdForUpdate(
+            final java.time.LocalDate date,
+            final Long timeId,
+            final Long themeId
+    ) {
+        final String sql = """
+                SELECT
+                    s.id AS slot_id,
+                    s.reservation_date,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    h.id AS theme_id,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_slot s
+                JOIN reservation_time t ON s.time_id = t.id
+                JOIN theme h ON s.theme_id = h.id
+                WHERE s.reservation_date = ? AND s.time_id = ? AND s.theme_id = ?
+                FOR UPDATE
+                """;
+
+        return findByDateAndTimeIdAndThemeId(date, timeId, themeId, sql);
+    }
+
+    private Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(
+            final java.time.LocalDate date,
+            final Long timeId,
+            final Long themeId,
+            final String sql
+    ) {
         try {
             return Optional.of(jdbcTemplate.queryForObject(
                     sql,
@@ -102,7 +137,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     @Override
     @Transactional
     public void deleteReservationAndPromoteWaiting(final Reservation reservation) {
-        final ReservationSlot slot = findById(reservation.getSlotId())
+        final ReservationSlot slot = findByIdForUpdate(reservation.getSlotId())
                 .orElseThrow(ReservationSlotNotFoundException::new);
 
         if (!deleteCurrentReservation(reservation.getId(), slot.getId())) {
@@ -150,7 +185,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         );
     }
 
-    private Optional<ReservationSlot> findById(final Long slotId) {
+    private Optional<ReservationSlot> findByIdForUpdate(final Long slotId) {
         final String sql = """
                 SELECT
                     s.id AS slot_id,
@@ -165,6 +200,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 JOIN reservation_time t ON s.time_id = t.id
                 JOIN theme h ON s.theme_id = h.id
                 WHERE s.id = ?
+                FOR UPDATE
                 """;
 
         try {

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -32,12 +33,13 @@ public class WaitingService {
     private final ReservationSlotRepository reservationSlotRepository;
     private final Clock clock;
 
+    @Transactional
     public long create(final WaitingCreateRequest request) {
         final Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(ReservationTimeNotFoundException::new);
-        final ReservationSlot slot = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
+        final ReservationSlot slot = reservationSlotRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 request.date(),
                 reservationTime.getId(),
                 theme.getId()

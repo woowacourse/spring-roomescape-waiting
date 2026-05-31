@@ -14,5 +14,7 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    Optional<ReservationSlot> findByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
+
     void deleteReservationAndPromoteWaiting(Reservation reservation);
 }

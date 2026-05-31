@@ -53,6 +53,15 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
+    public Optional<ReservationSlot> findByDateAndTimeIdAndThemeIdForUpdate(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId
+    ) {
+        return findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public void deleteReservationAndPromoteWaiting(final Reservation reservation) {
         if (!reservationRepository.removeById(reservation.getId())) {
             throw new ReservationNotFoundException();
