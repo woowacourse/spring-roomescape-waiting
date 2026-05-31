@@ -135,7 +135,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
                            s.id as store_id, s.name as store_name,
                            row_number() over (
                                partition by r.date, r.time_id, r.theme_id, r.store_id, r.status
-                               order by r.created_at, r.id
+                               order by r.id
                            ) as waiting_order
                     from reservation r
                     join users u on r.user_id = u.id
