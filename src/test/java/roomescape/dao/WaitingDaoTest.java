@@ -75,4 +75,16 @@ public class WaitingDaoTest {
 
         assertThat(waitings.size()).isEqualTo(1);
     }
+
+    @Test
+    void 동일한_슬롯에_대기하면_빠른_사람이_순번이_빠르다() {
+        List<WaitingQueryResult> results = waitingDao.findByUserName("토리");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).sequence()).isEqualTo(1);
+
+        results = waitingDao.findByUserName("로운");
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).sequence()).isEqualTo(2);
+    }
 }
