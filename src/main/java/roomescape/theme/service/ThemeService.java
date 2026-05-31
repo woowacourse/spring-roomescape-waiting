@@ -29,9 +29,6 @@ public class ThemeService {
     }
 
     public void delete(long id) {
-        boolean deleted = themeDao.delete(id);
-        if (!deleted) {
-            throw new IllegalArgumentException("삭제할 테마를 조회하지 못했습니다. id = " + id);
-        }
+        themeDao.delete(id);
     }
 }

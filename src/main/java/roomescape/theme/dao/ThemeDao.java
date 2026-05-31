@@ -58,14 +58,13 @@ public class ThemeDao {
         }
     }
 
-    public boolean delete(Long id) {
+    public void delete(Long id) {
         try {
             String sql = """
                     DELETE FROM theme
                     WHERE id = ?
                     """;
-            int deletedRowCount = jdbcTemplate.update(sql, id);
-            return deletedRowCount > 0;
+            jdbcTemplate.update(sql, id);
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("사용 중인 테마는 삭제할 수 없습니다. id = " + id);
         }
