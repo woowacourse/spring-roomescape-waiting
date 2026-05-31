@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인기 테마 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular" class="active">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations">내 예약</a>
+      <a href="/login" id="auth-link">로그인</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title"><i class="fas fa-fire" style="color:var(--accent);margin-right:10px;"></i>인기 테마 TOP 10</h1>
+  <p class="page-subtitle">최근 7일간 예약 수 기준</p>
+  <div id="popular-grid" class="theme-grid"></div>
+  <div id="popular-empty" class="empty d-none">최근 7일간 예약된 테마가 없습니다.</div>
+</main>
+
+<script src="/js/nav.js"></script>
+<script src="/js/popular.js"></script>
+</body>
+</html>

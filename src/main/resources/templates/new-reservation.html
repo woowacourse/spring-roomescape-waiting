@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방탈출 어드민 페이지</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/reservation.css">
+</head>
+
+<body>
+
+<div class="container-fluid page">
+  <div class="row">
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="col-md-3">
+      <nav id="sidebar" class="text-white">
+        <!-- 로고 영역 -->
+        <div class="sidebar-logo p-4">
+          <a href="/">
+            <img src="https://avatars.githubusercontent.com/u/141792611?s=96&v=4" alt="logo"
+                 class="img-fluid rounded-circle">
+          </a>
+        </div>
+        <ul class="list-unstyled mt-4">
+          <li class="p-3">
+            <i class="fas fa-calendar-check menu-icon mr-2"></i>
+            <a href="/reservation" class="text-white">예약관리</a>
+          </li>
+          <li class="p-3">
+            <i class="fas fa-clock menu-icon mr-2"></i>
+            <a href="/time" class="text-white">시간관리</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- Content -->
+    <div id="content-container" class="col-md-9 p-5">
+      <h1>예약 관리</h1>
+      <div class="table-header">
+        <button id="add-reservation" class="btn btn-primary">예약 추가</button>
+      </div>
+      <div class="table-container"/>
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>예약번호</th>
+          <th>예약자</th>
+          <th>날짜</th>
+          <th>시간</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody id="reservation-table-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/js/scripts.js"></script>
+<script src="/js/new-reservation.js"></script>
+</body>
+
+</html>

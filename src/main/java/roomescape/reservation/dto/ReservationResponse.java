@@ -1,0 +1,26 @@
+package roomescape.reservation.dto;
+
+import java.time.LocalDate;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.dto.TimeResponse;
+
+public record ReservationResponse(
+        Long id,
+        String memberName,
+        LocalDate date,
+        TimeResponse time,
+        Long themeId,
+        String themeName
+) {
+
+    public static ReservationResponse from(Reservation reservation) {
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getMember().getName(),
+                reservation.getDate(),
+                TimeResponse.of(reservation.getTime()),
+                reservation.getTheme().getId(),
+                reservation.getTheme().getName()
+        );
+    }
+}
