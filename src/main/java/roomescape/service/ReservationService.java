@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
@@ -82,12 +84,20 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationWithStatusResponses getMyReservations(Long userId) {
-        List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
-                .filter(Reservation::isReserved)
-                .toList();
+        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(userId);
 
-        Map<Reservation, Integer> waitingReservations =
-                reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
+        List<Reservation> reservations = new ArrayList<>();
+        Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
+        for (Map.Entry<Reservation, Integer> entry : myReservations.entrySet()) {
+            Reservation reservation = entry.getKey();
+            if (reservation.isReserved()) {
+                reservations.add(reservation);
+                continue;
+            }
+            if (reservation.isWaiting()) {
+                waitingReservations.put(reservation, entry.getValue());
+            }
+        }
 
         return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
     }

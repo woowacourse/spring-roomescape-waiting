@@ -39,24 +39,13 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByUserId(Long userId) {
+    public Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId) {
         return store.values().stream()
                 .filter(r -> r.getUser().getId().equals(userId))
                 .sorted(Comparator.comparing(Reservation::getStatus)
                         .thenComparing(Reservation::getDate)
                         .thenComparing(r -> r.getTime().getStartAt())
                         .thenComparing(Reservation::getId))
-                .toList();
-    }
-
-    @Override
-    public Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId) {
-        return store.values().stream()
-                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(r -> r.getTime().getStartAt())
-                        .thenComparing(Reservation::getId))
-                .filter(r -> r.getUser().getId().equals(userId))
                 .collect(java.util.stream.Collectors.toMap(
                         reservation -> reservation,
                         this::waitingOrder,

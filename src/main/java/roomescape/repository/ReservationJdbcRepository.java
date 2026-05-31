@@ -123,35 +123,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByUserId(Long userId) {
-        String sql = """
-                select r.id, r.date, r.status,
-                       u.id as u_id, u.username as u_username, u.password as u_password,
-                       u.name as u_name, u.role as u_role,
-                       t.id as time_id, t.start_at,
-                       th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
-                       s.id as store_id, s.name as store_name
-                from reservation r
-                join users u on r.user_id = u.id
-                join reservation_time t on r.time_id = t.id
-                join theme th on r.theme_id = th.id
-                join store s on r.store_id = s.id
-                where u.id = ?
-                order by case r.status
-                             when 'RESERVED' then 0
-                             when 'WAITING' then 1
-                             else 2
-                         end,
-                         r.date,
-                         t.start_at,
-                         r.created_at,
-                         r.id
-                """;
-        return jdbcTemplate.query(sql, rowMapper, userId);
-    }
-
-    @Override
-    public Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId) {
+    public Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId) {
         String sql = """
                 select *
                 from (
@@ -162,7 +134,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
                            th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
                            s.id as store_id, s.name as store_name,
                            row_number() over (
-                               partition by r.date, r.time_id, r.theme_id, r.store_id
+                               partition by r.date, r.time_id, r.theme_id, r.store_id, r.status
                                order by r.created_at, r.id
                            ) as waiting_order
                     from reservation r
@@ -170,18 +142,22 @@ public class ReservationJdbcRepository implements ReservationRepository {
                     join reservation_time t on r.time_id = t.id
                     join theme th on r.theme_id = th.id
                     join store s on r.store_id = s.id
-                    where r.status = ?
-                ) waiting_reservation
+                ) ranked_reservation
                 where u_id = ?
-                order by date, start_at, waiting_order
+                order by case status
+                             when 'RESERVED' then 0
+                             when 'WAITING' then 1
+                             else 2
+                         end,
+                         date, start_at, waiting_order, id
                 """;
 
-        Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
+        Map<Reservation, Integer> reservations = new LinkedHashMap<>();
         jdbcTemplate.query(sql, resultSet -> {
             Reservation reservation = rowMapper.mapRow(resultSet, resultSet.getRow());
-            waitingReservations.put(reservation, resultSet.getInt("waiting_order"));
-        }, ReservationStatus.WAITING.name(), userId);
-        return waitingReservations;
+            reservations.put(reservation, resultSet.getInt("waiting_order"));
+        }, userId);
+        return reservations;
     }
 
     @Override

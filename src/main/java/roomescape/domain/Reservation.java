@@ -62,6 +62,10 @@ public class Reservation {
         return status.equals(ReservationStatus.RESERVED);
     }
 
+    public boolean isWaiting() {
+        return status.equals(ReservationStatus.WAITING);
+    }
+
     public Reservation withId(Long id) {
         return new Reservation(id, user, theme, date, time, store, status);
     }

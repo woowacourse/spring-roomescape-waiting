@@ -100,7 +100,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findAllByUserId_예약_확정과_예약_대기를_상태와_예약일시_생성순으로_정렬해_조회한다() {
+    void findAllByUserIdWithWaitingOrder_예약_확정과_예약_대기를_상태와_예약일시_생성순으로_정렬해_조회한다() {
         Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운"); //주인공
         Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
         Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
@@ -115,14 +115,14 @@ class ReservationJdbcRepositoryTest {
         long waitingBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-01", time,
                 ReservationStatus.WAITING.name());
 
-        List<Reservation> results = repository.findAllByUserId(brown);
+        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown);
 
         assertThat(results).hasSize(2);
-        assertThat(results).extracting(reservation -> reservation.getUser().getName())
+        assertThat(results.keySet()).extracting(reservation -> reservation.getUser().getName())
                 .containsOnly("브라운");
-        assertThat(results).extracting(Reservation::getId)
+        assertThat(results.keySet()).extracting(Reservation::getId)
                 .containsExactly(reservedBrownId, waitingBrownId);
-        assertThat(results).extracting(
+        assertThat(results.keySet()).extracting(
                         Reservation::getStatus,
                         Reservation::getDate,
                         reservation -> reservation.getTime().getStartAt(),
@@ -135,7 +135,7 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findWaitingReservationsWithOrderByUserId_두_개의_슬롯에_건_대기는_슬롯별로_순번을_독립_계산한다() {
+    void findAllByUserIdWithWaitingOrder_두_개의_슬롯에_건_대기는_슬롯별로_순번을_독립_계산한다() {
         Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
         Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
@@ -165,7 +165,7 @@ class ReservationJdbcRepositoryTest {
         jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 11:00:00",
                 slotBBrownWaitingId);
 
-        Map<Reservation, Integer> results = repository.findWaitingReservationsWithOrderByUserId(brown);
+        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown);
 
         assertThat(results).hasSize(2);
         assertThat(results.keySet()).extracting(Reservation::getId)
