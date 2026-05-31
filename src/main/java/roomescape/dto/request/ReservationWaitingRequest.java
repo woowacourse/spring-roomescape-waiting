@@ -13,9 +13,9 @@ public record ReservationWaitingRequest(
         LocalDate reservationDate,
 
         @NotNull(message = "예약 시간은 필수값 입니다.")
-        long timeId,
+        Long timeId,
 
         @NotNull(message = "예약 테마는 필수값 입니다.")
-        long themeId
+        Long themeId
 ) {
 }
