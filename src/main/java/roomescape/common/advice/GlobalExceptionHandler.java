@@ -1,84 +1,103 @@
 package roomescape.common.advice;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.common.exception.AlreadyInUseException;
-import roomescape.common.exception.DuplicateException;
-import roomescape.common.exception.IllegalDateTimeException;
-import roomescape.common.exception.NotFoundException;
-import roomescape.common.exception.UnauthorizedException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import roomescape.common.exception.CustomException;
+import roomescape.common.exception.ErrorResponse;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleUnhandledException(final Exception e) {
-        String traceId = UUID.randomUUID().toString().substring(0, 8);
-        log.error("[TraceID: {}] Unhandled Exception 발생 : ", traceId, e);
-        return ResponseEntity.internalServerError().body("일시적인 서버 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(final CustomException e) {
+        return createResponse(e.getHttpStatus(), e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<String> handleValidationException(final BindException e) {
+    public ResponseEntity<ErrorResponse> handleValidationException(final BindException e) {
         log.error("Bind Exception 발생 : {}", e.getMessage());
-        return getStringResponseEntity(e.getBindingResult());
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> String.format("[%s] %s", error.getField(), error.getDefaultMessage()))
+                .collect(Collectors.joining(", "));
+        return createResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", errorMessage);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValid Exception 발생 : {}", e.getMessage());
-        return getStringResponseEntity(e.getBindingResult());
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> String.format("[%s] %s", error.getField(), error.getDefaultMessage()))
+                .collect(Collectors.joining(", "));
+        return createResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST_BODY", errorMessage);
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleReservationNotFoundException(final NotFoundException e) {
-        log.error("Reservation Not Found Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(final ConstraintViolationException e) {
+        String errorMessage = e.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(", "));
+        log.error("Constraint Violation Exception 발생 : {}", errorMessage);
+        return createResponse(HttpStatus.BAD_REQUEST, "CONSTRAINT_VIOLATION", errorMessage);
     }
 
-    @ExceptionHandler(AlreadyInUseException.class)
-    public ResponseEntity<String> handleReservationTimeInUseException(final AlreadyInUseException e) {
-        log.error("Reservation Already In Use Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException() {
+        return createResponse(HttpStatus.BAD_REQUEST, "INVALID_JSON", "요청 Json 형식이 잘못되었습니다.");
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<String> handleIllegalStateException(final IllegalStateException e) {
-        log.error("Illegal State Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.unprocessableEntity().body(e.getMessage());
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException() {
+        return createResponse(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", "지원하지 않는 HTTP Method 입니다.");
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<String> handleDuplicateException(final DuplicateException e) {
-        log.error("Duplicate Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException() {
+        return createResponse(HttpStatus.BAD_REQUEST, "TYPE_MISMATCH", "변환할 수 없는 잘못된 데이터 타입이 존재합니다.");
     }
 
-    @ExceptionHandler(IllegalDateTimeException.class)
-    public ResponseEntity<String> handleIllegalDateTimeException(final IllegalDateTimeException e) {
-        log.error("Illegal Date Time Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.unprocessableEntity().body(e.getMessage());
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameterException(
+            final MissingServletRequestParameterException e
+    ) {
+        return createResponse(HttpStatus.BAD_REQUEST, "MISSING_REQUEST_PARAMETER",
+                e.getParameterName() + " 파라미터가 누락 되었습니다.");
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<String> handleUnauthorizedReservationChangeException(final UnauthorizedException e) {
-        log.error("Unauthorized Exception 발생 : {}", e.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFoundException() {
+        return createResponse(HttpStatus.NOT_FOUND, "NO_RESOURCE_FOUND", "존재하지 않는 경로입니다.");
     }
 
-    private ResponseEntity<String> getStringResponseEntity(final BindingResult e) {
-        String message = e
-                .getAllErrors()
-                .getFirst()
-                .getDefaultMessage();
-        return ResponseEntity.badRequest().body(message);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnhandledException(final Exception e) {
+        String traceId = UUID.randomUUID().toString().substring(0, 8);
+        log.error("[TraceID: {}] Unhandled Exception 발생 : ", traceId, e);
+        return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "알 수 없는 서버 예외가 발생했습니다.");
+    }
+
+    private ResponseEntity<ErrorResponse> createResponse(final HttpStatus status, final String code,
+                                                         final String message) {
+        return ResponseEntity.status(status)
+                .body(ErrorResponse.of(code, message));
     }
 }

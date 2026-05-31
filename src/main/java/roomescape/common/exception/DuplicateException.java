@@ -1,7 +1,10 @@
 package roomescape.common.exception;
 
-public class DuplicateException extends RuntimeException {
-    public DuplicateException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class DuplicateException extends CustomException {
+
+    public DuplicateException(final String message) {
+        super("DUPLICATE", HttpStatus.CONFLICT, message);
     }
 }

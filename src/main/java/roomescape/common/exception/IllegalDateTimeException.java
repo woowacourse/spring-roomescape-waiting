@@ -1,7 +1,10 @@
 package roomescape.common.exception;
 
-public class IllegalDateTimeException extends RuntimeException {
-    public IllegalDateTimeException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class IllegalDateTimeException extends CustomException {
+
+    public IllegalDateTimeException(final String message) {
+        super("ILLEGAL_DATE_TIME", HttpStatus.UNPROCESSABLE_ENTITY, message);
     }
 }

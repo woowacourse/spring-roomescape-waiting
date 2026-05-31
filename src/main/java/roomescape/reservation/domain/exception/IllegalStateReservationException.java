@@ -1,7 +1,11 @@
 package roomescape.reservation.domain.exception;
 
-public class IllegalStateReservationException extends IllegalStateException {
-    public IllegalStateReservationException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+import roomescape.common.exception.CustomException;
+
+public class IllegalStateReservationException extends CustomException {
+
+    public IllegalStateReservationException(final String message) {
+        super("ILLEGAL_RESERVATION_STATE", HttpStatus.UNPROCESSABLE_ENTITY, message);
     }
 }

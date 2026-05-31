@@ -1,7 +1,10 @@
 package roomescape.common.exception;
 
-public class AlreadyInUseException extends RuntimeException {
-    public AlreadyInUseException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class AlreadyInUseException extends CustomException {
+
+    public AlreadyInUseException(final String message) {
+        super("ALREADY_IN_USE", HttpStatus.CONFLICT, message);
     }
 }
