@@ -17,8 +17,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.ConflictException;
-import roomescape.exception.NotFoundException;
+import roomescape.domain.exception.ConflictException;
+import roomescape.domain.exception.NotFoundException;
 
 @Repository
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {

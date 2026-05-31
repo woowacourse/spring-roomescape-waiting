@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
-import roomescape.exception.NotFoundException;
-import roomescape.projection.ReservationWaitingWithOrder;
+import roomescape.domain.exception.NotFoundException;
+import roomescape.domain.projection.ReservationWaitingWithOrder;
 import roomescape.repository.ReservationWaitingQueryRepository;
 import roomescape.repository.ReservationWaitingRepository;
 

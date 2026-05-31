@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.api.dto.ReservationResponses;
 import roomescape.domain.Reservation;
-import roomescape.dto.ReservationResponses;
-import roomescape.exception.NotFoundException;
+import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
 @Service

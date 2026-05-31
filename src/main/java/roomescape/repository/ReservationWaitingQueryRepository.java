@@ -2,7 +2,7 @@ package roomescape.repository;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.projection.ReservationWaitingWithOrder;
+import roomescape.domain.projection.ReservationWaitingWithOrder;
 
 public interface ReservationWaitingQueryRepository {
 

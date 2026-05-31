@@ -3,9 +3,9 @@ package roomescape.service;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.api.dto.ReservationWaitingRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
-import roomescape.dto.ReservationWaitingRequest;
 import roomescape.repository.ReservationWaitingRepository;
 
 @Service

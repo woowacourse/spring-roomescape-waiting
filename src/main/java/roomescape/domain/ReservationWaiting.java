@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import roomescape.exception.BusinessRuleViolationException;
-import roomescape.exception.UnauthorizedException;
+import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.UnauthorizedException;
 
 public class ReservationWaiting {
 

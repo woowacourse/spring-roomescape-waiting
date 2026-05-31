@@ -13,8 +13,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.BusinessRuleViolationException;
-import roomescape.exception.ConflictException;
+import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ConflictException;
 import roomescape.repository.ReservationTimeJdbcRepository;
 
 @JdbcTest

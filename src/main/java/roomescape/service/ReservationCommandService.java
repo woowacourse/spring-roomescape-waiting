@@ -3,11 +3,11 @@ package roomescape.service;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.api.dto.ReservationRequest;
+import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationUpdateRequest;
 import roomescape.repository.ReservationRepository;
 
 @Service

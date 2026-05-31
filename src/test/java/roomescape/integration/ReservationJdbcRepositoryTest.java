@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.ConflictException;
+import roomescape.domain.exception.ConflictException;
 import roomescape.repository.ReservationJdbcRepository;
 
 @JdbcTest

@@ -11,7 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.BusinessRuleViolationException;
 
 @Repository
 public class ThemeJdbcRepository implements ThemeRepository {

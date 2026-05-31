@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.ConflictException;
+import roomescape.domain.exception.ConflictException;
 
 @Repository
 public class ReservationJdbcRepository implements ReservationRepository {

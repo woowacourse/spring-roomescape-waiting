@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
-import roomescape.exception.NotFoundException;
+import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ThemeQueryService;
 

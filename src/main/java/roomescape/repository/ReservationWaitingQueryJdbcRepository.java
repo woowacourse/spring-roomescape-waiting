@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.projection.ReservationWaitingWithOrder;
+import roomescape.domain.projection.ReservationWaitingWithOrder;
 
 @Repository
 public class ReservationWaitingQueryJdbcRepository implements ReservationWaitingQueryRepository {

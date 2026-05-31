@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.repository.ThemeJdbcRepository;
 
 @JdbcTest

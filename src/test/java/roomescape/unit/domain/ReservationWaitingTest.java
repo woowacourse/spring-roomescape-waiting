@@ -11,8 +11,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
-import roomescape.exception.UnauthorizedException;
+import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.UnauthorizedException;
 
 class ReservationWaitingTest {
 

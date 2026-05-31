@@ -11,8 +11,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.BusinessRuleViolationException;
-import roomescape.exception.ConflictException;
+import roomescape.domain.exception.BusinessRuleViolationException;
+import roomescape.domain.exception.ConflictException;
 
 @Repository
 public class ReservationTimeJdbcRepository implements ReservationTimeRepository {
