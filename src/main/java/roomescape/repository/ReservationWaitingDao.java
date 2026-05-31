@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -91,6 +91,42 @@ public class ReservationWaitingDao {
     public Optional<ReservationWaiting> findReservationWaitingById(long id) {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.id = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id)
+                .stream()
+                .findFirst();
+    }
+
+    public Optional<ReservationWaiting> findSharedFirstByReservationId(Long reservationId) {
+        String sql = """
+                select for share
+                    w.id,
+                    w.name,
+                    w.date,
+                    w.created_at,
+                    t.id       as time_id,
+                    t.start_at as time_start_at,
+                    th.id          as theme_id,
+                    th.name        as theme_name,
+                    th.description as theme_description,
+                    th.url         as theme_url,
+                    ranked.sequence
+                from waiting w
+                join reservation_time t  ON w.time_id  = t.id
+                join theme th            ON w.theme_id = th.id
+                join (
+                    select
+                        id,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY date, time_id, theme_id
+                            ORDER BY created_at, id
+                        ) as sequence
+                    from waiting
+                ) as ranked ON w.id = ranked.id
+                WHERE w.reservation_id = ?
+                ORDER BY w.created_at, w.id
+                LIMIT 1
+                """;
+
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, reservationId)
                 .stream()
                 .findFirst();
     }
