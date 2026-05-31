@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.UnprocessableEntityException;
+import roomescape.domain.slot.EventSlot;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.time.ReservationTime;
 
@@ -12,9 +13,7 @@ public class Reservation {
 
     private final Long id;
     private final UserName userName;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final EventSlot eventSlot;
     private ReservationStatus status;
 
     public Reservation(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
@@ -23,6 +22,14 @@ public class Reservation {
 
     public Reservation(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
         this(id, userName, date, time, theme, ReservationStatus.PENDING);
+    }
+
+    public Reservation(Long id, UserName userName, EventSlot eventSlot) {
+        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme());
+    }
+
+    public Reservation(Long id, UserName userName, EventSlot eventSlot, ReservationStatus status) {
+        this(id, userName, eventSlot.date(), eventSlot.time(), eventSlot.theme(), status);
     }
 
     public Reservation(
@@ -36,9 +43,7 @@ public class Reservation {
         this.id = id;
         validate(userName, date, time, theme);
         this.userName = userName;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.eventSlot = EventSlot.from(date, time, theme);
         this.status = status;
     }
 
@@ -52,12 +57,12 @@ public class Reservation {
     public void verifyBookable(LocalDateTime now) {
         LocalDate today = now.toLocalDate();
 
-        if (date.isBefore(today)) {
+        if (eventSlot.isBeforeDate(today)) {
             status = status.reject();
             throw new UnprocessableEntityException("과거 날짜로는 예약할 수 없습니다.");
         }
 
-        if (date.isEqual(today) && time.isBefore(now.toLocalTime())) {
+        if (eventSlot.isEqualDate(today) && eventSlot.isBeforeTime(now.toLocalTime())) {
             status = status.reject();
             throw new UnprocessableEntityException("이미 지난 시간으로 예약할 수 없습니다.");
         }
@@ -65,15 +70,21 @@ public class Reservation {
 
     public Reservation change(UserName userName, LocalDate newDate, ReservationTime newTime, LocalDateTime now) {
         validateOwner(userName, "다른 사람의 예약은 변경할 수 없습니다.");
-        validatePast(newDate, newTime, now, "과거의 시간으로 예약을 변경할 수 없습니다.");
 
-        return new Reservation(this.id, userName, newDate, newTime, this.theme, status.pending());
+        EventSlot newEventSlot = EventSlot.from(newDate, newTime, this.eventSlot.theme());
+        validatePast(newEventSlot, now, "과거의 시간으로 예약을 변경할 수 없습니다.");
+
+        return new Reservation(this.id, userName, newEventSlot, status.pending());
     }
 
     public void cancel(UserName userName, LocalDateTime now) {
         validateOwner(userName, "다른 사람의 예약은 취소할 수 없습니다.");
-        validatePast(date, time, now, "이미 지난 예약은 취소할 수 없습니다.");
+        validatePast(eventSlot, now, "이미 지난 예약은 취소할 수 없습니다.");
 
+        status = status.cancel();
+    }
+
+    public void cancel() {
         status = status.cancel();
     }
 
@@ -83,20 +94,18 @@ public class Reservation {
         }
     }
 
-    private void validatePast(LocalDate date, ReservationTime time, LocalDateTime now, String message) {
-        LocalDateTime requestDateTime = LocalDateTime.of(date, time.getStartAt());
-
-        if (requestDateTime.isBefore(now)) {
+    private void validatePast(EventSlot eventSlot, LocalDateTime now, String message) {
+        if (eventSlot.isBeforeDateTime(now)) {
             throw new UnprocessableEntityException(message);
         }
     }
 
     public Reservation confirm() {
-        return new Reservation(id, userName, date, time, theme, status.confirm());
+        return new Reservation(id, userName, eventSlot, status.confirm());
     }
 
     public Reservation reject() {
-        return new Reservation(id, userName, date, time, theme, status.reject());
+        return new Reservation(id, userName, eventSlot, status.reject());
     }
 
     public Long getId() {
@@ -107,15 +116,7 @@ public class Reservation {
         return userName;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
+    public EventSlot getEventSlot() {
+        return eventSlot;
     }
 }

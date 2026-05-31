@@ -80,7 +80,7 @@ public class ReservationService {
 
         reservation.verifyBookable(LocalDateTime.now(clock));
 
-        EventSlot eventSlot = new EventSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        EventSlot eventSlot = reservation.getEventSlot();
         if (!slotManager.tryAcquire(eventSlot)) {
             reservation.reject();
             throw new ConflictException("이미 존재하는 예약 건입니다.");
@@ -98,8 +98,8 @@ public class ReservationService {
         ReservationTime newTime = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        EventSlot originEventSlot = EventSlot.from(origin.getDate(), origin.getTime(), origin.getTheme());
-        EventSlot modifiedEventSlot = EventSlot.from(command.date(), newTime, origin.getTheme());
+        EventSlot originEventSlot = origin.getEventSlot();
+        EventSlot modifiedEventSlot = EventSlot.from(command.date(), newTime, origin.getEventSlot().theme());
 
         if (originEventSlot.equals(modifiedEventSlot)) {
             return ReservationResult.from(origin);
@@ -127,6 +127,12 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
+        Reservation origin = reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
+
+        slotManager.release(origin.getEventSlot());
+        origin.cancel();
+
         reservationDao.delete(id);
     }
 
@@ -134,6 +140,7 @@ public class ReservationService {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 
+        slotManager.release(origin.getEventSlot());
         origin.cancel(UserName.parse(userName), LocalDateTime.now(clock));
 
         reservationDao.delete(id);

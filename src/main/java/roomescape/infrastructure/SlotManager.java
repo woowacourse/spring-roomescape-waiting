@@ -27,12 +27,9 @@ public class SlotManager {
         List<Reservation> confirmedReservations = reservationDao.findByAfterDateTime(LocalDateTime.now(clock));
         for (Reservation reservation : confirmedReservations) {
             confirmedSlots.put(
-                    EventSlot.from(
-                            reservation.getDate(),
-                            reservation.getTime(),
-                            reservation.getTheme()
-                    ),
-                    Boolean.TRUE);
+                    reservation.getEventSlot(),
+                    Boolean.TRUE
+            );
         }
     }
 

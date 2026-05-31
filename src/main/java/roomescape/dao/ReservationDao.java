@@ -28,17 +28,15 @@ public class ReservationDao {
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", reservation.getName().value());
-        params.put("date", reservation.getDate());
-        params.put("time_id", reservation.getTime().getId());
-        params.put("theme_id", reservation.getTheme().getId());
+        params.put("date", reservation.getEventSlot().date());
+        params.put("time_id", reservation.getEventSlot().time().getId());
+        params.put("theme_id", reservation.getEventSlot().theme().getId());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                reservation.getEventSlot()
         );
     }
 
@@ -208,9 +206,9 @@ public class ReservationDao {
         int affectedRows = jdbcTemplate.update(
                 sql,
                 reservation.getName().value(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+                reservation.getEventSlot().date(),
+                reservation.getEventSlot().time().getId(),
+                reservation.getEventSlot().theme().getId(),
                 reservation.getId()
         );
 
