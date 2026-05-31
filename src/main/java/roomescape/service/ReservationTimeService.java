@@ -55,7 +55,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(Long id) {
-        if (reservationTimeRepository.findById(id).isEmpty()) {
+        if (!reservationTimeRepository.existsById(id)) {
             log.warn("존재하지 않는 시간 삭제 시도: timeId={}", id);
             throw new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + id);
         }

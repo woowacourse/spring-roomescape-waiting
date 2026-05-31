@@ -65,7 +65,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("존재하지 않는 테마를 삭제하면 ThemeNotFoundException이 발생한다")
     void 존재하지_않는_테마_삭제시_예외가_발생한다() {
-        given(themeRepository.findById(1L)).willReturn(Optional.empty());
+        given(themeRepository.existsById(1L)).willReturn(false);
 
         assertThrows(
                 ThemeNotFoundException.class,
@@ -76,7 +76,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 테마를 삭제하면 ThemeInUseException이 발생한다")
     void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        given(themeRepository.existsById(1L)).willReturn(true);
         given(reservationRepository.existsByThemeId(1L)).willReturn(true);
 
         assertThrows(
@@ -88,7 +88,7 @@ class ThemeServiceTest {
     @Test
     @DisplayName("예약이 없는 테마는 정상적으로 삭제된다")
     void 예약이_없는_테마는_정상_삭제된다() {
-        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+        given(themeRepository.existsById(1L)).willReturn(true);
         given(reservationRepository.existsByThemeId(1L)).willReturn(false);
 
         assertDoesNotThrow(() -> themeService.delete(1L));
