@@ -19,7 +19,6 @@ import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Sql("/truncate.sql")
 class ReservationCancellationIntegrationTest {
 
