@@ -31,14 +31,15 @@ CREATE TABLE waiting
     created_at TIMESTAMP   NOT NULL,
     slot_id    BIGINT,
     name       VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
 
 CREATE TABLE reservation
 (
-    id       BIGINT      NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(10) NOT NULL,
-    slot_id  BIGINT,
+    id      BIGINT      NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(10) NOT NULL,
+    slot_id BIGINT,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
