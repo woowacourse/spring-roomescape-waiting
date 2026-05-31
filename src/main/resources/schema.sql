@@ -43,9 +43,9 @@ CREATE TABLE reservation
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     user_id  BIGINT NOT NULL,
-    theme_id BIGINT,
+    theme_id BIGINT  NOT NULL,
     date     DATE   NOT NULL,
-    time_id  BIGINT,
+    time_id  BIGINT  NOT NULL,
     store_id BIGINT NOT NULL,
     status   VARCHAR(30) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
