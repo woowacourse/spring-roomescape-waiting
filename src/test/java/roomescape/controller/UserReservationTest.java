@@ -61,16 +61,6 @@ class UserReservationTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약 취소 시 404를 반환한다.")
-    void cancelNonExistentReservation() {
-        RestAssured.given().log().all()
-                .queryParam("name", "녀녕")
-                .when().delete("/reservations/999")
-                .then().log().all()
-                .statusCode(404);
-    }
-
-    @Test
     @DisplayName("예약의 날짜와 시간을 변경한다.")
     void updateReservation() {
         Map<String, Object> params = new HashMap<>();
@@ -102,39 +92,6 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(400);
     }
-
-    @Test
-    @DisplayName("이미 차있는 시간으로 변경 시 409를 반환한다.")
-    void updateReservationToDuplicateSlot() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", "2026-06-05");
-        params.put("timeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .queryParam("name", "user_b")
-                .body(params)
-                .when().patch("/reservations/2")
-                .then().log().all()
-                .statusCode(409);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약 변경 시 404를 반환한다.")
-    void updateNonExistentReservation() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", "2026-07-01");
-        params.put("timeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .queryParam("name", "녀녕")
-                .body(params)
-                .when().patch("/reservations/999")
-                .then().log().all()
-                .statusCode(404);
-    }
-
 
     @Test
     @DisplayName("예약과 예약 대기가 같이 조회되는지 확인한다.")

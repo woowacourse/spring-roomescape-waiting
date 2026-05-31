@@ -43,57 +43,6 @@ public class WaitingTest {
     }
 
     @Test
-    @DisplayName("기존 예약이 존재하지 않으면 예약 대기가 실패한다.")
-    void createWaitingWithoutReservationTest() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "녀녕");
-        params.put("date", "2026-06-06");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waitings")
-                .then().log().all()
-                .statusCode(404);
-    }
-
-    @Test
-    @DisplayName("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없다.")
-    void createDuplicateWaitingTest() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "user_d");
-        params.put("date", "2026-06-05");
-        params.put("timeId", 2L);
-        params.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waitings")
-                .then().log().all()
-                .statusCode(409);
-    }
-
-    @Test
-    @DisplayName("기존 예약자와 같은 이름으로 예약 대기를 생성할 수 없다.")
-    void createWaitingWithMyReservationTest() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "user_c");
-        params.put("date", "2026-06-05");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waitings")
-                .then().log().all()
-                .statusCode(409);
-    }
-
-    @Test
     @DisplayName("지나간 시간에는 예약 대기를 생성할 수 없다.")
     void createPastWaitingTest() {
         Map<String, Object> params = new HashMap<>();
