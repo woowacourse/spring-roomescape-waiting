@@ -75,7 +75,7 @@ public class WaitingRepository {
                        th.name AS theme_name,
                        ranked.waiting_number
                 FROM (
-                    SELECT1
+                    SELECT
                         w.id AS waiting_id,
                         w.name,
                         w.date,
