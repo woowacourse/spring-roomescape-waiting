@@ -1,12 +1,9 @@
 package roomescape.reservation.domain;
 
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import roomescape.global.exception.RoomEscapeException;
 
 @Getter
-@EqualsAndHashCode(of = {"memberName", "slot"})
 public class Waiting {
 
     private final Long id;
@@ -26,5 +23,21 @@ public class Waiting {
                 .memberName(this.memberName)
                 .slot(this.slot)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Waiting waiting)) {
+            return false;
+        }
+        return id != null && id.equals(waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
