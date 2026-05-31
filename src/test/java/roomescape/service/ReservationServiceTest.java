@@ -17,21 +17,29 @@ import roomescape.repository.ReservationQueryingDao;
 import roomescape.repository.ReservationTimeQueryingDao;
 import roomescape.repository.ReservationTimeUpdatingDao;
 import roomescape.repository.ReservationUpdatingDao;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationWaiting.ReservationWaiting;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.repository.ReservationWaitingDao;
 import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Import({ReservationService.class,
         ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ThemeQueryingDao.class, ThemeUpdatingDao.class})
+        ThemeQueryingDao.class, ThemeUpdatingDao.class,
+        ReservationWaitingDao.class})
 class ReservationServiceTest {
 
     @Autowired
@@ -42,6 +50,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ThemeUpdatingDao themeUpdatingDao;
+
+    @Autowired
+    private ReservationWaitingDao reservationWaitingDao;
 
     @Test
     void 예약_생성_성공() {
@@ -198,5 +209,52 @@ class ReservationServiceTest {
         reservationService.delete(created.id());
 
         assertThat(reservationService.readAll()).isEmpty();
+    }
+
+    @Test
+    void 존재하지_않는_예약_삭제시_예외없이_무시된다() {
+        assertThatCode(() -> reservationService.delete(999L)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약_삭제_시_대기열이_있으면_첫_번째_대기자가_예약자로_승격된다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        Reservation reservation = Reservation.restore(
+                created.id(), "브라운", created.date(),
+                new ReservationTime(timeId, LocalTime.of(10, 0)),
+                new Theme(themeId, "테마", "설명", "http://example.com"),
+                LocalDateTime.now());
+        reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
+
+        reservationService.delete(created.id());
+
+        ReservationResponse promoted = reservationService.read(created.id());
+        assertThat(promoted.name()).isEqualTo("네오");
+        assertThat(reservationWaitingDao.findAllReservationWaiting()).isEmpty();
+    }
+
+    @Test
+    void 예약_삭제_시_대기열이_여러_개면_가장_먼저_등록된_대기자가_승격된다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        Reservation reservation = Reservation.restore(
+                created.id(), "브라운", created.date(),
+                new ReservationTime(timeId, LocalTime.of(10, 0)),
+                new Theme(themeId, "테마", "설명", "http://example.com"),
+                LocalDateTime.now());
+        reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
+        reservationWaitingDao.create(ReservationWaiting.create("제이슨", reservation));
+
+        reservationService.delete(created.id());
+
+        ReservationResponse promoted = reservationService.read(created.id());
+        assertThat(promoted.name()).isEqualTo("네오");
+        assertThat(reservationWaitingDao.findAllReservationWaiting()).hasSize(1);
+        assertThat(reservationWaitingDao.findAllReservationWaiting().get(0).getName()).isEqualTo("제이슨");
     }
 }
