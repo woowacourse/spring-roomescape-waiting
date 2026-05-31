@@ -50,7 +50,7 @@ public class Reservations {
 
     public Optional<Reservation> findByNameAndStatus(String name, ReservationStatus status) {
         return reservations.stream()
-                .filter(e -> e.matches(name, status))
+                .filter(reservation -> reservation.matches(name, status))
                 .findFirst();
     }
 
