@@ -74,7 +74,7 @@ class AdminReservationTimeAcceptanceTest {
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/times/" + timeId)
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
     }
 
     @Test

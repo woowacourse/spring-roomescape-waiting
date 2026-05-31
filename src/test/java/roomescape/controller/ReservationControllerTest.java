@@ -178,9 +178,9 @@ class ReservationControllerTest {
     }
 
     @Test
-    void DELETE_reservations_id_200을_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
+    void DELETE_reservations_id_204를_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
         mockMvc.perform(delete("/reservations/3"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(reservationService).cancelOwnReservation(Fixtures.cancelCommand(3L, 1L));
     }
