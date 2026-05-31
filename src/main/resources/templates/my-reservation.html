@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESCAPE — 내 예약</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0c;
+            --surface: #131317;
+            --surface-2: #1a1a20;
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.14);
+            --accent: #c8a96e;
+            --accent-dim: rgba(200,169,110,0.1);
+            --text-primary: #ede9e0;
+            --text-secondary: #8a8680;
+            --text-muted: #3e3d3a;
+            --danger: #e05252;
+            --danger-dim: rgba(224,82,82,0.12);
+            --success: #4caf7d;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 3rem;
+            background: rgba(10,10,12,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 0.25em;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-logo span { color: var(--accent); }
+
+        .nav-back {
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-back:hover { color: var(--accent); }
+
+        /* ─── MAIN ─── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 8rem 2rem 6rem;
+        }
+
+        /* ─── 페이지 헤더 ─── */
+        .page-header {
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        .page-eyebrow {
+            font-size: 0.68rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 0.75rem;
+        }
+
+        .page-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .page-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* ─── 검색 영역 ─── */
+        .search-section {
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent);
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--surface);
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            padding: 1rem 1.5rem;
+            outline: none;
+        }
+
+        .search-input::placeholder { color: var(--text-muted); }
+
+        .search-btn {
+            background: var(--accent);
+            border: none;
+            color: #1a1200;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover { opacity: 0.88; }
+
+        /* ─── 결과 영역 ─── */
+        .result-section {
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.6s forwards;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .result-count {
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        /* ─── 예약 카드 목록 ─── */
+        .reservation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .reservation-card {
+            background: var(--surface);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 2rem;
+            padding: 1.5rem 1.75rem;
+            transition: background 0.2s;
+        }
+
+        .reservation-card:hover { background: var(--surface-2); }
+
+        .reservation-info {}
+
+        .reservation-theme {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+        }
+
+        .reservation-meta {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .reservation-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .meta-value {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .reservation-status {
+            display: inline-block;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+        }
+
+        .status-upcoming {
+            background: rgba(200,169,110,0.12);
+            color: var(--accent);
+        }
+
+        .status-past {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+        }
+
+        .status-waiting {
+            background: rgba(76,175,125,0.12);
+            color: var(--success);
+        }
+
+        .reservation-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        .btn-edit {
+            padding: 0.4rem 0.9rem;
+            background: var(--accent-dim);
+            border: 1px solid rgba(200,169,110,0.3);
+            border-radius: 2px;
+            color: var(--accent);
+            font-size: 0.72rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: rgba(200,169,110,0.2);
+            border-color: var(--accent);
+        }
+
+        .btn-cancel {
+            padding: 0.4rem 0.9rem;
+            background: var(--danger-dim);
+            border: 1px solid rgba(224,82,82,0.3);
+            border-radius: 2px;
+            color: var(--danger);
+            font-size: 0.72rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(224,82,82,0.22);
+            border-color: var(--danger);
+        }
+
+        .btn-disabled {
+            padding: 0.4rem 0.9rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: not-allowed;
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── 빈 상태 ─── */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            border: 1px dashed var(--border);
+            border-radius: 4px;
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+
+        .empty-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 300;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ─── 초기 상태 ─── */
+        .initial-state {
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .initial-icon {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 5rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            line-height: 1;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .initial-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── 로딩 ─── */
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+            padding: 3rem;
+            justify-content: center;
+        }
+
+        .loading-dots span {
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: dot 1.2s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        /* ─── 변경 모달 ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10,10,12,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 90%;
+            max-width: 440px;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-content.edit-theme { border-top: 2px solid var(--accent); }
+        .modal-content.error-theme { border-top: 2px solid var(--danger); }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.1em;
+        }
+
+        .modal-title.accent { color: var(--accent); }
+        .modal-title.danger { color: var(--danger); }
+
+        .modal-status {
+            font-size: 0.72rem;
+            color: var(--danger);
+            background: var(--danger-dim);
+            padding: 3px 8px;
+            border-radius: 2px;
+            letter-spacing: 0.08em;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.88rem;
+            padding: 0.7rem 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus { outline: none; border-color: var(--accent); }
+
+        select.form-input {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a4845' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+        }
+
+        .btn-ghost {
+            padding: 0.6rem 1.5rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-hover);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover { color: var(--text-primary); border-color: var(--accent); }
+
+        .btn-submit {
+            padding: 0.6rem 1.5rem;
+            background: var(--accent);
+            color: #1a1200;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover { opacity: 0.88; }
+
+        /* ─── 토스트 ─── */
+        .toast {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.9rem 1.25rem;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            transform: translateY(8px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.error { border-color: var(--danger); color: var(--danger); }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            nav { padding: 1.2rem 1.5rem; }
+            main { padding: 6rem 1.25rem 4rem; }
+            .reservation-card { grid-template-columns: 1fr; gap: 1rem; }
+            .reservation-meta { flex-wrap: wrap; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="nav-logo">ESC<span>A</span>PE</a>
+    <a href="/" class="nav-back">← 홈으로</a>
+</nav>
+
+<main>
+    <div class="page-header">
+        <p class="page-eyebrow">My Reservations</p>
+        <h1 class="page-title">내 <em>예약</em> 조회</h1>
+        <p class="page-desc">예약자 이름으로 검색하여 예약을 조회하고 변경하거나 취소할 수 있습니다.</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-box">
+            <input
+                    class="search-input"
+                    type="text"
+                    id="search-name"
+                    placeholder="예약자 이름을 입력하세요"
+                    onkeydown="if(event.key==='Enter') searchReservations()"
+            >
+            <button class="search-btn" onclick="searchReservations()">조회하기</button>
+        </div>
+    </div>
+
+    <div class="result-section">
+        <div class="result-header" id="result-header" style="display:none;">
+            <span class="result-label">조회 결과</span>
+            <span class="result-count" id="result-count"></span>
+        </div>
+        <div id="result-container">
+            <div class="initial-state">
+                <div class="initial-icon">?</div>
+                <p class="initial-desc">이름을 입력하고 예약을 조회해보세요</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- 변경 모달 -->
+<div id="edit-modal" class="modal-overlay">
+    <div class="modal-content edit-theme">
+        <div class="modal-header">
+            <span class="modal-title accent">예약 변경</span>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">날짜</label>
+                <input class="form-input" type="date" id="edit-date">
+            </div>
+            <div class="form-group">
+                <label class="form-label">시간</label>
+                <select class="form-input" id="edit-time"></select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeEditModal()">취소</button>
+            <button class="btn-submit" onclick="submitUpdate()">변경하기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 에러 모달 -->
+<div id="error-modal" class="modal-overlay">
+    <div class="modal-content error-theme">
+        <div class="modal-header">
+            <span class="modal-title danger">System Error</span>
+            <span class="modal-status" id="error-status">400</span>
+        </div>
+        <div class="modal-body" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.6; word-break:keep-all;">
+            <span id="error-message">오류가 발생했습니다.</span>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeErrorModal()">확인</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script th:inline="none">
+    let currentEditId = null;
+    const today = new Date().toISOString().split('T')[0];
+
+    // ── 공통 API ──────────────────────────────────────
+    async function api(method, url, body) {
+        const options = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) options.body = JSON.stringify(body);
+        const res = await fetch(url, options);
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({
+                status: res.status,
+                message: '요청을 처리하는 도중 오류가 발생했습니다.'
+            }));
+            throw errorData;
+        }
+
+        if (res.status === 204) return null;
+        return res.json();
+    }
+
+    // ── 모달 제어 ─────────────────────────────────────
+    function showErrorAlert(errorResponse) {
+        document.getElementById('error-status').innerText = `ERROR ${errorResponse.status || 500}`;
+        document.getElementById('error-message').innerText = extractErrorMessage(errorResponse);
+        document.getElementById('error-modal').classList.add('active');
+    }
+
+    function extractErrorMessage(errorResponse) {
+        if (!errorResponse) {
+            return '오류가 발생했습니다.';
+        }
+        if (errorResponse.detail) {
+            return errorResponse.detail;
+        }
+        if (errorResponse.message) {
+            return errorResponse.message;
+        }
+        if (Array.isArray(errorResponse.errors) && errorResponse.errors.length > 0) {
+            return errorResponse.errors.map(error => error.message).join('\n');
+        }
+        return '오류가 발생했습니다.';
+    }
+
+    function closeErrorModal() {
+        document.getElementById('error-modal').classList.remove('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.remove('active');
+        currentEditId = null;
+    }
+
+    // ── 토스트 ────────────────────────────────────────
+    function showToast(msg, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2800);
+    }
+
+    // ── 예약 조회 ─────────────────────────────────────
+    async function searchReservations() {
+        const name = document.getElementById('search-name').value.trim();
+        if (!name) return showErrorAlert({ status: 400, message: '이름을 입력해주세요.' });
+
+        const container = document.getElementById('result-container');
+        container.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+        document.getElementById('result-header').style.display = 'none';
+
+        try {
+            const data = await api('GET', `/reservations?userName=${encodeURIComponent(name)}`);
+            renderReservations(data, name);
+        } catch (error) {
+            showErrorAlert(error);
+            container.innerHTML = '';
+        }
+    }
+
+    function renderReservations(reservations, name) {
+        const container = document.getElementById('result-container');
+        const header = document.getElementById('result-header');
+        const countEl = document.getElementById('result-count');
+
+        header.style.display = 'flex';
+
+        const myReservations = reservations.filter(r => r.name === name);
+
+        countEl.textContent = `${myReservations.length}건`;
+
+        if (myReservations.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-title">${name}님의 예약 또는 대기가 없습니다</div>
+                    <p class="empty-desc">예약 또는 대기 신청 후 다시 조회해보세요</p>
+                </div>
+            `;
+            return;
+        }
+
+        const now = new Date();
+
+        const list = document.createElement('div');
+        list.className = 'reservation-list';
+
+        myReservations.forEach(r => {
+            const time = r.time;
+            const theme = r.theme;
+            const isReserved = r.isReserved ?? r.reserved;
+            const reservationDate = new Date(`${r.date}T${time?.startAt}`);
+            const isPast = reservationDate < now;
+            const statusClass = isReserved ? (isPast ? 'status-past' : 'status-upcoming') : 'status-waiting';
+            const statusText = isReserved ? (isPast ? '지난 예약' : '예정된 예약') : `예약 대기 ${r.waitingNumber ?? '-'}번`;
+
+            const card = document.createElement('div');
+            card.className = 'reservation-card';
+            card.innerHTML = `
+                <div class="reservation-info">
+                    <div class="reservation-theme">${theme?.name ?? '-'}</div>
+                    <div class="reservation-meta">
+                        <div class="reservation-meta-item">
+                            <span class="meta-label">날짜</span>
+                            <span class="meta-value">${r.date}</span>
+                        </div>
+                        <div class="reservation-meta-item">
+                            <span class="meta-label">시간</span>
+                            <span class="meta-value">${time?.startAt?.slice(0,5) ?? '-'}</span>
+                        </div>
+                        <div class="reservation-meta-item">
+                            <span class="meta-label">예약자</span>
+                            <span class="meta-value">${r.name}</span>
+                        </div>
+                        ${isReserved ? '' : `
+                        <div class="reservation-meta-item">
+                            <span class="meta-label">대기 순번</span>
+                            <span class="meta-value">${r.waitingNumber ?? '-'}번</span>
+                        </div>
+                        `}
+                    </div>
+                    <span class="reservation-status ${statusClass}">
+                        ${statusText}
+                    </span>
+                </div>
+                <div class="reservation-actions">
+                    ${isReserved
+                ? (isPast
+                    ? `<button class="btn-disabled" disabled>변경불가</button>
+                               <button class="btn-disabled" disabled>취소불가</button>`
+                    : `<button class="btn-edit" onclick="openEditModal(${r.id})">변경</button>
+                               <button class="btn-cancel" onclick="cancelReservation(${r.id})">취소</button>`)
+                : `<button class="btn-cancel" onclick="cancelWaiting(${r.id})">대기 취소</button>`
+            }
+                </div>
+            `;
+            list.appendChild(card);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(list);
+    }
+
+    // ── 예약 취소 ─────────────────────────────────────
+    async function cancelReservation(id) {
+        if (!confirm('예약을 취소하시겠습니까?')) return;
+        try {
+            const name = document.getElementById('search-name').value.trim();
+            await api('DELETE', `/reservations/${id}?userName=${encodeURIComponent(name)}`);
+            showToast('예약이 취소되었습니다.', 'success');
+            searchReservations();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    async function cancelWaiting(id) {
+        if (!confirm('예약 대기를 취소하시겠습니까?')) return;
+        try {
+            const name = document.getElementById('search-name').value.trim();
+            await api('DELETE', `/waitings/${id}?userName=${encodeURIComponent(name)}`);
+            showToast('예약 대기가 취소되었습니다.', 'success');
+            searchReservations();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    // ── 예약 변경 ─────────────────────────────────────
+    async function openEditModal(id) {
+        currentEditId = id;
+
+        // 날짜 최솟값 설정
+        const dateInput = document.getElementById('edit-date');
+        dateInput.min = today;
+        dateInput.value = '';
+
+        // 시간 목록 로드
+        const timeSelect = document.getElementById('edit-time');
+        timeSelect.innerHTML = '<option>시간 불러오는 중...</option>';
+
+        try {
+            const times = await api('GET', '/times');
+            timeSelect.innerHTML = times.map(t =>
+                `<option value="${t.id}">${t.startAt?.slice(0,5)}</option>`
+            ).join('');
+        } catch (error) {
+            timeSelect.innerHTML = '<option>시간 불러오기 실패</option>';
+        }
+
+        document.getElementById('edit-modal').classList.add('active');
+    }
+
+    async function submitUpdate() {
+        const date = document.getElementById('edit-date').value;
+        const timeId = parseInt(document.getElementById('edit-time').value);
+
+        if (!date) return showErrorAlert({ status: 400, message: '날짜를 선택해주세요.' });
+        if (!timeId) return showErrorAlert({ status: 400, message: '시간을 선택해주세요.' });
+
+        try {
+            const name = document.getElementById('search-name').value.trim();
+            await api('PATCH', `/reservations/${currentEditId}?userName=${encodeURIComponent(name)}`, { date, timeId });
+            showToast('예약이 변경되었습니다.', 'success');
+            closeEditModal();
+            searchReservations();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    // 엔터키 지원
+    document.getElementById('search-name').addEventListener('keydown', e => {
+        if (e.key === 'Enter') searchReservations();
+    });
+</script>
+</body>
+</html>

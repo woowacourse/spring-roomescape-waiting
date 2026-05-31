@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESCAPE — 방탈출 예약</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0c;
+            --surface: #131317;
+            --surface-2: #1a1a20;
+            --border: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.14);
+            --accent: #c8a96e;
+            --accent-dim: rgba(200,169,110,0.1);
+            --accent-glow: rgba(200,169,110,0.15);
+            --text-primary: #ede9e0;
+            --text-secondary: #8a8680;
+            --text-muted: #3e3d3a;
+            --danger: #e05252;
+            --success: #4caf7d;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ─── NAV ─── */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 3rem;
+            background: rgba(10,10,12,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: padding 0.3s ease;
+        }
+
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 0.25em;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-logo span { color: var(--accent); }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-tabs a {
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-decoration: none;
+            position: relative;
+            padding-bottom: 4px;
+            transition: color 0.2s;
+        }
+
+        .nav-tabs a::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 1px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-tabs a:hover,
+        .nav-tabs a.active { color: var(--accent); }
+        .nav-tabs a:hover::after,
+        .nav-tabs a.active::after { width: 100%; }
+
+        .nav-reserve {
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--bg);
+            background: var(--accent);
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .nav-reserve:hover { opacity: 0.85; }
+
+        /* ─── HERO ─── */
+        #hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                    radial-gradient(ellipse 60% 50% at 50% 60%, rgba(200,169,110,0.04) 0%, transparent 70%),
+                    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(100,80,40,0.06) 0%, transparent 60%);
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                    linear-gradient(var(--border) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 80%);
+        }
+
+        .hero-eyebrow {
+            font-size: 0.68rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            position: relative;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.2s forwards;
+        }
+
+        .hero-eyebrow::before,
+        .hero-eyebrow::after {
+            content: '—';
+            margin: 0 0.8rem;
+            opacity: 0.5;
+        }
+
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3.5rem, 8vw, 7rem);
+            font-weight: 300;
+            line-height: 1.05;
+            letter-spacing: 0.02em;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+            max-width: 480px;
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.6s forwards;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.8s forwards;
+        }
+
+        .btn-primary {
+            padding: 0.85rem 2.2rem;
+            background: var(--accent);
+            color: #1a1200;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        .btn-ghost {
+            padding: 0.85rem 2.2rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 1px solid var(--border-hover);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover { color: var(--text-primary); border-color: var(--accent); }
+
+        .hero-scroll {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 1.2s forwards;
+        }
+
+        .hero-scroll span {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.1); }
+        }
+
+        /* ─── SECTION COMMON ─── */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-label span {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .section-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 3rem;
+        }
+
+        /* ─── TAB NAV ─── */
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+            gap: 0;
+        }
+
+        .tab-btn {
+            padding: 0.9rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover { color: var(--text-secondary); }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ─── 테마 소개 그리드 ─── */
+        .theme-intro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theme-intro-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .theme-intro-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .theme-intro-card:hover .card-arrow { transform: translateX(4px); }
+
+        .theme-intro-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            background: var(--surface-2);
+            display: block;
+        }
+
+        .theme-intro-placeholder {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-intro-placeholder::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(200,169,110,0.05), transparent 70%);
+        }
+
+        .theme-intro-body {
+            padding: 1.25rem 1.5rem 1.5rem;
+        }
+
+        .theme-intro-tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 3px 8px;
+            border-radius: 2px;
+        }
+
+        .theme-intro-name {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .theme-intro-desc {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+
+        .theme-intro-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-meta {
+            display: flex;
+            gap: 1.2rem;
+        }
+
+        .theme-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .theme-meta-label {
+            font-size: 0.58rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .theme-meta-value {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
+        .card-arrow {
+            font-size: 0.8rem;
+            color: var(--accent);
+            transition: transform 0.2s;
+        }
+
+        /* ─── 예약하기 탭 ─── */
+        .booking-banner {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 3rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--accent);
+        }
+
+        .booking-banner-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+
+        .booking-banner-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ─── 인기 테마 ─── */
+        .popular-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .popular-item {
+            background: var(--surface);
+            display: grid;
+            grid-template-columns: 3rem 1fr auto;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .popular-item:hover { background: var(--surface-2); }
+        .popular-item:hover .popular-arrow { transform: translateX(4px); opacity: 1; }
+
+        .popular-rank {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1;
+        }
+
+        .popular-item:nth-child(1) .popular-rank { color: var(--accent); opacity: 0.8; }
+        .popular-item:nth-child(2) .popular-rank { color: var(--accent); opacity: 0.5; }
+        .popular-item:nth-child(3) .popular-rank { color: var(--accent); opacity: 0.3; }
+
+        .popular-name {
+            font-size: 0.92rem;
+            font-weight: 400;
+            margin-bottom: 3px;
+        }
+
+        .popular-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .popular-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .popular-arrow {
+            font-size: 0.8rem;
+            color: var(--accent);
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+        }
+
+        .footer-logo span { color: var(--accent); opacity: 0.5; }
+
+        .footer-copy {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            nav { padding: 1.2rem 1.5rem; }
+            .nav-tabs { display: none; }
+            section { padding: 4rem 1.25rem; }
+            .booking-banner { grid-template-columns: 1fr; }
+            footer { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+
+        /* ─── ERROR MODAL ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 12, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--danger);
+            border-radius: 4px;
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.1em;
+            color: var(--danger);
+        }
+
+        .modal-status {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            color: var(--danger);
+            letter-spacing: 0.1em;
+            background: rgba(224, 82, 82, 0.1);
+            padding: 3px 8px;
+            border-radius: 2px;
+        }
+
+        .modal-body {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            word-break: keep-all;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .modal-footer .btn-ghost {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav id="navbar">
+    <a href="/home" class="nav-logo">ESC<span>A</span>PE</a>
+    <ul class="nav-tabs">
+        <li><a href="#themes" class="nav-link">테마 소개</a></li>
+        <li><a href="#booking" class="nav-link">예약하기</a></li>
+        <li><a href="#popular" class="nav-link">인기 테마</a></li>
+        <li><a href="/my-reservation">내 예약</a></li>
+    </ul>
+    <a href="/reservation" class="nav-reserve">예약하기</a>
+</nav>
+
+<div id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <p class="hero-eyebrow">Seoul Escape Room</p>
+    <h1 class="hero-title">현실을 <em>탈출</em>하는<br>가장 우아한 방법</h1>
+    <p class="hero-desc">
+        정교하게 설계된 미스터리 속으로.<br>
+        당신의 추리력과 팀워크로 60분을 지배하세요.
+    </p>
+    <div class="hero-cta">
+        <a href="/reservation" class="btn-primary">지금 예약하기</a>
+        <a href="#themes" class="btn-ghost">테마 둘러보기</a>
+        <a href="/my-reservation" class="btn-ghost">내 예약 보기</a>
+    </div>
+    <div class="hero-scroll">
+        <div class="scroll-line"></div>
+        <span>scroll</span>
+    </div>
+</div>
+
+<div style="background: var(--bg);">
+    <section id="main-section" style="max-width: 1100px; padding: 5rem 2rem 6rem;">
+
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="themes">테마 소개</button>
+            <button class="tab-btn" data-tab="booking">예약하기</button>
+            <button class="tab-btn" data-tab="popular">인기 테마</button>
+        </div>
+
+        <div class="tab-content active" id="tab-themes">
+            <div class="section-label"><span>Theme Gallery</span></div>
+            <h2 class="section-title fade-in">엄선된 <em style="font-style:italic; color:var(--accent)">테마</em>들을<br>만나보세요</h2>
+            <div class="theme-intro-grid" id="theme-intro-grid">
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-booking">
+            <div class="section-label"><span>Reservation</span></div>
+            <h2 class="section-title fade-in">간편하게<br>예약하세요</h2>
+
+            <div class="booking-banner fade-in">
+                <div>
+                    <div class="booking-banner-title">온라인 예약 안내</div>
+                    <div class="booking-banner-desc">
+                        원하는 테마와 날짜, 시간을 선택하면 바로 예약이 완료됩니다.<br>
+                        예약 완료 후 변경/취소는 방문 24시간 전까지 가능합니다.
+                    </div>
+                </div>
+                <a href="/reservation" class="btn-primary" style="white-space:nowrap;">예약 페이지로 →</a>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-popular">
+            <div class="section-label"><span>Popular Themes</span></div>
+            <h2 class="section-title fade-in" id="popular-title"></h2>
+            <div class="popular-list" id="popular-list">
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<footer>
+    <div class="footer-logo">ESC<span>A</span>PE</div>
+    <div class="footer-copy">© 2025 Escape Room. All rights reserved.</div>
+    <a href="/admin"
+       style="font-size:0.7rem; color:var(--text-muted); letter-spacing:0.1em; text-decoration:none;">
+        관리자
+    </a>
+</footer>
+
+<div id="error-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">System Message</span>
+            <span class="modal-status" id="error-status">400</span>
+        </div>
+        <div class="modal-body" id="error-message">
+            에러 메시지가 여기에 표시됩니다.
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeErrorAlert()">확인</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="none">
+    function showErrorAlert(errorResponse) {
+        document.getElementById('error-status').innerText = `ERROR ${errorResponse.status || 500}`;
+        document.getElementById('error-message').innerText = errorResponse.message || '서버와 통신 중 문제가 발생했습니다.';
+        document.getElementById('error-modal').classList.add('active');
+    }
+
+    function closeErrorAlert() {
+        document.getElementById('error-modal').classList.remove('active');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            triggerFadeIns();
+        });
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const target = link.getAttribute('href').replace('#', '');
+            const tabMap = { themes: 'themes', booking: 'booking', popular: 'popular' };
+            if (tabMap[target]) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector(`[data-tab="${tabMap[target]}"]`).classList.add('active');
+                document.getElementById('tab-' + tabMap[target]).classList.add('active');
+                document.getElementById('main-section').scrollIntoView({ behavior: 'smooth' });
+                triggerFadeIns();
+            }
+        });
+    });
+
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        nav.style.padding = window.scrollY > 60 ? '1rem 3rem' : '1.5rem 3rem';
+    });
+
+    function triggerFadeIns() {
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 80);
+            });
+        }, 50);
+    }
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    const emojis = ['👻', '🚀', '🧙‍♂️', '🔍', '🏴‍☠️', '🎭', '🕵️', '⚗️'];
+    const difficulties = ['입문', '보통', '어려움', '매우 어려움'];
+    const genres = [['공포', '미스터리'], ['SF', '탈출'], ['판타지', '모험'], ['추리', '스릴러'], ['해적', '탐험'], ['드라마', '심리'], ['추리', '범죄'], ['공포', '실험']];
+
+    function renderThemeIntroGrid(themes) {
+        const grid = document.getElementById('theme-intro-grid');
+        grid.innerHTML = '';
+        themes.forEach((t, i) => {
+            const card = document.createElement('a');
+            card.href = `/reservation?themeId=${t.id}`;
+            card.className = 'theme-intro-card fade-in';
+            const diff = difficulties[i % difficulties.length];
+            const genre = genres[i % genres.length];
+            const imgHtml = t.thumbnailUrl
+                ? `<img class="theme-intro-img" src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                   <div class="theme-intro-placeholder" style="display:none">${emojis[i % emojis.length]}</div>`
+                : `<div class="theme-intro-placeholder">${emojis[i % emojis.length]}</div>`;
+            card.innerHTML = `
+                ${imgHtml}
+                <div class="theme-intro-body">
+                    <div class="theme-intro-tags">
+                        ${genre.map(g => `<span class="tag">${g}</span>`).join('')}
+                    </div>
+                    <div class="theme-intro-name">${t.name}</div>
+                    <div class="theme-intro-desc">${t.description || '이 테마에 대한 설명이 없습니다.'}</div>
+                    <div class="theme-intro-footer">
+                        <div class="theme-meta">
+                            <div class="theme-meta-item">
+                                <span class="theme-meta-label">난이도</span>
+                                <span class="theme-meta-value">${diff}</span>
+                            </div>
+                            <div class="theme-meta-item">
+                                <span class="theme-meta-label">제한시간</span>
+                                <span class="theme-meta-value">60분</span>
+                            </div>
+                        </div>
+                        <span class="card-arrow">→</span>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        triggerFadeIns();
+    }
+
+    function renderPopularList(themes) {
+        const list = document.getElementById('popular-list');
+        list.innerHTML = '';
+        const titleEl = document.getElementById('popular-title');
+        if (titleEl) titleEl.innerHTML = '최근 1주일 인기 테마 TOP 10';
+        themes.forEach((t, i) => {
+            const item = document.createElement('a');
+            item.href = `/reservation?themeId=${t.id}`;
+            item.className = 'popular-item fade-in';
+            item.innerHTML = `
+                <div class="popular-rank">${String(i + 1).padStart(2, '0')}</div>
+                <div class="popular-info">
+                    <div class="popular-name">${t.name}</div>
+                    <div class="popular-sub">${t.description ? t.description.slice(0, 40) : '자세한 설명 없음'}</div>
+                </div>
+                <div class="popular-meta">
+                    <span class="popular-arrow">→</span>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+        triggerFadeIns();
+    }
+
+    const dummyThemes = [
+        { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 100년의 비밀을 밝혀라. 공포와 미스터리가 교차하는 극한의 체험.', thumbnailUrl: '' },
+        { id: 2, name: '우주 정거장 X9', description: '고장난 우주선에서 산소가 떨어지기 전에 지구로 귀환하라. SF 어드벤처의 정수.', thumbnailUrl: '' },
+        { id: 3, name: '마법사의 비밀 서재', description: '실종된 마법사의 서재에서 금지된 마법서를 찾아라. 판타지와 퍼즐이 어우러진 명작.', thumbnailUrl: '' },
+        { id: 4, name: '탐정 사무소 1987', description: '냉전 시대 베를린, 24시간 안에 스파이를 잡아라. 역사와 추리가 만나는 스릴러.', thumbnailUrl: '' },
+        { id: 5, name: '심해 탐사선', description: '수심 3000m, 통신이 끊긴 탐사선에서 살아 돌아올 수 있을까? 최고 난이도의 도전.', thumbnailUrl: '' },
+    ];
+
+    fetch('/themes')
+        .then(res => res.json())
+        .then(themes => renderThemeIntroGrid(themes))
+        .catch(() => renderThemeIntroGrid(dummyThemes));
+
+    fetch('/themes?topCount=10&during=7')
+        .then(res => res.json())
+        .then(themes => renderPopularList(themes))
+        .catch(() => renderPopularList(dummyThemes));
+</script>
+</body>
+</html>

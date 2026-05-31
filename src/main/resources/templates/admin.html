@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0d0f;
+            --surface: #16161a;
+            --surface-2: #1e1e24;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --accent: #c8a96e;
+            --accent-dim: rgba(200,169,110,0.12);
+            --text-primary: #f0ece4;
+            --text-secondary: #8a8680;
+            --text-muted: #4a4845;
+            --danger: #e05252;
+            --danger-dim: rgba(224,82,82,0.12);
+            --success: #4caf7d;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 2.5rem 3rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .header-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .header-badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.6rem;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem 6rem;
+        }
+
+        /* 탭 */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: var(--text-secondary); }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* 섹션 레이아웃 */
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* 테이블 */
+        .table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+        }
+
+        thead {
+            background: var(--surface);
+        }
+
+        th {
+            padding: 0.85rem 1.1rem;
+            text-align: left;
+            font-size: 0.65rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 400;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.85rem 1.1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover td { background: var(--surface); }
+
+        td.primary { color: var(--text-primary); }
+
+        /* 버튼류 */
+        .btn-delete {
+            padding: 0.3rem 0.75rem;
+            background: var(--danger-dim);
+            border: 1px solid rgba(224,82,82,0.3);
+            border-radius: 4px;
+            color: var(--danger);
+            font-size: 0.72rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(224,82,82,0.22);
+            border-color: var(--danger);
+        }
+
+        .btn-ghost {
+            padding: 0.6rem 1.5rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-hover);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        /* 폼 카드 */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 1.5rem;
+        }
+
+        .form-card-title {
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.65rem 0.85rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+
+        select.form-input {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a4845' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            padding-right: 2rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent);
+            color: #1a1400;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        /* 빈 상태 */
+        .empty-row td {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* 로딩 */
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+            padding: 2rem;
+            justify-content: center;
+        }
+
+        .loading-dots span {
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: dot 1.2s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.9rem 1.25rem;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            transform: translateY(8px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { border-color: var(--success); color: var(--success); }
+        .toast.error { border-color: var(--danger); color: var(--danger); }
+
+        /* ─── ERROR MODAL ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13, 13, 15, 0.85); /* --bg 기반 투명도 */
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--danger);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .modal-status {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            color: var(--danger);
+            letter-spacing: 0.1em;
+            background: var(--danger-dim);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .modal-body {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            word-break: keep-all;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .panel-grid { grid-template-columns: 1fr; }
+            header { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+            main { padding: 1.5rem 1rem 4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <a href="/" class="header-title">방탈출 예약</a>
+        <span class="header-sub">Admin Console</span>
+    </div>
+    <span class="header-badge">관리자</span>
+</header>
+
+<main>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('reservation')">예약 관리</div>
+        <div class="tab" onclick="switchTab('theme')">테마 관리</div>
+        <div class="tab" onclick="switchTab('time')">시간 관리</div>
+    </div>
+
+    <div class="tab-panel active" id="panel-reservation">
+        <div class="panel-grid">
+            <div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>예약자</th>
+                            <th>테마</th>
+                            <th>날짜</th>
+                            <th>시간</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="reservation-tbody">
+                        <tr><td colspan="6"><div class="loading-dots"><span></span><span></span><span></span></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="form-card-title">예약 추가</div>
+                <div class="form-group">
+                    <label class="form-label">예약자</label>
+                    <input class="form-input" type="text" id="res-name" placeholder="이름">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">날짜</label>
+                    <input class="form-input" type="date" id="res-date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">테마</label>
+                    <select class="form-input" id="res-theme"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">시간</label>
+                    <select class="form-input" id="res-time"></select>
+                </div>
+                <button class="btn-submit" onclick="createReservation()">예약 추가</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-panel" id="panel-theme">
+        <div class="panel-grid">
+            <div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>테마명</th>
+                            <th>설명</th>
+                            <th>썸네일</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="theme-tbody">
+                        <tr><td colspan="5"><div class="loading-dots"><span></span><span></span><span></span></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="form-card-title">테마 추가</div>
+                <div class="form-group">
+                    <label class="form-label">테마명</label>
+                    <input class="form-input" type="text" id="theme-name" placeholder="테마 이름">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">설명</label>
+                    <input class="form-input" type="text" id="theme-desc" placeholder="테마 설명">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">썸네일 URL</label>
+                    <input class="form-input" type="text" id="theme-thumbnail" placeholder="https://...">
+                </div>
+                <button class="btn-submit" onclick="createTheme()">테마 추가</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-panel" id="panel-time">
+        <div class="panel-grid">
+            <div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>시작 시간</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="time-tbody">
+                        <tr><td colspan="3"><div class="loading-dots"><span></span><span></span><span></span></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="form-card-title">시간 추가</div>
+                <div class="form-group">
+                    <label class="form-label">시작 시간</label>
+                    <input class="form-input" type="time" id="time-start">
+                </div>
+                <button class="btn-submit" onclick="createTime()">시간 추가</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div id="error-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">System Error</span>
+            <span class="modal-status" id="error-status">400</span>
+        </div>
+        <div class="modal-body" id="error-message">
+            에러 메시지가 여기에 표시됩니다.
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeErrorAlert()">확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── ERROR MODAL 제어 ──────────────────────────────
+    function showErrorAlert(errorResponse) {
+        const statusEl = document.getElementById('error-status');
+        const messageEl = document.getElementById('error-message');
+        const modalEl = document.getElementById('error-modal');
+
+        statusEl.innerText = `ERROR ${errorResponse.status || 500}`;
+        messageEl.innerText = extractErrorMessage(errorResponse);
+
+        modalEl.classList.add('active');
+    }
+
+    function extractErrorMessage(errorResponse) {
+        if (!errorResponse) {
+            return '서버와 통신 중 문제가 발생했습니다.';
+        }
+        if (errorResponse.detail) {
+            return errorResponse.detail;
+        }
+        if (errorResponse.message) {
+            return errorResponse.message;
+        }
+        if (Array.isArray(errorResponse.errors) && errorResponse.errors.length > 0) {
+            return errorResponse.errors.map(error => error.message).join('\n');
+        }
+        return '서버와 통신 중 문제가 발생했습니다.';
+    }
+
+    function closeErrorAlert() {
+        document.getElementById('error-modal').classList.remove('active');
+    }
+
+    // ── 탭 전환 ──────────────────────────────────────
+    function switchTab(name) {
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            const names = ['reservation', 'theme', 'time'];
+            t.classList.toggle('active', names[i] === name);
+        });
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${name}`).classList.add('active');
+    }
+
+    // ── 공통 API 호출 ──────────────────────────────────
+    async function api(method, url, body) {
+        const options = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) options.body = JSON.stringify(body);
+        const res = await fetch(url, options);
+
+        if (!res.ok) {
+            // 백엔드에서 내려주는 ErrorResponse 파싱 시도 (실패 시 기본 에러 객체 생성)
+            const errorData = await res.json().catch(() => ({
+                status: res.status,
+                message: '요청을 처리하는 도중 서버 오류가 발생했습니다.'
+            }));
+            throw errorData;
+        }
+
+        if (res.status === 204) return null;
+        return res.json();
+    }
+
+    // ── 예약 ──────────────────────────────────────────
+    async function loadReservations() {
+        const tbody = document.getElementById('reservation-tbody');
+        try {
+            const data = await api('GET', '/reservations');
+            if (!data.length) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="6">예약이 없습니다</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td class="primary">${r.name}</td>
+                    <td>${r.theme?.name ?? '-'}</td>
+                    <td>${r.date}</td>
+                    <td>${r.time?.startAt?.slice(0,5) ?? '-'}</td>
+                    <td><button class="btn-delete" onclick="deleteReservation(${r.id}, '${encodeURIComponent(r.name)}')">삭제</button></td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="6">불러오기 실패</td></tr>`;
+            // 불러오기 실패 시에도 모달을 띄우려면 아래 주석 해제
+            // showErrorAlert(error);
+        }
+    }
+
+    async function createReservation() {
+        const name = document.getElementById('res-name').value.trim();
+        const date = document.getElementById('res-date').value;
+        const themeId = parseInt(document.getElementById('res-theme').value);
+        const timeId = parseInt(document.getElementById('res-time').value);
+
+        if (!name || !date || !themeId || !timeId) {
+            return showErrorAlert({ status: 400, message: '모든 항목을 입력하세요.' });
+        }
+
+        try {
+            await api('POST', '/reservations', { name, date, themeId, timeId });
+            showToast('예약이 추가되었습니다', 'success');
+            loadReservations();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    async function deleteReservation(id, encodedUserName) {
+        if (!confirm('예약을 삭제하시겠습니까?')) return;
+        try {
+            const userName = decodeURIComponent(encodedUserName);
+            await api('DELETE', `/reservations/${id}?userName=${encodeURIComponent(userName)}`);
+            showToast('삭제되었습니다', 'success');
+            loadReservations();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    // ── 테마 ──────────────────────────────────────────
+    async function loadThemes() {
+        const tbody = document.getElementById('theme-tbody');
+        const themeSelect = document.getElementById('res-theme');
+        try {
+            const data = await api('GET', '/themes');
+
+            if (!data.length) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="5">테마가 없습니다</td></tr>`;
+            } else {
+                tbody.innerHTML = data.map(t => `
+                    <tr>
+                        <td>${t.id}</td>
+                        <td class="primary">${t.name}</td>
+                        <td>${t.description ?? '-'}</td>
+                        <td>${t.thumbnailUrl
+                    ? `<img src="${t.thumbnailUrl}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;" onerror="this.style.display='none'">`
+                    : '-'}</td>
+                        <td><button class="btn-delete" onclick="deleteTheme(${t.id})">삭제</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            themeSelect.innerHTML = data.map(t =>
+                `<option value="${t.id}">${t.name}</option>`
+            ).join('');
+        } catch (error) {
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="5">불러오기 실패</td></tr>`;
+        }
+    }
+
+    async function createTheme() {
+        const name = document.getElementById('theme-name').value.trim();
+        const description = document.getElementById('theme-desc').value.trim();
+        const thumbnailUrl = document.getElementById('theme-thumbnail').value.trim();
+
+        if (!name) {
+            return showErrorAlert({ status: 400, message: '테마명을 입력하세요.' });
+        }
+
+        try {
+            await api('POST', '/themes', { name, description, thumbnailUrl });
+            showToast('테마가 추가되었습니다', 'success');
+            loadThemes();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    async function deleteTheme(id) {
+        if (!confirm('테마를 삭제하시겠습니까?')) return;
+        try {
+            await api('DELETE', `/themes/${id}`);
+            showToast('삭제되었습니다', 'success');
+            loadThemes();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    // ── 시간 ──────────────────────────────────────────
+    async function loadTimes() {
+        const tbody = document.getElementById('time-tbody');
+        const timeSelect = document.getElementById('res-time');
+        try {
+            const data = await api('GET', '/times');
+
+            if (!data.length) {
+                tbody.innerHTML = `<tr class="empty-row"><td colspan="3">등록된 시간이 없습니다</td></tr>`;
+            } else {
+                tbody.innerHTML = data.map(t => `
+                    <tr>
+                        <td>${t.id}</td>
+                        <td class="primary">${t.startAt?.slice(0,5)}</td>
+                        <td><button class="btn-delete" onclick="deleteTime(${t.id})">삭제</button></td>
+                    </tr>
+                `).join('');
+            }
+
+            timeSelect.innerHTML = data.map(t =>
+                `<option value="${t.id}">${t.startAt?.slice(0,5)}</option>`
+            ).join('');
+        } catch (error) {
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="3">불러오기 실패</td></tr>`;
+        }
+    }
+
+    async function createTime() {
+        const startAt = document.getElementById('time-start').value;
+        if (!startAt) {
+            return showErrorAlert({ status: 400, message: '시간을 선택하세요.' });
+        }
+
+        try {
+            await api('POST', '/times', { startAt });
+            showToast('시간이 추가되었습니다', 'success');
+            loadTimes();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    async function deleteTime(id) {
+        if (!confirm('시간을 삭제하시겠습니까?')) return;
+        try {
+            await api('DELETE', `/times/${id}`);
+            showToast('삭제되었습니다', 'success');
+            loadTimes();
+        } catch (error) {
+            showErrorAlert(error);
+        }
+    }
+
+    // ── 토스트 ────────────────────────────────────────
+    function showToast(msg, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2800);
+    }
+
+    // ── 초기 로드 ─────────────────────────────────────
+    window.onload = function () {
+        loadReservations();
+        loadThemes();
+        loadTimes();
+    };
+</script>
+</body>
+</html>
