@@ -22,7 +22,7 @@ import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
