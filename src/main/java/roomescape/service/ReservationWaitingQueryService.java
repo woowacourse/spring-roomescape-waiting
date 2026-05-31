@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
 import roomescape.exception.NotFoundException;
+import roomescape.projection.ReservationWaitingWithOrder;
+import roomescape.repository.ReservationWaitingQueryRepository;
 import roomescape.repository.ReservationWaitingRepository;
 
 @Service
@@ -12,11 +14,14 @@ import roomescape.repository.ReservationWaitingRepository;
 public class ReservationWaitingQueryService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationWaitingQueryRepository reservationWaitingQueryRepository;
 
     public ReservationWaitingQueryService(
-            ReservationWaitingRepository reservationWaitingRepository
+            ReservationWaitingRepository reservationWaitingRepository,
+            ReservationWaitingQueryRepository reservationWaitingQueryRepository
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationWaitingQueryRepository = reservationWaitingQueryRepository;
     }
 
     public ReservationWaiting getById(Long id) {
@@ -24,7 +29,12 @@ public class ReservationWaitingQueryService {
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약대기입니다. Id: " + id));
     }
 
-    public List<ReservationWaiting> findMine(String name) {
-        return reservationWaitingRepository.findByName(name);
+    public ReservationWaitingWithOrder getWithOrderById(Long id) {
+        return reservationWaitingQueryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지않는 예약대기입니다. Id: " + id));
+    }
+
+    public List<ReservationWaitingWithOrder> findMine(String name) {
+        return reservationWaitingQueryRepository.findByName(name);
     }
 }

@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeAvailability;
 import roomescape.exception.NotFoundException;
+import roomescape.projection.ReservationTimeAvailability;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service

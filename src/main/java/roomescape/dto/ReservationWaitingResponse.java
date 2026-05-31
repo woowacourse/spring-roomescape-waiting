@@ -1,9 +1,8 @@
 package roomescape.dto;
 
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationWaiting;
-
 import java.time.LocalDate;
+import roomescape.domain.Reservation;
+import roomescape.projection.ReservationWaitingWithOrder;
 
 public record ReservationWaitingResponse(
         Long id,
@@ -13,15 +12,15 @@ public record ReservationWaitingResponse(
         ThemeResponse theme,
         int order
 ) {
-    public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting) {
-        Reservation reservation = reservationWaiting.getReservation();
+    public static ReservationWaitingResponse from(ReservationWaitingWithOrder reservationWaiting) {
+        Reservation reservation = reservationWaiting.reservation();
         return new ReservationWaitingResponse(
-                reservationWaiting.getId(),
-                reservationWaiting.getName(),
+                reservationWaiting.id(),
+                reservationWaiting.name(),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservationWaiting.getOrder()
+                reservationWaiting.order()
         );
     }
 }

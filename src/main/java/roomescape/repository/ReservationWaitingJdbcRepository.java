@@ -1,6 +1,8 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -26,15 +28,6 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
     private static final String SELECT_BASE = """
             SELECT rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
-                   (
-                       SELECT COUNT(*)
-                       FROM reservation_waiting as previous_rw
-                       WHERE previous_rw.reservation_id = rw.reservation_id
-                       AND (
-                           previous_rw.created_at < rw.created_at
-                           OR (previous_rw.created_at = rw.created_at AND previous_rw.id <= rw.id)
-                       )
-                   ) as waiting_order,
                    r.id as reservation_id, r.name as reservation_name, r.date,
                    t.id as time_id, t.start_at as time_value,
                    th.id as theme_id, th.name as theme_name,
@@ -53,6 +46,15 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     }
 
     private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
+        return new ReservationWaiting(
+                rs.getLong("waiting_id"),
+                rs.getString("waiting_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                mapReservation(rs)
+        );
+    };
+
+    private Reservation mapReservation(ResultSet rs) throws SQLException {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
                 rs.getTime("time_value").toLocalTime()
@@ -63,25 +65,17 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 rs.getString("theme_description"),
                 rs.getString("theme_thumbnail")
         );
-        Reservation reservation = new Reservation(
+        return new Reservation(
                 rs.getLong("reservation_id"),
                 rs.getString("reservation_name"),
                 rs.getDate("date").toLocalDate(),
                 time,
                 theme
         );
-        return new ReservationWaiting(
-                rs.getLong("waiting_id"),
-                rs.getString("waiting_name"),
-                rs.getTimestamp("created_at").toLocalDateTime(),
-                reservation,
-                rs.getInt("waiting_order")
-        );
-    };
+    }
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
-        int waitingOrder = calculateWaitingOrder(reservationWaiting);
         String sql = "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -107,8 +101,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 id,
                 reservationWaiting.getName(),
                 reservationWaiting.getCreatedAt(),
-                reservationWaiting.getReservation(),
-                waitingOrder
+                reservationWaiting.getReservation()
         );
     }
 
@@ -127,30 +120,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public List<ReservationWaiting> findByName(String name) {
-        String sql = SELECT_BASE + " WHERE rw.name = ? ORDER BY rw.created_at ASC, rw.id ASC";
-        return jdbcTemplate.query(sql, waitingRowMapper, name);
-    }
-
-    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
-    }
-
-    private int calculateWaitingOrder(ReservationWaiting reservationWaiting) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM reservation_waiting
-                WHERE reservation_id = ?
-                AND created_at <= ?
-                """;
-        Integer waitingCount = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                reservationWaiting.getReservation().getId(),
-                Timestamp.valueOf(reservationWaiting.getCreatedAt())
-        );
-
-        return waitingCount != null ? waitingCount + 1 : 1;
     }
 }

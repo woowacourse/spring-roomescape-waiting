@@ -24,6 +24,7 @@ import roomescape.domain.Theme;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.repository.ReservationWaitingQueryRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.ReservationQueryService;
 import roomescape.service.ReservationWaitingCommandService;
@@ -36,6 +37,9 @@ class ReservationWaitingUseCaseMockTest {
     private ReservationWaitingRepository reservationWaitingRepository;
 
     @Mock
+    private ReservationWaitingQueryRepository reservationWaitingQueryRepository;
+
+    @Mock
     private ReservationQueryService reservationQueryService;
 
     private ReservationWaitingQueryService reservationWaitingQueryService;
@@ -43,7 +47,10 @@ class ReservationWaitingUseCaseMockTest {
 
     @BeforeEach
     void setUp() {
-        reservationWaitingQueryService = new ReservationWaitingQueryService(reservationWaitingRepository);
+        reservationWaitingQueryService = new ReservationWaitingQueryService(
+                reservationWaitingRepository,
+                reservationWaitingQueryRepository
+        );
         reservationWaitingCommandService = new ReservationWaitingCommandService(
                 reservationWaitingRepository,
                 reservationQueryService,
@@ -57,8 +64,7 @@ class ReservationWaitingUseCaseMockTest {
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", reservation.getId());
-        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation,
-                1);
+        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
         given(reservationQueryService.getById(reservation.getId())).willReturn(reservation);
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
 
@@ -105,6 +111,6 @@ class ReservationWaitingUseCaseMockTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
         Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
-        return new ReservationWaiting(id, name, LocalDateTime.of(2026, 8, 1, 10, 0), reservation, 1);
+        return new ReservationWaiting(id, name, LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
     }
 }

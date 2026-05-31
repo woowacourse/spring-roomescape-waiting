@@ -20,10 +20,13 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
+import roomescape.projection.ReservationWaitingWithOrder;
 import roomescape.repository.ReservationWaitingJdbcRepository;
+import roomescape.repository.ReservationWaitingQueryJdbcRepository;
+import roomescape.repository.ReservationWaitingQueryRepository;
 
 @JdbcTest
-@Import(ReservationWaitingJdbcRepository.class)
+@Import({ReservationWaitingJdbcRepository.class, ReservationWaitingQueryJdbcRepository.class})
 class ReservationWaitingJdbcRepositoryTest {
 
     @Autowired
@@ -31,6 +34,9 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Autowired
     private ReservationWaitingJdbcRepository repository;
+
+    @Autowired
+    private ReservationWaitingQueryRepository queryRepository;
 
     private Reservation reservation;
 
@@ -57,14 +63,13 @@ class ReservationWaitingJdbcRepositoryTest {
     }
 
     @Test
-    void save는_생성된_id와_첫_순번을_부여해_반환한다() {
+    void save는_생성된_id를_부여해_반환한다() {
         ReservationWaiting waiting = new ReservationWaiting(
                 "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation);
 
         ReservationWaiting saved = repository.save(waiting);
 
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getOrder()).isEqualTo(1);
     }
 
     @Test
@@ -104,8 +109,9 @@ class ReservationWaitingJdbcRepositoryTest {
 
         ReservationWaiting second = repository.save(new ReservationWaiting(
                 "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
+        ReservationWaitingWithOrder found = queryRepository.findById(second.getId()).orElseThrow();
 
-        assertThat(second.getOrder()).isEqualTo(2);
+        assertThat(found.order()).isEqualTo(2);
     }
 
     @Test
@@ -144,10 +150,10 @@ class ReservationWaitingJdbcRepositoryTest {
         repository.save(new ReservationWaiting("브라운", waitingTime, reservation));
         repository.save(new ReservationWaiting("민욱", waitingTime.plusMinutes(1), reservation));
 
-        List<ReservationWaiting> found = repository.findByName("민욱");
+        List<ReservationWaitingWithOrder> found = queryRepository.findByName("민욱");
 
         assertThat(found).hasSize(1);
-        assertThat(found.get(0).getOrder()).isEqualTo(2);
+        assertThat(found.get(0).order()).isEqualTo(2);
     }
 
     @Test

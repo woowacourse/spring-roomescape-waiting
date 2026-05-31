@@ -16,6 +16,7 @@ import roomescape.domain.ReservationWaiting;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.dto.ReservationWaitingResponses;
+import roomescape.projection.ReservationWaitingWithOrder;
 import roomescape.service.ReservationWaitingCommandService;
 import roomescape.service.ReservationWaitingQueryService;
 
@@ -39,19 +40,22 @@ public class ReservationWaitingController {
             @RequestBody @Valid ReservationWaitingRequest request
     ) {
         ReservationWaiting reservationWaiting = reservationWaitingCommandService.save(request);
+        ReservationWaitingWithOrder waitingWithOrder = reservationWaitingQueryService.getWithOrderById(
+                reservationWaiting.getId()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationWaitingResponse.from(reservationWaiting));
+                .body(ReservationWaitingResponse.from(waitingWithOrder));
     }
 
     @GetMapping("/me")
     public ResponseEntity<ReservationWaitingResponses> searchMine(
             @RequestParam String name
     ) {
-        List<ReservationWaiting> myReservationWaitings = reservationWaitingQueryService.findMine(name);
+        List<ReservationWaitingWithOrder> waitings = reservationWaitingQueryService.findMine(name);
 
         return ResponseEntity.ok()
-                .body(ReservationWaitingResponses.from(myReservationWaitings));
+                .body(ReservationWaitingResponses.from(waitings));
     }
 
     @DeleteMapping("/me/{id}")

@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeAvailability;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.dto.ReservationTimeResponses;
 import roomescape.dto.TimeWithStatusResponse;
 import roomescape.dto.TimeWithStatusResponses;
+import roomescape.projection.ReservationTimeAvailability;
 import roomescape.service.ReservationTimeCommandService;
 import roomescape.service.ReservationTimeQueryService;
 

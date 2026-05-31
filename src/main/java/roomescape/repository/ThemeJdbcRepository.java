@@ -24,12 +24,13 @@ public class ThemeJdbcRepository implements ThemeRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<Theme> themeRowMapper = (rs, rowNum) -> new Theme(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getString("thumbnail_image_url")
-    );
+    private final RowMapper<Theme> themeRowMapper = (rs, rowNum) ->
+            new Theme(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("thumbnail_image_url")
+            );
 
     public List<Theme> findAll() {
         String sql = "SELECT id, name, description, thumbnail_image_url FROM theme ORDER BY id DESC";

@@ -1,12 +1,12 @@
 package roomescape.dto;
 
 import java.util.List;
-import roomescape.domain.ReservationWaiting;
+import roomescape.projection.ReservationWaitingWithOrder;
 
 public record ReservationWaitingResponses(
         List<ReservationWaitingResponse> waitings
 ) {
-    public static ReservationWaitingResponses from(List<ReservationWaiting> waitings) {
+    public static ReservationWaitingResponses from(List<ReservationWaitingWithOrder> waitings) {
         List<ReservationWaitingResponse> reservationWaitingResponses = waitings.stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();

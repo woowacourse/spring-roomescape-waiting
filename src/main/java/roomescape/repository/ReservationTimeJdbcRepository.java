@@ -20,10 +20,11 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
     private static final String ALREADY_EXISTS_TIME = "이미 존재하는 예약 시간입니다.";
     private static final String CANNOT_DELETE_TIME_IN_USE = "ID %d번 시간을 사용 중인 예약이 존재하여 시간을 삭제할 수 없습니다.";
 
-    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
-            rs.getLong("id"),
-            rs.getTime("start_at").toLocalTime()
-    );
+    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) ->
+            new ReservationTime(
+                    rs.getLong("id"),
+                    rs.getTime("start_at").toLocalTime()
+            );
 
     private final JdbcTemplate jdbcTemplate;
 
