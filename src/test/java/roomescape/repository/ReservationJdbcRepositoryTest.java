@@ -236,25 +236,42 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void existsByDateAndTimeIdAndThemeId_같은_조합이_있으면_true() {
+    void existsByDateAndTimeAndThemeAndStore_같은_조합이_있으면_true() {
         Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId);
+        long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
+        DbFixtures.insertReservationInStore(jdbcTemplate, userId, themeId, "2026-05-06", timeId, storeId);
 
-        boolean exists = repository.existsByDateAndTimeIdAndThemeId(
-                LocalDate.of(2026, 5, 6), timeId, themeId);
+        boolean exists = repository.existsByDateAndTimeAndThemeAndStore(
+                LocalDate.of(2026, 5, 6), timeId, themeId, storeId);
 
         assertThat(exists).isTrue();
     }
 
     @Test
-    void existsByDateAndTimeIdAndThemeId_같은_조합이_없으면_false() {
+    void existsByDateAndTimeAndThemeAndStore_같은_조합이_없으면_false() {
         Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
 
-        boolean exists = repository.existsByDateAndTimeIdAndThemeId(
-                LocalDate.of(2026, 5, 6), timeId, themeId);
+        boolean exists = repository.existsByDateAndTimeAndThemeAndStore(
+                LocalDate.of(2026, 5, 6), timeId, themeId, storeId);
+
+        assertThat(exists).isFalse();
+    }
+
+    @Test
+    void existsByDateAndTimeAndThemeAndStore_날짜시간테마는_같아도_매장이_다르면_false() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        long storeA = DbFixtures.defaultStoreId(jdbcTemplate);
+        long storeB = DbFixtures.insertStore(jdbcTemplate, "다른매장");
+        DbFixtures.insertReservationInStore(jdbcTemplate, userId, themeId, "2026-05-06", timeId, storeA);
+
+        boolean exists = repository.existsByDateAndTimeAndThemeAndStore(
+                LocalDate.of(2026, 5, 6), timeId, themeId, storeB);
 
         assertThat(exists).isFalse();
     }

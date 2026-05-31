@@ -227,7 +227,7 @@ class ReservationAcceptanceTest {
                 "date", "2026-05-08",
                 "themeId", existing.themeId(),
                 "timeId", existing.timeId(),
-                "storeId", DbFixtures.defaultStoreId(jdbcTemplate));
+                "storeId", existing.storeId());
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
@@ -382,7 +382,8 @@ class ReservationAcceptanceTest {
                 .save();
         long otherTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
         Scenario.reservation(jdbcTemplate)
-                .member("다른사람").onTheme(reserved.themeId()).onTime(otherTimeId).date("2026-06-02").save();
+                .member("다른사람").onTheme(reserved.themeId()).onTime(otherTimeId).onStore(reserved.storeId())
+                .date("2026-06-02").save();
         Map<String, Object> body = Map.of(
                 "date", "2026-06-02",
                 "themeId", reserved.themeId(),
