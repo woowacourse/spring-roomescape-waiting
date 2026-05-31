@@ -146,7 +146,7 @@ public class ReservationWaitingServiceTest {
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
-        assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId())).doesNotThrowAnyException();
+        assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트")).doesNotThrowAnyException();
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ReservationWaitingServiceTest {
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", LocalDate.now().minusDays(1), reservationTime, theme, 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
-        assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId()))
+        assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트"))
                 .isInstanceOf(ExpiredDateTimeException.class);
     }
 
@@ -162,7 +162,7 @@ public class ReservationWaitingServiceTest {
     void 존재하지_않는_예약_대기열_삭제를_시도하면_예외가_발생한다() {
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationWaitingService.delete(1L))
+        assertThatThrownBy(() -> reservationWaitingService.delete(1L, "테스트"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

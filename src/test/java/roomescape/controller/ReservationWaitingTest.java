@@ -131,27 +131,27 @@ public class ReservationWaitingTest {
 
     @Test
     void 예약_대기열_정상_삭제된다() throws Exception {
-        willDoNothing().given(reservationWaitingService).delete(1L);
+        willDoNothing().given(reservationWaitingService).delete(1L, "테스트");
 
-        mockMvc.perform(delete("/reservations/waitings/1"))
+        mockMvc.perform(delete("/reservations/waitings/1").param("name", "테스트"))
                 .andExpect(status().isNoContent());
     }
 
 
     @Test
     void 과거_예약_대기열_삭제시_에러_메세지_반환한다() throws Exception{
-        willThrow(new ExpiredDateTimeException()).given(reservationWaitingService).delete(1L);
+        willThrow(new ExpiredDateTimeException()).given(reservationWaitingService).delete(1L ,"테스트");
 
-        mockMvc.perform(delete("/reservations/waitings/1"))
+        mockMvc.perform(delete("/reservations/waitings/1").param("name", "테스트"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode").value("INVALID_DATE_OR_TIME"));
     }
 
     @Test
     void 존재하지_않는_예약_대기열_삭제시_에러_메세지_반환한다() throws Exception {
-        willThrow(new ResourceNotFoundException("")).given(reservationWaitingService).delete(1L);
+        willThrow(new ResourceNotFoundException("")).given(reservationWaitingService).delete(1L, "테스트");
 
-        mockMvc.perform(delete("/reservations/waitings/1"))
+        mockMvc.perform(delete("/reservations/waitings/1").param("name", "테스트"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value("RESERVATION_NOT_FOUND"));
     }

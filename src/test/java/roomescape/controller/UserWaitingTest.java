@@ -73,7 +73,7 @@ public class UserWaitingTest {
     @Test
     void 예약_대기열_정상_삭제된다() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/waitings/1")
+                .when().delete("/reservations/waitings/1?name=테스트")
                 .then().log().all()
                 .statusCode(204);
     }

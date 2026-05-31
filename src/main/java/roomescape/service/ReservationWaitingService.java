@@ -59,10 +59,11 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다.")));
     }
 
-    public void delete(Long id) {
+    public void delete(Long id, String name) {
         ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
 
+        reservationWaiting.validateOwner(name);
         reservationWaiting.validatePastDateTime();
 
         reservationWaitingUpdatingDao.delete(id);

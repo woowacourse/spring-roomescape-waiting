@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
+import roomescape.exception.InvalidInputException;
 
 public class ReservationWaiting {
 
@@ -69,6 +70,12 @@ public class ReservationWaiting {
     public void validatePastDateTime() {
         if(LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();
+        }
+    }
+
+    public void validateOwner(String name) {
+        if (!this.name.equals(name)) {
+            throw new InvalidInputException("본인의 대기만 취소할 수 있습니다.");
         }
     }
 }
