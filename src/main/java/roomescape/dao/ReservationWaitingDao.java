@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -96,7 +97,7 @@ public class ReservationWaitingDao {
         );
     }
 
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, long timeId, long themeId) {
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation_waiting
@@ -105,7 +106,7 @@ public class ReservationWaitingDao {
                 AND time_id = ? 
                 AND theme_id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
     public int delete(Long reservationWaitingId) {
@@ -113,7 +114,7 @@ public class ReservationWaitingDao {
         return jdbcTemplate.update(sql, reservationWaitingId);
     }
 
-    public int countOrder(LocalDate reservationDate, long timeId, long themeId, long waitingId) {
+    public int countOrder(ReservationSlot slot, long waitingId) {
         String sql = """
                 SELECT COUNT(*) 
                 FROM reservation_waiting 
@@ -122,7 +123,7 @@ public class ReservationWaitingDao {
                 AND theme_id = ?
                 AND id <= ?
                 """;
-        return jdbcTemplate.queryForObject(sql, Integer.class, reservationDate, timeId, themeId, waitingId);
+        return jdbcTemplate.queryForObject(sql, Integer.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), waitingId);
     }
 
     public List<ReservationWaiting> select() {

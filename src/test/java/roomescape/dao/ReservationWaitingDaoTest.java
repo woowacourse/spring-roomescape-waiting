@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -71,7 +72,10 @@ class ReservationWaitingDaoTest {
         reservationWaitingDao.insert(reservationWaiting);
 
         // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(reservationWaiting.getName(), reservationWaiting.getReservationDate(), savedTime.getId(), savedTheme.getId());
+        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
+                reservationWaiting.getName(),
+                new ReservationSlot(reservationWaiting.getReservationDate(), savedTime.getId(), savedTheme.getId())
+        );
 
         // then
         assertThat(result).isTrue();
@@ -80,7 +84,10 @@ class ReservationWaitingDaoTest {
     @Test
     void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하지_않으면_false를_반환한다() {
         // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId("맥스", LocalDate.of(2026, 6, 10), 999L, 999L);
+        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
+                "맥스",
+                new ReservationSlot(LocalDate.of(2026, 6, 10), 999L, 999L)
+        );
 
         // then
         assertThat(result).isFalse();
@@ -98,7 +105,10 @@ class ReservationWaitingDaoTest {
         ReservationWaiting savedReservationWaiting2 = reservationWaitingDao.insert(reservationWaiting2);
 
         // when
-        int countOrder = reservationWaitingDao.countOrder(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId(), savedReservationWaiting2.getId());
+        int countOrder = reservationWaitingDao.countOrder(
+                new ReservationSlot(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId()),
+                savedReservationWaiting2.getId()
+        );
 
         // then
         assertThat(countOrder).isEqualTo(2);

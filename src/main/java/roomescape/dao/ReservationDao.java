@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -98,20 +100,20 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId());
     }
 
-    public boolean existsDuplicateExcluding(LocalDate date, long timeId, long themeId, long reservationId) {
+    public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, reservationId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), reservationId);
     }
 
     public Reservation update(Long reservationId, LocalDate date, long timeId) {

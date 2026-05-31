@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -148,7 +149,9 @@ class ReservationDaoTest {
         reservationDao.insert(Reservation.createWithoutId("브라운", date, time, theme));
 
         // when
-        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId());
+        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
+                new ReservationSlot(date, time.getId(), theme.getId())
+        );
 
         // then
         assertThat(result).isTrue();
@@ -162,7 +165,9 @@ class ReservationDaoTest {
         LocalDate date = LocalDate.of(2026, 5, 5);
 
         // when
-        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId());
+        boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
+                new ReservationSlot(date, time.getId(), theme.getId())
+        );
 
         // then
         assertThat(result).isFalse();
