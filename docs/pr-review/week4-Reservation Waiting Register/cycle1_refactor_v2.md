@@ -10,7 +10,7 @@
   - `ReservationWaitingService` 생성자에서 `ReservationDao`, `ReservationTimeDao`, `ThemeDao` 3개 제거
   - 최종 의존: `ReservationWaitingService` → `ReservationWaitingDao`, `ReservationService`, `Clock`
 
-- [ ] **2. `reservation_waiting` 테이블 스키마 개선 — `reservation` FK 참조 구조로 전환**
+- [x] **2. `reservation_waiting` 테이블 스키마 개선 — `reservation` FK 참조 구조로 전환**
   - 현재: `reservation_waiting`이 `reservation`을 참조하지 않고 (name, date, time_id, theme_id)를 독립 중복 저장 → `Reservation.id`에 waiting PK를 채워넣는 ID 모호성 발생
   - `reservation_waiting` 테이블에 `reservation_id BIGINT FK → reservation.id` 컬럼 추가, 중복 컬럼(name, date, time_id, theme_id) 제거
   - `reservation` 테이블의 `UNIQUE (date, time_id, theme_id)` 제약 제거 — 예약/대기 모두 수용하기 위해

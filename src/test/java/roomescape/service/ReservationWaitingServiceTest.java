@@ -46,8 +46,6 @@ class ReservationWaitingServiceTest {
     @Test
     void saveWaiting_빈_슬롯이면_일반_예약으로_저장() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(1L)).willReturn(sampleTime);
-        given(reservationService.getTheme(1L)).willReturn(sampleTheme);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
         given(reservationService.save("브라운", futureDate, 1L, 1L))
                 .willReturn(new Reservation(10L, "브라운", futureDate, fixedNow, sampleTime, sampleTheme));
@@ -61,7 +59,8 @@ class ReservationWaitingServiceTest {
     @Test
     void saveWaiting_존재하지_않는_시간이면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(99L))
+        given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 99L, 1L)).willReturn(false);
+        given(reservationService.save("브라운", futureDate, 99L, 1L))
                 .willThrow(new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다."));
 
         assertThatThrownBy(() -> reservationWaitingService.saveWaiting("브라운", futureDate, 99L, 1L))
@@ -72,8 +71,8 @@ class ReservationWaitingServiceTest {
     @Test
     void saveWaiting_존재하지_않는_테마이면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(1L)).willReturn(sampleTime);
-        given(reservationService.getTheme(99L))
+        given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 99L)).willReturn(false);
+        given(reservationService.save("브라운", futureDate, 1L, 99L))
                 .willThrow(new ThemeNotFoundException("존재하지 않는 테마입니다."));
 
         assertThatThrownBy(() -> reservationWaitingService.saveWaiting("브라운", futureDate, 1L, 99L))
@@ -83,16 +82,14 @@ class ReservationWaitingServiceTest {
 
     @Test
     void saveWaiting_이미_예약된_슬롯에_대기_정상_저장() {
-        fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(1L)).willReturn(sampleTime);
-        given(reservationService.getTheme(1L)).willReturn(sampleTheme);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
         given(reservationService.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "이영희")).willReturn(false);
         given(reservationWaitingDao.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "이영희")).willReturn(false);
         Reservation savedReservation = new Reservation(5L, "이영희", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationService.saveEntry("이영희", futureDate, 1L, 1L)).willReturn(savedReservation);
         given(reservationWaitingDao.saveWaiting(any(Reservation.class)))
-                .willReturn(new ReservationWaiting(5L, savedReservation, 0));
+                .willReturn(new ReservationWaiting(7L, savedReservation, 0));
 
         Reservation result = reservationWaitingService.saveWaiting("이영희", futureDate, 1L, 1L);
 
@@ -102,8 +99,6 @@ class ReservationWaitingServiceTest {
     @Test
     void saveWaiting_이미_예약한_사람이_대기_신청하면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(1L)).willReturn(sampleTime);
-        given(reservationService.getTheme(1L)).willReturn(sampleTheme);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
         given(reservationService.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(true);
 
@@ -115,8 +110,6 @@ class ReservationWaitingServiceTest {
     @Test
     void saveWaiting_이미_대기_신청한_사람이면_예외() {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
-        given(reservationService.getTime(1L)).willReturn(sampleTime);
-        given(reservationService.getTheme(1L)).willReturn(sampleTheme);
         given(reservationService.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
         given(reservationService.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(false);
         given(reservationWaitingDao.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(true);

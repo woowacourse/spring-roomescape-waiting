@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
 
 @Service
@@ -30,8 +28,6 @@ public class ReservationWaitingService {
 
     @Transactional
     public Reservation saveWaiting(String name, LocalDate date, long timeId, long themeId) {
-        ReservationTime time = reservationService.getTime(timeId);
-        Theme theme = reservationService.getTheme(themeId);
         if (!reservationService.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             return reservationService.save(name, date, timeId, themeId);
         }
@@ -41,9 +37,9 @@ public class ReservationWaitingService {
         if (reservationWaitingDao.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
-        Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
+        Reservation saved = reservationService.saveEntry(name, date, timeId, themeId);
         try {
-            ReservationWaiting waiting = reservationWaitingDao.saveWaiting(reservation);
+            ReservationWaiting waiting = reservationWaitingDao.saveWaiting(saved);
             return waiting.reservation();
         } catch (DuplicateKeyException e) {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");

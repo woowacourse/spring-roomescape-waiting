@@ -47,7 +47,7 @@ public class ReservationWaitingController {
     public ResponseEntity<ReservationWaitingsResponse> getReservationWaiting(@RequestParam String username) {
         List<ReservationWaitingResponse> responses = reservationWaitingService.findAllWaitingByName(username)
                 .stream()
-                .map(r -> ReservationWaitingResponse.from(r.reservation(), r.reservation().getTheme(), r.waitingNumber()))
+                .map(ReservationWaitingResponse::from)
                 .toList();
         return ResponseEntity.ok(new ReservationWaitingsResponse(responses));
     }

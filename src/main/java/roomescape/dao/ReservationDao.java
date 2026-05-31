@@ -43,6 +43,7 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.id NOT IN (SELECT reservation_id FROM reservation_waiting)
                 ORDER BY r.date DESC, r.id DESC
                 LIMIT ? OFFSET ?
                 """;
@@ -50,8 +51,9 @@ public class ReservationDao {
     }
 
     public long count() {
-        return Objects.requireNonNullElse(
-                jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Integer.class), 0);
+        return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE id NOT IN (SELECT reservation_id FROM reservation_waiting)",
+                Integer.class), 0);
     }
 
     public Optional<Reservation> findById(long id) {
@@ -91,13 +93,13 @@ public class ReservationDao {
 
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?",
+                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND id NOT IN (SELECT reservation_id FROM reservation_waiting)",
                 Integer.class, date, timeId, themeId), 0) > 0;
     }
 
     public boolean existsReservationByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String username) {
         return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?",
+                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ? AND id NOT IN (SELECT reservation_id FROM reservation_waiting)",
                 Integer.class, date, timeId, themeId, username), 0) > 0;
     }
 
@@ -119,7 +121,7 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.name = ?
+                WHERE r.name = ? AND r.id NOT IN (SELECT reservation_id FROM reservation_waiting)
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, username);
     }

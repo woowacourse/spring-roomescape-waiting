@@ -20,7 +20,7 @@ public class ReservationWaitingDao {
     private final SimpleJdbcInsert jdbcWaitingInsert;
 
     private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (rs, rowNum) -> new ReservationWaiting(
-            rs.getLong("reservation_id"),
+            rs.getLong("waiting_id"),
             new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("name"),
@@ -39,53 +39,53 @@ public class ReservationWaitingDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public ReservationWaiting saveWaiting(Reservation reservation) {
-        long id = jdbcWaitingInsert.executeAndReturnKey(Map.of(
-                "name", reservation.getName(),
-                "date", reservation.getDate(),
-                "created_at", reservation.getCreatedAt(),
-                "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
-        )).longValue();
-        Reservation saved = new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
-        return new ReservationWaiting(id, saved, 0);
+    public ReservationWaiting saveWaiting(Reservation savedReservation) {
+        long waitingId = jdbcWaitingInsert.executeAndReturnKey(
+                Map.of("reservation_id", savedReservation.getId())
+        ).longValue();
+        return new ReservationWaiting(waitingId, savedReservation, 0);
     }
 
     public Optional<ReservationWaiting> findByWaitingId(long id) {
         String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, r.created_at,
+                SELECT rw.id AS waiting_id, r.id AS reservation_id, r.name, r.date, r.created_at,
                        t.id AS time_id, t.start_at AS time_value,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
                        0 AS waiting_order
-                FROM reservation_waiting AS r
+                FROM reservation_waiting AS rw
+                INNER JOIN reservation AS r ON rw.reservation_id = r.id
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.id = ?
+                WHERE rw.id = ?
                 """;
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, id).stream().findFirst();
     }
 
-    public void deleteWaiting(long id) {
-        jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
+    public void deleteWaiting(long waitingId) {
+        Long reservationId = jdbcTemplate.queryForObject(
+                "SELECT reservation_id FROM reservation_waiting WHERE id = ?", Long.class, waitingId);
+        jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", waitingId);
+        if (reservationId != null) {
+            jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", reservationId);
+        }
     }
 
     public List<ReservationWaiting> findAllWaitingByName(String username) {
         String sql = """
-                SELECT
-                    sub.reservation_id, sub.name, sub.date, sub.created_at,
-                    sub.time_id, sub.time_value,
-                    sub.theme_id, sub.theme_name, sub.theme_description, sub.theme_thumbnail,
-                    sub.waiting_order
+                SELECT sub.waiting_id, sub.reservation_id, sub.name, sub.date, sub.created_at,
+                       sub.time_id, sub.time_value,
+                       sub.theme_id, sub.theme_name, sub.theme_description, sub.theme_thumbnail,
+                       sub.waiting_order
                 FROM (
-                    SELECT r.id AS reservation_id, r.name, r.date, r.created_at,
+                    SELECT rw.id AS waiting_id, r.id AS reservation_id, r.name, r.date, r.created_at,
                            t.id AS time_id, t.start_at AS time_value,
                            th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
                            ROW_NUMBER() OVER (
                                PARTITION BY r.date, r.theme_id, r.time_id
                                ORDER BY r.created_at ASC
                            ) AS waiting_order
-                    FROM reservation_waiting AS r
+                    FROM reservation_waiting AS rw
+                    INNER JOIN reservation AS r ON rw.reservation_id = r.id
                     INNER JOIN reservation_time AS t ON r.time_id = t.id
                     INNER JOIN theme AS th ON r.theme_id = th.id
                 ) AS sub
@@ -96,7 +96,11 @@ public class ReservationWaitingDao {
 
     public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String username) {
         return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation_waiting WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?",
+                """
+                SELECT COUNT(*) FROM reservation_waiting rw
+                INNER JOIN reservation r ON rw.reservation_id = r.id
+                WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ? AND r.name = ?
+                """,
                 Integer.class, date, timeId, themeId, username), 0) > 0;
     }
 }
