@@ -103,10 +103,9 @@ public class ReservationService {
             return;
         }
 
-        ReservationWaiting reservationWaiting = optionalReservationWaiting.get();
-
-        reservationUpdatingDao.updateName(id, reservationWaiting.getName());
-        reservationWaitingDao.delete(reservationWaiting.getId());
+        ReservationWaiting waiting = optionalReservationWaiting.get();
+        reservationUpdatingDao.update(id, waiting.promote());
+        reservationWaitingDao.delete(waiting.getId());
     }
 
     private Reservation getReservation(Long id) {

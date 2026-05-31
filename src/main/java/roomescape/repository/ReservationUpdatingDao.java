@@ -18,13 +18,14 @@ public class ReservationUpdatingDao {
     }
 
     public void update(Long id, Reservation reservation) {
-        String sql = "update reservation set date = ?, time_id = ? where id = ?";
-        jdbcTemplate.update(sql, reservation.getDate(), reservation.getTime().getId(), id);
-    }
-
-    public void updateName(Long id, String name) {
-        String sql = "update reservation set name = ? where id = ?";
-        jdbcTemplate.update(sql, name, id);
+        String sql = "update reservation set name = ?, date = ?, time_id = ?, theme_id = ?, created_at = ? where id = ?";
+        jdbcTemplate.update(sql,
+                reservation.getName(),
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getCreatedAt(),
+                id);
     }
 
     public void delete(Long id) {

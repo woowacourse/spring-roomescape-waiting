@@ -49,6 +49,10 @@ public class ReservationWaiting {
         return createdAt;
     }
 
+    public Reservation promote() {
+        return this.reservation.transferTo(name);
+    }
+
     private static void validateWaitableReservation(String name, Reservation reservation) {
         if(reservation.isExpired()) {
             throw new InvalidInputException("이미 지난 예약에 대기열을 등록할 수 없습니다.");

@@ -35,6 +35,10 @@ public class Reservation {
         return new Reservation(id, name, date, time, theme, createdAt);
     }
 
+    public Reservation transferTo(String name) {
+        return Reservation.create(name, this.date, this.time, this.theme);
+    }
+
     public Reservation update(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateModifiable();
         validatePastDateTime(date, time.getStartAt());
