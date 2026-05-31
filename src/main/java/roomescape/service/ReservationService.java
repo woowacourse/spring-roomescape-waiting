@@ -89,8 +89,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         Theme theme = themeDao.findById(request.themeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
-        Store store = request.storeId() == null ? null
-                : storeDao.findById(request.storeId())
+        Store store = storeDao.findById(request.storeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 매장입니다."));
         Slot slot = new Slot(request.date(), time, theme, store);
         if (reservationDao.existsBySlotForUpdate(slot)) {

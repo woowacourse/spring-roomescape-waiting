@@ -60,11 +60,14 @@ class AdminReservationServiceTest {
     private Time savedTime2;
     private Theme savedTheme1;
     private Theme savedTheme2;
+    private Long storeId;
     private AdminReservationRequestDto requestDto1;
     private AdminReservationRequestDto requestDto2;
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
+        storeId = jdbcTemplate.queryForObject("SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
         jdbcTemplate.update(
                 "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
                 "유저", "user@test.com", "password", "USER"
@@ -74,8 +77,8 @@ class AdminReservationServiceTest {
         savedTime2 = timeDao.insert(new Time(LocalTime.of(14, 0)));
         savedTheme1 = themeDao.insert(new Theme(new Name("방탈출 이름1"), "http://thumbnail_url", "방탈출을 할 수 있다."));
         savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
-        requestDto1 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), null);
-        requestDto2 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), null);
+        requestDto1 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+        requestDto2 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), storeId);
     }
 
     @Nested
@@ -144,7 +147,7 @@ class AdminReservationServiceTest {
         @DisplayName("과거 날짜로도 예약을 생성한다")
         void createsReservationWithPastDate() {
             AdminReservationRequestDto pastDto = new AdminReservationRequestDto(
-                    member.getId(), LocalDate.now().minusDays(1), savedTime1.getId(), savedTheme1.getId(), null);
+                    member.getId(), LocalDate.now().minusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
 
             Reservation saved = adminReservationService.createByAdmin(pastDto);
 

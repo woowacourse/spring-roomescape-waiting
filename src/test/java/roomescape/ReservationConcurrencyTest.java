@@ -22,6 +22,7 @@ import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
@@ -49,10 +50,14 @@ class ReservationConcurrencyTest {
     private Member member;
     private Time time;
     private Theme theme;
+    private Store store;
     private Reservation savedReservation;
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
+        Long storeId = jdbcTemplate.queryForObject("SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
+        store = new Store(storeId, "강남점");
         jdbcTemplate.update(
                 "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
                 "유저", "user@test.com", "password", "USER"
@@ -61,7 +66,7 @@ class ReservationConcurrencyTest {
         time = timeDao.insert(new Time(LocalTime.of(13, 0)));
         theme = themeDao.insert(new Theme(new Name("방탈출"), "http://url", "설명"));
         savedReservation = reservationDao.insert(
-                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme, null));
+                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme, store));
     }
 
     @AfterEach
@@ -70,6 +75,7 @@ class ReservationConcurrencyTest {
         jdbcTemplate.update("DELETE FROM times");
         jdbcTemplate.update("DELETE FROM themes");
         jdbcTemplate.update("DELETE FROM members");
+        jdbcTemplate.update("DELETE FROM stores");
     }
 
     @Test
@@ -80,7 +86,7 @@ class ReservationConcurrencyTest {
                 LocalDate.now().plusDays(2),
                 time.getId(),
                 theme.getId(),
-                null
+                store.getId()
         );
 
         AtomicInteger successCount = new AtomicInteger(0);

@@ -63,13 +63,14 @@ class ReservationServiceTest {
     private Time savedTime2;
     private Theme savedTheme1;
     private Theme savedTheme2;
+    private Long storeId;
     private ReservationRequestDto requestDto1;
     private ReservationRequestDto requestDto2;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
-        Long storeId = jdbcTemplate.queryForObject(
+        storeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
         jdbcTemplate.update(
                 "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
@@ -128,7 +129,7 @@ class ReservationServiceTest {
         @DisplayName("과거 날짜로 예약을 생성하면 예외를 반환한다")
         void throwsWhenPastDate() {
             ReservationRequestDto pastDto = new ReservationRequestDto(
-                    LocalDate.now().minusDays(1), savedTime1.getId(), savedTheme1.getId(), null);
+                    LocalDate.now().minusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
 
             assertThatThrownBy(() -> reservationService.create(member, pastDto))
                     .isInstanceOf(BusinessRuleViolationException.class);
