@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -80,52 +82,72 @@ class WaitingListControllerTest {
         assertThat(count).isZero();
     }
 
-    @Test
-    void 예약_대기_조회() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "11:00", "11:30");
+    @Nested
+    class 예약_대기_조회 {
 
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "오즈의마법사", "판타지 테마", "http:~");
+        @BeforeEach
+        void setUp() {
+            jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+            jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "11:00", "11:30");
+            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "오즈의마법사", "판타지 테마", "http:~");
+            jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
+            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "검프", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
+            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
+            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "2", "2", LocalDateTime.now().minusDays(1));
+        }
 
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
-        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "검프", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
-        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
-        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "2", "2", LocalDateTime.now().minusDays(1));
+        @Test
+        void 대기가_1건인_사용자는_1건이_조회() {
+            List<WaitingListResult> responses = RestAssured.given().log().all()
+                    .when().get("/waiting-list?name=검프")
+                    .then().log().all()
+                    .statusCode(200).extract()
+                    .jsonPath().getList(".", WaitingListResult.class);
 
-        List<WaitingListResult> responses = RestAssured.given().log().all()
-                .when().get("/waiting-list?name=검프")
-                .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", WaitingListResult.class);
+            assertThat(responses).hasSize(1);
 
-        assertThat(responses.size()).isEqualTo(1);
+            WaitingListResult response = responses.getFirst();
+            assertThat(response.id()).isEqualTo(1);
+            assertThat(response.waitingOrder()).isEqualTo(1);
+            assertThat(response.name()).isEqualTo("검프");
+            assertThat(response.date()).isEqualTo(TOMORROW);
+            assertThat(response.timeId()).isEqualTo(1);
+            assertThat(response.themeId()).isEqualTo(1);
+        }
 
-        WaitingListResult response = responses.getFirst();
-        assertThat(response.id()).isEqualTo(1);
-        assertThat(response.waitingOrder()).isEqualTo(1);
-        assertThat(response.name()).isEqualTo("검프");
-        assertThat(response.date()).isEqualTo(TOMORROW);
-        assertThat(response.timeId()).isEqualTo(1);
-        assertThat(response.themeId()).isEqualTo(1);
+        @Test
+        void 대기가_2건인_사용자는_2건이_조회() {
+            List<WaitingListResult> responses = RestAssured.given().log().all()
+                    .when().get("/waiting-list?name=류시")
+                    .then().log().all()
+                    .statusCode(200).extract()
+                    .jsonPath().getList(".", WaitingListResult.class);
 
-        List<WaitingListResult> responses2 = RestAssured.given().log().all()
-                .when().get("/waiting-list?name=류시")
-                .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", WaitingListResult.class);
+            assertThat(responses).hasSize(2);
 
-        assertThat(responses2.size()).isEqualTo(2);
+            WaitingListResult first = responses.get(0);
+            assertThat(first.id()).isEqualTo(2);
+            assertThat(first.waitingOrder()).isEqualTo(2);
+            assertThat(first.timeId()).isEqualTo(1);
+            assertThat(first.themeId()).isEqualTo(1);
 
-        WaitingListResult response2 = responses2.getFirst();
-        assertThat(response2.id()).isEqualTo(2);
-        assertThat(response2.waitingOrder()).isEqualTo(2);
-        assertThat(response2.name()).isEqualTo("류시");
-        assertThat(response2.date()).isEqualTo(TOMORROW);
-        assertThat(response2.timeId()).isEqualTo(1);
-        assertThat(response2.themeId()).isEqualTo(1);
+            WaitingListResult second = responses.get(1);
+            assertThat(second.id()).isEqualTo(3);
+            assertThat(second.waitingOrder()).isEqualTo(1);
+            assertThat(second.timeId()).isEqualTo(2);
+            assertThat(second.themeId()).isEqualTo(2);
+        }
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
-        assertThat(count).isEqualTo(3);
+        @Test
+        void 없는_이름이면_빈_목록이_조회() {
+            List<WaitingListResult> responses = RestAssured.given().log().all()
+                    .when().get("/waiting-list?name=없는사람")
+                    .then().log().all()
+                    .statusCode(200).extract()
+                    .jsonPath().getList(".", WaitingListResult.class);
+
+            assertThat(responses).isEmpty();
+        }
     }
 }
