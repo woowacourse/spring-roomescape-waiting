@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
@@ -101,9 +102,19 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void deleteReservationTime_해당_시간을_참조하는_예약이_존재하면_예외() {
+    void deleteReservationTime_해당_시간을_참조하는_확정_예약이_존재하면_예외() {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        reservationRepository.save(buildReservation(timeId, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(timeId, LocalTime.of(10, 0), ReservationStatus.RESERVED));
+
+        assertThatThrownBy(() -> service.deleteReservationTime(timeId))
+                .isInstanceOf(ReservationTimeInUseException.class)
+                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
+    }
+
+    @Test
+    void deleteReservationTime_해당_시간을_참조하는_대기_예약이_존재하면_예외() {
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(timeId, LocalTime.of(10, 0), ReservationStatus.WAITING));
 
         assertThatThrownBy(() -> service.deleteReservationTime(timeId))
                 .isInstanceOf(ReservationTimeInUseException.class)
@@ -114,7 +125,7 @@ class ReservationTimeServiceTest {
     void deleteReservationTime_다른_시간을_참조하는_예약만_있으면_정상_삭제() {
         Long usedTimeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         Long targetTimeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
-        reservationRepository.save(buildReservation(usedTimeId, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(usedTimeId, LocalTime.of(10, 0), ReservationStatus.RESERVED));
 
         service.deleteReservationTime(targetTimeId);
 
@@ -122,10 +133,10 @@ class ReservationTimeServiceTest {
         assertThat(responses.times()).extracting("id").doesNotContain(targetTimeId);
     }
 
-    private Reservation buildReservation(Long timeId, LocalTime startAt) {
+    private Reservation buildReservation(Long timeId, LocalTime startAt, ReservationStatus status) {
         User user = Fixtures.memberWithId(1L, "브라운");
         Theme theme = new Theme(1L, "공포", "무서움", "https://thumbnail.url");
         ReservationTime time = new ReservationTime(timeId, startAt);
-        return Fixtures.reservation(user, theme, LocalDate.of(2026, 5, 8), time);
+        return Fixtures.reservation(user, theme, LocalDate.of(2026, 5, 8), time, status);
     }
 }
