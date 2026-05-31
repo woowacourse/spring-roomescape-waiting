@@ -56,11 +56,11 @@ class WaitingControllerTest {
         given(waitingService.addWaiting(request)).willReturn(expectedResponse);
 
         mockMvc.perform(
-                        post("/api/waiting")
+                        post("/api/waitings")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
                 ).andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/api/waiting/1"));
+                .andExpect(header().string("Location", "/api/waitings/1"));
     }
 
     @Test
@@ -70,7 +70,7 @@ class WaitingControllerTest {
         doNothing().when(waitingService).deleteWaiting(waitingId);
 
         mockMvc.perform(
-                delete("/api/waiting/{id}", waitingId)
+                delete("/api/waitings/{id}", waitingId)
         ).andExpect(status().isNoContent());
     }
 }

@@ -20,7 +20,7 @@ import roomescape.dto.WaitingResponseDTO;
 import roomescape.service.WaitingService;
 
 @RestController
-@RequestMapping("/api/waiting")
+@RequestMapping("/api/waitings")
 @Validated
 public class WaitingController {
 
@@ -33,7 +33,7 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<Void> add(@Valid @RequestBody WaitingRequestDTO request) {
         WaitingResponseDTO saved = waitingService.addWaiting(request);
-        return ResponseEntity.created(URI.create("/api/waiting/" + saved.id())).build();
+        return ResponseEntity.created(URI.create("/api/waitings/" + saved.id())).build();
     }
 
     @GetMapping
