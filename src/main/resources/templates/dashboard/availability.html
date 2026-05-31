@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 가능 시간 조회</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f6f7fb; color: #1f2937; }
+        .page { width: min(860px, calc(100% - 32px)); margin: 32px auto; }
+        .nav, .card { background: #fff; border: 1px solid #dde3f0; border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+        form { display: grid; gap: 12px; }
+        label { display: grid; gap: 6px; font-weight: 600; }
+        input, select, button { width: 100%; border: 1px solid #dde3f0; border-radius: 12px; padding: 11px 13px; font: inherit; background: white; }
+        button { border: none; background: #4f46e5; color: white; font-weight: 700; cursor: pointer; }
+        ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+        li { border: 1px solid #dde3f0; border-radius: 14px; padding: 14px; background: #fbfcff; }
+        .flash { padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; font-weight: 600; background: #fef3f2; color: #b42318; }
+        .links a { margin-right: 12px; color: #4f46e5; text-decoration: none; }
+        .empty { color: #667085; font-style: italic; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="nav">
+        <h1>예약 가능 시간 조회</h1>
+        <div class="links"><a href="/page/dashboard">홈</a><a href="/page/dashboard/reservations">예약 관리</a></div>
+    </section>
+    <article class="card">
+        <form method="get" th:action="@{/page/dashboard/availability}">
+            <label>테마
+                <select name="availableThemeId" required>
+                    <option value="">테마 선택</option>
+                    <option th:each="theme : ${themes}" th:value="${theme.id()}" th:text="${theme.name()}" th:selected="${selectedAvailableThemeId != null and selectedAvailableThemeId == theme.id()}"></option>
+                </select>
+            </label>
+            <label>날짜<input type="date" name="availableDate" th:value="${selectedDate}" required></label>
+            <button type="submit">가능 시간 보기</button>
+        </form>
+    </article>
+    <div th:if="${availableTimeErrorMessage}" class="flash" th:text="${availableTimeErrorMessage}"></div>
+    <article class="card">
+        <h2>조회 결과</h2>
+        <ul th:if="${selectedAvailableThemeId != null and selectedDate != null}">
+            <li th:if="${#lists.isEmpty(availableTimes)}" class="empty">가능 시간 없음. 휴일이거나 이미 예약된 날짜일 수 있습니다.</li>
+            <li th:each="time : ${availableTimes}" th:text="|${time.startAt()} (#${time.id()})|"></li>
+        </ul>
+        <p th:if="${selectedAvailableThemeId == null or selectedDate == null}" class="empty">테마와 날짜를 선택해 주세요.</p>
+    </article>
+</div>
+</body>
+</html>

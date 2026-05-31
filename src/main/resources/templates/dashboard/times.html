@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간 관리</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f6f7fb; color: #1f2937; }
+        .page { width: min(860px, calc(100% - 32px)); margin: 32px auto; }
+        .nav, .card { background: #fff; border: 1px solid #dde3f0; border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+        form { display: grid; gap: 12px; }
+        label { display: grid; gap: 6px; font-weight: 600; }
+        input, button { width: 100%; border: 1px solid #dde3f0; border-radius: 12px; padding: 11px 13px; font: inherit; background: white; }
+        button { border: none; background: #4f46e5; color: white; font-weight: 700; cursor: pointer; }
+        button.danger { background: #dc2626; width: auto; }
+        ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+        li { border: 1px solid #dde3f0; border-radius: 14px; padding: 14px; background: #fbfcff; }
+        .flash { padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; font-weight: 600; }
+        .success { background: #ecfdf3; color: #027a48; }
+        .error { background: #fef3f2; color: #b42318; }
+        .head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+        .inline-form { display: inline-block; }
+        .links a { margin-right: 12px; color: #4f46e5; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="nav"><h1>시간 관리</h1><div class="links"><a href="/page/dashboard">홈</a></div></section>
+    <div th:if="${successMessage}" class="flash success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="flash error" th:text="${errorMessage}"></div>
+    <article class="card">
+        <h2>시간 추가</h2>
+        <form method="post" th:action="@{/page/dashboard/times}">
+            <label>시작 시간<input type="datetime-local" name="startAt" required></label>
+            <label>종료 시간<input type="datetime-local" name="endAt" required></label>
+            <button type="submit">시간 추가</button>
+        </form>
+    </article>
+    <article class="card">
+        <h2>시간 목록</h2>
+        <ul>
+            <li th:each="time : ${times}">
+                <div class="head">
+                    <div><strong th:text="|#${time.id()}|"></strong><p th:text="|${time.startAt()} ~ ${time.endAt()}|"></p></div>
+                    <form class="inline-form" method="post" th:action="@{|/page/dashboard/times/${time.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
+                </div>
+            </li>
+        </ul>
+    </article>
+</div>
+</body>
+</html>
