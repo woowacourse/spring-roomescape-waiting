@@ -6,8 +6,6 @@ import roomescape.domain.Waiting;
 
 public interface WaitingRepository {
 
-    int calculateWaitingNumber(Waiting waiting);
-
     void save(Waiting waiting);
 
     void deleteById(Long id);

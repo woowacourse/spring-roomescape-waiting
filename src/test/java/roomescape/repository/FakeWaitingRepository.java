@@ -13,14 +13,6 @@ public class FakeWaitingRepository implements WaitingRepository {
     private long sequence = 1L;
 
     @Override
-    public int calculateWaitingNumber(Waiting waiting) {
-        return (int) storage.values().stream()
-                .filter(entry -> isSameSchedule(entry, waiting))
-                .filter(entry -> entry.getId() <= waiting.getId())
-                .count();
-    }
-
-    @Override
     public void save(Waiting waiting) {
         long id = sequence++;
         Waiting savedWaiting = createSavedWaiting(id, waiting);

@@ -21,29 +21,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int calculateWaitingNumber(Waiting waiting) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM waiting w
-                WHERE w.date = ?
-                  AND w.time_id = ?
-                  AND w.theme_id = ?
-                  AND w.created_at <= (
-                      SELECT target.created_at
-                      FROM waiting target
-                      WHERE target.name = ?
-                        AND target.date = ?
-                        AND target.time_id = ?
-                        AND target.theme_id = ?
-                  )
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Integer.class,
-                waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId(),
-                waiting.getName(), waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId());
-    }
-
-    @Override
     public void save(Waiting waiting) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);

@@ -68,15 +68,4 @@ class JdbcWaitingRepositoryTest {
         jdbcWaitingRepository.save(waiting);
         jdbcWaitingRepository.deleteById(1L);
     }
-
-    @Test
-    @DisplayName("예약 대기 순번을 계산한다.")
-    void calculateWaitingNumber() {
-        Waiting waiting1 = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
-        Waiting waiting2 = new Waiting(null, "워니", LocalDate.now(), 1L, 1L, null);
-        jdbcWaitingRepository.save(waiting1);
-        jdbcWaitingRepository.save(waiting2);
-
-        assertThat(jdbcWaitingRepository.calculateWaitingNumber(waiting2)).isEqualTo(2);
-    }
 }
