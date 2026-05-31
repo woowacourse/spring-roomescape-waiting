@@ -110,16 +110,16 @@ public class ReceptionFacade {
                                                     ReservationTime reservationTime, Theme theme) {
         Optional<Reservation> existing = reservationService.findBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
-        if (existing.isEmpty()) {
+        return existing.map(r -> {
+            if (r.isReservedBy(request.name())) {
+                throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
+            }
+            Wait newWait = waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));
+            return ReceptionResponse.from(newWait, waitService.calculateOrder(newWait), ReservationStatus.WAITING.name());
+        }).orElseGet(() -> {
             Reservation saved = reservationService.save(request, reservationTime, theme);
             return ReceptionResponse.from(saved, 0L, ReservationStatus.CONFIRMED.name());
-        }
-        if (existing.get().getName().equals(request.name())) {
-            throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
-        }
-
-        Wait newWait = waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));
-        return ReceptionResponse.from(newWait, waitService.calculateOrder(newWait), ReservationStatus.WAITING.name());
+        });
     }
 
     private void confirmFirstWait(Wait firstOrder) {

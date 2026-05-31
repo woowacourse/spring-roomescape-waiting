@@ -58,6 +58,10 @@ public class Reservation {
         return theme;
     }
 
+    public boolean isReservedBy(String name) {
+        return this.name.equals(name);
+    }
+
     public boolean isPast(LocalDateTime now) {
         if (date.isBefore(now.toLocalDate())) {
             return true;
