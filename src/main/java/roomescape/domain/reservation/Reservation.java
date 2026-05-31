@@ -77,6 +77,10 @@ public class Reservation {
         return this.name.equals(name);
     }
 
+    public boolean isExpired() {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now());
+    }
+
     private static void validatePastDateTime(LocalDate date, LocalTime time) {
         if(LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();

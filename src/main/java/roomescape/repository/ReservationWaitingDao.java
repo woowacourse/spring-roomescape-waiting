@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -24,31 +25,35 @@ public class ReservationWaitingDao {
     }
 
     private static final String SELECT_RESERVATION_WAITING_SQL = """
-                select
-                    w.id,
-                    w.name,
-                    w.date,
-                    w.created_at,
-                    t.id       as time_id,
-                    t.start_at as time_start_at,
-                    th.id          as theme_id,
-                    th.name        as theme_name,
-                    th.description as theme_description,
-                    th.url         as theme_url,
-                    ranked.sequence
-                from waiting w
-                join reservation_time t  ON w.time_id  = t.id
-                join theme th            ON w.theme_id = th.id
-                join (
-                    select
-                        id,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY date, time_id, theme_id
-                            ORDER BY created_at, id
-                        ) as sequence
-                    from waiting
-                ) as ranked ON w.id = ranked.id
-                """;
+            SELECT
+                w.id,
+                w.name,
+                w.created_at,
+                r.id         as reservation_id,
+                r.name       as reservation_name,
+                r.date       as reservation_date,
+                r.created_at as reservation_created_at,
+                t.id         as time_id,
+                t.start_at   as time_start_at,
+                th.id          as theme_id,
+                th.name        as theme_name,
+                th.description as theme_description,
+                th.url         as theme_url,
+                ranked.sequence
+            FROM waiting w
+            JOIN reservation r ON w.reservation_id = r.id
+            JOIN reservation_time t  ON r.time_id  = t.id
+            JOIN theme th            ON r.theme_id = th.id
+            JOIN (
+                SELECT
+                    id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY reservation_id
+                        ORDER BY created_at, id
+                    ) as sequence
+                FROM waiting
+            ) as ranked ON w.id = ranked.id
+            """;
 
     private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
@@ -63,29 +68,34 @@ public class ReservationWaitingDao {
                 resultSet.getString("theme_url")
         );
 
+        Reservation reservation = Reservation.restore(
+                resultSet.getLong("reservation_id"),
+                resultSet.getString("reservation_name"),
+                resultSet.getObject("reservation_date", LocalDate.class),
+                reservationTime,
+                theme,
+                resultSet.getObject("reservation_created_at", LocalDateTime.class)
+        );
+
         return ReservationWaiting.restore(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
-                resultSet.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
+                reservation,
                 resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
     };
 
-    public boolean isExistByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean isExistByNameAndReservationId(String name, Long reservationId) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
                     FROM waiting
                     WHERE name = ?
-                    AND date = ?
-                    AND time_id = ?
-                    AND theme_id = ?
+                    AND reservation_id = ?
             )
             """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, reservationId);
     }
 
     public Optional<ReservationWaiting> findReservationWaitingById(long id) {
@@ -141,16 +151,14 @@ public class ReservationWaitingDao {
     }
 
     public Long create(ReservationWaiting reservationWaiting) {
-        String sql = "insert into waiting(name, date, time_id, theme_id, created_at) values(?, ?, ?, ?, ?)";
+        String sql = "insert into waiting(name, reservation_id, created_at) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservationWaiting.getName());
-            ps.setObject(2, reservationWaiting.getDate());
-            ps.setLong(3, reservationWaiting.getTime().getId());
-            ps.setLong(4, reservationWaiting.getTheme().getId());
-            ps.setObject(5, reservationWaiting.getCreatedAt());
+            ps.setLong(2, reservationWaiting.getReservation().getId());
+            ps.setObject(3, reservationWaiting.getCreatedAt());
             return ps;
         }, keyHolder);
 
