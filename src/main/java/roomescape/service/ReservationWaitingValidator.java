@@ -44,7 +44,7 @@ public class ReservationWaitingValidator {
     }
 
     private void validateAlreadyReserved(ReservationWaiting waiting) {
-        if (!reservationRepository.existsWith(
+        if (!reservationRepository.existsWithForUpdate(
                 waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
             throw new InvalidInputException("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
         }

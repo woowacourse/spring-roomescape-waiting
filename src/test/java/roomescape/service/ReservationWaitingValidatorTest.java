@@ -31,7 +31,7 @@ class ReservationWaitingValidatorTest {
     void 예약된_시간이고_본인_예약과_중복_대기가_아니면_대기_신청이_가능하다() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
                 .thenReturn(true);
         when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
                 .thenReturn(false);
@@ -47,7 +47,7 @@ class ReservationWaitingValidatorTest {
     void 예약_가능한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
                 .thenReturn(false);
 
         // when & then
@@ -60,7 +60,7 @@ class ReservationWaitingValidatorTest {
     void 본인이_예약한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
                 .thenReturn(true);
         when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
                 .thenReturn(true);
@@ -75,7 +75,7 @@ class ReservationWaitingValidatorTest {
     void 이미_대기한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
                 .thenReturn(true);
         when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
                 .thenReturn(false);
