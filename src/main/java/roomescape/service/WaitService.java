@@ -15,6 +15,8 @@ import roomescape.service.dto.response.ServiceReceptionResponse;
 @Transactional(readOnly = true)
 public class WaitService {
 
+    private static final int MAX_WAITING_COUNT = 3;
+
     private final WaitRepository waitRepository;
 
     public WaitService(WaitRepository waitRepository) {
@@ -34,7 +36,7 @@ public class WaitService {
             }
         }
 
-        if (waits.size() >= 3) {
+        if (waits.size() >= MAX_WAITING_COUNT) {
             throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
         }
 
