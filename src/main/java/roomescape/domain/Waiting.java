@@ -51,7 +51,7 @@ public class Waiting {
         }
         if (name.length() > MAX_NAME_LENGTH) {
             throw new InvalidDomainException(
-                    "대기자 이름은 " + MAX_NAME_LENGTH + "자를 초과할 수 없습니다.");
+                    "대기자 이름은 %d자를 초과할 수 없습니다.".formatted(MAX_NAME_LENGTH));
         }
         if (date == null) {
             throw new InvalidDomainException("대기 날짜는 비어 있을 수 없습니다.");

@@ -56,7 +56,8 @@ class WaitingsTest {
             Waitings ws = new Waitings(List.of(waiting(1L, "브라운", 1)));
             assertThatThrownBy(() ->
                     ws.validateNoDuplicateBy("브라운"))
-                    .isInstanceOf(BusinessRuleViolationException.class);
+                    .isInstanceOf(BusinessRuleViolationException.class)
+                    .hasMessageContaining("이미 해당 시간에 대기 신청한 내역이 있습니다.");
         }
 
         @Test

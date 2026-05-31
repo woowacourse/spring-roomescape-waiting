@@ -8,6 +8,8 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.domain.exception.InvalidDomainException;
 
 class WaitingTest {
@@ -34,7 +36,8 @@ class WaitingTest {
         @DisplayName("이름이 비어있으면 거부")
         void 빈_이름_거부() {
             assertThatThrownBy(() -> Waiting.create("", DATE, TIME, THEME, 1))
-                    .isInstanceOf(InvalidDomainException.class);
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기자 이름은 비어 있을 수 없습니다.");
         }
 
         @Test
@@ -42,29 +45,33 @@ class WaitingTest {
         void 이름_30자_초과_거부() {
             String longName = "a".repeat(31);
             assertThatThrownBy(() -> Waiting.create(longName, DATE, TIME, THEME, 1))
-                    .isInstanceOf(InvalidDomainException.class);
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기자 이름은 30자를 초과할 수 없습니다.");
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(ints = {0, -1})
         @DisplayName("순번이 0 이하면 거부")
-        void 순번_0이하_거부() {
-            assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, THEME, 0))
-                    .isInstanceOf(InvalidDomainException.class);
-            assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, THEME, -1))
-                    .isInstanceOf(InvalidDomainException.class);
+        void 순번_0이하_거부(int orderIndex) {
+            assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, THEME, orderIndex))
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기 순번은 1 이상이어야 합니다.");
         }
 
         @Test
         @DisplayName("필수 값이 null이면 거부")
         void 필수값_null_거부() {
             assertThatThrownBy(() -> Waiting.create("브라운", null, TIME, THEME, 1))
-                    .isInstanceOf(InvalidDomainException.class);
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기 날짜는 비어 있을 수 없습니다.");
 
             assertThatThrownBy(() -> Waiting.create("브라운", DATE, null, THEME, 1))
-                    .isInstanceOf(InvalidDomainException.class);
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기 시간은 비어 있을 수 없습니다.");
 
             assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, null, 1))
-                    .isInstanceOf(InvalidDomainException.class);
+                    .isInstanceOf(InvalidDomainException.class)
+                    .hasMessageContaining("대기 테마는 비어 있을 수 없습니다.");
         }
     }
 
