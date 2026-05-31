@@ -29,7 +29,7 @@ import roomescape.controller.client.api.ReservationApiController;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
 import roomescape.controller.client.api.dto.response.ReservationResponse;
-import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.dto.response.ReservationTimeResponse;
 import roomescape.controller.client.api.dto.response.ThemeResponse;
@@ -112,7 +112,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 예약_식별자로_예약_정보를_조회할_수_있다() {
         // given
-        ReservationSlotDetailResponse result = new ReservationSlotDetailResponse(
+        ReservationDetailResponse result = new ReservationDetailResponse(
                 1L,
                 LocalDate.now(),
                 new ThemeResponse(1L, "테마명", "설명", "https://image.com/theme.png"),
@@ -122,7 +122,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         when(reservationQuery.findByReservationId(anyLong())).thenReturn(result);
 
         // when
-        ReservationSlotDetailResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+        ReservationDetailResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .when().get("/api/reservations/{reservationId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.OK)

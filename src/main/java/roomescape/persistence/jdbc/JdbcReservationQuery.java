@@ -9,7 +9,7 @@ import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
-import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 import roomescape.exception.EntityNotFoundException;
 import roomescape.persistence.jdbc.mapper.ReservationQueryRowMapper;
@@ -21,7 +21,7 @@ public class JdbcReservationQuery implements ReservationQuery {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public ReservationSlotDetailResponse findByReservationId(long reservationId) {
+    public ReservationDetailResponse findByReservationId(long reservationId) {
         String sql = """
                 SELECT r.id AS slot_id,
                        r.date AS slot_date,

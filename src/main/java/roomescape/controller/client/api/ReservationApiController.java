@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
-import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
 import roomescape.controller.client.api.dto.response.ReservationSlotResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
@@ -68,7 +68,7 @@ public class ReservationApiController {
     }
 
     @GetMapping("/{reservationId}")
-    public ResponseEntity<ReservationSlotDetailResponse> getReservation(
+    public ResponseEntity<ReservationDetailResponse> getReservation(
             @PathVariable @Positive(message = "예약 식별자는 양수입니다.") Long reservationId
     ) {
         return ResponseEntity.ok(reservationQuery.findByReservationId(reservationId));

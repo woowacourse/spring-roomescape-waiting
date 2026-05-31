@@ -3,7 +3,7 @@ package roomescape.persistence.jdbc.mapper;
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.controller.client.api.dto.response.ReservationResponse;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
-import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.dto.response.ReservationTimeResponse;
 import roomescape.controller.client.api.dto.response.ThemeResponse;
 
@@ -20,8 +20,8 @@ public final class ReservationQueryRowMapper {
                     rs.getInt("waiting_rank")
             );
 
-    public static final RowMapper<ReservationSlotDetailResponse> RESERVATION_DETAIL_ROW_MAPPER = (rs, rowNum) ->
-            new ReservationSlotDetailResponse(
+    public static final RowMapper<ReservationDetailResponse> RESERVATION_DETAIL_ROW_MAPPER = (rs, rowNum) ->
+            new ReservationDetailResponse(
                     rs.getLong("slot_id"),
                     rs.getDate("slot_date").toLocalDate(),
                     new ThemeResponse(

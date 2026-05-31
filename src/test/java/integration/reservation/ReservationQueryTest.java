@@ -14,7 +14,7 @@ import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
-import roomescape.controller.client.api.dto.response.ReservationSlotDetailResponse;
+import roomescape.controller.client.api.dto.response.ReservationDetailResponse;
 import roomescape.controller.client.api.query.ReservationQuery;
 
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
@@ -71,7 +71,7 @@ class ReservationQueryTest extends BaseIntegrationTest {
     @Test
     void 예약_식별자로_예약_상세_정보를_조회한다() {
         // when
-        ReservationSlotDetailResponse result = reservationQuery.findByReservationId(1L);
+        ReservationDetailResponse result = reservationQuery.findByReservationId(1L);
 
         // then
         assertAll(
