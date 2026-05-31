@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
@@ -21,12 +21,11 @@ import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional
 class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
-
 
     @DisplayName("예약 정상 테스트")
     @Test
@@ -49,7 +48,7 @@ class ReservationServiceTest {
     @DisplayName("지나간 시간에 대한 예약 생성은 불가능하다.")
     @Test
     void 지나간_시간_예약_예외_테스트() {
-        LocalDateTime mockToday= LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
+        LocalDateTime mockToday = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
 
         ReservationRequest request = new ReservationRequest("김철수", mockToday.toLocalDate(), 1L, 1L);
         assertThatThrownBy(() -> reservationService.save(mockToday, request))
@@ -61,7 +60,7 @@ class ReservationServiceTest {
     @Test
     void 지나간_시간_예약_취소_예외_테스트() {
         LocalDateTime now = LocalDateTime.now();
-        assertThatThrownBy(() -> reservationService.delete(now,1L,"김철수"))
+        assertThatThrownBy(() -> reservationService.delete(now, 1L, "김철수"))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
     }
@@ -113,7 +112,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("김철수", now.toLocalDate().plusDays(2), 2L, 1L);
         ReservationResponse response = reservationService.save(now, request);
 
-        reservationService.delete(now, response.reservationId(),"김철수");
+        reservationService.delete(now, response.reservationId(), "김철수");
 
         List<ReservationResponse> reservations = reservationService.findAllByName("김철수");
         assertThat(reservations)
@@ -134,7 +133,7 @@ class ReservationServiceTest {
         reservationService.save(now, ownerRequest);
         ReservationResponse waitingResponse = reservationService.save(now.plusSeconds(1), waitingRequest);
 
-        assertThatThrownBy(() -> reservationService.delete(now, waitingResponse.reservationId(),"김철수"))
+        assertThatThrownBy(() -> reservationService.delete(now, waitingResponse.reservationId(), "김철수"))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.COMMON_UNAUTHORIZED.getMessage());
     }
