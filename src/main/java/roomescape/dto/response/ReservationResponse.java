@@ -37,7 +37,7 @@ public record ReservationResponse(
         Slot slot = waiting.slot();
         return new ReservationResponse(
                 waiting.id(),
-                waiting.name(),
+                waiting.owner().name(),
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),

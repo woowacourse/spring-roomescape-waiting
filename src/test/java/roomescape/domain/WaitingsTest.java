@@ -20,17 +20,17 @@ class WaitingsTest {
         return new Slot(DATE, time, theme);
     }
 
-    private Waiting waiting(long id, String name, Slot slot, LocalDateTime createdAt) {
-        return Waiting.create(id, new Member(name), slot, createdAt);
+    private Waiting waiting(long id, Member owner, Slot slot, LocalDateTime createdAt) {
+        return Waiting.create(id, owner, slot, createdAt);
     }
 
     @Test
     @DisplayName("같은 슬롯의 대기는 생성 시각 순으로 1, 2, 3 순위를 가진다.")
     void rankBySameSlot() {
         Slot slot = slot(1, 1);
-        Waiting first = waiting(1, "a", slot, LocalDateTime.of(2026, 6, 1, 10, 0));
-        Waiting second = waiting(2, "b", slot, LocalDateTime.of(2026, 6, 1, 11, 0));
-        Waiting third = waiting(3, "c", slot, LocalDateTime.of(2026, 6, 1, 12, 0));
+        Waiting first = waiting(1, new Member("a"), slot, LocalDateTime.of(2026, 6, 1, 10, 0));
+        Waiting second = waiting(2, new Member("b"), slot, LocalDateTime.of(2026, 6, 1, 11, 0));
+        Waiting third = waiting(3, new Member("c"), slot, LocalDateTime.of(2026, 6, 1, 12, 0));
 
         Waitings waitings = new Waitings(List.of(third, first, second));
 
@@ -44,8 +44,8 @@ class WaitingsTest {
     void rankTieBreakById() {
         Slot slot = slot(1, 1);
         LocalDateTime sameTime = LocalDateTime.of(2026, 6, 1, 10, 0);
-        Waiting smallerId = waiting(10, "a", slot, sameTime);
-        Waiting biggerId = waiting(20, "b", slot, sameTime);
+        Waiting smallerId = waiting(10, new Member("a"), slot, sameTime);
+        Waiting biggerId = waiting(20, new Member("b"), slot, sameTime);
 
         Waitings waitings = new Waitings(List.of(biggerId, smallerId));
 
@@ -57,8 +57,8 @@ class WaitingsTest {
     @DisplayName("슬롯이 다르면 순위는 서로 독립적으로 매겨진다.")
     void rankIndependentPerSlot() {
         LocalDateTime time = LocalDateTime.of(2026, 6, 1, 10, 0);
-        Waiting inSlotA = waiting(1, "a", slot(1, 1), time);
-        Waiting inSlotB = waiting(2, "b", slot(2, 1), time);
+        Waiting inSlotA = waiting(1, new Member("a"), slot(1, 1), time);
+        Waiting inSlotB = waiting(2, new Member("b"), slot(2, 1), time);
 
         Waitings waitings = new Waitings(List.of(inSlotA, inSlotB));
 
@@ -67,22 +67,23 @@ class WaitingsTest {
     }
 
     @Test
-    @DisplayName("이름으로 조회하면 해당 사용자의 대기만 각자의 슬롯 순위와 함께 반환한다.")
-    void rankedByName() {
+    @DisplayName("회원으로 조회하면 해당 사용자의 대기만 각자의 슬롯 순위와 함께 반환한다.")
+    void rankedByMember() {
+        Member me = new Member("me");
         Slot slotA = slot(1, 1);
-        Waiting other = waiting(1, "other", slotA, LocalDateTime.of(2026, 6, 1, 10, 0));
-        Waiting mineInA = waiting(2, "me", slotA, LocalDateTime.of(2026, 6, 1, 11, 0));
-        Waiting mineInB = waiting(3, "me", slot(2, 1), LocalDateTime.of(2026, 6, 1, 9, 0));
+        Waiting other = waiting(1, new Member("other"), slotA, LocalDateTime.of(2026, 6, 1, 10, 0));
+        Waiting mineInA = waiting(2, me, slotA, LocalDateTime.of(2026, 6, 1, 11, 0));
+        Waiting mineInB = waiting(3, me, slot(2, 1), LocalDateTime.of(2026, 6, 1, 9, 0));
 
         Waitings waitings = new Waitings(List.of(other, mineInA, mineInB));
 
-        List<WaitingWithRank> result = waitings.rankedBy(new Member("me"));
+        List<WaitingWithRank> result = waitings.rankedBy(me);
 
         assertThat(result)
-                .extracting(WaitingWithRank::id, WaitingWithRank::rank)
+                .extracting(WaitingWithRank::id, WaitingWithRank::rank, WaitingWithRank::owner)
                 .containsExactlyInAnyOrder(
-                        tuple(2L, 2),
-                        tuple(3L, 1)
+                        tuple(2L, 2, me),
+                        tuple(3L, 1, me)
                 );
     }
 }

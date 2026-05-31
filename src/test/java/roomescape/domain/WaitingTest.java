@@ -21,14 +21,14 @@ class WaitingTest {
         return new Slot(date, ReservationTime.create(1, startAt), Theme.create(1, "테마", "url", "설명"));
     }
 
-    private Waiting waiting(String name, Slot slot) {
-        return Waiting.create(1, new Member(name), slot, CREATED_AT);
+    private Waiting waiting(Member owner, Slot slot) {
+        return Waiting.create(1, owner, slot, CREATED_AT);
     }
 
     @Test
     @DisplayName("타인의 예약대기면 소유권 검증에서 예외를 던진다.")
     void validateOwnedByThrows() {
-        Waiting waiting = waiting("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
+        Waiting waiting = waiting(new Member("me"), slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> waiting.validateOwnedBy(new Member("other")))
                 .isInstanceOf(ForbiddenException.class);
@@ -37,7 +37,7 @@ class WaitingTest {
     @Test
     @DisplayName("본인의 예약대기면 소유권 검증을 통과한다.")
     void validateOwnedByOk() {
-        Waiting waiting = waiting("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
+        Waiting waiting = waiting(new Member("me"), slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
         assertThatCode(() -> waiting.validateOwnedBy(new Member("me")))
                 .doesNotThrowAnyException();
@@ -46,10 +46,30 @@ class WaitingTest {
     @Test
     @DisplayName("이미 시작된 예약대기는 검증 시 예외를 던진다.")
     void validateNotStartedThrows() {
-        Waiting waiting = waiting("me", slot(LocalDate.of(2026, 6, 5), LocalTime.of(10, 0)));
+        Waiting waiting = waiting(new Member("me"), slot(LocalDate.of(2026, 6, 5), LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> waiting.validateNotStarted(NOW))
                 .isInstanceOf(PastReservationException.class);
+    }
+
+    @Test
+    @DisplayName("아직 시작되지 않은 예약대기는 검증을 통과한다.")
+    void validateNotStartedOk() {
+        Waiting waiting = waiting(new Member("me"), slot(LocalDate.of(2026, 6, 5), LocalTime.of(14, 0)));
+
+        assertThatCode(() -> waiting.validateNotStarted(NOW))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("생성 시각이 이른 대기가 앞선다.")
+    void isAheadOfByCreatedAt() {
+        Slot slot = slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0));
+        Waiting earlier = Waiting.create(1, new Member("a"), slot, LocalDateTime.of(2026, 6, 1, 9, 0));
+        Waiting later = Waiting.create(2, new Member("b"), slot, LocalDateTime.of(2026, 6, 1, 10, 0));
+
+        assertThat(earlier.isAheadOf(later)).isTrue();
+        assertThat(later.isAheadOf(earlier)).isFalse();
     }
 
     @Test
