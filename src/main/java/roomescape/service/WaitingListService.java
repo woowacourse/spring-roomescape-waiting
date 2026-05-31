@@ -40,27 +40,12 @@ public class WaitingListService {
 
     @Transactional
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
-        Theme findTheme = themeRepository.findById(createCommand.themeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
-        ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
+        Theme findTheme = findThemeOrThrow(createCommand.themeId());
+        ReservationTime findReservationTime = findReservationTimeOrThrow(createCommand.timeId());
 
         WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
-        validateFuture(waitingList);
 
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId()
-            )
-        ) {
-            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
-        }
-
-        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
-                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId()
-            )
-        ) {
-            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
-        }
+        validateWaitingList(waitingList, findReservationTime, findTheme);
 
         try {
             WaitingList savedWaitingList = waitingListRepository.save(waitingList);
@@ -80,17 +65,47 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 
-        validateFuture(findWaitingList);
+        validateNotPast(findWaitingList);
         
         waitingListRepository.deleteById(deleteCommand.waitingListId());
     }
 
-    private static void validateFuture(WaitingList waitingList) {
+    private ReservationTime findReservationTimeOrThrow(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
+    }
+
+    private Theme findThemeOrThrow(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
+    }
+
+    private void validateWaitingList(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {
+        validateNotPast(waitingList);
+        validateReservationExists(waitingList, findReservationTime, findTheme);
+        validateNotDuplicated(waitingList, findTheme, findReservationTime);
+    }
+
+    private static void validateNotPast(WaitingList waitingList) {
         if (waitingList.getReservationDate().isPast()) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
         if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore()) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
+        }
+    }
+
+    private void validateReservationExists(WaitingList waitingList, ReservationTime findReservationTime, Theme findTheme) {
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
+                waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId())) {
+            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
+        }
+    }
+
+    private void validateNotDuplicated(WaitingList waitingList, Theme findTheme, ReservationTime findReservationTime) {
+        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
+                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId())) {
+            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
     }
 }
