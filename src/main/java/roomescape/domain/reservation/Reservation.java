@@ -41,7 +41,6 @@ public class Reservation {
 
     public Reservation update(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateModifiable();
-        validatePastDateTime(date, time.getStartAt());
         return Reservation.create(name, date, time, theme);
     }
 
