@@ -44,7 +44,7 @@ public class ReservationService {
 
     public List<ReservationResponse> readAll() {
         List<Reservation> reservations = reservationQueryingDao.findAllReservations();
-         return reservations.stream()
+        return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -85,8 +85,6 @@ public class ReservationService {
 
         Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
 
-        reservationWaitingUpdateDao.deleteByDateAndTimeAndThemeId(
-                existedReservation.getDate(), existedReservation.getTime().getId(), existedReservation.getTheme().getId());
         reservationUpdatingDao.update(id, updatedReservation);
         return ReservationResponse.from(updatedReservation);
     }
@@ -94,7 +92,6 @@ public class ReservationService {
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
         reservation.validatePastDateTime();
-        reservationWaitingUpdateDao.deleteByDateAndTimeAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         reservationUpdatingDao.delete(id);
     }
 
@@ -104,7 +101,7 @@ public class ReservationService {
     }
 
     private void validateDuplicatedReservation(Long themeId, LocalDate date, Long timeId) {
-        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date,timeId);
+        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId);
         if (duplicateReservation.isPresent()) {
             throw new ReservationAlreadyExistException();
         }

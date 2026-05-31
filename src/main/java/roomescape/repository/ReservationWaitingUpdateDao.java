@@ -39,8 +39,4 @@ public class ReservationWaitingUpdateDao {
         String sql = "delete from waiting where id = ?";
         jdbcTemplate.update(sql, id);
     }
-
-    public void deleteByDateAndTimeAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update("delete from waiting where date = ? and time_id = ? and theme_id = ?", date, timeId, themeId);
-    }
 }
