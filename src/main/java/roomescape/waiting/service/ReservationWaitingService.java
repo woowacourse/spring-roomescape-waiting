@@ -2,8 +2,8 @@ package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.ErrorCode;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;

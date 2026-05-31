@@ -2,7 +2,7 @@ package roomescape.waiting;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
 import java.time.LocalDate;
@@ -10,7 +10,6 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.global.exception.ErrorCode.*;
 
 class ReservationWaitingTest {
 

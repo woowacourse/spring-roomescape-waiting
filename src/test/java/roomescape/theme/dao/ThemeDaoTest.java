@@ -9,10 +9,9 @@ import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import roomescape.global.exception.ErrorCode;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.theme.Theme;
-import roomescape.time.dao.TimeDao;
 
 @DataJdbcTest
 @Import(ThemeDao.class)

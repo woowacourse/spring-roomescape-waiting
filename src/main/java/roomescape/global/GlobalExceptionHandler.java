@@ -6,9 +6,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.global.exception.ErrorCode;
-import roomescape.global.exception.ErrorResponse;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.ErrorResponse;
+import roomescape.exception.RoomescapeException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

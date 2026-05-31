@@ -1,11 +1,11 @@
 package roomescape.waiting;
 
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
 import java.time.LocalDate;
 
-import static roomescape.global.exception.ErrorCode.FORBIDDEN_RESERVATION_WAITING_ACCESS;
+import static roomescape.exception.ErrorCode.FORBIDDEN_RESERVATION_WAITING_ACCESS;
 
 public class ReservationWaiting {
 

@@ -1,8 +1,8 @@
 package roomescape.reservation;
 
 import java.time.LocalDate;
-import roomescape.global.exception.ErrorCode;
-import roomescape.global.exception.RoomescapeException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
 public class Reservation {

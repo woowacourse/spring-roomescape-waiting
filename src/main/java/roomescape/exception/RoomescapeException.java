@@ -1,4 +1,4 @@
-package roomescape.global.exception;
+package roomescape.exception;
 
 public class RoomescapeException extends RuntimeException {
     private ErrorCode errorCode;
