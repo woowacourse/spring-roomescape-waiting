@@ -175,7 +175,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     s.date > :currentDate
                     OR (s.date = :currentDate AND rt.start_at >= :currentTime)
                   )
-                ORDER BY s.date ASC, rt.start_at ASC, w.id ASC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -215,7 +214,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     s.date < :currentDate
                     OR (s.date = :currentDate AND rt.start_at < :currentTime)
                   )
-                ORDER BY s.date DESC, rt.start_at DESC, w.id DESC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()

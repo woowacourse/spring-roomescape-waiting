@@ -237,7 +237,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ( s.date > :currentDate 
                       OR (s.date = :currentDate AND rt.start_at >= :currentTime)
                 )
-                ORDER BY s.date ASC, rt.start_at ASC, r.id ASC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -271,7 +270,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ( s.date < :currentDate 
                       OR (s.date = :currentDate AND rt.start_at < :currentTime)
                 )
-                ORDER BY s.date DESC, rt.start_at DESC, r.id DESC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
