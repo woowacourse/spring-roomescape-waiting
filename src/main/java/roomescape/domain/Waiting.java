@@ -20,7 +20,7 @@ public class Waiting {
         this.rank = rank;
     }
 
-    public static Waiting create(Member member, Reservation reservation) {
+    static Waiting create(Member member, Reservation reservation) {
         if (reservation.isSameMember(member)) {
             throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
         }
@@ -31,7 +31,11 @@ public class Waiting {
         return new Waiting(id, member, new Slot(date, time, theme, store), null);
     }
 
-    public Waiting withRank(Long rank) {
+    public Waiting withId(Long id) {
+        return new Waiting(id, member, slot, rank);
+    }
+
+    Waiting withRank(Long rank) {
         return new Waiting(id, member, slot, rank);
     }
 

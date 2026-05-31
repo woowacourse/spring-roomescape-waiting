@@ -118,6 +118,26 @@
   → 행 간 불변식 기준으로 ①②③ 분류. ② "동일 사용자 불가"만 Waiting.create()로 이전. private 생성자 + reconstruct() 패턴 적용.
   → 출처: log_24
 
+- [x] ~~WaitingService 조회 단순화 — DAO가 List<Waitings> 반환~~
+  → rank 계산을 도메인(Waitings.assignRanks)으로. 쿼리 두 번 → 한 번. 슬롯 전체 가져오기의 트레이드오프는 "대기 5명 제한"으로 끊어냄.
+  → 출처: log_25 (1차)
+
+- [x] ~~Waiting 생성 통로를 Waitings로 봉인~~
+  → Waiting.create() package-private + Waitings.enqueue로 단일 진입점. 모든 Waiting은 rank 부여된 상태로만 존재. 리뷰 finding 6개(#1,#3,#4,#7,#8,#13) 일괄 해결.
+  → 출처: log_25 (추가 검토)
+
 - [ ] **DTO 변환을 Slot 단위로**
   → 맥락: getter 위임은 1단계. DTO가 slot을 직접 받도록 점진 개선해 외부 노출 줄이기
   → 출처: log_23
+
+---
+
+## 실전 판단 (안목)
+
+- [ ] **"DB에 숨은 비즈니스 로직" 찾는 안목**
+  → 맥락: ReservationDao/Service에 같은 냄새가 나는 지점이 있는지 스캔. 오늘 패턴을 다른 곳에서 발견할 수 있는가
+  → 출처: log_25
+
+- [ ] **동시성 race (리뷰 finding #6) 검토 + DB unique index 도입 여부**
+  → 맥락: MAX_WAITING_COUNT=5와 '중복 멤버' 불변식이 상위 reservation 락에만 의존. backstop으로 unique index를 둘지 판단
+  → 출처: log_25 (추가 검토)

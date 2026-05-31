@@ -30,9 +30,8 @@ public class WaitingService {
                 .orElseThrow(() -> new BusinessRuleViolationException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         Waitings waitings = waitingDao.findQueueBySlotForUpdate(reservation.getSlot());
-        Waiting waiting = waitings.create(member, reservation);
-        Waiting saved = waitingDao.insert(waiting);
-        return saved.withRank(waitings.nextRank());
+        Waiting ranked = waitings.enqueue(member, reservation);
+        return waitingDao.insert(ranked);
     }
 
     public void delete(Long waitingId) {
@@ -43,24 +42,22 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<Waiting> findAll() {
-        return flattenRanked(waitingDao.findAllQueues());
+        return waitingDao.findAllQueues().stream()
+                .flatMap(queue -> queue.getAll().stream())
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<Waiting> findAllByMemberId(Long memberId) {
         return waitingDao.findQueuesContainingMember(memberId).stream()
-                .flatMap(waitings -> waitings.assignRanksOfMember(memberId).stream())
+                .flatMap(queue -> queue.ofMember(memberId).stream())
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<Waiting> findAllByStoreId(Long storeId) {
-        return flattenRanked(waitingDao.findQueuesByStoreId(storeId));
-    }
-
-    private List<Waiting> flattenRanked(List<Waitings> queues) {
-        return queues.stream()
-                .flatMap(waitings -> waitings.assignRanks().stream())
+        return waitingDao.findQueuesByStoreId(storeId).stream()
+                .flatMap(queue -> queue.getAll().stream())
                 .toList();
     }
 }
