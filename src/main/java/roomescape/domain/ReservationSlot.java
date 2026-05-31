@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ReservationSlot {
@@ -27,6 +28,10 @@ public class ReservationSlot {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return time.isPast(date, now);
     }
 
     @Override
