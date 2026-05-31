@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class ThemeSlot {
 
@@ -48,6 +49,10 @@ public class ThemeSlot {
 
     public boolean isReserved() {
         return isReserved;
+    }
+
+    public boolean hasSameId(Long id) {
+        return Objects.equals(this.id, id);
     }
 
     public void reserve() {

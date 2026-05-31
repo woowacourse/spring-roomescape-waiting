@@ -110,6 +110,10 @@ public class Reservation {
         return reservationStatus == ConfirmedStatus.getInstance();
     }
 
+    public boolean hasDifferentThemeSlot(Long themeSlotId) {
+        return !themeSlot.hasSameId(themeSlotId);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

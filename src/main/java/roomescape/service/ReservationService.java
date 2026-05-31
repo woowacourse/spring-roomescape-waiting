@@ -127,16 +127,8 @@ public class ReservationService {
 
         validateBeforeDate(themeSlot);
         validateDateTime(themeSlot);
-        if (!reservation.getThemeSlot().getId().equals(themeSlotId)) {
-            validateIsExistBy(themeSlotId);
-            themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
-            if (reservation.isConfirmedStatus()) {
-                themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
-                        .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
-                promoteWaitingReservationOrReleaseSlot(reservation);
-            } else {
-                themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
-            }
+        if (reservation.hasDifferentThemeSlot(themeSlotId)) {
+            changeThemeSlot(reservation, themeSlotId, themeSlot);
         }
 
         Reservation updateReservation = new Reservation(
@@ -147,6 +139,20 @@ public class ReservationService {
         );
         reservationRepository.updateThemeSlot(updateReservation);
         return updateReservation;
+    }
+
+    private void changeThemeSlot(Reservation reservation, Long themeSlotId, ThemeSlot themeSlot) {
+        validateIsExistBy(themeSlotId);
+        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
+
+        if (reservation.isConfirmedStatus()) {
+            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+            promoteWaitingReservationOrReleaseSlot(reservation);
+            return;
+        }
+
+        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {

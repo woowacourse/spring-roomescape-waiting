@@ -45,4 +45,15 @@ class ReservationTest {
         Reservation reservation = new Reservation("브라운", themeSlot);
         assertThat(reservation.getId()).isNull();
     }
+
+    @Test
+    @DisplayName("다른 예약 슬롯 식별자인지 판단한다.")
+    void hasDifferentThemeSlot() {
+        ThemeSlot themeSlot = new ThemeSlot(1L, new Theme(1L, null, null, null), LocalDate.now().plusDays(1),
+                new Time(1L, LocalTime.of(10, 0)), false);
+        Reservation reservation = new Reservation("브라운", themeSlot);
+
+        assertThat(reservation.hasDifferentThemeSlot(2L)).isTrue();
+        assertThat(reservation.hasDifferentThemeSlot(1L)).isFalse();
+    }
 }
