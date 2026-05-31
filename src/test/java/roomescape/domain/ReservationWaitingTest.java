@@ -22,7 +22,7 @@ public class ReservationWaitingTest {
 
     @Test
     void create로_생성된_예약_대기는_id와_sequence가_null이다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
 
         ReservationWaiting waiting = ReservationWaiting.create("브라운", reservation);
 
@@ -35,7 +35,7 @@ public class ReservationWaitingTest {
     @Test
     void 과거_예약에_대기를_등록하면_예외가_발생한다() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        Reservation expiredReservation = Reservation.restore(1L, "다른사람", yesterday, reservationTime, theme, LocalDateTime.now());
+        Reservation expiredReservation = Reservation.restore(1L, "다른사람", yesterday, reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThatThrownBy(() -> ReservationWaiting.create("브라운", expiredReservation))
                 .isInstanceOf(InvalidInputException.class);
@@ -43,7 +43,7 @@ public class ReservationWaitingTest {
 
     @Test
     void 이미_예약한_이름으로_대기를_등록하면_예외가_발생한다() {
-        Reservation reservation = Reservation.restore(1L, "브라운", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThatThrownBy(() -> ReservationWaiting.create("브라운", reservation))
                 .isInstanceOf(InvalidInputException.class);
@@ -52,7 +52,7 @@ public class ReservationWaitingTest {
     @Test
     void restore는_과거_날짜_시간이어도_예외_없이_복원된다() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        Reservation pastReservation = Reservation.restore(1L, "다른사람", pastDate, reservationTime, theme, LocalDateTime.now());
+        Reservation pastReservation = Reservation.restore(1L, "다른사람", pastDate, reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThatCode(() -> ReservationWaiting.restore(1L, "브라운", pastReservation, 1L, LocalDateTime.now()))
                 .doesNotThrowAnyException();
@@ -60,7 +60,7 @@ public class ReservationWaitingTest {
 
     @Test
     void restore로_생성된_예약_대기의_필드가_올바르게_설정된다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         LocalDateTime createdAt = LocalDateTime.now();
 
         ReservationWaiting waiting = ReservationWaiting.restore(1L, "브라운", reservation, 2L, createdAt);
@@ -78,7 +78,7 @@ public class ReservationWaitingTest {
     void promote는_대기자_이름으로_이전된_예약을_반환한다() {
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now(), "test-version");
         ReservationWaiting waiting = ReservationWaiting.restore(1L, "네오", reservation, 1L, LocalDateTime.now());
 
         Reservation promoted = waiting.promote();
@@ -93,7 +93,7 @@ public class ReservationWaitingTest {
     @Test
     void promote_호출_시_만료된_예약이면_예외가_발생한다() {
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
-        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now(), "test-version");
         ReservationWaiting waiting = ReservationWaiting.restore(1L, "네오", expiredReservation, 1L, LocalDateTime.now());
 
         assertThatThrownBy(waiting::promote)

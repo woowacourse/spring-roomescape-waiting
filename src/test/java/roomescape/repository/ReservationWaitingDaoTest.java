@@ -45,7 +45,7 @@ public class ReservationWaitingDaoTest {
 
         jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
         jdbcTemplate.update("insert into theme (name, description, url) values ('테스트', '설명', 'url')");
-        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at) values ('예약자', '2027-05-27', 1, 1, '2026-05-01 09:00:00')");
+        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at, version) values ('예약자', '2027-05-27', 1, 1, '2026-05-01 09:00:00', 'test-version-1')");
         jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('테스트', 1, '2026-05-15 10:30:00')");
     }
 
@@ -75,7 +75,7 @@ public class ReservationWaitingDaoTest {
 
     @Test
     void 예약_대기를_제대로_생성한다() {
-        Reservation reservation = Reservation.restore(1L, "예약자", LocalDate.parse("2027-05-27"), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "예약자", LocalDate.parse("2027-05-27"), reservationTime, theme, LocalDateTime.now(), "test-version");
         ReservationWaiting reservationWaiting = ReservationWaiting.create("새사람", reservation);
 
         reservationWaitingDao.create(reservationWaiting);
@@ -87,7 +87,7 @@ public class ReservationWaitingDaoTest {
 
     @Test
     void 동일한_이름과_예약으로_중복_대기열_삽입_시_예외가_발생한다() {
-        Reservation reservation = Reservation.restore(1L, "예약자", LocalDate.parse("2027-05-27"), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "예약자", LocalDate.parse("2027-05-27"), reservationTime, theme, LocalDateTime.now(), "test-version");
         ReservationWaiting duplicate = ReservationWaiting.create("테스트", reservation);
 
         assertThatThrownBy(() -> reservationWaitingDao.create(duplicate))
@@ -155,7 +155,7 @@ public class ReservationWaitingDaoTest {
 
     @Test
     void 서로_다른_예약의_대기_순번은_각_예약_내에서_독립적으로_계산된다() {
-        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at) values ('예약자2', '2027-06-01', 1, 1, '2026-05-01 09:00:00')");
+        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at, version) values ('예약자2', '2027-06-01', 1, 1, '2026-05-01 09:00:00', 'test-version-2')");
         jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('다른예약대기1', 2, '2026-05-15 10:30:00')");
         jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('두번째', 1, '2026-05-16 10:30:00')");
 

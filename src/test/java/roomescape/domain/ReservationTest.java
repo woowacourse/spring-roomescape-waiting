@@ -45,7 +45,7 @@ public class ReservationTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.parse("10:00"));
 
-        assertThatCode(() -> Reservation.restore(1L, "브라운", pastDate, pastTime, theme, LocalDateTime.now()))
+        assertThatCode(() -> Reservation.restore(1L, "브라운", pastDate, pastTime, theme, LocalDateTime.now(), "test-version"))
                 .doesNotThrowAnyException();
     }
 
@@ -54,7 +54,7 @@ public class ReservationTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        Reservation reservation = Reservation.restore(1L, "브라운", date, reservationTime, theme, createdAt);
+        Reservation reservation = Reservation.restore(1L, "브라운", date, reservationTime, theme, createdAt, "test-version");
 
         assertThat(reservation.getId()).isEqualTo(1L);
         assertThat(reservation.getName()).isEqualTo("브라운");
@@ -66,7 +66,7 @@ public class ReservationTest {
     void 미래_날짜_시간의_예약은_수정_가능하다(int day, int hour) {
         LocalDate futureDate = LocalDate.now().plusDays(day);
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(hour));
-        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now(), "test-version");
 
         assertThatCode(() -> reservation.update("브라운", futureDate, futureTime, theme))
                 .doesNotThrowAnyException();
@@ -76,7 +76,7 @@ public class ReservationTest {
     void update로_변경된_예약의_필드가_올바르게_설정된다() {
         LocalDate originalDate = LocalDate.now().plusDays(1);
         ReservationTime originalTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        Reservation reservation = Reservation.restore(1L, "브라운", originalDate, originalTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", originalDate, originalTime, theme, LocalDateTime.now(), "test-version");
 
         LocalDate newDate = LocalDate.now().plusDays(2);
         ReservationTime newTime = new ReservationTime(2L, LocalTime.now().plusHours(2));
@@ -94,7 +94,7 @@ public class ReservationTest {
     void 과거_날짜_시간의_예약은_수정시_예외가_발생한다(int day, int hour) {
         LocalDate pastDate = LocalDate.now().minusDays(day);
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(hour));
-        Reservation reservation = Reservation.restore(1L, "브라운", pastDate, pastTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", pastDate, pastTime, theme, LocalDateTime.now(), "test-version");
 
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
@@ -106,7 +106,7 @@ public class ReservationTest {
     void 미래_예약을_과거_날짜로_변경시_예외가_발생한다() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now(), "test-version");
 
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
@@ -116,14 +116,14 @@ public class ReservationTest {
 
     @Test
     void 예약자_이름이_일치하면_isReserved가_true를_반환한다() {
-        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThat(reservation.isReservedBy("브라운")).isTrue();
     }
 
     @Test
     void 예약자_이름이_다르면_isReserved가_false를_반환한다() {
-        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThat(reservation.isReservedBy("네오")).isFalse();
     }
@@ -141,7 +141,7 @@ public class ReservationTest {
 
     @Test
     void 미래_예약은_isExpired가_false를_반환한다() {
-        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now(), "test-version");
 
         assertThat(reservation.isExpired()).isFalse();
     }
@@ -149,7 +149,7 @@ public class ReservationTest {
     @Test
     void 과거_예약은_isExpired가_true를_반환한다() {
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.parse("10:00"));
-        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now(), "test-version");
 
         assertThat(reservation.isExpired()).isTrue();
     }
@@ -158,7 +158,7 @@ public class ReservationTest {
     void transferTo는_같은_슬롯에_이름만_바뀐_예약을_반환한다() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        Reservation original = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+        Reservation original = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now(), "test-version");
 
         Reservation transferred = original.transferTo("네오");
 
@@ -172,7 +172,7 @@ public class ReservationTest {
     @Test
     void 과거_예약에_transferTo를_호출하면_예외가_발생한다() {
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
-        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now(), "test-version");
 
         assertThatThrownBy(() -> expiredReservation.transferTo("네오"))
                 .isInstanceOf(ExpiredDateTimeException.class);

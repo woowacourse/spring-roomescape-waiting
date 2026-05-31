@@ -41,7 +41,7 @@ class RoomescapeApplicationTest {
 
         jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
         jdbcTemplate.update("insert into theme (name, description, url) values ('테스트', '설명', 'url')");
-        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at) values ('다른사람', ?, 1, 1, '2026-05-15 10:30:00')", tomorrow);
+        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at, version) values ('다른사람', ?, 1, 1, '2026-05-15 10:30:00', 'test-version-1')", tomorrow);
         jdbcTemplate.update("insert into waiting (name, reservation_id, created_at) values ('테스트', 1, '2026-05-15 10:30:00')");
     }
 

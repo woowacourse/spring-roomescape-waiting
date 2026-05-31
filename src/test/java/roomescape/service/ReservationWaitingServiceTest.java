@@ -41,7 +41,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_생성된다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         reservationQueryingDao.save(reservation);
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
@@ -61,7 +61,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 중복_예약_대기열_생성_시도하면_예외가_발생한다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         reservationQueryingDao.save(reservation);
 
         ReservationWaiting existing = ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now());
@@ -75,7 +75,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_삭제된다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         ReservationWaiting waiting = ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now());
         waitingDao.create(waiting);
 
@@ -84,7 +84,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 예약자_이름으로_대기_등록_시도하면_예외가_발생한다() {
-        Reservation reservation = Reservation.restore(1L, "테스트", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "테스트", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         reservationQueryingDao.save(reservation);
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
@@ -95,7 +95,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 전체_대기열을_조회한다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
         waitingDao.create(ReservationWaiting.restore(2L, "브라운", reservation, 2L, LocalDateTime.now()));
 
@@ -106,7 +106,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 이름으로_대기열을_조회한다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
         waitingDao.create(ReservationWaiting.restore(2L, "브라운", reservation, 2L, LocalDateTime.now()));
 
@@ -119,7 +119,7 @@ class ReservationWaitingServiceTest {
     @Test
     void 지난_예약에_대기열_등록_시도하면_예외가_발생한다() {
         LocalDate yesterday = LocalDate.now().minusDays(1);
-        Reservation expiredReservation = Reservation.restore(1L, "다른사람", yesterday, reservationTime, theme, LocalDateTime.now());
+        Reservation expiredReservation = Reservation.restore(1L, "다른사람", yesterday, reservationTime, theme, LocalDateTime.now(), "test-version");
         reservationQueryingDao.save(expiredReservation);
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("테스트", yesterday, 1L, 2L);
@@ -142,7 +142,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 이름으로_조회_시_일치하는_항목이_없으면_빈_리스트가_반환된다() {
-        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
         waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
 
         List<ReservationWaitingResponse> result = service.readByName("없는사람");
@@ -152,8 +152,8 @@ class ReservationWaitingServiceTest {
 
     @Test
     void 서로_다른_예약의_대기_순번은_독립적으로_계산된다() {
-        Reservation reservation1 = Reservation.restore(1L, "예약자A", tomorrow, reservationTime, theme, LocalDateTime.now());
-        Reservation reservation2 = Reservation.restore(2L, "예약자B", tomorrow.plusDays(1), reservationTime, theme, LocalDateTime.now());
+        Reservation reservation1 = Reservation.restore(1L, "예약자A", tomorrow, reservationTime, theme, LocalDateTime.now(), "test-version");
+        Reservation reservation2 = Reservation.restore(2L, "예약자B", tomorrow.plusDays(1), reservationTime, theme, LocalDateTime.now(), "test-version");
         reservationQueryingDao.save(reservation1);
         reservationQueryingDao.save(reservation2);
 

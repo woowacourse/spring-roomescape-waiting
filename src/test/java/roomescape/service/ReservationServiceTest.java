@@ -230,7 +230,7 @@ class ReservationServiceTest {
                 created.id(), "브라운", created.date(),
                 new ReservationTime(timeId, LocalTime.of(10, 0)),
                 new Theme(themeId, "테마", "설명", "http://example.com"),
-                LocalDateTime.now());
+                LocalDateTime.now(), "test-version");
         reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
 
         reservationService.delete(created.id());
@@ -284,8 +284,8 @@ class ReservationServiceTest {
         Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
 
-        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at) values (?, ?, ?, ?, ?)",
-                "브라운", LocalDate.now().minusDays(1), timeId, themeId, LocalDateTime.now());
+        jdbcTemplate.update("insert into reservation (name, date, time_id, theme_id, created_at, version) values (?, ?, ?, ?, ?, ?)",
+                "브라운", LocalDate.now().minusDays(1), timeId, themeId, LocalDateTime.now(), "test-version");
         Long expiredId = jdbcTemplate.queryForObject("select max(id) from reservation", Long.class);
 
         assertThatThrownBy(() -> reservationService.delete(expiredId))
@@ -303,7 +303,7 @@ class ReservationServiceTest {
                 created.id(), "브라운", created.date(),
                 new ReservationTime(timeId1, LocalTime.of(10, 0)),
                 new Theme(themeId, "테마", "설명", "http://example.com"),
-                LocalDateTime.now());
+                LocalDateTime.now(), "test-version");
         reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
 
         ReservationRequest newSlot = new ReservationRequest("브라운", LocalDate.now().plusDays(2), timeId2, themeId);
@@ -324,7 +324,7 @@ class ReservationServiceTest {
                 created.id(), "브라운", created.date(),
                 new ReservationTime(timeId, LocalTime.of(10, 0)),
                 new Theme(themeId, "테마", "설명", "http://example.com"),
-                LocalDateTime.now());
+                LocalDateTime.now(), "test-version");
         reservationWaitingDao.create(ReservationWaiting.create("네오", reservation));
         reservationWaitingDao.create(ReservationWaiting.create("제이슨", reservation));
 
