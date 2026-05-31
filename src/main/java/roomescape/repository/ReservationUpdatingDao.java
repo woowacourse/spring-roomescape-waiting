@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.time.LocalDateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -17,15 +18,26 @@ public class ReservationUpdatingDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void update(Long id, Reservation reservation) {
+    public long update(Long id, Reservation reservation) {
         String sql = "update reservation set name = ?, date = ?, time_id = ?, theme_id = ?, created_at = ? where id = ?";
-        jdbcTemplate.update(sql,
+        return jdbcTemplate.update(sql,
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
                 reservation.getCreatedAt(),
-                id);
+                id,
+                reservation.getCreatedAt()
+        );
+    }
+
+    public long updateIfVersion(Long id, LocalDateTime originalCreatedAt, Reservation reservation) {
+        String sql = "update reservation set name=?, date=?, time_id=?, theme_id=?, created_at=? " +
+                "where id=? and created_at=?";
+        return jdbcTemplate.update(sql,
+                reservation.getName(), reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId(),
+                reservation.getCreatedAt(), id, originalCreatedAt);
     }
 
     public void delete(Long id) {
