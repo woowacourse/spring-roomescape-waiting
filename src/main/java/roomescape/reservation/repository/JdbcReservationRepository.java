@@ -111,6 +111,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        String query = "SELECT count(*) FROM reservation WHERE member_id = ? AND date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, memberId, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
+    @Override
     public void deleteById(Long id) {
         String query = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(query, id);

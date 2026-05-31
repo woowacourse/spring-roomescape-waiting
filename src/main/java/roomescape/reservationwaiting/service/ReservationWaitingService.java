@@ -46,6 +46,11 @@ public class ReservationWaitingService {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "예약이 없는 슬롯에는 대기를 신청할 수 없습니다.");
         }
 
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+                member.getId(), request.date(), request.timeId(), request.themeId())) {
+            throw new BusinessException(HttpStatus.CONFLICT, "이미 예약한 슬롯에는 대기를 신청할 수 없습니다.");
+        }
+
         if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(), request.date(), request.timeId(), request.themeId())) {
             throw new BusinessException(HttpStatus.CONFLICT, "같은 슬롯에 중복 대기할 수 없습니다.");
