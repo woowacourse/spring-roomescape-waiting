@@ -30,7 +30,10 @@ public class ReservationDao {
       ReservationStatus status) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
-    String sql = "insert into reservation (name, date, time_id, theme_id, status) values (?, ?, ?, ?, ?)";
+    String sql = """
+        insert into reservation (name, date, time_id, theme_id, status)
+        values (?, ?, ?, ?, ?)
+        """;
     jdbcTemplate.update(connection -> {
       PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
       ps.setString(1, name);
@@ -41,15 +44,25 @@ public class ReservationDao {
       return ps;
     }, keyHolder);
 
+    String findTimeSql = """
+        select id, start_at
+        from reservation_time
+        where id = ?
+        """;
     ReservationTime time = jdbcTemplate.queryForObject(
-        "select id, start_at from reservation_time where id = ?",
+        findTimeSql,
         (resultSet, rowNum) -> ReservationTime.of(resultSet.getLong("id"),
             LocalTime.parse(resultSet.getString("start_at"))),
         timeId
     );
 
+    String findThemeSql = """
+        select *
+        from theme
+        where id = ?
+        """;
     Theme theme = jdbcTemplate.queryForObject(
-        "select * from theme where id = ?",
+        findThemeSql,
         (resultSet, rowNum) -> Theme.of(resultSet.getLong("id"),
             resultSet.getString("name"), resultSet.getString("description"),
             resultSet.getString("image_url")),
@@ -60,13 +73,15 @@ public class ReservationDao {
   }
 
   public List<Reservation> findAll() {
-    String sql = "select r.id, r.name, r.date, r.status, "
-        + "t.id as time_id, t.start_at, "
-        + "th.id as theme_id, th.name as theme_name, "
-        + "th.description as theme_description, th.image_url as theme_image_url "
-        + "from reservation r "
-        + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th on r.theme_id = th.id";
+    String sql = """
+        select r.id, r.name, r.date, r.status,
+               t.id as time_id, t.start_at,
+               th.id as theme_id, th.name as theme_name,
+               th.description as theme_description, th.image_url as theme_image_url
+        from reservation r
+        inner join reservation_time t on r.time_id = t.id
+        inner join theme th on r.theme_id = th.id
+        """;
 
     RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
       ReservationTime time = ReservationTime.of(
@@ -93,31 +108,43 @@ public class ReservationDao {
   }
 
   public void delete(Long id) {
-    String sql = "delete from reservation where id = ?";
+    String sql = """
+        delete from reservation
+        where id = ?
+        """;
     jdbcTemplate.update(sql, id);
   }
 
   public void deleteByIdAndName(Long id, String name) {
-    String sql = "delete from reservation where id = ? and name = ?";
+    String sql = """
+        delete from reservation
+        where id = ? and name = ?
+        """;
     jdbcTemplate.update(sql, id, name);
   }
 
   public boolean existsByTimeId(Long timeId) {
-    String sql = "select count(*) from reservation where time_id = ?";
+    String sql = """
+        select count(*)
+        from reservation
+        where time_id = ?
+        """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
 
     return count != null && count > 0;
   }
 
   public Reservation findById(Long id) {
-    String sql = "select r.id, r.name, r.date, r.status, "
-        + "t.id as time_id, t.start_at, "
-        + "th.id as theme_id, th.name as theme_name, "
-        + "th.description as theme_description, th.image_url as theme_image_url "
-        + "from reservation r "
-        + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th on r.theme_id = th.id "
-        + "where r.id = ?";
+    String sql = """
+        select r.id, r.name, r.date, r.status,
+               t.id as time_id, t.start_at,
+               th.id as theme_id, th.name as theme_name,
+               th.description as theme_description, th.image_url as theme_image_url
+        from reservation r
+        inner join reservation_time t on r.time_id = t.id
+        inner join theme th on r.theme_id = th.id
+        where r.id = ?
+        """;
 
     RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
       ReservationTime time = ReservationTime.of(
@@ -144,60 +171,84 @@ public class ReservationDao {
   }
 
   public boolean findByDateTimeTheme(String date, Long timeId, Long themeId) {
-    String sql = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
+    String sql = """
+        select count(*)
+        from reservation
+        where date = ? and time_id = ? and theme_id = ?
+        """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 
     return count != null && count > 0;
   }
 
   public boolean findByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
-    String sql = "select count(*) from reservation where name = ? and date = ? and time_id = ? and theme_id = ?";
+    String sql = """
+        select count(*)
+        from reservation
+        where name = ? and date = ? and time_id = ? and theme_id = ?
+        """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
 
     return count != null && count > 0;
   }
 
   public boolean existsByNameAndReservationId(String name, Long reservationId) {
-    String sql = "select count(*) from reservation where name = ? and id = ?";
+    String sql = """
+        select count(*)
+        from reservation
+        where name = ? and id = ?
+        """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, reservationId);
 
     return count != null && count > 0;
   }
 
   public void deleteByNameAndReservationId(String name, Long reservationId) {
-    String sql = "delete from reservation where name = ? and id = ?";
+    String sql = """
+        delete from reservation
+        where name = ? and id = ?
+        """;
     jdbcTemplate.update(sql, name, reservationId);
   }
 
   public void updateReservation(LocalDate date, Long timeId, String name, Long reservationId) {
-    String sql = "update reservation set date = ?, time_id = ? "
-        + "where name = ? and id = ?";
+    String sql = """
+        update reservation
+        set date = ?, time_id = ?
+        where name = ? and id = ?
+        """;
 
     jdbcTemplate.update(sql, date, timeId, name, reservationId);
   }
 
   public boolean existsByTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-    String sql = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
+    String sql = """
+        select count(*)
+        from reservation
+        where date = ? and time_id = ? and theme_id = ?
+        """;
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 
     return count != null && count > 0;
   }
 
   public List<MyReservationResponse> findAllByName(String name) {
-    String sql = "with waiting_rank as ( "
-        + "  select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank "
-        + "  from reservation "
-        + "  where status = 'WAITING' "
-        + ") "
-        + "select r.id, r.name, r.date, r.status, "
-        + "       t.id as time_id, t.start_at, "
-        + "       th.id as theme_id, th.name as theme_name, "
-        + "       wr.wait_rank "
-        + "from reservation r "
-        + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th           on r.theme_id = th.id "
-        + "left  join waiting_rank wr    on r.id = wr.id "
-        + "where r.name = ?";
+    String sql = """
+        with waiting_rank as (
+            select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank
+            from reservation
+            where status = 'WAITING'
+        )
+        select r.id, r.name, r.date, r.status,
+               t.id as time_id, t.start_at,
+               th.id as theme_id, th.name as theme_name,
+               wr.wait_rank
+        from reservation r
+        inner join reservation_time t on r.time_id = t.id
+        inner join theme th on r.theme_id = th.id
+        left join waiting_rank wr on r.id = wr.id
+        where r.name = ?
+        """;
 
     return jdbcTemplate.query(sql, (rs, rowNum) -> new MyReservationResponse(
         rs.getLong("id"),

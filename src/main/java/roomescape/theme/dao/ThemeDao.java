@@ -37,13 +37,21 @@ public class ThemeDao {
     }
 
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, image_url FROM theme ORDER BY id";
+        String sql = """
+                SELECT id, name, description, image_url
+                FROM theme
+                ORDER BY id
+                """;
         return jdbcTemplate.query(sql, themeRowMapper());
     }
 
     public Theme findById(Long id) {
         try {
-            String sql = "SELECT id, name, description, image_url FROM theme WHERE id = ?";
+            String sql = """
+                    SELECT id, name, description, image_url
+                    FROM theme
+                    WHERE id = ?
+                    """;
             return jdbcTemplate.queryForObject(sql, themeRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("존재하지 않는 테마입니다. id = " + id);
@@ -52,7 +60,10 @@ public class ThemeDao {
 
     public boolean delete(Long id) {
         try {
-            String sql = "DELETE FROM theme WHERE id = ?";
+            String sql = """
+                    DELETE FROM theme
+                    WHERE id = ?
+                    """;
             int deletedRowCount = jdbcTemplate.update(sql, id);
             return deletedRowCount > 0;
         } catch (DataIntegrityViolationException e) {
@@ -61,13 +72,15 @@ public class ThemeDao {
     }
 
     public List<ReservedThemeResponse> findMostReserved(long limit, LocalDate startDate, LocalDate endDate) {
-        String sql = "SELECT t.id, t.name, t.description, t.image_url, count(r.id) AS reservation_count"
-                + " FROM theme t"
-                + " LEFT OUTER JOIN reservation r ON t.id = r.theme_id"
-                + " AND (? IS NULL OR r.date >= ?) AND r.date <= ?"
-                + " GROUP BY t.id"
-                + " ORDER BY reservation_count DESC"
-                + " LIMIT ?";
+        String sql = """
+                SELECT t.id, t.name, t.description, t.image_url, count(r.id) AS reservation_count
+                FROM theme t
+                LEFT OUTER JOIN reservation r ON t.id = r.theme_id
+                    AND (? IS NULL OR r.date >= ?) AND r.date <= ?
+                GROUP BY t.id
+                ORDER BY reservation_count DESC
+                LIMIT ?
+                """;
 
         return jdbcTemplate.query(sql, reservedThemeRowMapper(), startDate, startDate, endDate, limit);
     }

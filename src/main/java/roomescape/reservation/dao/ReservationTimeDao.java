@@ -33,7 +33,10 @@ public class ReservationTimeDao {
     }
 
     public List<ReservationTime> findAll() {
-        String sql = "select id, start_at from reservation_time";
+        String sql = """
+                select id, start_at
+                from reservation_time
+                """;
         RowMapper<ReservationTime> rowMapper = (resultSet, rowNum) -> ReservationTime.of(
                 resultSet.getLong("id"),
                 LocalTime.parse(resultSet.getString("start_at"))
@@ -44,8 +47,13 @@ public class ReservationTimeDao {
 
     public ReservationTime findById(Long id) {
         try {
+            String sql = """
+                    select id, start_at
+                    from reservation_time
+                    where id = ?
+                    """;
             return jdbcTemplate.queryForObject(
-                    "select id, start_at from reservation_time where id = ?",
+                    sql,
                     (resultSet, rowNum) -> ReservationTime.of(resultSet.getLong("id"),
                             LocalTime.parse(resultSet.getString("start_at"))),
                     id
@@ -56,6 +64,10 @@ public class ReservationTimeDao {
     }
 
     public void delete(Long id) {
-        jdbcTemplate.update("delete from reservation_time where id = ?", id);
+        String sql = """
+                delete from reservation_time
+                where id = ?
+                """;
+        jdbcTemplate.update(sql, id);
     }
 }
