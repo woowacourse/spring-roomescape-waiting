@@ -81,6 +81,6 @@ public class ReservationController {
             @PathVariable Long id,
             @LoginUserId Long userId) {
         reservationService.cancelOwnReservation(new CancelReservationCommand(id, userId));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

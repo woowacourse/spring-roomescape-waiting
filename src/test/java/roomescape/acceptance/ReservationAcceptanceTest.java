@@ -112,7 +112,7 @@ class ReservationAcceptanceTest {
                 .header(AUTHORIZATION, waitingReservation2.bearer())
                 .when().delete("/reservations/" + waitingReservation2.reservationId())
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
 
         //재조회 - 대기 2번
         RestAssured.given().log().all()
@@ -433,7 +433,7 @@ class ReservationAcceptanceTest {
                 .header(AUTHORIZATION, reserved.bearer())
                 .when().delete("/reservations/" + reserved.reservationId())
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
     }
 
     @Test

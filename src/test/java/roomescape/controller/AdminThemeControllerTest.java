@@ -75,9 +75,9 @@ class AdminThemeControllerTest {
     }
 
     @Test
-    void DELETE_admin_themes_id_200을_반환하고_서비스에_위임한다() throws Exception {
+    void DELETE_admin_themes_id_204를_반환하고_서비스에_위임한다() throws Exception {
         mockMvc.perform(delete("/admin/themes/3"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(themeService).deleteTheme(3L);
     }

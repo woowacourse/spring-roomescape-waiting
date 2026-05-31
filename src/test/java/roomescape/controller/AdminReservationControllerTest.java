@@ -132,9 +132,9 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_200을_반환하고_서비스에_위임한다() throws Exception {
+    void DELETE_admin_reservations_id_204를_반환하고_서비스에_위임한다() throws Exception {
         mockMvc.perform(delete("/admin/reservations/3"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(adminReservationService).deleteReservation(3L, MANAGER_ID);
     }

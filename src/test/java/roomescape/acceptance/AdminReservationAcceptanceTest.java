@@ -102,7 +102,7 @@ class AdminReservationAcceptanceTest {
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/reservations/" + reserved.reservationId())
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(204);
     }
 
     @Test
