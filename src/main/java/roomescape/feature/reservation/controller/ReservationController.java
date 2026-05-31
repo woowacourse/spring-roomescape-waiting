@@ -65,19 +65,4 @@ public class ReservationController {
     ) {
         return ResponseEntity.ok(reservationService.cancelReservation(id, new ReserverName(name)));
     }
-
-    @PostMapping("/waitings")
-    public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
-        @Valid @RequestBody ReservationCreateRequestDto requestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(reservationService.saveWaitingReservation(reservationMapper.toCreateCommand(requestDto)));
-    }
-
-    @PatchMapping("/{id}/waitings/cancel")
-    public ResponseEntity<ReservationCancelResponseDto> cancelWaitingReservation(
-        @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
-        @RequestParam String name
-    ) {
-        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, new ReserverName(name)));
-    }
 }
