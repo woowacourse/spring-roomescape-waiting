@@ -105,7 +105,7 @@ public class ReservationSlot {
 
     public Reservation findReservationByNameAndStatus(String name, ReservationStatus status) {
         return reservations.findByNameAndStatus(name, status)
-                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 찾을 수 없습니다."));
     }
 
     public void cancelReservation(long reservationId) {
