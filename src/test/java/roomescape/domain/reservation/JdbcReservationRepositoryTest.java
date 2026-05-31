@@ -18,6 +18,12 @@ import roomescape.domain.theme.Theme;
 @JdbcTest
 class JdbcReservationRepositoryTest {
 
+    private static final long DATE_ID = 101L;
+    private static final long TIME_ID = 201L;
+    private static final long THEME_ID = 301L;
+    private static final LocalDate PLAY_DAY = LocalDate.of(2026, 5, 15);
+    private static final LocalTime START_AT = LocalTime.of(10, 0);
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -31,14 +37,15 @@ class JdbcReservationRepositoryTest {
     void setUp() {
         reservationRepository = new JdbcReservationRepository(jdbcTemplate);
 
-        jdbcTemplate.update("insert into reservation_date(play_day) values (?)", "2026-05-15");
-        reservationDate = ReservationDate.of(1L, LocalDate.parse("2026-05-15"));
+        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", DATE_ID, PLAY_DAY.toString());
+        reservationDate = ReservationDate.of(DATE_ID, PLAY_DAY);
 
-        jdbcTemplate.update("insert into reservation_time(start_at) values (?)", "10:00");
-        reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", TIME_ID, START_AT.toString());
+        reservationTime = ReservationTime.of(TIME_ID, START_AT);
 
-        jdbcTemplate.update("insert into theme(name, content, url) values (?, ?, ?)", "테마", "설명", "url");
-        theme = Theme.of(1L, "테마", "설명", "url");
+        jdbcTemplate.update("insert into theme(id, name, content, url) values (?, ?, ?, ?)",
+                THEME_ID, "테마", "설명", "url");
+        theme = Theme.of(THEME_ID, "테마", "설명", "url");
     }
 
     @Test
