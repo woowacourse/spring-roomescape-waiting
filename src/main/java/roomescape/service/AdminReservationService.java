@@ -48,13 +48,13 @@ public class AdminReservationService {
 
     @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
-        ReservationTime time = reservationTimeRepository.findByIdWithLock(command.timeId())
+        ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
                 });
 
-        Theme theme = themeRepository.findByIdWithLock(command.themeId())
+        Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 테마로 예약 생성 시도: themeId={}", command.themeId());
                     return new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + command.themeId());
@@ -82,7 +82,7 @@ public class AdminReservationService {
 
     @Transactional
     public void delete(Long id) {
-        if (reservationRepository.findByIdWithLock(id).isEmpty()) {
+        if (reservationRepository.findById(id).isEmpty()) {
             log.warn("존재하지 않는 예약 삭제 시도: reservationId={}", id);
             throw new ReservationNotFoundException("존재하지 않는 예약입니다: reservationId=" + id);
         }

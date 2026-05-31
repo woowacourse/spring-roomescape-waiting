@@ -56,8 +56,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("같은 이름+날짜+시간+테마에 이미 예약이 있으면 ReservationConflictException이 발생한다")
     void 같은_날짜_시간_테마에_이미_예약이_있으면_예외가_발생한다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(true);
@@ -73,8 +73,8 @@ class ReservationServiceTest {
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
         ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
                 1L, VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L);
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
                 VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L))
                 .willReturn(false);
@@ -88,7 +88,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 timeId로 예약을 생성하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_timeId로_예약시_예외가_발생한다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
@@ -99,8 +99,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 themeId로 예약을 생성하면 ThemeNotFoundException이 발생한다")
     void 존재하지_않는_themeId로_예약시_예외가_발생한다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-        given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(themeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ThemeNotFoundException.class,
@@ -112,7 +112,7 @@ class ReservationServiceTest {
     @DisplayName("존재하는 예약은 정상적으로 삭제된다")
     void 존재하는_예약은_정상적으로_삭제된다() {
         Reservation reservation = new Reservation(1L, "모아", LocalDate.now(), VALID_TIME, VALID_THEME);
-        given(reservationRepository.findByIdWithLock(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertDoesNotThrow(() -> reservationService.delete(1L));
     }
@@ -120,7 +120,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하면 ReservationNotFoundException이 발생한다")
     void 존재하지_않는_예약_삭제시_예외가_발생한다() {
-        given(reservationRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
+        given(reservationRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationNotFoundException.class,
@@ -135,8 +135,8 @@ class ReservationServiceTest {
         @Test
         @DisplayName("해당 타임 슬롯에 예약이 없다면 얘약을 허용한다")
         void 해당_타임_슬롯에_예약이_없다면_예약을_허용한다() {
-            given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-            given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
+            given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+            given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
             given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                     1L))
                     .willReturn(false);
@@ -155,8 +155,8 @@ class ReservationServiceTest {
             @Test
             @DisplayName("기존 예약자와 동일한 사용자의 예약 요청이라면 거부한다")
             void 사용자_이름이_같으면_ReservationConflictException을_던진다() {
-                given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
+                given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
                         VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L))
                         .willReturn(true);
@@ -170,8 +170,8 @@ class ReservationServiceTest {
             @Test
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
-                given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
-                given(themeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_THEME));
+                given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+                given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
                         "모아",
                         VALID_COMMAND_MOA.date(),

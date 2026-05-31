@@ -72,7 +72,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("존재하지 않는 시간을 삭제하면 ReservationTimeNotFoundException이 발생한다")
     void 존재하지_않는_시간_삭제시_예외가_발생한다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.empty());
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationTimeNotFoundException.class,
@@ -83,7 +83,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제하면 ReservationTimeInUseException이 발생한다")
     void 예약이_존재하는_시간_삭제시_예외가_발생한다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByTimeId(1L)).willReturn(true);
 
         assertThrows(
@@ -95,7 +95,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 없는 시간은 정상적으로 삭제된다")
     void 예약이_없는_시간은_정상_삭제된다() {
-        given(reservationTimeRepository.findByIdWithLock(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(reservationRepository.existsByTimeId(1L)).willReturn(false);
 
         assertDoesNotThrow(() -> reservationTimeService.delete(1L));

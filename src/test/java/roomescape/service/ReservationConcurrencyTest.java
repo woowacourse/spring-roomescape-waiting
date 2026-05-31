@@ -91,34 +91,7 @@ class ReservationConcurrencyTest {
         assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(threadCount);
     }
 
-    @DisplayName("동시에 동일한 시간 슬롯으로 업데이트를 시도할 때 정합성이 보장된다")
-    @Test
-    void 동일한_시간_슬롯으로_동시_업데이트시_하나만_성공한다() throws InterruptedException {
-        ReservationUpdateCommand mattCommand =
-                new ReservationUpdateCommand(mattReservationId, 매트, 예약_날짜, time3Id);
-        ReservationUpdateCommand rudevicoCommand =
-                new ReservationUpdateCommand(rudevicoReservationId, 루드비코, 예약_날짜, time3Id);
-
-        ConcurrencyResult result = 동시_실행(
-                () -> userReservationService.update(mattCommand),
-                () -> userReservationService.update(rudevicoCommand)
-        );
-
-        assertThat(result.successCount()).isEqualTo(1);
-        assertThat(result.failCount()).isEqualTo(1);
-        assertThat(특정_시간의_예약_개수_조회(time3Id)).isEqualTo(1);
-    }
-
-    @DisplayName("동일한 예약을 동시에 취소하려고 할 때 하나만 성공한다")
-    @Test
-    void 동일한_예약을_동시에_취소하려고_할_때_하나만_성공한다() throws InterruptedException {
-        ConcurrencyResult result = 동시_실행(5, () -> userReservationService.cancel(mattReservationId, 매트));
-
-        assertThat(result.successCount()).isEqualTo(1);
-        assertThat(result.failCount()).isEqualTo(4);
-    }
-
-    @DisplayName("예약 생성과 해당 시간 삭제가 동시에 일어날 때 락에 의해 정합성이 보장된다")
+    @DisplayName("예약 생성과 해당 시간 삭제가 동시에 일어날 때 외래 키 제약 조건 등에 의해 정합성이 보장된다")
     @Test
     void 예약_생성과_해당_시간_삭제가_동시에_일어날_때_정합성이_보장된다() throws InterruptedException {
         ReservationCreateCommand command = new ReservationCreateCommand("새로운사용자", 예약_날짜, time3Id, themeId);

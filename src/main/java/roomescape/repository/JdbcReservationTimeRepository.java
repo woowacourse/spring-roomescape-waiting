@@ -44,16 +44,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findByIdWithLock(Long id) {
-        List<ReservationTime> result = jdbcTemplate.query(
-                "SELECT id, start_at FROM reservation_time WHERE id = ? FOR UPDATE",
-                reservationTimeRowMapper,
-                id
-        );
-        return result.stream().findFirst();
-    }
-
-    @Override
     public ReservationTime save(ReservationTime time) {
         String sql = "INSERT INTO reservation_time (start_at) VALUES (?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();

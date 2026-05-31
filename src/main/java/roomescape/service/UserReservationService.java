@@ -43,7 +43,7 @@ public class UserReservationService {
 
     @Transactional
     public ReservationResult create(ReservationCreateCommand command) {
-        ReservationTime time = reservationTimeRepository.findByIdWithLock(command.timeId())
+        ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 생성 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
@@ -80,7 +80,7 @@ public class UserReservationService {
                 "이미 지난 예약은 변경할 수 없습니다"
         );
 
-        ReservationTime newTime = reservationTimeRepository.findByIdWithLock(command.timeId())
+        ReservationTime newTime = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 시간으로 예약 변경 시도: timeId={}", command.timeId());
                     return new ReservationTimeNotFoundException("존재하지 않는 시간입니다: timeId=" + command.timeId());
@@ -100,7 +100,7 @@ public class UserReservationService {
     }
 
     private Reservation findReservation(Long id) {
-        return reservationRepository.findByIdWithLock(id)
+        return reservationRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("존재하지 않는 예약 접근 시도: reservationId={}", id);
                     return new ReservationNotFoundException(

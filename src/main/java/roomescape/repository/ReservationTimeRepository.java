@@ -11,8 +11,6 @@ public interface ReservationTimeRepository {
 
     Optional<ReservationTime> findById(Long id);
 
-    Optional<ReservationTime> findByIdWithLock(Long id);
-
     ReservationTime save(ReservationTime time);
 
     void deleteById(Long id);

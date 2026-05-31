@@ -55,16 +55,6 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findByIdWithLock(Long id) {
-        List<Theme> result = jdbcTemplate.query(
-                "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ? FOR UPDATE",
-                rowMapper,
-                id
-        );
-        return result.stream().findFirst();
-    }
-
-    @Override
     public Theme save(Theme theme) {
         String sql = "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
