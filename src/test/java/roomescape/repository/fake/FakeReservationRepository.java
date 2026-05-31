@@ -101,12 +101,14 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
+    public boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
+                                                               Long storeId) {
         return store.values().stream()
                 .anyMatch(r -> r.getDate().equals(date)
                         && r.getTime().getId().equals(timeId)
                         && r.getTheme().getId().equals(themeId)
-                        && r.getStore().getId().equals(storeId));
+                        && r.getStore().getId().equals(storeId)
+                        && r.getStatus().equals(ReservationStatus.RESERVED));
     }
 
     @Override
@@ -124,17 +126,6 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsByReservationTimeId(Long timeId) {
         return store.values().stream()
                 .anyMatch(r -> r.getTime().getId().equals(timeId));
-    }
-
-    @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId, Long storeId,
-                                                                ReservationStatus status) {
-        return store.values().stream()
-                .anyMatch(r -> r.getDate().equals(date)
-                        && r.getTime().getId().equals(timeId)
-                        && r.getTheme().getId().equals(themeId)
-                        && r.getStore().getId().equals(storeId)
-                        && r.getStatus().equals(status));
     }
 
     Collection<Reservation> all() {

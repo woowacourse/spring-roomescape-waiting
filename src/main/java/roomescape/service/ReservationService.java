@@ -151,8 +151,8 @@ public class ReservationService {
     }
 
     private void validateReservationAlreadyExists(CreateReservationCommand command) {
-        Boolean isReservedExist = reservationRepository.existsByDateAndTimeAndThemeAndStoreAndStatus(
-                command.date(), command.timeId(), command.themeId(), command.storeId(), ReservationStatus.RESERVED
+        Boolean isReservedExist = reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(
+                command.date(), command.timeId(), command.themeId(), command.storeId()
         );
 
         if (!isReservedExist) {
@@ -186,7 +186,7 @@ public class ReservationService {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndThemeAndStore(
+        if (reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
                 reservation.getStore().getId())) {
             throw new DuplicateReservationException();

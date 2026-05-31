@@ -226,9 +226,21 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ?)";
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId));
+    public boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
+                                                               Long storeId) {
+        String sql = """
+                select exists(
+                    select 1
+                    from reservation
+                    where date = ?
+                      and time_id = ?
+                      and theme_id = ?
+                      and store_id = ?
+                      and status = ?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class,
+                date, timeId, themeId, storeId, ReservationStatus.RESERVED.name()));
     }
 
     @Override
@@ -245,12 +257,4 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, store_id, userId));
     }
 
-    @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId,
-                                                                Long storeId,
-                                                                ReservationStatus reservationStatus) {
-        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ? and status = ?)";
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId, reservationStatus.name()));
-    }
 }
