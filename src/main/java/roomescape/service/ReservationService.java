@@ -12,7 +12,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.reservation.CancelReservationCommand;
 import roomescape.dto.reservation.CreateReservationCommand;
-import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
@@ -23,7 +22,6 @@ import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.StoreRepository;
@@ -54,26 +52,7 @@ public class ReservationService {
         this.timeProvider = timeProvider;
     }
 
-    public ReservationResponses getReservations(int page, int size, String name, Long managerId) {
-        List<Long> storeIds = storeRepository.findStoreIdsByUserId(managerId);
-        if (storeIds.isEmpty()) {
-            return ReservationResponses.of(List.of(), false);
-        }
-        List<Reservation> reservations = fetchReservations(page, size, name, storeIds);
-        boolean hasNext = reservations.size() > size;
-        if (hasNext) {
-            reservations = reservations.subList(0, size);
-        }
-        return ReservationResponses.of(reservations, hasNext);
-    }
-
-    private List<Reservation> fetchReservations(int page, int size, String name, List<Long> storeIds) {
-        if (name == null) {
-            return reservationRepository.findAllByStoreIds(storeIds, size + 1, page * size);
-        }
-        return reservationRepository.findAllByStoreIdsAndName(storeIds, name, size + 1, page * size);
-    }
-
+    @Transactional(readOnly = true)
     public Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("예약", id));
@@ -139,14 +118,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long reservationId, Long managerId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("예약", reservationId));
-        validateManagesStore(managerId, reservation.getStore().getId());
-        reservationRepository.deleteById(reservationId);
-    }
-
-    @Transactional
     public void cancelOwnReservation(CancelReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
@@ -156,6 +127,9 @@ public class ReservationService {
         reservationRepository.deleteById(command.reservationId());
     }
 
+    /**
+     * 헬퍼메서드
+     */
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
@@ -191,12 +165,6 @@ public class ReservationService {
             return;
         }
         validateNotDuplicated(updated);
-    }
-
-    private void validateManagesStore(Long managerId, Long storeId) {
-        if (!storeRepository.existsByStoreIdAndUserId(storeId, managerId)) {
-            throw new StoreManagementForbiddenException();
-        }
     }
 
     private static void validateReservationOwner(Long userId, Reservation reservation) {

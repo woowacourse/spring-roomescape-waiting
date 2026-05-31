@@ -31,7 +31,7 @@ import roomescape.infrastructure.LoginCheckInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.LoginUserId;
 import roomescape.infrastructure.WebConfig;
-import roomescape.service.ReservationService;
+import roomescape.service.AdminReservationService;
 
 @WebMvcTest(controllers = AdminReservationController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
@@ -45,7 +45,7 @@ class AdminReservationControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private AdminReservationService adminReservationService;
 
     @TestConfiguration
     static class LoginUserIdResolverConfig implements WebMvcConfigurer {
@@ -69,7 +69,7 @@ class AdminReservationControllerTest {
 
     @Test
     void GET_admin_reservations_서비스가_반환한_목록과_hasNext를_그대로_응답한다() throws Exception {
-        given(reservationService.getReservations(0, 20, null, MANAGER_ID))
+        given(adminReservationService.getReservations(0, 20, null, MANAGER_ID))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
         mockMvc.perform(get("/admin/reservations"))
@@ -81,26 +81,26 @@ class AdminReservationControllerTest {
 
     @Test
     void GET_admin_reservations_page와_size_쿼리_파라미터를_그대로_위임한다() throws Exception {
-        given(reservationService.getReservations(2, 5, null, MANAGER_ID))
+        given(adminReservationService.getReservations(2, 5, null, MANAGER_ID))
                 .willReturn(ReservationResponses.of(List.of(), true));
 
         mockMvc.perform(get("/admin/reservations?page=2&size=5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasNext").value(true));
 
-        verify(reservationService).getReservations(2, 5, null, MANAGER_ID);
+        verify(adminReservationService).getReservations(2, 5, null, MANAGER_ID);
     }
 
     @Test
     void GET_admin_reservations_name_쿼리_파라미터가_있으면_서비스에_위임한다() throws Exception {
-        given(reservationService.getReservations(0, 20, "브라운", MANAGER_ID))
+        given(adminReservationService.getReservations(0, 20, "브라운", MANAGER_ID))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
         mockMvc.perform(get("/admin/reservations?name=브라운"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.size()").value(1));
 
-        verify(reservationService).getReservations(0, 20, "브라운", MANAGER_ID);
+        verify(adminReservationService).getReservations(0, 20, "브라운", MANAGER_ID);
     }
 
     @Test
@@ -136,13 +136,13 @@ class AdminReservationControllerTest {
         mockMvc.perform(delete("/admin/reservations/3"))
                 .andExpect(status().isOk());
 
-        verify(reservationService).deleteReservation(3L, MANAGER_ID);
+        verify(adminReservationService).deleteReservation(3L, MANAGER_ID);
     }
 
     @Test
     void DELETE_admin_reservations_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         willThrow(new ResourceNotFoundException("예약", 9999L))
-                .given(reservationService).deleteReservation(9999L, MANAGER_ID);
+                .given(adminReservationService).deleteReservation(9999L, MANAGER_ID);
 
         mockMvc.perform(delete("/admin/reservations/9999"))
                 .andExpect(status().isNotFound())
