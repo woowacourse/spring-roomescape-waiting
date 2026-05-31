@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -81,6 +83,15 @@ public class ReservationWaitingDaoTest {
         Optional<ReservationWaiting> found = reservationWaitingDao.findAllByName("새사람").stream().findFirst();
         assertThat(found.isPresent()).isTrue();
         assertThat(found.get().getReservation().getDate()).isEqualTo(LocalDate.parse("2027-05-27"));
+    }
+
+    @Test
+    void 동일한_이름과_예약으로_중복_대기열_삽입_시_예외가_발생한다() {
+        Reservation reservation = Reservation.restore(1L, "예약자", LocalDate.parse("2027-05-27"), reservationTime, theme, LocalDateTime.now());
+        ReservationWaiting duplicate = ReservationWaiting.create("테스트", reservation);
+
+        assertThatThrownBy(() -> reservationWaitingDao.create(duplicate))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
