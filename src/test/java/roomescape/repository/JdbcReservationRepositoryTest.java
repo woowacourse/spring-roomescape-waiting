@@ -125,16 +125,19 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 예약을 제외한 날짜+시간+테마 조합의 예약 존재 여부를 확인한다")
-    void existsByNameAndDateAndTimeIdAndThemeIdAndIdNot() {
+    @DisplayName("자기 자신을 제외하고 본인이 같은 슬롯에 예약/대기 중인지 확인한다")
+    void existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
-        Reservation saved = insertReservation("브라운", DATE, time, theme);
+        Reservation mine = insertReservation("브라운", DATE, time, theme);
+        insertReservation("모아", DATE, time, theme); // 타인은 같은 슬롯에 있어도 본인 기준 판단에 영향 없음
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                DATE, time.getId(), theme.getId(), saved.getId())).isFalse();
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                DATE, time.getId(), theme.getId(), 999L)).isTrue();
+        // 본인(브라운) row를 제외하면 본인의 다른 예약은 없음 → false (모아가 슬롯에 있어도 무관)
+        assertThat(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                "브라운", DATE, time.getId(), theme.getId(), mine.getId())).isFalse();
+        // 본인 row가 제외 대상이 아니면 → true
+        assertThat(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                "브라운", DATE, time.getId(), theme.getId(), 999L)).isTrue();
     }
 
     @Test
@@ -165,9 +168,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Instant base = Instant.now();
-        Reservation first = insertReservationWithCreatedAt("루드비코", DATE, time, theme, base);
-        Reservation second = insertReservationWithCreatedAt("모아", DATE, time, theme, base.plusSeconds(1));
-        Reservation third = insertReservationWithCreatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
+        Reservation first = insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
+        Reservation second = insertReservationWithUpdatedAt("모아", DATE, time, theme, base.plusSeconds(1));
+        Reservation third = insertReservationWithUpdatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
 
         assertThat(reservationRepository.findByReserverName("루드비코"))
                 .usingRecursiveFieldByFieldElementComparator()
@@ -191,9 +194,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Instant base = Instant.now();
-        insertReservationWithCreatedAt("루드비코", DATE, time, theme, base);
+        insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
 
-        assertThatThrownBy(() -> insertReservationWithCreatedAt("루드비코", DATE, time, theme, base))
+        assertThatThrownBy(() -> insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base))
                 .isExactlyInstanceOf(DuplicateKeyException.class);
 
     }
@@ -204,9 +207,9 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Instant base = Instant.now();
-        Reservation reservation1 = insertReservationWithCreatedAt("루드비코", DATE, time, theme, base);
-        insertReservationWithCreatedAt("모아", DATE, time, theme, base.plusSeconds(1));
-        insertReservationWithCreatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
+        Reservation reservation1 = insertReservationWithUpdatedAt("루드비코", DATE, time, theme, base);
+        insertReservationWithUpdatedAt("모아", DATE, time, theme, base.plusSeconds(1));
+        insertReservationWithUpdatedAt("브라운", DATE, time, theme, base.plusSeconds(2));
 
         List<ReservationWithWaitingOrder> list = reservationRepository.findByReserverName("브라운");
         long waitingOrder = list.getFirst().waitingOrder().value();
@@ -219,6 +222,28 @@ class JdbcReservationRepositoryTest {
         long waitingOrder2 = list2.getFirst().waitingOrder().value();
         assertThat(waitingOrder2).isEqualTo(1L);
 
+    }
+
+    @Test
+    @DisplayName("다른 사람이 선점한 슬롯으로 예약을 변경하면 대기열 맨 뒤(대기)로 들어간다")
+    void 예약_변경_시_대기열_맨_뒤로_들어간다() {
+        Theme theme = insertTheme("무인도 탈출");
+        ReservationTime time11 = insertTime(LocalTime.of(11, 0));
+        ReservationTime time13 = insertTime(LocalTime.of(13, 0));
+        Instant now = Instant.now();
+
+        // user1이 먼저 11시를, user2가 나중에 13시를 예약 (user1.updated_at < user2.updated_at, 둘 다 과거)
+        Reservation user1 = insertReservationWithUpdatedAt("user1", DATE, time11, theme, now.minusSeconds(10));
+        insertReservationWithUpdatedAt("user2", DATE, time13, theme, now.minusSeconds(5));
+
+        // user1이 user2가 선점한 13시 슬롯으로 변경
+        reservationRepository.update(new Reservation(user1.getId(), "user1", DATE, time13, theme));
+
+        // user2는 확정(0번), 나중에 끼어든 user1은 대기(1번) 이어야 한다
+        long user2Order = reservationRepository.findByReserverName("user2").getFirst().waitingOrder().value();
+        long user1Order = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
+        assertThat(user2Order).isEqualTo(0L);
+        assertThat(user1Order).isEqualTo(1L);
     }
 
     private ReservationTime insertTime(LocalTime startAt) {
@@ -245,11 +270,12 @@ class JdbcReservationRepositoryTest {
         return new Reservation(id, name, date, time, theme);
     }
 
-    private Reservation insertReservationWithCreatedAt(String name, LocalDate date, ReservationTime time, Theme theme,
-                                                       Instant createdAt) {
+    private Reservation insertReservationWithUpdatedAt(String name, LocalDate date, ReservationTime time, Theme theme,
+                                                       Instant updatedAt) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (reserver_name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)",
-                name, date.toString(), time.getId(), theme.getId(), Timestamp.from(createdAt)
+                "INSERT INTO reservation (reserver_name, date, time_id, theme_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                name, date.toString(), time.getId(), theme.getId(),
+                Timestamp.from(updatedAt), Timestamp.from(updatedAt)
         );
         long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
         return new Reservation(id, name, date, time, theme);

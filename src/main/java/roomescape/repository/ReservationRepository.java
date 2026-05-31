@@ -23,7 +23,8 @@ public interface ReservationRepository {
 
     boolean existsByReserverNameAndDateAndTimeIdAndThemeId(String reserverName, LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id);
+    boolean existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+            String reserverName, LocalDate date, Long timeId, Long themeId, Long id);
 
     boolean existsByTimeId(Long timeId);
 

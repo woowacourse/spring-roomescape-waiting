@@ -52,7 +52,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   WHERE r2.date = r.date
                     AND r2.time_id = r.time_id
                     AND r2.theme_id = r.theme_id
-                    AND r2.created_at < r.created_at) AS waiting_order
+                    AND r2.updated_at < r.updated_at) AS waiting_order
             FROM reservation r
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
@@ -139,7 +139,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public ReservationWithWaitingOrder update(Reservation reservation) {
-        String sql = "UPDATE reservation SET reserver_name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
+        String sql = "UPDATE reservation SET reserver_name = ?, date = ?, time_id = ?, theme_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         jdbcTemplate.update(
                 sql,
                 reservation.getReserverName(),
@@ -182,11 +182,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndIdNot(LocalDate date, Long timeId, Long themeId, Long id) {
+    public boolean existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+            String reserverName, LocalDate date, Long timeId, Long themeId, Long id) {
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND id <> ?",
+                "SELECT COUNT(*) FROM reservation WHERE reserver_name = ? AND date = ? AND time_id = ? AND theme_id = ? AND id <> ?",
                 Integer.class,
-                Date.valueOf(date), timeId, themeId, id
+                reserverName, Date.valueOf(date), timeId, themeId, id
         );
         return count != null && count > 0;
     }

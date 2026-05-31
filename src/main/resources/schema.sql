@@ -24,6 +24,7 @@ CREATE TABLE reservation (
                              time_id BIGINT NOT NULL,
                              theme_id BIGINT NOT NULL,
                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              PRIMARY KEY (id),
                              FOREIGN KEY (time_id) REFERENCES reservation_time (id),
                              FOREIGN KEY (theme_id) REFERENCES theme (id),

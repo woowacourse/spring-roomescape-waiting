@@ -184,8 +184,8 @@ class UserReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
-        given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
+        given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
         given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
             Reservation r = inv.getArgument(0);
             return new ReservationWithWaitingOrder(
@@ -198,8 +198,8 @@ class UserReservationServiceTest {
         assertThat(result.time().id()).isEqualTo(2L);
         verify(reservationRepository, times(1)).findById(1L);
         verify(reservationTimeRepository, times(1)).findById(2L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
+        verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
         verify(reservationRepository, times(1)).update(any(Reservation.class));
         verifyNoInteractions(reservationService);
     }
@@ -273,14 +273,14 @@ class UserReservationServiceTest {
     }
 
     @Test
-    @DisplayName("변경하려는 시간이 이미 차 있으면 ReservationConflictException이 발생한다")
+    @DisplayName("본인이 이미 예약 또는 대기중인 시간으로 변경하면 ReservationConflictException이 발생한다")
     void 변경_시간_충돌시_예외가_발생한다() {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
         ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
-        given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(true);
+        given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(true);
 
         assertThrows(
                 ReservationConflictException.class,
@@ -289,8 +289,8 @@ class UserReservationServiceTest {
 
         verify(reservationRepository, times(1)).findById(1L);
         verify(reservationTimeRepository, times(1)).findById(2L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
+        verify(reservationRepository, times(1)).existsByReserverNameAndDateAndTimeIdAndThemeIdAndIdNot(
+                OWNER, ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
         verifyNoInteractions(reservationService);
     }
 }
