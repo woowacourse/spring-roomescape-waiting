@@ -35,7 +35,6 @@ CREATE TABLE reservation_waiting (
     theme_id BIGINT NOT NULL,
     date    DATE NOT NULL,
     time_id BIGINT NOT NULL,
-    waiting_number BIGINT NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE CASCADE,

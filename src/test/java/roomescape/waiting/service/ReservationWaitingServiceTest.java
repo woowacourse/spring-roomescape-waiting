@@ -38,12 +38,29 @@ public class ReservationWaitingServiceTest {
     private TimeDao timeDao;
 
     @Test
+    void 예약이_없는_경우_대기_신청_시_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId))
+                .thenReturn(false);
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.CANNOT_WAIT_WITHOUT_RESERVATION.getMessage());
+    }
+
+    @Test
     void 이미_예약한_경우_예약_대기_신청_시_예외_발생() {
         String name = "ever";
         Long themeId = 1L;
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId))
+                .thenReturn(true);
         when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, timeId))
                 .thenReturn(true);
 
@@ -59,6 +76,8 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(true);
         when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong()))
                 .thenReturn(false);
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong())).thenReturn(true);
@@ -75,22 +94,21 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        ReservationWaiting expected = new ReservationWaiting(1L, name, themeId, date, reservationTime, 1L);
 
-        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(
-                name, themeId, date, timeId
-        )).thenReturn(false);
-
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(true);
+        when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(reservationTime));
-
-        when(reservationWaitingDao.findNextWaitingNumber(themeId, date, timeId))
-                .thenReturn(100L);
-
         when(reservationWaitingDao.insert(any(ReservationWaiting.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenReturn(expected);
 
         ReservationWaiting actual = reservationWaitingService.add(name, themeId, date, timeId);
 
-        assertThat(actual.getWaitingNumber()).isEqualTo(100L);
+        assertThat(actual.getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
@@ -100,12 +118,11 @@ public class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
 
-        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(
-                name, themeId, date, timeId
-        )).thenReturn(false);
-
-        when(timeDao.selectById(timeId))
-                .thenReturn(Optional.empty());
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(true);
+        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId))
+                .thenReturn(false);
+        when(timeDao.selectById(timeId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
                 .isInstanceOf(RoomescapeException.class)
@@ -130,7 +147,7 @@ public class ReservationWaitingServiceTest {
         Long id = 1L;
         String name = "ever";
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        ReservationWaiting reservationWaiting = new ReservationWaiting("other", 1L, LocalDate.now().plusDays(1), reservationTime, 1L);
+        ReservationWaiting reservationWaiting = new ReservationWaiting("other", 1L, LocalDate.now().plusDays(1), reservationTime);
 
         when(reservationWaitingDao.selectById(id))
                 .thenReturn(Optional.of(reservationWaiting));
@@ -145,7 +162,7 @@ public class ReservationWaitingServiceTest {
         Long id = 1L;
         String name = "ever";
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().minusDays(1), reservationTime, 1L);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().minusDays(1), reservationTime);
 
         when(reservationWaitingDao.selectById(id))
                 .thenReturn(Optional.of(reservationWaiting));
@@ -160,7 +177,7 @@ public class ReservationWaitingServiceTest {
         Long id = 1L;
         String name = "ever";
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().plusDays(1), reservationTime, 1L);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, 1L, LocalDate.now().plusDays(1), reservationTime);
 
         when(reservationWaitingDao.selectById(id))
                 .thenReturn(Optional.of(reservationWaiting));

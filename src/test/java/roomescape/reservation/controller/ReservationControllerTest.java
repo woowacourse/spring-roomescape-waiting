@@ -39,7 +39,8 @@ public class ReservationControllerTest {
     void 이름으로_예약과_예약_대기_조회_성공() {
         String name = "초록";
         String date = LocalDate.now().plusDays(1).toString();
-        Integer reservationId = createReservation(name, 1L, date, 1L);
+        Integer reservationId1 = createReservation(name, 1L, date, 1L);
+        createReservation("another", 2L, date, 2L);
         Integer waitingId = createWaiting(name, 2L, date, 2L);
 
         RestAssured.given().log().all()
@@ -47,7 +48,7 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
-                .body("[0].id", is(reservationId))
+                .body("[0].id", is(reservationId1))
                 .body("[0].name", is(name))
                 .body("[0].themeName", is("은하수"))
                 .body("[0].date", is(date))

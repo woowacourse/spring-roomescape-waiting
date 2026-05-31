@@ -25,13 +25,13 @@ public class ReservationWaiting {
         this.waitingNumber = waitingNumber;
     }
 
-    public ReservationWaiting(String name, Long themeId, LocalDate date, ReservationTime reservationTime, Long waitingNumber) {
+    public ReservationWaiting(String name, Long themeId, LocalDate date, ReservationTime reservationTime) {
         this.id = null;
         this.name = name;
         this.themeId = themeId;
         this.date = date;
         this.time = reservationTime;
-        this.waitingNumber = waitingNumber;
+        this.waitingNumber = null;
     }
 
     public Long getId() {

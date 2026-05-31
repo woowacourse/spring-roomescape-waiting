@@ -30,14 +30,14 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {
+        validateReservationExists(themeId, date, timeId);
         validateAlreadyReserved(name, themeId, date, timeId);
         validateDuplicatedWaiting(name, themeId, date, timeId);
 
         ReservationTime reservationTime = timeDao.selectById(timeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
 
-        Long nextWaitingNumber = reservationWaitingDao.findNextWaitingNumber(themeId, date, timeId);
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, nextWaitingNumber);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime);
 
         return reservationWaitingDao.insert(reservationWaiting);
     }
@@ -49,6 +49,12 @@ public class ReservationWaitingService {
         originReservationWaiting.validateSameName(name);
         validateDateTime(originReservationWaiting.getDate(), originReservationWaiting.getTime());
         reservationWaitingDao.deleteById(id);
+    }
+
+    private void validateReservationExists(Long themeId, LocalDate date, Long timeId) {
+        if (!reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)) {
+            throw new RoomescapeException(ErrorCode.CANNOT_WAIT_WITHOUT_RESERVATION);
+        }
     }
 
     private void validateAlreadyReserved(String name, Long themeId, LocalDate date, Long timeId) {

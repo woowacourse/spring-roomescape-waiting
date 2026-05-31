@@ -40,9 +40,8 @@ class ReservationWaitingDaoTest {
         LocalDate date = LocalDate.now();
         Long timeId = 1L;
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        Long waitingNumber = 1L;
 
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, waitingNumber);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime);
         reservationWaitingDao.insert(reservationWaiting);
         Boolean actual = reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId);
 
@@ -55,8 +54,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                2L
+                new ReservationTime(1L, LocalTime.now().plusHours(1))
         );
 
         ReservationWaiting expected =  reservationWaitingDao.insert(reservationWaiting);
@@ -73,9 +71,9 @@ class ReservationWaitingDaoTest {
     void 이름으로_예약_대기_목록_조회_성공() {
         LocalDate date = LocalDate.now();
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime, 1L);
-        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime, 2L);
-        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime, 3L);
+        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime);
+        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime);
+        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime);
         reservationWaitingDao.insert(first);
         reservationWaitingDao.insert(second);
         reservationWaitingDao.insert(other);
@@ -96,8 +94,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                2L
+                new ReservationTime(1L, LocalTime.now().plusHours(1))
         );
 
         ReservationWaiting expected = reservationWaitingDao.insert(reservationWaiting);
@@ -112,46 +109,12 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
-    void 예약_대기가_없을_때_순번_1_반환_성공() {
-        Long expected = 1L;
-        Long actual = reservationWaitingDao.findNextWaitingNumber(
-                1L,
-                LocalDate.now(),
-                3L
-        );
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void 다음_순번_번호_찾기_성공() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
-                "티버",
-                1L,
-                LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                1L
-        );
-        reservationWaitingDao.insert(reservationWaiting);
-
-        Long expected = 2L;
-        Long actual = reservationWaitingDao.findNextWaitingNumber(
-                1L,
-                LocalDate.now(),
-                1L
-        );
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
     void 예약_대기_삭제_성공() {
         ReservationWaiting reservationWaiting = new ReservationWaiting(
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                1L
+                new ReservationTime(1L, LocalTime.now().plusHours(1))
         );
 
         ReservationWaiting inserted = reservationWaitingDao.insert(reservationWaiting);
@@ -160,5 +123,22 @@ class ReservationWaitingDaoTest {
         Optional<ReservationWaiting> actual = reservationWaitingDao.selectById(inserted.getId());
 
         assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void 대기_취소_시_대기_번호_자동_재정렬_성공() {
+        LocalDate date = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        ReservationWaiting first = reservationWaitingDao.insert(new ReservationWaiting("티버", 1L, date, reservationTime));
+        reservationWaitingDao.insert(new ReservationWaiting("로치", 1L, date, reservationTime));
+        reservationWaitingDao.insert(new ReservationWaiting("워넬", 1L, date, reservationTime));
+
+        // 1번 대기자 취소
+        reservationWaitingDao.deleteById(first.getId());
+
+        List<ReservationWaiting> actual = reservationWaitingDao.selectByName("로치");
+
+        // 로치가 자동으로 1번이 되는지 검증
+        assertThat(actual.get(0).getWaitingNumber()).isEqualTo(1L);
     }
 }

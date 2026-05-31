@@ -18,7 +18,7 @@ class ReservationWaitingTest {
 
     @BeforeEach
     void setUp() {
-        reservationWaiting = new ReservationWaiting("ever", 1L, LocalDate.now(), new ReservationTime(LocalTime.now().plusHours(1)), 1L);
+        reservationWaiting = new ReservationWaiting("ever", 1L, LocalDate.now(), new ReservationTime(LocalTime.now().plusHours(1)));
     }
 
     @Test

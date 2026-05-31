@@ -15,7 +15,7 @@ import roomescape.waiting.ReservationWaiting;
 public class ReservationWaitingDao {
     private static final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) ->
             new ReservationWaiting(
-                    rs.getLong("reservation_waiting_id"),
+                    rs.getLong("id"),
                     rs.getString("name"),
                     rs.getLong("theme_id"),
                     rs.getDate("date").toLocalDate(),
@@ -36,7 +36,8 @@ public class ReservationWaitingDao {
 
     public Optional<ReservationWaiting> selectById(Long id) {
         String sql = """
-                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
+                    ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
@@ -49,7 +50,8 @@ public class ReservationWaitingDao {
 
     public List<ReservationWaiting> selectByName(String name) {
         String sql = """
-                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
+                    ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
@@ -76,23 +78,11 @@ public class ReservationWaitingDao {
                 .addValue("name", reservationsWaiting.getName())
                 .addValue("theme_id", reservationsWaiting.getThemeId())
                 .addValue("date", reservationsWaiting.getDate())
-                .addValue("time_id", reservationsWaiting.getTime().getId())
-                .addValue("waiting_number", reservationsWaiting.getWaitingNumber());
+                .addValue("time_id", reservationsWaiting.getTime().getId());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
-        return new ReservationWaiting(id, reservationsWaiting.getName(), reservationsWaiting.getThemeId(),
-                reservationsWaiting.getDate(),
-                reservationsWaiting.getTime(), reservationsWaiting.getWaitingNumber());
-    }
-
-    public Long findNextWaitingNumber(Long themeId, LocalDate date, Long timeId) {
-        String sql = """
-                SELECT COALESCE(MAX(waiting_number), 0) + 1
-                FROM reservation_waiting
-                WHERE theme_id = ? AND date = ? AND time_id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Long.class, themeId, date, timeId);
+        return selectById(id)
+                .orElseThrow(() -> new IllegalStateException("삽입된 예약 대기 데이터를 찾을 수 없습니다. id : " + id));
     }
 
     public void deleteById(Long id) {
