@@ -138,7 +138,7 @@ public class ReservationServiceImpl implements ReservationService {
             reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
                     .ifPresent(waitingId -> {
                         if (!reservationRepository.promoteToReserved(waitingId)) {
-                            throw new ReservationNotFoundException(waitingId);
+                            throw new IllegalStateException("대기 예약 승격에 실패했습니다. id: " + waitingId);
                         }
                     });
         }
