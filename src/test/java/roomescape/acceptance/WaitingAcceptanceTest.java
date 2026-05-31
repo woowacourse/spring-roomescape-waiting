@@ -1,12 +1,12 @@
 package roomescape.acceptance;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.support.ReservationApiSteps.내_예약목록_조회;
+import static roomescape.support.ReservationApiSteps.대기_신청_요청;
+import static roomescape.support.ReservationApiSteps.대기_취소_요청;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,8 +23,8 @@ import roomescape.support.AcceptanceTest;
  * 검증한다. 그래서 서비스 분기가 늘어도 인수 테스트는 따라 늘지 않는다 — 새 케이스를 여기 추가할지는 "이미 다른 데서 검증됐나"가 아니라 "새로운 사용자 흐름인가"로만 판단한다. (에러는 모든 분기가 아니라
  * 사용자에게 도달하는 하나의 대표 경로만 본다. 아래 중복 대기 거부가 그 예다.)
  *
- * <p>given을 헬퍼로 까는 이유: "이미 예약된 슬롯"은 이 시나리오의 검증 대상이 아니라 전제다.
- * 전제는 가장 싸게(JdbcTemplate insert) 깔고, 검증 대상(대기 신청·조회)만 실제 API로 태운다.
+ * <p>HTTP 호출은 ReservationApiSteps에, given 데이터는 fixture 빌더에 가둔다.
+ * 전제(이미 예약된 슬롯)는 가장 싸게 빌더로 깔고, 검증 대상(대기 신청·조회)만 실제 API로 태운다.
  */
 class WaitingAcceptanceTest extends AcceptanceTest {
 
@@ -37,28 +37,21 @@ class WaitingAcceptanceTest extends AcceptanceTest {
     void setUpSlot() {
         timeId = fixture.insertTime(LocalTime.of(10, 0));
         themeId = fixture.insertTheme("테마A");
-        // 전제: 슬롯에 예약이 이미 1건 있어 대기가 가능한 상태
-        fixture.insertReservation("브라운", FUTURE, timeId, themeId);
+        // 전제: 슬롯에 예약이 이미 1건 있어 대기가 가능한 상태 (슬롯·날짜가 의미 있어 명시, 예약자 이름은 무관)
+        fixture.reservation(timeId, themeId).date(FUTURE).insert();
     }
 
     @Test
     @DisplayName("사용자는 예약된 슬롯에 대기를 신청하고, 내 목록에서 대기 순번과 함께 확인할 수 있다")
     void 대기_신청_후_내목록_확인() {
         // 사용자가 대기를 신청한다
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of("name", "콘", "date", FUTURE.toString(),
-                        "timeId", timeId, "themeId", themeId))
-                .when().post("/user/waitings")
-                .then().log().all()
+        대기_신청_요청("콘", FUTURE, timeId, themeId)
                 .statusCode(201)
                 .body("name", is("콘"))
                 .body("orderIndex", is(1));
 
         // 사용자가 자신의 목록을 조회하면 그 대기가 순번과 함께 보인다
-        RestAssured.given().log().all()
-                .when().get("/user/reservations?name=콘")
-                .then().log().all()
+        내_예약목록_조회("콘")
                 .statusCode(200)
                 .body("size()", is(1))
                 .body("[0].status", is("WAITING"))
@@ -68,30 +61,26 @@ class WaitingAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("사용자는 자신의 대기를 취소할 수 있다")
     void 대기_취소() {
-        Long waitingId = fixture.insertWaiting("콘", FUTURE, timeId, themeId, 1);
+        // 콘의 대기 1건 (신청자 이름이 취소·조회의 키라 명시)
+        Long waitingId = fixture.waiting(timeId, themeId).name("콘").insert();
 
-        RestAssured.given().log().all()
-                .when().delete("/user/waitings/" + waitingId + "?name=콘")
-                .then().log().all()
+        대기_취소_요청(waitingId, "콘")
                 .statusCode(204);
 
-        RestAssured.given()
-                .when().get("/user/reservations?name=콘")
-                .then().statusCode(200)
+        내_예약목록_조회("콘")
+                .statusCode(200)
                 .body("size()", is(0));
     }
 
     @Test
     @DisplayName("예약과 대기가 한 목록에서 status로 구분되어 보인다")
     void 예약과_대기_함께_조회() {
-        // 콘: 다른 슬롯의 예약자 + 이 슬롯의 대기자
+        // 콘: 다른 슬롯(11시)의 예약자 + 이 슬롯(10시)의 대기자
         Long timeId11 = fixture.insertTime(LocalTime.of(11, 0));
-        fixture.insertReservation("콘", FUTURE, timeId11, themeId);   // 콘의 예약
-        fixture.insertWaiting("콘", FUTURE, timeId, themeId, 1);      // 콘의 대기
+        fixture.reservation(timeId11, themeId).name("콘").insert();   // 콘의 예약
+        fixture.waiting(timeId, themeId).name("콘").insert();         // 콘의 대기
 
-        RestAssured.given().log().all()
-                .when().get("/user/reservations?name=콘")
-                .then().log().all()
+        내_예약목록_조회("콘")
                 .statusCode(200)
                 .body("size()", is(2))
                 .body("findAll { it.status == 'RESERVED' }.size()", is(1))
@@ -101,15 +90,10 @@ class WaitingAcceptanceTest extends AcceptanceTest {
     @Test
     @DisplayName("같은 슬롯에 중복 대기를 신청하면 사용자에게 400 에러로 도달한다")
     void 중복_대기_거부가_사용자에게_도달() {
-        // 콘이 이미 대기 중인 상태에서, 콘이 같은 슬롯에 다시 대기 신청
-        fixture.insertWaiting("콘", FUTURE, timeId, themeId, 1);
+        // 콘이 이미 대기 중 (이름·슬롯·날짜가 모두 중복 판정 키라 명시)
+        fixture.waiting(timeId, themeId).name("콘").date(FUTURE).insert();
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(Map.of("name", "콘", "date", FUTURE.toString(),
-                        "timeId", timeId, "themeId", themeId))
-                .when().post("/user/waitings")
-                .then().log().all()
+        대기_신청_요청("콘", FUTURE, timeId, themeId)
                 .statusCode(400)
                 .body("message", is("이미 해당 시간에 대기 신청한 내역이 있습니다."));
     }

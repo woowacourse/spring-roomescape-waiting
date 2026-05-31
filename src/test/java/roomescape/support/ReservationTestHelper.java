@@ -11,8 +11,7 @@ import org.springframework.stereotype.Component;
  * 통합/인수 테스트의 given 단계를 빠르게 까는 헬퍼 + 검증용 조회.
  *
  * <p>given을 "실제 API 호출"이 아니라 JdbcTemplate 직접 insert로 까는 이유:
- * 테스트의 검증 대상이 아닌 사전 데이터는, 그 데이터를 만드는 API의 정상 동작까지 끌어들이지 않고
- * 가장 싸게 깔아야 한다. (예: "대기 취소" 테스트의 given인 "예약 1건"은, 예약 생성 API가
+ * 테스트의 검증 대상이 아닌 사전 데이터는, 그 데이터를 만드는 API의 정상 동작까지 끌어들이지 않고 가장 싸게 깔아야 한다. (예: "대기 취소" 테스트의 given인 "예약 1건"은, 예약 생성 API가
  * 멀쩡한지와 무관하게 그냥 존재하기만 하면 된다.)
  *
  * <p>반대로 인수 테스트에서 "사용자 시나리오 그 자체"를 검증할 때는 API로 상태를 만든다.
@@ -24,6 +23,8 @@ import org.springframework.stereotype.Component;
 public class ReservationTestHelper {
 
     private final JdbcTemplate jdbcTemplate;
+    public static final String DEFAULT_NAME = "브라운";
+    public static final LocalDate DEFAULT_DATE = LocalDate.of(2050, 12, 31);
 
     public ReservationTestHelper(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -97,4 +98,77 @@ public class ReservationTestHelper {
                 "SELECT order_index FROM waiting WHERE id = ?",
                 Integer.class, waitingId);
     }
+
+    // ---------- given: 빌더 (관심 있는 필드만 명시, 나머진 기본값) ----------
+
+    public ReservationInsertBuilder reservation(Long timeId, Long themeId) {
+        return new ReservationInsertBuilder(this, timeId, themeId);
+    }
+
+    public WaitingInsertBuilder waiting(Long timeId, Long themeId) {
+        return new WaitingInsertBuilder(this, timeId, themeId);
+    }
+
+    public static final class ReservationInsertBuilder {
+        private final ReservationTestHelper helper;
+        private final Long timeId;
+        private final Long themeId;
+        private String name = DEFAULT_NAME;
+        private LocalDate date = DEFAULT_DATE;
+
+        private ReservationInsertBuilder(ReservationTestHelper helper, Long timeId, Long themeId) {
+            this.helper = helper;
+            this.timeId = timeId;
+            this.themeId = themeId;
+        }
+
+        public ReservationInsertBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ReservationInsertBuilder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public Long insert() {
+            return helper.insertReservation(name, date, timeId, themeId);
+        }
+    }
+
+    public static final class WaitingInsertBuilder {
+        private final ReservationTestHelper helper;
+        private final Long timeId;
+        private final Long themeId;
+        private String name = DEFAULT_NAME;
+        private LocalDate date = DEFAULT_DATE;
+        private int order = 1;
+
+        private WaitingInsertBuilder(ReservationTestHelper helper, Long timeId, Long themeId) {
+            this.helper = helper;
+            this.timeId = timeId;
+            this.themeId = themeId;
+        }
+
+        public WaitingInsertBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public WaitingInsertBuilder date(LocalDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public WaitingInsertBuilder order(int order) {
+            this.order = order;
+            return this;
+        }
+
+        public Long insert() {
+            return helper.insertWaiting(name, date, timeId, themeId, order);
+        }
+    }
+
 }
