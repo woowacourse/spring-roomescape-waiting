@@ -65,7 +65,7 @@ public class ReservationService {
             throw new NotFoundException("해당 이름으로 예약을 찾을 수 없습니다. 예약 정보를 확인해주세요.");
         }
         if (reservation.isCanceled()) {
-            throw new InvalidRequestException("이미 취소된 예약은 다시 취소할 수 없습니다.");
+            throw new InvalidRequestException("취소된 예약은 변경할 수 없습니다.");
         }
 
         ReservationTime time = findTime(timeId);
