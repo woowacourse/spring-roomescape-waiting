@@ -92,15 +92,24 @@ public class Member {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Member that)) {
+    public final boolean equals(Object o) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        return Objects.equals(id, that.id);
+
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name)
+                && Objects.equals(email, member.email) && Objects.equals(password, member.password)
+                && role == member.role && Objects.equals(store, member.store);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(name);
+        result = 31 * result + Objects.hashCode(email);
+        result = 31 * result + Objects.hashCode(password);
+        result = 31 * result + Objects.hashCode(role);
+        result = 31 * result + Objects.hashCode(store);
+        return result;
     }
 }
