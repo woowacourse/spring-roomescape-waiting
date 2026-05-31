@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.dto.response.ReservationWaitingOrderResponse;
 
 @JdbcTest
 @Import({ReservationWaitingDao.class, ReservationTimeDao.class, ThemeDao.class})
@@ -226,19 +227,19 @@ class ReservationWaitingDaoTest {
         );
 
         // when
-        List<ReservationWaiting> result = reservationWaitingDao.selectByName("맥스");
+        List<ReservationWaitingOrderResponse> result = reservationWaitingDao.selectByNameWithOrder("맥스");
 
         // then
         assertAll(
                 () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.getFirst().getName()).isEqualTo("맥스")
+                () -> assertThat(result.getFirst().waiting().getName()).isEqualTo("맥스")
         );
     }
 
     @Test
     void 존재하지_않는_이름으로_조회하면_빈_목록을_반환한다() {
         // when
-        List<ReservationWaiting> result = reservationWaitingDao.selectByName("없는이름");
+        List<ReservationWaitingOrderResponse> result = reservationWaitingDao.selectByNameWithOrder("없는이름");
 
         // then
         assertThat(result).isEmpty();
