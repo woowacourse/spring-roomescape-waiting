@@ -220,9 +220,9 @@ public class ReservationRepository {
             LocalDate date = LocalDate.parse(rs.getString("entry_date"));
 
             if ("WAITING".equals(rs.getString("entry_status"))) {
-                return UserReservation.from(id, name, date, time, theme, rs.getLong("entry_rank"));
+                return UserReservation.waiting(id, name, date, time, theme, rs.getLong("entry_rank"));
             }
-            return UserReservation.from(id, name, date, time, theme);
+            return UserReservation.reserved(id, name, date, time, theme);
         };
     }
 
