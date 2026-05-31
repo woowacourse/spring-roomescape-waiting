@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.NotFoundException;
+import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -68,7 +68,7 @@ class ReservationAvailabilityServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.findAvailableTime(themeId, date))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
 
         verify(themeRepository, times(1)).findBy(themeId);

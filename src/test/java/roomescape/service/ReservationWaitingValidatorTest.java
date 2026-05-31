@@ -6,12 +6,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.ForbiddenReservationException;
-import roomescape.exception.InvalidInputException;
-import roomescape.exception.PastReservationException;
-import roomescape.exception.PastReservationLockedException;
-import roomescape.exception.WaitingNotAllowedForOwnReservationException;
+import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
 
@@ -58,7 +53,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateWaiting(waiting))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
     }
 
@@ -73,7 +68,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateWaiting(waiting))
-                .isInstanceOf(WaitingNotAllowedForOwnReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
     }
 
@@ -90,7 +85,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateWaiting(waiting))
-                .isInstanceOf(DuplicateReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 예약 대기를 신청한 시간입니다.");
     }
 
@@ -101,7 +96,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateWaiting(waiting))
-                .isInstanceOf(PastReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
         verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
@@ -124,7 +119,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "구구"))
-                .isInstanceOf(ForbiddenReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
         verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
@@ -136,7 +131,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "브라운"))
-                .isInstanceOf(PastReservationLockedException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");
         verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }

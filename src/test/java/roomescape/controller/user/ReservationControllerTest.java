@@ -9,7 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.*;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
@@ -176,7 +177,7 @@ class ReservationControllerTest {
         // given
         Long id = 999L;
         String name = "브라운";
-        willThrow(new NotFoundException("존재하지 않는 예약입니다."))
+        willThrow(new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."))
                 .given(reservationService).delete(id, name);
 
         // when & then
@@ -195,7 +196,7 @@ class ReservationControllerTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        willThrow(new ForbiddenReservationException("본인의 예약만 변경하거나 취소할 수 있습니다."))
+        willThrow(new BusinessException(ErrorCode.FORBIDDEN_RESERVATION, "본인의 예약만 변경하거나 취소할 수 있습니다."))
                 .given(reservationService).delete(id, name);
 
         // when & then
@@ -214,7 +215,7 @@ class ReservationControllerTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        willThrow(new PastReservationLockedException("이미 지난 예약은 변경하거나 취소할 수 없습니다."))
+        willThrow(new BusinessException(ErrorCode.PAST_RESERVATION_LOCKED, "이미 지난 예약은 변경하거나 취소할 수 없습니다."))
                 .given(reservationService).delete(id, name);
 
         // when & then
@@ -317,7 +318,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 2)),
                 eq(2L)))
-                .willThrow(new NotFoundException("존재하지 않는 예약입니다."));
+                .willThrow(new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -339,7 +340,7 @@ class ReservationControllerTest {
     void 사용자_본인_예약_변경시_본인의_예약이_아니면_에러_응답() throws Exception {
         // given
         Long id = 1L;
-        willThrow(new ForbiddenReservationException("본인의 예약만 변경하거나 취소할 수 있습니다."))
+        willThrow(new BusinessException(ErrorCode.FORBIDDEN_RESERVATION, "본인의 예약만 변경하거나 취소할 수 있습니다."))
                 .given(reservationService).update(
                         id,
                         "브라운",
@@ -371,7 +372,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 2)),
                 eq(2L)))
-                .willThrow(new PastReservationLockedException("이미 지난 예약은 변경하거나 취소할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.PAST_RESERVATION_LOCKED, "이미 지난 예약은 변경하거나 취소할 수 없습니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -404,7 +405,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2000, 1, 1)),
                 eq(null)))
-                .willThrow(new PastReservationException("이미 지난 시간으로는 예약할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.PAST_RESERVATION, "이미 지난 시간으로는 예약할 수 없습니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -431,7 +432,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 2)),
                 eq(2L)))
-                .willThrow(new DuplicateReservationException("이미 예약된 시간입니다."));
+                .willThrow(new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -458,7 +459,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 2)),
                 eq(2L)))
-                .willThrow(new UnchangedReservationException("기존 예약과 같은 날짜·시간으로는 변경할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.UNCHANGED_RESERVATION, "기존 예약과 같은 날짜·시간으로는 변경할 수 없습니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -490,7 +491,7 @@ class ReservationControllerTest {
                 eq("브라운"),
                 eq(null),
                 eq(null)))
-                .willThrow(new InvalidInputException("변경할 날짜 또는 시간이 필요합니다."));
+                .willThrow(new BusinessException(ErrorCode.INVALID_INPUT, "변경할 날짜 또는 시간이 필요합니다."));
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", id)
@@ -562,7 +563,7 @@ class ReservationControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new PastReservationException("이미 지난 시간으로는 예약할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.PAST_RESERVATION, "이미 지난 시간으로는 예약할 수 없습니다."));
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -588,7 +589,7 @@ class ReservationControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new NotFoundException("존재하지 않는 테마입니다."));
+                .willThrow(new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -614,7 +615,7 @@ class ReservationControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new DuplicateReservationException("이미 예약된 시간입니다."));
+                .willThrow(new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다."));
 
         // when & then
         mockMvc.perform(post("/reservations")

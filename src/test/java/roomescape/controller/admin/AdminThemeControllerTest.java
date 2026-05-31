@@ -7,7 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Theme;
-import roomescape.exception.ResourceInUseException;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.service.ThemeService;
 
 import java.util.List;
@@ -112,7 +113,7 @@ class AdminThemeControllerTest {
     @Test
     void 예약이_존재하는_테마는_삭제시_에러_응답() throws Exception {
         // given
-        doThrow(new ResourceInUseException("예약이 존재하는 테마는 삭제할 수 없습니다."))
+        doThrow(new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다."))
                 .when(themeService)
                 .delete(1L);
 

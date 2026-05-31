@@ -9,7 +9,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
@@ -86,7 +87,7 @@ class AdminReservationControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new DuplicateReservationException("이미 예약된 시간입니다."));
+                .willThrow(new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약된 시간입니다."));
 
         // when & then
         mockMvc.perform(post("/admin/reservations")

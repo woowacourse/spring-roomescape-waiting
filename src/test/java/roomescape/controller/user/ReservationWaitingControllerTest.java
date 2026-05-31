@@ -8,7 +8,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.*;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.result.WaitingResult;
 
@@ -210,7 +211,7 @@ class ReservationWaitingControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new DuplicateReservationException("이미 예약 대기를 신청한 시간입니다."));
+                .willThrow(new BusinessException(ErrorCode.DUPLICATE_RESERVATION, "이미 예약 대기를 신청한 시간입니다."));
 
         // when & then
         mockMvc.perform(post("/waitings")
@@ -236,7 +237,7 @@ class ReservationWaitingControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new InvalidInputException("예약 가능한 시간에는 대기를 신청할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다."));
 
         // when & then
         mockMvc.perform(post("/waitings")
@@ -262,7 +263,7 @@ class ReservationWaitingControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new WaitingNotAllowedForOwnReservationException("본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION, "본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
 
         // when & then
         mockMvc.perform(post("/waitings")
@@ -288,7 +289,7 @@ class ReservationWaitingControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new PastReservationException("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다."));
+                .willThrow(new BusinessException(ErrorCode.PAST_RESERVATION, "이미 지난 시간으로는 예약 대기를 신청할 수 없습니다."));
 
         // when & then
         mockMvc.perform(post("/waitings")
@@ -314,7 +315,7 @@ class ReservationWaitingControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new NotFoundException("존재하지 않는 테마입니다."));
+                .willThrow(new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
 
         // when & then
         mockMvc.perform(post("/waitings")
@@ -335,7 +336,7 @@ class ReservationWaitingControllerTest {
     @Test
     void 예약_대기_취소시_본인의_대기가_아니면_에러_응답() throws Exception {
         // given
-        willThrow(new ForbiddenReservationException("본인의 예약 대기만 취소할 수 있습니다."))
+        willThrow(new BusinessException(ErrorCode.FORBIDDEN_RESERVATION, "본인의 예약 대기만 취소할 수 있습니다."))
                 .given(reservationWaitingService).delete(1L, "브라운");
 
         // when & then
@@ -352,7 +353,7 @@ class ReservationWaitingControllerTest {
     @Test
     void 예약_대기_취소시_이미_지난_대기이면_에러_응답() throws Exception {
         // given
-        willThrow(new PastReservationLockedException("이미 지난 예약 대기는 취소할 수 없습니다."))
+        willThrow(new BusinessException(ErrorCode.PAST_RESERVATION_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다."))
                 .given(reservationWaitingService).delete(1L, "브라운");
 
         // when & then
@@ -369,7 +370,7 @@ class ReservationWaitingControllerTest {
     @Test
     void 예약_대기_취소시_존재하지_않는_대기이면_에러_응답() throws Exception {
         // given
-        willThrow(new NotFoundException("존재하지 않는 예약 대기입니다."))
+        willThrow(new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 대기입니다."))
                 .given(reservationWaitingService).delete(999L, "브라운");
 
         // when & then

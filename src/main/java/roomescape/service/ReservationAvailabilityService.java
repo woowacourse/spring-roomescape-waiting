@@ -4,7 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.NotFoundException;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -50,7 +51,7 @@ public class ReservationAvailabilityService {
 
     private void validateThemeExists(Long themeId) {
         if (themeRepository.findBy(themeId).isEmpty()) {
-            throw new NotFoundException("존재하지 않는 테마입니다.");
+            throw new BusinessException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다.");
         }
     }
 }

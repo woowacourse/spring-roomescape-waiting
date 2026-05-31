@@ -3,7 +3,8 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.exception.ResourceInUseException;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.result.PopularThemeResult;
@@ -50,7 +51,7 @@ public class ThemeService {
 
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
-            throw new ResourceInUseException("예약이 존재하는 테마는 삭제할 수 없습니다.");
+            throw new BusinessException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
     }
 }

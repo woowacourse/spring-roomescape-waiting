@@ -66,27 +66,28 @@ public class GlobalExceptionHandler {
             modelAndView.setStatus(errorCode.getStatus());
             return modelAndView;
         }
-        return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+        return error(errorCode);
     }
 
-    @ExceptionHandler(RoomescapeException.class)
-    public ResponseEntity<ErrorResponse> handleRoomescapeException(RoomescapeException e) {
-        return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.from(e));
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        return error(e.getErrorCode(), e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException() {
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-
-        return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+        return error(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorResponse> invalidInput(String detail) {
-        ErrorCode errorCode = ErrorCode.INVALID_INPUT;
+        return error(ErrorCode.INVALID_INPUT, detail);
+    }
 
+    private ResponseEntity<ErrorResponse> error(ErrorCode errorCode) {
+        return error(errorCode, errorCode.getMessage());
+    }
+
+    private ResponseEntity<ErrorResponse> error(ErrorCode errorCode, String detail) {
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ErrorResponse.from(errorCode, detail));
     }

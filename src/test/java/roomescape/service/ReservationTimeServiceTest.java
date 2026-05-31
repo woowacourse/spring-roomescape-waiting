@@ -3,7 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.ResourceInUseException;
+import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -100,7 +100,7 @@ class ReservationTimeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.delete(id))
-                .isInstanceOf(ResourceInUseException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
 
         verify(reservationRepository, times(1)).existsByTimeId(id);

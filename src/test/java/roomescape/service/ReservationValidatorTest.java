@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.*;
+import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
@@ -39,7 +39,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateNotPast(LocalDate.now().minusDays(1), time))
-                .isInstanceOf(PastReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 시간으로는 예약할 수 없습니다.");
         verifyNoMoreInteractions(reservationRepository);
     }
@@ -71,7 +71,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateAlreadyReserved(date, timeId, themeId))
-                .isInstanceOf(DuplicateReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 예약된 시간입니다.");
         verify(reservationRepository, times(1)).existsWith(date, timeId, themeId);
         verifyNoMoreInteractions(reservationRepository);
@@ -95,7 +95,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
-                .isInstanceOf(ForbiddenReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
         verifyNoMoreInteractions(reservationRepository);
     }
@@ -107,7 +107,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatableReservation(reservation, "브라운"))
-                .isInstanceOf(PastReservationLockedException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("이미 지난 예약은 변경하거나 취소할 수 없습니다.");
         verifyNoMoreInteractions(reservationRepository);
     }
@@ -138,7 +138,7 @@ class ReservationValidatorTest {
 
         // when & then
         assertThatThrownBy(() -> validator.validateUpdatePolicy(reservation, updatedReservation))
-                .isInstanceOf(UnchangedReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("기존 예약과 같은 날짜·시간으로는 변경할 수 없습니다.");
         verify(reservationRepository, never()).existsWith(any(LocalDate.class), anyLong(), anyLong());
         verifyNoMoreInteractions(reservationRepository);
@@ -156,7 +156,7 @@ class ReservationValidatorTest {
     void 변경할_값이_없으면_예외가_발생한다() {
         // when & then
         assertThatThrownBy(() -> validator.validateUpdateValueExists(null, null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
         verifyNoMoreInteractions(reservationRepository);
     }

@@ -3,7 +3,7 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import roomescape.domain.Theme;
-import roomescape.exception.ResourceInUseException;
+import roomescape.exception.BusinessException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.result.PopularThemeResult;
@@ -106,7 +106,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.delete(id))
-                .isInstanceOf(ResourceInUseException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
 
         verify(reservationRepository, times(1)).existsByThemeId(id);
