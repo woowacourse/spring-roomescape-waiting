@@ -14,10 +14,12 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
+import roomescape.domain.Slot;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.Waiting;
+import roomescape.domain.Waitings;
 import roomescape.domain.vo.Name;
 
 @Repository
@@ -55,8 +57,7 @@ public class WaitingJdbcDao implements WaitingDao {
                 LocalDate.parse(rs.getString("date")),
                 TIME_ROW_MAPPER.mapRow(rs, rowNum),
                 THEME_ROW_MAPPER.mapRow(rs, rowNum),
-                waitingStore,
-                rs.getLong("rank")
+                waitingStore
         );
     };
     private static final String BASE_SELECT = """
@@ -77,14 +78,7 @@ public class WaitingJdbcDao implements WaitingDao {
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.thumbnail_url AS theme_thumbnail_url,
-                    th.description AS theme_description,
-                    (SELECT COUNT(*)+1
-                        FROM waitings w2
-                        WHERE w2.date = w.date
-                        AND w2.time_id = w.time_id
-                        AND w2.theme_id = w.theme_id
-                        AND w2.store_id = w.store_id
-                        AND w2.id < w.id) AS rank
+                    th.description AS theme_description
                 FROM waitings w
                 INNER JOIN members m ON w.member_id = m.id
                 INNER JOIN times t ON w.time_id = t.id
@@ -92,6 +86,7 @@ public class WaitingJdbcDao implements WaitingDao {
                 LEFT JOIN stores ws ON w.store_id = ws.id
                 LEFT JOIN stores ms ON m.store_id = ms.id
             """;
+    private static final String DEFAULT_ORDER = "ORDER BY w.date, w.time_id, w.theme_id, w.store_id, w.id";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -171,63 +166,74 @@ public class WaitingJdbcDao implements WaitingDao {
     }
 
     @Override
-    public boolean existsByMemberAndSlotKey(
-            Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
-        String sql = """
-                SELECT EXISTS(
-                    SELECT 1 FROM waitings
-                    WHERE member_id = :memberId
-                    AND date = :date
-                    AND time_id = :timeId
-                    AND theme_id = :themeId
-                    AND store_id = :storeId
-                );
-                """;
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("memberId", memberId)
-                .addValue("date", date)
-                .addValue("timeId", timeId)
-                .addValue("themeId", themeId)
-                .addValue("storeId", storeId);
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
+    public Waitings findQueueBySlot(Slot slot) {
+        return findQueueBySlot(slot, "");
     }
 
     @Override
-    public Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId) {
+    public Waitings findQueueBySlotForUpdate(Slot slot) {
+        return findQueueBySlot(slot, "FOR UPDATE");
+    }
+
+    private Waitings findQueueBySlot(Slot slot, String lockClause) {
         String sql = BASE_SELECT + """
                 WHERE w.date = :date AND w.time_id = :timeId AND w.theme_id = :themeId AND w.store_id = :storeId
-                ORDER BY w.id LIMIT 1
-                """;
-        SqlParameterSource params = new MapSqlParameterSource("date", date)
-                .addValue("timeId", timeId)
-                .addValue("themeId", themeId)
-                .addValue("storeId", storeId);
+                ORDER BY w.id
+                """ + lockClause;
+        SqlParameterSource params = new MapSqlParameterSource("date", slot.getDate())
+                .addValue("timeId", slot.getTime().getId())
+                .addValue("themeId", slot.getTheme().getId())
+                .addValue("storeId", slot.getStoreId());
 
-        return jdbcTemplate.query(sql, params, ROW_MAPPER)
-                .stream().findFirst();
+        return new Waitings(slot, jdbcTemplate.query(sql, params, ROW_MAPPER));
     }
 
     @Override
-    public List<Waiting> findAllByMemberId(Long memberId) {
+    public List<Waitings> findAllQueues() {
+        String sql = BASE_SELECT + DEFAULT_ORDER;
+        return toQueues(jdbcTemplate.query(sql, ROW_MAPPER));
+    }
+
+    @Override
+    public List<Waitings> findQueuesContainingMember(Long memberId) {
         String sql = BASE_SELECT + """
-                WHERE w.member_id = :memberId
-                ORDER BY w.date, w.time_id
-                """;
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM waitings mine
+                    WHERE mine.member_id = :memberId
+                    AND mine.date = w.date
+                    AND mine.time_id = w.time_id
+                    AND mine.theme_id = w.theme_id
+                    AND mine.store_id = w.store_id
+                )
+                """ + DEFAULT_ORDER;
 
         SqlParameterSource params = new MapSqlParameterSource("memberId", memberId);
 
-        return jdbcTemplate.query(sql, params, ROW_MAPPER);
+        return toQueues(jdbcTemplate.query(sql, params, ROW_MAPPER));
     }
 
     @Override
-    public List<Waiting> findAllByStoreId(Long storeId) {
+    public List<Waitings> findQueuesByStoreId(Long storeId) {
         String sql = BASE_SELECT + """
                 WHERE w.store_id = :storeId
-                ORDER BY w.date, w.time_id, w.id
-                """;
+                """ + DEFAULT_ORDER;
 
         SqlParameterSource params = new MapSqlParameterSource("storeId", storeId);
 
-        return jdbcTemplate.query(sql, params, ROW_MAPPER);
+        return toQueues(jdbcTemplate.query(sql, params, ROW_MAPPER));
+    }
+
+    private List<Waitings> toQueues(List<Waiting> waitings) {
+        return waitings.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        Waiting::getSlot,
+                        java.util.LinkedHashMap::new,
+                        java.util.stream.Collectors.toList()
+                ))
+                .entrySet()
+                .stream()
+                .map(entry -> new Waitings(entry.getKey(), entry.getValue()))
+                .toList();
     }
 }

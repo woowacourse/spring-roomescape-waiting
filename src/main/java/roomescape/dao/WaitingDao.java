@@ -3,15 +3,19 @@ package roomescape.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
+import roomescape.domain.Waitings;
 
 public interface WaitingDao extends CommonDao<Waiting> {
 
-    Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId);
+    Waitings findQueueBySlot(Slot slot);
 
-    boolean existsByMemberAndSlotKey(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId);
+    Waitings findQueueBySlotForUpdate(Slot slot);
 
-    List<Waiting> findAllByMemberId(Long memberId);
+    List<Waitings> findAllQueues();
 
-    List<Waiting> findAllByStoreId(Long storeId);
+    List<Waitings> findQueuesContainingMember(Long memberId);
+
+    List<Waitings> findQueuesByStoreId(Long storeId);
 }

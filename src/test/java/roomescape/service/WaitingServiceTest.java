@@ -107,6 +107,24 @@ class WaitingServiceTest {
                 memberId, date, timeId, themeId, storeId);
     }
 
+    private Member saveMember(String name, String email) {
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                name, email, "password", "USER"
+        );
+        Long id = jdbcTemplate.queryForObject(
+                "SELECT id FROM members WHERE email = ?", Long.class, email);
+        return new Member(id, name, email, "password", MemberRole.USER);
+    }
+
+    private Long rankOf(List<Waiting> waitings, Long waitingId) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getId().equals(waitingId))
+                .findFirst()
+                .orElseThrow()
+                .getRank();
+    }
+
     @Nested
     class Create {
 
@@ -151,6 +169,20 @@ class WaitingServiceTest {
             WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
 
             assertThatThrownBy(() -> waitingService.create(dto, reserver))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+
+        @Test
+        @DisplayName("같은 슬롯의 대기가 5개이면 더 이상 대기할 수 없다")
+        void throwsWhenWaitingCountLimitExceeded() {
+            WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
+            for (int i = 0; i < 5; i++) {
+                Member waitingMember = saveMember("대기" + i, "waiting" + i + "@test.com");
+                waitingService.create(dto, waitingMember);
+            }
+            Member sixthMember = saveMember("대기6", "waiting6@test.com");
+
+            assertThatThrownBy(() -> waitingService.create(dto, sixthMember))
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
     }
@@ -198,6 +230,24 @@ class WaitingServiceTest {
 
             assertThat(result).extracting(Waiting::getId)
                     .containsExactlyInAnyOrder(w1.getId(), w2.getId());
+        }
+
+        @Test
+        @DisplayName("전체 대기 조회 시 같은 슬롯 안에서만 순번을 부여한다")
+        void assignsRankPerSlotWhenFindAll() {
+            Waiting first = waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
+            Waiting second = waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
+            Member thirdMember = saveMember("유저3", "user3@test.com");
+            Waiting otherSlot = waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, otherStoreId), thirdMember);
+
+            List<Waiting> result = waitingService.findAll();
+
+            assertThat(rankOf(result, first.getId())).isEqualTo(1L);
+            assertThat(rankOf(result, second.getId())).isEqualTo(2L);
+            assertThat(rankOf(result, otherSlot.getId())).isEqualTo(1L);
         }
     }
 
