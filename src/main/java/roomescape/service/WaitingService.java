@@ -66,15 +66,7 @@ public class WaitingService {
     public List<WaitingWithRankResponse> getWaitingsByName(String name) {
         List<RankedWaiting> allWithRankByName = waitingDao.findAllWithRankByName(name);
         return allWithRankByName.stream()
-                .map(rankedWaiting -> new WaitingWithRankResponse(
-                        rankedWaiting.id(),
-                        rankedWaiting.createdAt(),
-                        rankedWaiting.slotId(),
-                        rankedWaiting.name(),
-                        rankedWaiting.rank(),
-                        rankedWaiting.date(),
-                        rankedWaiting.startAt(),
-                        rankedWaiting.themeName()))
+                .map(WaitingWithRankResponse::from)
                 .toList();
     }
 
