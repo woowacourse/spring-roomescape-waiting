@@ -1,19 +1,18 @@
 package roomescape.controller;
 
+import static org.hamcrest.Matchers.notNullValue;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
+import java.time.LocalDate;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.DatabaseInitializer;
-
-import java.time.LocalDate;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,30 +27,58 @@ class ReservationWaitingControllerTest {
     }
 
     @Test
-    void 예약을_추가한다() {
+    void 예약_대기를_추가한다() {
         int timeId = createTime("10:00");
         int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        createReservation("로지", LocalDate.of(2026, 6, 10).toString(), timeId, themeId).statusCode(201);
+        createReservation("로지", LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
 
-        createReservationWaiting("브라운", LocalDate.of(2026, 6, 10), timeId, themeId)
+        createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId, themeId)
                 .statusCode(201)
                 .body("id", notNullValue())
                 .header("Location", "/waitings/1");
     }
 
     @Test
-    void 예약을_삭제한다() {
+    void 예약이_없는_슬롯에_대기를_신청하면_400을_반환한다() {
         int timeId = createTime("10:00");
-        int themeId = createTheme("방탈출11", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        createReservation("로지", LocalDate.of(2026, 6, 10).toString(), timeId, themeId).statusCode(201);
-        int reservationWaitingId = createReservationWaiting("브라운", LocalDate.of(2026, 6, 10), timeId, themeId)
+        int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+
+        createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId, themeId)
+                .statusCode(404);
+    }
+
+    @Test
+    void 동일한_슬롯에_중복_대기를_신청하면_409를_반환한다() {
+        int timeId = createTime("10:00");
+        int themeId = createTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+        createReservation("로지", LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
+        createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId, themeId).statusCode(201);
+
+        createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId, themeId)
+                .statusCode(409);
+    }
+
+    @Test
+    void 예약_대기를_취소한다() {
+        int timeId = createTime("10:00");
+        int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
+        createReservation("로지", LocalDate.now().plusDays(1).toString(), timeId, themeId).statusCode(201);
+        int waitingId = createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId, themeId)
                 .statusCode(201)
                 .extract().path("id");
 
         RestAssured.given().log().all()
-                .when().delete("/waitings/" + reservationWaitingId)
+                .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 존재하지_않는_대기를_취소하면_404를_반환한다() {
+        RestAssured.given().log().all()
+                .when().delete("/waitings/999")
+                .then().log().all()
+                .statusCode(404);
     }
 
     private int createTime(String startAt) {
@@ -75,7 +102,7 @@ class ReservationWaitingControllerTest {
     private ValidatableResponse createReservationWaiting(String name, LocalDate reservationDate, int timeId, int themeId) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "reservationDate", reservationDate, "timeId", timeId, "themeId", themeId))
+                .body(Map.of("name", name, "reservationDate", reservationDate.toString(), "timeId", timeId, "themeId", themeId))
                 .when().post("/waitings")
                 .then().log().all();
     }
