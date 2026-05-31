@@ -73,4 +73,30 @@ public class ReservationWaitingTest {
         assertThat(waiting.getSequence()).isEqualTo(2L);
         assertThat(waiting.getCreatedAt()).isEqualTo(createdAt);
     }
+
+    @Test
+    void promote는_대기자_이름으로_이전된_예약을_반환한다() {
+        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, "네오", reservation, 1L, LocalDateTime.now());
+
+        Reservation promoted = waiting.promote();
+
+        assertThat(promoted.getName()).isEqualTo("네오");
+        assertThat(promoted.getDate()).isEqualTo(futureDate);
+        assertThat(promoted.getTime()).isEqualTo(futureTime);
+        assertThat(promoted.getTheme()).isEqualTo(theme);
+        assertThat(promoted.getId()).isNull();
+    }
+
+    @Test
+    void promote_호출_시_만료된_예약이면_예외가_발생한다() {
+        ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
+        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, "네오", expiredReservation, 1L, LocalDateTime.now());
+
+        assertThatThrownBy(waiting::promote)
+                .isInstanceOf(roomescape.exception.ExpiredDateTimeException.class);
+    }
 }
