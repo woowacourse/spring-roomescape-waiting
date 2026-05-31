@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
 import java.time.LocalTime;
+import java.util.UUID;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -16,29 +17,35 @@ public class Reservation {
     private final ReservationTime time;
     private final Theme theme;
     private final LocalDateTime createdAt;
+    private final String version;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt, String version) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.createdAt = createdAt;
+        this.version = version;
     }
 
     public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validatePastDateTime(date, time.getStartAt());
-        return new Reservation(null, name, date, time, theme, LocalDateTime.now());
+        return new Reservation(null, name, date, time, theme, LocalDateTime.now(), UUID.randomUUID().toString());
     }
 
-    public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        return new Reservation(id, name, date, time, theme, createdAt);
+    public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt, String version) {
+        return new Reservation(id, name, date, time, theme, createdAt, version);
+    }
+
+    public Reservation transferTo(String name) {
+        return Reservation.create(name, this.date, this.time, this.theme);
     }
 
     public Reservation update(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateModifiable();
         validatePastDateTime(date, time.getStartAt());
-        return Reservation.create(name, date, time, theme);
+        return new Reservation(this.id, name, date, time, theme, this.createdAt, UUID.randomUUID().toString());
     }
 
     private void validateModifiable() {
@@ -46,7 +53,7 @@ public class Reservation {
     }
 
     public Reservation withReservationId(Long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme, this.createdAt);
+        return new Reservation(id, this.name, this.date, this.time, this.theme, this.createdAt, this.version);
     }
 
     public Long getId() {
@@ -71,6 +78,10 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getVersion() {
+        return version;
     }
 
     public boolean isReservedBy(String name) {

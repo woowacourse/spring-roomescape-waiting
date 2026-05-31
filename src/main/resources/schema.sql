@@ -21,7 +21,8 @@ CREATE TABLE reservation
     date       DATE         NOT NULL,
     time_id    BIGINT       NOT NULL,
     theme_id   BIGINT       NOT NULL,
-    created_at VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    version    VARCHAR(36) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (date, theme_id, time_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
@@ -33,7 +34,7 @@ CREATE TABLE waiting
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(255) NOT NULL,
     reservation_id  BIGINT  NOT NULL,
-    created_at VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (name, reservation_id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE RESTRICT

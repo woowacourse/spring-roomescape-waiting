@@ -27,14 +27,17 @@ INSERT INTO theme (name, description, url)
 VALUES ('꿈속의 과자집', '꿈속에서 길을 잃은 당신, 달콤하지만 위험한 과자집의 비밀을 풀어야 합니다.', 'https://picsum.photos/id/140/200');
 
 
-INSERT INTO slot (date, time_id, theme_id) VALUES ('2026-06-01', 1, 1);
-INSERT INTO slot (date, time_id, theme_id) VALUES ('2026-06-02', 3, 2);
-INSERT INTO slot (date, time_id, theme_id) VALUES ('2026-06-05', 2, 3);
-INSERT INTO slot (date, time_id, theme_id) VALUES ('2026-06-05', 4, 4);
-INSERT INTO slot (date, time_id, theme_id) VALUES ('2026-06-10', 1, 5);
+INSERT INTO reservation (name, date, theme_id, time_id, created_at, version)
+VALUES ('브라운', '2026-06-01', 1, 1, '2026-05-15 10:30:00', '11111111-1111-1111-1111-111111111111');
 
-INSERT INTO reservation (slot_id, name, created_at) VALUES (1, '브라운', '2026-05-15 10:30:00');
-INSERT INTO reservation (slot_id, name, created_at) VALUES (2, '네오', '2026-05-16 14:20:00');
-INSERT INTO reservation (slot_id, name, created_at) VALUES (3, '제이슨', '2026-05-18 09:15:00');
-INSERT INTO reservation (slot_id, name, created_at) VALUES (4, '워니', '2026-05-20 18:45:00');
-INSERT INTO reservation (slot_id, name, created_at) VALUES (5, '포비', '2026-05-21 22:00:00');
+INSERT INTO reservation (name, date, theme_id, time_id, created_at, version)
+VALUES ('네오', '2026-06-02', 2, 3, '2026-05-16 14:20:00', '22222222-2222-2222-2222-222222222222');
+
+INSERT INTO reservation (name, date, theme_id, time_id, created_at, version)
+VALUES ('제이슨', '2026-06-05', 3, 2, '2026-05-18 09:15:00', '33333333-3333-3333-3333-333333333333');
+
+INSERT INTO reservation (name, date, theme_id, time_id, created_at, version)
+VALUES ('워니', '2026-06-05', 4, 4, '2026-05-20 18:45:00', '44444444-4444-4444-4444-444444444444');
+
+INSERT INTO reservation (name, date, theme_id, time_id, created_at, version)
+VALUES ('포비', '2026-06-10', 5, 1, '2026-05-21 22:00:00', '55555555-5555-5555-5555-555555555555');

@@ -33,6 +33,7 @@ public class ReservationWaitingDao {
                 r.name       as reservation_name,
                 r.date       as reservation_date,
                 r.created_at as reservation_created_at,
+                r.version    as reservation_version,
                 t.id         as time_id,
                 t.start_at   as time_start_at,
                 th.id          as theme_id,
@@ -74,7 +75,8 @@ public class ReservationWaitingDao {
                 resultSet.getObject("reservation_date", LocalDate.class),
                 reservationTime,
                 theme,
-                resultSet.getObject("reservation_created_at", LocalDateTime.class)
+                resultSet.getObject("reservation_created_at", LocalDateTime.class),
+                resultSet.getString("reservation_version")
         );
 
         return ReservationWaiting.restore(
