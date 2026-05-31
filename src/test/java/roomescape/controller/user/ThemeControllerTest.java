@@ -7,7 +7,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Theme;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.result.PopularThemeResult;
+import roomescape.repository.dto.PopularThemeResult;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 import roomescape.service.result.TimeAvailabilityResult;

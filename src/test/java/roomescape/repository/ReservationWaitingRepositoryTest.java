@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.repository.dto.WaitingWithTurn;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -81,20 +82,22 @@ class ReservationWaitingRepositoryTest {
         ReservationTime time2 = findTimeByStartAt("12:00");
         Theme theme1 = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
+        waitingRepository.insert(new ReservationWaiting(null, "구구", date, time1, theme1));
         waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time1, theme1));
         waitingRepository.insert(new ReservationWaiting(null, "브라운", date.plusDays(1), time2, theme2));
-        waitingRepository.insert(new ReservationWaiting(null, "구구", date, time2, theme2));
 
         // when
-        List<ReservationWaiting> result = waitingRepository.findByName("브라운");
+        List<WaitingWithTurn> result = waitingRepository.findByNameWithTurn("브라운");
 
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(ReservationWaiting::getName)
+                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getName())
                         .containsExactly("브라운", "브라운"),
-                () -> assertThat(result).extracting(ReservationWaiting::getDate)
-                        .containsExactly(date, date.plusDays(1)));
+                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getDate())
+                        .containsExactly(date, date.plusDays(1)),
+                () -> assertThat(result).extracting(WaitingWithTurn::turn)
+                        .containsExactly(2L, 1L));
     }
 
     @Test
@@ -127,21 +130,21 @@ class ReservationWaitingRepositoryTest {
     }
 
     @Test
-    void 예약_대기_순번_조회_테스트() {
+    void 아이디로_예약_대기와_순번을_조회한다() {
         // given
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        Long id1 = waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
         Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme));
 
         // when
-        long actualTurn1 = waitingRepository.countEarlierWaitings(id1);
-        long actualTurn2 = waitingRepository.countEarlierWaitings(id2);
+        WaitingWithTurn result = waitingRepository.findByIdWithTurn(id2).get();
 
         // then
         assertAll(
-                () -> assertThat(actualTurn1 + 1).isEqualTo(1),
-                () -> assertThat(actualTurn2 + 1).isEqualTo(2));
+                () -> assertThat(result.waiting().getId()).isEqualTo(id2),
+                () -> assertThat(result.waiting().getName()).isEqualTo("구구"),
+                () -> assertThat(result.turn()).isEqualTo(2L));
     }
 
     private ReservationTime findTimeByStartAt(String startAt) {

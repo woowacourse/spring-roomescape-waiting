@@ -1,4 +1,4 @@
-package roomescape.repository.result;
+package roomescape.repository.dto;
 
 public record PopularThemeResult(
         Long id,

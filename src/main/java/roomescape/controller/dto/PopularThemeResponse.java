@@ -1,6 +1,6 @@
 package roomescape.controller.dto;
 
-import roomescape.repository.result.PopularThemeResult;
+import roomescape.repository.dto.PopularThemeResult;
 
 public record PopularThemeResponse(
         Long id,

@@ -6,7 +6,7 @@ import roomescape.domain.Theme;
 import roomescape.exception.ResourceInUseException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.result.PopularThemeResult;
+import roomescape.repository.dto.PopularThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;

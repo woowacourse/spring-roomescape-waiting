@@ -11,6 +11,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.dto.WaitingWithTurn;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
@@ -37,15 +38,17 @@ public class ReservationWaitingService {
     }
 
     public List<WaitingResult> findByName(String name) {
-        return reservationWaitingRepository.findByName(name).stream()
-                .map(waiting -> new WaitingResult(
-                        waiting.getId(),
-                        waiting.getName(),
-                        waiting.getDate(),
-                        waiting.getTime(),
-                        waiting.getTheme(),
-                        calculateTurn(waiting)))
-                .toList();
+        return reservationWaitingRepository.findByNameWithTurn(name).stream()
+                .map(waitingWithTurn -> {
+                    ReservationWaiting waiting = waitingWithTurn.waiting();
+                    return new WaitingResult(
+                            waiting.getId(),
+                            waiting.getName(),
+                            waiting.getDate(),
+                            waiting.getTime(),
+                            waiting.getTheme(),
+                            waitingWithTurn.turn());
+                }).toList();
     }
 
     @Transactional
@@ -56,14 +59,15 @@ public class ReservationWaitingService {
 
         reservationWaitingValidator.validateWaiting(waiting);
 
-        ReservationWaiting saved = save(waiting);
+        WaitingWithTurn saved = save(waiting);
+        ReservationWaiting savedWaiting = saved.waiting();
         return new WaitingResult(
-                saved.getId(),
-                saved.getName(),
-                saved.getDate(),
-                saved.getTime(),
-                saved.getTheme(),
-                calculateTurn(saved));
+                savedWaiting.getId(),
+                savedWaiting.getName(),
+                savedWaiting.getDate(),
+                savedWaiting.getTime(),
+                savedWaiting.getTheme(),
+                saved.turn());
     }
 
     @Transactional
@@ -71,10 +75,6 @@ public class ReservationWaitingService {
         ReservationWaiting waiting = findWaiting(id);
         reservationWaitingValidator.validateUpdatableReservation(waiting, name);
         reservationWaitingRepository.delete(id);
-    }
-
-    private long calculateTurn(ReservationWaiting waiting) {
-        return reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
     }
 
     private Theme findTheme(Long themeId) {
@@ -87,10 +87,10 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
     }
 
-    private ReservationWaiting save(ReservationWaiting waiting) {
+    private WaitingWithTurn save(ReservationWaiting waiting) {
         try {
             Long id = reservationWaitingRepository.insert(waiting);
-            return reservationWaitingRepository.findById(id)
+            return reservationWaitingRepository.findByIdWithTurn(id)
                     .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
         } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException("이미 예약 대기를 신청한 시간입니다.");

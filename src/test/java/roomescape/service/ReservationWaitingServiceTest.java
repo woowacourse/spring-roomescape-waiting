@@ -10,6 +10,7 @@ import roomescape.exception.*;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.dto.WaitingWithTurn;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
@@ -43,16 +44,12 @@ class ReservationWaitingServiceTest {
     void 이름으로_예약_대기_목록을_조회한다() {
         // given
         String name = "브라운";
-        List<ReservationWaiting> waitings = List.of(
-                new ReservationWaiting(1L, name, date, time, theme),
-                new ReservationWaiting(2L, name, date.plusDays(1), time, theme));
+        List<WaitingWithTurn> waitingWithTurns = List.of(
+                new WaitingWithTurn(new ReservationWaiting(1L, name, date, time, theme), 1L),
+                new WaitingWithTurn(new ReservationWaiting(2L, name, date.plusDays(1), time, theme), 2L));
 
-        when(reservationWaitingRepository.findByName(name))
-                .thenReturn(waitings);
-        when(reservationWaitingRepository.countEarlierWaitings(1L))
-                .thenReturn(0L);
-        when(reservationWaitingRepository.countEarlierWaitings(2L))
-                .thenReturn(1L);
+        when(reservationWaitingRepository.findByNameWithTurn(name))
+                .thenReturn(waitingWithTurns);
 
         // when
         List<WaitingResult> result = service.findByName(name);
@@ -83,10 +80,8 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(theme));
         when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
                 .thenReturn(id);
-        when(reservationWaitingRepository.findById(id))
-                .thenReturn(Optional.of(savedWaiting));
-        when(reservationWaitingRepository.countEarlierWaitings(id))
-                .thenReturn(0L);
+        when(reservationWaitingRepository.findByIdWithTurn(id))
+                .thenReturn(Optional.of(new WaitingWithTurn(savedWaiting, 1L)));
 
         // when
         WaitingResult result = service.create(name, date, time.getId(), theme.getId());
