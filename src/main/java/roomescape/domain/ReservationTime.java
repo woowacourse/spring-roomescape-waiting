@@ -53,23 +53,21 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReservationTime that)) {
             return false;
         }
-
-        ReservationTime reservationTime = (ReservationTime) object;
-        if (id != null && reservationTime.id != null) {
-            return Objects.equals(id, reservationTime.id);
+        if (id == null) {
+            return false;
         }
-        return Objects.equals(startAt, reservationTime.startAt);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        if (id != null) {
-            return Objects.hash(id);
-        }
-        return Objects.hash(startAt);
+        return Objects.hashCode(id);
     }
 }

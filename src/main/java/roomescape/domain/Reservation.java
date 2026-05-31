@@ -74,26 +74,21 @@ public class Reservation {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) {
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
         }
-        if (object == null || getClass() != object.getClass()) {
+        if (!(o instanceof Reservation that)) {
             return false;
         }
-
-        Reservation reservation = (Reservation) object;
-        if (id != null && reservation.id != null) {
-            return Objects.equals(id, reservation.id);
+        if (id == null) {
+            return false;
         }
-        return Objects.equals(name, reservation.name) && Objects.equals(slot, reservation.slot);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        if (id != null) {
-            return Objects.hash(id);
-        }
-        return Objects.hash(name, slot);
+        return Objects.hashCode(id);
     }
 }

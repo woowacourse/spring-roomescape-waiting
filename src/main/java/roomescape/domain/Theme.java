@@ -41,24 +41,21 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Theme that)) {
             return false;
         }
-
-        Theme theme = (Theme) object;
-        if (id != null && theme.id != null) {
-            return Objects.equals(id, theme.id);
+        if (id == null) {
+            return false;
         }
-        return Objects.equals(name, theme.name) && Objects.equals(description, theme.description)
-                && Objects.equals(thumbnail, theme.thumbnail);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        if (id != null) {
-            return Objects.hash(id);
-        }
-        return Objects.hash(name, description, thumbnail);
+        return Objects.hashCode(id);
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Waiting {
 
@@ -38,5 +39,24 @@ public class Waiting {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Waiting that)) {
+            return false;
+        }
+        if (id == null) {
+            return false;
+        }
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

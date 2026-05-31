@@ -42,15 +42,21 @@ public class Slot {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (this == object) return true;
-        if (object == null || getClass() != object.getClass()) return false;
-        Slot slot = (Slot) object;
-        return Objects.equals(id, slot.id) || (Objects.equals(date, slot.date) && Objects.equals(time, slot.time) && Objects.equals(theme, slot.theme));
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Slot that)) {
+            return false;
+        }
+        if (id == null) {
+            return false;
+        }
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, time, theme);
+        return Objects.hashCode(id);
     }
 }
