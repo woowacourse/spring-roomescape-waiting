@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
@@ -37,8 +38,8 @@ public class ReservationRestController {
     }
 
     @GetMapping("/reservations/mine")
-    public List<ReservationResponse> readMine(@RequestParam String name) {
-        return reservationService.readByName(name);
+    public List<MyReservationResponse> readMine(@RequestParam String name) {
+        return reservationService.readMineByName(name);
     }
 
     @GetMapping("/reservations/{id}")
@@ -82,10 +83,5 @@ public class ReservationRestController {
     @GetMapping("/reservations/waitings")
     public List<ReservationWaitingResponse> waitingReadAll() {
         return reservationWaitingService.readAll();
-    }
-
-    @GetMapping("/reservations/waitings/mine")
-    public List<ReservationWaitingResponse> waitingReadMine(@RequestParam String name) {
-        return reservationWaitingService.readByName(name);
     }
 }

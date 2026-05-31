@@ -165,15 +165,4 @@ public class ReservationWaitingTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("테스트"));
     }
-
-    @Test
-    void 에약_대기열_조회가_정상적으로_반환된다() throws Exception{
-        ReservationWaitingResponse reservationWaitingResponse = new ReservationWaitingResponse(1L, "테스트", now, ReservationTimeResponse.from(reservationTime), ThemeResponse.from(theme), 1L, nowDateTime);
-
-        given(reservationWaitingService.readByName(reservationWaitingResponse.getName())).willReturn(List.of(reservationWaitingResponse));
-        mockMvc.perform(get("/reservations/waitings/mine")
-                        .param("name", "테스트"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("테스트"));
-    }
 }

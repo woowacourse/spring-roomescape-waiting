@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
+import roomescape.dto.reservation.MyReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -13,10 +14,12 @@ import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationUpdateDao;
+import roomescape.repository.ReservationWaitingQueryDao;
 import roomescape.repository.ReservationWaitingUpdateDao;
 import roomescape.repository.ThemeQueryDao;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,14 +30,14 @@ public class ReservationService {
     private final ReservationUpdateDao reservationUpdatingDao;
     private final ReservationTimeQueryDao reservationTimeQueryingDao;
     private final ThemeQueryDao themeQueryingDao;
-    private final ReservationWaitingUpdateDao reservationWaitingUpdateDao;
+    private final ReservationWaitingQueryDao reservationWaitingQueryDao;
 
-    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
+    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingQueryDao reservationWaitingQueryDao) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.themeQueryingDao = themeQueryingDao;
-        this.reservationWaitingUpdateDao = reservationWaitingUpdateDao;
+        this.reservationWaitingQueryDao = reservationWaitingQueryDao;
     }
 
     public ReservationResponse read(Long id) {
@@ -49,11 +52,19 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> readByName(String name) {
-        return reservationQueryingDao.findAllByName(name)
+    public List<MyReservationResponse> readMineByName(String name) {
+        List<MyReservationResponse> reservations = reservationQueryingDao.findAllByName(name)
                 .stream()
-                .map(ReservationResponse::from)
+                .map(MyReservationResponse::fromReservation)
                 .toList();
+
+        List<MyReservationResponse> waitings = reservationWaitingQueryDao.findAllByName(name)
+                .stream()
+                .map(MyReservationResponse::fromWaiting)
+                .toList();
+        List<MyReservationResponse> result = new ArrayList<>(reservations);
+        result.addAll(waitings);
+        return result;
     }
 
     public ReservationResponse create(ReservationRequest reservationReq) {

@@ -75,13 +75,6 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    public List<ReservationWaitingResponse> readByName(String name) {
-        return reservationWaitingQueryingDao.findAllByName(name)
-                .stream()
-                .map(ReservationWaitingResponse::from)
-                .toList();
-    }
-
     private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
         return reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId).stream()
                 .findFirst()

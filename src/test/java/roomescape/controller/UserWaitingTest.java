@@ -98,16 +98,14 @@ public class UserWaitingTest {
     void 이름으로_예약_대기열_조회가_정상적으로_반환된다() {
         RestAssured.given().log().all()
                 .queryParam("name", "테스트")
-                .when().get("/reservations/waitings/mine")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("[0].id", is(1))
-                .body("[0].name", is("테스트"))
                 .body("[0].date", is(TOMORROW.toString()))
                 .body("[0].time.id", is(1))
-                .body("[0].time.startAt", is("10:00"))
                 .body("[0].theme.id", is(1))
-                .body("[0].theme.name", is("테스트"))
+                .body("[0].status", is("WAITING"))
                 .body("[0].sequence", is(1));
     }
 

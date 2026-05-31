@@ -17,6 +17,7 @@ import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationTimeUpdateDao;
 import roomescape.repository.ReservationUpdateDao;
+import roomescape.repository.ReservationWaitingQueryDao;
 import roomescape.repository.ReservationWaitingUpdateDao;
 import roomescape.repository.ThemeQueryDao;
 import roomescape.repository.ThemeUpdateDao;
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import({ReservationService.class,
         ReservationQueryDao.class, ReservationUpdateDao.class,
         ReservationTimeQueryDao.class, ReservationTimeUpdateDao.class,
-        ThemeQueryDao.class, ThemeUpdateDao.class, ReservationWaitingUpdateDao.class})
+        ThemeQueryDao.class, ThemeUpdateDao.class, ReservationWaitingQueryDao.class})
 class ReservationServiceTest {
 
     @Autowired
