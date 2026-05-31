@@ -19,6 +19,7 @@ import roomescape.support.ReservationTestHelper;
 public class WaitingStepTest extends IntegrationTest {
 
     private static final LocalDate FUTURE_DATE = LocalDate.of(2050, 12, 31);
+    public static final String RESERVATION_NAME = "브라운";
 
     @Autowired
     private ReservationTestHelper helper;
@@ -31,7 +32,7 @@ public class WaitingStepTest extends IntegrationTest {
         // 시간, 테마, 예약을 하나씩 생성
         timeId = helper.insertTime(LocalTime.of(10, 0));
         themeId = helper.insertTheme("테마A", "설명", "url");
-        helper.insertReservation("브라운", FUTURE_DATE, timeId, themeId);
+        helper.insertReservation(RESERVATION_NAME, FUTURE_DATE, timeId, themeId);
     }
 
     @Nested
@@ -92,6 +93,22 @@ public class WaitingStepTest extends IntegrationTest {
         }
 
         @Test
+        @DisplayName("본인이 예약한  슬롯에 대기 시 400")
+        void 예약한_슬롯에_대기() {
+            Map<String, Object> body = new HashMap<>();
+            body.put("name", RESERVATION_NAME);
+            body.put("date", FUTURE_DATE.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON).body(body)
+                    .when().post("/user/waitings")
+                    .then().statusCode(400)
+                    .body("message", is("이미 본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
+        }
+
+        @Test
         @DisplayName("같은 사용자가 같은 슬롯에 중복 대기 시 400")
         void 중복_대기() {
             helper.insertWaiting("콘", FUTURE_DATE, timeId, themeId, 1);
@@ -144,7 +161,7 @@ public class WaitingStepTest extends IntegrationTest {
             RestAssured.given()
                     .when().delete("/user/waitings/" + w2 + "?name=모카")
                     .then().statusCode(204);
-            
+
             assertThat(helper.findWaitingOrder(w1)).isEqualTo(1);
             assertThat(helper.findWaitingOrder(w3)).isEqualTo(2);
         }
