@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -53,8 +54,13 @@ public class ReservationService {
         validatePastDatetime(slot.getDate(), now, reservationTime);
 
         Reservation reservation = Reservation.createWithoutId(command.name(), command.date(), reservationTime, theme);
-        Reservation savedReservation = reservationDao.insert(reservation);
-        return ReservationResponse.from(savedReservation);
+
+        try {
+            Reservation savedReservation = reservationDao.insert(reservation);
+            return ReservationResponse.from(savedReservation);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
+        }
     }
 
     public List<ReservationResponse> getAllReservations() {
