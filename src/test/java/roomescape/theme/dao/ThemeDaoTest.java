@@ -2,6 +2,7 @@ package roomescape.theme.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,10 @@ class ThemeDaoTest {
             Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // then
-            assertThat(saved.getId()).isNotNull();
-            assertThat(saved.getName()).isEqualTo("테마이름");
+            assertAll(
+                    () -> assertThat(saved.getId()).isNotNull(),
+                    () -> assertThat(saved.getName()).isEqualTo("테마이름")
+            );
         }
 
         @Test
@@ -52,8 +55,10 @@ class ThemeDaoTest {
 
             // then
             List<Theme> allThemes = themeDao.findAll();
-            assertThat(allThemes).hasSize(1);
-            assertThat(allThemes.get(0)).isEqualTo(saved);
+            assertAll(
+                    () -> assertThat(allThemes).hasSize(1),
+                    () -> assertThat(allThemes.get(0)).isEqualTo(saved)
+            );
         }
     }
 

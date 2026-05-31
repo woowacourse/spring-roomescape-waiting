@@ -1,12 +1,12 @@
 package roomescape.reservation.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -60,10 +60,12 @@ class ReservationDaoTest {
             Reservation saved = reservationDao.insert("브라운", LocalDate.of(2023, 8, 5), time, theme, ReservationStatus.RESERVED);
 
             // then
-            assertThat(saved.getId()).isNotNull();
-            assertThat(saved.getName()).isEqualTo("브라운");
-            assertThat(saved.getTime().getId()).isEqualTo(time.getId());
-            assertThat(saved.getTheme().getId()).isEqualTo(theme.getId());
+            assertAll(
+                    () -> assertThat(saved.getId()).isNotNull(),
+                    () -> assertThat(saved.getName()).isEqualTo("브라운"),
+                    () -> assertThat(saved.getTime().getId()).isEqualTo(time.getId()),
+                    () -> assertThat(saved.getTheme().getId()).isEqualTo(theme.getId())
+            );
         }
 
         @Test
@@ -99,17 +101,19 @@ class ReservationDaoTest {
             List<Reservation> all = reservationDao.findAll();
 
             // then
-            assertThat(all).hasSize(2);
-            assertThat(all.getFirst().getId()).isEqualTo(1);
-            assertThat(all.getFirst().getName()).isEqualTo("브라운");
-            assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2023, 8, 5));
-            assertThat(all.getFirst().getTime().getId()).isEqualTo(1);
-            assertThat(all.getFirst().getTheme().getId()).isEqualTo(1);
-            assertThat(all.get(1).getId()).isEqualTo(2);
-            assertThat(all.get(1).getName()).isEqualTo("조다현");
-            assertThat(all.get(1).getDate()).isEqualTo(LocalDate.of(2023, 8, 5));
-            assertThat(all.get(1).getTime().getId()).isEqualTo(2);
-            assertThat(all.get(1).getTheme().getId()).isEqualTo(2);
+            assertAll(
+                    () -> assertThat(all).hasSize(2),
+                    () -> assertThat(all.getFirst().getId()).isEqualTo(1),
+                    () -> assertThat(all.getFirst().getName()).isEqualTo("브라운"),
+                    () -> assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2023, 8, 5)),
+                    () -> assertThat(all.getFirst().getTime().getId()).isEqualTo(1),
+                    () -> assertThat(all.getFirst().getTheme().getId()).isEqualTo(1),
+                    () -> assertThat(all.get(1).getId()).isEqualTo(2),
+                    () -> assertThat(all.get(1).getName()).isEqualTo("조다현"),
+                    () -> assertThat(all.get(1).getDate()).isEqualTo(LocalDate.of(2023, 8, 5)),
+                    () -> assertThat(all.get(1).getTime().getId()).isEqualTo(2),
+                    () -> assertThat(all.get(1).getTheme().getId()).isEqualTo(2)
+            );
         }
 
         @Test
@@ -124,10 +128,12 @@ class ReservationDaoTest {
             Reservation reservation = reservationDao.findById(1L);
 
             // then
-            Assertions.assertThat(reservation.getName()).isEqualTo("브라운");
-            Assertions.assertThat(reservation.getDate()).isEqualTo(LocalDate.of(2023, 8, 5));
-            Assertions.assertThat(reservation.getTime().getId()).isEqualTo(1);
-            Assertions.assertThat(reservation.getTheme().getId()).isEqualTo(1);
+            assertAll(
+                    () -> assertThat(reservation.getName()).isEqualTo("브라운"),
+                    () -> assertThat(reservation.getDate()).isEqualTo(LocalDate.of(2023, 8, 5)),
+                    () -> assertThat(reservation.getTime().getId()).isEqualTo(1),
+                    () -> assertThat(reservation.getTheme().getId()).isEqualTo(1)
+            );
         }
     }
 

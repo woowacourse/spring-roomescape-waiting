@@ -2,6 +2,7 @@ package roomescape.reservation.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -42,8 +43,10 @@ class ReservationTimeDaoTest {
             ReservationTimeCreateResponse saved = ReservationTimeCreateResponse.of(reservationTime.getId(), LocalTime.of(10, 0));
 
             // then
-            assertThat(saved.id()).isNotNull();
-            assertThat(saved.startAt()).isEqualTo(LocalTime.of(10, 0));
+            assertAll(
+                    () -> assertThat(saved.id()).isNotNull(),
+                    () -> assertThat(saved.startAt()).isEqualTo(LocalTime.of(10, 0))
+            );
         }
 
         @Test
