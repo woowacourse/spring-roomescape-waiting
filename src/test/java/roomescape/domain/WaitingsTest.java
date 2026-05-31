@@ -80,7 +80,7 @@ class WaitingsTest {
         List<WaitingWithRank> result = waitings.rankedBy(me);
 
         assertThat(result)
-                .extracting(WaitingWithRank::id, WaitingWithRank::rank, WaitingWithRank::owner)
+                .extracting(w -> w.waiting().id(), WaitingWithRank::rank, w -> w.waiting().owner())
                 .containsExactlyInAnyOrder(
                         tuple(2L, 2, me),
                         tuple(3L, 1, me)

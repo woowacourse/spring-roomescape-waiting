@@ -1,4 +1,4 @@
 package roomescape.domain;
 
-public record WaitingWithRank(Long id, Member owner, Slot slot, int rank) {
+public record WaitingWithRank(Waiting waiting, int rank) {
 }

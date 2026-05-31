@@ -33,16 +33,16 @@ public record ReservationResponse(
         );
     }
 
-    public static ReservationResponse from(WaitingWithRank waiting) {
-        Slot slot = waiting.slot();
+    public static ReservationResponse from(WaitingWithRank waitingWithRank) {
+        Slot slot = waitingWithRank.waiting().slot();
         return new ReservationResponse(
-                waiting.id(),
-                waiting.owner().name(),
+                waitingWithRank.waiting().id(),
+                waitingWithRank.waiting().owner().name(),
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
                 ReservationStatus.WAITING,
-                waiting.rank()
+                waitingWithRank.rank()
         );
     }
 }

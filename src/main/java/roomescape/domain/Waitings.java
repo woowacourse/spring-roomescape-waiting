@@ -13,7 +13,7 @@ public class Waitings {
     public List<WaitingWithRank> rankedBy(Member member) {
         return waitings.stream()
                 .filter(waiting -> waiting.isOwnedBy(member))
-                .map(waiting -> new WaitingWithRank(waiting.id(), waiting.owner(), waiting.slot(), rankOf(waiting)))
+                .map(waiting -> new WaitingWithRank(waiting, rankOf(waiting)))
                 .toList();
     }
 
