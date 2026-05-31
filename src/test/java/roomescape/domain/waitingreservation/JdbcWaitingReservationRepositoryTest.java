@@ -113,14 +113,14 @@ class JdbcWaitingReservationRepositoryTest {
     @Test
     void 사용자_이름으로_예약_대기_목록을_조회하면_각_슬롯의_순번을_반환한다() {
         waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
-        waitingReservationRepository.save(waiting("조회대상", LocalDateTime.of(2026, 5, 8, 10, 0)));
+        waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 8, 10, 0)));
 
         Slot secondSlot = insertSlot(
                 102L, LocalDate.of(2026, 5, 11),
                 202L, LocalTime.of(11, 0),
                 302L, "스릴러"
         );
-        waitingReservationRepository.save(waiting("조회대상", secondSlot, LocalDateTime.of(2026, 5, 7, 11, 0)));
+        waitingReservationRepository.save(waiting("이산", secondSlot, LocalDateTime.of(2026, 5, 7, 11, 0)));
         waitingReservationRepository.save(waiting("브리", secondSlot, LocalDateTime.of(2026, 5, 8, 11, 0)));
 
         Slot thirdSlot = insertSlot(
@@ -130,13 +130,13 @@ class JdbcWaitingReservationRepositoryTest {
         );
         waitingReservationRepository.save(waiting("나무", thirdSlot, LocalDateTime.of(2026, 5, 7, 12, 0)));
         waitingReservationRepository.save(waiting("고래", thirdSlot, LocalDateTime.of(2026, 5, 8, 12, 0)));
-        waitingReservationRepository.save(waiting("조회대상", thirdSlot, LocalDateTime.of(2026, 5, 9, 12, 0)));
+        waitingReservationRepository.save(waiting("이산", thirdSlot, LocalDateTime.of(2026, 5, 9, 12, 0)));
 
-        List<WaitingReservationWithRank> waitings = waitingReservationRepository.findAllByNameWithRank("조회대상");
+        List<WaitingReservationWithRank> waitings = waitingReservationRepository.findAllByNameWithRank("이산");
 
         assertThat(waitings).hasSize(3);
         assertThat(waitings).extracting(result -> result.waitingReservation().getName())
-                .containsOnly("조회대상");
+                .containsOnly("이산");
         assertThat(waitings).extracting(result -> result.waitingReservation().getDate().getId())
                 .containsExactly(DATE_ID, 102L, 103L);
         assertThat(waitings).extracting(WaitingReservationWithRank::rank)
