@@ -20,14 +20,14 @@ class ReservationTest {
         return new Slot(date, ReservationTime.create(1, startAt), Theme.create(1, "테마", "url", "설명"));
     }
 
-    private Reservation reservation(String name, Slot slot) {
-        return Reservation.create(1, new Member(name), slot);
+    private Reservation reservation(Member owner, Slot slot) {
+        return Reservation.create(1, owner, slot);
     }
 
     @Test
     @DisplayName("본인 예약이면 소유권 검증을 통과한다.")
     void validateOwnedByOk() {
-        Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
+        Reservation reservation = reservation(new Member("me"), slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
         assertThatCode(() -> reservation.validateOwnedBy(new Member("me")))
                 .doesNotThrowAnyException();
@@ -36,7 +36,7 @@ class ReservationTest {
     @Test
     @DisplayName("타인 예약이면 소유권 검증에서 예외를 던진다.")
     void validateOwnedByThrows() {
-        Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
+        Reservation reservation = reservation(new Member("me"), slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> reservation.validateOwnedBy(new Member("other")))
                 .isInstanceOf(ForbiddenException.class);
@@ -45,7 +45,7 @@ class ReservationTest {
     @Test
     @DisplayName("이미 시작된 예약은 검증 시 예외를 던진다.")
     void validateNotStartedThrows() {
-        Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 5), LocalTime.of(10, 0)));
+        Reservation reservation = reservation(new Member("me"), slot(LocalDate.of(2026, 6, 5), LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> reservation.validateNotStarted(NOW))
                 .isInstanceOf(PastReservationException.class);
@@ -54,7 +54,7 @@ class ReservationTest {
     @Test
     @DisplayName("아직 시작되지 않은 예약은 검증을 통과한다.")
     void validateNotStartedOk() {
-        Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 5), LocalTime.of(14, 0)));
+        Reservation reservation = reservation(new Member("me"), slot(LocalDate.of(2026, 6, 5), LocalTime.of(14, 0)));
 
         assertThatCode(() -> reservation.validateNotStarted(NOW))
                 .doesNotThrowAnyException();
@@ -63,18 +63,18 @@ class ReservationTest {
     @Test
     @DisplayName("isOwnedBy는 이름 일치 여부를 반환한다.")
     void isOwnedBy() {
-        Reservation reservation = reservation("me", slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
+        Reservation reservation = reservation(new Member("me"), slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0)));
 
         assertThat(reservation.isOwnedBy(new Member("me"))).isTrue();
         assertThat(reservation.isOwnedBy(new Member("other"))).isFalse();
     }
 
     @Test
-    @DisplayName("withSlot은 id와 이름은 유지하고 슬롯만 교체한 새 예약을 만든다.")
+    @DisplayName("withSlot은 id와 owner는 유지하고 슬롯만 교체한 새 예약을 만든다.")
     void withSlot() {
         Slot original = slot(LocalDate.of(2026, 6, 6), LocalTime.of(10, 0));
         Slot newSlot = slot(LocalDate.of(2026, 6, 7), LocalTime.of(14, 0));
-        Reservation reservation = reservation("me", original);
+        Reservation reservation = reservation(new Member("me"), original);
 
         Reservation changed = reservation.withSlot(newSlot);
 
