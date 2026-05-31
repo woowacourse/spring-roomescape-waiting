@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -73,7 +74,7 @@ public class ReservationService {
         try {
             Long generatedId = reservationUpdatingDao.insert(reservation);
             return ReservationResponse.from(reservation.withReservationId(generatedId));
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistException();
         }
     }
