@@ -10,6 +10,7 @@ import roomescape.waiting.ReservationWaiting;
 import roomescape.waiting.dao.ReservationWaitingDao;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ReservationWaitingService {
@@ -27,6 +28,10 @@ public class ReservationWaitingService {
     public ReservationWaiting findById(Long id) {
         return reservationWaitingDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
+    }
+
+    public List<ReservationWaiting> findByName(String name) {
+        return reservationWaitingDao.selectByName(name);
     }
 
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {

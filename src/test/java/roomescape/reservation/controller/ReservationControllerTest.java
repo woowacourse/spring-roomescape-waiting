@@ -29,37 +29,26 @@ public class ReservationControllerTest {
     @Test
     void 이름으로_전체예약_조회_성공() {
         RestAssured.given().log().all()
-                .when().get("/reservations/list?name=로치")
+                .when().get("/reservations?name=로치")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(13));
     }
 
     @Test
-    void 이름으로_예약과_예약_대기_조회_성공() {
+    void 이름으로_예약_조회_성공() {
         String name = "초록";
         String date = LocalDate.now().plusDays(1).toString();
-        Integer reservationId1 = createReservation(name, 1L, date, 1L);
+        Integer reservationId = createReservation(name, 1L, date, 1L);
         createReservation("another", 2L, date, 2L);
-        Integer waitingId = createWaiting(name, 2L, date, 2L);
 
         RestAssured.given().log().all()
-                .when().get("/reservations/list?name=" + name)
+                .when().get("/reservations?name=" + name)
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2))
-                .body("[0].id", is(reservationId1))
-                .body("[0].name", is(name))
-                .body("[0].themeName", is("은하수"))
-                .body("[0].date", is(date))
-                .body("[0].startAt", is("10:00:00"))
-                .body("[0].waitingNumber", nullValue())
-                .body("[1].id", is(waitingId))
-                .body("[1].name", is(name))
-                .body("[1].themeName", is("지구"))
-                .body("[1].date", is(date))
-                .body("[1].startAt", is("11:00:00"))
-                .body("[1].waitingNumber", is(1));
+                .body("size()", is(1))
+                .body("[0].id", is(reservationId))
+                .body("[0].name", is(name));
     }
 
     @Test
@@ -209,7 +198,7 @@ public class ReservationControllerTest {
         Integer reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/my/" + reservationId + "?name=로치")
+                .when().delete("/reservations/" + reservationId + "?name=로치")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -217,7 +206,7 @@ public class ReservationControllerTest {
     @Test
     void 본인이_아닌_예약_삭제_실패() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/my/1?name=브라운")
+                .when().delete("/reservations/1?name=브라운")
                 .then().log().all()
                 .statusCode(403);
     }
@@ -225,7 +214,7 @@ public class ReservationControllerTest {
     @Test
     void 없는_예약_삭제_실패() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/my/17?name=로치")
+                .when().delete("/reservations/17?name=로치")
                 .then().log().all()
                 .statusCode(404);
     }

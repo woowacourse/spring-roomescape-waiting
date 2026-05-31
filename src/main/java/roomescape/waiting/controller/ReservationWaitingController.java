@@ -11,6 +11,7 @@ import roomescape.waiting.dto.ReservationWaitingResponse;
 import roomescape.waiting.service.ReservationWaitingService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/reservation-waitings")
@@ -22,10 +23,18 @@ public class ReservationWaitingController {
         this.reservationWaitingService = reservationWaitingService;
     }
 
-    @GetMapping("/reservations/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
         ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
         return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservationWaiting));
+    }
+
+    @GetMapping(value = "/reservations", params = "name")
+    public ResponseEntity<List<ReservationWaitingResponse>> findByName(@RequestParam String name) {
+        List<ReservationWaitingResponse> reservationWaitingResponses = reservationWaitingService.findByName(name).stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+        return ResponseEntity.ok().body(reservationWaitingResponses);
     }
 
     @PostMapping
