@@ -1,17 +1,17 @@
 package roomescape.dao;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
+import roomescape.dto.response.ReservationWaitingOrderResponse;
 
 @Repository
 public class ReservationWaitingDao {
@@ -100,9 +100,32 @@ public class ReservationWaitingDao {
         return jdbcTemplate.query(baseSelectSql(), ROW_MAPPER);
     }
 
-    public List<ReservationWaiting> selectByName(String name) {
-        String sql = baseSelectSql() + "WHERE rw.name = ?";
-        return jdbcTemplate.query(sql, ROW_MAPPER, name);
+    public List<ReservationWaitingOrderResponse> selectByNameWithOrder(String name) {
+        String sql = """
+                 SELECT rw.id,
+                       rw.name as waiting_name,
+                       rw.created_at,
+                       rw.reservation_date,
+                       rt.id as time_id,
+                       rt.start_at,
+                       t.id as theme_id,
+                       t.name as theme_name,
+                       t.description,
+                       t.thumbnail,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY rw.reservation_date, rw.time_id, rw.theme_id
+                           ORDER BY rw.id
+                       ) as order_num
+                FROM reservation_waiting as rw
+                INNER JOIN reservation_time as rt ON rw.time_id = rt.id
+                INNER JOIN theme as t ON rw.theme_id = t.id
+                WHERE rw.name = ?
+                """;
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            ReservationWaiting waiting = ROW_MAPPER.mapRow(resultSet, rowNum);
+            int order = resultSet.getInt("order_num");
+            return new ReservationWaitingOrderResponse(waiting, order);
+        }, name);
     }
 
     private String baseSelectSql() {
