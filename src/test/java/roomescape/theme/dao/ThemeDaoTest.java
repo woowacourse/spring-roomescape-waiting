@@ -104,20 +104,19 @@ class ThemeDaoTest {
             Theme saved = themeDao.insert(new ThemeCreateRequest("테마이름", "테마설명", "https://image.url"));
 
             // when
-            boolean deleted = themeDao.delete(saved.getId());
+            themeDao.delete(saved.getId());
 
             // then
-            assertThat(deleted).isTrue();
             assertThat(themeDao.findAll()).isEmpty();
         }
 
         @Test
-        void 존재하지_않는_ID_삭제_시_false를_반환한다() {
+        void 존재하지_않는_ID_삭제_시_아무것도_삭제하지_않는다() {
             // when
-            boolean deleted = themeDao.delete(999L);
+            themeDao.delete(999L);
 
             // then
-            assertThat(deleted).isFalse();
+            assertThat(themeDao.findAll()).isEmpty();
         }
     }
 }
