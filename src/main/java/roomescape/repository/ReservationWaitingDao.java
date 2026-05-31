@@ -116,18 +116,6 @@ public class ReservationWaitingDao {
                 .findFirst();
     }
 
-    public Optional<ReservationWaiting> findFirstReservationWaitingByReservationId(Long reservationId) {
-        String sql = SELECT_RESERVATION_WAITING_SQL + """
-                WHERE w.reservation_id = ?
-                ORDER BY w.created_at, w.id
-                LIMIT 1
-                FOR UPDATE
-                """;
-        return jdbcTemplate.query(sql, reservationWaitingRowMapper, reservationId)
-                .stream()
-                .findFirst();
-    }
-
     public List<ReservationWaiting> findAllReservationWaiting() {
         return jdbcTemplate.query(SELECT_RESERVATION_WAITING_SQL, reservationWaitingRowMapper);
     }

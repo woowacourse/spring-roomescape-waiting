@@ -1,5 +1,6 @@
 package roomescape.exception;
 
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,5 +49,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handle(InvalidInputException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_INPUT", e.getMessage()));
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handle(PessimisticLockingFailureException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("LOCK_CONFLICT", "일시적 충돌이 발생했습니다. 다시 시도해주세요."));
     }
 }

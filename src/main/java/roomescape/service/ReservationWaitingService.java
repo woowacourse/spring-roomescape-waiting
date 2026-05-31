@@ -3,6 +3,8 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
