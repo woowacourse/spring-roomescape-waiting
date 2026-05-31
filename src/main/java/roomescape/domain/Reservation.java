@@ -78,6 +78,10 @@ public class Reservation {
         return themeSlot;
     }
 
+    public Long getThemeSlotId() {
+        return themeSlot.getId();
+    }
+
     public ReservationStatus getReservationStatus() {
         return reservationStatus;
     }

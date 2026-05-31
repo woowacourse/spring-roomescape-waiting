@@ -62,7 +62,7 @@ public class ReservationService {
     @Transactional
     public void removeReservation(long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
-        Long themeSlotId = reservation.getThemeSlot().getId();
+        Long themeSlotId = reservation.getThemeSlotId();
         reservationRepository.deleteById(reservationId);
         boolean hasActiveReservation = reservationRepository.existsByThemeSlotId(themeSlotId);
         themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), hasActiveReservation));
@@ -83,7 +83,7 @@ public class ReservationService {
         // 예약이 PENDING이라면 themeSlot으로 repository에서 대기 순번을 함께 조회한다.
         for (Reservation reservation : reservations) {
             if (reservation.isPendingStatus()) {
-                List<WaitingReservation> pendingReservations = findWaitingReservationsWithOrder(reservation.getThemeSlot().getId());
+                List<WaitingReservation> pendingReservations = findWaitingReservationsWithOrder(reservation.getThemeSlotId());
                 WaitingReservationResponse waitingReservationResponse = pendingReservations.stream()
                         .filter(each -> each.name().equals(reservation.getName()))
                         .map(WaitingReservationResponse::from)
@@ -102,7 +102,7 @@ public class ReservationService {
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
+            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
                     .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
         }
 
@@ -146,7 +146,7 @@ public class ReservationService {
         themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
 
         if (reservation.isConfirmedStatus()) {
-            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
+            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
                     .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
             promoteWaitingReservationOrReleaseSlot(reservation);
             return;
@@ -156,7 +156,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
-        Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
+        Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlotId());
 
         if (waitingReservation.isPresent()) {
             waitingReservation.ifPresent(Reservation::confirm);
