@@ -723,7 +723,7 @@
             <span>시간</span><span id="confirm-reservationTime">-</span>
           </div>
           <div class="confirm-row">
-            <span>예약자</span><span id="confirm-name">-</span>
+            <span>예약자</span><span id="confirm-reserver">-</span>
           </div>
           <div class="btn-row" id="confirm-actions" style="margin-top:20px">
             <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
@@ -991,7 +991,7 @@
       const waitLabel = !t.isAvailable && t.waitNumber > 0 ? `<small>대기 ${t.waitNumber}명</small>` : '';
       return `
         <div class="reservationTime-slot ${t.isAvailable ? '' : 'unavailable'}"
-             onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}')`}"
+             onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}', ${t.waitNumber ?? 0})`}"
              id="slot-${t.id}">
           <span>${t.startAt}</span>${waitLabel}
         </div>
@@ -1014,9 +1014,9 @@
     document.getElementById('wait-reservationTime-btn').style.display = 'none';
   }
 
-  function pickWaitingTime(id, startAt) {
-    selectedTime = { id, startAt };
-    selectedWaitingTarget = { id, startAt };
+  function pickWaitingTime(id, startAt, waitNumber = 0) {
+    selectedTime = { id, startAt, waitNumber };
+    selectedWaitingTarget = { id, startAt, waitNumber };
     document.querySelectorAll('.reservationTime-slot').forEach(s => s.classList.remove('selected'));
     document.getElementById(`slot-${id}`).classList.add('selected');
     document.getElementById('confirm-reservationTime-btn').disabled = true;
@@ -1049,7 +1049,7 @@
     renderReservationSummary({
       themeName: selectedTheme.name,
       date: selectedDate,
-      reservationTime: selectedTime?.startAt || '-',
+      time: selectedTime?.startAt || '-',
       name: username
     });
     document.getElementById('confirm-id-row').style.display = 'none';
@@ -1059,8 +1059,8 @@
   function renderReservationSummary(reservationSlot) {
     document.getElementById('confirm-theme').textContent = reservationSlot.themeName;
     document.getElementById('confirm-date').textContent = formatDate(reservationSlot.date);
-    document.getElementById('confirm-reservationTime').textContent = reservationSlot.reservationTime;
-    document.getElementById('confirm-name').textContent = reservationSlot.name || username;
+    document.getElementById('confirm-reservationTime').textContent = reservationSlot.time;
+    document.getElementById('confirm-reserver').textContent = reservationSlot.name || username;
   }
 
   function showReservationComplete(reservationSlot) {
@@ -1096,13 +1096,24 @@
         resetBookingState();
         switchSection('my');
       } else {
-        const response = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
+        await fetchEmpty(`${API}/reservations`, request, '예약에 실패했습니다.');
         cachedAdminReservations = null;
-        if (response.order > 1) {
-          showWaitingComplete(response);
+        if (selectedWaitingTarget) {
+          showWaitingComplete({
+            themeName: selectedTheme.name,
+            date: selectedDate,
+            time: selectedTime?.startAt || '-',
+            name: username,
+            order: Number(selectedWaitingTarget.waitNumber ?? 0) + 1
+          });
         } else {
           showToast('예약이 완료되었습니다!');
-          showReservationComplete(response);
+          showReservationComplete({
+            themeName: selectedTheme.name,
+            date: selectedDate,
+            time: selectedTime?.startAt || '-',
+            name: username
+          });
           resetBookingState();
         }
       }
@@ -1173,12 +1184,12 @@
   }
 
   async function submitWaiting() {
-    // 대기도 동일한 POST /reservations 엔드포인트 사용 (order > 1이면 대기)
+    // 대기도 동일한 POST /reservations 엔드포인트를 사용한다.
     await submitReservation();
   }
 
   function showWaitingComplete(reservation) {
-    const waitingOrder = reservation.order - 1;
+    const waitingOrder = Number(reservation.order ?? 1);
     document.getElementById('booking-title').textContent = '예약 대기 완료';
     document.getElementById('booking-desc').textContent = '예약 대기가 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 대기 완료';
@@ -1188,7 +1199,7 @@
     renderReservationSummary({
       themeName: reservation.themeName,
       date: reservation.date,
-      reservationTime: reservation.reservationTime,
+      time: reservation.time,
       name: reservation.name || username
     });
     document.getElementById('confirm-actions').innerHTML = `
@@ -1208,7 +1219,7 @@
 
     try {
       const reservations = await fetchJson(
-        `${API}/reservations?username=${encodeURIComponent(username)}`,
+        `${API}/reservations?name=${encodeURIComponent(username)}`,
         {},
         '예약 목록을 불러올 수 없습니다.'
       );
@@ -1226,7 +1237,7 @@
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
           <div class="reservationSlot-info">
             <div class="reservationSlot-theme">${r.themeName}</div>
-            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.reservationTime}${waitingMeta(r)}</div>
+            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
           </div>
           <div class="reservationSlot-actions">${reservationActions(r)}</div>
         </div>
@@ -1282,13 +1293,19 @@
     return String(r.status ?? '').toUpperCase() === 'CANCELED';
   }
 
+  function isCompletedReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'COMPLETED';
+  }
+
   function reservationState(r) {
     if (isCanceledReservation(r)) return 'canceled';
+    if (isCompletedReservation(r)) return 'confirmed';
     return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
   }
 
   function reservationStatusLabel(r) {
     const state = reservationState(r);
+    if (isCompletedReservation(r)) return '이용 완료';
     if (state === 'canceled') return '예약 취소';
     if (state === 'waiting') return '대기';
     return '예약 확정';
@@ -1300,7 +1317,7 @@
   }
 
   function reservationActions(r) {
-    if (isCanceledReservation(r)) {
+    if (isCanceledReservation(r) || isCompletedReservation(r)) {
       return reservationStatusBadge(r);
     }
 

@@ -409,7 +409,9 @@
       <thead>
         <tr>
           <th>슬롯 #</th>
+          <th>예약자</th>
           <th>테마</th>
+          <th>상태</th>
           <th>날짜</th>
           <th>시간</th>
         </tr>
@@ -472,7 +474,7 @@
     <h3>⏰ 시간 추가</h3>
     <div class="form-group">
       <label>시작 시간 (HH:MM)</label>
-      <input type="reservationTime" id="new-reservationTime" value="10:00">
+      <input type="time" id="new-reservationTime" value="10:00">
     </div>
     <button class="btn btn-accent" onclick="createTime()">시간 추가</button>
   </div>
@@ -558,11 +560,13 @@
       }
 
       document.getElementById('res-tbody').innerHTML = list.map(r => `
-        <tr id="admin-res-${r.id}">
-          <td class="muted">${r.id}</td>
+        <tr id="admin-res-${r.reservationId}">
+          <td class="muted">${r.reservationId}</td>
+          <td>${r.name}</td>
           <td>${r.themeName}</td>
+          <td class="muted">${displayReservationStatus(r)}</td>
           <td class="muted">${r.date}</td>
-          <td class="muted">${r.reservationTime}</td>
+          <td class="muted">${r.time}</td>
         </tr>
       `).join('');
       document.getElementById('res-table-wrap').style.display = 'block';
@@ -630,6 +634,14 @@
     } catch (e) {
       showToast(e.message, 'error');
     }
+  }
+
+  function displayReservationStatus(reservation) {
+    const status = String(reservation.status ?? '').toUpperCase();
+    if (status === 'COMPLETED') return '이용 완료';
+    if (status === 'WAITING') return `대기 ${reservation.order ?? 0}번`;
+    if (status === 'CANCELED') return '취소';
+    return '예약 확정';
   }
 
   async function deleteTheme(id) {
