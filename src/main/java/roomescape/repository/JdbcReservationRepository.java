@@ -52,7 +52,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                   WHERE r2.date = r.date
                     AND r2.time_id = r.time_id
                     AND r2.theme_id = r.theme_id
-                    AND r2.updated_at < r.updated_at) AS waiting_order
+                    AND (r2.updated_at < r.updated_at
+                         OR (r2.updated_at = r.updated_at AND r2.id < r.id))) AS waiting_order
             FROM reservation r
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
@@ -172,7 +173,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByReserverNameAndDateAndTimeIdAndThemeId(String reserverName, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsByReserverNameAndDateAndTimeIdAndThemeId(String reserverName, LocalDate date, Long timeId,
+                                                                  Long themeId) {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE reserver_name = ? AND date = ? AND time_id = ? AND theme_id = ?",
                 Integer.class,

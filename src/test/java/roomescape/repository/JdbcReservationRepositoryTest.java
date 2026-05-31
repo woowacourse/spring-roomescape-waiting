@@ -246,6 +246,25 @@ class JdbcReservationRepositoryTest {
         assertThat(user1Order).isEqualTo(1L);
     }
 
+    @Test
+    @DisplayName("updated_at이 동률이면 id가 작은 예약이 확정(0번)이 된다")
+    void updated_at_동률이면_id로_순번을_가른다() {
+        ReservationTime time = insertTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("무인도 탈출");
+        Instant sameInstant = Instant.now().minusSeconds(10);
+
+        // 두 예약이 정확히 같은 updated_at을 가져도 한 슬롯에 확정은 1명이어야 한다
+        Reservation first = insertReservationWithUpdatedAt("user1", DATE, time, theme, sameInstant);
+        Reservation second = insertReservationWithUpdatedAt("user2", DATE, time, theme, sameInstant);
+
+        long firstOrder = reservationRepository.findByReserverName("user1").getFirst().waitingOrder().value();
+        long secondOrder = reservationRepository.findByReserverName("user2").getFirst().waitingOrder().value();
+
+        assertThat(first.getId()).isLessThan(second.getId());
+        assertThat(firstOrder).isEqualTo(0L);
+        assertThat(secondOrder).isEqualTo(1L);
+    }
+
     private ReservationTime insertTime(LocalTime startAt) {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", startAt.toString());
         long id = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_time", Long.class);

@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -37,6 +38,13 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConflict(ResourceConflictException e) {
         return new ErrorResponse(ErrorCode.CONFLICT.name(), e.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("데이터 무결성 제약 위반(동시 중복 요청 등): {}", e.getMessage());
+        return new ErrorResponse(ErrorCode.CONFLICT.name(), "이미 예약 또는 대기중인 시간입니다.");
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -62,6 +63,19 @@ class UserReservationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reserverName").value("브라운"));
+    }
+
+    @Test
+    @DisplayName("POST /user/reservations - 동시 중복 등 무결성 제약 위반이면 409를 반환한다")
+    void create_duplicate_conflict() throws Exception {
+        given(userReservationService.create(any()))
+                .willThrow(new DataIntegrityViolationException("duplicate"));
+        ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2099, 12, 31), 1L, 1L);
+
+        mockMvc.perform(post("/user/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
     }
 
     @Test
