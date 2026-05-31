@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간 관리 · 방탈출 어드민</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/admin}">방탈출 어드민</a>
+    <nav class="nav">
+        <a th:href="@{/}">사용자 페이지</a>
+        <a th:href="@{/admin/reservation}">예약</a>
+        <a th:href="@{/admin/theme}">테마</a>
+        <a class="active" th:href="@{/admin/time}">시간</a>
+    </nav>
+</header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>시간 관리</h1>
+            <p class="subtitle">예약 가능한 시간대를 등록하고 관리합니다.</p>
+        </div>
+        <button id="add-button" class="btn btn-primary" type="button">+ 시간 추가</button>
+    </div>
+
+    <section class="card">
+        <table class="data">
+            <thead>
+            <tr>
+                <th style="width: 80px;">#</th>
+                <th>시작 시각</th>
+                <th class="actions"></th>
+            </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </section>
+</main>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/time.js}"></script>
+</body>
+</html>
