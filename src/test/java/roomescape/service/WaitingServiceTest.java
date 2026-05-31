@@ -1,7 +1,7 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +24,8 @@ import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.WaitingException;
 
-class WaitingServiceTest extends ServiceTest {
+class
+WaitingServiceTest extends ServiceTest {
 
     @Autowired
     private WaitingService waitingService;
@@ -90,17 +91,19 @@ class WaitingServiceTest extends ServiceTest {
 
         String testUser = "첫번째대기신청자";
         saveWaiting(reservationDate, reservationTime, theme, testUser, currentDateTime);
-        saveWaiting(reservationDate, reservationTime, theme, "두번째대기신청자", currentDateTime);
-        saveWaiting(reservationDate, reservationTime, theme, "세번째대기신청자", currentDateTime);
+        saveWaiting(reservationDate, reservationTime, theme, "두번째대기신청자", currentDateTime.plusMinutes(1));
+        saveWaiting(reservationDate, reservationTime, theme, "세번째대기신청자", currentDateTime.plusMinutes(2));
 
         // when
         List<WaitingWithRankResponse> response = waitingService.getWaitingsByName(testUser);
 
         // then
-        assertSoftly(softly -> {
-            softly.assertThat(response.getFirst().rank()).isEqualTo(1);
-            softly.assertThat(response.getFirst().name()).isEqualTo(testUser);
-        });
+        assertThat(response)
+                .singleElement()
+                .satisfies(waiting -> {
+                    assertThat(waiting.rank()).isEqualTo(1);
+                    assertThat(waiting.name()).isEqualTo(testUser);
+                });
     }
 
     private Theme saveTheme(String name) {
@@ -140,8 +143,8 @@ class WaitingServiceTest extends ServiceTest {
                              ReservationTime reservationTime,
                              Theme theme,
                              String name,
-                             LocalDateTime currentDateTime) {
+                             LocalDateTime createdAt) {
         WaitingRequest request = new WaitingRequest(date, reservationTime.getId(), theme.getId(), name);
-        waitingService.create(request, currentDateTime);
+        waitingService.create(request, createdAt);
     }
 }
