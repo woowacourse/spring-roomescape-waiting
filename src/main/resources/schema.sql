@@ -50,7 +50,7 @@ CREATE TABLE reservation
 (
     id          BIGINT NOT NULL AUTO_INCREMENT,
     member_id   BIGINT NOT NULL,
-    schedule_id BIGINT,
+    schedule_id BIGINT NOT NULL,
     PRIMARY KEY (id),
     CONSTRAINT uk_reservation_schedule UNIQUE (schedule_id),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
