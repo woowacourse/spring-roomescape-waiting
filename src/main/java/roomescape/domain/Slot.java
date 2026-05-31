@@ -7,13 +7,13 @@ public class Slot {
     private final LocalDate date;
     private final Time time;
     private final Theme theme;
-    private final Long storeId;
+    private final Store store;
 
-    public Slot(LocalDate date, Time time, Theme theme, Long storeId) {
+    public Slot(LocalDate date, Time time, Theme theme, Store store) {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.storeId = storeId;
+        this.store = store;
     }
 
     public boolean isPast(LocalDateTime now) {
@@ -32,7 +32,11 @@ public class Slot {
         return theme;
     }
 
+    public Store getStore() {
+        return store;
+    }
+
     public Long getStoreId() {
-        return storeId;
+        return store == null ? null : store.getId();
     }
 }

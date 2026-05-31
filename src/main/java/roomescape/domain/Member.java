@@ -3,26 +3,48 @@ package roomescape.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import roomescape.common.exception.InvalidInputException;
 
 public class Member {
+    private static final int NAME_MAX_LENGTH = 20;
+
     private final Long id;
     private final String name;
     private final String email;
     private final String password;
     private final MemberRole role;
-    private final Long storeId;
+    private final Store store;
 
     public Member(Long id, String name, String email, String password, MemberRole role) {
         this(id, name, email, password, role, null);
     }
 
-    public Member(Long id, String name, String email, String password, MemberRole role, Long storeId) {
+    public Member(Long id, String name, String email, String password, MemberRole role, Store store) {
+        validate(name, email, password, role);
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
-        this.storeId = storeId;
+        this.store = store;
+    }
+
+    private void validate(String name, String email, String password, MemberRole role) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidInputException("이름은 비어 있을 수 없습니다.");
+        }
+        if (name.length() > NAME_MAX_LENGTH) {
+            throw new InvalidInputException("이름은 " + NAME_MAX_LENGTH + "자 이하여야 합니다.");
+        }
+        if (email == null || email.isBlank() || !email.contains("@")) {
+            throw new InvalidInputException("이메일 형식이 올바르지 않습니다.");
+        }
+        if (password == null || password.isBlank()) {
+            throw new InvalidInputException("비밀번호는 비어 있을 수 없습니다.");
+        }
+        if (role == null) {
+            throw new InvalidInputException("역할은 비어 있을 수 없습니다.");
+        }
     }
 
     public boolean isAdmin() {
@@ -58,8 +80,12 @@ public class Member {
         return role;
     }
 
+    public Store getStore() {
+        return store;
+    }
+
     public Long getStoreId() {
-        return storeId;
+        return store == null ? null : store.getId();
     }
 
     @Override

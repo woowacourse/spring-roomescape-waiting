@@ -28,6 +28,7 @@ import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
@@ -72,8 +73,9 @@ class ReservationAuthorizationServiceTest {
         manager = memberDao.findByEmail("manager@test.com").orElseThrow();
         Time time = timeDao.insert(new Time(LocalTime.of(13, 0)));
         Theme theme = themeDao.insert(new Theme(new Name("방탈출"), "http://thumbnail_url", "설명"));
+        Store store = new Store(storeId, "강남점");
         reservation = reservationDao.insert(
-                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme, storeId));
+                Reservation.createByAdmin(member, LocalDate.now().plusDays(1), time, theme, store));
     }
 
     @Nested
@@ -108,7 +110,7 @@ class ReservationAuthorizationServiceTest {
         @DisplayName("매니저는 다른 매장 예약에 접근할 수 없다")
         void throwsWhenDifferentStore() {
             Member otherStoreManager = new Member(99L, "홍대매니저", "manager2@test.com", "password",
-                    MemberRole.MANAGER, storeId + 1);
+                    MemberRole.MANAGER, new Store(storeId + 1, "홍대점"));
 
             assertThatThrownBy(() -> authorizationService.validateManagerCanAccess(otherStoreManager.getStoreId(), reservation.getId()))
                     .isInstanceOf(UnauthorizedException.class);

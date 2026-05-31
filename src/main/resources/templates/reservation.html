@@ -180,9 +180,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <h2 class="m-title" id="m-theme">—</h2>
     <p class="m-info" id="m-info">—</p>
     <p class="m-info" id="m-wait-note" style="display:none;color:var(--acc-h);margin-top:-1.25rem">이미 예약된 시간입니다. 대기 신청하시겠어요?</p>
+    <label class="m-info" for="store-select" style="margin-top:0.5rem">매장</label>
+    <select id="store-select" style="width:100%;padding:0.6rem 0.75rem;border-radius:6px;background:#1a1115;color:#fff;border:1px solid #3a2530;margin-bottom:1rem" onchange="onStoreChange(this.value)">
+      <option value="">매장을 선택하세요</option>
+    </select>
     <div class="m-actions">
       <button class="btn-g" onclick="closeModal()">취소</button>
-      <button class="btn-s" id="confirm-btn" onclick="doConfirm()">예약 확정</button>
+      <button class="btn-s" id="confirm-btn" onclick="doConfirm()" disabled>예약 확정</button>
     </div>
   </div>
 </div>
@@ -197,8 +201,8 @@ async function logout() {
 
 const params = new URLSearchParams(location.search);
 const themeId = params.get('themeId');
-const DEFAULT_STORE_ID = 1;
-let selTimeId = null, selDate = null, theme = null, me = null, mode = 'reserve';
+let selTimeId = null, selDate = null, selStoreId = null, theme = null, me = null, mode = 'reserve';
+let stores = [];
 
 if (!themeId) { location.href = '/'; }
 
@@ -225,9 +229,43 @@ function fmt(t) {
   return String(t).substring(0, 5);
 }
 
+async function loadStores() {
+  try {
+    const r = await fetch('/stores');
+    if (!r.ok) return [];
+    return await r.json();
+  } catch { return []; }
+}
+
+function populateStoreSelect() {
+  const sel = document.getElementById('store-select');
+  sel.innerHTML = '<option value="">매장을 선택하세요</option>';
+  stores.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = String(s.id);
+    opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+  if (me && me.storeId) {
+    sel.value = String(me.storeId);
+    sel.disabled = true;
+    selStoreId = me.storeId;
+  } else {
+    sel.disabled = false;
+    selStoreId = null;
+  }
+}
+
+function onStoreChange(value) {
+  selStoreId = value ? Number(value) : null;
+  document.getElementById('confirm-btn').disabled = !selStoreId;
+}
+
 async function init() {
   me = await loadMe();
   if (!me) return;
+  stores = await loadStores();
+  populateStoreSelect();
   try {
     const r = await fetch(`/themes/${themeId}`);
     if (!r.ok) { location.href = '/'; return; }
@@ -303,6 +341,7 @@ function openModal(timeId, timeStr, isWait) {
   document.getElementById('m-eye').textContent = isWait ? '대기 신청' : '예약 확정';
   document.getElementById('m-wait-note').style.display = isWait ? 'block' : 'none';
   document.getElementById('confirm-btn').textContent = isWait ? '대기 신청' : '예약 확정';
+  document.getElementById('confirm-btn').disabled = !selStoreId;
   document.getElementById('overlay').classList.add('open');
 }
 
@@ -333,7 +372,7 @@ async function doReserve() {
         date: selDate,
         timeId: selTimeId,
         themeId: Number(themeId),
-        storeId: me.storeId || DEFAULT_STORE_ID
+        storeId: selStoreId
       })
     });
     if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
@@ -367,7 +406,7 @@ async function doWait() {
         date: selDate,
         timeId: selTimeId,
         themeId: Number(themeId),
-        storeId: me.storeId || DEFAULT_STORE_ID
+        storeId: selStoreId
       })
     });
     if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }

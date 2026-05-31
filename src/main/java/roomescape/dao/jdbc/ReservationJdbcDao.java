@@ -18,6 +18,8 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.Slot;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.vo.Name;
@@ -32,13 +34,15 @@ public class ReservationJdbcDao implements ReservationDao {
                 r.status,
                 r.deleted_at,
                 r.version,
-                r.store_id,
+                rs.id AS reservation_store_id,
+                rs.name AS reservation_store_name,
                 m.id AS member_id,
                 m.name AS member_name,
                 m.email AS member_email,
                 m.password AS member_password,
                 m.role AS member_role,
-                m.store_id AS member_store_id,
+                ms.id AS member_store_id,
+                ms.name AS member_store_name,
                 t.id AS time_id,
                 t.start_at AS time_start_at,
                 th.id AS theme_id,
@@ -49,6 +53,8 @@ public class ReservationJdbcDao implements ReservationDao {
             INNER JOIN members m ON r.member_id = m.id
             INNER JOIN times t ON r.time_id = t.id
             INNER JOIN themes th ON r.theme_id = th.id
+            LEFT JOIN stores rs ON r.store_id = rs.id
+            LEFT JOIN stores ms ON m.store_id = ms.id
             """;
 
     private static final RowMapper<Theme> THEME_ROW_MAPPER = (rs, rowNum) ->
@@ -63,21 +69,28 @@ public class ReservationJdbcDao implements ReservationDao {
                     rs.getLong("time_id"),
                     LocalTime.parse(rs.getString("time_start_at"))
             );
-    private static final RowMapper<Member> MEMBER_ROW_MAPPER = (rs, rowNum) ->
-            new Member(
-                    rs.getLong("member_id"),
-                    rs.getString("member_name"),
-                    rs.getString("member_email"),
-                    rs.getString("member_password"),
-                    MemberRole.valueOf(rs.getString("member_role")),
-                    rs.getObject("member_store_id", Long.class)
-            );
+    private static final RowMapper<Member> MEMBER_ROW_MAPPER = (rs, rowNum) -> {
+        Long memberStoreId = rs.getObject("member_store_id", Long.class);
+        Store memberStore = memberStoreId == null ? null
+                : new Store(memberStoreId, rs.getString("member_store_name"));
+        return new Member(
+                rs.getLong("member_id"),
+                rs.getString("member_name"),
+                rs.getString("member_email"),
+                rs.getString("member_password"),
+                MemberRole.valueOf(rs.getString("member_role")),
+                memberStore
+        );
+    };
     private static final RowMapper<Reservation> ROW_MAPPER = (rs, rowNum) -> {
         Timestamp deletedAt = rs.getTimestamp("deleted_at");
         LocalDateTime deletedAtValue = deletedAt != null ? deletedAt.toLocalDateTime() : null;
         if (SENTINEL.equals(deletedAtValue)) {
             deletedAtValue = null;
         }
+        Long reservationStoreId = rs.getObject("reservation_store_id", Long.class);
+        Store reservationStore = reservationStoreId == null ? null
+                : new Store(reservationStoreId, rs.getString("reservation_store_name"));
         return Reservation.reconstruct(
                 rs.getLong("id"),
                 MEMBER_ROW_MAPPER.mapRow(rs, rowNum),
@@ -87,7 +100,7 @@ public class ReservationJdbcDao implements ReservationDao {
                 ReservationStatus.valueOf(rs.getString("status")),
                 deletedAtValue,
                 rs.getLong("version"),
-                rs.getObject("store_id", Long.class)
+                reservationStore
         );
     };
 
@@ -126,7 +139,7 @@ public class ReservationJdbcDao implements ReservationDao {
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return Reservation.reconstruct(id, reservation.getMember(), reservation.getDate(),
                 reservation.getTime(), reservation.getTheme(), ReservationStatus.BOOKED, null, 0L,
-                reservation.getStoreId());
+                reservation.getStore());
     }
 
     @Override
@@ -204,7 +217,7 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
-    public boolean existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
+    public boolean existsBySlotForUpdate(Slot slot) {
         String sql = """
                 SELECT id FROM reservations
                 WHERE theme_id = :themeId AND time_id = :timeId AND date = :date
@@ -213,16 +226,16 @@ public class ReservationJdbcDao implements ReservationDao {
                 FOR UPDATE
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("themeId", themeId)
-                .addValue("timeId", timeId)
-                .addValue("date", date)
-                .addValue("storeId", storeId)
+                .addValue("themeId", slot.getTheme().getId())
+                .addValue("timeId", slot.getTime().getId())
+                .addValue("date", slot.getDate())
+                .addValue("storeId", slot.getStoreId())
                 .addValue("sentinel", SENTINEL);
         return !jdbcTemplate.queryForList(sql, params, Long.class).isEmpty();
     }
 
     @Override
-    public Optional<Reservation> findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
+    public Optional<Reservation> findBySlotKeyForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
         String sql = BASE_SELECT + """
                 WHERE r.theme_id = :themeId AND r.time_id = :timeId AND r.date = :date
                 AND r.store_id = :storeId

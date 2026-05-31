@@ -10,17 +10,29 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
+import roomescape.domain.Store;
 
 @Repository
 public class MemberJdbcDao implements MemberDao {
-    private static final RowMapper<Member> ROW_MAPPER = (rs, rowNum) -> new Member(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("email"),
-            rs.getString("password"),
-            MemberRole.valueOf(rs.getString("role")),
-            rs.getObject("store_id", Long.class)
-    );
+    private static final String BASE_SELECT = """
+            SELECT m.id AS member_id, m.name AS member_name, m.email, m.password, m.role,
+                   s.id AS store_id, s.name AS store_name
+            FROM members m
+            LEFT JOIN stores s ON m.store_id = s.id
+            """;
+
+    private static final RowMapper<Member> ROW_MAPPER = (rs, rowNum) -> {
+        Long storeId = rs.getObject("store_id", Long.class);
+        Store store = storeId == null ? null : new Store(storeId, rs.getString("store_name"));
+        return new Member(
+                rs.getLong("member_id"),
+                rs.getString("member_name"),
+                rs.getString("email"),
+                rs.getString("password"),
+                MemberRole.valueOf(rs.getString("role")),
+                store
+        );
+    };
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -43,14 +55,14 @@ public class MemberJdbcDao implements MemberDao {
                 .addValue("store_id", member.getStoreId());
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return new Member(id, member.getName(), member.getEmail(), member.getPassword(),
-                member.getRole(), member.getStoreId());
+                member.getRole(), member.getStore());
     }
 
     @Override
     public Optional<Member> findByEmail(String email) {
         try {
             Member member = jdbcTemplate.queryForObject(
-                    "SELECT id, name, email, password, role, store_id FROM members WHERE email = ?",
+                    BASE_SELECT + " WHERE m.email = ?",
                     ROW_MAPPER, email);
             return Optional.ofNullable(member);
         } catch (EmptyResultDataAccessException e) {
@@ -62,7 +74,7 @@ public class MemberJdbcDao implements MemberDao {
     public Optional<Member> findById(Long id) {
         try {
             Member member = jdbcTemplate.queryForObject(
-                    "SELECT id, name, email, password, role, store_id FROM members WHERE id = ?",
+                    BASE_SELECT + " WHERE m.id = ?",
                     ROW_MAPPER, id);
             return Optional.ofNullable(member);
         } catch (EmptyResultDataAccessException e) {

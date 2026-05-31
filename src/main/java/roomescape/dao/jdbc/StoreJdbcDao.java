@@ -1,5 +1,6 @@
 package roomescape.dao.jdbc;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,5 +30,10 @@ public class StoreJdbcDao implements StoreDao {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<Store> findAll() {
+        return jdbcTemplate.query("SELECT id, name FROM stores ORDER BY id", ROW_MAPPER);
     }
 }
