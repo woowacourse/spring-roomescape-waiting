@@ -261,7 +261,7 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         List<ReservationWithWaitingOrder> reservationWithWaitingOrders = List.of(
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme), Status.RESERVED, 0),
+                        ThemeResponse.from(theme), Status.RESERVED, null),
                 new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
                         ThemeResponse.from(theme2), Status.WAITING, 3)
         );
@@ -272,6 +272,8 @@ class ReservationServiceImplTest {
 
         // then
         assertThat(result).hasSize(2);
+        assertThat(result.getFirst().waitingOrder()).isNull();
+        assertThat(result.get(1).waitingOrder()).isEqualTo(3);
         verify(reservationRepository, times(1)).findAllByName("라이");
     }
 
@@ -282,14 +284,14 @@ class ReservationServiceImplTest {
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
         when(reservationRepository.findEarliestWaiting(any(), any())).thenReturn(Optional.empty());
 
         // when
-        reservationService.cancelForUser(1L, "라이");
+        reservationService.cancelForUser(reservation.getId(), "라이");
 
         // then
-        verify(reservationRepository).deleteById(1L);
+        verify(reservationRepository).deleteById(reservation.getId());
         verify(reservationRepository, never()).promoteToReserved(any());
     }
 
@@ -303,7 +305,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelForUser(1L, "어셔"))
+        assertThatThrownBy(() -> reservationService.cancelForUser(reservation.getId(), "어셔"))
                 .isInstanceOf(ForbiddenRequestException.class)
                 .hasMessage("예약에 대한 접근 권한이 없습니다.");
     }
@@ -325,10 +327,10 @@ class ReservationServiceImplTest {
         // given
         ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
         Reservation past = new Reservation("라이", time, null, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(past));
+        when(reservationRepository.findById(past.getId())).thenReturn(Optional.of(past));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelForUser(1L, "라이"))
+        assertThatThrownBy(() -> reservationService.cancelForUser(past.getId(), "라이"))
                 .isInstanceOf(PastReservationException.class);
     }
 
@@ -340,18 +342,18 @@ class ReservationServiceImplTest {
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(any())).thenReturn(Optional.of(reservation));
-        when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
+        when(reservationRepository.findEarliestWaiting(time.getId(), theme.getId())).thenReturn(Optional.of(2L));
         when(reservationRepository.promoteToReserved(2L)).thenReturn(true);
-        when(reservationRepository.deleteById(1L)).thenReturn(true);
+        when(reservationRepository.deleteById(reservation.getId())).thenReturn(true);
 
         // when
-        reservationService.cancelForUser(1L, "라이");
+        reservationService.cancelForUser(reservation.getId(), "라이");
 
         // then
         verify(reservationRepository).findById(any());
-        verify(reservationRepository).findEarliestWaiting(1L, 1L);
+        verify(reservationRepository).findEarliestWaiting(time.getId(), theme.getId());
         verify(reservationRepository).promoteToReserved(2L);
-        verify(reservationRepository).deleteById(1L);
+        verify(reservationRepository).deleteById(reservation.getId());
     }
 
     @DisplayName("예약 시간을 변경한다")
@@ -364,13 +366,13 @@ class ReservationServiceImplTest {
                 LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
-        when(reservationRepository.hasConfirmedReservation(1L, newTime)).thenReturn(false);
+        when(reservationRepository.hasConfirmedReservation(existing.getId(), newTime)).thenReturn(false);
         when(reservationRepository.update(any(), any(), any(), any())).thenReturn(true);
 
         // when
-        Reservation result = reservationService.update(1L, 2L);
+        Reservation result = reservationService.update(existing.getId(), newTime.getId());
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
@@ -396,11 +398,11 @@ class ReservationServiceImplTest {
         ReservationTime newTime = new ReservationTime(2L, PAST_START, PAST_END);
         Theme theme = new Theme("테마1", "설명", "https://img.test/a.png").withId(1L);
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(timeService.findById(2L)).thenReturn(newTime);
+        when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(timeService.findById(newTime.getId())).thenReturn(newTime);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
+        assertThatThrownBy(() -> reservationService.update(existing.getId(), newTime.getId()))
                 .isInstanceOf(PastReservationException.class);
     }
 
@@ -410,10 +412,10 @@ class ReservationServiceImplTest {
         // given
         ReservationTime oldTime = new ReservationTime(1L, PAST_START, PAST_END);
         Reservation existing = new Reservation("라이", oldTime, null, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(reservationRepository.findById(existing.getId())).thenReturn(Optional.of(existing));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
+        assertThatThrownBy(() -> reservationService.update(existing.getId(), oldTime.getId()))
                 .isInstanceOf(PastReservationException.class);
     }
 }
