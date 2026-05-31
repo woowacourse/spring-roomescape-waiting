@@ -1,7 +1,6 @@
 package roomescape.controller.client.api.dto.response;
 
 import java.time.LocalTime;
-import roomescape.service.result.ThemeTimesResult;
 
 public record ThemeTimesResponse(
         long id,
@@ -9,7 +8,4 @@ public record ThemeTimesResponse(
         boolean isReservable,
         String status
 ) {
-    public static ThemeTimesResponse from(ThemeTimesResult result) {
-        return new ThemeTimesResponse(result.id(), result.startAt(), result.isReservable(), result.status());
-    }
 }

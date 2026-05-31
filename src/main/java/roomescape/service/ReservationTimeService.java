@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.persistence.ReservationTimeRepository;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.result.ReservationTimeResult;
 

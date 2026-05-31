@@ -1,28 +1,15 @@
-package roomescape.repository.jdbc;
+package roomescape.persistence.jdbc.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 
-public final class ReservationEntityMapper {
+public final class ReservationSlotRowMapper {
 
-    public static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) ->
-            new Reservation(
-                    rs.getLong("reservation_id"),
-                    rs.getString("reservation_name"),
-                    null,
-                    ReservationStatus.valueOf(rs.getString("reservation_status")),
-                    rs.getTimestamp("reservation_created_at").toLocalDateTime()
-            );
-
-    public static ReservationSlot mapReservationSlot(ResultSet rs) throws SQLException {
+    public static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
                 rs.getTime("time_start").toLocalTime(),
@@ -42,7 +29,8 @@ public final class ReservationEntityMapper {
                 time,
                 List.of()
         );
-    }
+    };
 
-    private ReservationEntityMapper() {}
+    private ReservationSlotRowMapper() {
+    }
 }

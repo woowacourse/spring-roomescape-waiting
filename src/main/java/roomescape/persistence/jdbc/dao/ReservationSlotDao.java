@@ -1,6 +1,4 @@
-package roomescape.repository.jdbc;
-
-import static roomescape.repository.jdbc.ReservationEntityMapper.mapReservationSlot;
+package roomescape.persistence.jdbc.dao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -12,8 +10,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationSlot;
-import roomescape.repository.dto.ReservationCondition;
-import roomescape.repository.util.RepositoryExceptionTranslator;
+import roomescape.persistence.dto.ReservationCondition;
+import roomescape.persistence.jdbc.mapper.ReservationSlotRowMapper;
+import roomescape.persistence.util.RepositoryExceptionTranslator;
 
 @Repository
 @RequiredArgsConstructor
@@ -99,7 +98,11 @@ public class ReservationSlotDao {
 
     private Optional<ReservationSlot> queryOptional(String sql, Object... params) {
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapReservationSlot(rs), params));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(
+                    sql,
+                    ReservationSlotRowMapper.RESERVATION_SLOT_ROW_MAPPER,
+                    params
+            ));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.repository.ThemeRepository;
+import roomescape.persistence.ThemeRepository;
 
 class ThemeRepositoryTest extends BaseIntegrationTest {
     @Autowired

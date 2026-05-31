@@ -1,8 +1,8 @@
-package roomescape.repository;
+package roomescape.persistence;
 
 import java.util.Optional;
 import roomescape.domain.ReservationSlot;
-import roomescape.repository.dto.ReservationCondition;
+import roomescape.persistence.dto.ReservationCondition;
 
 public interface ReservationSlotRepository {
 

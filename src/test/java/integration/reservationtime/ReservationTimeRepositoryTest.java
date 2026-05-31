@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.persistence.ReservationTimeRepository;
 
 class ReservationTimeRepositoryTest extends BaseIntegrationTest {
 

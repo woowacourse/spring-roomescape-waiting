@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.dto.ReservationCondition;
+import roomescape.persistence.ReservationSlotRepository;
+import roomescape.persistence.dto.ReservationCondition;
 
 public class FakeReservationSlotRepository implements ReservationSlotRepository {
 

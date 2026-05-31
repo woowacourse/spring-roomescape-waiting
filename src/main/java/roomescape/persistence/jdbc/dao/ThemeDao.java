@@ -1,6 +1,4 @@
-package roomescape.repository.jdbc;
-
-import static roomescape.repository.jdbc.ThemeEntityMapper.THEME_MAPPER;
+package roomescape.persistence.jdbc.dao;
 
 import java.sql.PreparedStatement;
 import java.util.Optional;
@@ -11,23 +9,21 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.util.RepositoryExceptionTranslator;
+import roomescape.persistence.jdbc.mapper.ThemeRowMapper;
+import roomescape.persistence.util.RepositoryExceptionTranslator;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcThemeRepository implements ThemeRepository {
+public class ThemeDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
     public boolean isActiveByName(String name) {
         String sql = "SELECT EXISTS (SELECT 1 FROM theme WHERE name=? and is_active=1)";
         Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, name);
         return Boolean.TRUE.equals(result);
     }
 
-    @Override
     public Theme save(Theme theme) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "INSERT INTO theme (name, description, thumbnail_image_url, is_active) VALUES (?, ?, ?, ?)";
@@ -43,14 +39,15 @@ public class JdbcThemeRepository implements ThemeRepository {
                 }, keyHolder), "이미 존재하는 테마 정보입니다.");
 
         Long id = keyHolder.getKey().longValue();
-        return new Theme(id,
+        return new Theme(
+                id,
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailImageUrl(),
-                theme.isActive());
+                theme.isActive()
+        );
     }
 
-    @Override
     public void update(Theme theme) {
         String sql = """
                     UPDATE theme
@@ -68,15 +65,13 @@ public class JdbcThemeRepository implements ThemeRepository {
                 ), "이미 존재하는 테마 정보입니다.");
     }
 
-    @Override
     public Optional<Theme> findById(long id) {
         try {
             String sql = "SELECT * FROM theme WHERE id = ?";
-            Theme theme = jdbcTemplate.queryForObject(sql, THEME_MAPPER, id);
+            Theme theme = jdbcTemplate.queryForObject(sql, ThemeRowMapper.THEME_ROW_MAPPER, id);
             return Optional.ofNullable(theme);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
-
 }

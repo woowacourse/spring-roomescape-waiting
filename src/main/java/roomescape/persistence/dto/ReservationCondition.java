@@ -1,4 +1,4 @@
-package roomescape.repository.dto;
+package roomescape.persistence.dto;
 
 import java.time.LocalDate;
 import roomescape.service.command.ReservationCommand;

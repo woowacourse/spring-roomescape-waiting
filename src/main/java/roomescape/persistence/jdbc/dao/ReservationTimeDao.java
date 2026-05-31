@@ -1,6 +1,5 @@
-package roomescape.repository.jdbc;
+package roomescape.persistence.jdbc.dao;
 
-import static roomescape.repository.jdbc.ReservationTimeEntityMapper.RESERVATION_TIME_MAPPER;
 import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.time.LocalTime;
@@ -12,17 +11,15 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.TimeStatus;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.util.RepositoryExceptionTranslator;
+import roomescape.persistence.jdbc.mapper.ReservationTimeRowMapper;
+import roomescape.persistence.util.RepositoryExceptionTranslator;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcReservationTimeRepository implements ReservationTimeRepository {
+public class ReservationTimeDao {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
     public ReservationTime save(ReservationTime reservationTime) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "INSERT INTO reservation_time (start_at, status) VALUES (?, ?)";
@@ -43,25 +40,26 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         );
     }
 
-    @Override
     public Optional<ReservationTime> findById(long id) {
         try {
             String sql = "SELECT * FROM reservation_time WHERE id = ?";
-            ReservationTime time = jdbcTemplate.queryForObject(sql, RESERVATION_TIME_MAPPER, id);
+            ReservationTime time = jdbcTemplate.queryForObject(
+                    sql,
+                    ReservationTimeRowMapper.RESERVATION_TIME_ROW_MAPPER,
+                    id
+            );
             return Optional.ofNullable(time);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
-    @Override
     public boolean existsByStartAt(LocalTime time) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE start_at = ?)";
         Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, time);
         return Boolean.TRUE.equals(result);
     }
 
-    @Override
     public void update(ReservationTime time) {
         String sql = """
                     UPDATE reservation_time

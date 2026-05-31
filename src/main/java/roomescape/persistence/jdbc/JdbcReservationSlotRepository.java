@@ -1,13 +1,15 @@
-package roomescape.repository.jdbc;
+package roomescape.persistence.jdbc;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.dto.ReservationCondition;
+import roomescape.domain.ReservationSlot;
+import roomescape.persistence.ReservationSlotRepository;
+import roomescape.persistence.dto.ReservationCondition;
+import roomescape.persistence.jdbc.dao.ReservationDao;
+import roomescape.persistence.jdbc.dao.ReservationSlotDao;
 
 @Repository
 @RequiredArgsConstructor

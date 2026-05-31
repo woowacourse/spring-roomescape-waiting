@@ -1,6 +1,4 @@
-package roomescape.repository.jdbc;
-
-import static roomescape.repository.jdbc.ReservationEntityMapper.RESERVATION_ROW_MAPPER;
+package roomescape.persistence.jdbc.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -11,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.persistence.jdbc.mapper.ReservationRowMapper;
 
 @Repository
 @RequiredArgsConstructor
@@ -80,6 +79,6 @@ public class ReservationDao {
                 WHERE slot_id = ?
                 ORDER BY id
                 """;
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, slotId);
+        return jdbcTemplate.query(sql, ReservationRowMapper.RESERVATION_ROW_MAPPER, slotId);
     }
 }

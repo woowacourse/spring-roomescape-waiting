@@ -1,11 +1,11 @@
-package roomescape.repository.jdbc;
+package roomescape.persistence.jdbc.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.domain.Theme;
 
-public final class ThemeEntityMapper {
+public final class ThemeRowMapper {
 
-    public static final RowMapper<Theme> THEME_MAPPER = (rs, rowNum) -> new Theme(
+    public static final RowMapper<Theme> THEME_ROW_MAPPER = (rs, rowNum) -> new Theme(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),
@@ -13,5 +13,6 @@ public final class ThemeEntityMapper {
             rs.getBoolean("is_active")
     );
 
-    private ThemeEntityMapper() {}
+    private ThemeRowMapper() {
+    }
 }

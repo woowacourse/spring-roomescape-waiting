@@ -19,8 +19,8 @@ import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
-import roomescape.repository.ReservationSlotRepository;
-import roomescape.repository.dto.ReservationCondition;
+import roomescape.persistence.ReservationSlotRepository;
+import roomescape.persistence.dto.ReservationCondition;
 
 class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     @Autowired
