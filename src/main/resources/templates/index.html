@@ -334,14 +334,17 @@
         return;
       }
 
-      fetchJson(`/api/reservations?name=${encodeURIComponent(name)}`)
-      .then(renderReservations)
+      Promise.all([
+        fetchJson(`/api/reservations?name=${encodeURIComponent(name)}`),
+        fetchJson(`/api/waiting?name=${encodeURIComponent(name)}`)
+      ])
+      .then(([reservations, waitings]) => renderReservations({ reservations, waitings }))
       .catch(error => showReservationMessage(toErrorMessage(error, '예약을 조회하지 못했습니다.')));
     }
 
     function renderReservations(data) {
       reservationList.innerHTML = '';
-      const reservations = data.reservations;
+      const reservations = data.reservations || [];
       const waitings = data.waitings || [];
 
       if (reservations.length === 0 && waitings.length === 0) {

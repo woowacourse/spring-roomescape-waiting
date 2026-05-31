@@ -161,9 +161,8 @@ public class ReservationAcceptanceTest {
                 .when().get("/api/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("reservations.size()", is(1))
-                .body("reservations[0].name", is("브라운"))
-                .body("waitings.size()", is(0));
+                .body("size()", is(1))
+                .body("[0].name", is("브라운"));
     }
 
     @Test

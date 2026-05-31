@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -9,7 +10,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.WaitingRequestDTO;
 import roomescape.dto.WaitingResponseDTO;
-import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
@@ -84,7 +84,8 @@ public class WaitingService {
         }
     }
 
-    private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
+    private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time,
+            Theme theme) {
         Reservation existReservation = reservationRepository.findByDateAndTimeAndThemeWithLock(
                 request.date(),
                 time,
@@ -96,6 +97,11 @@ public class WaitingService {
         if (existReservation.isSameName(request.name())) {
             throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
+    }
+
+    public List<WaitingResponseDTO> findWaitingsByName(String name) {
+        return waitingRepository.findByName(name).stream()
+                .map(waiting -> WaitingResponseDTO.from(waiting)).toList();
     }
 
     @Transactional

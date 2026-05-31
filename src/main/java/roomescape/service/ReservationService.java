@@ -15,7 +15,6 @@ import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservedTimeResponseDTO;
-import roomescape.dto.UserBookingResponseDTO;
 import roomescape.dto.WaitingResponseDTO;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
@@ -86,18 +85,6 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponseDTO::from)
                 .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public UserBookingResponseDTO findReservationsAndWaitingByName(String name) {
-        List<ReservationResponseDTO> reservatoins = reservationRepository.findByName(name).stream()
-                .map(ReservationResponseDTO::from)
-                .toList();
-        List<WaitingResponseDTO> waitings = waitingRepository.findByName(name).stream()
-                .map(WaitingResponseDTO::from)
-                .toList();
-
-        return UserBookingResponseDTO.of(reservatoins, waitings);
     }
 
     @Transactional(readOnly = true)
