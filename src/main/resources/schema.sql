@@ -3,7 +3,7 @@ CREATE TABLE reservation_time (
     start_at TIME NOT NULL,
     status ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
     active_start_at TIME GENERATED ALWAYS AS (
-        CASE WHEN status = 'ACTIVE' THEN start_at ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN start_at END
     ),
     PRIMARY KEY (id)
 );
@@ -15,7 +15,7 @@ CREATE TABLE theme (
     image_url VARCHAR(2000) NOT NULL,
     status ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
     active_name VARCHAR(255) GENERATED ALWAYS AS (
-        CASE WHEN status = 'ACTIVE' THEN name ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN name END
     ),
     PRIMARY KEY (id)
 );
@@ -27,19 +27,11 @@ CREATE TABLE reservation (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     status ENUM('ACTIVE', 'CANCELED', 'DELETED', 'WAITING') DEFAULT 'ACTIVE',
-    -- canceled_at DATETIME DEFAULT NULL,
-    -- deleted_at DATETIME DEFAULT NULL,
-    active_date DATE GENERATED ALWAYS AS (
-        CASE WHEN status = 'ACTIVE' THEN date ELSE NULL END
+    active_flag BOOLEAN GENERATED ALWAYS AS (
+        CASE WHEN status = 'ACTIVE' THEN true END
     ),
-    active_time_id BIGINT GENERATED ALWAYS AS (
-        CASE WHEN status = 'ACTIVE' THEN time_id ELSE NULL END
-    ),
-    active_theme_id BIGINT GENERATED ALWAYS AS (
-        CASE WHEN status = 'ACTIVE' THEN theme_id ELSE NULL END
-    ),
-    active_waiting BOOLEAN GENERATED ALWAYS AS (
-        CASE WHEN status = 'WAITING' THEN true ELSE NULL END
+    waiting_flag BOOLEAN GENERATED ALWAYS AS (
+        CASE WHEN status = 'WAITING' THEN true END
     ),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -47,10 +39,10 @@ CREATE TABLE reservation (
 );
 
 CREATE UNIQUE INDEX uq_waiting_reservation
-ON reservation (active_waiting, name, date, time_id, theme_id);
+ON reservation (waiting_flag, name, date, time_id, theme_id);
 
 CREATE UNIQUE INDEX uq_active_reservation
-ON reservation (active_date, active_time_id, active_theme_id);
+ON reservation (active_flag, date, time_id, theme_id);
 
 CREATE UNIQUE INDEX uq_active_reservation_time
 ON reservation_time (active_start_at);
