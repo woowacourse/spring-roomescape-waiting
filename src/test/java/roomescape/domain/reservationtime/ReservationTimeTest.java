@@ -49,13 +49,12 @@ class ReservationTimeTest {
 
     @Test
     void 예약_날짜가_오늘이고_시작_시간이_과거면_예외() {
-        ReservationTime time = ReservationTime.of(
-                1L,
-                LocalTime.now().minusHours(1),
-                LocalTime.now().plusHours(1)
-        );
+        LocalTime pastStart = LocalTime.now().minusHours(1);
+        LocalDate date = pastStart.isBefore(LocalTime.now()) ? LocalDate.now() : LocalDate.now().minusDays(1);
 
-        assertThatThrownBy(() -> time.validateIfTimePast(LocalDate.now()))
+        ReservationTime time = ReservationTime.of(1L, pastStart, pastStart.plusHours(1));
+
+        assertThatThrownBy(() -> time.validateIfTimePast(date))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
     }

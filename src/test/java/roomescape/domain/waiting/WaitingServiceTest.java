@@ -135,21 +135,7 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-        }
 
-        @Test
-        void 이미_예약한_사람이면_대기_신청_예외() {
-            WaitingRequest request = new WaitingRequest("예약자", LocalDate.of(2099, 12, 31), 1L, 1L);
-            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(false);
-            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
-                    .thenReturn(Optional.of("예약자"));
-
-            assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.WAITING_NOT_AVAILABLE);
         }
 
         @Test

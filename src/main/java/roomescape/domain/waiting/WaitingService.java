@@ -46,7 +46,6 @@ public class WaitingService {
         validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
                 waitingRequest.name());
         reservationTime.validateIfTimePast(waitingRequest.date());
-        validateWaitingIsAvailable(waitingRequest);
 
         Waiting waiting = Waiting.of(
                 waitingRequest.name(),
@@ -54,6 +53,11 @@ public class WaitingService {
                 reservationTime,
                 theme
         );
+
+        String reservationOwner = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
+                        waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+        waiting.validateNotOwnerOf(reservationOwner);
 
         try {
             Waiting saved = waitingRepository.save(waiting);
@@ -88,13 +92,4 @@ public class WaitingService {
         }
     }
 
-    private void validateWaitingIsAvailable(WaitingRequest waitingRequest) {
-        String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
-                        waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
-
-        if (reservationName.equals(waitingRequest.name())) {
-            throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);
-        }
-    }
 }
