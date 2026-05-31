@@ -2,9 +2,9 @@ package roomescape.theme.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.AdminThemeRequest;
@@ -37,7 +37,7 @@ public class AdminThemeService {
     @Transactional
     public void deleteTheme(Long id) {
         if (themeRepository.existsReservationByThemeId(id)) {
-            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
+            throw new BusinessException(HttpStatus.CONFLICT, "예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
     }

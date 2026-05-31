@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.AdminThemeRequest;
@@ -64,6 +63,6 @@ class AdminThemeServiceTest {
 
         assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_HAS_RESERVATION));
+                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 }

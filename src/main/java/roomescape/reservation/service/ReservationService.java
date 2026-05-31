@@ -3,10 +3,10 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
@@ -29,6 +29,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
@@ -63,7 +64,7 @@ public class ReservationService {
     public void deleteReservation(Long id, Long memberId) {
         Reservation reservation = getById(id);
         if (!reservation.isOwnedBy(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
+            throw new BusinessException(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
         }
         if (reservation.isPast()) {
             throw new PastTimeCancelException();
@@ -75,7 +76,7 @@ public class ReservationService {
     public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
         if (reservation.isPast()) {
-            throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 예약은 변경할 수 없습니다.");
         }
 
         ReservationTime newTime = reservationTimeService.getById(request.timeId());
@@ -94,7 +95,7 @@ public class ReservationService {
     @NonNull
     public Reservation getById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
     public ReservationIdResponse getReservationId(LocalDate date, Long themeId, Long timeId) {

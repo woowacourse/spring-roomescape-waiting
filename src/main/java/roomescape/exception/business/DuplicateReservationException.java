@@ -1,10 +1,10 @@
 package roomescape.exception.business;
 
-import roomescape.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
 
 public class DuplicateReservationException extends BusinessException {
 
     public DuplicateReservationException() {
-        super(ErrorCode.DUPLICATE_RESERVATION);
+        super(HttpStatus.CONFLICT, "이미 예약된 시간입니다.");
     }
 }

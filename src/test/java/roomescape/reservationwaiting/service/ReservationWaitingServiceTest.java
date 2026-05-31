@@ -1,12 +1,22 @@
 package roomescape.reservationwaiting.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.repository.ReservationRepository;
@@ -20,25 +30,9 @@ import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceTest {
 
-    private final Member member = Member.restore(1L, "user1", "test@test.com", "1234");
-    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
-    private final LocalDate futureDate = LocalDate.now().plusDays(1);
     @Mock
     private ReservationWaitingRepository waitingRepository;
     @Mock
@@ -51,6 +45,11 @@ class ReservationWaitingServiceTest {
     private ReservationService reservationService;
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
+
+    private final Member member = Member.restore(1L, "user1", "test@test.com", "1234");
+    private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+    private final Theme theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+    private final LocalDate futureDate = LocalDate.now().plusDays(1);
 
     @Test
     @DisplayName("대기 생성 성공")
@@ -78,7 +77,7 @@ class ReservationWaitingServiceTest {
         assertThatThrownBy(() -> reservationWaitingService.createWaiting(member,
                 new ReservationWaitingRequest(futureDate, 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_WAITING));
+                .hasMessage("같은 슬롯에 중복 대기할 수 없습니다.");
     }
 
     @Test
@@ -99,7 +98,7 @@ class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.deleteWaiting(1L, 2L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+                .hasMessage("접근 권한이 없습니다.");
     }
 
     @Test

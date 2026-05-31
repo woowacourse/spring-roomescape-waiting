@@ -3,7 +3,7 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
-import roomescape.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -37,7 +37,7 @@ public class Reservation {
             throw new IllegalArgumentException("예약 시간은 필수입니다.");
         }
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new BusinessException(ErrorCode.PAST_TIME_CREATE);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 예약할 수 없습니다.");
         }
         if (theme == null) {
             throw new IllegalArgumentException("테마는 필수입니다.");
@@ -70,7 +70,7 @@ public class Reservation {
                 .theme(this.theme)
                 .build();
         if (changed.isPast()) {
-            throw new BusinessException(ErrorCode.PAST_TIME_RESERVATION);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간으로 변경할 수 없습니다.");
         }
         return changed;
     }

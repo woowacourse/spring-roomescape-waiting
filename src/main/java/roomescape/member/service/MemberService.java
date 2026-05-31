@@ -1,8 +1,8 @@
 package roomescape.member.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginRequest;
@@ -29,15 +29,15 @@ public class MemberService {
 
     public Member login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
         if (!member.getPassword().equals(request.password())) {
-            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다.");
         }
         return member;
     }
 
     public Member getById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
     }
 }

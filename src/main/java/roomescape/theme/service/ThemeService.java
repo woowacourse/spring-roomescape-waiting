@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
@@ -24,7 +24,7 @@ public class ThemeService {
 
     public Theme getById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     public List<ThemeResponse> getTopThemes(int limit) {

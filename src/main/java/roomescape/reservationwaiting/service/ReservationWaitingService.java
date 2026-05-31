@@ -2,9 +2,9 @@ package roomescape.reservationwaiting.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.repository.ReservationRepository;
@@ -43,12 +43,12 @@ public class ReservationWaitingService {
         Theme theme = themeService.getById(request.themeId());
 
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
-            throw new BusinessException(ErrorCode.NO_RESERVATION_FOR_WAITING);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "예약이 없는 슬롯에는 대기를 신청할 수 없습니다.");
         }
 
         if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(), request.date(), request.timeId(), request.themeId())) {
-            throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
+            throw new BusinessException(HttpStatus.CONFLICT, "같은 슬롯에 중복 대기할 수 없습니다.");
         }
 
         ReservationWaiting saved = reservationWaitingRepository.save(
@@ -59,12 +59,12 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteWaiting(Long id, Long memberId) {
         ReservationWaiting waiting = reservationWaitingRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 대기입니다."));
         if (!waiting.isOwnedBy(memberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
+            throw new BusinessException(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
         }
         if (waiting.isPast()) {
-            throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기를 취소할 수 없습니다.");
         }
         reservationWaitingRepository.deleteById(id);
     }

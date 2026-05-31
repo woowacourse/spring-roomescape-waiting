@@ -3,7 +3,7 @@ package roomescape.reservationwaiting.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
-import roomescape.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -34,7 +34,7 @@ public class ReservationWaiting {
             throw new IllegalArgumentException("날짜, 시간, 테마는 필수입니다.");
         }
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new BusinessException(ErrorCode.PAST_TIME_WAITING);
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다.");
         }
         return ReservationWaiting.builder()
                 .id(null)

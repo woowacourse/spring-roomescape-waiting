@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.TimeRequest;
@@ -83,7 +82,7 @@ class ReservationTimeServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.getById(4L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.TIME_NOT_FOUND));
+                .hasMessage("존재하지 않는 시간대입니다.");
     }
 
     @Test
@@ -93,6 +92,6 @@ class ReservationTimeServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.TIME_HAS_RESERVATION));
+                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 }

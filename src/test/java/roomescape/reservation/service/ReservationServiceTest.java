@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
@@ -69,7 +68,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.createReservation(member, new ReservationRequest(futureDate, 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_RESERVATION));
+                .hasMessage("이미 예약된 시간입니다.");
     }
 
     @Test
@@ -100,6 +99,6 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.deleteReservation(1L, 2L))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN));
+                .hasMessage("접근 권한이 없습니다.");
     }
 }
