@@ -49,7 +49,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     void 각_날짜에_존재하는_모든_테마_조회_레포토지리_테스트() {
-        List<Theme> themes = repository.findScheduledThemesByDate(LocalDate.of(2026, 5, 5));
+        List<Theme> themes = repository.findThemesBySlotDate(LocalDate.of(2026, 5, 5));
 
         assertThat(themes).hasSize(4);
         assertThat(themes).extracting(Theme::getId)

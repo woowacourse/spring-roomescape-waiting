@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -22,17 +22,17 @@ public class ThemeServiceTest {
     private ThemeRepository themeRepository;
 
     @Mock
-    private ScheduleService scheduleService;
+    private SlotService slotService;
 
     @InjectMocks
     private ThemeService themeService;
 
     @Test
-    @DisplayName("스케줄에 테마에 대한 참조가 존재하면 테마 삭제에 실패한다.")
+    @DisplayName("슬롯에 테마에 대한 참조가 존재하면 테마 삭제에 실패한다.")
     void delete_실패_테스트_1() {
         // given
         long themeId = 1L;
-        doThrow(new IllegalStateException()).when(scheduleService).validateThemeDeletable(themeId);
+        doThrow(new IllegalStateException()).when(slotService).validateThemeDeletable(themeId);
 
         // when, then
         assertThatThrownBy(() -> themeService.delete(themeId))
@@ -42,7 +42,7 @@ public class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄에 테마에 대한 참조가 존재하지 않으면 테마 삭제에 성공한다.")
+    @DisplayName("슬롯에 테마에 대한 참조가 존재하지 않으면 테마 삭제에 성공한다.")
     void delete_성공_테스트() {
         // given
         long themeId = 1L;

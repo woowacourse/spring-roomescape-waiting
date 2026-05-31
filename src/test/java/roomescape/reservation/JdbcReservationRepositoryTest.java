@@ -36,7 +36,7 @@ class JdbcReservationRepositoryTest {
             softly.assertThat(savedReservation).isNotNull();
             softly.assertThat(savedReservation.getId()).isNotNull();
             softly.assertThat(savedReservation.getMemberId()).isEqualTo(MEMBER_ID);
-            softly.assertThat(savedReservation.getScheduleId()).isEqualTo(4L);
+            softly.assertThat(savedReservation.getSlotId()).isEqualTo(4L);
         });
     }
 
@@ -104,30 +104,30 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("같은 스케줄에 본인 제외 다른 예약이 있으면 true를 반환한다.")
-    void existsByScheduleIdAndIdNot_true반환_테스트() {
-        boolean result = reservationRepository.existsByScheduleIdAndIdNot(2L, 1L);
+    @DisplayName("같은 슬롯에 본인 제외 다른 예약이 있으면 true를 반환한다.")
+    void existsBySlotIdAndIdNot_true반환_테스트() {
+        boolean result = reservationRepository.existsBySlotIdAndIdNot(2L, 1L);
 
         assertThat(result).isTrue();
     }
 
     @Test
-    @DisplayName("같은 스케줄에 본인 제외 다른 예약이 없으면 false를 반환한다.")
-    void existsByScheduleIdAndIdNot_false반환_테스트() {
-        boolean result = reservationRepository.existsByScheduleIdAndIdNot(4L, 1L);
+    @DisplayName("같은 슬롯에 본인 제외 다른 예약이 없으면 false를 반환한다.")
+    void existsBySlotIdAndIdNot_false반환_테스트() {
+        boolean result = reservationRepository.existsBySlotIdAndIdNot(4L, 1L);
 
         assertThat(result).isFalse();
     }
 
     @Test
-    @DisplayName("회원 본인의 기존 예약을 변경 가능한 스케줄로 변경할 수 있다.")
-    void updateScheduleByIdAndMemberId_테스트() {
-        int affectedRow = reservationRepository.updateScheduleById(1L, 4L);
+    @DisplayName("회원 본인의 기존 예약을 변경 가능한 슬롯로 변경할 수 있다.")
+    void updateSlotByIdAndMemberId_테스트() {
+        int affectedRow = reservationRepository.updateSlotById(1L, 4L);
 
         assertThat(affectedRow).isEqualTo(1);
         assertThat(reservationRepository.findById(1L))
                 .get()
-                .extracting(Reservation::getScheduleId)
+                .extracting(Reservation::getSlotId)
                 .isEqualTo(4L);
     }
 }

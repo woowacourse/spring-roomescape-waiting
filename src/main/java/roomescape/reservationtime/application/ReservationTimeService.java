@@ -18,13 +18,13 @@ import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.reservationtime.dto.response.TimeSlotStatus;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationTimeService {
-    private final ScheduleService scheduleService;
+    private final SlotService slotService;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
@@ -39,12 +39,12 @@ public class ReservationTimeService {
     }
 
     public void delete(long id) {
-        scheduleService.validateTimeDeletable(id);
+        slotService.validateTimeDeletable(id);
         reservationTimeRepository.deleteById(id);
     }
 
     public List<AvailableTimeFindResponse> findTimesByDateAndThemeId(LocalDate date, long themeId) {
-        // schedule에서 존재하는 시간 id 모두 조회
+        // slot에서 존재하는 시간 id 모두 조회
         List<ReservationTime> totalTimes = reservationTimeRepository.findTimesByDateAndThemeId(date, themeId);
 
         Set<Long> reservationTimeIds = reservationRepository.findTimeIdByDateAndThemeId(date, themeId);

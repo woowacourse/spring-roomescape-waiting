@@ -22,10 +22,10 @@ public class UserThemeController {
     private final ThemeService themeService;
 
     @GetMapping(params = "date")
-    public ResponseEntity<ApiResponse<List<ThemeFindResponse>>> findScheduledThemesByDate(
+    public ResponseEntity<ApiResponse<List<ThemeFindResponse>>> findThemesBySlotDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        List<ThemeFindResponse> responses = themeService.findScheduledThemesByDate(date);
+        List<ThemeFindResponse> responses = themeService.findThemesBySlotDate(date);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 

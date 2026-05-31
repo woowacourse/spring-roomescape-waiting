@@ -60,10 +60,10 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findScheduledThemesByDate(LocalDate date) {
+    public List<Theme> findThemesBySlotDate(LocalDate date) {
         String sql = "SELECT DISTINCT t.id, t.name, t.description, t.thumbnail_url " +
                 "FROM theme t " +
-                "JOIN schedule s ON t.id = s.theme_id " +
+                "JOIN slot s ON t.id = s.theme_id " +
                 "WHERE s.date = :date " +
                 "ORDER BY t.id ASC";
 
@@ -79,8 +79,8 @@ public class JdbcThemeRepository implements ThemeRepository {
 
         String sql = "SELECT t.id, t.name, t.description, t.thumbnail_url " +
                 "FROM theme t " +
-                "JOIN schedule s ON t.id = s.theme_id " +
-                "JOIN reservation r ON s.id = r.schedule_id " +
+                "JOIN slot s ON t.id = s.theme_id " +
+                "JOIN reservation r ON s.id = r.slot_id " +
                 "WHERE s.date >= :startDate " +
                 "AND s.date < :currentDate " +
                 "GROUP BY t.id, t.name, t.description, t.thumbnail_url " +

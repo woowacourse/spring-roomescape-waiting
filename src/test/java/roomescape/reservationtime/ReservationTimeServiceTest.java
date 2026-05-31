@@ -12,7 +12,7 @@ import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -34,7 +34,7 @@ public class ReservationTimeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
-    private ScheduleService scheduleService;
+    private SlotService slotService;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
@@ -71,11 +71,11 @@ public class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄에 시간에 대한 참조가 존재하면 시간 삭제에 실패한다.")
+    @DisplayName("슬롯에 시간에 대한 참조가 존재하면 시간 삭제에 실패한다.")
     void delete_실패_테스트_1() {
         // given
         long timeId = 1L;
-        doThrow(new IllegalStateException()).when(scheduleService).validateTimeDeletable(timeId);
+        doThrow(new IllegalStateException()).when(slotService).validateTimeDeletable(timeId);
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.delete(timeId))
@@ -85,7 +85,7 @@ public class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄에 시간에 대한 참조가 존재하지 않으면 시간 삭제에 성공한다.")
+    @DisplayName("슬롯에 시간에 대한 참조가 존재하지 않으면 시간 삭제에 성공한다.")
     void delete_성공_테스트() {
         // given
         long timeId = 1L;

@@ -15,7 +15,7 @@ import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
 @Service
@@ -23,14 +23,14 @@ import roomescape.waiting.infrastructure.WaitingRepository;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final ScheduleService scheduleService;
+    private final SlotService slotService;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
-        scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.resolveScheduleId(body.date(), body.timeId(),
+        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
+        long slotId = slotService.resolveSlotId(body.date(), body.timeId(),
                 body.themeId());
-        validateScheduleAvailableForReservation(scheduleId);
-        Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
+        throwIfSlotUnavailableForReservation(slotId);
+        Reservation reservation = reservationRepository.save(body.toDomain(memberId, slotId));
 
         return ReservationSaveResponse.from(reservation);
     }
@@ -119,12 +119,12 @@ public class ReservationService {
 
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long scheduleId = scheduleService.resolveScheduleId(newDate, newTimeId,
+        long slotId = slotService.resolveSlotId(newDate, newTimeId,
                 oldReservation.getThemeId());
-        scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
-        validateScheduleAvailableForUpdate(reservationId, scheduleId);
+        slotService.validateSlot(newDate, newTimeId, oldReservation.getThemeId());
+        throwIfSlotUnavailableForUpdate(reservationId, slotId);
 
-        int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
+        int affectedRow = reservationRepository.updateSlotById(oldReservation.id(), slotId);
         validateReservationUpdated(affectedRow);
 
         return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
@@ -141,22 +141,22 @@ public class ReservationService {
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 
-    private void validateScheduleAvailableForUpdate(long reservationId, long scheduleId) {
-        if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)
-                || waitingRepository.existsByScheduleId(scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+    private void throwIfSlotUnavailableForUpdate(long reservationId, long slotId) {
+        if (reservationRepository.existsBySlotIdAndIdNot(slotId, reservationId)
+                || waitingRepository.existsBySlotId(slotId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
         }
     }
 
-    private void validateScheduleAvailableForReservation(long scheduleId) {
-        if (reservationRepository.existsByScheduleId(scheduleId)
-                || waitingRepository.existsByScheduleId(scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, scheduleId);
+    private void throwIfSlotUnavailableForReservation(long slotId) {
+        if (reservationRepository.existsBySlotId(slotId)
+                || waitingRepository.existsBySlotId(slotId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
         }
     }
 
     private void validateNotPast(ReservationDetailProjection reservationDetail) {
-        scheduleService.validateNotPastDate(reservationDetail.date());
-        scheduleService.validateNotPastTime(reservationDetail.date(), reservationDetail.getTime());
+        slotService.validateNotPastDate(reservationDetail.date());
+        slotService.validateNotPastTime(reservationDetail.date(), reservationDetail.getTime());
     }
 }

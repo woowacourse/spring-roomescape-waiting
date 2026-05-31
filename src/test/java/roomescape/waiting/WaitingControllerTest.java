@@ -88,7 +88,7 @@ public class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 스케줄에 대기를 신청할 수 있다.")
+    @DisplayName("이미 예약된 슬롯에 대기를 신청할 수 있다.")
     void 예약_대기_API_테스트_1() {
         String accessToken = loginUser();
 
@@ -102,12 +102,12 @@ public class WaitingControllerTest {
                 .body("success", is(true))
                 .body("data.id", notNullValue())
                 .body("data.memberId", is(2))
-                .body("data.scheduleId", is(1))
+                .body("data.slotId", is(1))
                 .body("data.waitingOrder", is(1));
     }
 
     @Test
-    @DisplayName("같은 스케줄에 대기를 신청하면 신청 순서대로 순번이 부여된다.")
+    @DisplayName("같은 슬롯에 대기를 신청하면 신청 순서대로 순번이 부여된다.")
     void 예약_대기_API_테스트_2() {
         String accessToken = loginUser();
         String otherAccessToken = loginOtherUser();
@@ -121,7 +121,7 @@ public class WaitingControllerTest {
                 .statusCode(201)
                 .body("success", is(true))
                 .body("data.memberId", is(2))
-                .body("data.scheduleId", is(1))
+                .body("data.slotId", is(1))
                 .body("data.waitingOrder", is(1));
 
         RestAssured.given().log().all()
@@ -133,12 +133,12 @@ public class WaitingControllerTest {
                 .statusCode(201)
                 .body("success", is(true))
                 .body("data.memberId", is(3))
-                .body("data.scheduleId", is(1))
+                .body("data.slotId", is(1))
                 .body("data.waitingOrder", is(2));
     }
 
     @Test
-    @DisplayName("해당 스케줄에 예약/대기가 모두 없으면 대기 신청에 실패한다.")
+    @DisplayName("해당 슬롯에 예약/대기가 모두 없으면 대기 신청에 실패한다.")
     void 예약_대기_API_테스트_3() {
         String accessToken = loginUser();
 
@@ -154,7 +154,7 @@ public class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("같은 사용자가 같은 스케줄에 중복 대기를 신청할 수 없다.")
+    @DisplayName("같은 사용자가 같은 슬롯에 중복 대기를 신청할 수 없다.")
     void 예약_대기_API_테스트_4() {
         String accessToken = loginUser();
         createWaiting(accessToken);
@@ -171,7 +171,7 @@ public class WaitingControllerTest {
     }
 
     @Test
-    @DisplayName("본인이 이미 예약한 스케줄에는 대기를 신청할 수 없다.")
+    @DisplayName("본인이 이미 예약한 슬롯에는 대기를 신청할 수 없다.")
     void 예약_대기_API_테스트_5() {
         String accessToken = loginReservedUser();
 

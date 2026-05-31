@@ -23,7 +23,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final RowMapper<Waiting> waitingRowMapper = (resultSet, rowNum) -> new Waiting(
             resultSet.getLong("id"),
             resultSet.getLong("member_id"),
-            resultSet.getLong("schedule_id")
+            resultSet.getLong("slot_id")
     );
 
     private final RowMapper<WaitingDetailProjection> waitingDetailRowMapper = (resultSet, rowNum) ->
@@ -42,11 +42,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Waiting save(Waiting waiting) {
-        String sql = "INSERT INTO waiting(member_id, schedule_id) VALUES (:memberId, :scheduleId)";
+        String sql = "INSERT INTO waiting(member_id, slot_id) VALUES (:memberId, :slotId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", waiting.getMemberId())
-                .addValue("scheduleId", waiting.getScheduleId());
+                .addValue("slotId", waiting.getSlotId());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(sql, params, keyHolder);
@@ -56,13 +56,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
             throw new IllegalStateException("waiting 저장 후 생성된 ID를 반환받지 못했습니다.");
         }
 
-        return new Waiting(id.longValue(), waiting.getMemberId(), waiting.getScheduleId());
+        return new Waiting(id.longValue(), waiting.getMemberId(), waiting.getSlotId());
     }
 
     @Override
     public Optional<Waiting> findById(long waitingId) {
         String sql = """
-                SELECT id, member_id, schedule_id
+                SELECT id, member_id, slot_id
                 FROM waiting
                 WHERE id = :waitingId
                 """;
@@ -80,7 +80,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         String sql = """
                 SELECT s.time_id
                 FROM waiting w
-                JOIN schedule s ON w.schedule_id = s.id
+                JOIN slot s ON w.slot_id = s.id
                 WHERE s.date = :date
                 AND s.theme_id = :themeId
                 """;
@@ -93,39 +93,39 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId) {
+    public boolean existsBySlotIdAndMemberId(long memberId, long slotId) {
         String sql = """
-                SELECT EXISTS (SELECT 1 FROM waiting WHERE member_id = :memberId AND schedule_id = :scheduleId)
+                SELECT EXISTS (SELECT 1 FROM waiting WHERE member_id = :memberId AND slot_id = :slotId)
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 
     @Override
-    public boolean existsByScheduleId(long scheduleId) {
+    public boolean existsBySlotId(long slotId) {
         String sql = """
-                SELECT EXISTS (SELECT 1 FROM waiting WHERE schedule_id = :scheduleId)
+                SELECT EXISTS (SELECT 1 FROM waiting WHERE slot_id = :slotId)
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 
     @Override
-    public long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId) {
+    public long countBySlotIdAndIdLessThanEqual(long slotId, long waitingId) {
         String sql = """
                 SELECT COUNT(*) FROM waiting
-                WHERE schedule_id = :scheduleId
+                WHERE slot_id = :slotId
                 AND id <= :waitingId
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("scheduleId", scheduleId)
+                .addValue("slotId", slotId)
                 .addValue("waitingId", waitingId);
 
         Long count = jdbcTemplate.queryForObject(sql, params, Long.class);
@@ -151,11 +151,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     (
                         SELECT COUNT(*)
                         FROM waiting previous_waiting
-                        WHERE previous_waiting.schedule_id = w.schedule_id
+                        WHERE previous_waiting.slot_id = w.slot_id
                         AND previous_waiting.id <= w.id
                     ) AS waiting_order
                 FROM waiting w
-                JOIN schedule s ON w.schedule_id = s.id
+                JOIN slot s ON w.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON w.member_id = m.id

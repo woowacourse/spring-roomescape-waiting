@@ -168,19 +168,19 @@ function renderTimeList(times) {
   });
 }
 
-function renderScheduleList(schedules) {
-  const list = document.getElementById("schedule-list");
+function renderSlotList(slots) {
+  const list = document.getElementById("slot-list");
   list.innerHTML = "";
-  if (!schedules.length) {
+  if (!slots.length) {
     const li = document.createElement("li");
     li.className = "empty-message";
-    li.textContent = "조회된 스케줄이 없습니다.";
+    li.textContent = "조회된 슬롯이 없습니다.";
     list.appendChild(li);
     return;
   }
-  schedules.forEach((schedule) => {
+  slots.forEach((slot) => {
     const li = document.createElement("li");
-    li.innerHTML = `#${schedule.id} / ${schedule.date} / timeId=${schedule.time_id} / themeId=${schedule.theme_id}`;
+    li.innerHTML = `#${slot.id} / ${slot.date} / timeId=${slot.time_id} / themeId=${slot.theme_id}`;
     list.appendChild(li);
   });
 }
@@ -195,9 +195,9 @@ async function loadTimes() {
   renderTimeList(times);
 }
 
-async function loadSchedules() {
-  const schedules = await api("/manager/schedules");
-  renderScheduleList(schedules);
+async function loadSlots() {
+  const slots = await api("/manager/slots");
+  renderSlotList(slots);
 }
 
 document.getElementById("theme-form").addEventListener("submit", async (e) => {
@@ -496,23 +496,23 @@ document.getElementById("time-delete-form").addEventListener("submit", async (e)
   }
 });
 
-document.getElementById("schedule-form").addEventListener("submit", async (e) => {
+document.getElementById("slot-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const date = document.getElementById("schedule-date").value;
-    const timeId = Number(document.getElementById("schedule-time-id").value);
-    const themeId = Number(document.getElementById("schedule-theme-id").value);
+    const date = document.getElementById("slot-date").value;
+    const timeId = Number(document.getElementById("slot-time-id").value);
+    const themeId = Number(document.getElementById("slot-theme-id").value);
     const confirmed = await confirmAction({
-      title: "스케줄 추가 확인",
-      message: `${date} / timeId ${timeId} / themeId ${themeId} 스케줄을 추가할까요?`,
+      title: "슬롯 추가 확인",
+      message: `${date} / timeId ${timeId} / themeId ${themeId} 슬롯을 추가할까요?`,
       okLabel: "추가",
     });
     if (!confirmed) {
-      setStatus("스케줄 추가 취소");
+      setStatus("슬롯 추가 취소");
       return;
     }
 
-    await api("/manager/schedules", {
+    await api("/manager/slots", {
       method: "POST",
       body: JSON.stringify({
         date,
@@ -520,80 +520,80 @@ document.getElementById("schedule-form").addEventListener("submit", async (e) =>
         themeId,
       }),
     });
-    await loadSchedules();
-    setStatus("스케줄 추가 완료");
+    await loadSlots();
+    setStatus("슬롯 추가 완료");
     await showResultModal({
-      title: "스케줄 추가 성공",
-      message: `${date} 스케줄이 추가되었습니다.`,
+      title: "슬롯 추가 성공",
+      message: `${date} 슬롯이 추가되었습니다.`,
     });
   } catch (error) {
     setStatus(error.message, true);
     await showResultModal({
-      title: "스케줄 추가 실패",
+      title: "슬롯 추가 실패",
       message: error.message,
       isError: true,
     });
   }
 });
 
-document.getElementById("schedule-delete-form").addEventListener("submit", async (e) => {
+document.getElementById("slot-delete-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const id = document.getElementById("schedule-delete-id").value;
+    const id = document.getElementById("slot-delete-id").value;
     const confirmed = await confirmAction({
-      title: "스케줄 삭제 확인",
-      message: `스케줄 ID ${id}를 삭제할까요?`,
+      title: "슬롯 삭제 확인",
+      message: `슬롯 ID ${id}를 삭제할까요?`,
       okLabel: "삭제",
       okDanger: true,
     });
     if (!confirmed) {
-      setStatus("스케줄 삭제 취소");
+      setStatus("슬롯 삭제 취소");
       return;
     }
 
-    await api(`/manager/schedules/${id}`, { method: "DELETE" });
-    await loadSchedules();
-    setStatus(`스케줄 #${id} 삭제 완료`);
+    await api(`/manager/slots/${id}`, { method: "DELETE" });
+    await loadSlots();
+    setStatus(`슬롯 #${id} 삭제 완료`);
     e.target.reset();
     await showResultModal({
-      title: "스케줄 삭제 성공",
-      message: `스케줄 ID ${id}가 삭제되었습니다.`,
+      title: "슬롯 삭제 성공",
+      message: `슬롯 ID ${id}가 삭제되었습니다.`,
     });
   } catch (error) {
     setStatus(error.message, true);
     await showResultModal({
-      title: "스케줄 삭제 실패",
+      title: "슬롯 삭제 실패",
       message: error.message,
       isError: true,
     });
   }
 });
 
-document.getElementById("schedule-refresh").addEventListener("click", async () => {
+document.getElementById("slot-refresh").addEventListener("click", async () => {
   try {
-    await loadSchedules();
-    setStatus("스케줄 목록 조회 완료");
+    await loadSlots();
+    setStatus("슬롯 목록 조회 완료");
   } catch (error) {
-    await showErrorModal("스케줄 목록 조회 실패", error);
+    await showErrorModal("슬롯 목록 조회 실패", error);
   }
 });
 
-document.getElementById("schedule-find-form").addEventListener("submit", async (e) => {
+document.getElementById("slot-find-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
-    const id = document.getElementById("schedule-find-id").value;
-    const schedule = await api(`/manager/schedules/${id}`);
-    renderScheduleList([schedule]);
-    setStatus(`스케줄 #${id} 단건 조회 완료`);
+    const id = document.getElementById("slot-find-id").value;
+    const slot = await api(`/manager/slots/${id}`);
+    renderSlotList([slot]);
+    setStatus(`슬롯 #${id} 단건 조회 완료`);
   } catch (error) {
-    await showErrorModal("스케줄 단건 조회 실패", error);
+    await showErrorModal("슬롯 단건 조회 실패", error);
   }
 });
 
 function setTodayDefault() {
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById("reservation-date").value = today;
-  document.getElementById("schedule-date").value = today;
+  document.getElementById("slot-date").value = today;
   document.getElementById("theme-by-date").value = today;
 }
 

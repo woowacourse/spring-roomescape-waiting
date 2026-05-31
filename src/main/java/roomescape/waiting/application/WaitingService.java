@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
@@ -17,21 +17,21 @@ import roomescape.waiting.dto.response.WaitingResponse;
 @RequiredArgsConstructor
 public class WaitingService {
 
-    private final ScheduleService scheduleService;
+    private final SlotService slotService;
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
 
     @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
-        scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.resolveScheduleId(body.date(), body.timeId(), body.themeId());
+        slotService.validateSlot(body.date(), body.timeId(), body.themeId());
+        long slotId = slotService.resolveSlotId(body.date(), body.timeId(), body.themeId());
 
-        validateReservedByMemberNotExists(memberId, scheduleId);
-        validateWaitingByMemberNotExists(memberId, scheduleId);
-        validateWaitingTargetExists(scheduleId);
+        validateReservedByMemberNotExists(memberId, slotId);
+        validateWaitingByMemberNotExists(memberId, slotId);
+        validateWaitingTargetExists(slotId);
 
-        Waiting waiting = waitingRepository.save(body.toDomain(memberId, scheduleId));
-        long waitingOrder = waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId());
+        Waiting waiting = waitingRepository.save(body.toDomain(memberId, slotId));
+        long waitingOrder = waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, waiting.getId());
 
         return WaitingResponse.of(waiting, waitingOrder);
     }
@@ -50,21 +50,21 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
-    private void validateReservedByMemberNotExists(long memberId, long scheduleId) {
-        if (reservationRepository.existsByMemberIdAndScheduleId(memberId, scheduleId)) {
+    private void validateReservedByMemberNotExists(long memberId, long slotId) {
+        if (reservationRepository.existsByMemberIdAndSlotId(memberId, slotId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION);
         }
     }
 
-    private void validateWaitingByMemberNotExists(long memberId, long scheduleId) {
-        if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)) {
+    private void validateWaitingByMemberNotExists(long memberId, long slotId) {
+        if (waitingRepository.existsBySlotIdAndMemberId(memberId, slotId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
         }
     }
 
-    private void validateWaitingTargetExists(long scheduleId) {
-        if (!reservationRepository.existsByScheduleId(scheduleId)
-                && !waitingRepository.existsByScheduleId(scheduleId)) {
+    private void validateWaitingTargetExists(long slotId) {
+        if (!reservationRepository.existsBySlotId(slotId)
+                && !waitingRepository.existsBySlotId(slotId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
     }

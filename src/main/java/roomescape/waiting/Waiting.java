@@ -8,6 +8,6 @@ import lombok.Getter;
 public class Waiting {
     private final Long id;
     private final Long memberId;
-    private Long scheduleId;
+    private Long slotId;
 }
 

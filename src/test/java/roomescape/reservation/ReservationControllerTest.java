@@ -81,7 +81,7 @@ public class ReservationControllerTest {
                 .body("success", is(true))
                 .body("data.id", is(5))
                 .body("data.memberId", is(1))
-                .body("data.scheduleId", is(4));
+                .body("data.slotId", is(4));
     }
 
     @Test

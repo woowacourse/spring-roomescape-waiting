@@ -13,7 +13,7 @@ VALUES ('세기의 도둑', '보안을 뚫고 보석을 훔쳐라', './images/th
        ('세기의 도둑3', '보안을 뚫고 보석을 훔쳐라3', './images/time.jpeg'),
        ('세기의 도둑4', '보안을 뚫고 보석을 훔쳐라4', './images/ghosthotel.jpeg');
 
-INSERT INTO schedule (date, time_id, theme_id)
+INSERT INTO slot (date, time_id, theme_id)
 VALUES ('2026-05-05', 1, 1), -- id=1
        ('2026-05-05', 2, 2), -- id=2
        ('2026-05-05', 3, 3), -- id=3
@@ -28,7 +28,7 @@ VALUES ('a', 'test1', 'USER'),
 
 
 INSERT
-INTO reservation (member_id, schedule_id)
+INTO reservation (member_id, slot_id)
 VALUES (1, 1),
        (1, 2),
        (1, 3),

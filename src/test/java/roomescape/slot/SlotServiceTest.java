@@ -1,4 +1,4 @@
-package roomescape.schedule;
+package roomescape.slot;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,11 +9,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.schedule.application.ScheduleService;
-import roomescape.schedule.dto.request.ScheduleSaveRequest;
-import roomescape.schedule.dto.response.ScheduleFindResponse;
-import roomescape.schedule.dto.response.ScheduleSaveResponse;
-import roomescape.schedule.infrastructure.ScheduleRepository;
+import roomescape.slot.application.SlotService;
+import roomescape.slot.dto.request.SlotSaveRequest;
+import roomescape.slot.dto.response.SlotFindResponse;
+import roomescape.slot.dto.response.SlotSaveResponse;
+import roomescape.slot.infrastructure.SlotRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -32,10 +32,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ScheduleServiceTest {
+class SlotServiceTest {
 
     @Mock
-    private ScheduleRepository scheduleRepository;
+    private SlotRepository slotRepository;
     @Mock
     private ThemeRepository themeRepository;
     @Mock
@@ -44,13 +44,13 @@ class ScheduleServiceTest {
     private Clock clock;
 
     @InjectMocks
-    private ScheduleService scheduleService;
+    private SlotService slotService;
 
     @Test
-    @DisplayName("스케줄 저장에 성공한다.")
+    @DisplayName("슬롯 저장에 성공한다.")
     void save_성공_테스트() {
-        ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
-        Schedule savedSchedule = new Schedule(10L, LocalDate.of(2026, 5, 10), 1L, 2L);
+        SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 1L, 2L);
+        Slot savedSlot = new Slot(10L, LocalDate.of(2026, 5, 10), 1L, 2L);
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 6)
@@ -61,9 +61,9 @@ class ScheduleServiceTest {
                 .thenReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
         when(themeRepository.findById(request.themeId()))
                 .thenReturn(Optional.of(new Theme(request.themeId(), "test", "testDescription", "testUrl")));
-        when(scheduleRepository.save(any(Schedule.class))).thenReturn(savedSchedule);
+        when(slotRepository.save(any(Slot.class))).thenReturn(savedSlot);
 
-        ScheduleSaveResponse response = scheduleService.save(request);
+        SlotSaveResponse response = slotService.save(request);
 
         assertThat(response.id()).isEqualTo(10L);
         assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 10));
@@ -72,9 +72,9 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄 저장 시 요청으로 들어온 timeId가 시간 목록에 존재하지 않는다면 예외가 발생한다.")
+    @DisplayName("슬롯 저장 시 요청으로 들어온 timeId가 시간 목록에 존재하지 않는다면 예외가 발생한다.")
     void save_존재하지_않는_시간_실패_테스트() {
-        ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 999L, 2L);
+        SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 999L, 2L);
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 6)
@@ -83,14 +83,14 @@ class ScheduleServiceTest {
         );
         when(reservationTimeRepository.findById(request.timeId())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> scheduleService.save(request))
+        assertThatThrownBy(() -> slotService.save(request))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test
-    @DisplayName("스케줄 저장 시 요청으로 들어온 themeId가 테마 목록에 존재하지 않는다면 예외가 발생한다.")
+    @DisplayName("슬롯 저장 시 요청으로 들어온 themeId가 테마 목록에 존재하지 않는다면 예외가 발생한다.")
     void save_존재하지_않는_테마_실패_테스트() {
-        ScheduleSaveRequest request = new ScheduleSaveRequest(LocalDate.of(2026, 5, 10), 1L, 999L);
+        SlotSaveRequest request = new SlotSaveRequest(LocalDate.of(2026, 5, 10), 1L, 999L);
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 6)
@@ -101,17 +101,17 @@ class ScheduleServiceTest {
                 .thenReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.of(10, 0))));
         when(themeRepository.findById(request.themeId())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> scheduleService.save(request))
+        assertThatThrownBy(() -> slotService.save(request))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test
-    @DisplayName("ID로 스케줄 단건 조회에 성공한다.")
+    @DisplayName("ID로 슬롯 단건 조회에 성공한다.")
     void findById_성공_테스트() {
-        Schedule schedule = new Schedule(1L, LocalDate.of(2026, 5, 5), 1L, 1L);
-        when(scheduleRepository.findById(1L)).thenReturn(Optional.of(schedule));
+        Slot slot = new Slot(1L, LocalDate.of(2026, 5, 5), 1L, 1L);
+        when(slotRepository.findById(1L)).thenReturn(Optional.of(slot));
 
-        ScheduleFindResponse response = scheduleService.findById(1L);
+        SlotFindResponse response = slotService.findById(1L);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 5));
@@ -120,18 +120,18 @@ class ScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("스케줄 삭제를 요청한다.")
+    @DisplayName("슬롯 삭제를 요청한다.")
     void deleteById_테스트() {
         // when
-        scheduleService.deleteById(1L);
+        slotService.deleteById(1L);
 
         // then
-        verify(scheduleRepository).deleteById(1L);
+        verify(slotRepository).deleteById(1L);
     }
 
     @Test
     @DisplayName("요청으로 들어온 date가 과거 날짜이면 예외가 발생한다.")
-    void validateSchedule_테스트_1() {
+    void validateSlot_테스트_1() {
         // given: 오늘을 2026-05-06으로 고정
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
@@ -144,13 +144,13 @@ class ScheduleServiceTest {
         Long testThemeId = 1L;
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(beforeDate, testTimeId, testThemeId))
+        assertThatThrownBy(() -> slotService.validateSlot(beforeDate, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test
     @DisplayName("요청으로 들어온 timeId가 시간 목록에 존재하지 않는다면 예외가 발생한다.")
-    void validateSchedule_테스트_2() {
+    void validateSlot_테스트_2() {
         // given: 오늘을 2026-05-06으로 고정
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
@@ -163,13 +163,13 @@ class ScheduleServiceTest {
         Long testThemeId = 1L;
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
+        assertThatThrownBy(() -> slotService.validateSlot(date, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test
     @DisplayName("요청으로 들어온 themeId가 테마 목록에 존재하지 않는다면 예외가 발생한다.")
-    void validateSchedule_테스트_3() {
+    void validateSlot_테스트_3() {
         // given: 오늘을 2026-05-06으로 고정
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
@@ -185,13 +185,13 @@ class ScheduleServiceTest {
         when(themeRepository.findById(testThemeId)).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
+        assertThatThrownBy(() -> slotService.validateSlot(date, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
     @Test
     @DisplayName("요청으로 들어온 body가 모두 정상이면 예외를 반환하지 않는다.")
-    void validateSchedule_테스트_4() {
+    void validateSlot_테스트_4() {
         // given: 오늘을 2026-05-06으로 고정
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
         when(clock.instant()).thenReturn(
@@ -206,7 +206,7 @@ class ScheduleServiceTest {
         when(reservationTimeRepository.findById(testTimeId)).thenReturn(Optional.of(new ReservationTime(testTimeId, LocalTime.of(10, 0))));
         when(themeRepository.findById(testThemeId)).thenReturn(Optional.of(new Theme(testThemeId, "test", "testDescription", "testUrl")));
         // when, then
-        assertThatCode(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
+        assertThatCode(() -> slotService.validateSlot(date, testTimeId, testThemeId))
                 .doesNotThrowAnyException();
         verify(reservationTimeRepository, times(1)).findById(testTimeId);
         verify(themeRepository, times(1)).findById(testThemeId);

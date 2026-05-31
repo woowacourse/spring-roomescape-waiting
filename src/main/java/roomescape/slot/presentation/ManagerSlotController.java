@@ -1,4 +1,4 @@
-package roomescape.schedule.presentation;
+package roomescape.slot.presentation;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -13,47 +13,47 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.schedule.application.ScheduleService;
-import roomescape.schedule.dto.request.ScheduleSaveRequest;
-import roomescape.schedule.dto.response.ScheduleFindResponse;
-import roomescape.schedule.dto.response.ScheduleSaveResponse;
+import roomescape.slot.application.SlotService;
+import roomescape.slot.dto.request.SlotSaveRequest;
+import roomescape.slot.dto.response.SlotFindResponse;
+import roomescape.slot.dto.response.SlotSaveResponse;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/manager/schedules")
+@RequestMapping("/api/manager/slots")
 @RequiredArgsConstructor
-public class ManagerScheduleController {
+public class ManagerSlotController {
 
-    private final ScheduleService scheduleService;
+    private final SlotService slotService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ScheduleSaveResponse>> save(
-            @RequestBody @Valid ScheduleSaveRequest body
+    public ResponseEntity<ApiResponse<SlotSaveResponse>> save(
+            @RequestBody @Valid SlotSaveRequest body
     ) {
-        ScheduleSaveResponse response = scheduleService.save(body);
+        SlotSaveResponse response = slotService.save(body);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ScheduleFindResponse>>> findAll() {
-        List<ScheduleFindResponse> response = scheduleService.findAll();
+    public ResponseEntity<ApiResponse<List<SlotFindResponse>>> findAll() {
+        List<SlotFindResponse> response = slotService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
-    @GetMapping("/{scheduleId}")
-    public ResponseEntity<ApiResponse<ScheduleFindResponse>> findById(
-            @PathVariable @Positive long scheduleId
+    @GetMapping("/{slotId}")
+    public ResponseEntity<ApiResponse<SlotFindResponse>> findById(
+            @PathVariable @Positive long slotId
     ) {
-        ScheduleFindResponse response = scheduleService.findById(scheduleId);
+        SlotFindResponse response = slotService.findById(slotId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/{scheduleId}")
+    @DeleteMapping("/{slotId}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable @Positive long scheduleId
+            @PathVariable @Positive long slotId
     ) {
-        scheduleService.deleteById(scheduleId);
+        slotService.deleteById(slotId);
         return ResponseEntity.noContent().build();
     }
 }

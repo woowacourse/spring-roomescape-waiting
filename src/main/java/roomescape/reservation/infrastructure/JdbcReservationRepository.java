@@ -38,11 +38,11 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        String insertReservationSql = "INSERT INTO reservation(member_id, schedule_id) VALUES (:memberId, :scheduleId)";
+        String insertReservationSql = "INSERT INTO reservation(member_id, slot_id) VALUES (:memberId, :slotId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", reservation.getMemberId())
-                .addValue("scheduleId", reservation.getScheduleId());
+                .addValue("slotId", reservation.getSlotId());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         template.update(insertReservationSql, params, keyHolder);
@@ -55,7 +55,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Reservation.of(
                 keyHolder.getKey().longValue(),
                 reservation.getMemberId(),
-                reservation.getScheduleId()
+                reservation.getSlotId()
         );
     }
 
@@ -74,7 +74,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rt.id AS time_id,
                     rt.start_at
                 FROM reservation r
-                JOIN schedule s ON r.schedule_id = s.id
+                JOIN slot s ON r.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON r.member_id = m.id
@@ -89,8 +89,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = """
                 SELECT
                     s.time_id
-                FROM schedule s
-                LEFT JOIN reservation r ON s.id = r.schedule_id
+                FROM slot s
+                LEFT JOIN reservation r ON s.id = r.slot_id
                 WHERE s.date = :date
                 AND s.theme_id = :themeId
                 AND r.id IS NOT NULL
@@ -119,7 +119,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rt.id AS time_id,
                     rt.start_at
                 FROM reservation r
-                JOIN schedule s ON r.schedule_id = s.id
+                JOIN slot s ON r.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON r.member_id = m.id
@@ -164,7 +164,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rt.id AS time_id,
                     rt.start_at
                 FROM reservation r
-                JOIN schedule s ON r.schedule_id = s.id
+                JOIN slot s ON r.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON r.member_id = m.id
@@ -180,26 +180,26 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByScheduleIdAndIdNot(long scheduleId, long reservationId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation r WHERE r.schedule_id = :scheduleId AND r.id <> :reservationId)";
+    public boolean existsBySlotIdAndIdNot(long slotId, long reservationId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation r WHERE r.slot_id = :slotId AND r.id <> :reservationId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("reservationId", reservationId)
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
     }
 
     @Override
-    public int updateScheduleById(long reservationId, long scheduleId) {
+    public int updateSlotById(long reservationId, long slotId) {
         String sql = """ 
                 UPDATE reservation
-                SET schedule_id = :scheduleId
+                SET slot_id = :slotId
                 WHERE id = :reservationId
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("reservationId", reservationId)
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return template.update(sql, params);
     }
@@ -215,28 +215,28 @@ public class JdbcReservationRepository implements ReservationRepository {
                 (resultSet, rowNum) -> new Reservation(
                         resultSet.getLong("id"),
                         resultSet.getLong("member_id"),
-                        resultSet.getLong("schedule_id")
+                        resultSet.getLong("slot_id")
                 )
         ).stream().findFirst();
     }
 
     @Override
-    public boolean existsByScheduleId(long scheduleId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE schedule_id = :scheduleId)";
+    public boolean existsBySlotId(long slotId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE slot_id = :slotId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
     }
 
     @Override
-    public boolean existsByMemberIdAndScheduleId(long memberId, long scheduleId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE member_id = :memberId AND schedule_id = :scheduleId)";
+    public boolean existsByMemberIdAndSlotId(long memberId, long slotId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE member_id = :memberId AND slot_id = :slotId)";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
-                .addValue("scheduleId", scheduleId);
+                .addValue("slotId", slotId);
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
     }

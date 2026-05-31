@@ -15,11 +15,11 @@ public interface WaitingRepository {
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 
-    boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId);
+    boolean existsBySlotIdAndMemberId(long memberId, long slotId);
 
-    boolean existsByScheduleId(long scheduleId);
+    boolean existsBySlotId(long slotId);
 
-    long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId);
+    long countBySlotIdAndIdLessThanEqual(long slotId, long waitingId);
 
     List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 

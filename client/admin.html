@@ -126,35 +126,35 @@
     </details>
 
     <details class="admin-section-toggle">
-      <summary><h2>스케줄 관리</h2></summary>
+      <summary><h2>슬롯 관리</h2></summary>
       <div class="admin-grid">
         <article class="admin-card">
-          <h3>스케줄 추가</h3>
-          <form id="schedule-form" class="row-form admin-form">
-            <label>날짜 <input type="date" id="schedule-date" required></label>
-            <label>시간 ID <input type="number" id="schedule-time-id" min="1" required></label>
-            <label>테마 ID <input type="number" id="schedule-theme-id" min="1" required></label>
-            <button type="submit" class="search-button">스케줄 추가</button>
+          <h3>슬롯 추가</h3>
+          <form id="slot-form" class="row-form admin-form">
+            <label>날짜 <input type="date" id="slot-date" required></label>
+            <label>시간 ID <input type="number" id="slot-time-id" min="1" required></label>
+            <label>테마 ID <input type="number" id="slot-theme-id" min="1" required></label>
+            <button type="submit" class="search-button">슬롯 추가</button>
           </form>
         </article>
 
         <article class="admin-card">
-          <h3>스케줄 삭제</h3>
-          <form id="schedule-delete-form" class="row-form inline-form">
-            <label>스케줄 ID <input type="number" id="schedule-delete-id" min="1" required></label>
-            <button type="submit" class="danger-button">스케줄 삭제</button>
+          <h3>슬롯 삭제</h3>
+          <form id="slot-delete-form" class="row-form inline-form">
+            <label>슬롯 ID <input type="number" id="slot-delete-id" min="1" required></label>
+            <button type="submit" class="danger-button">슬롯 삭제</button>
           </form>
         </article>
       </div>
 
       <div class="reservation-toolbar">
-        <button id="schedule-refresh" class="search-button">스케줄 목록 조회</button>
+        <button id="slot-refresh" class="search-button">슬롯 목록 조회</button>
       </div>
-      <form id="schedule-find-form" class="row-form inline-form">
-        <label>스케줄 ID <input type="number" id="schedule-find-id" min="1" required></label>
+      <form id="slot-find-form" class="row-form inline-form">
+        <label>슬롯 ID <input type="number" id="slot-find-id" min="1" required></label>
         <button type="submit" class="search-button">단건 조회</button>
       </form>
-      <ul id="schedule-list" class="list reservation-list"></ul>
+      <ul id="slot-list" class="list reservation-list"></ul>
     </details>
     </div>
 

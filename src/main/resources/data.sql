@@ -20,7 +20,7 @@ VALUES ('세기의 도둑', '보안을 뚫고 보석을 훔쳐라', './images/th
        ('잠든 박물관', '야간 경비를 피해 전시실의 비밀을 밝혀라', './images/museum.jpeg'),
        ('붉은 파도', '폭풍우 치는 선박 위에서 사건의 진실을 추적하라', './images/red-wave.jpeg');
 
-INSERT INTO schedule (date, time_id, theme_id)
+INSERT INTO slot (date, time_id, theme_id)
 VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 1),  -- 기본일 10시 세기의 도둑 / 1
        (DATEADD('DAY', 1, CURRENT_DATE), 2, 1),  -- 기본일 11시 세기의 도둑 / 2
        (DATEADD('DAY', 1, CURRENT_DATE), 3, 1),  -- 기본일 12시 세기의 도둑 / 3
@@ -95,7 +95,7 @@ VALUES ('kim', 'kimpass', 'USER'),
        ('oh', 'ohpass', 'USER'),
        ('manager', 'mpass', 'MANAGER');
 
-INSERT INTO reservation (member_id, schedule_id)
+INSERT INTO reservation (member_id, slot_id)
 VALUES (1, 1),  -- 기본일 10시 세기의 도둑 예약
        (1, 2),  -- 기본일 11시 세기의 도둑 예약
        (2, 9),  -- 기본일 10시 심해 연구소 예약
@@ -109,7 +109,7 @@ VALUES (1, 1),  -- 기본일 10시 세기의 도둑 예약
        (1, 54); -- 사흘 뒤 11시 붉은 파도 예약
 
 -- 클라이언트 확인용 예약 대기 데이터
-INSERT INTO waiting (member_id, schedule_id)
+INSERT INTO waiting (member_id, slot_id)
 VALUES (3, 1),  -- park: 기본일 10시 세기의 도둑 대기 1번
        (2, 1),  -- lee : 기본일 10시 세기의 도둑 대기 2번
        (4, 1),  -- oh  : 기본일 10시 세기의 도둑 대기 3번

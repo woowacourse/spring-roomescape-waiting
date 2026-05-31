@@ -21,13 +21,13 @@ public interface ReservationRepository {
 
     Optional<ReservationDetailProjection> findDetailById(long reservationId);
 
-    boolean existsByScheduleIdAndIdNot(long scheduleId, long reservationId);
+    boolean existsBySlotIdAndIdNot(long slotId, long reservationId);
 
-    int updateScheduleById(long reservationId, long scheduleId);
+    int updateSlotById(long reservationId, long slotId);
 
     Optional<Reservation> findById(long reservationId);
 
-    boolean existsByScheduleId(long scheduleId);
+    boolean existsBySlotId(long slotId);
 
-    boolean existsByMemberIdAndScheduleId(long memberId, long scheduleId);
+    boolean existsByMemberIdAndSlotId(long memberId, long slotId);
 }

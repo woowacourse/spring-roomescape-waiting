@@ -5,7 +5,7 @@ import roomescape.waiting.Waiting;
 public record WaitingResponse(
         Long id,
         Long memberId,
-        Long scheduleId,
+        Long slotId,
         Long waitingOrder
 ) {
 
@@ -13,7 +13,7 @@ public record WaitingResponse(
         return new WaitingResponse(
                 waiting.getId(),
                 waiting.getMemberId(),
-                waiting.getScheduleId(),
+                waiting.getSlotId(),
                 waitingOrder
         );
     }

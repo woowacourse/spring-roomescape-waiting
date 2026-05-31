@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
@@ -32,7 +32,7 @@ class WaitingServiceTest {
     private static final long MEMBER_ID = 1L;
 
     @Mock
-    private ScheduleService scheduleService;
+    private SlotService slotService;
 
     @Mock
     private WaitingRepository waitingRepository;
@@ -47,42 +47,42 @@ class WaitingServiceTest {
     @DisplayName("예약 대기를 저장할 수 있다.")
     void save_테스트_1() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
-        long scheduleId = 1L;
-        Waiting savedWaiting = new Waiting(10L, MEMBER_ID, scheduleId);
+        long slotId = 1L;
+        Waiting savedWaiting = new Waiting(10L, MEMBER_ID, slotId);
 
-        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(scheduleId);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slotId);
+        when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
                 .thenReturn(false);
-        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+        when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
+        when(reservationRepository.existsBySlotId(slotId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleId(scheduleId))
+        when(waitingRepository.existsBySlotId(slotId))
                 .thenReturn(true);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
-        when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
+        when(waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, savedWaiting.getId()))
                 .thenReturn(3L);
 
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
         assertThat(response.id()).isEqualTo(10L);
         assertThat(response.memberId()).isEqualTo(MEMBER_ID);
-        assertThat(response.scheduleId()).isEqualTo(scheduleId);
+        assertThat(response.slotId()).isEqualTo(slotId);
         assertThat(response.waitingOrder()).isEqualTo(3L);
         verify(waitingRepository).save(any(Waiting.class));
     }
 
     @Test
-    @DisplayName("똑같은 사람이 같은 스케줄에 대한 중복 대기를 하면 예외가 발생한다.")
+    @DisplayName("똑같은 사람이 같은 슬롯에 대한 중복 대기를 하면 예외가 발생한다.")
     void save_테스트_2() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
-        long scheduleId = 1L;
+        long slotId = 1L;
 
-        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(scheduleId);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slotId);
+        when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
@@ -90,19 +90,19 @@ class WaitingServiceTest {
                         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.WAITING_ALREADY_EXIST)
                 );
 
-        verify(scheduleService).resolveScheduleId(request.date(), request.timeId(), request.themeId());
+        verify(slotService).resolveSlotId(request.date(), request.timeId(), request.themeId());
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
 
     @Test
-    @DisplayName("유저가 이미 예약한 스케줄이면 다시 대기를 신청할 수 없다.")
+    @DisplayName("유저가 이미 예약한 슬롯이면 다시 대기를 신청할 수 없다.")
     void save_테스트_3() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
-        long scheduleId = 1L;
+        long slotId = 1L;
 
-        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(scheduleId);
-        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slotId);
+        when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
@@ -114,20 +114,20 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("해당 스케줄에 예약/대기가 모두 없으면 대기를 신청할 수 없다.")
+    @DisplayName("해당 슬롯에 예약/대기가 모두 없으면 대기를 신청할 수 없다.")
     void save_테스트_4() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
-        long scheduleId = 4L;
+        long slotId = 4L;
 
-        when(scheduleService.resolveScheduleId(request.date(), request.timeId(), request.themeId()))
-                .thenReturn(scheduleId);
-        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slotId);
+        when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+        when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
+        when(reservationRepository.existsBySlotId(slotId))
                 .thenReturn(false);
-        when(waitingRepository.existsByScheduleId(scheduleId))
+        when(waitingRepository.existsBySlotId(slotId))
                 .thenReturn(false);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))

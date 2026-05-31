@@ -11,11 +11,11 @@ public record ReservationSaveRequest(
         @NotNull Long timeId,
         @NotNull Long themeId
 ) {
-    public Reservation toDomain(long memberId, long scheduleId) {
+    public Reservation toDomain(long memberId, long slotId) {
         return new Reservation(
                 null,
                 memberId,
-                scheduleId
+                slotId
         );
     }
 }

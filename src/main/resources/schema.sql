@@ -14,15 +14,15 @@ CREATE TABLE theme
     PRIMARY KEY (id)
 );
 
-CREATE TABLE schedule
+CREATE TABLE slot
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     date     DATE   NOT NULL,
     time_id  BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uk_schedule_date_time_theme UNIQUE (date, time_id, theme_id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT ,
+    CONSTRAINT uk_slot_date_time_theme UNIQUE (date, time_id, theme_id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT,
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT
 );
 
@@ -39,10 +39,10 @@ CREATE TABLE waiting
 (
     id          BIGINT NOT NULL AUTO_INCREMENT,
     member_id   BIGINT NOT NULL,
-    schedule_id BIGINT NOT NULL,
-    CONSTRAINT uk_waiting_member_schedule UNIQUE (member_id, schedule_id),
+    slot_id   BIGINT NOT NULL,
+    CONSTRAINT uk_waiting_member_slot UNIQUE (member_id, slot_id),
     FOREIGN KEY (member_id) REFERENCES member (id),
-    FOREIGN KEY (schedule_id) REFERENCES schedule (id),
+    FOREIGN KEY (slot_id) REFERENCES slot (id),
     PRIMARY KEY (id)
 );
 
@@ -50,9 +50,9 @@ CREATE TABLE reservation
 (
     id          BIGINT NOT NULL AUTO_INCREMENT,
     member_id   BIGINT NOT NULL,
-    schedule_id BIGINT NOT NULL,
+    slot_id   BIGINT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uk_reservation_schedule UNIQUE (schedule_id),
+    CONSTRAINT uk_reservation_slot UNIQUE (slot_id),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
-    FOREIGN KEY (schedule_id) REFERENCES schedule (id) ON DELETE RESTRICT
+    FOREIGN KEY (slot_id) REFERENCES slot (id) ON DELETE RESTRICT
 );

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.schedule.application.ScheduleService;
+import roomescape.slot.application.SlotService;
 import roomescape.theme.Theme;
 import roomescape.theme.dto.request.ThemeSaveRequest;
 import roomescape.theme.dto.response.ThemeFindResponse;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ThemeService {
     private final ThemeRepository themeRepository;
-    private final ScheduleService scheduleService;
+    private final SlotService slotService;
     private final Clock clock;
 
     public ThemeSaveResponse save(ThemeSaveRequest body) {
@@ -28,12 +28,12 @@ public class ThemeService {
     }
 
     public void delete(long id) {
-        scheduleService.validateThemeDeletable(id);
+        slotService.validateThemeDeletable(id);
         themeRepository.deleteById(id);
     }
 
-    public List<ThemeFindResponse> findScheduledThemesByDate(LocalDate date) {
-        List<Theme> themes = themeRepository.findScheduledThemesByDate(date);
+    public List<ThemeFindResponse> findThemesBySlotDate(LocalDate date) {
+        List<Theme> themes = themeRepository.findThemesBySlotDate(date);
         return ThemeFindResponse.from(themes);
     }
 

@@ -1,4 +1,4 @@
- package roomescape.schedule;
+package roomescape.slot;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.is;
 @Import(TestTimeConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ScheduleControllerTest {
+class SlotControllerTest {
 
     @BeforeEach
     void setUp() {
@@ -42,18 +42,18 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 스케줄_생성() {
+    void 슬롯_생성() {
         String accessToken = loginManager();
-        Map<String, Object> schedule = new HashMap<>();
-        schedule.put("date", "2026-05-06");
-        schedule.put("timeId", 1);
-        schedule.put("themeId", 4);
+        Map<String, Object> slot = new HashMap<>();
+        slot.put("date", "2026-05-06");
+        slot.put("timeId", 1);
+        slot.put("themeId", 4);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(ContentType.JSON)
-                .body(schedule)
-                .when().post("/api/manager/schedules")
+                .body(slot)
+                .when().post("/api/manager/slots")
                 .then().log().all()
                 .statusCode(201)
                 .body("success", is(true))
@@ -64,18 +64,18 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 존재하지_않는_시간으로_스케줄_생성시_404를_응답한다() {
+    void 존재하지_않는_시간으로_슬롯_생성시_404를_응답한다() {
         String accessToken = loginManager();
-        Map<String, Object> schedule = new HashMap<>();
-        schedule.put("date", "2026-05-06");
-        schedule.put("timeId", 999);
-        schedule.put("themeId", 4);
+        Map<String, Object> slot = new HashMap<>();
+        slot.put("date", "2026-05-06");
+        slot.put("timeId", 999);
+        slot.put("themeId", 4);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(ContentType.JSON)
-                .body(schedule)
-                .when().post("/api/manager/schedules")
+                .body(slot)
+                .when().post("/api/manager/slots")
                 .then().log().all()
                 .statusCode(404)
                 .body("success", is(false))
@@ -83,18 +83,18 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 존재하지_않는_테마로_스케줄_생성시_404를_응답한다() {
+    void 존재하지_않는_테마로_슬롯_생성시_404를_응답한다() {
         String accessToken = loginManager();
-        Map<String, Object> schedule = new HashMap<>();
-        schedule.put("date", "2026-05-06");
-        schedule.put("timeId", 1);
-        schedule.put("themeId", 999);
+        Map<String, Object> slot = new HashMap<>();
+        slot.put("date", "2026-05-06");
+        slot.put("timeId", 1);
+        slot.put("themeId", 999);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(ContentType.JSON)
-                .body(schedule)
-                .when().post("/api/manager/schedules")
+                .body(slot)
+                .when().post("/api/manager/slots")
                 .then().log().all()
                 .statusCode(404)
                 .body("success", is(false))
@@ -102,12 +102,12 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 스케줄_전체_조회() {
+    void 슬롯_전체_조회() {
         String accessToken = loginManager();
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/schedules")
+                .when().get("/api/manager/slots")
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
@@ -115,12 +115,12 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 스케줄_단건_조회() {
+    void 슬롯_단건_조회() {
         String accessToken = loginManager();
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/schedules/1")
+                .when().get("/api/manager/slots/1")
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
@@ -131,26 +131,26 @@ class ScheduleControllerTest {
     }
 
     @Test
-    void 스케줄_삭제() {
+    void 슬롯_삭제() {
         String accessToken = loginManager();
 
-        Map<String, Object> schedule = new HashMap<>();
-        schedule.put("date", "2026-05-06");
-        schedule.put("timeId", 1);
-        schedule.put("themeId", 4);
+        Map<String, Object> slot = new HashMap<>();
+        slot.put("date", "2026-05-06");
+        slot.put("timeId", 1);
+        slot.put("themeId", 4);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(ContentType.JSON)
-                .body(schedule)
-                .when().post("/api/manager/schedules")
+                .body(slot)
+                .when().post("/api/manager/slots")
                 .then().log().all()
                 .statusCode(201)
                 .body("data.id", is(6));
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/schedules/6")
+                .when().delete("/api/manager/slots/6")
                 .then().log().all()
                 .statusCode(204);
     }

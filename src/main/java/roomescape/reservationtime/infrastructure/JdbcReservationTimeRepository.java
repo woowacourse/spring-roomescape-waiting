@@ -70,7 +70,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findTimesByDateAndThemeId(LocalDate date, long themeId) {
-        String sql = "SELECT rt.id, rt.start_at FROM schedule s " +
+        String sql = "SELECT rt.id, rt.start_at FROM slot s " +
                 "JOIN reservation_time rt ON s.time_id = rt.id " +
                 "WHERE s.date = :date AND s.theme_id = :themeId";
 

@@ -11,11 +11,11 @@ public record WaitingRequest(
         @NotNull Long timeId,
         @NotNull Long themeId
 ) {
-    public Waiting toDomain(long memberId, long scheduleId) {
+    public Waiting toDomain(long memberId, long slotId) {
         return new Waiting(
                 null,
                 memberId,
-                scheduleId
+                slotId
         );
     }
 }
