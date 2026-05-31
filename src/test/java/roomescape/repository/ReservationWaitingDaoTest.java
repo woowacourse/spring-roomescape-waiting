@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -114,7 +114,7 @@ public class ReservationWaitingDaoTest {
     @Test
     void 예약_대기가_이름으로_정상_조회한다() {
         assertThat(reservationWaitingDao.findAllByName("테스트").size()).isEqualTo(1);
-        assertThat(reservationWaitingDao.findAllByName("테스트").getFirst().getCreatedAt())
+        assertThat(reservationWaitingDao.findAllByName("테스트").get(0).getCreatedAt())
                 .isEqualTo(LocalDateTime.parse("2026-05-15T10:30:00"));
     }
 

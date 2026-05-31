@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.repository.ReservationWaitingDao;
 
 public class FakeReservationWaitingDao extends ReservationWaitingDao {

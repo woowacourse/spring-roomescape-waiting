@@ -1,4 +1,4 @@
-package roomescape.domain.reservatinWaiting;
+package roomescape.domain.reservationWaiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
