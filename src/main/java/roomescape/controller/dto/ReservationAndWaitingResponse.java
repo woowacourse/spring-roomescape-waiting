@@ -6,8 +6,8 @@ public record ReservationAndWaitingResponse(
         Long id,
         String name,
         LocalDate date,
-        TimeResponse timeResponse,
-        ThemeResponse themeResponse,
+        TimeResponse time,
+        ThemeResponse theme,
         boolean isReserved,
         Integer waitingNumber
 ) {

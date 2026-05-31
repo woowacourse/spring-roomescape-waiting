@@ -48,8 +48,11 @@ public class WaitingService {
     }
 
     private void validReservation(Waiting waiting) {
-        reservationRepository.findByDateAndTimeIdAndThemeId(waiting.getDate(),
-                waiting.getTimeSlotId(), waiting.getThemeId()).ifPresent(reservation -> {
+        reservationRepository.findByDateAndTimeIdAndThemeId(
+                waiting.getDate(),
+                waiting.getTimeSlotId(),
+                waiting.getThemeId()
+        ).ifPresent(reservation -> {
             if (reservation.getName().equals(waiting.getName())) {
                 throw new DuplicateReservationException(reservation.getDate().toString(),
                         reservation.getTimeSlot().getId(), reservation.getTheme().getId());
