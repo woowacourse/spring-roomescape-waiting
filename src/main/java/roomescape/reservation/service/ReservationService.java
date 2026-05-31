@@ -13,8 +13,6 @@ import roomescape.reservation.dto.request.UpdateMyReservation;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ThemeSimpleResponse;
-import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Service
@@ -45,23 +43,12 @@ public class ReservationService {
 
     public List<ReservationResponse> findAll() {
         return reservationDao.findAll().stream()
-                .map(reservation -> ReservationResponse.of(
-                        reservation.getId(),
-                        reservation.getName(),
-                        reservation.getDate(),
-                        TimeResponse.from(reservation.getTime()),
-                        ThemeSimpleResponse.from(reservation.getTheme()),
-                    reservation.getStatus()
-
-                )).toList();
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public ReservationResponse findById(Long id) {
-        Reservation reservation = reservationDao.findById(id);
-        return ReservationResponse.of(reservation.getId(), reservation.getName(),
-            reservation.getDate(), TimeResponse.from(reservation.getTime()),
-            ThemeSimpleResponse.from(reservation.getTheme()),
-            reservation.getStatus());
+        return ReservationResponse.from(reservationDao.findById(id));
     }
 
     public void delete(Long id) {
