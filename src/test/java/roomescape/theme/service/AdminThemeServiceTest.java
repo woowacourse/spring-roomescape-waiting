@@ -2,72 +2,84 @@ package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.business.BusinessException;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.AdminThemeRequest;
 import roomescape.theme.dto.AdminThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(properties = {
+        "spring.sql.init.data-locations=",
+        "spring.datasource.url=jdbc:h2:mem:service-test;DB_CLOSE_DELAY=-1"
+})
+@Transactional
 class AdminThemeServiceTest {
 
-    @Mock
-    private ThemeRepository themeRepository;
-
-    @InjectMocks
+    @Autowired
     private AdminThemeService adminThemeService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ReservationTimeRepository timeRepository;
 
-    private Theme theme;
+    @Test
+    @DisplayName("테마를 생성하면 응답에 정보가 담기고 DB에 저장된다")
+    void 테마_생성_시_응답과_DB에_저장된다() {
+        AdminThemeResponse response = adminThemeService.createTheme(
+                new AdminThemeRequest("테마A", "설명A", "https://a.com"));
 
-    @BeforeEach
-    void setUp() {
-        theme = Theme.restore(1L, "테마A", "설명", "https://a.com");
+        assertThat(response.id()).isNotNull().isPositive();
+        assertThat(response.name()).isEqualTo("테마A");
+        assertThat(themeRepository.findById(response.id())).isPresent();
     }
 
     @Test
-    @DisplayName("테마 생성 성공")
-    void 테마_생성_성공() {
-        when(themeRepository.save(any())).thenReturn(theme);
+    @DisplayName("전체 테마 목록을 조회한다")
+    void 전체_테마_목록을_조회한다() {
+        adminThemeService.createTheme(new AdminThemeRequest("테마A", "설명A", "https://a.com"));
+        adminThemeService.createTheme(new AdminThemeRequest("테마B", "설명B", "https://b.com"));
 
-        AdminThemeResponse response = adminThemeService.createTheme(new AdminThemeRequest("테마A", "설명", "https://a.com"));
-        assertThat(response.id()).isEqualTo(1L);
+        assertThat(adminThemeService.getAllThemes()).hasSize(2);
     }
 
     @Test
-    @DisplayName("전체 테마 조회")
-    void 전체_테마_조회() {
-        when(themeRepository.findAll()).thenReturn(List.of(theme));
+    @DisplayName("테마를 삭제하면 DB에서 제거된다")
+    void 테마_삭제_시_DB에서_제거된다() {
+        AdminThemeResponse saved = adminThemeService.createTheme(
+                new AdminThemeRequest("테마A", "설명A", "https://a.com"));
 
-        assertThat(adminThemeService.getAllThemes()).hasSize(1);
-    }
+        adminThemeService.deleteTheme(saved.id());
 
-    @Test
-    @DisplayName("테마 삭제 성공")
-    void 테마_삭제_성공() {
-        when(themeRepository.existsReservationByThemeId(1L)).thenReturn(false);
-
-        adminThemeService.deleteTheme(1L);
-        verify(themeRepository).deleteById(1L);
+        assertThat(themeRepository.findById(saved.id())).isEmpty();
     }
 
     @Test
     @DisplayName("예약이 존재하는 테마는 삭제할 수 없다")
-    void 예약_있는_테마_삭제_불가() {
-        when(themeRepository.existsReservationByThemeId(1L)).thenReturn(true);
+    void 예약이_존재하는_테마는_삭제할_수_없다() {
+        Theme theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
+        Member member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        ReservationTime time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
+        reservationRepository.save(Reservation.restore(null, member, LocalDate.now().plusDays(1), time, theme));
 
-        assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
+        assertThatThrownBy(() -> adminThemeService.deleteTheme(theme.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
