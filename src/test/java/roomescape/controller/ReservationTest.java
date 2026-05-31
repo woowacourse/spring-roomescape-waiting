@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/testReservationData.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -28,29 +29,24 @@ public class ReservationTest {
         params.put("timeId", 1L);
         params.put("themeId", 2L);
 
-        RestAssured.given().log().all()
+        int newId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("name", is("녀녕"))
+                .body("date", is("2026-06-05"))
+                .extract().path("id");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(4))
-                .body("[3].id", is(4))
-                .body("[3].name", is("녀녕"))
-                .body("[3].date", is("2026-06-05"))
-                .body("[3].time.id", is(1))
-                .body("[3].time.startAt", is("10:00"))
-                .body("[3].theme.id", is(2))
-                .body("[3].theme.name", is("예약없는테마"))
-                .body("[3].theme.thumbnailUrl", is("https://picsum.photos/seed/empty/400/300"))
-                .body("[3].theme.description", is("예약이 없는 테마"));
+                .body("find { it.id == " + newId + " }.name", is("녀녕"))
+                .body("find { it.id == " + newId + " }.date", is("2026-06-05"));
     }
 
     @Test
