@@ -17,6 +17,7 @@ import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import java.util.List;
 import roomescape.fake.FakeReservationQueryingDao;
 import roomescape.fake.FakeReservationWaitingDao;
 
@@ -79,6 +80,40 @@ class ReservationWaitingServiceTest {
         waitingDao.create(waiting);
 
         assertThatCode(() -> service.delete(1L)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약자_이름으로_대기_등록_시도하면_예외가_발생한다() {
+        Reservation reservation = Reservation.restore(1L, "테스트", tomorrow, reservationTime, theme, LocalDateTime.now());
+        reservationQueryingDao.save(reservation);
+
+        ReservationWaitingRequest request = new ReservationWaitingRequest("테스트", tomorrow, 1L, 2L);
+
+        assertThatThrownBy(() -> service.create(request))
+                .isInstanceOf(InvalidInputException.class);
+    }
+
+    @Test
+    void 전체_대기열을_조회한다() {
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
+        waitingDao.create(ReservationWaiting.restore(2L, "브라운", reservation, 2L, LocalDateTime.now()));
+
+        List<ReservationWaitingResponse> result = service.readAll();
+
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void 이름으로_대기열을_조회한다() {
+        Reservation reservation = Reservation.restore(1L, "다른사람", tomorrow, reservationTime, theme, LocalDateTime.now());
+        waitingDao.create(ReservationWaiting.restore(1L, "테스트", reservation, 1L, LocalDateTime.now()));
+        waitingDao.create(ReservationWaiting.restore(2L, "브라운", reservation, 2L, LocalDateTime.now()));
+
+        List<ReservationWaitingResponse> result = service.readByName("테스트");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).name()).isEqualTo("테스트");
     }
 
 }
