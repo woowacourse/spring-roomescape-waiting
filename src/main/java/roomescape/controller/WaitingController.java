@@ -3,6 +3,7 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.Waiting;
 import roomescape.service.WaitingService;
 
+@Validated
 @RestController
 @RequestMapping("/waitings")
 public class WaitingController {
