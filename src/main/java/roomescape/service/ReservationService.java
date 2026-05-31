@@ -96,7 +96,7 @@ public class ReservationService {
             return;
         }
 
-        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findFirstByReservationId(id);
+        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findFirstReservationWaitingByReservationId(id);
 
         if(optionalReservationWaiting.isEmpty()) {
             reservationUpdatingDao.delete(id);
