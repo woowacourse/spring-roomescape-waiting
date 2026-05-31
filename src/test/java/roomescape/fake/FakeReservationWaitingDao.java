@@ -1,6 +1,5 @@
 package roomescape.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,12 +18,10 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
     }
 
     @Override
-    public boolean isExistByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean isExistByNameAndReservationId(String name, Long reservationId) {
         return store.stream().anyMatch(w ->
                 w.getName().equals(name)
-                && w.getDate().equals(date)
-                && w.getTime().getId().equals(timeId)
-                && w.getTheme().getId().equals(themeId));
+                && w.getReservation().getId().equals(reservationId));
     }
 
     @Override
@@ -52,8 +49,7 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
     public Long create(ReservationWaiting waiting) {
         Long id = idGenerator.getAndIncrement();
         ReservationWaiting withId = ReservationWaiting.restore(
-                id, waiting.getName(), waiting.getDate(),
-                waiting.getTime(), waiting.getTheme(),
+                id, waiting.getName(), waiting.getReservation(),
                 waiting.getSequence(), waiting.getCreatedAt());
         store.add(withId);
         return id;
@@ -66,17 +62,14 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
 
     private ReservationWaiting withSequence(ReservationWaiting waiting) {
         long sequence = store.stream()
-                .filter(w -> w.getDate().equals(waiting.getDate())
-                          && w.getTime().getId().equals(waiting.getTime().getId())
-                          && w.getTheme().getId().equals(waiting.getTheme().getId()))
+                .filter(w -> w.getReservation().getId().equals(waiting.getReservation().getId()))
                 .sorted(Comparator.comparing(ReservationWaiting::getCreatedAt)
                         .thenComparing(w -> w.getId() == null ? Long.MAX_VALUE : w.getId()))
                 .takeWhile(w -> !w.equals(waiting))
                 .count() + 1;
 
         return ReservationWaiting.restore(
-                waiting.getId(), waiting.getName(), waiting.getDate(),
-                waiting.getTime(), waiting.getTheme(),
+                waiting.getId(), waiting.getName(), waiting.getReservation(),
                 sequence, waiting.getCreatedAt());
     }
 }

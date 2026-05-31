@@ -1,39 +1,32 @@
 package roomescape.domain.reservationWaiting;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
-import roomescape.exception.ExpiredDateTimeException;
+import roomescape.domain.reservation.Reservation;
+import roomescape.exception.InvalidInputException;
 
 public class ReservationWaiting {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Reservation reservation;
     private final Long sequence;
     private final LocalDateTime createdAt;
 
-    private ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
+    private ReservationWaiting(Long id, String name, Reservation reservation, Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservation = reservation;
         this.sequence = sequence;
         this.createdAt = createdAt;
     }
 
-    public static ReservationWaiting create(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validatePastDateTime(date, time.getStartAt());
-        return new ReservationWaiting(null, name, date, time, theme, null, LocalDateTime.now());
+    public static ReservationWaiting create(String name, Reservation reservation) {
+        validateWaitableReservation(name, reservation);
+        return new ReservationWaiting(null, name, reservation, null, LocalDateTime.now());
     }
 
-    public static ReservationWaiting restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
-        return new ReservationWaiting(id, name, date, time, theme, sequence, createdAt);
+    public static ReservationWaiting restore(Long id, String name, Reservation reservation, Long sequence, LocalDateTime createdAt) {
+        return new ReservationWaiting(id, name, reservation, sequence, createdAt);
     }
 
     public Long getId() {
@@ -44,33 +37,25 @@ public class ReservationWaiting {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
     public Long getSequence() {
         return sequence;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void validateDeletable() {
-        validatePastDateTime(date, time.getStartAt());
-    }
+    private static void validateWaitableReservation(String name, Reservation reservation) {
+        if(reservation.isExpired()) {
+            throw new InvalidInputException("이미 지난 예약에 대기열을 등록할 수 없습니다.");
+        }
 
-    private static void validatePastDateTime(LocalDate date, LocalTime time) {
-        if (LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
-            throw new ExpiredDateTimeException();
+        if(reservation.isReservedBy(name)) {
+            throw new InvalidInputException("이미 등록된 예약이 있습니다.");
         }
     }
 }
