@@ -620,7 +620,7 @@
   async function deleteReservation(id) {
     if (!confirm('이 예약을 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/reservations/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/admin/reservations/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       showToast('예약이 삭제되었습니다.');
       loadReservations(resPage);

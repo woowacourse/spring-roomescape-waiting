@@ -1054,7 +1054,7 @@
       ? `${API}/reservations/waiting/${id}`
       : `${API}/reservations/${id}`;
     try {
-      const res = await fetch(endpoint, { method: 'DELETE' });
+      const res = await fetch(`${endpoint}?username=${encodeURIComponent(username)}`, { method: 'DELETE' });
       if (!res.ok) {
         const { message } = await res.json();
         showToast(message || '취소에 실패했습니다.', 'error');
