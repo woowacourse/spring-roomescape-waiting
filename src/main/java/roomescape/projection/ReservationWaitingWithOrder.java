@@ -1,13 +1,15 @@
 package roomescape.projection;
 
-import java.time.LocalDateTime;
-import roomescape.domain.Reservation;
+import java.time.LocalDate;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
 public record ReservationWaitingWithOrder(
         Long id,
         String name,
-        LocalDateTime createdAt,
-        Reservation reservation,
+        LocalDate date,
+        ReservationTime time,
+        Theme theme,
         int order
 ) {
 }

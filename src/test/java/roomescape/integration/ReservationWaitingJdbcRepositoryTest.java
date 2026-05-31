@@ -104,11 +104,12 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void 같은_예약에_먼저_신청한_대기가_있으면_다음_순번을_부여한다() {
+        LocalDateTime waitingTime = LocalDateTime.of(2026, 8, 1, 10, 0, 0);
         repository.save(new ReservationWaiting(
-                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+                "민욱", waitingTime, reservation));
 
         ReservationWaiting second = repository.save(new ReservationWaiting(
-                "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
+                "브라운", waitingTime, reservation));
         ReservationWaitingWithOrder found = queryRepository.findById(second.getId()).orElseThrow();
 
         assertThat(found.order()).isEqualTo(2);
