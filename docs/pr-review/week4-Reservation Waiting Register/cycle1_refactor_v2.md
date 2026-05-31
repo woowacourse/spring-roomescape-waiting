@@ -4,7 +4,7 @@
 
 ## ✅ 리팩토링 할 것 목록
 
-- [ ] **1. `ReservationWaitingService`에서 `ReservationDao`, `ReservationTimeDao`, `ThemeDao` 직접 의존 제거**
+- [x] **1. `ReservationWaitingService`에서 `ReservationDao`, `ReservationTimeDao`, `ThemeDao` 직접 의존 제거**
   - `ReservationService`에 `existsByDateAndTimeIdAndThemeId`, `existsByDateAndTimeIdAndThemeIdAndName` 위임 메서드 추가
   - `ReservationWaitingService`의 `validateReservationTime`, `validateTheme` 제거 — `ReservationService`에 이미 존재하므로 중복
   - `ReservationWaitingService` 생성자에서 `ReservationDao`, `ReservationTimeDao`, `ThemeDao` 3개 제거

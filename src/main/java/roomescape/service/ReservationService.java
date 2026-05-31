@@ -75,6 +75,26 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        return reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String name) {
+        return reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationTime getTime(long timeId) {
+        return validateReservationTime(timeId);
+    }
+
+    @Transactional(readOnly = true)
+    public Theme getTheme(long themeId) {
+        return validateTheme(themeId);
+    }
+
+    @Transactional(readOnly = true)
     public Page<Reservation> findAllWithCount(int page, int size) {
         List<Reservation> reservations = reservationDao.findAll(page, size);
         long totalCount = reservationDao.count();
