@@ -113,6 +113,10 @@ public class ReservationService {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(memberId, reservation);
         validatePastReservationCancel(reservation.getDate(), reservation.getTime().getStartAt());
+        deleteOrPromoteWaiting(reservationId);
+    }
+
+    private void deleteOrPromoteWaiting(Long reservationId) {
         reservationWaitDao.findEarliestMemberId(reservationId)
                 .ifPresentOrElse(
                         m -> changeToRecentWaitingMember(reservationId, m),

@@ -59,6 +59,6 @@ CREATE TABLE reservation_wait
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE,
     CONSTRAINT uq_reservation_wait_reservation_member UNIQUE (reservation_id, member_id)
 );
