@@ -39,7 +39,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
-                ReservationStatus.valueOf(resultSet.getString("status")),
+                fromDbValue(resultSet.getString("status")),
                 resultSet.getObject("waiting_rank", Long.class),
                 resultSet.getString("name"),
                 resultSet.getDate("date").toLocalDate(),
@@ -74,7 +74,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                        t.name AS theme_name,
                        t.description AS theme_description,
                        t.thumbnail AS theme_thumbnail,
-                       'CANCELED' AS status,
+                       %s AS status,
                        CAST(NULL AS BIGINT) AS waiting_rank,
                        h.request_order,
                        1 AS source_order
@@ -82,7 +82,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time rt ON h.time_id = rt.id
                 JOIN theme t ON h.theme_id = t.id
                 WHERE h.name = ?
-                """;
+                """.formatted(toSqlLiteral(ReservationStatus.CANCELED));
         String sql = selectReservations("WHERE r.name = ?", historyUnionClause);
 
         return jdbcTemplate.query(sql, reservationRowMapper, name, name);
@@ -128,8 +128,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                            ranked.theme_description,
                            ranked.theme_thumbnail,
                            CASE
-                               WHEN ranked.queue_position = 1 THEN 'RESERVED'
-                               ELSE 'WAITING'
+                               WHEN ranked.queue_position = 1 THEN %s
+                               ELSE %s
                            END AS status,
                            ranked.queue_position - 1 AS waiting_rank,
                            ranked.request_order,
@@ -164,7 +164,33 @@ public class JdbcReservationRepository implements ReservationRepository {
                          result.start_at ASC,
                          result.request_order ASC,
                          result.source_order ASC
-                """.formatted(whereClause, additionalRowsClause);
+                """.formatted(
+                        toSqlLiteral(ReservationStatus.RESERVED),
+                        toSqlLiteral(ReservationStatus.WAITING),
+                        whereClause,
+                        additionalRowsClause
+                );
+    }
+
+    private static String toSqlLiteral(ReservationStatus status) {
+        return "'" + toDbValue(status) + "'";
+    }
+
+    private static ReservationStatus fromDbValue(String value) {
+        return switch (value) {
+            case "RESERVED" -> ReservationStatus.RESERVED;
+            case "WAITING" -> ReservationStatus.WAITING;
+            case "CANCELED" -> ReservationStatus.CANCELED;
+            default -> throw new IllegalArgumentException("알 수 없는 예약 상태입니다: " + value);
+        };
+    }
+
+    private static String toDbValue(ReservationStatus status) {
+        return switch (status) {
+            case RESERVED -> "RESERVED";
+            case WAITING -> "WAITING";
+            case CANCELED -> "CANCELED";
+        };
     }
 
     @Override
