@@ -42,7 +42,7 @@ import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
 
 @JdbcTest
-@Import({ReservationService.class, ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
+@Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
         ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
