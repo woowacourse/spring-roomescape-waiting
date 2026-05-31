@@ -31,6 +31,11 @@ public class ReservationTime {
         return Objects.equals(id, that.id);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     private void validateTime(LocalTime startAt) {
         if (startAt == null) {
             throw new IllegalArgumentException("startAt은 비어 있을 수 없습니다.");
