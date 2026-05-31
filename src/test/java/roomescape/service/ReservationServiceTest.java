@@ -161,6 +161,9 @@ public class ReservationServiceTest {
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         Long reservationId = 1L;
-        assertDoesNotThrow(() -> reservationService.deleteReservation(reservationId));
+        given(reservationDao.findById(reservationId))
+                .willReturn(Optional.of(new Reservation(reservationId, UserName.parse(name), futureDate, time, theme)));
+
+        assertDoesNotThrow(() -> reservationService.deleteReservation(reservationId, name));
     }
 }
