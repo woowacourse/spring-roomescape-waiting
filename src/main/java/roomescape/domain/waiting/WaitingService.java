@@ -75,7 +75,6 @@ public class WaitingService {
         return MyWaitingsResponse.from(myWaitingResults);
     }
 
-
     private void validateDuplicateWaiting(LocalDate date, Long timeId, Long themeId, String name) {
         boolean isDuplicated = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name);
         if (isDuplicated) {
@@ -98,5 +97,4 @@ public class WaitingService {
             throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);
         }
     }
-
 }

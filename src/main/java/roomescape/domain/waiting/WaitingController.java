@@ -1,8 +1,5 @@
 package roomescape.domain.waiting;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,26 +16,26 @@ import roomescape.domain.waiting.dto.WaitingResponse;
 @RestController
 public class WaitingController {
 
+    private final WaitingQueue waitingQueue;
     private final WaitingService waitingService;
 
-    public WaitingController(WaitingService waitingService) {
+    public WaitingController(WaitingQueue waitingQueue, WaitingService waitingService) {
+        this.waitingQueue = waitingQueue;
         this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations/waiting")
     public ResponseEntity<WaitingResponse> createWaiting(
-            @RequestBody @Valid WaitingRequest waitingRequest
+            @RequestBody WaitingRequest waitingRequest
     ) {
-
-        WaitingResponse response = waitingService.createWaiting(waitingRequest);
+        WaitingResponse response = waitingQueue.submit(waitingRequest);
         URI location = URI.create("/reservations/waiting/" + response.id());
-
         return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/reservations/waiting/mine")
     public ResponseEntity<MyWaitingsResponse> getMyWaitings(
-            @RequestParam @NotBlank @Size(max = 100) String name
+            @RequestParam String name
     ) {
         MyWaitingsResponse response = waitingService.getMyWaitings(name);
         return ResponseEntity.ok(response);
@@ -51,5 +48,4 @@ public class WaitingController {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
-
 }
