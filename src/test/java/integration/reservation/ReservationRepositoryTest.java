@@ -11,8 +11,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -132,10 +132,15 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
 
         // then
         assertThat(find).isPresent();
-        assertThat(find.get().getReservations())
+        ReservationSlot result = find.get();
+        assertThat(result.getReservations())
                 .singleElement()
                 .extracting(Reservation::getName, Reservation::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
+        assertThat(result.getReservations())
+                .singleElement()
+                .extracting(Reservation::getSlot)
+                .isSameAs(result);
     }
 
     @Test

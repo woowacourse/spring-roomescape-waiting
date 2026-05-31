@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import integration.BaseIntegrationTest;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.result.ReservationSlotResult;
 
 class ReservationServiceIntTest extends BaseIntegrationTest {
 
@@ -58,5 +60,24 @@ class ReservationServiceIntTest extends BaseIntegrationTest {
         // then: DB에 예약이 딱 하나만 있어야 하고, DataIntergrityViolation 예외가 한 번 발생해야 됨.
         assertThat(errorCount.get()).isEqualTo(1);
         assertThat(reservationDataSource.countReservations()).isEqualTo(1);
+    }
+
+    @Test
+    void 예약_취소_시_대기자를_예약으로_승격한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationSlotResult reservation = reservationService.reserve(new ReservationCommand("이프", date, 1L, 1L));
+        reservationService.addWaiting(new ReservationCommand("라텔", date, 1L, 1L));
+
+        // when
+        reservationService.cancelReservation(reservation.reservation().id());
+
+        // then
+        List<String> statuses = reservationDataSource.findReservationStatusesBySlotId(reservation.slotId());
+        assertThat(statuses)
+                .containsExactlyInAnyOrder(
+                        "이프:DELETED",
+                        "라텔:RESERVED"
+                );
     }
 }

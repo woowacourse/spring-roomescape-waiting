@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 public class Reservation {
 
-    private Long id;
-    private String name;
-    private ReservationSlot slot;
+    private final Long id;
+    private final String name;
+    private final ReservationSlot slot;
+    private final LocalDateTime createdAt;
     private ReservationStatus status;
-    private LocalDateTime createdAt;
 
     public Reservation(Long id, String name, ReservationSlot slot, ReservationStatus status, LocalDateTime createdAt) {
         this.id = id;

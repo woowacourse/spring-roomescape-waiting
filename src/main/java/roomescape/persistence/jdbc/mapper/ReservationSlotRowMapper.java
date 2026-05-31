@@ -9,7 +9,7 @@ import roomescape.domain.TimeStatus;
 
 public final class ReservationSlotRowMapper {
 
-    public static final RowMapper<ReservationSlot> RESERVATION_SLOT_ROW_MAPPER = (rs, rowNum) -> {
+    public static final RowMapper<ReservationSlot> RESERVATION_SLOT_WITHOUT_RESERVATIONS_ROW_MAPPER = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
                 rs.getTime("time_start").toLocalTime(),

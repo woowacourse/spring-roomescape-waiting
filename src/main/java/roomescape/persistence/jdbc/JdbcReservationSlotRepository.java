@@ -63,7 +63,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 slot.getDate(),
                 slot.getTheme(),
                 slot.getTime(),
-                reservationDao.findBySlotId(slot.getId())
+                reservationDao.findBySlot(slot)
         );
     }
 }

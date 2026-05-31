@@ -100,7 +100,7 @@ public class ReservationSlotDao {
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(
                     sql,
-                    ReservationSlotRowMapper.RESERVATION_SLOT_ROW_MAPPER,
+                    ReservationSlotRowMapper.RESERVATION_SLOT_WITHOUT_RESERVATIONS_ROW_MAPPER,
                     params
             ));
         } catch (EmptyResultDataAccessException e) {

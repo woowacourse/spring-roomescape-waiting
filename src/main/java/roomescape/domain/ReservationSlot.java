@@ -17,9 +17,9 @@ public class ReservationSlot {
 
     private final Long id;
     private final Theme theme;
-    private LocalDate date;
-    private ReservationTime time;
-    private Reservations reservations;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Reservations reservations;
 
     public ReservationSlot(Long id, LocalDate date, Theme theme, ReservationTime time, List<Reservation> reservations) {
         validateReservation(date, theme, time);

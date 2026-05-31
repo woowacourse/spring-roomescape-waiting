@@ -2,6 +2,7 @@ package integration.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -60,5 +61,18 @@ public class ReservationDataSource {
     public int countReservations() {
         String sql = "SELECT COUNT(*) FROM reservation_slot";
         return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    public List<String> findReservationStatusesBySlotId(long slotId) {
+        String sql = """
+                SELECT name, status
+                FROM reservation
+                WHERE slot_id = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> "%s:%s".formatted(rs.getString("name"), rs.getString("status")),
+                slotId
+        );
     }
 }
