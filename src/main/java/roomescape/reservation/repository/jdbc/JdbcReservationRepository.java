@@ -6,14 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.repository.entity.ReservationEntity;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -54,7 +53,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now) {
+    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now) {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
@@ -78,7 +77,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return jdbcTemplate.query(sql,
                         this::mapToDomain,
-                        customerName.name(),
+                        customerName,
                         Date.valueOf(now.toLocalDate()),
                         Date.valueOf(now.toLocalDate()),
                         Time.valueOf(now.toLocalTime())

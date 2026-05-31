@@ -2,7 +2,6 @@ package roomescape.reservation.service.support;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
@@ -74,9 +73,9 @@ public class FakeReservationRepository implements ReservationRepository  {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(final CustomerName customerName, final LocalDateTime now) {
+    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(final String customerName, final LocalDateTime now) {
         return reservations.stream()
-                .filter(reservation -> reservation.getCustomerName().equals(customerName.name()))
+                .filter(reservation -> reservation.getCustomerName().equals(customerName))
                 .filter(reservation -> LocalDateTime.of(
                         reservation.getDate(),
                         reservation.getTime().getStartAt()).isAfter(now)

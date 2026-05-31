@@ -8,12 +8,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 import java.time.*;
 import java.util.List;
@@ -193,7 +192,7 @@ class JdbcReservationRepositoryTest {
         insertReservation("초코칩", "2026-08-05", 1L, 1L);
         insertReservation("재키", "2026-08-05", 2L, 1L);
 
-        List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName("초코칩"), NOW);
+        List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter("초코칩", NOW);
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("초코칩");

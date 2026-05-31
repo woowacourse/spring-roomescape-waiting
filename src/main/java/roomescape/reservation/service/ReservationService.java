@@ -56,9 +56,10 @@ public class ReservationService {
 
     public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
         final LocalDateTime now = LocalDateTime.now(clock);
+        final CustomerName validCustomerName = new CustomerName(customerName);
 
         final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
-                new CustomerName(customerName),
+                validCustomerName.name(),
                 now
         );
         final List<WaitingResponse> waitingsWithRank = waitingRepository.findAllWithRankByCustomerNameAndReservationDateTimeAfter(
