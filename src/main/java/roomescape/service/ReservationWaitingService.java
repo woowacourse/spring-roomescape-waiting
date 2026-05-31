@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
@@ -32,10 +33,18 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaitingCommand = reservationWaitingReq.to(reservation);
 
         if(reservationWaitingDao.isExistByNameAndReservationId(reservationWaitingReq.name(), reservation.getId())) {
-            throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
+            throw new InvalidInputException("이미 대기열에 등록되어 있습니다.");
         }
 
-        Long id = reservationWaitingDao.create(reservationWaitingCommand);
+        Long id;
+        try {
+            id = reservationWaitingDao.create(reservationWaitingCommand);
+        } catch (DuplicateKeyException e) {
+            throw new InvalidInputException("이미 대기열에 등록되어 있습니다.");
+        } catch (DataIntegrityViolationException e) {
+            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
+        }
+
         ReservationWaiting reservationWaiting = reservationWaitingDao.findReservationWaitingById(id)
                 .stream()
                 .findFirst()
