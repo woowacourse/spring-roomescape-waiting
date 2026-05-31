@@ -142,7 +142,7 @@ class ReservationTest {
 
             LocalDate newDate = LocalDate.now().plusDays(3);
             Time newTime = new Time(2L, LocalTime.of(14, 0));
-            reservation.update(newDate, newTime);
+            reservation.update(newDate, newTime, LocalDateTime.now());
 
             assertThat(reservation.getDate()).isEqualTo(newDate);
             assertThat(reservation.getTime()).isEqualTo(newTime);
@@ -156,7 +156,7 @@ class ReservationTest {
             LocalDate pastDate = LocalDate.now().minusDays(1);
             Time pastTime = new Time(2L, LocalTime.of(14, 0));
 
-            assertThatThrownBy(() -> reservation.update(pastDate, pastTime))
+            assertThatThrownBy(() -> reservation.update(pastDate, pastTime, LocalDateTime.now()))
                     .isInstanceOf(BusinessRuleViolationException.class);
         }
     }

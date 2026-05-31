@@ -24,23 +24,23 @@ public class Reservation {
     }
 
     public static Reservation createByUser(Member member, LocalDate date, Time time, Theme theme,
-                                           Long storeId, LocalDateTime now) {
-        Slot slot = new Slot(date, time, theme, storeId);
+                                           Store store, LocalDateTime now) {
+        Slot slot = new Slot(date, time, theme, store);
         if (slot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 생성은 불가능합니다.");
         }
         return new Reservation(null, member, slot, ReservationStatus.BOOKED, null, 0L);
     }
 
-    public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
-        return new Reservation(null, member, new Slot(date, time, theme, storeId),
+    public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Store store) {
+        return new Reservation(null, member, new Slot(date, time, theme, store),
                 ReservationStatus.BOOKED, null, 0L);
     }
 
     public static Reservation reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme,
                                           ReservationStatus status, LocalDateTime deletedAt, long version,
-                                          Long storeId) {
-        return new Reservation(id, member, new Slot(date, time, theme, storeId), status, deletedAt, version);
+                                          Store store) {
+        return new Reservation(id, member, new Slot(date, time, theme, store), status, deletedAt, version);
     }
 
     public void cancelByUser(LocalDateTime now) {
@@ -59,9 +59,8 @@ public class Reservation {
         this.deletedAt = now;
     }
 
-    public void update(LocalDate date, Time time) {
-        LocalDateTime now = LocalDateTime.now();
-        Slot newSlot = new Slot(date, time, slot.getTheme(), slot.getStoreId());
+    public void update(LocalDate date, Time time, LocalDateTime now) {
+        Slot newSlot = new Slot(date, time, slot.getTheme(), slot.getStore());
         if (newSlot.isPast(now)) {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 수정은 불가능합니다.");
         }
@@ -95,6 +94,7 @@ public class Reservation {
     public LocalDate getDate() { return slot.getDate(); }
     public Time getTime() { return slot.getTime(); }
     public Theme getTheme() { return slot.getTheme(); }
+    public Store getStore() { return slot.getStore(); }
     public Long getStoreId() { return slot.getStoreId(); }
     public ReservationStatus getStatus() { return status; }
     public long getVersion() { return version; }

@@ -8,10 +8,13 @@ import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.dto.request.AdminReservationRequestDto;
@@ -25,17 +28,20 @@ public class AdminReservationService {
     private final MemberDao memberDao;
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
+    private final StoreDao storeDao;
 
     public AdminReservationService(
             ReservationDao reservationDao,
             MemberDao memberDao,
             TimeDao timeDao,
-            ThemeDao themeDao
+            ThemeDao themeDao,
+            StoreDao storeDao
     ) {
         this.reservationDao = reservationDao;
         this.memberDao = memberDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
+        this.storeDao = storeDao;
     }
 
     @Transactional(readOnly = true)
@@ -69,7 +75,7 @@ public class AdminReservationService {
         Reservation reservation = findById(id);
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
-        reservation.update(request.date(), time);
+        reservation.update(request.date(), time, LocalDateTime.now());
         return reservationDao.update(reservation);
     }
 
@@ -86,13 +92,17 @@ public class AdminReservationService {
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {
-        if (reservationDao.existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(request.themeId(), request.timeId(), request.date(), request.storeId())) {
-            throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
-        }
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         Theme theme = themeDao.findById(request.themeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
-        return Reservation.createByAdmin(member, request.date(), time, theme, request.storeId());
+        Store store = request.storeId() == null ? null
+                : storeDao.findById(request.storeId())
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 매장입니다."));
+        Slot slot = new Slot(request.date(), time, theme, store);
+        if (reservationDao.existsBySlotForUpdate(slot)) {
+            throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
+        }
+        return Reservation.createByAdmin(member, request.date(), time, theme, store);
     }
 }

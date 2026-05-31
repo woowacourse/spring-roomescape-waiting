@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 
 public interface ReservationDao extends CommonDao<Reservation> {
     List<Reservation> findAll(int limit, int offset);
@@ -15,9 +16,9 @@ public interface ReservationDao extends CommonDao<Reservation> {
 
     long count();
 
-    boolean existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId);
+    boolean existsBySlotForUpdate(Slot slot);
 
-    Optional<Reservation> findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId);
+    Optional<Reservation> findBySlotKeyForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId);
 
     boolean existsByThemeId(Long themeId);
 

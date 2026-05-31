@@ -25,13 +25,13 @@ public class WaitingService {
     }
 
     public Waiting create(WaitingRequestDto waitingRequestDto, Member member) {
-        Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(waitingRequestDto.themeId(),
+        Reservation reservation = reservationDao.findBySlotKeyForUpdate(waitingRequestDto.themeId(),
                         waitingRequestDto.timeId(), waitingRequestDto.date(), waitingRequestDto.storeId())
                 .orElseThrow(() -> new BusinessRuleViolationException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         Waiting waiting = Waiting.create(member, reservation);
 
-        if (waitingDao.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStoreId(
+        if (waitingDao.existsByMemberAndSlotKey(
                 member.getId(),
                 waitingRequestDto.date(),
                 waitingRequestDto.timeId(),

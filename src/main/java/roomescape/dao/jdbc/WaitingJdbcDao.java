@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
+import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.domain.Waiting;
@@ -21,14 +22,19 @@ import roomescape.domain.vo.Name;
 
 @Repository
 public class WaitingJdbcDao implements WaitingDao {
-    private static final RowMapper<Member> MEMBER_ROW_MAPPER = (rs, rowNum) -> new Member(
-            rs.getLong("member_id"),
-            rs.getString("member_name"),
-            rs.getString("member_email"),
-            rs.getString("member_password"),
-            MemberRole.valueOf(rs.getString("member_role")),
-            rs.getObject("member_store_id", Long.class)
-    );
+    private static final RowMapper<Member> MEMBER_ROW_MAPPER = (rs, rowNum) -> {
+        Long memberStoreId = rs.getObject("member_store_id", Long.class);
+        Store memberStore = memberStoreId == null ? null
+                : new Store(memberStoreId, rs.getString("member_store_name"));
+        return new Member(
+                rs.getLong("member_id"),
+                rs.getString("member_name"),
+                rs.getString("member_email"),
+                rs.getString("member_password"),
+                MemberRole.valueOf(rs.getString("member_role")),
+                memberStore
+        );
+    };
     private static final RowMapper<Time> TIME_ROW_MAPPER = (rs, rowNum) -> new Time(
             rs.getLong("time_id"),
             LocalTime.parse(rs.getString("time_start_at"))
@@ -39,26 +45,33 @@ public class WaitingJdbcDao implements WaitingDao {
             rs.getString("theme_thumbnail_url"),
             rs.getString("theme_description")
     );
-    private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> Waiting.reconstruct(
-            rs.getLong("id"),
-            MEMBER_ROW_MAPPER.mapRow(rs, rowNum),
-            LocalDate.parse(rs.getString("date")),
-            TIME_ROW_MAPPER.mapRow(rs, rowNum),
-            THEME_ROW_MAPPER.mapRow(rs, rowNum),
-            rs.getObject("store_id", Long.class),
-            rs.getLong("rank")
-    );
+    private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
+        Long waitingStoreId = rs.getObject("waiting_store_id", Long.class);
+        Store waitingStore = waitingStoreId == null ? null
+                : new Store(waitingStoreId, rs.getString("waiting_store_name"));
+        return Waiting.reconstruct(
+                rs.getLong("id"),
+                MEMBER_ROW_MAPPER.mapRow(rs, rowNum),
+                LocalDate.parse(rs.getString("date")),
+                TIME_ROW_MAPPER.mapRow(rs, rowNum),
+                THEME_ROW_MAPPER.mapRow(rs, rowNum),
+                waitingStore,
+                rs.getLong("rank")
+        );
+    };
     private static final String BASE_SELECT = """
             SELECT
                     w.id,
                     w.date,
-                    w.store_id,
+                    ws.id AS waiting_store_id,
+                    ws.name AS waiting_store_name,
                     m.id AS member_id,
                     m.name AS member_name,
                     m.email AS member_email,
                     m.password AS member_password,
                     m.role AS member_role,
-                    m.store_id AS member_store_id,
+                    ms.id AS member_store_id,
+                    ms.name AS member_store_name,
                     t.id AS time_id,
                     t.start_at AS time_start_at,
                     th.id AS theme_id,
@@ -76,6 +89,8 @@ public class WaitingJdbcDao implements WaitingDao {
                 INNER JOIN members m ON w.member_id = m.id
                 INNER JOIN times t ON w.time_id = t.id
                 INNER JOIN themes th ON w.theme_id = th.id
+                LEFT JOIN stores ws ON w.store_id = ws.id
+                LEFT JOIN stores ms ON m.store_id = ms.id
             """;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -156,7 +171,7 @@ public class WaitingJdbcDao implements WaitingDao {
     }
 
     @Override
-    public boolean existsByMemberIdAndDateAndTimeIdAndThemeIdAndStoreId(
+    public boolean existsByMemberAndSlotKey(
             Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
         String sql = """
                 SELECT EXISTS(

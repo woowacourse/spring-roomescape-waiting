@@ -23,8 +23,8 @@ public class Waiting {
         return new Waiting(null, member, reservation.getSlot(), null);
     }
 
-    public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Long storeId, Long rank) {
-        return new Waiting(id, member, new Slot(date, time, theme, storeId), rank);
+    public static Waiting reconstruct(Long id, Member member, LocalDate date, Time time, Theme theme, Store store, Long rank) {
+        return new Waiting(id, member, new Slot(date, time, theme, store), rank);
     }
 
     public Long getId() {
@@ -49,6 +49,10 @@ public class Waiting {
 
     public Theme getTheme() {
         return slot.getTheme();
+    }
+
+    public Store getStore() {
+        return slot.getStore();
     }
 
     public Long getStoreId() {
