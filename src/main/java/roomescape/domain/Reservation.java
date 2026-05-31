@@ -102,4 +102,8 @@ public class Reservation {
     public boolean isReservedBy(long memberId) {
         return this.memberId.equals(memberId);
     }
+
+    public boolean isPast() {
+        return time.isPast(date);
+    }
 }

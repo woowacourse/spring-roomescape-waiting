@@ -7,6 +7,7 @@ import roomescape.exception.auth.WrongStoreAccessException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -147,5 +148,20 @@ public class ReservationTest {
 
         assertThatThrownBy(() -> reservation.validateStoreOwnership(regularUser))
                 .isInstanceOf(WrongStoreAccessException.class);
+    }
+
+    @Test
+    void 지난_슬롯의_예약은_과거다() {
+        Reservation reservation = new Reservation(
+                1L, 1L, LocalDate.now().minusDays(1), SAMPLE_TIME, 1L, 1L);
+
+        assertThat(reservation.isPast()).isTrue();
+    }
+
+    @Test
+    void 다가올_슬롯의_예약은_과거가_아니다() {
+        Reservation reservation = new Reservation(1L, 1L, SAMPLE_DATE, SAMPLE_TIME, 1L, 1L);
+
+        assertThat(reservation.isPast()).isFalse();
     }
 }

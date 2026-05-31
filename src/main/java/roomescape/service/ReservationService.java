@@ -20,8 +20,6 @@ import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsExceptio
 import roomescape.exception.reservationwait.SelfReservationWaitNotAllowedException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -54,8 +52,10 @@ public class ReservationService {
 
     @Transactional
     public Reservation createReservation(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
-        LocalTime startAt = reservationTimeDao.findReservationTimeById(timeId).getStartAt();
-        validatePastReservationCreate(date, startAt);
+        ReservationTime reservationTime = reservationTimeDao.findReservationTimeById(timeId);
+        if (reservationTime.isPast(date)) {
+            throw new PastReservationNotAllowedException();
+        }
         try {
             Long id = reservationDao.insertWithKeyHolder(memberId, date, timeId, themeId, storeId);
             return reservationDao.findReservationById(id);
@@ -67,7 +67,9 @@ public class ReservationService {
     @Transactional
     public CreatedWaitResult createWait(Long memberId, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
-        validatePastReservationWaitCreate(reservation.getDate(), reservation.getTime().getStartAt());
+        if (reservation.isPast()) {
+            throw new PastReservationWaitNotAllowedException();
+        }
         validateIfSelfReserved(memberId, reservation);
         try {
             Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
@@ -85,7 +87,9 @@ public class ReservationService {
     public Reservation updateReservation(Long id, LocalDate date, Long memberId, Long timeId) {
         ReservationTime reservationTime = findReservationTime(timeId);
         validateReservationOwner(memberId, findReservation(id));
-        validatePastReservationCreate(date, reservationTime.getStartAt());
+        if (reservationTime.isPast(date)) {
+            throw new PastReservationNotAllowedException();
+        }
         try {
             reservationDao.updateById(id, date, timeId);
         } catch (DuplicateKeyException e) {
@@ -99,7 +103,9 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTime(timeId);
         Reservation reservation = findReservation(reservationId);
         reservation.validateStoreOwnership(manager);
-        validatePastReservationCreate(date, reservationTime.getStartAt());
+        if (reservationTime.isPast(date)) {
+            throw new PastReservationNotAllowedException();
+        }
         try {
             reservationDao.updateById(reservationId, date, timeId);
         } catch (DuplicateKeyException e) {
@@ -112,7 +118,9 @@ public class ReservationService {
     public void deleteReservation(Long reservationId, Long memberId) {
         Reservation reservation = findReservation(reservationId);
         validateReservationOwner(memberId, reservation);
-        validatePastReservationCancel(reservation.getDate(), reservation.getTime().getStartAt());
+        if (reservation.isPast()) {
+            throw new PastReservationCancelNotAllowedException();
+        }
         deleteOrPromoteWaiting(reservationId);
     }
 
@@ -159,30 +167,6 @@ public class ReservationService {
             return reservationTimeDao.findReservationTimeById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new ReservationTimeNotFoundException();
-        }
-    }
-
-    private void validatePastReservationCreate(LocalDate date, LocalTime startAt) {
-        LocalDateTime present = LocalDateTime.now();
-        LocalDateTime request = LocalDateTime.of(date, startAt);
-        if (present.isAfter(request)) {
-            throw new PastReservationNotAllowedException();
-        }
-    }
-
-    private void validatePastReservationCancel(LocalDate date, LocalTime startAt) {
-        LocalDateTime present = LocalDateTime.now();
-        LocalDateTime request = LocalDateTime.of(date, startAt);
-        if (present.isAfter(request)) {
-            throw new PastReservationCancelNotAllowedException();
-        }
-    }
-
-    private void validatePastReservationWaitCreate(LocalDate date, LocalTime startAt) {
-        LocalDateTime present = LocalDateTime.now();
-        LocalDateTime request = LocalDateTime.of(date, startAt);
-        if (present.isAfter(request)) {
-            throw new PastReservationWaitNotAllowedException();
         }
     }
 
