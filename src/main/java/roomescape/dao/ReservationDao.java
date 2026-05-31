@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -29,12 +30,16 @@ public class ReservationDao {
                 resultSet.getString("thumbnail")
         );
 
-        return new Reservation(
-                resultSet.getLong("id"),
-                resultSet.getString("reservation_name"),
+        ReservationSlot slot = new ReservationSlot(
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,
                 theme
+        );
+
+        return new Reservation(
+                resultSet.getLong("id"),
+                resultSet.getString("reservation_name"),
+                slot
         );
     };
 
@@ -59,9 +64,7 @@ public class ReservationDao {
         return new Reservation(
                 generatedId.longValue(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                reservation.getSlot()
         );
     }
 
@@ -98,20 +101,22 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId);
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public boolean existsBySlot(ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class,
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
-    public boolean existsDuplicateExcluding(LocalDate date, long timeId, long themeId, long reservationId) {
+    public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?""";
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, reservationId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class,
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId(), reservationId);
     }
 
     public Reservation update(Long reservationId, LocalDate date, long timeId) {

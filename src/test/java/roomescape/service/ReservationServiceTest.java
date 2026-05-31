@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
@@ -137,7 +138,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 내_예약과_대기가_날짜_순으로_정렬된다(){
+    void 내_예약과_대기가_날짜_순으로_정렬된다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme1 = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
         Theme theme2 = saveTheme("방탈출2", "설명2", "https://thumbnail2.com");
@@ -225,10 +226,11 @@ class ReservationServiceTest {
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationDao.insert(Reservation.createWithoutId(name, date, time, theme));
+        return reservationDao.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(), date, time, theme));
+        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(),
+                new ReservationSlot(date, time, theme)));
     }
 }

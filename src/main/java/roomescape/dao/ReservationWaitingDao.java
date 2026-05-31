@@ -1,6 +1,5 @@
 package roomescape.dao;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -28,13 +28,17 @@ public class ReservationWaitingDao {
                 resultSet.getString("thumbnail")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getDate("reservation_date").toLocalDate(),
+                reservationTime,
+                theme
+        );
+
         return new ReservationWaiting(
                 resultSet.getLong("id"),
                 resultSet.getString("waiting_name"),
                 resultSet.getTimestamp("created_at").toLocalDateTime(),
-                resultSet.getDate("reservation_date").toLocalDate(),
-                reservationTime,
-                theme
+                slot
         );
     };
 
@@ -61,22 +65,21 @@ public class ReservationWaitingDao {
                 generatedId.longValue(),
                 reservationWaiting.getName(),
                 reservationWaiting.getCreatedAt(),
-                reservationWaiting.getReservationDate(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getTheme()
+                reservationWaiting.getSlot()
         );
     }
 
-    public boolean existsByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, long timeId, long themeId) {
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
         String sql = """
                 SELECT COUNT(*) > 0
                 FROM reservation_waiting
                 WHERE name = ?
                 AND reservation_date = ?
-                AND time_id = ? 
+                AND time_id = ?
                 AND theme_id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class,
+                name, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
     public int delete(Long reservationWaitingId) {
@@ -84,16 +87,17 @@ public class ReservationWaitingDao {
         return jdbcTemplate.update(sql, reservationWaitingId);
     }
 
-    public int countOrder(LocalDate reservationDate, long timeId, long themeId, long waitingId) {
+    public int countOrder(ReservationSlot slot, long waitingId) {
         String sql = """
-                SELECT COUNT(*) 
-                FROM reservation_waiting 
+                SELECT COUNT(*)
+                FROM reservation_waiting
                 WHERE reservation_date = ?
                 AND time_id = ?
                 AND theme_id = ?
                 AND id <= ?
                 """;
-        return jdbcTemplate.queryForObject(sql, Integer.class, reservationDate, timeId, themeId, waitingId);
+        return jdbcTemplate.queryForObject(sql, Integer.class,
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId(), waitingId);
     }
 
     public List<ReservationWaiting> select() {
@@ -130,21 +134,21 @@ public class ReservationWaitingDao {
 
     private String baseSelectSql() {
         return """
-                SELECT rw.id, 
-                       rw.name as waiting_name, 
-                       rw.created_at, 
-                       rw.reservation_date, 
-                       rt.id as time_id, 
+                SELECT rw.id,
+                       rw.name as waiting_name,
+                       rw.created_at,
+                       rw.reservation_date,
+                       rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,
-                       t.name as theme_name, 
+                       t.name as theme_name,
                        t.description,
                        t.thumbnail
                 FROM reservation_waiting as rw
-                INNER JOIN reservation_time as rt 
+                INNER JOIN reservation_time as rt
                 ON rw.time_id = rt.id
-                INNER JOIN theme as t 
-                ON rw.theme_id = t.id 
+                INNER JOIN theme as t
+                ON rw.theme_id = t.id
                 """;
     }
 }
