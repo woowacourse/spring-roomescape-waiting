@@ -117,14 +117,14 @@ public class ReservationDao {
 
     public boolean existByNameReservationIdStatus(String name, Long reservationSlotId, Status status) {
         String sql = """
-            SELECT EXISTS (
-                SELECT 1
-                FROM reservation
-                WHERE name = ?
-                  AND reservation_slot_id = ?
-                  AND status = ?
-            )
-            """;
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation
+                    WHERE name = ?
+                      AND reservation_slot_id = ?
+                      AND status = ?
+                )
+                """;
 
         return jdbcTemplate.queryForObject(sql, Boolean.class, name, reservationSlotId, status.name());
     }

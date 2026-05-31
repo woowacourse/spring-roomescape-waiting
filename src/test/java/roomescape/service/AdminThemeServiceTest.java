@@ -24,7 +24,6 @@ class AdminThemeServiceTest {
         assertThatThrownBy(() -> adminThemeService.delete(themeId))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.UNALLOWED_DELETE_EXISTS_THEME.getMessage());
-
     }
 
     @DisplayName("존재하는 테마를 추가하면 에러를 던진다.")
@@ -35,5 +34,4 @@ class AdminThemeServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_THEME.getMessage());
     }
-
 }

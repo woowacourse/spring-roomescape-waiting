@@ -168,5 +168,4 @@ class ReservationServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
     }
-
 }

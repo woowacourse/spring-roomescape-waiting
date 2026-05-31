@@ -21,20 +21,20 @@ public record ReservationResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
         int order) {
-        public static ReservationResponse from(Reservation reservation, ReservationSlot reservationSlot, int order) {
-                Theme theme = reservationSlot.getTheme();
-                Time time = reservationSlot.getTime();
+    public static ReservationResponse from(Reservation reservation, ReservationSlot reservationSlot, int order) {
+        Theme theme = reservationSlot.getTheme();
+        Time time = reservationSlot.getTime();
 
-                return new ReservationResponse(
-                        reservation.getId(),
-                        reservation.getName(),
-                        reservation.getStatus().toString(),
-                        reservationSlot.getDate(),
-                        theme.getName(),
-                        theme.getDescription(),
-                        theme.getThumbnailUrl(),
-                        time.getStartAt(),
-                        order
-                );
-        }
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getStatus().toString(),
+                reservationSlot.getDate(),
+                theme.getName(),
+                theme.getDescription(),
+                theme.getThumbnailUrl(),
+                time.getStartAt(),
+                order
+        );
+    }
 }

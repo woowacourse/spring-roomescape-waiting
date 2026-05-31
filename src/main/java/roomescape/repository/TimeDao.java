@@ -21,7 +21,6 @@ public class TimeDao {
             rs.getTime("start_at").toLocalTime()
     );
 
-
     public TimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)

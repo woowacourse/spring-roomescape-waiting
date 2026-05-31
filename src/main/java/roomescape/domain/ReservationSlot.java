@@ -44,7 +44,6 @@ public class ReservationSlot {
         return id;
     }
 
-
     public LocalDate getDate() {
         return date;
     }

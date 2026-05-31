@@ -23,7 +23,6 @@ public class Reservation {
         this.updateAt = updateAt;
     }
 
-
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new CustomException(ErrorCode.RESERVATION_NAME_BLANK);

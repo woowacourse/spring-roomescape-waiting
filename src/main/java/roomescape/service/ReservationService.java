@@ -46,7 +46,6 @@ public class ReservationService {
 
             Long reservationId = reservationDao.save(request.name(), reservationSlotId, now);
 
-
             Reservation reservation = reservationDao.findById(reservationId);
             return ReservationResponse.from(reservation, reservationSlot, reservationDao.findOrderByReservationId(reservationId, reservationSlotId));
         } catch (DuplicateKeyException e) {

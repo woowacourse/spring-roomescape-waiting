@@ -4,11 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+
 import org.junit.jupiter.api.Test;
+
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.Time;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
+import roomescape.domain.Time;
 import roomescape.exception.CustomException;
 
 class ReservationTest {
@@ -30,21 +35,19 @@ class ReservationTest {
         assertThat(reservationSlot.getTime()).isEqualTo(time);
     }
 
-//    @Test
-//    void 이름이_null이면_예외() {
-//        Time time = new Time(1L, LocalTime.of(15, 40));
-//
-//        assertThatThrownBy(() -> new Reservation(1L, LocalDate.of(2023, 8, 5), time, theme))
-//                .isInstanceOf(CustomException.class);
-//    }
-//
-//    @Test
-//    void 이름이_공백이면_예외() {
-//        Time time = new Time(1L, LocalTime.of(15, 40));
-//
-//        assertThatThrownBy(() -> new Reservation(1L, "   ", LocalDate.of(2023, 8, 5), time, theme))
-//                .isInstanceOf(CustomException.class);
-//    }
+    @Test
+    void 이름이_null이면_예외() {
+        LocalDateTime now = LocalDateTime.now();
+        assertThatThrownBy(() -> new Reservation(1L, null, 1L, Status.RESERVED, now.plusDays(1)))
+                .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    void 이름이_공백이면_예외() {
+        LocalDateTime now = LocalDateTime.now();
+        assertThatThrownBy(() -> new Reservation(1L, "   ", 1L, Status.RESERVED, now.plusDays(1)))
+                .isInstanceOf(CustomException.class);
+    }
 
     @Test
     void 날짜가_null이면_예외() {

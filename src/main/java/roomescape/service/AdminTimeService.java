@@ -5,12 +5,13 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
 import roomescape.domain.Time;
+import roomescape.dto.TimeRequest;
+import roomescape.dto.TimeResponse;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.TimeDao;
-import roomescape.dto.TimeRequest;
-import roomescape.dto.TimeResponse;
 
 @Service
 public class AdminTimeService {
@@ -23,12 +24,11 @@ public class AdminTimeService {
     public TimeResponse save(TimeRequest request) {
         try {
             Long id = timeDao.save(request.startAt());
-            Time saved = new Time(id,request.startAt());
+            Time saved = new Time(id, request.startAt());
             return TimeResponse.from(saved);
-        } catch(DuplicateKeyException e){
+        } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_TIME);
         }
-
     }
 
     public List<TimeResponse> findAll() {
@@ -38,11 +38,10 @@ public class AdminTimeService {
     }
 
     public void delete(Long id) {
-        try{
+        try {
             timeDao.delete(id);
-        } catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_RESERVED_TIME);
         }
-
     }
 }
