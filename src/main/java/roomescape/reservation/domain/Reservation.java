@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import lombok.Getter;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -14,18 +15,14 @@ public class Reservation {
 
     private final Long id;
     private final CustomerName customerName;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    private Reservation(final Long id, final CustomerName customerName, final LocalDate date, final ReservationTime time, final Theme theme) {
-        validateRequiredValues(date, time);
+    private Reservation(final Long id, final CustomerName customerName, final ReservationSlot slot) {
+        validateRequiredValues(slot);
 
         this.id = id;
         this.customerName = customerName;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     public static Reservation create(
@@ -35,12 +32,18 @@ public class Reservation {
             final Theme theme,
             final LocalDateTime now
     ) {
+        return create(name, ReservationSlot.create(date, reservationTime, theme), now);
+    }
+
+    public static Reservation create(
+            final String name,
+            final ReservationSlot slot,
+            final LocalDateTime now
+    ) {
         final Reservation reservation = new Reservation(
                 null,
                 new CustomerName(name),
-                date,
-                reservationTime,
-                theme
+                slot
         );
 
         reservation.validateNotPast(now);
@@ -53,12 +56,18 @@ public class Reservation {
             final LocalDate date,
             final ReservationTime time,
             final Theme theme) {
+        return of(id, name, ReservationSlot.create(date, time, theme));
+    }
+
+    public static Reservation of(
+            final Long id,
+            final String name,
+            final ReservationSlot slot
+    ) {
         return new Reservation(
                 id,
                 new CustomerName(name),
-                date,
-                time,
-                theme
+                slot
         );
     }
 
@@ -67,12 +76,17 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime now
     ) {
+        return changeSchedule(ReservationSlot.create(date, time, slot.getTheme()), now);
+    }
+
+    public Reservation changeSchedule(
+            final ReservationSlot slot,
+            final LocalDateTime now
+    ) {
         final Reservation changed = new Reservation(
                 id,
                 customerName,
-                date,
-                time,
-                theme
+                slot
         );
 
         changed.validateNotPast(now);
@@ -81,6 +95,22 @@ public class Reservation {
 
     public String getCustomerName() {
         return customerName.name();
+    }
+
+    public Long getSlotId() {
+        return slot.getId();
+    }
+
+    public LocalDate getDate() {
+        return slot.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return slot.getTime();
+    }
+
+    public Theme getTheme() {
+        return slot.getTheme();
     }
 
     public void validateCancelableByCustomer(final LocalDate today) {
@@ -96,16 +126,12 @@ public class Reservation {
     }
 
     private boolean isBeforeReservationDate(final LocalDate today) {
-        return today.isBefore(date);
+        return today.isBefore(slot.getDate());
     }
 
-    private void validateRequiredValues(final LocalDate date, final ReservationTime time) {
-        if (date == null) {
-            throw new IllegalArgumentException("예약일을 입력해야 합니다.");
-        }
-
-        if (time == null) {
-            throw new IllegalArgumentException("예약 시간을 입력해야 합니다.");
+    private void validateRequiredValues(final ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯을 입력해야 합니다.");
         }
     }
 
@@ -120,6 +146,6 @@ public class Reservation {
     }
 
     private LocalDateTime reservationDateTime() {
-        return LocalDateTime.of(date, time.getStartAt());
+        return slot.dateTime();
     }
 }

@@ -42,9 +42,7 @@ public class FakeReservationRepository implements ReservationRepository  {
         Reservation savedReservationWithId = Reservation.of(
                 1L,
                 newReservation.getCustomerName(),
-                newReservation.getDate(),
-                newReservation.getTime(),
-                newReservation.getTheme()
+                newReservation.getSlot()
         );
         reservations.add(savedReservationWithId);
         return savedReservationWithId;
@@ -66,8 +64,7 @@ public class FakeReservationRepository implements ReservationRepository  {
         return false;
     }
 
-    @Override
-    public boolean deleteById(final Long reservationId) {
+    public boolean removeById(final Long reservationId) {
         return reservations.removeIf(reservation -> reservation.getId().equals(reservationId));
     }
 

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
@@ -277,19 +278,19 @@ class WaitingControllerTest {
         return Theme.of(1L, name, description, thumbnailUrl);
     }
 
-    private void insertReservation(
+    private Long insertReservation(
             final String name,
             final LocalDate date,
             final long timeId,
             final long themeId
     ) {
+        Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation(customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation(customer_name, slot_id) VALUES (?, ?)",
                 name,
-                Date.valueOf(date),
-                timeId,
-                themeId
+                slotId
         );
+        return slotId;
     }
 
     private long insertWaiting(
@@ -298,18 +299,17 @@ class WaitingControllerTest {
             final long timeId,
             final long themeId
     ) {
+        Long slotId = insertReservationSlot(reservationDate, timeId, themeId);
         final String sql = """
-                INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO waiting(customer_name, slot_id)
+                VALUES (?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, name);
-            ps.setDate(2, Date.valueOf(reservationDate));
-            ps.setLong(3, timeId);
-            ps.setLong(4, themeId);
+            ps.setLong(2, slotId);
             return ps;
         }, keyHolder);
 
@@ -318,5 +318,24 @@ class WaitingControllerTest {
             throw new IllegalStateException("대기 생성에 실패했습니다.");
         }
         return key.longValue();
+    }
+
+    private Long insertReservationSlot(final LocalDate reservationDate, final long timeId, final long themeId) {
+        try {
+            jdbcTemplate.update(
+                    "INSERT INTO reservation_slot(reservation_date, time_id, theme_id) VALUES (?, ?, ?)",
+                    Date.valueOf(reservationDate),
+                    timeId,
+                    themeId
+            );
+        } catch (DuplicateKeyException ignored) {
+        }
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
+                Date.valueOf(reservationDate),
+                timeId,
+                themeId
+        );
     }
 }

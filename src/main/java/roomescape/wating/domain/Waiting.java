@@ -3,9 +3,9 @@ package roomescape.wating.domain;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import lombok.Getter;
 import roomescape.reservation.domain.CustomerName;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.exception.PastDateTimeWaitingException;
@@ -15,26 +15,20 @@ public class Waiting {
 
     private final Long id;
     private final CustomerName customerName;
-    private final LocalDate reservationDate;
     private final LocalDateTime createdAt;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
     private Waiting(
             Long id,
             CustomerName customerName,
-            LocalDate reservationDate,
             LocalDateTime createdAt,
-            ReservationTime time,
-            Theme theme
+            ReservationSlot slot
     ) {
-        validateNotNull(customerName, reservationDate, time, theme);
+        validateRequiredValues(slot);
         this.id = id;
         this.customerName = customerName;
-        this.reservationDate = reservationDate;
         this.createdAt = createdAt;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     public static Waiting create(
@@ -44,13 +38,19 @@ public class Waiting {
             final Theme theme,
             final LocalDateTime now
     ) {
+        return create(customerName, ReservationSlot.create(date, time, theme), now);
+    }
+
+    public static Waiting create(
+            final String customerName,
+            final ReservationSlot slot,
+            final LocalDateTime now
+    ) {
         final Waiting waiting = new Waiting(
                 null,
                 new CustomerName(customerName),
-                date,
                 null,
-                time,
-                theme);
+                slot);
 
         waiting.validateNotPast(now);
         return waiting;
@@ -64,13 +64,25 @@ public class Waiting {
             final ReservationTime time,
             final Theme theme
     ) {
+        return of(
+                id,
+                customerName,
+                ReservationSlot.create(date.toLocalDate(), time, theme),
+                createdAt
+        );
+    }
+
+    public static Waiting of(
+            final Long id,
+            final String customerName,
+            final ReservationSlot slot,
+            final LocalDateTime createdAt
+    ) {
         return new Waiting(
                 id,
                 new CustomerName(customerName),
-                date.toLocalDate(),
                 createdAt,
-                time,
-                theme
+                slot
         );
     }
 
@@ -82,19 +94,25 @@ public class Waiting {
         return !isPastReservation(now);
     }
 
-    private void validateNotNull(
-            final CustomerName customerName,
-            final LocalDate reservationDate,
-            final ReservationTime time,
-            final Theme theme
-    ) {
-        try {
-            Objects.requireNonNull(customerName);
-            Objects.requireNonNull(reservationDate);
-            Objects.requireNonNull(time);
-            Objects.requireNonNull(theme);
-        } catch (NullPointerException exception) {
-            throw new IllegalStateException("예약자명/예약대기날짜/시간/테마는 필수 입력값입니다.");
+    public Long getSlotId() {
+        return slot.getId();
+    }
+
+    public LocalDate getReservationDate() {
+        return slot.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return slot.getTime();
+    }
+
+    public Theme getTheme() {
+        return slot.getTheme();
+    }
+
+    private void validateRequiredValues(final ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("예약 슬롯을 입력해야 합니다.");
         }
     }
 
@@ -109,6 +127,6 @@ public class Waiting {
     }
 
     private LocalDateTime reservationDateTime() {
-        return LocalDateTime.of(reservationDate, time.getStartAt());
+        return slot.dateTime();
     }
 }

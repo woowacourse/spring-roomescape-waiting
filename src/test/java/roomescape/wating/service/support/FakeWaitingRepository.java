@@ -5,13 +5,8 @@ import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class FakeWaitingRepository implements WaitingRepository {
 
@@ -28,10 +23,8 @@ public class FakeWaitingRepository implements WaitingRepository {
         final Waiting savedWaitingWithId = Waiting.of(
                 1L,
                 waiting.getCustomerName().name(),
-                Date.valueOf(waiting.getReservationDate()),
-                waiting.getCreatedAt(),
-                waiting.getTime(),
-                waiting.getTheme()
+                waiting.getSlot(),
+                waiting.getCreatedAt()
         );
         waitings.add(savedWaitingWithId);
         return savedWaitingWithId.getId();
@@ -50,27 +43,21 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findEarliestBySlot(final LocalDate date, final long timeId, final long themeId) {
+    public Optional<Waiting> findEarliestBySlotId(final Long slotId) {
         return waitings.stream()
-                .filter(w -> w.getReservationDate().equals(date))
-                .filter(w -> w.getTime().getId().equals(timeId))
-                .filter(w -> w.getTheme().getId().equals(themeId))
+                .filter(w -> Objects.equals(w.getSlotId(), slotId))
                 .min(Comparator.comparing(Waiting::getCreatedAt)
                         .thenComparing(Waiting::getId));
     }
 
     @Override
     public int countEarlierWaitingsInSlot(
-            final LocalDate date,
-            final long timeId,
-            final long themeId,
+            final Long slotId,
             final LocalDateTime createdAt,
             final long waitingId
     ) {
         return (int) waitings.stream()
-                .filter(w -> w.getReservationDate().equals(date))
-                .filter(w -> w.getTime().getId().equals(timeId))
-                .filter(w -> w.getTheme().getId().equals(themeId))
+                .filter(w -> Objects.equals(w.getSlotId(), slotId))
                 .filter(w -> w.getCreatedAt().isBefore(createdAt)
                         || (w.getCreatedAt().equals(createdAt) && w.getId() < waitingId))
                 .count();

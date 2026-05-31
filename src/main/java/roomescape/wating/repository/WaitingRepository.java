@@ -1,6 +1,5 @@
 package roomescape.wating.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,9 +13,9 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long id);
 
-    Optional<Waiting> findEarliestBySlot(LocalDate date, long timeId, long themeId);
+    Optional<Waiting> findEarliestBySlotId(Long slotId);
 
-    int countEarlierWaitingsInSlot(LocalDate date, long timeId, long themeId, LocalDateTime createdAt, long waitingId);
+    int countEarlierWaitingsInSlot(Long slotId, LocalDateTime createdAt, long waitingId);
 
     List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
             String customerName,

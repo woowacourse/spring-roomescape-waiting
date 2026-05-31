@@ -17,6 +17,7 @@ import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
+import roomescape.reservationslot.service.support.FakeReservationSlotRepository;
 import roomescape.theme.service.support.FakeThemeRepository;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.service.support.FakeWaitingRepository;
@@ -41,6 +42,7 @@ class ReservationServiceTest {
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeThemeRepository themeRepository;
+    private FakeReservationSlotRepository reservationSlotRepository;
     private FakeWaitingRepository waitingRepository;
     private ReservationService reservationService;
 
@@ -50,10 +52,12 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         waitingRepository = new FakeWaitingRepository();
+        reservationSlotRepository = new FakeReservationSlotRepository(reservationRepository, waitingRepository);
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
+                reservationSlotRepository,
                 waitingRepository,
                 FIXED_CLOCK
         );

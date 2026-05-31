@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.service.dto.response.ReservationResponse;
@@ -67,7 +68,7 @@ class AdminReservationControllerTest {
     void 예약_목록을_조회한다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .when().get("/admin/reservations")
@@ -110,7 +111,7 @@ class AdminReservationControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-05-01", "1", "1");
+        insertReservation("브라운", "2026-05-01", 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -126,7 +127,12 @@ class AdminReservationControllerTest {
                 .body("time.id", is(2));
 
         Map<String, Object> updatedReservation = jdbcTemplate.queryForMap(
-                "SELECT reservation_date, time_id FROM reservation WHERE id = ?",
+                """
+                        SELECT s.reservation_date, s.time_id
+                        FROM reservation r
+                        JOIN reservation_slot s ON r.slot_id = s.id
+                        WHERE r.id = ?
+                        """,
                 1L
         );
         assertThat(updatedReservation.get("RESERVATION_DATE").toString()).isEqualTo("2026-05-02");
@@ -138,7 +144,7 @@ class AdminReservationControllerTest {
     void 관리자는_예약을_삭제할_수_있다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2026-08-05", "1", "1");
+        insertReservation("브라운", "2026-08-05", 1L, 1L);
 
         RestAssured.given().log().all()
                 .when().delete("/admin/reservations/1")
@@ -157,5 +163,33 @@ class AdminReservationControllerTest {
                 .then().log().all()
                 .statusCode(404)
                 .body("message", is("존재하지 않는 예약입니다."));
+    }
+
+    private void insertReservation(final String name, final String date, final long timeId, final long themeId) {
+        Long slotId = insertReservationSlot(date, timeId, themeId);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
+                name,
+                slotId
+        );
+    }
+
+    private Long insertReservationSlot(final String date, final long timeId, final long themeId) {
+        try {
+            jdbcTemplate.update(
+                    "INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)",
+                    date,
+                    timeId,
+                    themeId
+            );
+        } catch (DuplicateKeyException ignored) {
+        }
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
+                date,
+                timeId,
+                themeId
+        );
     }
 }

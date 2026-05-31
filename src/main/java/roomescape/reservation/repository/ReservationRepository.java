@@ -19,8 +19,6 @@ public interface ReservationRepository {
 
     boolean update(Reservation updatedReservation);
 
-    boolean deleteById(Long reservationId);
-
     List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now);

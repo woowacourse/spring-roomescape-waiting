@@ -22,7 +22,18 @@ VALUES (1, '잃어버린 시간의 방', '멈춰버린 시계탑에서 사라진
        (11, '마녀의 숲', '깊은 숲속 마녀의 오두막에서 숨겨진 계약서를 찾는 판타지 테마', 'https://example.com/images/witch-forest.jpg'),
        (12, '사라진 열차', '한밤중 흔적 없이 사라진 열차의 비밀을 추적하는 추리 테마', 'https://example.com/images/missing-train.jpg');
 
-INSERT INTO reservation (id, customer_name, reservation_date, time_id, theme_id)
+DROP TABLE IF EXISTS reservation_seed;
+
+CREATE TABLE reservation_seed
+(
+    id               BIGINT,
+    customer_name    VARCHAR(10),
+    reservation_date DATE,
+    time_id          BIGINT,
+    theme_id         BIGINT
+);
+
+INSERT INTO reservation_seed (id, customer_name, reservation_date, time_id, theme_id)
 VALUES
     -- 2026-05-01
     (1, '김민준', '2026-05-01', 1, 1),
@@ -69,7 +80,7 @@ VALUES
     (30, '나예린', '2026-05-07', 4, 10);
 
 
-INSERT INTO reservation (id, customer_name, reservation_date, time_id, theme_id)
+INSERT INTO reservation_seed (id, customer_name, reservation_date, time_id, theme_id)
 VALUES (31, '테스트1', '2026-04-25', 1, 12),
        (32, '테스트2', '2026-04-25', 2, 12),
        (33, '테스트3', '2026-04-26', 1, 12),
@@ -80,3 +91,13 @@ VALUES (31, '테스트1', '2026-04-25', 1, 12),
        (38, '테스트8', '2026-04-28', 2, 12),
        (39, '테스트9', '2026-04-29', 1, 12),
        (40, '테스트10', '2026-04-29', 2, 12);
+
+INSERT INTO reservation_slot (id, reservation_date, time_id, theme_id)
+SELECT id, reservation_date, time_id, theme_id
+FROM reservation_seed;
+
+INSERT INTO reservation (id, customer_name, slot_id)
+SELECT id, customer_name, id
+FROM reservation_seed;
+
+DROP TABLE reservation_seed;

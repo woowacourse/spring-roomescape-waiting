@@ -11,6 +11,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 
@@ -47,11 +48,15 @@ class JdbcReservationRepositoryTest {
     void 예약을_저장하고_조회한다() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
+        Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
         Reservation reservation = Reservation.create(
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~"),
+                ReservationSlot.of(
+                        slotId,
+                        LocalDate.of(2026, 8, 5),
+                        ReservationTime.of(1L, LocalTime.of(10, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                ),
                 LocalDateTime.of(2026, 8, 5, 9, 0)
         );
 
@@ -60,19 +65,23 @@ class JdbcReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getId()).isEqualTo(savedReservation.getId());
+        assertThat(savedReservation.getSlotId()).isEqualTo(slotId);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("브라운");
         assertThat(reservations.getFirst().getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
         assertThat(reservations.getFirst().getTheme().getName()).isEqualTo("링");
     }
 
     @Test
-    void 존재하지_않는_예약_시간으로_예약을_저장하면_예외가_발생한다() {
+    void 존재하지_않는_예약_슬롯으로_예약을_저장하면_예외가_발생한다() {
         insertTheme("링", "공포 테마", "http:~");
         Reservation reservation = Reservation.create(
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(999L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~"),
+                ReservationSlot.of(
+                        999L,
+                        LocalDate.of(2026, 8, 5),
+                        ReservationTime.of(999L, LocalTime.of(10, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                ),
                 LocalDateTime.of(2026, 8, 5, 9, 0)
         );
 
@@ -98,13 +107,17 @@ class JdbcReservationRepositoryTest {
         insertReservationTime("11:00");
         insertTheme("링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
+        Long changedSlotId = insertReservationSlot("2026-08-06", 2L, 1L);
 
         boolean updated = reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 6),
-                ReservationTime.of(2L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                ReservationSlot.of(
+                        changedSlotId,
+                        LocalDate.of(2026, 8, 6),
+                        ReservationTime.of(2L, LocalTime.of(11, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                )
         ));
 
         Optional<Reservation> reservation = reservationRepository.findById(1L);
@@ -122,9 +135,12 @@ class JdbcReservationRepositoryTest {
         boolean updated = reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                ReservationSlot.of(
+                        999L,
+                        LocalDate.of(2026, 8, 5),
+                        ReservationTime.of(1L, LocalTime.of(10, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                )
         ));
 
         assertThat(updated).isFalse();
@@ -137,18 +153,22 @@ class JdbcReservationRepositoryTest {
         insertTheme("링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
         insertReservation("제임스", "2026-08-05", 2L, 1L);
+        Long duplicatedSlotId = insertReservationSlot("2026-08-05", 2L, 1L);
 
         assertThatThrownBy(() -> reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(2L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                ReservationSlot.of(
+                        duplicatedSlotId,
+                        LocalDate.of(2026, 8, 5),
+                        ReservationTime.of(2L, LocalTime.of(11, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                )
         ))).isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
-    void 존재하지_않는_예약_시간으로_수정하면_예외가_발생한다() {
+    void 존재하지_않는_예약_슬롯으로_수정하면_예외가_발생한다() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -156,9 +176,12 @@ class JdbcReservationRepositoryTest {
         assertThatThrownBy(() -> reservationRepository.update(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(999L, LocalTime.of(11, 0)),
-                Theme.of(1L, "링", "공포 테마", "http:~")
+                ReservationSlot.of(
+                        999L,
+                        LocalDate.of(2026, 8, 5),
+                        ReservationTime.of(999L, LocalTime.of(11, 0)),
+                        Theme.of(1L, "링", "공포 테마", "http:~")
+                )
         ))).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -174,26 +197,6 @@ class JdbcReservationRepositoryTest {
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("초코칩");
-    }
-
-    @Test
-    void 예약을_삭제한다() {
-        insertReservationTime("10:00");
-        insertTheme("링", "공포 테마", "http:~");
-        insertReservation("브라운", "2026-08-05", 1L, 1L);
-
-        boolean deleted = reservationRepository.deleteById(1L);
-
-        assertThat(deleted).isTrue();
-        assertThat(reservationRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void 존재하지_않는_예약을_삭제하면_false를_반환한다() {
-        boolean deleted = reservationRepository.deleteById(1L);
-
-        assertThat(deleted).isFalse();
-        assertThat(reservationRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -233,9 +236,27 @@ class JdbcReservationRepositoryTest {
     }
 
     private void insertReservation(final String name, final String date, final Long timeId, final Long themeId) {
+        Long slotId = insertReservationSlot(date, timeId, themeId);
         jdbcTemplate.update(
-                "INSERT INTO reservation (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation (customer_name, slot_id) VALUES (?, ?)",
                 name,
+                slotId
+        );
+    }
+
+    private Long insertReservationSlot(final String date, final Long timeId, final Long themeId) {
+        try {
+            jdbcTemplate.update(
+                    "INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)",
+                    date,
+                    timeId,
+                    themeId
+            );
+        } catch (DuplicateKeyException ignored) {
+        }
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_slot WHERE reservation_date = ? AND time_id = ? AND theme_id = ?",
+                Long.class,
                 date,
                 timeId,
                 themeId
