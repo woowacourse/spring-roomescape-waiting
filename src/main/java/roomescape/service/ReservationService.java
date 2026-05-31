@@ -31,7 +31,8 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao,
+    public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao,
+                              ReservationTimeDao reservationTimeDao,
                               ThemeDao themeDao) {
         this.reservationDao = reservationDao;
         this.reservationWaitingDao = reservationWaitingDao;
@@ -67,12 +68,7 @@ public class ReservationService {
                 .map(MyReservationResponse::fromReservationWaiting)
                 .toList();
 
-        List<MyReservationResponse> reservationResponses = new ArrayList<>();
-        reservationResponses.addAll(reservations);
-        reservationResponses.addAll(reservationWaitings);
-        reservationResponses.sort(Comparator.comparing(MyReservationResponse::date));
-
-        return reservationResponses;
+        return getMyReservationResponses(reservations, reservationWaitings);
     }
 
     @Transactional
@@ -128,5 +124,17 @@ public class ReservationService {
     private Reservation getReservation(Long reservationId) {
         return reservationDao.selectById(reservationId)
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
+    }
+
+    private List<MyReservationResponse> getMyReservationResponses(List<MyReservationResponse> reservations,
+                                                                  List<MyReservationResponse> reservationWaitings) {
+        List<MyReservationResponse> reservationResponses = new ArrayList<>();
+        reservationResponses.addAll(reservations);
+        reservationResponses.addAll(reservationWaitings);
+        reservationResponses.sort(
+                Comparator.comparing(MyReservationResponse::date)
+                        .thenComparing(reservation -> reservation.time().startAt())
+        );
+        return reservationResponses;
     }
 }
