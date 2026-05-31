@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -26,14 +25,12 @@ public class ReservationTimeService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
-    private final Clock clock;
 
 
-    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ThemeDao themeDao, ReservationDao reservationDao, Clock clock) {
+    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ThemeDao themeDao, ReservationDao reservationDao) {
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.reservationDao = reservationDao;
-        this.clock = clock;
     }
 
     public ReservationTimeResponse create(ReservationTimeRequest request) {
@@ -50,10 +47,10 @@ public class ReservationTimeService {
         }
     }
 
-    public List<AvailableReservationTimeResponse> getReservationTimes(long themeId, LocalDate date) {
+    public List<AvailableReservationTimeResponse> getReservationTimes(long themeId, LocalDate baseDate, LocalDate currentDate) {
         validateTheme(themeId);
-        validateDate(date);
-        List<ReservationTimeAvailability> timeAvailabilities = reservationTimeDao.findAvailabilitiesByThemeIdAndDate(themeId, date);
+        validateDate(baseDate, currentDate);
+        List<ReservationTimeAvailability> timeAvailabilities = reservationTimeDao.findAvailabilitiesByThemeIdAndDate(themeId, baseDate);
         return timeAvailabilities.stream()
                 .map(AvailableReservationTimeResponse::from)
                 .toList();
@@ -66,8 +63,8 @@ public class ReservationTimeService {
         }
     }
 
-    private void validateDate(LocalDate date) {
-        boolean exists = date.isBefore(LocalDate.now(clock));
+    private void validateDate(LocalDate baseDate, LocalDate currentDate) {
+        boolean exists = baseDate.isBefore(currentDate);
         if (exists) {
             throw new ReservationException(ReservationErrorCode.PAST_DATE_NOT_ALLOWED);
         }

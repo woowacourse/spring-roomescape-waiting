@@ -1,5 +1,9 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
@@ -18,12 +22,6 @@ import roomescape.exception.domain.ReservationException;
 import roomescape.exception.domain.ReservationTimeException;
 import roomescape.exception.domain.ThemeException;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
 @Service
 public class ReservationService {
 
@@ -31,22 +29,19 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final SlotDao slotDao;
-    private final Clock clock;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao, Clock clock) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ThemeDao themeDao, SlotDao slotDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.slotDao = slotDao;
-        this.clock = clock;
     }
 
-    public ReservationResponse create(ReservationRequest request) {
+    public ReservationResponse create(ReservationRequest request, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
-        LocalDateTime currentDateTime = LocalDateTime.now(clock);
 
-        Slot slot = createSlot(request.date(),reservationTime,theme);
+        Slot slot = createSlot(request.date(), reservationTime, theme);
         Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
 
@@ -56,7 +51,7 @@ public class ReservationService {
 
     private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
         Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId());
-        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date,reservationTime,theme)));
+        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date, reservationTime, theme)));
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -90,13 +85,13 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse update(long reservationId, ReservationRequest request) {
+    public ReservationResponse update(long reservationId, ReservationRequest request, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
-        validateModifiable(reservation);
+        validateModifiable(reservation, currentDateTime);
 
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
-        validateNotPastDateTime(request.date(), reservationTime, LocalDateTime.now(clock));
+        validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
         validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
 
         Slot slot = createSlot(request.date(), reservationTime, theme);
@@ -112,10 +107,8 @@ public class ReservationService {
         }
     }
 
-    private void validateModifiable(Reservation reservation) {
-        LocalDateTime now = LocalDateTime.now(clock);
-
-        if (reservation.isNotModifiableAt(now)) {
+    private void validateModifiable(Reservation reservation, LocalDateTime currentDateTime) {
+        if (reservation.isNotModifiableAt(currentDateTime)) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED);
         }
     }
@@ -130,9 +123,9 @@ public class ReservationService {
         }
     }
 
-    public void delete(long reservationId) {
+    public void delete(long reservationId, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
-        validateModifiable(reservation);
+        validateModifiable(reservation, currentDateTime);
         reservationDao.delete(reservationId);
     }
 

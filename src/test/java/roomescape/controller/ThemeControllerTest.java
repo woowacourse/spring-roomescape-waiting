@@ -6,11 +6,10 @@ import static org.hamcrest.Matchers.not;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.Clock;
+import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.sql.PreparedStatement;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,9 +21,6 @@ class ThemeControllerTest extends AcceptanceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private Clock clock;
 
     @Test
     void 테마_목록을_조회한다() {
@@ -64,7 +60,7 @@ class ThemeControllerTest extends AcceptanceTest {
     }
 
     private void createRankingData() {
-        LocalDate baseDate = LocalDate.now(clock);
+        LocalDate baseDate = LocalDate.now();
 
         long time10 = createTime("10:00");
         long time11 = createTime("11:00");

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -41,9 +40,6 @@ class ThemeServiceTest extends ServiceTest {
 
     @Autowired
     private SlotDao slotDao;
-
-    @Autowired
-    private Clock clock;
 
     @Test
     void 테마를_생성할_수_있다() {
@@ -127,7 +123,7 @@ class ThemeServiceTest extends ServiceTest {
     @Test
     void 인기_테마를_조회한다() {
         // given
-        LocalDate fixedToday = LocalDate.now(clock);
+        LocalDate today = LocalDate.of(2026, 5, 31);
 
         Theme popularTheme = saveTheme("인기 테마");
         Theme normalTheme = saveTheme("보통 테마");
@@ -138,23 +134,23 @@ class ThemeServiceTest extends ServiceTest {
         ReservationTime time12 = saveReservationTime(LocalTime.of(12, 0));
 
         // 인기 테마: 조회 기간 내 예약 3개
-        saveReservation("예약자일", fixedToday.minusDays(1), time10, popularTheme);
-        saveReservation("예약자이", fixedToday.minusDays(2), time11, popularTheme);
-        saveReservation("예약자삼", fixedToday.minusDays(3), time12, popularTheme);
+        saveReservation("예약자일", today.minusDays(1), time10, popularTheme);
+        saveReservation("예약자이", today.minusDays(2), time11, popularTheme);
+        saveReservation("예약자삼", today.minusDays(3), time12, popularTheme);
 
         // 보통 테마: 조회 기간 내 예약 2개
-        saveReservation("예약자사", fixedToday.minusDays(1), time10, normalTheme);
-        saveReservation("예약자오", fixedToday.minusDays(2), time11, normalTheme);
+        saveReservation("예약자사", today.minusDays(1), time10, normalTheme);
+        saveReservation("예약자오", today.minusDays(2), time11, normalTheme);
 
         // 비인기 테마: 조회 기간 내 예약 1개
-        saveReservation("예약자육", fixedToday.minusDays(1), time10, unpopularTheme);
+        saveReservation("예약자육", today.minusDays(1), time10, unpopularTheme);
 
         // 조회 기간 밖 예약: 순위에 반영되면 안 됨
-        saveReservation("예약자칠", fixedToday, time10, unpopularTheme);
-        saveReservation("예약자팔", fixedToday.minusDays(8), time11, unpopularTheme);
+        saveReservation("예약자칠", today, time10, unpopularTheme);
+        saveReservation("예약자팔", today.minusDays(8), time11, unpopularTheme);
 
         // when
-        List<ThemeResponse> rankings = themeService.getThemeRankings();
+        List<ThemeResponse> rankings = themeService.getThemeRankings(today);
 
         // then
         assertThat(rankings)

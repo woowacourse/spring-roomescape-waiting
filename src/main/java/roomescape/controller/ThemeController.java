@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class ThemeController {
 
     @GetMapping("/rankings")
     public ResponseEntity<List<ThemeResponse>> readThemeRankings() {
-        List<ThemeResponse> responses = themeService.getThemeRankings();
+        List<ThemeResponse> responses = themeService.getThemeRankings(LocalDate.now());
         return ResponseEntity.ok(responses);
     }
 }

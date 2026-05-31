@@ -114,7 +114,7 @@
                     }
                     const themeId = themes[0].id;
                     const date = '2099-12-31'; // 예약이 없을 법한 미래 날짜
-                    return fetch(`/times?themeId=${themeId}&date=${date}`);
+                    return fetch(`/times?themeId=${themeId}&baseDate=${date}`);
                 })
                 .then(response => {
                     if (!response) return;

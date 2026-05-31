@@ -261,7 +261,7 @@
 
             if (!tId || !d) return;
 
-            const response = await fetch(`/times?themeId=${tId}&date=${d}`);
+            const response = await fetch(`/times?themeId=${tId}&baseDate=${d}`);
             const times = await response.json();
             
             timeSelect.innerHTML = times.map(t => {

@@ -175,7 +175,7 @@
             return;
         }
 
-        fetch(`/times?themeId=${selectedThemeId}&date=${date}`)
+        fetch(`/times?themeId=${selectedThemeId}&baseDate=${date}`)
             .then(response => {
                 if (!response.ok) {
                     return response.json().then(error => {

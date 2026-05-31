@@ -21,12 +21,12 @@ public class ReservationTimeControllerTest extends AcceptanceTest {
     void 시간을_조회한다() {
         long reservationTimeId = createTime("22:00");
         long themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
+        LocalDate reservationDate = LocalDate.of(2099, 5, 31);
 
-        LocalDate date = LocalDate.now();
-        createReservation("러키", date, reservationTimeId, themeId);
+        createReservation("러키", reservationDate.toString(), reservationTimeId, themeId);
 
         List<AvailableReservationTimeResponse> responses = RestAssured.given().log().all()
-                .when().get("/times?themeId=" + themeId + "&date=" + date)
+                .when().get("/times?themeId=" + themeId + "&baseDate=" + reservationDate)
                 .then().log().all()
                 .statusCode(200)
                 .extract()
@@ -72,10 +72,10 @@ public class ReservationTimeControllerTest extends AcceptanceTest {
                 .getLong("id");
     }
 
-    private void createReservation(String name, LocalDate date, long timeId, long themeId) {
+    private void createReservation(String name, String date, long timeId, long themeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
-        params.put("date", date.toString());
+        params.put("date", date);
         params.put("timeId", timeId);
         params.put("themeId", themeId);
 

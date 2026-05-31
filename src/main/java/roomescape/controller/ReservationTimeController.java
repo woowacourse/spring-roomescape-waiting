@@ -20,10 +20,13 @@ public class ReservationTimeController {
         this.reservationTimeService = reservationTimeService;
     }
 
-    @GetMapping(params = {"themeId", "date"})
+    @GetMapping(params = {"themeId", "baseDate"})
     public ResponseEntity<List<AvailableReservationTimeResponse>> readReservationTimes(@RequestParam(value = "themeId") long themeId,
-                                                                                       @RequestParam(value = "date") LocalDate date) {
-        List<AvailableReservationTimeResponse> responses = reservationTimeService.getReservationTimes(themeId, date);
+                                                                                       @RequestParam(value = "baseDate") LocalDate baseDate) {
+        List<AvailableReservationTimeResponse> responses = reservationTimeService.getReservationTimes(
+                themeId,
+                baseDate,
+                LocalDate.now());
         return ResponseEntity.ok(responses);
     }
 }

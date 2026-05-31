@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
@@ -15,10 +17,6 @@ import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.SlotException;
 import roomescape.exception.domain.WaitingException;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 @Service
 public class WaitingService {
@@ -26,22 +24,20 @@ public class WaitingService {
     private final WaitingDao waitingDao;
     private final ReservationDao reservationDao;
     private final SlotDao slotDao;
-    private final Clock clock;
 
-    public WaitingService(WaitingDao waitingDao, ReservationDao reservationDao, SlotDao slotDao, Clock clock) {
+    public WaitingService(WaitingDao waitingDao, ReservationDao reservationDao, SlotDao slotDao) {
         this.waitingDao = waitingDao;
         this.reservationDao = reservationDao;
         this.slotDao = slotDao;
-        this.clock = clock;
     }
 
-    public WaitingResponse create(WaitingRequest request) {
+    public WaitingResponse create(WaitingRequest request, LocalDateTime currentDateTime) {
         Slot slot = slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
                 .orElseThrow(() -> new SlotException(SlotErrorCode.SLOT_NOT_FOUND));
 
         validateNotOwnReservation(slot.getId(), request.name());
 
-        Waiting waiting = new Waiting(LocalDateTime.now(clock), slot.getId(), request.name());
+        Waiting waiting = new Waiting(currentDateTime, slot.getId(), request.name());
         validateUniqueWaiting(slot.getId(), request.name());
         Waiting savedWaiting = waitingDao.save(waiting);
         return WaitingResponse.from(savedWaiting);

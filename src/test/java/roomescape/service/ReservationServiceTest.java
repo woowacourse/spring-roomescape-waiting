@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -41,11 +42,13 @@ class ReservationServiceTest extends ServiceTest {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        LocalDate reservationDate = LocalDate.of(2026, 5, 8);
 
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
+        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), reservationDate);
 
         // when
-        ReservationResponse response = reservationService.create(request);
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse response = reservationService.create(request, currentDateTime);
 
         // then
         assertThat(response)
@@ -65,10 +68,16 @@ class ReservationServiceTest extends ServiceTest {
     void 예약_생성시_예약시간이_존재하지_않으면_예외가_발생한다() {
         // given
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        ReservationRequest request = createReservationRequest(0L, theme.getId(), LocalDate.of(2026, 5, 8));
+        LocalDate reservationDate = LocalDate.of(2026, 5, 8);
+        long invalidTimeId = 0L;
+
+        ReservationRequest request = createReservationRequest(invalidTimeId, theme.getId(), reservationDate);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(request))
+        assertThatThrownBy(() -> {
+            LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+            reservationService.create(request, currentDateTime);
+        })
                 .isInstanceOf(ReservationTimeException.class)
                 .hasMessage(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
     }
@@ -77,11 +86,16 @@ class ReservationServiceTest extends ServiceTest {
     void 예약_생성시_테마가_존재하지_않으면_예외가_발생한다() {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), 0L, LocalDate.of(2026, 5, 8));
+        LocalDate reservationDate = LocalDate.of(2026, 5, 8);
+        long invalidThemeId = 0L;
+
+        ReservationRequest request = createReservationRequest(reservationTime.getId(), invalidThemeId, reservationDate);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(request))
-                .isInstanceOf(ThemeException.class)
+        assertThatThrownBy(() -> {
+            LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+            reservationService.create(request, currentDateTime);
+        }).isInstanceOf(ThemeException.class)
                 .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
     }
 
@@ -90,11 +104,14 @@ class ReservationServiceTest extends ServiceTest {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
-        reservationService.create(request);
+        LocalDate reservationDate = LocalDate.of(2026, 5, 8);
+        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), reservationDate);
+
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        reservationService.create(request, currentDateTime);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(request))
+        assertThatThrownBy(() -> reservationService.create(request, currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }
@@ -108,12 +125,14 @@ class ReservationServiceTest extends ServiceTest {
         Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
         Theme changedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
+        LocalDate reservationDate = LocalDate.of(2026, 5, 10);
         ReservationRequest createRequest = createReservationRequest(
                 originalTime.getId(),
                 originalTheme.getId(),
-                LocalDate.of(2026, 5, 10)
+                reservationDate
         );
-        ReservationResponse savedReservation = reservationService.create(createRequest);
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
         ReservationRequest updateRequest = new ReservationRequest(
                 "브라운",
@@ -123,7 +142,7 @@ class ReservationServiceTest extends ServiceTest {
         );
 
         // when
-        ReservationResponse response = reservationService.update(savedReservation.id(), updateRequest);
+        ReservationResponse response = reservationService.update(savedReservation.id(), updateRequest, currentDateTime);
 
         // then
         assertAll(
@@ -166,15 +185,18 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 이미_예약된_날짜_시간_테마로는_예약을_수정할_수_없다() {
         // given
+        LocalDate alreadyReservedDate = LocalDate.of(2026, 5, 12);
         ReservationTime alreadyReservedTime = saveReservationTime(LocalTime.of(20, 0));
         Theme alreadyReservedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
         ReservationRequest alreadyReservedRequest = new ReservationRequest(
                 "로지",
-                LocalDate.of(2026, 5, 12),
+                alreadyReservedDate,
                 alreadyReservedTime.getId(),
                 alreadyReservedTheme.getId()
         );
-        reservationService.create(alreadyReservedRequest);
+
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        reservationService.create(alreadyReservedRequest, currentDateTime);
 
         ReservationTime originalTime = saveReservationTime(LocalTime.of(10, 0));
         Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
@@ -183,17 +205,17 @@ class ReservationServiceTest extends ServiceTest {
                 originalTheme.getId(),
                 LocalDate.of(2026, 5, 10)
         );
-        ReservationResponse savedReservation = reservationService.create(createRequest);
+        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
         ReservationRequest updateRequest = new ReservationRequest(
                 "브라운",
-                LocalDate.of(2026, 5, 12),
+                alreadyReservedDate,
                 alreadyReservedTime.getId(),
                 alreadyReservedTheme.getId()
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest))
+        assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest, currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }
@@ -209,20 +231,21 @@ class ReservationServiceTest extends ServiceTest {
                 originalTime.getId(),
                 originalTheme.getId()
         );
-        ReservationResponse savedReservation = reservationService.create(createRequest);
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
         ReservationTime pastTime = saveReservationTime(LocalTime.of(10, 0));
         Theme updateTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
         ReservationRequest updateRequest = new ReservationRequest(
                 "러키",
-                LocalDate.of(2026, 5, 4),
+                currentDateTime.minusDays(1).toLocalDate(),
                 pastTime.getId(),
                 updateTheme.getId()
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest))
+        assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest, currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.PAST_DATE_NOT_ALLOWED.getMessage());
     }
@@ -234,12 +257,13 @@ class ReservationServiceTest extends ServiceTest {
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
-        ReservationResponse response = reservationService.create(request);
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        ReservationResponse response = reservationService.create(request, currentDateTime);
 
         int beforeSize = reservationService.getReservations().size();
 
         // when
-        reservationService.delete(response.id());
+        reservationService.delete(response.id(), currentDateTime);
 
         // then
         List<ReservationResponse> reservations = reservationService.getReservations();
@@ -253,8 +277,12 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     void 삭제할_예약이_존재하지_않으면_예외를_반환한다() {
+        // given
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
+        long invalidReservationId = 0L;
+
         // when & then
-        assertThatThrownBy(() -> reservationService.delete(0L))
+        assertThatThrownBy(() -> reservationService.delete(invalidReservationId, currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
@@ -264,18 +292,21 @@ class ReservationServiceTest extends ServiceTest {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
         Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        LocalDate reservationDate = LocalDate.of(2026, 5, 5);
 
         ReservationRequest request = createReservationRequest(
                 reservationTime.getId(),
                 theme.getId(),
-                LocalDate.of(2026, 5, 5)
+                reservationDate
         );
-        ReservationResponse response = reservationService.create(request);
+        LocalDateTime currentDateTimeWhenReserve = LocalDateTime.of(2026, 5, 1, 10, 0);
+        ReservationResponse response = reservationService.create(request, currentDateTimeWhenReserve);
 
         int beforeSize = reservationService.getReservations().size();
 
         // when & then
-        assertThatThrownBy(() -> reservationService.delete(response.id()))
+        LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 4, 14, 0);
+        assertThatThrownBy(() -> reservationService.delete(response.id(), currentDateTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_CANCEL_DEADLINE_PASSED.getMessage());
 

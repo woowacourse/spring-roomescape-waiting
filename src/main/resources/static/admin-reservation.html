@@ -296,7 +296,7 @@
             const timeSelect = document.getElementById(timeSelectId);
 
             if (date && themeId) {
-                return fetch(`/times?themeId=${themeId}&date=${date}`)
+                return fetch(`/times?themeId=${themeId}&baseDate=${date}`)
                     .then(response => {
                         if (!response.ok) return response.json().then(error => { throw error; });
                         return response.json();

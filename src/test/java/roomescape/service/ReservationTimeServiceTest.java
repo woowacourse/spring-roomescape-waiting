@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -47,9 +46,6 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Autowired
     private SlotDao slotDao;
 
-    @Autowired
-    private Clock clock;
-
     @Test
     void 예약_시간을_생성할_수_있다() {
         // given
@@ -80,12 +76,12 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 테마_및_날짜에_따른_예약시간을_조회할_수_있다() {
         // given
         Theme theme = saveTheme("테마1");
-        LocalDate date = LocalDate.now();
+        LocalDate baseDate = LocalDate.of(2026, 5, 31);
 
         ReservationTime reservedTime = saveReservationTime(LocalTime.of(10, 0));
         ReservationTime notReservedTime = saveReservationTime(LocalTime.of(11, 0));
 
-        Slot savedSlot = slotDao.save(new Slot(date, reservedTime, theme));
+        Slot savedSlot = slotDao.save(new Slot(baseDate, reservedTime, theme));
         Reservation reservation = new Reservation(
                 savedSlot,
                 "예약1"
@@ -93,8 +89,9 @@ class ReservationTimeServiceTest extends ServiceTest {
         reservationDao.save(reservation);
 
         // when
+        LocalDate currentDate = LocalDate.of(2026, 5, 30);
         List<AvailableReservationTimeResponse> responses =
-                reservationTimeService.getReservationTimes(theme.getId(), date);
+                reservationTimeService.getReservationTimes(theme.getId(), baseDate, currentDate);
 
         // then
         assertThat(responses)
@@ -113,10 +110,11 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 예약시간_조회시_날짜가_오늘_이전이면_예외가_발생한다() {
         // given
         Theme theme = saveTheme("테마1");
-        LocalDate invalidDate = LocalDate.now(clock).minusDays(1);
+        LocalDate today = LocalDate.of(2026, 5, 31);
+        LocalDate invalidDate = today.minusDays(1);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.getReservationTimes(theme.getId(), invalidDate))
+        assertThatThrownBy(() -> reservationTimeService.getReservationTimes(theme.getId(), invalidDate, today))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorCode.PAST_DATE_NOT_ALLOWED.getMessage());
     }
@@ -125,10 +123,10 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 예약시간_조회시_테마가_존재하지_않으면_예외가_발생한다() {
         // given
         long invalidThemeId = 0L;
-        LocalDate date = LocalDate.now().minusDays(1);
+        LocalDate today = LocalDate.of(2026, 5, 31);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.getReservationTimes(invalidThemeId, date))
+        assertThatThrownBy(() -> reservationTimeService.getReservationTimes(invalidThemeId, today, today))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
     }
@@ -137,19 +135,19 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 예약시간을_삭제할_수_있다() {
         // given
         Theme theme = saveTheme("테마1");
-        LocalDate date = LocalDate.now();
+        LocalDate today = LocalDate.of(2026, 5, 31);
         LocalTime startAt = LocalTime.of(10, 0);
 
         ReservationTimeRequest request = new ReservationTimeRequest(startAt);
         ReservationTimeResponse response = reservationTimeService.create(request);
 
-        int beforeSize = reservationTimeService.getReservationTimes(theme.getId(), date).size();
+        int beforeSize = reservationTimeService.getReservationTimes(theme.getId(), today, today).size();
 
         // when
         reservationTimeService.delete(response.id());
 
         // then
-        List<AvailableReservationTimeResponse> reservations = reservationTimeService.getReservationTimes(theme.getId(), date);
+        List<AvailableReservationTimeResponse> reservations = reservationTimeService.getReservationTimes(theme.getId(), today, today);
         assertAll(
                 () -> assertThat(reservations).hasSize(beforeSize - 1),
                 () -> assertThat(reservations)
