@@ -71,7 +71,9 @@ public class ReservationService {
         validateIfSelfReserved(memberId, reservation);
         try {
             Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
-            ReservationWait wait = reservationWaitDao.findReservationWaitById(waitId).get();
+            ReservationWait wait = reservationWaitDao.findReservationWaitById(waitId)
+                    .orElseThrow(() -> new IllegalStateException(
+                            "방금 생성한 예약 대기를 조회할 수 없습니다. waitId=" + waitId));
             Long order = reservationWaitDao.findWaitOrder(waitId);
             return new CreatedWaitResult(wait, order);
         } catch (DuplicateKeyException e) {
