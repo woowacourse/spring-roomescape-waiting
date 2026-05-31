@@ -63,6 +63,9 @@ public class Reservation {
     }
 
     public Reservation withId(Long id) {
+        if (this.id != null) {
+            throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
+        }
         return new Reservation(id, user, theme, date, time, store, status);
     }
 
