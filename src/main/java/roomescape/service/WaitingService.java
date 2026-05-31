@@ -49,25 +49,27 @@ public class WaitingService {
         ensureReservationExistsForWaiting(request, time, theme);
         validateUniqueWaiting(request, time, theme);
 
-        Long latestWaitingNumber = getLatestWaitingNumber(request, time, theme);
+        Long nextWaitingNumber = generateNextWaitingNumber(request, time, theme);
         Waiting newWaiting = Waiting.create(
                 request.name(),
                 request.date(),
                 time,
                 theme,
-                ++latestWaitingNumber
+                nextWaitingNumber
         );
         Waiting savedWaiting = waitingRepository.save(newWaiting);
 
         return WaitingResponseDTO.from(savedWaiting);
     }
 
-    private Long getLatestWaitingNumber(WaitingRequestDTO request, ReservationTime time, Theme theme) {
-        return waitingRepository.findMaxWaitingNumberBy(
+    private Long generateNextWaitingNumber(WaitingRequestDTO request, ReservationTime time, Theme theme) {
+        Long maxWaitingNumber = waitingRepository.findMaxWaitingNumberBy(
                 request.date(),
                 time,
                 theme
         ).orElse(0L);
+
+        return maxWaitingNumber + 1L;
     }
 
     private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
@@ -83,7 +85,7 @@ public class WaitingService {
     }
 
     private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
-        Reservation existReservation = reservationRepository.findByDateAndTimeAndTheme(
+        Reservation existReservation = reservationRepository.findByDateAndTimeAndThemeWithLock(
                 request.date(),
                 time,
                 theme

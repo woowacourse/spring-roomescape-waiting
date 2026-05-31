@@ -10,13 +10,13 @@ import roomescape.domain.Waiting;
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
 
-    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme);
-
-    Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme);
+    Optional<Waiting> findById(Long id);
 
     List<Waiting> findByName(String name);
 
-    Optional<Waiting> findById(Long id);
+    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme);
+
+    Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme);
 
     void delete(Long id);
 }
