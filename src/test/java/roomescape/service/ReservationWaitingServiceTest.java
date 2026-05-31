@@ -132,7 +132,7 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 동시에_중복_대기_신청시_예외_발생() {
+    void 예약_대기_저장시_중복키_예외가_발생하면_비즈니스_예외로_변환한다() {
         // given
         String name = "브라운";
         when(reservationTimeRepository.findBy(time.getId()))
