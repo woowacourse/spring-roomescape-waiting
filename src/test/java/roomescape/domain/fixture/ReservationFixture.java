@@ -10,6 +10,9 @@ import roomescape.domain.Theme;
 
 public class ReservationFixture {
 
+    private static final LocalDate REFERENCE_DATE = LocalDate.of(2000, 1, 2);
+    private static final LocalTime REFERENCE_TIME = LocalTime.of(10, 0);
+
     public static Stream<Arguments> invalidReservationConstructor() {
         return Stream.of(
                 // 날짜 정보가 누락된 경우
@@ -21,30 +24,30 @@ public class ReservationFixture {
                 ),
                 // 테마 정보가 누락된 경우
                 Arguments.of(
-                        LocalDate.now().plusDays(1),
+                        REFERENCE_DATE,
                         null,
                         ReservationTimeFixture.createDefault(),
                         "테마 정보는 비어있을 수 없습니다."
                 ),
                 // 예약 시간 정보가 누락된 경우
                 Arguments.of(
-                        LocalDate.now().plusDays(1),
+                        REFERENCE_DATE,
                         ThemeFixture.createDefaultTheme(),
                         null,
                         "예약 날짜 및 시간 정보는 비어있을 수 없습니다."
                 ),
                 // 오늘보다 과거 날짜인 경우
                 Arguments.of(
-                        LocalDate.now().minusDays(1),
+                        REFERENCE_DATE.minusDays(1),
                         ThemeFixture.createDefaultTheme(),
                         ReservationTimeFixture.createDefault(),
                         "이전 날짜로 예약 할 수 없습니다."
                 ),
-                // 오늘과 날짜는 동일하지만 시간이 과거인 경우
+                // 기준 일시보다 과거인 경우
                 Arguments.of(
-                        LocalDate.now(),
+                        REFERENCE_DATE,
                         ThemeFixture.createDefaultTheme(),
-                        new ReservationTime(LocalTime.now().minusHours(1)),
+                        new ReservationTime(REFERENCE_TIME.minusHours(1)),
                         "이전 날짜로 예약 할 수 없습니다."
                 )
         );
