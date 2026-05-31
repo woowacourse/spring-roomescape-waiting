@@ -63,4 +63,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "데이터 충돌이 발생했습니다. 다시 시도해주세요."));
     }
+
 }
