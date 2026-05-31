@@ -103,8 +103,11 @@ public class ReservationWaitingServiceTest {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("test",
                 pastDate, 1L, 1L);
 
+        Reservation pastReservation = new Reservation(1L, "다른사람", pastDate, reservationTime, theme, LocalDateTime.now());
+
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
+        when(reservationQueryingDao.findReservationByThemeAndDateAndTime(1L, pastDate, 1L)).thenReturn(Optional.of(pastReservation));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ExpiredDateTimeException.class);
