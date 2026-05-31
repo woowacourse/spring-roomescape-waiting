@@ -64,15 +64,12 @@ public class ReservationService {
         List<MyReservationResponse> reservations = reservationDao.selectByName(name).stream()
                 .map(MyReservationResponse::fromReservation)
                 .toList();
-        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
-                .map(waiting -> MyReservationResponse.fromReservationWaiting(
-                        waiting,
-                        reservationWaitingDao.countOrder(
-                                waiting.getReservationDate(),
-                                waiting.getTime().getId(),
-                                waiting.getTheme().getId(),
-                                waiting.getId()
-                        )))
+
+        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByNameWithOrder(name).stream()
+                .map(waitingWithOrder -> MyReservationResponse.fromReservationWaiting(
+                        waitingWithOrder.reservationWaiting(),
+                        waitingWithOrder.order()
+                ))
                 .toList();
 
         List<MyReservationResponse> reservationResponses = new ArrayList<>();

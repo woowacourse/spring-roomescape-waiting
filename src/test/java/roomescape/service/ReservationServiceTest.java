@@ -224,6 +224,21 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomEscapeException.class);
     }
 
+    @Test
+    void 내_예약_조회에서_대기_순번은_전체_대기열_기준으로_계산된다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        LocalDate date = LocalDate.of(2026, 6, 10);
+
+        saveReservation("예약자", date, time, theme);
+        saveReservationWaiting("맥스", date, time, theme);
+        saveReservationWaiting("로지", date, time, theme);
+        saveReservationWaiting("브라운", date, time, theme);
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("브라운");
+        assertThat(responses.getFirst().order()).isEqualTo(3);
+    }
+
     private ReservationTime saveTime(int hour, int minute) {
         return reservationTimeDao.insert(ReservationTime.createWithoutId(LocalTime.of(hour, minute)));
     }
