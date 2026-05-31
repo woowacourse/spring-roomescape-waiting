@@ -8,26 +8,20 @@ public class ReservationWaiting {
     private final Long id;
     private final String name;
     private final LocalDateTime createdAt;
-    private final LocalDate reservationDate;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
+    public ReservationWaiting(Long id, String name, LocalDateTime createdAt, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약 대기자명은 필수값 입니다.");
         Objects.requireNonNull(createdAt, "예약 대기 생성일자는 필수값 입니다.");
-        Objects.requireNonNull(reservationDate, "예약 일자는 필수값 입니다.");
-        Objects.requireNonNull(time, "예약 대기할 시간은 필수값 입니다.");
-        Objects.requireNonNull(theme, "예약 대기할 테마는 필수값 입니다.");
+        Objects.requireNonNull(slot, "예약 슬롯은 필수값 입니다.");
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
-        this.reservationDate = reservationDate;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime time, Theme theme) {
-        return new ReservationWaiting(null, name, createdAt, reservationDate, time, theme);
+    public static ReservationWaiting createWithoutId(String name, LocalDateTime createdAt, ReservationSlot slot) {
+        return new ReservationWaiting(null, name, createdAt, slot);
     }
 
     public Long getId() {
@@ -42,16 +36,20 @@ public class ReservationWaiting {
         return createdAt;
     }
 
-    public ReservationTime getTime() {
-        return time;
+    public ReservationSlot getSlot() {
+        return slot;
     }
 
     public LocalDate getReservationDate() {
-        return reservationDate;
+        return slot.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     @Override
@@ -65,8 +63,8 @@ public class ReservationWaiting {
             return Objects.equals(id, reservationWaiting.id);
         }
         return Objects.equals(name, reservationWaiting.name)
-                && Objects.equals(createdAt, reservationWaiting.createdAt) && Objects.equals(reservationDate, reservationWaiting.reservationDate)
-                && Objects.equals(time, reservationWaiting.time) && Objects.equals(theme, reservationWaiting.theme);
+                && Objects.equals(createdAt, reservationWaiting.createdAt)
+                && Objects.equals(slot, reservationWaiting.slot);
     }
 
     @Override
@@ -74,6 +72,6 @@ public class ReservationWaiting {
         if (id != null) {
             return Objects.hash(id);
         }
-        return Objects.hash(name, createdAt, reservationDate, time, theme);
+        return Objects.hash(name, createdAt, slot);
     }
 }

@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -16,6 +15,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationCommand;
@@ -44,11 +44,12 @@ public class ReservationService {
     public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
+        ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
 
-        validateUniqueReservation(command.date(), command.timeId(), command.themeId());
-        validatePastDatetime(command.date(), now, reservationTime);
+        validateUniqueReservation(slot);
+        validatePastDatetime(slot, now);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), command.date(), reservationTime, theme);
+        Reservation reservation = Reservation.createWithoutId(command.name(), slot);
         Reservation savedReservation = reservationDao.insert(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -74,10 +75,11 @@ public class ReservationService {
     @Transactional
     public ReservationResponse update(Long reservationId, UpdateReservationCommand command, LocalDateTime now) {
         Reservation reservation = getReservation(reservationId);
-
         ReservationTime time = getTime(command.timeId());
-        validateUniqueExcludingSelf(command.date(), command.timeId(), reservation.getTheme().getId(), reservationId);
-        validatePastDatetime(command.date(), now, time);
+        ReservationSlot slot = new ReservationSlot(command.date(), time, reservation.getTheme());
+
+        validateUniqueExcludingSelf(slot, reservationId);
+        validatePastDatetime(slot, now);
 
         Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
         return ReservationResponse.from(updateReservation);
@@ -101,22 +103,22 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateUniqueReservation(LocalDate date, long timeId, long themeId) {
-        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    private void validateUniqueReservation(ReservationSlot slot) {
+        boolean exists = reservationDao.existsBySlot(slot);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
-    private void validateUniqueExcludingSelf(LocalDate date, long timeId, long themeId, long id) {
-        boolean exists = reservationDao.existsDuplicateExcluding(date, timeId, themeId, id);
+    private void validateUniqueExcludingSelf(ReservationSlot slot, long id) {
+        boolean exists = reservationDao.existsDuplicateExcluding(slot, id);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
-    private void validatePastDatetime(LocalDate date, LocalDateTime now, ReservationTime reservationTime) {
-        if (reservationTime.isPast(date, now)) {
+    private void validatePastDatetime(ReservationSlot slot, LocalDateTime now) {
+        if (slot.getTime().isPast(slot.getDate(), now)) {
             throw new RoomEscapeException(ReservationErrorCode.PAST_DATETIME);
         }
     }

@@ -17,6 +17,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -47,7 +48,8 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지", LocalDate.of(2026, 6, 10), time, theme));
+        reservationDao.insert(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );
@@ -80,7 +82,8 @@ class ReservationWaitingServiceTest {
     void 동일한_슬롯에_중복_대기를_신청하면_예외가_발생한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지", LocalDate.of(2026, 6, 10), time, theme));
+        reservationDao.insert(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );
@@ -95,7 +98,8 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
-        reservationDao.insert(Reservation.createWithoutId("로지", LocalDate.of(2026, 6, 10), time, theme));
+        reservationDao.insert(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
 
         waitingService.addReservationWaiting(new CreateReservationWaitingCommand(
                 "브라운", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
@@ -117,7 +121,8 @@ class ReservationWaitingServiceTest {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationWaiting saved = reservationWaitingDao.insert(
-                ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(), LocalDate.of(2026, 5, 5), time, theme)
+                ReservationWaiting.createWithoutId("브라운", LocalDateTime.now(),
+                        new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme))
         );
 
         // when & then

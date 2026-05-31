@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -262,6 +263,6 @@ class ThemeDaoTest {
     }
 
     private void saveReservation(LocalDate date, ReservationTime time, Theme theme) {
-        reservationDao.insert(Reservation.createWithoutId("예약자", date, time, theme));
+        reservationDao.insert(Reservation.createWithoutId("예약자", new ReservationSlot(date, time, theme)));
     }
 }

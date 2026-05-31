@@ -6,24 +6,18 @@ import java.util.Objects;
 public class Reservation {
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, ReservationSlot slot) {
         Objects.requireNonNull(name, "예약자명은 필수값 입니다.");
-        Objects.requireNonNull(date, "예약 날짜는 필수값 입니다.");
-        Objects.requireNonNull(time, "예약 시간은 필수값 입니다.");
-        Objects.requireNonNull(theme, "테마는 필수값 입니다.");
+        Objects.requireNonNull(slot, "예약 슬롯은 필수값 입니다.");
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
-    public static Reservation createWithoutId(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, name, date, time, theme);
+    public static Reservation createWithoutId(String name, ReservationSlot slot) {
+        return new Reservation(null, name, slot);
     }
 
     public Long getId() {
@@ -34,16 +28,20 @@ public class Reservation {
         return name;
     }
 
+    public ReservationSlot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     @Override
@@ -57,8 +55,7 @@ public class Reservation {
             return Objects.equals(id, reservation.id);
         }
         return Objects.equals(name, reservation.name)
-                && Objects.equals(date, reservation.date) && Objects.equals(time, reservation.time)
-                && Objects.equals(theme, reservation.theme);
+                && Objects.equals(slot, reservation.slot);
     }
 
     @Override
@@ -66,6 +63,6 @@ public class Reservation {
         if (id != null) {
             return Objects.hash(id);
         }
-        return Objects.hash(name, date, time, theme);
+        return Objects.hash(name, slot);
     }
 }
