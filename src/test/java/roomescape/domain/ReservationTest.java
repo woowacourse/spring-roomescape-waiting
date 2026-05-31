@@ -138,4 +138,43 @@ public class ReservationTest {
         assertThat(withId.getId()).isEqualTo(99L);
         assertThat(withId.getName()).isEqualTo("브라운");
     }
+
+    @Test
+    void 미래_예약은_isExpired가_false를_반환한다() {
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
+
+        assertThat(reservation.isExpired()).isFalse();
+    }
+
+    @Test
+    void 과거_예약은_isExpired가_true를_반환한다() {
+        ReservationTime pastTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+
+        assertThat(reservation.isExpired()).isTrue();
+    }
+
+    @Test
+    void transferTo는_같은_슬롯에_이름만_바뀐_예약을_반환한다() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        Reservation original = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+
+        Reservation transferred = original.transferTo("네오");
+
+        assertThat(transferred.getName()).isEqualTo("네오");
+        assertThat(transferred.getDate()).isEqualTo(futureDate);
+        assertThat(transferred.getTime()).isEqualTo(futureTime);
+        assertThat(transferred.getTheme()).isEqualTo(theme);
+        assertThat(transferred.getId()).isNull();
+    }
+
+    @Test
+    void 과거_예약에_transferTo를_호출하면_예외가_발생한다() {
+        ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
+        Reservation expiredReservation = Reservation.restore(1L, "브라운", LocalDate.now().minusDays(1), pastTime, theme, LocalDateTime.now());
+
+        assertThatThrownBy(() -> expiredReservation.transferTo("네오"))
+                .isInstanceOf(ExpiredDateTimeException.class);
+    }
 }
