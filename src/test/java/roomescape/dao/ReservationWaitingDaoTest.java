@@ -1,20 +1,19 @@
 package roomescape.dao;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 
 @JdbcTest
 @Import({ReservationWaitingDao.class, ReservationTimeDao.class, ThemeDao.class})
@@ -34,15 +33,34 @@ class ReservationWaitingDaoTest {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(
+                "맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme
+        );
 
         // when
         ReservationWaiting saved = reservationWaitingDao.insert(reservationWaiting);
 
         // then
         assertThat(saved)
-                .extracting(ReservationWaiting::getName, ReservationWaiting::getCreatedAt, ReservationWaiting::getReservationDate, ReservationWaiting::getTime, ReservationWaiting::getTheme)
-                .containsExactly(reservationWaiting.getName(), reservationWaiting.getCreatedAt(), reservationWaiting.getReservationDate(), reservationWaiting.getTime(), reservationWaiting.getTheme());
+                .extracting(ReservationWaiting::getName, ReservationWaiting::getReservationDate,
+                        ReservationWaiting::getTime, ReservationWaiting::getTheme)
+                .containsExactly(reservationWaiting.getName(), reservationWaiting.getReservationDate(),
+                        reservationWaiting.getTime(), reservationWaiting.getTheme());
+    }
+
+    @Test
+    void 생성된_예약_대기는_id가_존재한다() {
+        // given
+        ReservationTime savedTime = saveTime(10, 0);
+        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+
+        // when
+        ReservationWaiting saved = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+
+        // then
+        assertThat(saved.getId()).isNotNull();
     }
 
     @Test
@@ -50,9 +68,9 @@ class ReservationWaitingDaoTest {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting saved = reservationWaitingDao.insert(reservationWaiting);
+        ReservationWaiting saved = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
 
         // when
         reservationWaitingDao.delete(saved.getId());
@@ -62,16 +80,28 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
+    void 존재하지_않는_대기를_삭제하면_0을_반환한다() {
+        // when
+        int deleted = reservationWaitingDao.delete(999L);
+
+        // then
+        assertThat(deleted).isEqualTo(0);
+    }
+
+    @Test
     void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하면_true를_반환한다() {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(
+                "맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme
+        );
         reservationWaitingDao.insert(reservationWaiting);
 
         // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(reservationWaiting.getName(), reservationWaiting.getReservationDate(), savedTime.getId(), savedTheme.getId());
+        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
+                "맥스", LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId()
+        );
 
         // then
         assertThat(result).isTrue();
@@ -80,28 +110,85 @@ class ReservationWaitingDaoTest {
     @Test
     void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하지_않으면_false를_반환한다() {
         // when
-        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId("맥스", LocalDate.of(2026, 6, 10), 999L, 999L);
+        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
+                "맥스", LocalDate.of(2026, 6, 10), 999L, 999L
+        );
 
         // then
         assertThat(result).isFalse();
     }
 
     @Test
-    void 대기_순번을_계산한다() {
+    void 이름이_다르면_같은_슬롯이어도_false를_반환한다() {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting1 = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting reservationWaiting2 = ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting savedReservationWaiting1 = reservationWaitingDao.insert(reservationWaiting1);
-        ReservationWaiting savedReservationWaiting2 = reservationWaitingDao.insert(reservationWaiting2);
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
 
         // when
-        int countOrder = reservationWaitingDao.countOrder(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId(), savedReservationWaiting2.getId());
+        boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
+                "로지", LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId()
+        );
 
         // then
-        assertThat(countOrder).isEqualTo(2);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void 첫번째_대기자의_순번은_1이다() {
+        // given
+        ReservationTime savedTime = saveTime(10, 0);
+        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+        ReservationWaiting saved = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+
+        // when
+        int order = reservationWaitingDao.countOrder(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId(), saved.getId());
+
+        // then
+        assertThat(order).isEqualTo(1);
+    }
+
+    @Test
+    void 두번째_대기자의_순번은_2이다() {
+        // given
+        ReservationTime savedTime = saveTime(10, 0);
+        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+        ReservationWaiting second = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+
+        // when
+        int order = reservationWaitingDao.countOrder(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId(), second.getId());
+
+        // then
+        assertThat(order).isEqualTo(2);
+    }
+
+    @Test
+    void 다른_슬롯의_대기는_순번_계산에_포함되지_않는다() {
+        // given
+        ReservationTime savedTime1 = saveTime(10, 0);
+        ReservationTime savedTime2 = saveTime(11, 0);
+        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime1, savedTheme)
+        );
+        ReservationWaiting saved = reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime2, savedTheme)
+        );
+
+        // when
+        int order = reservationWaitingDao.countOrder(LocalDate.of(2026, 6, 10), savedTime2.getId(), savedTheme.getId(), saved.getId());
+
+        // then
+        assertThat(order).isEqualTo(1);
     }
 
     @Test
@@ -109,20 +196,52 @@ class ReservationWaitingDaoTest {
         // given
         ReservationTime savedTime = saveTime(10, 0);
         Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting1 = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting reservationWaiting2 = ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting savedReservationWaiting1 = reservationWaitingDao.insert(reservationWaiting1);
-        ReservationWaiting savedReservationWaiting2 = reservationWaitingDao.insert(reservationWaiting2);
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
 
         // when
-        List<ReservationWaiting> reservationWaitings = reservationWaitingDao.select();
+        List<ReservationWaiting> result = reservationWaitingDao.select();
 
         // then
         assertAll(
-                () -> assertThat(reservationWaitings.size()).isEqualTo(2),
-                () -> assertThat(reservationWaitings.getFirst().getName()).isEqualTo("맥스")
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result.getFirst().getName()).isEqualTo("맥스")
         );
+    }
+
+    @Test
+    void 이름으로_대기_목록을_조회한다() {
+        // given
+        ReservationTime savedTime = saveTime(10, 0);
+        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+        reservationWaitingDao.insert(
+                ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme)
+        );
+
+        // when
+        List<ReservationWaiting> result = reservationWaitingDao.selectByName("맥스");
+
+        // then
+        assertAll(
+                () -> assertThat(result).hasSize(1),
+                () -> assertThat(result.getFirst().getName()).isEqualTo("맥스")
+        );
+    }
+
+    @Test
+    void 존재하지_않는_이름으로_조회하면_빈_목록을_반환한다() {
+        // when
+        List<ReservationWaiting> result = reservationWaitingDao.selectByName("없는이름");
+
+        // then
+        assertThat(result).isEmpty();
     }
 
     private ReservationTime saveTime(int hour, int minute) {
