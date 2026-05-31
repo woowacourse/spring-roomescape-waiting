@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
-import roomescape.controller.client.api.dto.response.TimeSlotProjection;
+import roomescape.controller.client.api.dto.response.TimeSlotResponse;
 import roomescape.controller.client.api.query.ThemeTimesQuery;
 import roomescape.persistence.jdbc.mapper.TimeSlotProjectionRowMapper;
 
@@ -43,7 +43,7 @@ public class JdbcThemeTimesQuery implements ThemeTimesQuery {
                 .toList();
     }
 
-    private ThemeTimesResponse toResponse(TimeSlotProjection projection, LocalDate date) {
+    private ThemeTimesResponse toResponse(TimeSlotResponse projection, LocalDate date) {
         if (LocalDateTime.of(date, projection.startAt()).isBefore(LocalDateTime.now())) {
             return new ThemeTimesResponse(projection.id(), projection.startAt(), false, "UNAVAILABLE");
         }
