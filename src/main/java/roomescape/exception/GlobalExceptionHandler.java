@@ -1,10 +1,8 @@
 package roomescape.exception;
 
-import org.springframework.dao.ConcurrencyFailureException;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -53,35 +51,9 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("INVALID_INPUT", e.getMessage()));
     }
 
-    @ExceptionHandler({ConcurrencyConflictException.class, ConcurrencyFailureException.class})
-    public ResponseEntity<ErrorResponse> handleConcurrencyConflict() {
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handle(PessimisticLockingFailureException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("LOCK_CONFLICT", "일시적 충돌이 발생했습니다. 다시 시도해주세요."));
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handle(DataIntegrityViolationException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("DATA_INTEGRITY_VIOLATION", "데이터 충돌이 발생했습니다. 다시 시도해주세요."));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handle(HttpMessageNotReadableException e) {
-        Throwable cause = e.getCause();
-        while (cause != null && !(cause instanceof InvalidInputException)) {
-            cause = cause.getCause();
-        }
-        if (cause == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("INVALID_INPUT", "요청 본문을 읽을 수 없습니다."));
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_INPUT", cause.getMessage()));
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorResponse> handle(RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("INTERNER_SERVER_ERROR", "서버에 오류가 발생하였습니다. 다시 시도해주세요."));
     }
 }

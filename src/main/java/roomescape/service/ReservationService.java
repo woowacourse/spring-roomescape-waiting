@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -88,13 +90,14 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
+    @Retryable(retryFor = PessimisticLockingFailureException.class)
     @Transactional
     public void delete(Long id) {
         if(!reservationQueryingDao.isExistById(id)) {
             return;
         }
 
-        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findFirstReservationWaitingByReservationId(id);
+        Optional<ReservationWaiting> optionalReservationWaiting = reservationWaitingDao.findFirstByReservationId(id);
 
         if(optionalReservationWaiting.isEmpty()) {
             reservationUpdatingDao.delete(id);
