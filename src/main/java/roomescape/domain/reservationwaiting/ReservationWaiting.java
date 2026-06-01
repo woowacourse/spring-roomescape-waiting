@@ -7,21 +7,21 @@ public class ReservationWaiting {
     private final Long id;
     private final Reservation reservation;
     private final String name;
-    private final LocalDateTime requestAt;
+    private final LocalDateTime requestedAt;
 
-    public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestAt) {
+    public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestedAt) {
         this.id = id;
         this.reservation = reservation;
         this.name = name;
-        this.requestAt = requestAt;
+        this.requestedAt = requestedAt;
     }
 
-    public static ReservationWaiting createNew(final Reservation reservation, String name, LocalDateTime requestAt) {
-        return new ReservationWaiting(null, reservation, name, requestAt);
+    public static ReservationWaiting createNew(final Reservation reservation, String name, LocalDateTime requestedAt) {
+        return new ReservationWaiting(null, reservation, name, requestedAt);
     }
 
     public ReservationWaiting withId(final Long id) {
-        return new ReservationWaiting(id, this.reservation, this.name, this.requestAt);
+        return new ReservationWaiting(id, this.reservation, this.name, this.requestedAt);
     }
 
     public Long getId() {
@@ -36,7 +36,7 @@ public class ReservationWaiting {
         return name;
     }
 
-    public LocalDateTime getRequestAt() {
-        return requestAt;
+    public LocalDateTime getRequestedAt() {
+        return requestedAt;
     }
 }

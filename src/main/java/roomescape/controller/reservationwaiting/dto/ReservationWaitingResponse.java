@@ -7,14 +7,14 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 public record ReservationWaitingResponse(
         Long id,
         String name,
-        LocalDateTime requestAt,
+        LocalDateTime requestedAt,
         ReservationResponse reservationResponse
 ) {
     public static ReservationWaitingResponse from(final ReservationWaiting reservationWaiting) {
         return new ReservationWaitingResponse(
                 reservationWaiting.getId(),
                 reservationWaiting.getName(),
-                reservationWaiting.getRequestAt(),
+                reservationWaiting.getRequestedAt(),
                 ReservationResponse.from(reservationWaiting.getReservation())
         );
     }

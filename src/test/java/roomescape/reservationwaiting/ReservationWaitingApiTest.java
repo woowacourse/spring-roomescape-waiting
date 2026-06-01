@@ -54,7 +54,7 @@ class ReservationWaitingApiTest {
                 .andExpect(header().string("Location", "/waitings/1"))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("아루"))
-                .andExpect(jsonPath("$.requestAt", notNullValue()))
+                .andExpect(jsonPath("$.requestedAt", notNullValue()))
                 .andExpect(jsonPath("$.reservationResponse.id").value(1))
                 .andExpect(jsonPath("$.reservationResponse.name").value("쿠다"))
                 .andExpect(jsonPath("$.reservationResponse.theme.id").value(1))
