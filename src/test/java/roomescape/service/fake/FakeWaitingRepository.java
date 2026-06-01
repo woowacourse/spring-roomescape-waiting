@@ -44,11 +44,11 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time) {
+    public Long findWaitingOrder(Long id, Theme theme, LocalDate date, ReservationTime time) {
         return waitings.stream()
                 .filter(w -> isSameSchedule(w, date, time.getId(), theme.getId()))
                 .filter(w -> w.getId() < id)
-                .count();
+                .count() + 1;
     }
 
     @Override

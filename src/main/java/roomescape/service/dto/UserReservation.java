@@ -23,4 +23,8 @@ public record UserReservation(
     public static UserReservation from(Long id, String name, LocalDate date, ReservationTime time, Theme theme, long entryRank) {
         return new UserReservation(id, name, date, time, theme, ReservationStatus.WAITING, entryRank);
     }
+
+    public static UserReservation waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+        return new UserReservation(id, name, date, time, theme, ReservationStatus.WAITING, null);
+    }
 }

@@ -15,7 +15,7 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long id);
 
-    Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time);
+    Long findWaitingOrder(Long id, Theme theme, LocalDate date, ReservationTime time);
 
     void delete(Waiting waiting);
 }

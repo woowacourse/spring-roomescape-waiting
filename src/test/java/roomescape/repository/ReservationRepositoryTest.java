@@ -219,7 +219,7 @@ class ReservationRepositoryTest {
                 .findFirst()
                 .orElseThrow();
         assertThat(waiting.name()).isEqualTo("브라운");
-        assertThat(waiting.rank()).isEqualTo(2L);
+        assertThat(waiting.rank()).isNull();
     }
 
     @Test

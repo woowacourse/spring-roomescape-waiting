@@ -103,7 +103,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                        entry.name      AS entry_name,
                        entry.date      AS entry_date,
                        entry.status    AS entry_status,
-                       entry.rank      AS entry_rank,
                        t.id            AS time_id,
                        t.start_at      AS time_start_at,
                        th.id           AS theme_id,
@@ -112,18 +111,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                        th.thumbnail    AS theme_thumbnail
                 FROM (
                     SELECT r.id, r.name, r.date, r.time_id, r.theme_id,
-                           'RESERVED' AS status,
-                           0          AS rank
+                           'RESERVED' AS status
                     FROM reservation r
                     WHERE r.name = ?
                     UNION ALL
                     SELECT w.id, w.name, w.date, w.time_id, w.theme_id,
-                           'WAITING'  AS status,
-                           (SELECT COUNT(*) FROM waiting w2
-                             WHERE w2.theme_id = w.theme_id
-                               AND w2.date     = w.date
-                               AND w2.time_id  = w.time_id
-                               AND w2.id       < w.id) + 1 AS rank
+                           'WAITING'  AS status
                     FROM waiting w
                     WHERE w.name = ?
                 ) entry
@@ -229,7 +222,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             LocalDate date = LocalDate.parse(rs.getString("entry_date"));
 
             if ("WAITING".equals(rs.getString("entry_status"))) {
-                return UserReservation.from(id, name, date, time, theme, rs.getLong("entry_rank"));
+                return UserReservation.waiting(id, name, date, time, theme);
             }
             return UserReservation.from(id, name, date, time, theme);
         };

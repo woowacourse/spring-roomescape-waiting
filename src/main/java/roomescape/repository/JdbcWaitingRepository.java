@@ -103,9 +103,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time) {
+    public Long findWaitingOrder(Long id, Theme theme, LocalDate date, ReservationTime time) {
         String sql = """
-            SELECT COUNT(*) FROM waiting
+            SELECT COUNT(*) + 1 FROM waiting
             WHERE theme_id = ?
               AND date = ?
               AND time_id = ?

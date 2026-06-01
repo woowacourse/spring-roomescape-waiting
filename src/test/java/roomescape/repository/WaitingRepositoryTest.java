@@ -104,18 +104,18 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    void 같은_일정에서_앞선_예약_대기의_수를_센다() {
+    void 같은_일정에서_예약_대기_순번을_구한다() {
         Waiting first = waitingRepository.save(new Waiting(null, "레서", date, time, theme));
         waitingRepository.save(new Waiting(null, "밍구", date, time, theme));
         Waiting third = waitingRepository.save(new Waiting(null, "브라운", date, time, theme));
 
-        Long firstOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(
+        Long firstOrder = waitingRepository.findWaitingOrder(
                 first.getId(), theme, date, time);
-        Long thirdOrder = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(
+        Long thirdOrder = waitingRepository.findWaitingOrder(
                 third.getId(), theme, date, time);
 
-        assertThat(firstOrder).isEqualTo(0L);
-        assertThat(thirdOrder).isEqualTo(2L);
+        assertThat(firstOrder).isEqualTo(1L);
+        assertThat(thirdOrder).isEqualTo(3L);
     }
 
     @Test

@@ -51,7 +51,7 @@ public class WaitingService {
         checkWaitable(waiting);
 
         waiting = waitingRepository.save(waiting);
-        Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime()) + 1;
+        Long order = waitingRepository.findWaitingOrder(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime());
 
         return WaitingResult.of(waiting, order);
     }

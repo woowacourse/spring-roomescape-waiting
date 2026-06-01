@@ -6,20 +6,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
 
 import java.time.*;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -37,13 +42,16 @@ class ReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    private WaitingRepository waitingRepository;
+
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, reservationTimeRepository, themeRepository, fixedClock
+                reservationRepository, reservationTimeRepository, themeRepository, waitingRepository, fixedClock
         );
     }
 
@@ -182,6 +190,27 @@ class ReservationServiceTest {
                 .isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
 
         verify(reservationRepository, never()).update(any(Reservation.class));
+    }
+
+    @Test
+    void 예약대기_항목의_대기순번은_서비스에서_계산한다() {
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
+        LocalDate date = LocalDate.of(2026, 5, 10);
+        UserReservation reserved = UserReservation.from(1L, "레서", date, time, theme);
+        UserReservation waiting = UserReservation.waiting(2L, "레서", date, time, theme);
+
+        when(reservationRepository.findUserReservations("레서", 0, 10))
+                .thenReturn(List.of(reserved, waiting));
+        when(waitingRepository.findWaitingOrder(2L, theme, date, time))
+                .thenReturn(2L);
+
+        List<UserReservation> result = reservationService.findUserReservations("레서", 0, 10);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).status()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(result.get(1).status()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(result.get(1).rank()).isEqualTo(2L);
     }
 
     @Test
