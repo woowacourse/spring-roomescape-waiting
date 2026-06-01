@@ -24,7 +24,8 @@ CREATE TABLE waiting
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
-    FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
+    FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT,
+    CONSTRAINT unique_waiting UNIQUE (name, date, time_id, theme_id)
 );
 
 CREATE TABLE reservation
