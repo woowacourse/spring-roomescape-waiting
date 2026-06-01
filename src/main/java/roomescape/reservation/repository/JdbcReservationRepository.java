@@ -26,7 +26,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getLong("member_id"),
                     resultSet.getString("member_name"),
                     resultSet.getString("member_email"),
-                    resultSet.getString("member_password")
+                    resultSet.getString("member_password"),
+                    roomescape.member.domain.Role.valueOf(resultSet.getString("member_role"))
             ),
             resultSet.getDate("date").toLocalDate(),
             ReservationTime.restore(
@@ -67,7 +68,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> findById(Long id) {
         String query = """
                 SELECT r.id AS reservation_id, r.date,
-                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r
@@ -83,7 +84,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findByMemberId(Long memberId) {
         String query = """
                 SELECT r.id AS reservation_id, r.date,
-                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
                        rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
                        t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
                 FROM reservation r

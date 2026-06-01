@@ -21,15 +21,24 @@ class AdminThemeControllerTest {
     @LocalServerPort
     int port;
 
+    String sessionId;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        sessionId = given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "user1@test.com", "password", "1234"))
+                .post("/login")
+                .then()
+                .extract().cookie("JSESSIONID");
     }
 
     @DisplayName("테마 생성 성공")
     @Test
     void 테마_생성_성공() {
         given()
+                .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
                 .post("/admin/themes")
@@ -42,6 +51,7 @@ class AdminThemeControllerTest {
     @Test
     void 전체_테마_조회_성공() {
         given()
+                .cookie("JSESSIONID", sessionId)
                 .get("/admin/themes")
                 .then()
                 .statusCode(HttpStatus.OK.value())
@@ -52,6 +62,7 @@ class AdminThemeControllerTest {
     @Test
     void 테마_삭제_성공() {
         int id = given()
+                .cookie("JSESSIONID", sessionId)
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", "테마E", "description", "설명E", "imageUrl", "https://e.com"))
                 .post("/admin/themes")
@@ -60,6 +71,7 @@ class AdminThemeControllerTest {
                 .extract().path("id");
 
         given()
+                .cookie("JSESSIONID", sessionId)
                 .delete("/admin/themes/" + id)
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());

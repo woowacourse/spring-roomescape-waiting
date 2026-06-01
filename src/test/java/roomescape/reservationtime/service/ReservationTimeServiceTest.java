@@ -94,7 +94,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 존재하는 시간은 삭제할 수 없다")
     void 예약이_존재하는_시간은_삭제할_수_없다() {
         ReservationTime time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
-        Member member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        Member member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
         Theme theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
         reservationRepository.save(Reservation.restore(null, member, LocalDate.now().plusDays(1), time, theme));
 
@@ -108,7 +108,7 @@ class ReservationTimeServiceTest {
     void 날짜와_테마로_예약_가능한_시간만_조회한다() {
         ReservationTime reserved = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
         timeRepository.save(ReservationTime.restore(null, LocalTime.of(14, 0), LocalTime.of(15, 0)));
-        Member member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        Member member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
         Theme theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
         LocalDate date = LocalDate.now().plusDays(1);
         reservationRepository.save(Reservation.restore(null, member, date, reserved, theme));

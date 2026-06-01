@@ -31,11 +31,11 @@ INSERT INTO theme (name, description, image_url) VALUES ('투투 어드벤쳐', 
 INSERT INTO theme (name, description, image_url) VALUES ('NOSTALGIA', '추억을 자극하는 감성 테마.', 'https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/nostalgia_sizedown.png');
 
 -- 회원 데이터
-INSERT INTO member (name, email, password) VALUES ('user1', 'user1@test.com', '1234');
-INSERT INTO member (name, email, password) VALUES ('user2', 'user2@test.com', '1234');
-INSERT INTO member (name, email, password) VALUES ('user3', 'user3@test.com', '1234');
-INSERT INTO member (name, email, password) VALUES ('user4', 'user4@test.com', '1234');
-INSERT INTO member (name, email, password) VALUES ('user5', 'user5@test.com', '1234');
+INSERT INTO member (name, email, password, role) VALUES ('user1', 'user1@test.com', '1234', 'ADMIN');
+INSERT INTO member (name, email, password, role) VALUES ('user2', 'user2@test.com', '1234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('user3', 'user3@test.com', '1234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('user4', 'user4@test.com', '1234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('user5', 'user5@test.com', '1234', 'USER');
 
 -- 예약 데이터
 INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, DATEADD(DAY, -1, CURRENT_DATE), 1, 1);

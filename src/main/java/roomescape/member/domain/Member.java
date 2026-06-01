@@ -6,8 +6,9 @@ public class Member {
     private final String name;
     private final String email;
     private final String password;
+    private final Role role;
 
-    private Member(Long id, String name, String email, String password) {
+    private Member(Long id, String name, String email, String password, Role role) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("이름은 필수입니다.");
         }
@@ -17,14 +18,26 @@ public class Member {
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("비밀번호는 필수입니다.");
         }
+        if (role == null) {
+            throw new IllegalArgumentException("권한은 필수입니다.");
+        }
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
-    public static Member restore(Long id, String name, String email, String password) {
-        return new Member(id, name, email, password);
+    public static Member of(String name, String email, String password) {
+        return new Member(null, name, email, password, Role.USER);
+    }
+
+    public static Member restore(Long id, String name, String email, String password, Role role) {
+        return new Member(id, name, email, password, role);
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 
     public Long getId() {
@@ -41,5 +54,9 @@ public class Member {
 
     public String getPassword() {
         return password;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }

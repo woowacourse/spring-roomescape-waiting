@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -24,7 +25,7 @@ class ReservationTest {
     void setUp() {
         time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
-        member = Member.restore(1L, "현미밥", "test@test.com", "1234");
+        member = Member.restore(1L, "현미밥", "test@test.com", "1234", Role.USER);
         futureDate = LocalDate.now().plusDays(1);
     }
 

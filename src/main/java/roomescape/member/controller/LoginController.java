@@ -3,9 +3,11 @@ package roomescape.member.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.LoginRequest;
 import roomescape.member.dto.MemberResponse;
@@ -21,6 +23,11 @@ public class LoginController {
 
     public LoginController(MemberService memberService) {
         this.memberService = memberService;
+    }
+
+    @GetMapping("/member/profile")
+    public ResponseEntity<MemberResponse> getProfile(@LoginMember Member member) {
+        return ResponseEntity.ok(MemberResponse.from(member));
     }
 
     @PostMapping("/signup")

@@ -53,7 +53,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
         time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
         otherTime = timeRepository.save(ReservationTime.restore(null, LocalTime.of(14, 0), LocalTime.of(15, 0)));
         theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
@@ -134,7 +134,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("다른 사람의 예약은 삭제할 수 없다")
     void 타인의_예약은_삭제할_수_없다() {
-        Member other = memberRepository.save(Member.restore(null, "user2", "user2@test.com", "1234"));
+        Member other = memberRepository.save(Member.of("user2", "user2@test.com", "1234"));
         ReservationResponse response = reservationService.createReservation(
                 member, new ReservationRequest(futureDate, time.getId(), theme.getId()));
 

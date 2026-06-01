@@ -75,7 +75,7 @@ class AdminThemeServiceTest {
     @DisplayName("예약이 존재하는 테마는 삭제할 수 없다")
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         Theme theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
-        Member member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
+        Member member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
         ReservationTime time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
         reservationRepository.save(Reservation.restore(null, member, LocalDate.now().plusDays(1), time, theme));
 

@@ -52,8 +52,8 @@ class ReservationWaitingServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = memberRepository.save(Member.restore(null, "user1", "user1@test.com", "1234"));
-        reserver = memberRepository.save(Member.restore(null, "user2", "user2@test.com", "1234"));
+        member = memberRepository.save(Member.of("user1", "user1@test.com", "1234"));
+        reserver = memberRepository.save(Member.of("user2", "user2@test.com", "1234"));
         time = timeRepository.save(ReservationTime.restore(null, LocalTime.of(10, 0), LocalTime.of(11, 0)));
         theme = themeRepository.save(Theme.restore(null, "테마A", "설명A", "https://a.com"));
         futureDate = LocalDate.now().plusDays(1);
@@ -145,7 +145,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("먼저 신청한 대기가 더 빠른 순번을 가진다")
     void 먼저_신청한_대기가_더_빠른_순번을_가진다() {
         reserveByOther();
-        Member member3 = memberRepository.save(Member.restore(null, "user3", "user3@test.com", "1234"));
+        Member member3 = memberRepository.save(Member.of("user3", "user3@test.com", "1234"));
         ReservationWaitingResponse first = reservationWaitingService.createWaiting(member, request());
         ReservationWaitingResponse second = reservationWaitingService.createWaiting(member3, request());
 

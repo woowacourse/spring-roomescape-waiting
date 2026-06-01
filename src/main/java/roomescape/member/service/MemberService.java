@@ -22,7 +22,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponse signup(SignupRequest request) {
-        Member member = Member.restore(null, request.name(), request.email(), request.password());
+        Member member = Member.of(request.name(), request.email(), request.password());
         Member saved = memberRepository.save(member);
         return MemberResponse.from(saved);
     }
