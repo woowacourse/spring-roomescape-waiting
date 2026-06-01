@@ -33,13 +33,13 @@ class ReservationWaitingTest {
     @DisplayName("예약 대기는 ID가 같으면 같은 객체이다")
     void equalsById() {
         Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
-        ReservationWaiting waiting = new ReservationWaiting(
+        ReservationWaiting waiting = ReservationWaiting.of(
                 1L,
                 reservation,
                 "아루",
                 LocalDateTime.parse("2026-08-05T12:00:00")
         );
-        ReservationWaiting sameIdWaiting = new ReservationWaiting(
+        ReservationWaiting sameIdWaiting = ReservationWaiting.of(
                 1L,
                 reservation,
                 "다른이름",

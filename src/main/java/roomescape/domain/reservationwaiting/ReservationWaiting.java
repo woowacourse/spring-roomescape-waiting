@@ -3,6 +3,7 @@ package roomescape.domain.reservationwaiting;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationName;
 
 public class ReservationWaiting {
     private final Long id;
@@ -10,7 +11,7 @@ public class ReservationWaiting {
     private final String name;
     private final LocalDateTime requestAt;
 
-    public ReservationWaiting(
+    private ReservationWaiting(
             final Long id,
             final Reservation reservation,
             final String name,
@@ -18,7 +19,7 @@ public class ReservationWaiting {
     ) {
         this.id = id;
         this.reservation = reservation;
-        this.name = name;
+        this.name = ReservationName.from(name).value();
         this.requestAt = requestAt;
     }
 
@@ -30,8 +31,17 @@ public class ReservationWaiting {
         return new ReservationWaiting(null, reservation, name, requestAt);
     }
 
+    public static ReservationWaiting of(
+            final Long id,
+            final Reservation reservation,
+            final String name,
+            final LocalDateTime requestAt
+    ) {
+        return new ReservationWaiting(id, reservation, name, requestAt);
+    }
+
     public ReservationWaiting withId(final Long id) {
-        return new ReservationWaiting(id, this.reservation, this.name, this.requestAt);
+        return ReservationWaiting.of(id, this.reservation, this.name, this.requestAt);
     }
 
     public Long getId() {
@@ -47,7 +57,7 @@ public class ReservationWaiting {
     }
 
     public boolean hasName(final String name) {
-        return this.name.equals(name);
+        return this.name.equals(ReservationName.from(name).value());
     }
 
     public LocalDateTime getRequestAt() {

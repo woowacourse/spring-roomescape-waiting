@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationAvailabilityPolicy;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -51,16 +52,11 @@ public class ReservationWaitingService {
     }
 
     private String validateName(final String name) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 필수입니다.");
+        try {
+            return ReservationName.from(name).value();
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
         }
-
-        String trimmedName = name.trim();
-        if (trimmedName.length() >= 10) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 10자 미만이어야 합니다.");
-        }
-
-        return trimmedName;
     }
 
     private void validateWaitableName(final Reservation reservation, final String waitingName) {
@@ -88,13 +84,14 @@ public class ReservationWaitingService {
     }
 
     public void deleteByIdAndName(final Long waitingId, final String name) {
+        String waitingName = validateName(name);
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_WAITING_NOT_FOUND,
                         "삭제된 대기 데이터가 없습니다."
                 ));
 
-        if (!reservationWaiting.hasName(name)) {
+        if (!reservationWaiting.hasName(waitingName)) {
             throw new ResourceNotFoundException(
                     ErrorCode.RESERVATION_WAITING_NOT_FOUND,
                     "삭제된 대기 데이터가 없습니다."

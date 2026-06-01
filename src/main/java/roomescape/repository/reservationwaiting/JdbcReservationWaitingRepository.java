@@ -36,7 +36,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 reservationTime
         );
 
-        return new ReservationWaiting(
+        return ReservationWaiting.of(
                 resultSet.getLong("id"),
                 reservation,
                 resultSet.getString("waiting_name"),
