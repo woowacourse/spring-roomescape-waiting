@@ -153,18 +153,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean isExistBy(Long reservationId) {
-        String sql = """
-                        SELECT EXISTS (
-                            SELECT 1
-                            FROM reservation 
-                            WHERE id = ? 
-                        ) 
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
-    }
-
-    @Override
     public void updateStatus(Reservation reservation) {
         String sql = """
                 UPDATE reservation 
@@ -247,68 +235,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             case "CANCELLED" -> CancelledStatus.getInstance();
             default -> throw new IllegalArgumentException("존재하지 않는 예약 상태입니다.");
         };
-    }
-
-    //TODO: Optional 처리
-    @Override
-    public List<Reservation> findByThemeSlotAndPending(Long themeSlotId) {
-        String sql = """
-                SELECT 
-                    r.id AS r_id,
-                    r.name,
-                    r.status,
-                    ts.id AS theme_slot_id,
-                    ts.date,
-                    ts.is_reserved,
-                    t.id AS t_id,
-                    t.start_at, 
-                    theme.id as theme_id,
-                    theme.name AS theme_name,
-                    theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url
-                FROM 
-                    reservation r 
-                        INNER JOIN
-                        theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN 
-                        time t ON ts.time_id = t.id
-                        INNER JOIN 
-                        theme theme ON ts.theme_id = theme.id
-                WHERE ts.id = ?
-                AND r.status = 'PENDING'
-                ORDER BY r.id
-                """;
-        return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().toList();
-    }
-
-    @Override
-    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name,
-                    r.status,
-                    ts.date,
-                    t.id AS t_id,
-                    t.start_at,
-                    theme.id AS theme_id,
-                    theme.name AS theme_name,
-                    theme.description AS theme_description,
-                    theme.thumbnail_url AS theme_thumbnail_url,
-                    ROW_NUMBER() OVER (ORDER BY r.id ASC) AS waiting_order
-                FROM
-                    reservation r
-                        INNER JOIN
-                        theme_slot ts ON r.theme_slot_id = ts.id
-                        INNER JOIN
-                        time t ON ts.time_id = t.id
-                        INNER JOIN
-                        theme theme ON ts.theme_id = theme.id
-                WHERE ts.id = ?
-                AND r.status = 'PENDING'
-                ORDER BY r.id
-                """;
-        return jdbcTemplate.query(sql, waitingReservationRowMapper(), themeSlotId).stream().toList();
     }
 
     @Override

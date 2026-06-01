@@ -15,9 +15,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
-import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
+import roomescape.domain.reservationStatus.CompletedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.repository.FakeReservationDao;
@@ -31,16 +31,18 @@ class ReservationServiceTest {
     private Theme savedTheme;
     private ThemeSlot savedThemeSlot1;
     private ThemeSlot savedThemeSlot2;
+    private FakeReservationDao fakeReservationDao;
     private FakeThemeSlotDao fakeThemeSlotDao;
 
     @BeforeEach
     void setUp() {
         FakeTimeDao fakeReservationTimeDao = new FakeTimeDao();
         FakeThemeDao fakeThemeDao = new FakeThemeDao();
+        fakeReservationDao = new FakeReservationDao();
         fakeThemeSlotDao = new FakeThemeSlotDao();
 
         reservationService = new ReservationService(
-                new FakeReservationDao(),
+                fakeReservationDao,
                 fakeThemeSlotDao
         );
         savedTime = fakeReservationTimeDao.save(Time.of(LocalTime.of(10, 0)));
@@ -87,8 +89,8 @@ class ReservationServiceTest {
 
         reservationService.removeReservation(confirmedReservation.getId());
 
-        Reservation promotedReservation = reservationService.findReservation(firstPendingReservation.getId());
-        Reservation waitingReservation = reservationService.findReservation(secondPendingReservation.getId());
+        Reservation promotedReservation = findReservation(firstPendingReservation.getId());
+        Reservation waitingReservation = findReservation(secondPendingReservation.getId());
         ThemeSlot themeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
         assertThat(promotedReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
         assertThat(waitingReservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
@@ -101,14 +103,6 @@ class ReservationServiceTest {
         reservationService.saveReservation("브라운", savedThemeSlot1.getId());
         List<Reservation> reservations = reservationService.allReservations();
         assertThat(reservations).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("식별자를 통해 특정 예약 객체를 조회한다.")
-    void findReservation() {
-        Reservation savedReservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        Reservation foundReservation = reservationService.findReservation(savedReservation.getId());
-        assertThat(foundReservation.getName()).isEqualTo("브라운");
     }
 
     @Test
@@ -131,13 +125,16 @@ class ReservationServiceTest {
     @DisplayName("같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다")
     void giveOrderByApplicationOrder() {
         reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        Reservation reservation1 = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        Reservation reservation2 = reservationService.saveReservation("나피리", savedThemeSlot1.getId());
-        Reservation reservation3 = reservationService.saveReservation("드레이븐", savedThemeSlot1.getId());
+        reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+        reservationService.saveReservation("나피리", savedThemeSlot1.getId());
+        reservationService.saveReservation("드레이븐", savedThemeSlot1.getId());
 
-        List<WaitingReservation> responses = reservationService.findWaitingReservationsWithOrder(savedThemeSlot1.getId());
-        assertThat(responses).extracting(WaitingReservation::waitingOrder)
-                .containsExactly(1, 2, 3);
+        assertThat(reservationService.findReservationBy("김대기").waitingReservationResponses().get(0).waitingOrder())
+                .isEqualTo(1);
+        assertThat(reservationService.findReservationBy("나피리").waitingReservationResponses().get(0).waitingOrder())
+                .isEqualTo(2);
+        assertThat(reservationService.findReservationBy("드레이븐").waitingReservationResponses().get(0).waitingOrder())
+                .isEqualTo(3);
     }
 
     @Test
@@ -154,7 +151,7 @@ class ReservationServiceTest {
     void allowSameUserToWaitAgainAfterCancelWaitingReservation() {
         reservationService.saveReservation("브라운", savedThemeSlot1.getId());
         Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        reservationService.cancelReservation(pendingReservation.getId());
+        reservationService.cancelReservation(pendingReservation.getId(), "김대기");
 
         Reservation reservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
 
@@ -169,10 +166,10 @@ class ReservationServiceTest {
         Reservation reservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
 
         //when
-        reservationService.cancelReservation(reservation.getId());
+        reservationService.cancelReservation(reservation.getId(), "김대기");
 
         //then
-        Reservation findReservation = reservationService.findReservation(reservation.getId());
+        Reservation findReservation = findReservation(reservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
         assertThat(findReservation.getThemeSlot().isReserved()).isTrue();
     }
@@ -185,11 +182,11 @@ class ReservationServiceTest {
         Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
 
         //when
-        reservationService.cancelReservation(confirmReservation.getId());
+        reservationService.cancelReservation(confirmReservation.getId(), "브라운");
 
         //then
-        Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
-        Reservation findPendingReservation = reservationService.findReservation(pendingReservation.getId());
+        Reservation findReservation = findReservation(confirmReservation.getId());
+        Reservation findPendingReservation = findReservation(pendingReservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
         assertThat(findPendingReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
     }
@@ -201,10 +198,10 @@ class ReservationServiceTest {
         Reservation confirmReservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
 
         //when
-        reservationService.cancelReservation(confirmReservation.getId());
+        reservationService.cancelReservation(confirmReservation.getId(), "브라운");
 
         //then
-        Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
+        Reservation findReservation = findReservation(confirmReservation.getId());
         ThemeSlot findThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
         assertThat(findThemeSlot.isReserved()).isFalse();
@@ -219,9 +216,9 @@ class ReservationServiceTest {
 
         reservationService.modifyReservation(confirmReservation.getId(), savedThemeSlot2.getId());
 
-        Reservation modifiedReservation = reservationService.findReservation(confirmReservation.getId());
-        Reservation promotedReservation = reservationService.findReservation(firstPendingReservation.getId());
-        Reservation waitingReservation = reservationService.findReservation(secondPendingReservation.getId());
+        Reservation modifiedReservation = findReservation(confirmReservation.getId());
+        Reservation promotedReservation = findReservation(firstPendingReservation.getId());
+        Reservation waitingReservation = findReservation(secondPendingReservation.getId());
         ThemeSlot previousThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
         ThemeSlot modifiedThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot2.getId()).orElseThrow();
         assertThat(modifiedReservation.getThemeSlot().getId()).isEqualTo(savedThemeSlot2.getId());
@@ -266,7 +263,7 @@ class ReservationServiceTest {
     @DisplayName("취소된 예약은 다른 슬롯으로 변경할 수 없다.")
     void throwExceptionWhenModifyCancelledReservation() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        reservationService.cancelReservation(reservation.getId());
+        reservationService.cancelReservation(reservation.getId(), "브라운");
 
         assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId()))
                 .isInstanceOf(CustomException.class)
@@ -277,7 +274,7 @@ class ReservationServiceTest {
     @DisplayName("완료된 예약은 다른 슬롯으로 변경할 수 없다.")
     void throwExceptionWhenModifyCompletedReservation() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
-        reservationService.completeReservation(reservation.getId());
+        markCompleted(reservation);
 
         assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId()))
                 .isInstanceOf(CustomException.class)
@@ -288,9 +285,9 @@ class ReservationServiceTest {
     @DisplayName("이미 CANCELLED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCancelledReservation(){
         Reservation cancelledReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        reservationService.cancelReservation(cancelledReservation.getId());
+        reservationService.cancelReservation(cancelledReservation.getId(), "김대기");
         assertThatThrownBy(() -> {
-            reservationService.cancelReservation(cancelledReservation.getId());
+            reservationService.cancelReservation(cancelledReservation.getId(), "김대기");
         }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
     }
 
@@ -298,9 +295,9 @@ class ReservationServiceTest {
     @DisplayName("이미 COMPLETED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCompletedReservation(){
         Reservation completedReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
-        reservationService.completeReservation(completedReservation.getId());
+        markCompleted(completedReservation);
         assertThatThrownBy(() -> {
-            reservationService.cancelReservation(completedReservation.getId());
+            reservationService.cancelReservation(completedReservation.getId(), "김대기");
         }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
     }
 
@@ -321,5 +318,19 @@ class ReservationServiceTest {
         MyReservationResponse reservation3Response = reservationService.findReservationBy("김대기3");
         assertThat(reservation3Response.waitingReservationResponses().get(0).waitingOrder()).isEqualTo(2);
         assertThat(reservation3Response.waitingReservationResponses().get(1).waitingOrder()).isEqualTo(1);
+    }
+
+    private Reservation findReservation(Long reservationId) {
+        return fakeReservationDao.findById(reservationId).orElseThrow();
+    }
+
+    private void markCompleted(Reservation reservation) {
+        Reservation completedReservation = new Reservation(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getThemeSlot(),
+                CompletedStatus.getInstance()
+        );
+        fakeReservationDao.updateStatus(completedReservation);
     }
 }

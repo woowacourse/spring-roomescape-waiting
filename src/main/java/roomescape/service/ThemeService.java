@@ -39,10 +39,6 @@ public class ThemeService {
         themeRepository.deleteById(themeId);
     }
 
-    public Theme findTheme(long themeId) {
-        return getThemeOrElseThrow(themeId);
-    }
-
     @NonNull
     private Theme getThemeOrElseThrow(long themeId) {
         return themeRepository.findById(themeId)

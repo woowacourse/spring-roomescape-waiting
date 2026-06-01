@@ -8,7 +8,6 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
-import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -79,10 +78,6 @@ public class ReservationService {
         updateThemeSlotReserved(reservation.getThemeSlot(), hasActiveReservation);
     }
 
-    public Reservation findReservation(long reservationId) {
-        return getReservationOrElseThrow(reservationId);
-    }
-
     public MyReservationResponse findReservationBy(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         List<ReservationResponse> myNotPendingReservation = reservations.stream()
@@ -95,12 +90,6 @@ public class ReservationService {
                 .map(WaitingReservationResponse::from)
                 .toList();
         return new MyReservationResponse(myNotPendingReservation, waitingReservationResponses);
-    }
-
-    @Transactional
-    public void cancelReservation(Long reservationId) {
-        Reservation reservation = getReservationOrElseThrow(reservationId);
-        cancel(reservation);
     }
 
     @Transactional
@@ -130,13 +119,6 @@ public class ReservationService {
         if (!reservation.isOwnedBy(name)) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_ALLOWED);
         }
-    }
-
-    @Transactional
-    public void completeReservation(Long reservationId) {
-        Reservation reservation = getReservationOrElseThrow(reservationId);
-        reservation.complete();
-        reservationRepository.updateStatus(reservation);
     }
 
     @Transactional
@@ -200,11 +182,6 @@ public class ReservationService {
         if (waitingReservation.isEmpty()) {
             updateThemeSlotReserved(reservation.getThemeSlot(), false);
         }
-    }
-
-    @Transactional(readOnly = true)
-    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
-        return reservationRepository.findWaitingReservationsWithOrder(themeSlotId);
     }
 
     @NonNull

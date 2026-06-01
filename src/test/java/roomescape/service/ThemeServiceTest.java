@@ -48,13 +48,4 @@ public class ThemeServiceTest {
         assertThat(themes).hasSize(1);
     }
 
-    @Test
-    @DisplayName("식별자를 통해 특정 테마를 조회한다.")
-    void findTime() {
-        Theme theme = themeService.saveTheme("공포", "무섭습니다", "xxx.example.com");
-        Theme foundTime = themeService.findTheme(theme.getId());
-        assertThat(foundTime.getName()).isEqualTo("공포");
-        assertThat(foundTime.getDescription()).isEqualTo("무섭습니다");
-        assertThat(foundTime.getThumbnailUrl()).isEqualTo("xxx.example.com");
-    }
 }

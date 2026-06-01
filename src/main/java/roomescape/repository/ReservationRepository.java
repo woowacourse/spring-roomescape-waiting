@@ -18,13 +18,7 @@ public interface ReservationRepository {
 
     boolean existsByThemeSlotId(long themeSlotId);
 
-    boolean isExistBy(Long reservationId);
-
     List<Reservation> findByName(String name);
-
-    List<Reservation> findByThemeSlotAndPending(Long themeSlotId);
-
-    List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId);
 
     List<WaitingReservation> findWaitingReservationsWithOrderByName(String name);
 

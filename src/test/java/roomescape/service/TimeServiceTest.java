@@ -61,14 +61,6 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("식별자를 통해 특정 예약 시간 객체를 조회한다.")
-    void findTime() {
-        Time savedTime = reservationTimeService.saveTime(LocalTime.of(10, 0));
-        Time foundTime = reservationTimeService.findTime(savedTime.getId());
-        assertThat(foundTime.getStartAt()).isEqualTo(LocalTime.of(10, 0));
-    }
-
-    @Test
     @DisplayName("해당 테마, 날짜에 대한 슬롯이 없으면 빈 목록을 반환한다.")
     void findThemeSlotBy_returnsEmpty_whenNotExists() {
         Theme theme = fakeThemeDao.save(new Theme("테마1", "설명", "test.com"));

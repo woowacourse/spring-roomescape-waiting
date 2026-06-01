@@ -53,10 +53,6 @@ public class TimeService {
         timeRepository.deleteById(timeId);
     }
 
-    public Time findTime(long timeId) {
-        return getTimeOrElseThrow(timeId);
-    }
-
     public List<ThemeSlot> findThemeSlotBy(long themeId, LocalDate date) {
         getThemeOrElseThrow(themeId);
         return themeSlotRepository.findByThemeIdAndDate(themeId, date);

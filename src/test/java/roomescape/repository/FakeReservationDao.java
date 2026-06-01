@@ -52,30 +52,10 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public boolean isExistBy(Long reservationId) {
-        return storage.containsKey(reservationId);
-    }
-
-    @Override
     public List<Reservation> findByName(String name) {
         return storage.values().stream()
                 .filter(reservation -> Objects.equals(reservation.getName(), name))
                 .toList();
-    }
-
-    @Override
-    public List<Reservation> findByThemeSlotAndPending(Long themeSlotId) {
-        return storage.values().stream()
-                .filter(reservation -> Objects.equals(reservation.getThemeSlot().getId(), themeSlotId))
-                .filter(reservation -> "PENDING".equals(reservation.getReservationStatusName()))
-                .sorted(Comparator.comparing(Reservation::getId))
-                .toList();
-    }
-
-    @Override
-    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
-        List<Reservation> reservations = findByThemeSlotAndPending(themeSlotId);
-        return createWaitingReservations(reservations);
     }
 
     @Override
