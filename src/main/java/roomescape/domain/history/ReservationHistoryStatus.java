@@ -1,4 +1,4 @@
-package roomescape.controller.history;
+package roomescape.domain.history;
 
 public enum ReservationHistoryStatus {
     RESERVATION,

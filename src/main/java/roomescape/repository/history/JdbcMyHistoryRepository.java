@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -18,7 +19,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
     private static final RowMapper<MyHistory> historyRowMapper = (resultSet, rowNumber) -> new MyHistory(
             resultSet.getLong("reservation_id"),
             getNullableLong(resultSet, "waiting_id"),
-            resultSet.getString("status"),
+            ReservationHistoryStatus.valueOf(resultSet.getString("status")),
             resultSet.getString("history_name"),
             resultSet.getDate("date").toLocalDate(),
             mapTheme(resultSet),

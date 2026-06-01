@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
-import roomescape.controller.history.ReservationHistoryStatus;
 import roomescape.controller.history.dto.HistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.repository.history.MyHistory;
 import roomescape.repository.history.MyHistoryRepository;
@@ -33,7 +33,7 @@ public class MyHistoryService {
 
     private Map<Long, Integer> findWaitingSequences(final List<MyHistory> histories) {
         List<Long> waitingReservationIds = histories.stream()
-                .filter(history -> ReservationHistoryStatus.WAITING.name().equals(history.status()))
+                .filter(history -> history.status() == ReservationHistoryStatus.WAITING)
                 .map(MyHistory::reservationId)
                 .distinct()
                 .toList();
@@ -67,7 +67,7 @@ public class MyHistoryService {
         return new HistoryResponse(
                 history.reservationId(),
                 history.waitingId(),
-                ReservationHistoryStatus.valueOf(history.status()),
+                history.status(),
                 history.name(),
                 history.date(),
                 ThemeResponse.from(history.theme()),
@@ -77,7 +77,7 @@ public class MyHistoryService {
     }
 
     private Integer resolveSequence(final MyHistory history, final Map<Long, Integer> waitingSequences) {
-        if (ReservationHistoryStatus.RESERVATION.name().equals(history.status())) {
+        if (history.status() == ReservationHistoryStatus.RESERVATION) {
             return 0;
         }
 
