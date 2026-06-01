@@ -21,8 +21,8 @@ public record ReservationAndWaiting(
                 reservation.getTheme(), true, null);
     }
 
-    public static ReservationAndWaiting fromWaiting(Waiting waiting, TimeSlot timeSlot, Theme theme) {
-        return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), timeSlot, theme, false,
-                waiting.getWaitingNumber());
+    public static ReservationAndWaiting fromWaiting(Waiting waiting) {
+        return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), waiting.getTimeSlot(),
+                waiting.getTheme(), false, waiting.getWaitingNumber());
     }
 }

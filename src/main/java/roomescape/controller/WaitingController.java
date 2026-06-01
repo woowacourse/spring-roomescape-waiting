@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.WaitingRequest;
-import roomescape.domain.Waiting;
 import roomescape.service.WaitingService;
 
 @Validated
@@ -27,15 +26,14 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> apply(@RequestBody @Valid WaitingRequest waitingRequest) {
-        Waiting waiting = Waiting.transientOf(waitingRequest.name(), waitingRequest.date(), waitingRequest.timeId(),
+    public ResponseEntity<Void> createWaiting(@RequestBody @Valid WaitingRequest waitingRequest) {
+        waitingService.saveWaiting(waitingRequest.name(), waitingRequest.date(), waitingRequest.timeId(),
                 waitingRequest.themeId());
-        waitingService.saveWaiting(waiting);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancel(
+    public ResponseEntity<Void> deleteWaiting(
             @PathVariable
             long id,
             @RequestParam @NotBlank

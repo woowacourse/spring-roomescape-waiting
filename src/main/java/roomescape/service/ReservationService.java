@@ -51,34 +51,25 @@ public class ReservationService {
                 .orElseThrow(ReservationNotFoundException::new);
     }
 
-    public List<ReservationAndWaiting> findReservationByName(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-        List<Waiting> waitings = waitingRepository.findByName(name);
-
+    public List<ReservationAndWaiting> findReservationAndWaitingByName(String name) {
         List<ReservationAndWaiting> reservationAndWaitings = new ArrayList<>();
 
-        for (Reservation reservation : reservations) {
-            reservationAndWaitings.add(ReservationAndWaiting.fromReservation(reservation));
-        }
+        reservationRepository.findByName(name).stream()
+                .map(ReservationAndWaiting::fromReservation)
+                .forEach(reservationAndWaitings::add);
 
-        for (Waiting waiting : waitings) {
-            TimeSlot timeSlot = timeSlotRepository.findById(waiting.getTimeSlotId())
-                    .orElseThrow(TimeSlotNotFoundException::new);
-
-            Theme theme = themeRepository.findById(waiting.getThemeId())
-                    .orElseThrow(ThemeNotFoundException::new);
-
-            reservationAndWaitings.add(ReservationAndWaiting.fromWaiting(waiting, timeSlot, theme));
-        }
+        waitingRepository.findByName(name).stream()
+                .map(ReservationAndWaiting::fromWaiting)
+                .forEach(reservationAndWaitings::add);
 
         return reservationAndWaitings;
     }
 
     @Transactional
     public Reservation saveReservation(String name, LocalDate date, Long timeId, Long themeId) {
+        Reservation reservation = createReservation(name, date, timeId, themeId);
         validateDuplicatedReservation(date, timeId, themeId);
-        Reservation transientReservation = createReservation(name, date, timeId, themeId);
-        return reservationRepository.save(transientReservation);
+        return reservationRepository.save(reservation);
     }
 
     @Transactional

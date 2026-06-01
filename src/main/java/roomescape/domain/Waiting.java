@@ -1,37 +1,61 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.PastTimeException;
 
 public class Waiting {
 
     private final Long id;
-    private String name;
-    private LocalDate date;
-    private Long timeSlotId;
-    private Long themeId;
-    private Integer waitingNumber;
+    private final String name;
+    private final LocalDate date;
+    private final TimeSlot timeSlot;
+    private final Theme theme;
+    private final Integer waitingNumber;
 
-    public Waiting(Long id, String name, LocalDate date, Long timeSlotId, Long themeId, Integer waitingNumber) {
-        validateFields(name, date, timeSlotId, themeId);
+    public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, Integer waitingNumber) {
+        validateNullOrBlank(name, date, timeSlot, theme);
         this.id = id;
         this.name = name;
         this.date = date;
-        this.timeSlotId = timeSlotId;
-        this.themeId = themeId;
+        this.timeSlot = timeSlot;
+        this.theme = theme;
         this.waitingNumber = waitingNumber;
     }
 
-    public static Waiting transientOf(String name, LocalDate date, Long timeSlotId, Long themeId) {
-        return new Waiting(null, name, date, timeSlotId, themeId, null);
+    public Waiting(String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime now) {
+        this(null, name, date, timeSlot, theme, null);
+        validateCreatable(date, timeSlot, now);
     }
 
-    private void validateFields(String name, LocalDate date, Long timeSlotId, Long themeId) {
+    private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
         validateName(name);
         validateDate(date);
-        validateTimeSlot(timeSlotId);
-        validateTheme(themeId);
+        validateTimeSlot(timeSlot);
+        validateTheme(theme);
     }
+
+    private void validateCreatable(LocalDate date, TimeSlot time, LocalDateTime now) {
+        validateNotPast(date, time, now, "지난 날짜/시간으로 예약 대기를 추가할 수 없습니다.");
+    }
+
+    public void validateCancelable(LocalDateTime now, String userName) {
+        validateNotPast(this.date, this.timeSlot, now, "이미 지난 대기 정보는 삭제할 수 없습니다.");
+        validateOwnedBy(userName);
+    }
+
+    private void validateNotPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now, String errorMessage) {
+        if (isPast(date, timeSlot, now)) {
+            throw new PastTimeException(errorMessage);
+        }
+    }
+
+    private boolean isPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now) {
+        LocalDateTime targetDateTime = LocalDateTime.of(date, timeSlot.getStartAt());
+        return targetDateTime.isBefore(now);
+    }
+
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
@@ -45,20 +69,20 @@ public class Waiting {
         }
     }
 
-    private void validateTimeSlot(Long timeSlotId) {
-        if (timeSlotId == null) {
+    private void validateTimeSlot(TimeSlot timeSlot) {
+        if (timeSlot == null) {
             throw new IllegalArgumentException("존재하지 않는 예약 시간대입니다.");
         }
     }
 
-    private void validateTheme(Long themeId) {
-        if (themeId == null) {
+    private void validateTheme(Theme theme) {
+        if (theme == null) {
             throw new IllegalArgumentException("존재하지 않는 테마입니다.");
         }
     }
 
-    public void validateModifiable(String requesterName) {
-        if (!this.name.equals(requesterName)) {
+    private void validateOwnedBy(String userName) {
+        if (!this.name.equals(userName)) {
             throw new InvalidOwnershipException();
         }
     }
@@ -75,12 +99,12 @@ public class Waiting {
         return date;
     }
 
-    public Long getTimeSlotId() {
-        return timeSlotId;
+    public TimeSlot getTimeSlot() {
+        return timeSlot;
     }
 
-    public Long getThemeId() {
-        return themeId;
+    public Theme getTheme() {
+        return theme;
     }
 
     public Integer getWaitingNumber() {

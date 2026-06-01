@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 
 @Repository
@@ -38,7 +41,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean isExists(Waiting waiting) {
+    public boolean exists(String name, LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -50,9 +53,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 )
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Boolean.class, waiting.getName(), waiting.getDate(),
-                waiting.getTimeSlotId(),
-                waiting.getThemeId());
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId);
+        return Boolean.TRUE.equals(exists);
     }
 
     @Override
@@ -60,16 +62,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
         String sql = """
                 SELECT *
                 FROM (
-                    SELECT id,
-                           name,
-                           date,
-                           time_id,
-                           theme_id,
+                    SELECT w.id,
+                           w.name,
+                           w.date,
+                           ts.id AS time_id,
+                           ts.start_at,
+                           th.id AS theme_id,
+                           th.name AS theme_name,
+                           th.description AS theme_description,
+                           th.thumbnail_url AS theme_thumbnail_url,
                            ROW_NUMBER() OVER (
-                               PARTITION BY date, time_id, theme_id
-                               ORDER BY created_at ASC, id ASC
+                               PARTITION BY w.date, w.time_id, w.theme_id
+                               ORDER BY w.created_at ASC, w.id ASC
                            ) AS waiting_number
-                    FROM waiting
+                    FROM waiting w
+                    INNER JOIN time_slot ts ON w.time_id = ts.id
+                    INNER JOIN theme th ON w.theme_id = th.id
                 ) ranked
                 WHERE ranked.name = ?
                 """;
@@ -82,16 +90,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
         String sql = """
                 SELECT *
                 FROM (
-                    SELECT id,
-                           name,
-                           date,
-                           time_id,
-                           theme_id,
+                    SELECT w.id,
+                           w.name,
+                           w.date,
+                           ts.id AS time_id,
+                           ts.start_at,
+                           th.id AS theme_id,
+                           th.name AS theme_name,
+                           th.description AS theme_description,
+                           th.thumbnail_url AS theme_thumbnail_url,
                            ROW_NUMBER() OVER (
-                               PARTITION BY date, time_id, theme_id
-                               ORDER BY created_at ASC, id ASC
+                               PARTITION BY w.date, w.time_id, w.theme_id
+                               ORDER BY w.created_at ASC, w.id ASC
                            ) AS waiting_number
-                    FROM waiting
+                    FROM waiting w
+                    INNER JOIN time_slot ts ON w.time_id = ts.id
+                    INNER JOIN theme th ON w.theme_id = th.id
                 ) ranked
                 WHERE ranked.id = ?
                 """;
@@ -110,8 +124,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return Map.of(
                 "name", waiting.getName(),
                 "date", waiting.getDate(),
-                "time_id", waiting.getTimeSlotId(),
-                "theme_id", waiting.getThemeId()
+                "time_id", waiting.getTimeSlot().getId(),
+                "theme_id", waiting.getTheme().getId()
         );
     }
 
@@ -120,8 +134,16 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 rs.getLong("id"),
                 rs.getString("name"),
                 rs.getObject("date", LocalDate.class),
-                rs.getLong("time_id"),
-                rs.getLong("theme_id"),
+                new TimeSlot(
+                        rs.getLong("time_id"),
+                        rs.getObject("start_at", LocalTime.class)
+                ),
+                new Theme(
+                        rs.getLong("theme_id"),
+                        rs.getString("theme_name"),
+                        rs.getString("theme_description"),
+                        rs.getString("theme_thumbnail_url")
+                ),
                 rs.getInt("waiting_number")
         );
     }

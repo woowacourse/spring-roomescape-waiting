@@ -1,7 +1,5 @@
 package roomescape.exception;
 
-import roomescape.domain.Waiting;
-
 public class DuplicateWaitingException extends RoomescapeException {
 
     public DuplicateWaitingException() {
