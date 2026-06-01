@@ -69,8 +69,8 @@ class TimeServiceTest {
     }
 
     @Test
-    @DisplayName("해당 테마, 날짜에 대한 슬롯이 없으면 등록된 모든 시간으로 슬롯을 생성하여 반환한다.")
-    void findThemeSlotBy_createsSlots_whenNotExists() {
+    @DisplayName("해당 테마, 날짜에 대한 슬롯이 없으면 빈 목록을 반환한다.")
+    void findThemeSlotBy_returnsEmpty_whenNotExists() {
         Theme theme = fakeThemeDao.save(new Theme("테마1", "설명", "test.com"));
         fakeTimeDao.save(Time.of(LocalTime.of(10, 0)));
         fakeTimeDao.save(Time.of(LocalTime.of(14, 0)));
@@ -78,8 +78,8 @@ class TimeServiceTest {
 
         List<ThemeSlot> slots = reservationTimeService.findThemeSlotBy(theme.getId(), date);
 
-        assertThat(slots).hasSize(2);
-        assertThat(slots).allMatch(slot -> !slot.isReserved());
+        assertThat(slots).isEmpty();
+        assertThat(fakeThemeSlotDao.findByThemeIdAndDate(theme.getId(), date)).isEmpty();
     }
 
     @Test

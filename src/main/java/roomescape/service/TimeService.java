@@ -14,7 +14,6 @@ import roomescape.repository.TimeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -59,16 +58,8 @@ public class TimeService {
     }
 
     public List<ThemeSlot> findThemeSlotBy(long themeId, LocalDate date) {
-        boolean isExist = themeSlotRepository.isExistBy(themeId, date);
-        if (isExist) {
-            return themeSlotRepository.findByThemeIdAndDate(themeId, date);
-        }
-
-        Theme theme = getThemeOrElseThrow(themeId);
-        List<Time> times = timeRepository.findAll();
-        List<ThemeSlot> themeSlots = new ArrayList<>();
-        times.forEach(time -> themeSlots.add(new ThemeSlot(theme, date, time, false)));
-        return themeSlotRepository.saveAll(themeSlots);
+        getThemeOrElseThrow(themeId);
+        return themeSlotRepository.findByThemeIdAndDate(themeId, date);
     }
 
     @NonNull
