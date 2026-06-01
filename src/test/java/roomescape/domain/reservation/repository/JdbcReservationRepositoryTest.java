@@ -256,8 +256,8 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual).hasSize(1);
-            assertThat(actual.getFirst().getTime().getDeletedAt()).isNotNull();
-            assertThat(actual.getFirst().getTheme().getDeletedAt()).isNotNull();
+            assertThat(actual.getFirst().getTime().isDeleted()).isTrue();
+            assertThat(actual.getFirst().getTheme().isDeleted()).isTrue();
         }
 
         @Test
@@ -604,7 +604,7 @@ class JdbcReservationRepositoryTest {
 
     private Integer countDeletedReservationById(Long id) {
         return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation WHERE id = ? AND status = 'DELETED'",
+            "SELECT COUNT(*) FROM reservation WHERE id = ? AND deleted_at IS NOT NULL",
             Integer.class,
             id
         );

@@ -43,7 +43,7 @@ public class Theme {
         return imageUrl;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }

@@ -61,7 +61,7 @@ public final class ReservationMapper {
             return ReservationEditableStatus.WAITING;
         }
 
-        if (reservation.getTime().getDeletedAt() != null || reservation.getTheme().getDeletedAt() != null) {
+        if (reservation.getTime().isDeleted() || reservation.getTheme().isDeleted()) {
             return ReservationEditableStatus.EDIT_RECOMMENDED;
         }
 

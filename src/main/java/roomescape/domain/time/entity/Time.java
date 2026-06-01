@@ -31,7 +31,7 @@ public class Time {
         return startAt;
     }
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public boolean isDeleted() {
+        return deletedAt != null;
     }
 }

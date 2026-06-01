@@ -24,7 +24,7 @@ public final class TimeMapper {
     }
 
     public ReservationTimeResponseDto toReservationResponseDto(Time time) {
-        return new ReservationTimeResponseDto(time.getId(), time.getStartAt(), time.getDeletedAt() != null);
+        return new ReservationTimeResponseDto(time.getId(), time.getStartAt(), time.isDeleted());
     }
 
     public TimeAvailabilityResponseDto toAvailabilityResponseDto(Time time, boolean available) {

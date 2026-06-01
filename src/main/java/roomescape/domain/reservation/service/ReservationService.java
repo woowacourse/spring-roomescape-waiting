@@ -173,11 +173,11 @@ public class ReservationService {
     private void validateUpdateResources(Time time, Theme theme) {
         List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
 
-        if (time == null || time.getDeletedAt() != null) {
+        if (time == null || time.isDeleted()) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
         }
 
-        if (theme == null || theme.getDeletedAt() != null) {
+        if (theme == null || theme.isDeleted()) {
             parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
         }
 

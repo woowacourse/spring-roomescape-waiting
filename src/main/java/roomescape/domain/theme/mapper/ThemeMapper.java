@@ -20,6 +20,6 @@ public final class ThemeMapper {
 
     public ReservationThemeResponseDto toReservationResponseDto(Theme theme) {
         return new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-            theme.getImageUrl(), theme.getDeletedAt() != null);
+            theme.getImageUrl(), theme.isDeleted());
     }
 }

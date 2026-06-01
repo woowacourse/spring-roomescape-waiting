@@ -46,7 +46,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                WHERE r.status <> 'DELETED'
+                WHERE r.deleted_at IS NULL
                 ORDER BY r.id ASC
                 """,
             (rs, rowNum) -> mapReservation(rs)
@@ -94,7 +94,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
             WHERE r.name = :name
-              AND r.status <> 'DELETED'
+              AND r.deleted_at IS NULL
             ORDER BY r.date ASC, rt.start_at ASC
             """;
         SqlParameterSource parameters = new MapSqlParameterSource("name", name);
@@ -117,7 +117,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
             WHERE r.id = :id
-              AND r.status <> 'DELETED'
+              AND r.deleted_at IS NULL
             """;
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
         List<Reservation> reservations = jdbcTemplate.query(
@@ -139,6 +139,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             WHERE r.date = :date
               AND r.theme_id = :themeId
               AND r.status = 'ACTIVE'
+              AND r.deleted_at IS NULL
               AND rt.deleted_at IS NULL
               AND t.deleted_at IS NULL
             """;
@@ -178,6 +179,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 theme_id = :themeId,
                 status = :status
             WHERE id = :id
+              AND deleted_at IS NULL
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
@@ -207,6 +209,7 @@ public class JdbcReservationRepository implements ReservationRepository {
               AND time_id = :timeId
               AND theme_id = :themeId
               AND status = 'WAITING'
+              AND deleted_at IS NULL
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservationId)
@@ -219,7 +222,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void deleteReservationById(Long id) {
-        String sql = "UPDATE reservation SET status = 'DELETED' WHERE id = :id AND status <> 'DELETED'";
+        String sql = "UPDATE reservation SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND deleted_at IS NULL";
         SqlParameterSource parameters = new MapSqlParameterSource("id", id);
         int updatedRowCount = jdbcTemplate.update(sql, parameters);
         if (updatedRowCount == 0) {
@@ -234,7 +237,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT 1
                 FROM reservation
                 WHERE id = :id
-                  AND status <> 'DELETED'
+                  AND deleted_at IS NULL
             )
             """;
 
@@ -253,6 +256,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   AND time_id = :timeId
                   AND theme_id = :themeId
                   AND status = 'ACTIVE'
+                  AND deleted_at IS NULL
             )
             """;
 
@@ -277,6 +281,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   AND time_id = :timeId
                   AND theme_id = :themeId
                   AND status = :status
+                  AND deleted_at IS NULL
             )
             """;
 
@@ -304,6 +309,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   AND theme_id = :themeId
                   AND id != :id
                   AND status = 'ACTIVE'
+                  AND deleted_at IS NULL
             )
             """;
 
