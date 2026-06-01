@@ -123,6 +123,7 @@ public class ReservationService {
     @Transactional
     public Reservation modifyReservation(Long reservationId, Long themeSlotId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        validateModifiable(reservation);
         ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
 
         validateBeforeDate(themeSlot);
@@ -155,6 +156,12 @@ public class ReservationService {
 
         if (reservation.isPendingStatus()) {
             reservation.confirm();
+        }
+    }
+
+    private void validateModifiable(Reservation reservation) {
+        if (!reservation.isModifiableStatus()) {
+            throw new CustomException(ErrorCode.INVALID_MODIFY_COMMAND);
         }
     }
 

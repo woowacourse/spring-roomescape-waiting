@@ -114,6 +114,10 @@ public class Reservation {
         return reservationStatus == ConfirmedStatus.getInstance();
     }
 
+    public boolean isModifiableStatus() {
+        return isPendingStatus() || isConfirmedStatus();
+    }
+
     public boolean hasDifferentThemeSlot(Long themeSlotId) {
         return !themeSlot.hasSameId(themeSlotId);
     }

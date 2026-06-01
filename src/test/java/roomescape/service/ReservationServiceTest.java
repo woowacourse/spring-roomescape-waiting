@@ -230,6 +230,28 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("취소된 예약은 다른 슬롯으로 변경할 수 없다.")
+    void throwExceptionWhenModifyCancelledReservation() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        reservationService.cancelReservation(reservation.getId());
+
+        assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("변경할 수 없는 예약입니다.");
+    }
+
+    @Test
+    @DisplayName("완료된 예약은 다른 슬롯으로 변경할 수 없다.")
+    void throwExceptionWhenModifyCompletedReservation() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        reservationService.completeReservation(reservation.getId());
+
+        assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("변경할 수 없는 예약입니다.");
+    }
+
+    @Test
     @DisplayName("이미 CANCELLED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
     void returnInvalidCancelledCommandWhenCancelCancelledReservation(){
         Reservation cancelledReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
