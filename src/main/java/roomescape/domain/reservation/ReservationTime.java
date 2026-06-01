@@ -1,18 +1,21 @@
-package roomescape.domain;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+package roomescape.domain.reservation;
 
 import java.time.LocalTime;
 import java.util.Objects;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationTime {
-
     private final Long id;
     private final LocalTime startAt;
 
-    public static ReservationTime from(long id, LocalTime startAt) {
+    private ReservationTime(Long id, LocalTime startAt) {
+        Objects.requireNonNull(startAt, "시작 시간은 필수입니다.");
+
+        this.id = id;
+        this.startAt = startAt;
+    }
+
+    public static ReservationTime from(Long id, LocalTime startAt) {
+        Objects.requireNonNull(id, "조회 및 복원시 ReservationTime의 id는 필수입니다.");
         return new ReservationTime(id, startAt);
     }
 

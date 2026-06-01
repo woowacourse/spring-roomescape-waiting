@@ -1,18 +1,25 @@
-package roomescape.domain;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+package roomescape.domain.theme;
 
 import java.util.Objects;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Theme {
     private final Long id;
-    private final String name;
+    private final String themeName;
     private final String thumbnailUrl;
     private final String description;
 
-    public static Theme from(long id, String name, String thumbnailUrl, String description) {
+    private Theme(Long id, String themeName, String thumbnailUrl, String description) {
+        Objects.requireNonNull(themeName, "테마 이름은 필수입니다.");
+
+        this.id = id;
+        this.themeName = themeName;
+        this.thumbnailUrl = thumbnailUrl;
+        this.description = description;
+    }
+
+    public static Theme from(Long id, String name, String thumbnailUrl, String description) {
+        Objects.requireNonNull(id, "조회 및 복원시 Theme의 id는 필수입니다.");
+
         return new Theme(id, name, thumbnailUrl, description);
     }
 
@@ -24,8 +31,8 @@ public class Theme {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getThemeName() {
+        return themeName;
     }
 
     public String getThumbnailUrl() {

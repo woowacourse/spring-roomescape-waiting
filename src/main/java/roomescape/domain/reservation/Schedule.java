@@ -1,19 +1,27 @@
-package roomescape.domain;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Schedule {
     private final LocalDate date;
     private final ReservationTime time;
 
+    private Schedule(LocalDate date, ReservationTime time) {
+        validateFields(date, time);
+
+        this.date = date;
+        this.time = time;
+    }
+
     public static Schedule from(LocalDate date, ReservationTime time) {
         return new Schedule(date, time);
+    }
+
+    private void validateFields(LocalDate date, ReservationTime time) {
+        Objects.requireNonNull(date, "날짜는 필수입니다.");
+        Objects.requireNonNull(time, "예약 시간은 필수입니다.");
     }
 
     public boolean isPast(LocalDateTime now) {

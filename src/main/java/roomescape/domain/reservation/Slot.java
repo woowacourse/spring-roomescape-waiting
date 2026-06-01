@@ -1,5 +1,6 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
+import roomescape.domain.theme.Theme;
 import roomescape.exception.PastDateTimeException;
 
 import java.time.LocalDate;
@@ -7,12 +8,19 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Slot {
-    private Schedule schedule;
-    private Theme theme;
+    private final Schedule schedule;
+    private final Theme theme;
 
     private Slot(Schedule schedule, Theme theme) {
+        validateFields(schedule, theme);
+
         this.schedule = schedule;
         this.theme = theme;
+    }
+
+    private void validateFields(Schedule schedule, Theme theme) {
+        Objects.requireNonNull(schedule, "일정(schedule)은 비어있을 수 없습니다.");
+        Objects.requireNonNull(theme, "테마는 비어있을 수 없습니다.");
     }
 
     public static Slot from(Schedule schedule, Theme theme) {
