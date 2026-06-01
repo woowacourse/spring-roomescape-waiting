@@ -322,13 +322,19 @@ async function doConfirm() {
 }
 
 async function doReserve() {
+  if (!me) { me = await loadMe(); if (!me) return; }
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   try {
     const r = await fetch('/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: selDate, timeId: selTimeId, themeId: Number(themeId) })
+      body: JSON.stringify({
+        date: selDate,
+        timeId: selTimeId,
+        themeId: Number(themeId),
+        storeId: me.storeId || DEFAULT_STORE_ID
+      })
     });
     if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
     if (!r.ok) {
