@@ -273,7 +273,8 @@ class AcceptanceTest {
     }
 
     @Test
-    void 앞_대기_취소_후_내_예약_조회시_뒤_대기의_순번이_1로_조회된다() {
+    @DisplayName("앞 대기 취소 후 내 예약 조회시 뒤 대기의 순번이 1로 조회된다.")
+    void 앞_대기_취소_후_내_예약_조회() {
         String firstUserToken = login("b", "test2");
         String secondUserToken = login("c", "test3");
 
@@ -315,5 +316,82 @@ class AcceptanceTest {
                 .body("data.size()", is(1))
                 .body("data[0].status", is("WAITING"))
                 .body("data[0].waitingOrder", is(1));
+    }
+
+    @Test
+    @DisplayName("대기자가 여러 명이면 예약 취소마다 선두 대기자가 순차 승격된다.")
+    void 다중_대기자_순차_승격() {
+        String userAToken = userAToken();
+        String userBToken = userBToken();
+        String userCToken = login("c", "test3");
+
+        Map<String, Object> waiting = waitingRequest();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userBToken)
+                .contentType(ContentType.JSON)
+                .body(waiting)
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("data.waitingOrder", is(1));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userCToken)
+                .contentType(ContentType.JSON)
+                .body(waiting)
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("data.waitingOrder", is(2));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userAToken)
+                .when().delete("/api/user/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        List<Map<String, Object>> userBMyList = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userBToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data");
+
+        Map<String, Object> userBPromotedReservation = userBMyList.stream()
+                .filter(item -> "RESERVED".equals(item.get("status")))
+                .filter(item -> "2026-05-05".equals(item.get("date")))
+                .filter(item -> Integer.valueOf(1).equals(((Map<String, Object>) item.get("theme")).get("id")))
+                .filter(item -> Integer.valueOf(1).equals(((Map<String, Object>) item.get("time")).get("id")))
+                .findFirst()
+                .orElseThrow();
+
+        int promotedReservationId = (Integer) userBPromotedReservation.get("id");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userCToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("data[0].status", is("WAITING"))
+                .body("data[0].waitingOrder", is(1));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userBToken)
+                .when().delete("/api/user/reservations/" + promotedReservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + userCToken)
+                .queryParam("period", "UPCOMING")
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("data[0].status", is("RESERVED"))
+                .body("data[0].waitingOrder", is((Object) null));
     }
 }

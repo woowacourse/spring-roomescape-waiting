@@ -35,10 +35,9 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약이 없는 스케줄에는 DB 제약으로 대기 저장이 실패한다.")
+    @DisplayName("존재하지 않는 스케줄에는 DB 제약으로 대기 저장이 실패한다.")
     void save_테스트_2() {
-        // test-data.sql 기준: schedule_id=4는 reservation이 존재하지 않음
-        Waiting waiting = new Waiting(null, 1L, 4L);
+        Waiting waiting = new Waiting(null, 1L, 999L);
 
         assertThatThrownBy(() -> waitingRepository.save(waiting))
                 .isInstanceOf(DataIntegrityViolationException.class);

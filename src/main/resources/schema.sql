@@ -53,6 +53,6 @@ CREATE TABLE waiting
     schedule_id BIGINT NOT NULL,
     CONSTRAINT uk_waiting_member_schedule UNIQUE (member_id, schedule_id),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
-    FOREIGN KEY (schedule_id) REFERENCES reservation (schedule_id) ON DELETE RESTRICT,
+    FOREIGN KEY (schedule_id) REFERENCES schedule (id) ON DELETE RESTRICT,
     PRIMARY KEY (id)
 );
