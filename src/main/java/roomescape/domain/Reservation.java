@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.RoomEscapeException;
+import roomescape.exception.WaitingErrorCode;
 
 public class Reservation {
 
@@ -79,8 +80,10 @@ public class Reservation {
         }
     }
 
-    public boolean isSameName(String otherName) {
-        return name.equals(otherName);
+    public void validateNotMyReservation(String inputName) {
+        if(name.equals(inputName)) {
+            throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
+        }
     }
 
     public Long getId() {

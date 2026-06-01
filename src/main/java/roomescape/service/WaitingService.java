@@ -71,10 +71,7 @@ public class WaitingService {
         ).orElseThrow(() ->
                 new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE)
         );
-
-        if (existReservation.isSameName(request.name())) {
-            throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
-        }
+        existReservation.validateNotMyReservation(request.name());
     }
 
     private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time,
