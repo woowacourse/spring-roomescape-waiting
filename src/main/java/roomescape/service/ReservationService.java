@@ -75,12 +75,11 @@ public class ReservationService {
         Theme themeById = themeQueryingDao.findThemeById(reservationRequest.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationRequest.themeId()));
 
-        Reservation reservationCommand = reservationRequest.toReservation(reservationTimeById, themeById);
-        reservationCommand.validatePastDateTime();
-
         validateDuplicatedReservation(new ReservationSlot(reservationRequest.date(), reservationTimeById, themeById));
 
         Reservation reservation = reservationRequest.toReservation(reservationTimeById, themeById);
+        reservation.validatePastDateTime();
+
         Long generatedId = reservationUpdatingDao.insert(reservation);
         return ReservationResponse.from(reservation.withReservationId(generatedId));
     }
