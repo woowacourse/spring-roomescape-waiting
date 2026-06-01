@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>방탈출 예약</title>
+  <link rel="stylesheet" href="/css/roomescape.css?v=popup-errors-2" />
+</head>
+<body data-page="user">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div class="brand-text">
+            <div class="brand-title">방탈출 예약</div>
+            <div class="brand-subtitle">날짜와 테마를 고르고 가능한 시간만 예약</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <nav class="view-toggle" aria-label="화면 전환">
+            <a id="userTab" class="view-button active" href="/">사용자</a>
+            <a id="adminTab" class="view-button" href="/admin">관리자</a>
+          </nav>
+          <div id="sourceStatus" class="status-pill">
+            <span class="status-dot"></span>
+            <span>데이터 불러오는 중</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="popular-band" aria-labelledby="popularTitle">
+        <div>
+          <p class="section-kicker">인기 테마</p>
+          <h1 id="popularTitle" class="popular-title">최근 1주 기준 상위 10개</h1>
+        </div>
+        <div id="popularList" class="popular-list" aria-label="인기 테마 목록"></div>
+      </section>
+
+      <section class="reservation-layout" aria-label="사용자 예약">
+        <div class="workspace">
+          <div class="control-strip">
+            <label class="field">
+              <span class="label">예약 날짜</span>
+              <input id="dateInput" class="date-input" type="date" />
+            </label>
+            <p class="date-note" id="dateNote"></p>
+          </div>
+
+          <div>
+            <div class="area-header">
+              <h2 class="area-title">테마 선택</h2>
+              <span id="themeCount" class="area-subtitle"></span>
+            </div>
+            <div id="themeGrid" class="theme-grid" aria-label="테마 목록"></div>
+          </div>
+
+          <div class="time-area">
+            <div class="area-header">
+              <h2 class="area-title">예약/대기 시간</h2>
+              <span id="timeCount" class="area-subtitle"></span>
+            </div>
+            <div id="timeGrid" class="time-grid" aria-label="예약 시간 목록"></div>
+          </div>
+        </div>
+
+        <aside class="summary-panel" aria-label="예약 요약">
+          <div class="summary-head">
+            <h2 class="summary-title">예약 정보</h2>
+            <span class="summary-badge">사용자</span>
+          </div>
+
+          <label class="field">
+            <span class="label">예약자 이름</span>
+            <input id="nameInput" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+          </label>
+
+          <div class="summary-list">
+            <div class="summary-row">
+              <span class="summary-label">날짜</span>
+              <span id="summaryDate" class="summary-value">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">테마</span>
+              <span id="summaryTheme" class="summary-value">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">시간</span>
+              <span id="summaryTime" class="summary-value">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">상태</span>
+              <span id="summaryStatus" class="summary-value">-</span>
+            </div>
+          </div>
+
+          <button id="reserveButton" class="reserve-button" type="button" disabled>예약하기</button>
+          <p id="formMessage" class="message"></p>
+        </aside>
+      </section>
+
+      <section class="lookup-panel" aria-labelledby="lookupTitle">
+        <div class="lookup-head">
+          <div class="lookup-title-group">
+            <h2 id="lookupTitle" class="area-title">내 예약 조회</h2>
+            <span id="lookupCount" class="area-subtitle">예약자 이름으로 조회</span>
+          </div>
+          <form id="lookupForm" class="lookup-form">
+            <label class="field">
+              <span class="label">예약자 이름</span>
+              <input id="lookupGuestName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+            <button id="lookupButton" class="secondary-button" type="submit">조회</button>
+          </form>
+        </div>
+        <p id="lookupMessage" class="message"></p>
+        <div id="lookupList" class="lookup-list" aria-label="예약 조회 결과"></div>
+        <form id="editReservationForm" class="reservation-edit-form" hidden>
+          <div class="edit-head">
+            <div class="lookup-title-group">
+              <h2 id="editReservationTitle" class="area-title">예약 수정</h2>
+              <span id="editReservationMeta" class="area-subtitle"></span>
+            </div>
+            <button id="editCancelButton" class="secondary-button" type="button">취소</button>
+          </div>
+          <div class="edit-grid">
+            <label class="field">
+              <span class="label">수정자 이름</span>
+              <input id="editAuthorizationName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+            <label class="field">
+              <span class="label">예약 날짜</span>
+              <input id="editReservationDate" class="date-input" type="date" />
+            </label>
+            <label class="field">
+              <span class="label">예약 시간</span>
+              <select id="editReservationTime" class="select-input"></select>
+            </label>
+          </div>
+          <button id="editReservationButton" class="primary-button" type="submit" disabled>수정하기</button>
+          <p id="editReservationMessage" class="message"></p>
+        </form>
+        <form id="cancelReservationForm" class="reservation-edit-form" hidden>
+          <div class="edit-head">
+            <div class="lookup-title-group">
+              <h2 id="cancelReservationTitle" class="area-title">예약 취소</h2>
+              <span id="cancelReservationMeta" class="area-subtitle"></span>
+            </div>
+            <button id="cancelReservationCloseButton" class="secondary-button" type="button">닫기</button>
+          </div>
+          <div class="edit-grid cancel-grid">
+            <label class="field">
+              <span class="label">예약자 이름</span>
+              <input id="cancelAuthorizationName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+          </div>
+          <button id="cancelReservationButton" class="danger-button" type="submit" disabled>취소하기</button>
+          <p id="cancelReservationMessage" class="message"></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="errorPopup" class="message-popup" role="alertdialog" aria-modal="true" aria-labelledby="errorPopupTitle" aria-describedby="errorPopupMessage" hidden>
+    <div class="message-popup-panel">
+      <div class="message-popup-icon" aria-hidden="true">!</div>
+      <div class="message-popup-content">
+        <h2 id="errorPopupTitle" class="message-popup-title">확인해주세요</h2>
+        <p id="errorPopupMessage" class="message-popup-message"></p>
+      </div>
+      <button id="errorPopupClose" class="message-popup-button" type="button">확인</button>
+    </div>
+  </div>
+  <script src="/js/roomescape.js?v=popup-errors-2" defer></script>
+</body>
+</html>

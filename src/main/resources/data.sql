@@ -1,0 +1,103 @@
+INSERT INTO theme (id, name, description, thumbnail) VALUES
+    (1, 'Theme 1', 'Popular theme rank 1', 'https://example.com/theme-1.png'),
+    (2, 'Theme 2', 'Popular theme rank 2', 'https://example.com/theme-2.png'),
+    (3, 'Theme 3', 'Popular theme rank 3', 'https://example.com/theme-3.png'),
+    (4, 'Theme 4', 'Popular theme rank 4', 'https://example.com/theme-4.png'),
+    (5, 'Theme 5', 'Popular theme rank 5', 'https://example.com/theme-5.png'),
+    (6, 'Theme 6', 'Popular theme rank 6', 'https://example.com/theme-6.png'),
+    (7, 'Theme 7', 'Popular theme rank 7', 'https://example.com/theme-7.png'),
+    (8, 'Theme 8', 'Popular theme rank 8', 'https://example.com/theme-8.png'),
+    (9, 'Theme 9', 'Popular theme rank 9', 'https://example.com/theme-9.png'),
+    (10, 'Theme 10', 'Popular theme rank 10', 'https://example.com/theme-10.png'),
+    (11, 'Theme 11', 'Out of range reservations only', 'https://example.com/theme-11.png'),
+    (12, 'Theme 12', 'No reservations', 'https://example.com/theme-12.png');
+
+INSERT INTO reservation_time (id, start_at) VALUES
+    (1, '10:00:00'),
+    (2, '12:00:00'),
+    (3, '14:00:00'),
+    (4, '16:00:00'),
+    (5, '18:00:00'),
+    (6, '20:00:00');
+
+INSERT INTO reservation (
+    id,
+    guest_name,
+    date,
+    time_id,
+    theme_id,
+    status,
+    last_modified_at
+) VALUES
+      (1, 'guest-1', '2026-05-21', 1, 1, 'CONFIRMED', '2026-05-27 09:00:00'),
+      (2, 'guest-2', '2026-05-21', 2, 1, 'CONFIRMED', '2026-05-27 09:01:00'),
+      (3, 'guest-3', '2026-05-22', 1, 1, 'CONFIRMED', '2026-05-27 09:02:00'),
+      (4, 'guest-4', '2026-05-23', 1, 1, 'CONFIRMED', '2026-05-27 09:03:00'),
+      (5, 'guest-5', '2026-05-24', 1, 1, 'CONFIRMED', '2026-05-27 09:04:00'),
+      (6, 'guest-6', '2026-05-25', 1, 1, 'CONFIRMED', '2026-05-27 09:05:00'),
+      (7, 'guest-7', '2026-05-26', 1, 1, 'CONFIRMED', '2026-05-27 09:06:00'),
+      (8, 'guest-8', '2026-05-27', 1, 1, 'WAITING', '2026-05-27 09:07:00'),
+      (9, 'guest-9', '2026-05-27', 2, 1, 'WAITING', '2026-05-27 09:08:00'),
+      (10, 'guest-10', '2026-05-27', 3, 1, 'CANCELED', '2026-05-27 09:09:00'),
+
+      (11, 'guest-11', '2026-05-21', 1, 2, 'CONFIRMED', '2026-05-27 09:10:00'),
+      (12, 'guest-12', '2026-05-21', 2, 2, 'CONFIRMED', '2026-05-27 09:11:00'),
+      (13, 'guest-13', '2026-05-22', 1, 2, 'WAITING', '2026-05-27 09:12:00'),
+      (14, 'guest-14', '2026-05-23', 1, 2, 'CONFIRMED', '2026-05-27 09:13:00'),
+      (15, 'guest-15', '2026-05-24', 1, 2, 'CANCELED', '2026-05-27 09:14:00'),
+      (16, 'guest-16', '2026-05-25', 1, 2, 'WAITING', '2026-05-27 09:15:00'),
+      (17, 'guest-17', '2026-05-26', 1, 2, 'CONFIRMED', '2026-05-27 09:16:00'),
+      (18, 'guest-18', '2026-05-27', 1, 2, 'WAITING', '2026-05-27 09:17:00'),
+      (19, 'guest-19', '2026-05-27', 2, 2, 'CONFIRMED', '2026-05-27 09:18:00'),
+
+      (20, 'guest-20', '2026-05-21', 1, 3, 'CONFIRMED', '2026-05-27 09:19:00'),
+      (21, 'guest-21', '2026-05-21', 2, 3, 'WAITING', '2026-05-27 09:20:00'),
+      (22, 'guest-22', '2026-05-22', 1, 3, 'CONFIRMED', '2026-05-27 09:21:00'),
+      (23, 'guest-23', '2026-05-23', 1, 3, 'CONFIRMED', '2026-05-27 09:22:00'),
+      (24, 'guest-24', '2026-05-24', 1, 3, 'WAITING', '2026-05-27 09:23:00'),
+      (25, 'guest-25', '2026-05-25', 1, 3, 'CANCELED', '2026-05-27 09:24:00'),
+      (26, 'guest-26', '2026-05-26', 1, 3, 'CONFIRMED', '2026-05-27 09:25:00'),
+      (27, 'guest-27', '2026-05-27', 1, 3, 'WAITING', '2026-05-27 09:26:00'),
+
+      (28, 'guest-28', '2026-05-21', 1, 4, 'CONFIRMED', '2026-05-27 09:27:00'),
+      (29, 'guest-29', '2026-05-21', 2, 4, 'WAITING', '2026-05-27 09:28:00'),
+      (30, 'guest-30', '2026-05-22', 1, 4, 'CONFIRMED', '2026-05-27 09:29:00'),
+      (31, 'guest-31', '2026-05-23', 1, 4, 'WAITING', '2026-05-27 09:30:00'),
+      (32, 'guest-32', '2026-05-24', 1, 4, 'CONFIRMED', '2026-05-27 09:31:00'),
+      (33, 'guest-33', '2026-05-25', 1, 4, 'CANCELED', '2026-05-27 09:32:00'),
+      (34, 'guest-34', '2026-05-26', 1, 4, 'WAITING', '2026-05-27 09:33:00'),
+
+      (35, 'guest-35', '2026-05-21', 1, 5, 'CONFIRMED', '2026-05-27 09:34:00'),
+      (36, 'guest-36', '2026-05-21', 2, 5, 'WAITING', '2026-05-27 09:35:00'),
+      (37, 'guest-37', '2026-05-22', 1, 5, 'CONFIRMED', '2026-05-27 09:36:00'),
+      (38, 'guest-38', '2026-05-23', 1, 5, 'WAITING', '2026-05-27 09:37:00'),
+      (39, 'guest-39', '2026-05-24', 1, 5, 'CONFIRMED', '2026-05-27 09:38:00'),
+      (40, 'guest-40', '2026-05-25', 1, 5, 'CANCELED', '2026-05-27 09:39:00'),
+
+      (41, 'guest-41', '2026-05-21', 1, 6, 'CONFIRMED', '2026-05-27 09:40:00'),
+      (42, 'guest-42', '2026-05-21', 2, 6, 'WAITING', '2026-05-27 09:41:00'),
+      (43, 'guest-43', '2026-05-22', 1, 6, 'CONFIRMED', '2026-05-27 09:42:00'),
+      (44, 'guest-44', '2026-05-23', 1, 6, 'WAITING', '2026-05-27 09:43:00'),
+      (45, 'guest-45', '2026-05-24', 1, 6, 'CONFIRMED', '2026-05-27 09:44:00'),
+
+      (46, 'guest-46', '2026-05-21', 1, 7, 'CONFIRMED', '2026-05-27 09:45:00'),
+      (47, 'guest-47', '2026-05-21', 2, 7, 'WAITING', '2026-05-27 09:46:00'),
+      (48, 'guest-48', '2026-05-22', 1, 7, 'CONFIRMED', '2026-05-27 09:47:00'),
+      (49, 'guest-49', '2026-05-23', 1, 7, 'CANCELED', '2026-05-27 09:48:00'),
+
+      (50, 'guest-50', '2026-05-21', 1, 8, 'CONFIRMED', '2026-05-27 09:49:00'),
+      (51, 'guest-51', '2026-05-21', 2, 8, 'WAITING', '2026-05-27 09:50:00'),
+      (52, 'guest-52', '2026-05-22', 1, 8, 'CONFIRMED', '2026-05-27 09:51:00'),
+
+      (53, 'guest-53', '2026-05-21', 1, 9, 'CONFIRMED', '2026-05-27 09:52:00'),
+      (54, 'guest-54', '2026-05-21', 2, 9, 'WAITING', '2026-05-27 09:53:00'),
+
+      (55, 'guest-55', '2026-05-21', 1, 10, 'CONFIRMED', '2026-05-27 09:54:00'),
+
+      (56, 'guest-56', '2026-05-28', 1, 11, 'CONFIRMED', '2026-05-27 09:55:00'),
+      (57, 'guest-57', '2026-05-28', 2, 11, 'WAITING', '2026-05-27 09:56:00'),
+      (58, 'guest-58', '2026-05-20', 1, 11, 'CANCELED', '2026-05-27 09:57:00');
+
+ALTER TABLE theme ALTER COLUMN id RESTART WITH 13;
+ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 7;
+ALTER TABLE reservation ALTER COLUMN id RESTART WITH 59;
