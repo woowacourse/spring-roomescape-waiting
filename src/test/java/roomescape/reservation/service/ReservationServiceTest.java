@@ -149,7 +149,7 @@ class ReservationServiceTest {
         )).isInstanceOf(InvalidReservationDateValueException.class);
     }
 
-    @DisplayName("예약 생성 시, 시간이 유효하지 않으면 예외가 발생한다.")
+    @DisplayName("예약 생성 시,테마가 없으면 예외가 발생한다.")
     @Test
     void makeReservationTest_theme_not_found() {
         //given

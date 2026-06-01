@@ -1,4 +1,4 @@
-package roomescape.integration.support;
+package roomescape.e2e.support;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.auth.exception.AuthenticationException;
 import roomescape.auth.exception.AuthorizationException;
 import roomescape.global.exception.BusinessException;
@@ -44,6 +45,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(status)
                 .body(ErrorResponse.of(e));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(
+            MissingServletRequestParameterException e
+    ) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ErrorResponse("요청 파라미터 형식이 유효하지 않습니다."));
     }
 
     @ExceptionHandler(DuplicateException.class)

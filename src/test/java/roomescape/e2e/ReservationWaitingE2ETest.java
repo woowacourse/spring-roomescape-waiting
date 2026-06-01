@@ -1,4 +1,4 @@
-package roomescape.integration;
+package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -9,11 +9,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
+import roomescape.e2e.support.DatabaseHelper;
+import roomescape.e2e.support.SpringWebTest;
 
 @SpringWebTest
-class ReservationWaitingControllerTest {
+class ReservationWaitingE2ETest {
 
     @Autowired
     DatabaseHelper databaseHelper;

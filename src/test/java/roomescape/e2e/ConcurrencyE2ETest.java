@@ -1,4 +1,4 @@
-package roomescape.integration;
+package roomescape.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -18,9 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.e2e.support.DatabaseHelper;
+import roomescape.e2e.support.SpringWebTest;
 import roomescape.global.exception.BusinessException;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
@@ -40,7 +40,7 @@ import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
 @SpringWebTest
-class ConcurrencyTest {
+class ConcurrencyE2ETest {
 
     @Autowired
     DatabaseHelper databaseHelper;

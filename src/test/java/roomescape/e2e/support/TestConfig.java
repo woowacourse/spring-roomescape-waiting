@@ -1,4 +1,4 @@
-package roomescape.integration.support;
+package roomescape.e2e.support;
 
 import io.restassured.RestAssured;
 import java.time.Clock;
