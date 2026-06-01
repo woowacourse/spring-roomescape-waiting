@@ -20,10 +20,10 @@ import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
-import roomescape.repository.FakeReservationDao;
-import roomescape.repository.FakeThemeDao;
-import roomescape.repository.FakeThemeSlotDao;
-import roomescape.repository.FakeTimeDao;
+import roomescape.repository.FakeReservationRepository;
+import roomescape.repository.FakeThemeRepository;
+import roomescape.repository.FakeThemeSlotRepository;
+import roomescape.repository.FakeTimeRepository;
 
 class ReservationServiceTest {
 
@@ -35,18 +35,18 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        FakeTimeDao fakeReservationTimeDao = new FakeTimeDao();
-        FakeThemeDao fakeThemeDao = new FakeThemeDao();
-        FakeThemeSlotDao fakeThemeSlotDao = new FakeThemeSlotDao();
+        FakeTimeRepository fakeReservationTimeDao = new FakeTimeRepository();
+        FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
+        FakeThemeSlotRepository fakeThemeSlotRepository = new FakeThemeSlotRepository();
 
         reservationService = new ReservationService(
-                new FakeReservationDao(),
-                fakeThemeSlotDao
+                new FakeReservationRepository(),
+                fakeThemeSlotRepository
         );
         savedTime = fakeReservationTimeDao.save(Time.of(LocalTime.of(10, 0)));
-        savedTheme = fakeThemeDao.save(new Theme("이름", "설명", "test.com"));
-        savedThemeSlot1 = fakeThemeSlotDao.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(1), savedTime, false));
-        savedThemeSlot2 = fakeThemeSlotDao.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(2), savedTime, false));
+        savedTheme = fakeThemeRepository.save(new Theme("이름", "설명", "test.com"));
+        savedThemeSlot1 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(1), savedTime, false));
+        savedThemeSlot2 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(2), savedTime, false));
     }
 
     @Test

@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import roomescape.domain.Theme;
-import roomescape.repository.ThemeRepository;
 
-public class FakeThemeDao implements ThemeRepository {
+public class FakeThemeRepository implements ThemeRepository {
 
     private final Map<Long, Theme> storage = new HashMap<>();
     private long sequence = 1L;

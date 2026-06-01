@@ -2,14 +2,12 @@ package roomescape.repository;
 
 import java.util.*;
 
-import ch.qos.logback.core.spi.PreSerializationTransformer;
 import roomescape.domain.Reservation;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
 
-public class FakeReservationDao implements ReservationRepository {
+public class FakeReservationRepository implements ReservationRepository {
 
     private final Map<Long, Reservation> storage = new HashMap<>();
     private long sequence = 1L;

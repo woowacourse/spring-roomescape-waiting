@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import roomescape.domain.Time;
-import roomescape.repository.TimeRepository;
 
-public class FakeTimeDao implements TimeRepository {
+public class FakeTimeRepository implements TimeRepository {
 
     private final Map<Long, Time> storage = new HashMap<>();
     private long sequence = 1L;
