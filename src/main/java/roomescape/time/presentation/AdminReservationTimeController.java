@@ -19,19 +19,19 @@ import roomescape.time.presentation.dto.ReservationTimeResponse;
 @RequestMapping("/admin/times")
 public class AdminReservationTimeController {
 
-    private final ReservationTimeService service;
+    private final ReservationTimeService reservationTimeService;
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createReservationTime(@Valid @RequestBody ReservationTimeRequest request) {
         ReservationTimeResponse response = ReservationTimeResponse.from(
-                service.addReservationTime(request.toCommand())
+                reservationTimeService.create(request.toCommand())
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable Long id) {
-        service.deleteReservationTime(id);
+    public ResponseEntity<Void> deactivateReservationTime(@PathVariable Long id) {
+        reservationTimeService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

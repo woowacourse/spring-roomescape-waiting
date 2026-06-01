@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.common.exception.InactiveException;
 import roomescape.common.exception.ValidationException;
-import roomescape.reservation.domain.exception.IllegalReservationDateTimeException;
 
 @Getter
 @EqualsAndHashCode

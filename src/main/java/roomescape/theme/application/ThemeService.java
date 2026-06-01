@@ -15,7 +15,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ThemeService {
 
@@ -27,23 +27,27 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeInfo addTheme(ThemeCommand theme) {
-        if (themeRepository.existsByName(theme.name())) {
+    @Transactional
+    public ThemeInfo create(ThemeCommand command) {
+        if (themeRepository.existsByName(command.name())) {
             throw new DuplicateThemeException("이미 존재하는 테마입니다.");
         }
-        return ThemeInfo.from(themeRepository.save(theme.toEntity()));
+
+        Theme theme = themeRepository.save(command.toEntity());
+        return ThemeInfo.from(theme);
     }
 
-    public void deleteTheme(Long id) {
+    @Transactional
+    public void deactivate(Long id) {
+        Theme theme = themeRepository.getById(id);
+
         if (reservationRepository.existsByTheme(id)) {
-            throw new ThemeInUseException("해당 테마의 예약이 존재합니다.");
+            throw new ThemeInUseException("예약이 존재하는 테마는 비활성화할 수 없습니다.");
         }
-        Theme theme = themeRepository.getById(id)
-                .deactivate();
-        themeRepository.delete(theme);
+
+        themeRepository.update(theme.deactivate());
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeInfo> getThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -51,14 +55,13 @@ public class ThemeService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeInfo> getWeeksTopThemes() {
         return themeRepository.findByReservationCountWithLimit(
-                LocalDate.now(clock).minusWeeks(WEEKS_BOUND),
-                LocalDate.now(clock).minusDays(DAYS_BOUND),
-                THEME_SIZE_LIMIT
-        ).stream()
-        .map(ThemeInfo::from)
-        .toList();
+                        LocalDate.now(clock).minusWeeks(WEEKS_BOUND),
+                        LocalDate.now(clock).minusDays(DAYS_BOUND),
+                        THEME_SIZE_LIMIT
+                ).stream()
+                .map(ThemeInfo::from)
+                .toList();
     }
 }
