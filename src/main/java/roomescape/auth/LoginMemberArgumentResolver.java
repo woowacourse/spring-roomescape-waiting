@@ -8,10 +8,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.dao.MemberDao;
-import roomescape.domain.Member;
-import roomescape.exception.auth.InsufficientRoleException;
-import roomescape.exception.auth.UnauthorizedException;
+import roomescape.member.MemberDao;
+import roomescape.member.Member;
+import roomescape.auth.exception.InsufficientRoleException;
+import roomescape.auth.exception.UnauthorizedException;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {

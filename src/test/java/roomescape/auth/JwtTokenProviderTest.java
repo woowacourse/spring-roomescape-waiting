@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.auth.ExpiredTokenException;
-import roomescape.exception.auth.InvalidTokenException;
+import roomescape.auth.exception.ExpiredTokenException;
+import roomescape.auth.exception.InvalidTokenException;
 
 public class JwtTokenProviderTest {
 

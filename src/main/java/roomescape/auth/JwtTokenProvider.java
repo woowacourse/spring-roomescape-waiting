@@ -11,8 +11,8 @@ import java.util.Base64;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.exception.auth.ExpiredTokenException;
-import roomescape.exception.auth.InvalidTokenException;
+import roomescape.auth.exception.ExpiredTokenException;
+import roomescape.auth.exception.InvalidTokenException;
 
 @Component
 public class JwtTokenProvider {
