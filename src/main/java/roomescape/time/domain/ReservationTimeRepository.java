@@ -8,7 +8,9 @@ import roomescape.common.exception.NotFoundException;
 public interface ReservationTimeRepository {
     ReservationTime save(ReservationTime reservationTime);
 
-    List<ReservationTime> findAll();
+    List<ReservationTime> findAll(int page, int size);
+
+    List<ReservationTime> findAllActive();
 
     Optional<ReservationTime> findById(Long id);
 

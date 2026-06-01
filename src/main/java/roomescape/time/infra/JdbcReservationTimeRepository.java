@@ -48,7 +48,22 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTime> findAll() {
+    public List<ReservationTime> findAll(int page, int size) {
+        String sql = """
+                SELECT id, start_at, is_active
+                FROM reservation_time
+                WHERE is_active = 1
+                ORDER BY start_at ASC
+                LIMIT :size OFFSET :offset
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("size", size)
+                .addValue("offset", page * size);
+        return jdbcTemplate.query(sql, params, rowMapper);
+    }
+
+    @Override
+    public List<ReservationTime> findAllActive() {
         String sql = """
                 SELECT id, start_at, is_active
                 FROM reservation_time

@@ -32,7 +32,7 @@ public class PageController {
     @GetMapping("/admin")
     public String adminPage(Model model) {
         model.addAttribute("themes", themeService.getThemes(0, 10));
-        model.addAttribute("times", reservationTimeService.getReservationTimes());
+        model.addAttribute("times", reservationTimeService.getReservationTimes(0, 10));
         model.addAttribute("reservations", reservationService.getReservations(0, 10));
         return "admin";
     }

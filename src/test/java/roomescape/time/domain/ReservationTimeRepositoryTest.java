@@ -56,7 +56,7 @@ class ReservationTimeRepositoryTest extends BaseRepositoryTest {
         dataSource.insertTimeByStartToEndWithOneHourRotation(10, 12);
 
         // when
-        List<ReservationTime> times = reservationTimeRepository.findAll();
+        List<ReservationTime> times = reservationTimeRepository.findAll(0, 10);
 
         // then
         assertThat(times).extracting(ReservationTime::getStartAt)

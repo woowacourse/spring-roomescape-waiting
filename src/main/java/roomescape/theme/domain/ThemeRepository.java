@@ -10,8 +10,6 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(Long id);
 
-    List<Theme> findAll();
-
     List<Theme> findAll(int page, int size);
 
     List<Theme> findByReservationCountWithLimit(LocalDate startDate, LocalDate endDate, int limit);

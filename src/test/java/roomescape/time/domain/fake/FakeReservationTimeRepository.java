@@ -23,7 +23,17 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTime> findAll() {
+    public List<ReservationTime> findAll(int page, int size) {
+        return reservationTimes.stream()
+                .filter(ReservationTime::isActive)
+                .sorted(Comparator.comparing(ReservationTime::getStartAt))
+                .skip((long) page * size)
+                .limit(size)
+                .toList();
+    }
+
+    @Override
+    public List<ReservationTime> findAllActive() {
         return reservationTimes.stream()
                 .filter(ReservationTime::isActive)
                 .sorted(Comparator.comparing(ReservationTime::getStartAt))

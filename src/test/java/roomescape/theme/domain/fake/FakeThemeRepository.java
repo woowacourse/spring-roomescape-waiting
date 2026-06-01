@@ -28,11 +28,6 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findAll() {
-        return List.copyOf(themes);
-    }
-
-    @Override
     public List<Theme> findAll(int page, int size) {
         return themes.stream()
                 .filter(Theme::isActive)

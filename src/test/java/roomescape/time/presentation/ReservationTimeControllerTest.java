@@ -43,7 +43,7 @@ class ReservationTimeControllerTest extends BaseControllerUnitTest {
                 new ReservationTimeInfo(1L, LocalTime.of(10, 0)),
                 new ReservationTimeInfo(2L, LocalTime.of(11, 0))
         );
-        when(reservationTimeService.getReservationTimes()).thenReturn(expectedInfos);
+        when(reservationTimeService.getReservationTimes(0, 10)).thenReturn(expectedInfos);
 
         // when & then
         List<ReservationTimeResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -54,6 +54,30 @@ class ReservationTimeControllerTest extends BaseControllerUnitTest {
                 });
 
         assertThat(response).containsExactlyElementsOf(expectedInfos.stream().map(ReservationTimeResponse::from).toList());
+    }
+
+    @Test
+    void 시간_목록_조회_요청_시_페이지가_음수이면_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .queryParam("page", "-1")
+                .queryParam("size", "10")
+                .when().get("/times")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString("페이지 번호는 0 이상이어야 합니다."));
+    }
+
+    @Test
+    void 시간_목록_조회_요청_시_조회_개수가_양수가_아니면_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .queryParam("page", "0")
+                .queryParam("size", "0")
+                .when().get("/times")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString("조회 개수는 양수여야 합니다."));
     }
 
     @Test

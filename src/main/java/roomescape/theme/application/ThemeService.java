@@ -42,13 +42,6 @@ public class ThemeService {
         themeRepository.update(theme.deactivate());
     }
 
-    public List<ThemeInfo> getThemes() {
-        return themeRepository.findAll()
-                .stream()
-                .map(ThemeInfo::from)
-                .toList();
-    }
-
     public List<ThemeInfo> getThemes(int page, int size) {
         return themeRepository.findAll(page, size)
                 .stream()

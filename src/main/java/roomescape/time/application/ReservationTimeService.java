@@ -49,8 +49,8 @@ public class ReservationTimeService {
         reservationTimeRepository.update(time.deactivate());
     }
 
-    public List<ReservationTimeInfo> getReservationTimes() {
-        return reservationTimeRepository.findAll()
+    public List<ReservationTimeInfo> getReservationTimes(int page, int size) {
+        return reservationTimeRepository.findAll(page, size)
                 .stream()
                 .map(ReservationTimeInfo::from)
                 .toList();
@@ -60,7 +60,7 @@ public class ReservationTimeService {
         Theme theme = themeRepository.getById(command.themeId());
 
         List<Reservation> reservations = reservationRepository.findByThemeAndDate(theme.getId(), command.date());
-        List<ReservationTime> allTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> allTimes = reservationTimeRepository.findAllActive();
 
         Set<ReservationTime> reservedTimes = reservations.stream()
                 .map(Reservation::getTime)

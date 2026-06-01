@@ -22,7 +22,7 @@ public class AdminReservationTimeController {
     private final ReservationTimeService reservationTimeService;
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> createReservationTime(@Valid @RequestBody ReservationTimeRequest request) {
+    public ResponseEntity<ReservationTimeResponse> create(@Valid @RequestBody ReservationTimeRequest request) {
         ReservationTimeResponse response = ReservationTimeResponse.from(
                 reservationTimeService.create(request.toCommand())
         );
@@ -30,7 +30,7 @@ public class AdminReservationTimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivateReservationTime(@PathVariable Long id) {
+    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         reservationTimeService.deactivate(id);
         return ResponseEntity.noContent().build();
     }

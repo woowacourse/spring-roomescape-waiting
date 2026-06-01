@@ -73,7 +73,7 @@ class ReservationTimeServiceTest {
         reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
         // when
-        List<ReservationTimeInfo> responses = reservationTimeService.getReservationTimes();
+        List<ReservationTimeInfo> responses = reservationTimeService.getReservationTimes(0, 10);
 
         // then
         assertThat(responses).extracting(ReservationTimeInfo::startAt)
