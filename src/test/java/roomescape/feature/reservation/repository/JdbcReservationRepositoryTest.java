@@ -522,48 +522,6 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class 다른_예약_중복_여부_확인 {
-
-        @BeforeEach
-        void assumeBasicsWork() {
-            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
-        }
-
-        @Test
-        void 자기_자신_예약은_false를_반환한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
-
-            // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                reservation.getDate(), time, theme, reservation.getId());
-
-            // then
-            assertThat(actual).isFalse();
-        }
-
-        @Test
-        void 다른_예약이_있으면_true를_반환한다() {
-            // given
-            LocalDate date = LocalDate.now().plusYears(1);
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme, ReservationStatus.ACTIVE));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자2"), date.plusDays(1), time, theme, ReservationStatus.ACTIVE));
-
-            // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                date, time, theme, reservation.getId());
-
-            // then
-            assertThat(actual).isTrue();
-        }
-    }
-
-    @Nested
     class 예약_삭제 {
 
         @BeforeEach

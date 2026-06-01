@@ -38,6 +38,7 @@ public class Reservation {
     public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
         Schedule newSchedule = new Schedule(newDate, newTime);
         validateUpdatable(requestName, newSchedule);
+        validateChanged(newSchedule, newTheme);
 
         return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
     }
@@ -87,12 +88,35 @@ public class Reservation {
         validateFuture(newSchedule);
     }
 
+    private void validateChanged(Schedule newSchedule, Theme newTheme) {
+        if (isSameSchedule(newSchedule) && isSameTheme(newTheme)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_CHANGED);
+        }
+    }
+
+    private boolean isSameSchedule(Schedule newSchedule) {
+        return this.schedule.date().equals(newSchedule.date())
+            && isSameId(this.schedule.time().getId(), newSchedule.time().getId());
+    }
+
+    private boolean isSameTheme(Theme newTheme) {
+        return isSameId(this.theme.getId(), newTheme.getId());
+    }
+
+    private boolean isSameId(Long currentId, Long newId) {
+        return currentId != null && currentId.equals(newId);
+    }
+
     public Long getId() {
         return id;
     }
 
     public ReserverName getName() {
         return name;
+    }
+
+    public boolean hasDifferentName(ReserverName name) {
+        return !this.name.equals(name);
     }
 
     public LocalDate getDate() {

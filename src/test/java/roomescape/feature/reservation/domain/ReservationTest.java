@@ -12,6 +12,7 @@ import roomescape.feature.time.domain.Time;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.fixture.TimeFixture;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.exception.GeneralException;
 
 class ReservationTest {
@@ -68,6 +69,20 @@ class ReservationTest {
             assertThatNoException().isThrownBy(() ->
                     reservation.update(DEFAULT_RESERVER_NAME, FUTURE_DATE, newTime, newTheme)
             );
+        }
+
+        @Test
+        void 날짜_시간_테마가_모두_그대로이면_예외를_던진다() {
+            Time time = Time.reconstruct(1L, DEFAULT_TIME.getStartAt(), EntityStatus.ACTIVE);
+            Theme theme = Theme.reconstruct(1L, "테마 이름", "테마 설명", "https://example.com/theme.png",
+                    EntityStatus.ACTIVE);
+            Reservation reservation = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, time, theme, ReservationStatus.ACTIVE);
+
+            assertThatThrownBy(() ->
+                    reservation.update(DEFAULT_RESERVER_NAME, FUTURE_DATE, time, theme)
+            ).isInstanceOf(GeneralException.class)
+                    .hasMessage("변경할 내용이 없습니다.");
         }
 
         @Test

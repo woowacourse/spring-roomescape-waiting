@@ -286,8 +286,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                newDate, newTime, newTheme, 1L)).thenReturn(false);
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+                newDate, newTime, newTheme)).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -454,8 +454,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                futureDate, time, theme, 1L)).thenReturn(true);
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+                futureDate, time, theme)).thenReturn(true);
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))

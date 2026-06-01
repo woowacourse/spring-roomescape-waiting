@@ -32,7 +32,4 @@ public interface ReservationRepository {
     boolean existsReservationByDateAndTimeAndThemeAndNotDeleted(LocalDate date, Time time, Theme theme);
 
     boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status);
-
-    boolean existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(LocalDate date, Time time, Theme theme,
-                                                                        Long id);
 }

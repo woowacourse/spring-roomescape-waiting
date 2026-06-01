@@ -74,11 +74,7 @@ public class ReservationManagementService implements ReservationService, Waiting
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.ACTIVE);
 
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(reservation.getDate(),
-            reservation.getTime(),
-            reservation.getTheme())) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        validateNotReservedByOther(reservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
@@ -121,10 +117,7 @@ public class ReservationManagementService implements ReservationService, Waiting
 
         Reservation updated = existingReservation.update(command.name(), command.date(), newTime, newTheme);
 
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-            updated.getDate(), updated.getTime(), updated.getTheme(), id)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        validateNotReservedByOther(updated);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
@@ -157,13 +150,8 @@ public class ReservationManagementService implements ReservationService, Waiting
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.WAITING);
 
-        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.WAITING)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
-        }
-
-        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        validateNotAlreadyWaitingByMySelf(reservation);
+        validateNotReservedByMyself(reservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
@@ -179,5 +167,26 @@ public class ReservationManagementService implements ReservationService, Waiting
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelWaiting(name)));
+    }
+
+    private void validateNotReservedByOther(Reservation reservation) {
+        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme())) {
+            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+        }
+    }
+
+    private void validateNotReservedByMyself(Reservation reservation) {
+        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
+            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+        }
+    }
+
+    private void validateNotAlreadyWaitingByMySelf(Reservation reservation) {
+        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.WAITING)) {
+            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
+        }
     }
 }
