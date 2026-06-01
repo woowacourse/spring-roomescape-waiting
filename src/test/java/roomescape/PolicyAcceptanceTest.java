@@ -90,6 +90,7 @@ public class PolicyAcceptanceTest {
     @DisplayName("[예약] 존재하지 않는 예약을 취소하면 404를 반환한다.")
     void 존재하지_않는_예약_취소시_404() {
         RestAssured.given().log().all()
+                .queryParam("name", "브라운")
                 .when().patch("/reservations/99999/cancel")
                 .then().log().all()
                 .statusCode(404);
@@ -150,6 +151,7 @@ public class PolicyAcceptanceTest {
     void 이미_취소된_예약_취소시_422() {
         // ID 78: CANCELLED 상태
         RestAssured.given().log().all()
+                .queryParam("name", "과거게스트")
                 .when().patch("/reservations/78/cancel")
                 .then().log().all()
                 .statusCode(422);
@@ -160,9 +162,20 @@ public class PolicyAcceptanceTest {
     void 이미_완료된_예약_취소시_422() {
         // ID 76: COMPLETED 상태
         RestAssured.given().log().all()
+                .queryParam("name", "과거게스트")
                 .when().patch("/reservations/76/cancel")
                 .then().log().all()
                 .statusCode(422);
+    }
+
+    @Test
+    @DisplayName("[예약] 다른 사용자의 예약을 취소하면 403을 반환한다.")
+    void 다른_사용자의_예약_취소시_403() {
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().patch("/reservations/1/cancel")
+                .then().log().all()
+                .statusCode(403);
     }
 
     // ── 예약 규칙: 존재하지 않는 시간 ID로 변경(404) ──────────────────────────────
@@ -260,6 +273,7 @@ public class PolicyAcceptanceTest {
                 .path("id");
 
         RestAssured.given().log().all()
+                .queryParam("name", "취소대기")
                 .when().patch("/reservations/{reservationId}/cancel", reservationId.longValue())
                 .then().log().all()
                 .statusCode(204);

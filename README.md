@@ -62,12 +62,17 @@ PATCH /reservations/{reservationId}/cancel
 |---------------|------|---------|
 | reservationId | Long | 예약 ID |
 
+| 쿼리 파라미터 | 타입 | 필수 | 설명        |
+|---------------|------|------|-------------|
+| name          | String | O    | 예약자 이름 |
+
 **응답 204 No Content**
 
 
 | 에러 상황                                                  | 상태 코드                |
 |------------------------------------------------------------|--------------------------|
 | 예약 없음                                                  | 404 Not Found            |
+| 자신의 예약이 아님                                         | 403 Forbidden            |
 | 취소할 수 없는 예약 (이미 취소되었거나, 완료 처리 된 예약) | 422 Unprocessable Entity |
 
 ---
@@ -405,6 +410,10 @@ PATCH /reservations/{reservationId}/cancel
 |--------------|------|---------|
 | reservationId | Long | 예약 ID |
 
+| 쿼리 파라미터 | 타입 | 필수 | 설명        |
+|---------------|------|------|-------------|
+| name          | String | O    | 예약자 이름 |
+
 **응답 204 No Content**
 
 - CONFIRMED 예약 취소 시, 같은 슬롯의 첫 번째 PENDING 예약이 자동으로 CONFIRMED로 승격
@@ -413,6 +422,7 @@ PATCH /reservations/{reservationId}/cancel
 | 에러 상황                  | 상태 코드                |
 |----------------------------|--------------------------|
 | 예약 ID 존재하지 않음      | 404 Not Found            |
+| 자신의 예약이 아님         | 403 Forbidden            |
 | 이미 취소된 예약           | 422 Unprocessable Entity |
 | 이미 완료된 예약           | 422 Unprocessable Entity |
 

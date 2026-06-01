@@ -87,6 +87,17 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        cancel(reservation);
+    }
+
+    @Transactional
+    public void cancelReservation(Long reservationId, String name) {
+        Reservation reservation = getReservationOrElseThrow(reservationId);
+        validateOwner(reservation, name);
+        cancel(reservation);
+    }
+
+    private void cancel(Reservation reservation) {
         boolean wasConfirmed = reservation.isConfirmedStatus();
 
         if (wasConfirmed) {
@@ -99,6 +110,12 @@ public class ReservationService {
 
         if (wasConfirmed) {
             promoteWaitingReservationOrReleaseSlot(reservation);
+        }
+    }
+
+    private void validateOwner(Reservation reservation, String name) {
+        if (!reservation.isOwnedBy(name)) {
+            throw new CustomException(ErrorCode.RESERVATION_NOT_ALLOWED);
         }
     }
 

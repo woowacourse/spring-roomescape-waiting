@@ -62,6 +62,10 @@ public class Reservation {
         return name;
     }
 
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
+    }
+
     public LocalDate getDate() {
         return themeSlot.getDate();
     }
