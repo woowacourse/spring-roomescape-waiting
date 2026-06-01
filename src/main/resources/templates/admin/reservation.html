@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 관리 · 방탈출 어드민</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/admin}">방탈출 어드민</a>
+    <nav class="nav">
+        <a th:href="@{/}">사용자 페이지</a>
+        <a class="active" th:href="@{/admin/reservation}">예약</a>
+        <a th:href="@{/admin/theme}">테마</a>
+        <a th:href="@{/admin/time}">시간</a>
+    </nav>
+</header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>예약 관리</h1>
+            <p class="subtitle">확정된 예약 현황을 확인하고 관리합니다. 대기 현황은 사용자 이름 조회에서 확인할 수 있습니다.</p>
+        </div>
+        <button id="refresh-button" class="btn btn-ghost" type="button">새로고침</button>
+    </div>
+
+    <section class="card">
+        <table class="data">
+            <thead>
+            <tr>
+                <th style="width: 60px;">#</th>
+                <th>예약자</th>
+                <th>테마</th>
+                <th>날짜</th>
+                <th>시간</th>
+                <th class="actions">관리</th>
+            </tr>
+            </thead>
+            <tbody id="admin-reservation-table-body"></tbody>
+        </table>
+    </section>
+</main>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/admin-reservation.js}"></script>
+</body>
+</html>
