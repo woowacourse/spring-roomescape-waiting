@@ -2,48 +2,30 @@ package roomescape.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.exception.DomainConflictException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.WaitingResult;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ResourceNotFoundException;
+import roomescape.service.fake.FakeReservationRepository;
+import roomescape.service.fake.FakeReservationTimeRepository;
+import roomescape.service.fake.FakeThemeRepository;
+import roomescape.service.fake.FakeWaitingRepository;
 
 import java.time.*;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
 
-    @Mock
-    private WaitingRepository waitingRepository;
-
-    @Mock
-    private ReservationRepository reservationRepository;
-
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Mock
-    private ThemeRepository themeRepository;
-
-    @InjectMocks
+    private FakeWaitingRepository waitingRepository;
+    private FakeReservationRepository reservationRepository;
+    private FakeReservationTimeRepository reservationTimeRepository;
+    private FakeThemeRepository themeRepository;
     private WaitingService waitingService;
 
     private ReservationTime time;
@@ -53,111 +35,103 @@ class WaitingServiceTest {
     @BeforeEach
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
-        waitingService = new WaitingService(
-                reservationTimeRepository, themeRepository, waitingRepository, reservationRepository, fixedClock
-        );
+        waitingRepository = new FakeWaitingRepository();
+        reservationRepository = new FakeReservationRepository();
+        reservationTimeRepository = new FakeReservationTimeRepository();
+        themeRepository = new FakeThemeRepository();
+
         time = new ReservationTime(1L, LocalTime.of(10, 0));
         theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
+        reservationTimeRepository.add(time);
+        themeRepository.add(theme);
+
+        waitingService = new WaitingService(
+                reservationTimeRepository, themeRepository, waitingRepository, reservationRepository, fixedClock);
     }
 
     @Test
     void 예약_대기를_생성하고_대기_순번을_반환한다() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any())).thenReturn(Optional.empty());
-        when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.empty());
-        Waiting saved = new Waiting(1L, "레서", futureDate, time, theme);
-        when(waitingRepository.save(any())).thenReturn(saved);
-        when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(1L, theme, futureDate, time))
-                .thenReturn(2L);
+        reservationRepository.save(new Reservation(null, "예약자", futureDate, time, theme));
+        waitingRepository.save(new Waiting(null, "선행자", futureDate, time, theme));
 
         WaitingResult result = waitingService.createWaiting("레서", futureDate, 1L, 1L);
 
-        assertThat(result.waiting().getId()).isEqualTo(1L);
         assertThat(result.waiting().getName()).isEqualTo("레서");
-        assertThat(result.order()).isEqualTo(3L);
-        verify(waitingRepository).save(any());
+        assertThat(result.order()).isEqualTo(2L);
+        assertThat(waitingRepository.findAll())
+                .extracting(Waiting::getName)
+                .containsExactly("선행자", "레서");
     }
 
     @Test
     void 존재하지_않는_시간_id로_예약_대기를_생성하면_예외가_발생한다() {
-        when(reservationTimeRepository.findById(999L)).thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 999L, 1L))
                 .isInstanceOf(ResourceNotFoundException.class);
-        verify(waitingRepository, never()).save(any());
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 존재하지_않는_테마_id로_예약_대기를_생성하면_예외가_발생한다() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-        when(themeRepository.findById(999L)).thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 999L))
                 .isInstanceOf(ResourceNotFoundException.class);
-        verify(waitingRepository, never()).save(any());
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 이미_지난_날짜로_예약_대기를_생성하면_예외가_발생한다() {
         LocalDate pastDate = LocalDate.of(2026, 4, 1);
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", pastDate, 1L, 1L))
                 .isInstanceOf(DomainConflictException.class);
-        verify(waitingRepository, never()).save(any());
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 동일한_일정에_이미_대기_중이면_예외가_발생한다() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any()))
-                .thenReturn(Optional.of(new Waiting(1L, "레서", futureDate, time, theme)));
+        waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);
-        verify(waitingRepository, never()).save(any());
+        assertThat(waitingRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void 예약이_존재하지_않는_일정에_예약_대기를_생성하면_예외가_발생한다() {
+        assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
+                .isInstanceOf(BusinessConflictException.class);
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 동일한_일정에_본인의_예약이_이미_있으면_예외가_발생한다() {
-        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any())).thenReturn(Optional.empty());
-        when(reservationRepository.findBySchedule(futureDate, 1L, 1L))
-                .thenReturn(Optional.of(new Reservation(1L, "레서", futureDate, time, theme)));
+        reservationRepository.save(new Reservation(null, "레서", futureDate, time, theme));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);
-        verify(waitingRepository, never()).save(any());
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @Test
     void 존재하지_않는_예약_대기_id인_경우_예외가_발생한다() {
-        when(waitingRepository.findById(999L)).thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> waitingService.deleteWaiting(999L, "레서"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void 예약_대기의_소유자가_아닌_경우_예외가_발생한다() {
-        when(waitingRepository.findById(anyLong())).thenReturn(Optional.of(new Waiting(
-                1L, "레서", futureDate, time, theme)));
+    void 예약_대기의_소유자가_아닌_경우_예외가_발생하고_삭제되지_않는다() {
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
 
-        assertThatThrownBy(() -> waitingService.deleteWaiting(1L, "밍구"))
+        assertThatThrownBy(() -> waitingService.deleteWaiting(saved.getId(), "밍구"))
                 .isInstanceOf(DomainConflictException.class);
+        assertThat(waitingRepository.findAll()).hasSize(1);
     }
 
     @Test
     void 예약_대기의_소유자인_경우_삭제한다() {
-        Waiting waiting = new Waiting(1L, "레서", futureDate, time, theme);
-        when(waitingRepository.findById(1L)).thenReturn(Optional.of(waiting));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
 
-        waitingService.deleteWaiting(1L, "레서");
+        waitingService.deleteWaiting(saved.getId(), "레서");
 
-        verify(waitingRepository).delete(waiting);
+        assertThat(waitingRepository.findAll()).isEmpty();
     }
 }

@@ -19,7 +19,8 @@ public enum ErrorCode {
     THEME_NOT_FOUND("존재하지 않는 테마입니다."),
 
     // Waiting
-    DUPLICATE_WAITING("이미 대기 중인 시간입니다");
+    DUPLICATE_WAITING("이미 대기 중인 시간입니다"),
+    WAITING_WITHOUT_RESERVATION("예약이 존재하지 않아 예약대기를 할 수 없습니다.");
 
     private final String message;
 

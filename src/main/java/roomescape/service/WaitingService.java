@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -47,7 +48,7 @@ public class WaitingService {
         Waiting waiting = Waiting.create(name, date, time, theme, LocalDateTime.now(clock));
 
         checkDuplicatedWaiting(waiting);
-        checkDuplicatedReservation(waiting);
+        checkWaitable(waiting);
 
         waiting = waitingRepository.save(waiting);
         Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThan(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime()) + 1;
@@ -72,15 +73,14 @@ public class WaitingService {
         }
     }
 
-    private void checkDuplicatedReservation(Waiting waiting) {
-        boolean duplicated = reservationRepository.findBySchedule(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId())
-                .filter(found -> waiting.isSameName(found.getName()))
-                .isPresent();
+    private void checkWaitable(Waiting waiting) {
+        Reservation reservation = reservationRepository.findBySchedule(
+                        waiting.getDate(),
+                        waiting.getTime().getId(),
+                        waiting.getTheme().getId())
+                .orElseThrow(() -> new BusinessConflictException(ErrorCode.WAITING_WITHOUT_RESERVATION));
 
-        if (duplicated) {
+        if (waiting.isSameName(reservation.getName())) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }

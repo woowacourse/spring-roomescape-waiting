@@ -45,6 +45,8 @@ class WaitingE2ETest {
     @DisplayName("POST /waitings - 예약대기를 생성하면 201과 대기 순번을 반환한다")
     void createWaiting() {
         String futureDate = LocalDate.now().plusDays(1).toString();
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "예약자", futureDate, 1L, 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
