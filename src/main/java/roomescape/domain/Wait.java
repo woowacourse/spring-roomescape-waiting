@@ -58,6 +58,10 @@ public class Wait {
         return theme;
     }
 
+    public boolean isWaitedBy(String name) {
+        return this.name.equals(name);
+    }
+
     public boolean isPast(LocalDateTime now) {
         if (reservationDate.isBefore(now.toLocalDate())) {
             return true;
