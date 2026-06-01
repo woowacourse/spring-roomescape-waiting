@@ -3,7 +3,6 @@ package roomescape.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +10,9 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
+import roomescape.dto.ReservationTimeResult;
+import roomescape.dto.ThemeResult;
 import roomescape.dto.WaitingListResult;
 
 import java.time.LocalDate;
@@ -27,21 +26,64 @@ class WaitingListControllerTest {
     private static final LocalDate TOMORROW = TODAY.plusDays(1);
     private static final String STRING_TOMORROW = TOMORROW.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    private long timeId;
+    private long themeId;
+
+    @BeforeEach
+    void setUp() {
+        Map<String, Object> timeParams = new HashMap<>();
+        timeParams.put("startAt", "10:00");
+        timeParams.put("endAt", "10:30");
+        ReservationTimeResult time = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(timeParams)
+                .when().post("/times")
+                .then().statusCode(201)
+                .extract().jsonPath().getObject(".", ReservationTimeResult.class);
+        timeId = time.id();
+
+        Map<String, Object> themeParams = new HashMap<>();
+        themeParams.put("name", "링");
+        themeParams.put("description", "공포 테마");
+        themeParams.put("thumbnailUrl", "http:~");
+        ThemeResult theme = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(themeParams)
+                .when().post("/themes")
+                .then().statusCode(201)
+                .extract().jsonPath().getObject(".", ThemeResult.class);
+        themeId = theme.id();
+    }
 
     @Test
     void 예약_대기_추가() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
-        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "브라운");
+        reservationParams.put("date", STRING_TOMORROW);
+        reservationParams.put("timeId", timeId);
+        reservationParams.put("themeId", themeId);
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().statusCode(201);
+
+        Map<String, Object> waitingParams = new HashMap<>();
+        waitingParams.put("name", "류시");
+        waitingParams.put("date", STRING_TOMORROW);
+        waitingParams.put("timeId", timeId);
+        waitingParams.put("themeId", themeId);
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(waitingParams)
+                .when().post("/waiting-list")
+                .then().statusCode(201);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "검프");
         params.put("date", STRING_TOMORROW);
-        params.put("timeId", 1);
-        params.put("themeId", 1);
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
 
         WaitingListResult response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -51,50 +93,146 @@ class WaitingListControllerTest {
                 .statusCode(201).extract()
                 .jsonPath().getObject(".", WaitingListResult.class);
 
-        assertThat(response.id()).isEqualTo(2);
         assertThat(response.waitingOrder()).isEqualTo(2);
         assertThat(response.name()).isEqualTo("검프");
         assertThat(response.date()).isEqualTo(TOMORROW);
-        assertThat(response.timeId()).isEqualTo(1);
-        assertThat(response.themeId()).isEqualTo(1);
-
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
-        assertThat(count).isEqualTo(2);
+        assertThat(response.timeId()).isEqualTo(timeId);
+        assertThat(response.themeId()).isEqualTo(themeId);
     }
 
     @Test
     void 예약_대기_삭제() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "검프", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "브라운");
+        reservationParams.put("date", STRING_TOMORROW);
+        reservationParams.put("timeId", timeId);
+        reservationParams.put("themeId", themeId);
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().statusCode(201);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "검프");
+        Map<String, Object> waitingParams = new HashMap<>();
+        waitingParams.put("name", "검프");
+        waitingParams.put("date", STRING_TOMORROW);
+        waitingParams.put("timeId", timeId);
+        waitingParams.put("themeId", themeId);
+        WaitingListResult created = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(waitingParams)
+                .when().post("/waiting-list")
+                .then().statusCode(201)
+                .extract().jsonPath().getObject(".", WaitingListResult.class);
+
+        Map<String, Object> deleteParams = new HashMap<>();
+        deleteParams.put("name", "검프");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
-                .when().delete("/waiting-list/1")
+                .body(deleteParams)
+                .when().delete("/waiting-list/" + created.id())
                 .then().log().all()
                 .statusCode(204);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
-        assertThat(count).isZero();
+        List<WaitingListResult> remaining = RestAssured.given()
+                .when().get("/waiting-list?name=검프")
+                .then().statusCode(200)
+                .extract().jsonPath().getList(".", WaitingListResult.class);
+        assertThat(remaining).isEmpty();
     }
 
     @Nested
     class 예약_대기_조회 {
 
+        private long timeId2;
+        private long themeId2;
+        private long geumpWaitingId;
+        private long ryusiWaiting1Id;
+        private long ryusiWaiting2Id;
+
         @BeforeEach
         void setUp() {
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "11:00", "11:30");
-            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "오즈의마법사", "판타지 테마", "http:~");
-            jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
-            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "검프", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
-            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
-            jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "2", "2", LocalDateTime.now().minusDays(1));
+            Map<String, Object> timeParams2 = new HashMap<>();
+            timeParams2.put("startAt", "11:00");
+            timeParams2.put("endAt", "11:30");
+            ReservationTimeResult time2 = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(timeParams2)
+                    .when().post("/times")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", ReservationTimeResult.class);
+            timeId2 = time2.id();
+
+            Map<String, Object> themeParams2 = new HashMap<>();
+            themeParams2.put("name", "오즈의마법사");
+            themeParams2.put("description", "판타지 테마");
+            themeParams2.put("thumbnailUrl", "http:~");
+            ThemeResult theme2 = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(themeParams2)
+                    .when().post("/themes")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", ThemeResult.class);
+            themeId2 = theme2.id();
+
+            Map<String, Object> reservationParams = new HashMap<>();
+            reservationParams.put("name", "브라운");
+            reservationParams.put("date", STRING_TOMORROW);
+            reservationParams.put("timeId", timeId);
+            reservationParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
+
+            Map<String, Object> waiting1 = new HashMap<>();
+            waiting1.put("name", "검프");
+            waiting1.put("date", STRING_TOMORROW);
+            waiting1.put("timeId", timeId);
+            waiting1.put("themeId", themeId);
+            geumpWaitingId = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waiting1)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", WaitingListResult.class).id();
+
+            Map<String, Object> waiting2 = new HashMap<>();
+            waiting2.put("name", "류시");
+            waiting2.put("date", STRING_TOMORROW);
+            waiting2.put("timeId", timeId);
+            waiting2.put("themeId", themeId);
+            ryusiWaiting1Id = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waiting2)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", WaitingListResult.class).id();
+
+            Map<String, Object> reservationParams2 = new HashMap<>();
+            reservationParams2.put("name", "브라운");
+            reservationParams2.put("date", STRING_TOMORROW);
+            reservationParams2.put("timeId", timeId2);
+            reservationParams2.put("themeId", themeId2);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams2)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
+
+            Map<String, Object> waiting3 = new HashMap<>();
+            waiting3.put("name", "류시");
+            waiting3.put("date", STRING_TOMORROW);
+            waiting3.put("timeId", timeId2);
+            waiting3.put("themeId", themeId2);
+            ryusiWaiting2Id = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waiting3)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", WaitingListResult.class).id();
         }
 
         @Test
@@ -108,12 +246,12 @@ class WaitingListControllerTest {
             assertThat(responses).hasSize(1);
 
             WaitingListResult response = responses.getFirst();
-            assertThat(response.id()).isEqualTo(1);
+            assertThat(response.id()).isEqualTo(geumpWaitingId);
             assertThat(response.waitingOrder()).isEqualTo(1);
             assertThat(response.name()).isEqualTo("검프");
             assertThat(response.date()).isEqualTo(TOMORROW);
-            assertThat(response.timeId()).isEqualTo(1);
-            assertThat(response.themeId()).isEqualTo(1);
+            assertThat(response.timeId()).isEqualTo(timeId);
+            assertThat(response.themeId()).isEqualTo(themeId);
         }
 
         @Test
@@ -127,16 +265,16 @@ class WaitingListControllerTest {
             assertThat(responses).hasSize(2);
 
             WaitingListResult first = responses.get(0);
-            assertThat(first.id()).isEqualTo(2);
+            assertThat(first.id()).isEqualTo(ryusiWaiting1Id);
             assertThat(first.waitingOrder()).isEqualTo(2);
-            assertThat(first.timeId()).isEqualTo(1);
-            assertThat(first.themeId()).isEqualTo(1);
+            assertThat(first.timeId()).isEqualTo(timeId);
+            assertThat(first.themeId()).isEqualTo(themeId);
 
             WaitingListResult second = responses.get(1);
-            assertThat(second.id()).isEqualTo(3);
+            assertThat(second.id()).isEqualTo(ryusiWaiting2Id);
             assertThat(second.waitingOrder()).isEqualTo(1);
-            assertThat(second.timeId()).isEqualTo(2);
-            assertThat(second.themeId()).isEqualTo(2);
+            assertThat(second.timeId()).isEqualTo(timeId2);
+            assertThat(second.themeId()).isEqualTo(themeId2);
         }
 
         @Test
