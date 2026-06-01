@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body { background: #f8f9fa; }
+    .management-header { border-bottom: 1px solid #dee2e6; }
+    .section-title { font-size: 1.5rem; font-weight: 600; }
+    .table img { width: 72px; height: 48px; object-fit: cover; border-radius: 5px; }
+    .form-error-summary {
+      display: none;
+      border: 1px solid #f1aeb5;
+      background: #fff5f6;
+      color: #842029;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 8px;
+      box-shadow: 0 8px 20px rgba(132, 32, 41, 0.06);
+    }
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      color: #b42318;
+      font-size: 0.875rem;
+      line-height: 1.35;
+    }
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.08);
+    }
+    .error-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(33, 37, 41, 0.18);
+      z-index: 1040;
+    }
+    .error-modal {
+      display: none;
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      width: min(420px, calc(100vw - 32px));
+      background: #fff;
+      border: 1px solid #f1aeb5;
+      border-radius: 8px;
+      box-shadow: 0 16px 44px rgba(33, 37, 41, 0.16);
+      z-index: 1050;
+      overflow: hidden;
+    }
+    .error-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid #f8d7da;
+      background: #fff5f6;
+      color: #842029;
+      font-weight: 700;
+    }
+    .error-modal-body {
+      padding: 14px 16px 16px;
+      color: #495057;
+    }
+    .error-detail-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: #842029;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">Roomescape</a>
+    <div class="navbar-nav">
+      <a class="nav-link" href="/">테마예약</a>
+      <a class="nav-link active" href="/admin">관리자패널</a>
+    </div>
+  </div>
+</nav>
+
+<header class="management-header bg-white py-4">
+  <div class="container d-flex justify-content-between align-items-center gap-3">
+    <div>
+      <h1 class="h2 mb-1">관리자 페이지</h1>
+      <p class="text-muted mb-0">예약, 테마, 예약 시간을 관리합니다.</p>
+    </div>
+    <button type="button" class="btn btn-outline-dark" onclick="location.href='/'">뒤로가기</button>
+  </div>
+</header>
+
+<div id="errorModalBackdrop" class="error-modal-backdrop" onclick="hideErrorModal()"></div>
+<div id="errorModal" class="error-modal" role="alertdialog" aria-live="assertive" aria-labelledby="errorModalTitle">
+  <div class="error-modal-header">
+    <span id="errorModalTitle">요청을 처리하지 못했습니다</span>
+    <button type="button" class="btn-close" aria-label="닫기" onclick="hideErrorModal()"></button>
+  </div>
+  <div class="error-modal-body">
+    <div id="errorModalMessage"></div>
+    <ul id="errorModalDetails" class="error-detail-list"></ul>
+  </div>
+</div>
+
+<main class="container my-5">
+  <section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="section-title mb-0">전체 예약 관리</h2>
+      <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadReservations()">새로고침</button>
+    </div>
+    <form id="reservationForm" class="row g-2 bg-white border rounded p-3 mb-3">
+      <div class="col-12">
+        <h3 class="h5 mb-1">예약 추가</h3>
+        <p class="text-muted mb-2">관리자가 예약자 이름, 날짜, 테마, 시간을 선택해 새 예약을 등록합니다.</p>
+      </div>
+      <div class="col-md-3">
+        <label for="reservationName" class="form-label">예약자 이름</label>
+        <input type="text" id="reservationName" class="form-control" required>
+        <div id="reservationNameError" class="field-error"></div>
+      </div>
+      <div class="col-md-3">
+        <label for="reservationDate" class="form-label">날짜</label>
+        <input type="date" id="reservationDate" class="form-control" required>
+        <div id="reservationDateError" class="field-error"></div>
+      </div>
+      <div class="col-md-3">
+        <label for="reservationThemeId" class="form-label">테마</label>
+        <select id="reservationThemeId" class="form-select" required>
+          <option value="">테마를 선택하세요</option>
+        </select>
+        <div id="reservationThemeIdError" class="field-error"></div>
+      </div>
+      <div class="col-md-2">
+        <label for="reservationTimeId" class="form-label">시간</label>
+        <select id="reservationTimeId" class="form-select" required>
+          <option value="">날짜와 테마를 선택하세요</option>
+        </select>
+        <div id="reservationTimeIdError" class="field-error"></div>
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">추가</button>
+      </div>
+      <div class="col-12">
+        <div id="reservationFormError" class="form-error-summary" role="alert"></div>
+      </div>
+    </form>
+    <div class="row g-2 bg-white border rounded p-3 mb-3">
+      <div class="col-12">
+        <h3 class="h5 mb-1">예약 목록 필터 및 정렬</h3>
+        <p class="text-muted mb-2">등록된 예약 목록을 이름, 날짜 범위, 테마로 좁히고 원하는 기준으로 정렬합니다.</p>
+      </div>
+      <div class="col-md-3">
+        <label for="reservationKeywordFilter" class="form-label">예약자 검색</label>
+        <input type="search" id="reservationKeywordFilter" class="form-control" placeholder="이름 입력">
+      </div>
+      <div class="col-md-2">
+        <label for="reservationStartDateFilter" class="form-label">시작일</label>
+        <input type="date" id="reservationStartDateFilter" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="reservationEndDateFilter" class="form-label">종료일</label>
+        <input type="date" id="reservationEndDateFilter" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="reservationThemeFilter" class="form-label">테마</label>
+        <select id="reservationThemeFilter" class="form-select">
+          <option value="">전체 테마</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="reservationSortFilter" class="form-label">정렬</label>
+        <select id="reservationSortFilter" class="form-select">
+          <option value="idAsc">ID 빠른순</option>
+          <option value="dateAsc">날짜 빠른순</option>
+          <option value="dateDesc">날짜 늦은순</option>
+          <option value="themeAsc">테마명 가나다순</option>
+          <option value="nameAsc">예약자 가나다순</option>
+          <option value="idDesc">최근 등록순</option>
+        </select>
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-outline-secondary w-100" onclick="resetReservationFilters()">초기화</button>
+      </div>
+    </div>
+    <div class="table-responsive bg-white border rounded">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+        <tr>
+          <th>ID</th><th>이름</th><th>날짜</th><th>테마</th><th>시간</th><th>상태</th><th>삭제</th>
+        </tr>
+        </thead>
+        <tbody id="reservationList">
+        <tr><td colspan="7" class="text-center text-muted py-4">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <p id="reservationPageInfo" class="text-muted mb-0"></p>
+      <nav aria-label="예약 목록 페이지">
+        <ul id="reservationPagination" class="pagination pagination-sm mb-0"></ul>
+      </nav>
+    </div>
+  </section>
+
+  <section class="mb-5">
+    <h2 class="section-title mb-3">테마 관리</h2>
+    <form id="themeForm" class="row g-2 bg-white border rounded p-3 mb-3">
+      <div class="col-md-2">
+        <label for="themeName" class="form-label">이름</label>
+        <input type="text" id="themeName" class="form-control" required>
+        <div id="themeNameError" class="field-error"></div>
+      </div>
+      <div class="col-md-4">
+        <label for="themeDescription" class="form-label">설명</label>
+        <input type="text" id="themeDescription" class="form-control" required>
+        <div id="themeDescriptionError" class="field-error"></div>
+      </div>
+      <div class="col-md-4">
+        <label for="themeImageUrl" class="form-label">이미지 URL</label>
+        <input type="url" id="themeImageUrl" class="form-control" required>
+        <div id="themeImageUrlError" class="field-error"></div>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">테마 추가</button>
+      </div>
+      <div class="col-12">
+        <div id="themeFormError" class="form-error-summary" role="alert"></div>
+      </div>
+    </form>
+    <div class="table-responsive bg-white border rounded">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+        <tr>
+          <th>ID</th><th>이미지</th><th>이름</th><th>설명</th><th>삭제</th>
+        </tr>
+        </thead>
+        <tbody id="themeList">
+        <tr><td colspan="5" class="text-center text-muted py-4">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section-title mb-3">예약 시간 관리</h2>
+    <form id="timeForm" class="row g-2 bg-white border rounded p-3 mb-3">
+      <div class="col-md-10">
+        <label for="startAt" class="form-label">시작 시간</label>
+        <input type="time" id="startAt" class="form-control" required>
+        <div id="startAtError" class="field-error"></div>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">시간 추가</button>
+      </div>
+      <div class="col-12">
+        <div id="timeFormError" class="form-error-summary" role="alert"></div>
+      </div>
+    </form>
+    <div class="table-responsive bg-white border rounded">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+        <tr>
+          <th>ID</th><th>시작 시간</th><th>삭제</th>
+        </tr>
+        </thead>
+        <tbody id="timeList">
+        <tr><td colspan="3" class="text-center text-muted py-4">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const RESERVATIONS_PER_PAGE = 20;
+  let allReservations = [];
+  let reservations = [];
+  let currentReservationPage = 1;
+
+  function emptyRow(colspan, message) {
+    return `<tr><td colspan="${colspan}" class="text-center text-muted py-4">${escapeHtml(message)}</td></tr>`;
+  }
+
+  async function parseErrorResponse(response) {
+    try {
+      return await response.json();
+    } catch (error) {
+      return { message: '요청 처리에 실패했습니다.' };
+    }
+  }
+
+  function createRequestError(errorData) {
+    const error = new Error(errorData?.message || '요청 처리에 실패했습니다.');
+    error.data = errorData || {};
+    return error;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+  }
+
+  async function requestJson(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw createRequestError(await parseErrorResponse(response));
+    }
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+    return response.json();
+  }
+
+  async function requestOk(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw createRequestError(await parseErrorResponse(response));
+    }
+  }
+
+  function clearFormErrors(fieldIds, summaryId) {
+    document.getElementById(summaryId).style.display = 'none';
+    fieldIds.forEach(id => {
+      const field = document.getElementById(id);
+      const error = document.getElementById(`${id}Error`);
+      field?.classList.remove('is-invalid');
+      if (error) {
+        error.innerText = '';
+        error.style.display = 'none';
+      }
+    });
+  }
+
+  function showFormError(errorData, summaryId, fieldMap) {
+    const summary = document.getElementById(summaryId);
+    summary.innerText = errorData?.message || '요청을 처리하지 못했습니다.';
+    summary.style.display = 'block';
+
+    (errorData?.parameterErrors || []).forEach(({ parameter, message }) => {
+      const fieldId = fieldMap[parameter] || parameter;
+      const field = document.getElementById(fieldId);
+      const error = document.getElementById(`${fieldId}Error`);
+      field?.classList.add('is-invalid');
+      if (error) {
+        error.innerText = message;
+        error.style.display = 'block';
+      }
+    });
+  }
+
+  function showErrorModal(errorData, title = '요청을 처리하지 못했습니다') {
+    document.getElementById('errorModalTitle').innerText = title;
+    document.getElementById('errorModalMessage').innerText = errorData?.message || '잠시 후 다시 시도해주세요.';
+
+    const details = document.getElementById('errorModalDetails');
+    const parameterErrors = errorData?.parameterErrors || [];
+    details.innerHTML = parameterErrors
+        .map(({ parameter, message }) => `<li>${escapeHtml(parameter)}: ${escapeHtml(message)}</li>`)
+        .join('');
+    details.style.display = parameterErrors.length === 0 ? 'none' : 'block';
+
+    document.getElementById('errorModalBackdrop').style.display = 'block';
+    document.getElementById('errorModal').style.display = 'block';
+  }
+
+  function hideErrorModal() {
+    document.getElementById('errorModalBackdrop').style.display = 'none';
+    document.getElementById('errorModal').style.display = 'none';
+  }
+
+  async function loadReservations() {
+    try {
+      const data = await requestJson('/api/admin/reservations');
+      const list = document.getElementById('reservationList');
+
+      allReservations = data;
+
+      if (allReservations.length === 0) {
+        reservations = [];
+        list.innerHTML = emptyRow(7, '등록된 예약이 없습니다.');
+        renderReservationPagination();
+        return;
+      }
+
+      applyReservationFilters(false);
+    } catch (error) {
+      document.getElementById('reservationList').innerHTML =
+          emptyRow(7, error.data?.message || '예약 목록을 불러오지 못했습니다.');
+      document.getElementById('reservationPageInfo').innerText = '';
+      document.getElementById('reservationPagination').innerHTML = '';
+    }
+  }
+
+  function renderReservations() {
+    const list = document.getElementById('reservationList');
+
+    if (reservations.length === 0) {
+      list.innerHTML = emptyRow(7, '조건에 맞는 예약이 없습니다.');
+      renderReservationPagination();
+      return;
+    }
+
+    const startIndex = (currentReservationPage - 1) * RESERVATIONS_PER_PAGE;
+    const pageReservations = reservations.slice(startIndex, startIndex + RESERVATIONS_PER_PAGE);
+
+    list.innerHTML = pageReservations.map(res => `
+        <tr>
+            <td>${res.id}</td>
+            <td>${escapeHtml(res.name)}</td>
+            <td>${escapeHtml(res.date)}</td>
+            <td>${escapeHtml(res.theme.name)}</td>
+            <td>${escapeHtml(res.time.startAt)}</td>
+            <td>${renderReservationStatusBadge(res)}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="deleteReservation(${res.id})">삭제</button></td>
+        </tr>
+    `).join('');
+
+    renderReservationPagination();
+  }
+
+  function renderReservationPagination() {
+    const pageInfo = document.getElementById('reservationPageInfo');
+    const pagination = document.getElementById('reservationPagination');
+    const totalPages = Math.ceil(reservations.length / RESERVATIONS_PER_PAGE);
+
+    if (reservations.length === 0) {
+      pageInfo.innerText = allReservations.length === 0 ? '' : `전체 ${allReservations.length}건 중 0건 표시`;
+      pagination.innerHTML = '';
+      return;
+    }
+
+    const start = (currentReservationPage - 1) * RESERVATIONS_PER_PAGE + 1;
+    const end = Math.min(currentReservationPage * RESERVATIONS_PER_PAGE, reservations.length);
+    pageInfo.innerText = `전체 ${allReservations.length}건 중 ${reservations.length}건 표시, ${start}-${end}건`;
+
+    let pageItems = `
+        <li class="page-item ${currentReservationPage === 1 ? 'disabled' : ''}">
+            <button class="page-link" type="button" onclick="changeReservationPage(${currentReservationPage - 1})">이전</button>
+        </li>
+    `;
+
+    for (let page = 1; page <= totalPages; page++) {
+      pageItems += `
+          <li class="page-item ${page === currentReservationPage ? 'active' : ''}">
+              <button class="page-link" type="button" onclick="changeReservationPage(${page})">${page}</button>
+          </li>
+      `;
+    }
+
+    pageItems += `
+        <li class="page-item ${currentReservationPage === totalPages ? 'disabled' : ''}">
+            <button class="page-link" type="button" onclick="changeReservationPage(${currentReservationPage + 1})">다음</button>
+        </li>
+    `;
+
+    pagination.innerHTML = pageItems;
+  }
+
+  function renderReservationStatusBadge(reservation) {
+    const { status, waitingNumber } = reservation;
+
+    if (status === 'CANCELED') {
+      return '<span class="badge bg-secondary">취소됨</span>';
+    }
+    if (status === 'WAITING') {
+      const suffix = waitingNumber != null ? ` (${waitingNumber}번째)` : '';
+      return `<span class="badge bg-info text-dark">대기 중${escapeHtml(suffix)}</span>`;
+    }
+    if (status === 'LOCKED') {
+      return '<span class="badge bg-secondary">지난 예약</span>';
+    }
+    if (status === 'EDIT_RECOMMENDED') {
+      return '<span class="badge bg-warning text-dark">수정 권장</span>';
+    }
+    return '<span class="badge bg-success">예약됨</span>';
+  }
+
+  function changeReservationPage(page) {
+    const totalPages = Math.ceil(reservations.length / RESERVATIONS_PER_PAGE);
+    if (page < 1 || page > totalPages || page === currentReservationPage) {
+      return;
+    }
+
+    currentReservationPage = page;
+    renderReservations();
+  }
+
+  function applyReservationFilters(resetPage = true) {
+    const keyword = document.getElementById('reservationKeywordFilter').value.trim().toLowerCase();
+    const startDate = document.getElementById('reservationStartDateFilter').value;
+    const endDate = document.getElementById('reservationEndDateFilter').value;
+    const themeId = document.getElementById('reservationThemeFilter').value;
+    const sortType = document.getElementById('reservationSortFilter').value;
+
+    reservations = allReservations.filter(res => {
+      const matchesKeyword = !keyword || res.name.toLowerCase().includes(keyword);
+      const matchesStartDate = !startDate || res.date >= startDate;
+      const matchesEndDate = !endDate || res.date <= endDate;
+      const matchesTheme = !themeId || String(res.theme.id) === themeId;
+
+      return matchesKeyword && matchesStartDate && matchesEndDate && matchesTheme;
+    }).sort((a, b) => compareReservations(a, b, sortType));
+
+    const totalPages = Math.max(1, Math.ceil(reservations.length / RESERVATIONS_PER_PAGE));
+    currentReservationPage = resetPage ? 1 : Math.min(currentReservationPage, totalPages);
+    renderReservations();
+  }
+
+  function compareReservations(a, b, sortType) {
+    if (sortType === 'dateDesc') {
+      return compareDateTime(b, a) || a.id - b.id;
+    }
+
+    if (sortType === 'themeAsc') {
+      return a.theme.name.localeCompare(b.theme.name) || compareDateTime(a, b) || a.id - b.id;
+    }
+
+    if (sortType === 'nameAsc') {
+      return a.name.localeCompare(b.name) || compareDateTime(a, b) || a.id - b.id;
+    }
+
+    if (sortType === 'idDesc') {
+      return b.id - a.id;
+    }
+
+    if (sortType === 'idAsc') {
+      return a.id - b.id;
+    }
+
+    return compareDateTime(a, b) || a.id - b.id;
+  }
+
+  function compareDateTime(a, b) {
+    const dateCompare = a.date.localeCompare(b.date);
+    if (dateCompare !== 0) {
+      return dateCompare;
+    }
+
+    return a.time.startAt.localeCompare(b.time.startAt);
+  }
+
+  function resetReservationFilters() {
+    document.getElementById('reservationKeywordFilter').value = '';
+    document.getElementById('reservationStartDateFilter').value = '';
+    document.getElementById('reservationEndDateFilter').value = '';
+    document.getElementById('reservationThemeFilter').value = '';
+    document.getElementById('reservationSortFilter').value = 'idAsc';
+    applyReservationFilters();
+  }
+
+  async function deleteReservation(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      await requestOk(`/api/admin/reservations/${id}`, { method: 'DELETE' });
+      await loadReservations();
+      await loadAvailableReservationTimes();
+    } catch (error) {
+      showErrorModal(error.data, '예약 삭제 실패');
+    }
+  }
+
+  async function loadThemes() {
+    try {
+      const themes = await requestJson('/api/themes');
+      const list = document.getElementById('themeList');
+      const reservationThemeSelect = document.getElementById('reservationThemeId');
+      const reservationThemeFilter = document.getElementById('reservationThemeFilter');
+
+      reservationThemeSelect.innerHTML = '<option value="">테마를 선택하세요</option>' +
+          themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
+      reservationThemeFilter.innerHTML = '<option value="">전체 테마</option>' +
+          themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
+
+      if (themes.length === 0) {
+        list.innerHTML = emptyRow(5, '등록된 테마가 없습니다.');
+        return;
+      }
+
+      list.innerHTML = themes.map(theme => `
+          <tr>
+              <td>${theme.id}</td>
+              <td><img src="${escapeHtml(theme.imageUrl)}" alt="${escapeHtml(theme.name)}"></td>
+              <td>${escapeHtml(theme.name)}</td>
+              <td>${escapeHtml(theme.description)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteTheme(${theme.id})">삭제</button></td>
+          </tr>
+      `).join('');
+    } catch (error) {
+      document.getElementById('themeList').innerHTML =
+          emptyRow(5, error.data?.message || '테마 목록을 불러오지 못했습니다.');
+    }
+  }
+
+  async function loadAvailableReservationTimes() {
+    const date = document.getElementById('reservationDate').value;
+    const themeId = document.getElementById('reservationThemeId').value;
+    const timeSelect = document.getElementById('reservationTimeId');
+
+    if (!date || !themeId) {
+      timeSelect.innerHTML = '<option value="">날짜와 테마를 선택하세요</option>';
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({ date, themeId });
+      const times = await requestJson(`/api/times?${params.toString()}`);
+      const availableTimes = times.filter(time => time.available);
+
+      if (availableTimes.length === 0) {
+        timeSelect.innerHTML = '<option value="">예약 가능한 시간이 없습니다</option>';
+        return;
+      }
+
+      timeSelect.innerHTML = '<option value="">시간을 선택하세요</option>' +
+          availableTimes.map(time => `<option value="${time.id}">${escapeHtml(time.startAt)}</option>`).join('');
+    } catch (error) {
+      timeSelect.innerHTML = '<option value="">시간을 불러오지 못했습니다</option>';
+      showFormError(error.data, 'reservationFormError', {
+        date: 'reservationDate',
+        themeId: 'reservationThemeId'
+      });
+    }
+  }
+
+  async function createReservation(event) {
+    event.preventDefault();
+    const fieldIds = ['reservationName', 'reservationDate', 'reservationThemeId', 'reservationTimeId'];
+    clearFormErrors(fieldIds, 'reservationFormError');
+
+    const body = {
+      name: document.getElementById('reservationName').value,
+      date: document.getElementById('reservationDate').value,
+      themeId: document.getElementById('reservationThemeId').value,
+      timeId: document.getElementById('reservationTimeId').value
+    };
+
+    try {
+      await requestJson('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      event.target.reset();
+      document.getElementById('reservationTimeId').innerHTML = '<option value="">날짜와 테마를 선택하세요</option>';
+      currentReservationPage = 1;
+      await loadReservations();
+    } catch (error) {
+      showFormError(error.data, 'reservationFormError', {
+        name: 'reservationName',
+        date: 'reservationDate',
+        themeId: 'reservationThemeId',
+        timeId: 'reservationTimeId'
+      });
+    }
+  }
+
+  async function createTheme(event) {
+    event.preventDefault();
+    const fieldIds = ['themeName', 'themeDescription', 'themeImageUrl'];
+    clearFormErrors(fieldIds, 'themeFormError');
+
+    const body = {
+      name: document.getElementById('themeName').value,
+      description: document.getElementById('themeDescription').value,
+      imageUrl: document.getElementById('themeImageUrl').value
+    };
+
+    try {
+      await requestJson('/api/admin/themes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      event.target.reset();
+      await loadThemes();
+    } catch (error) {
+      showFormError(error.data, 'themeFormError', {
+        name: 'themeName',
+        description: 'themeDescription',
+        imageUrl: 'themeImageUrl'
+      });
+    }
+  }
+
+  async function deleteTheme(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      await requestOk(`/api/admin/themes/${id}`, { method: 'DELETE' });
+      await loadThemes();
+    } catch (error) {
+      showErrorModal(error.data, '테마 삭제 실패');
+    }
+  }
+
+  async function loadTimes() {
+    try {
+      const times = await requestJson('/api/admin/times');
+      const list = document.getElementById('timeList');
+
+      if (times.length === 0) {
+        list.innerHTML = emptyRow(3, '등록된 시간이 없습니다.');
+        return;
+      }
+
+      list.innerHTML = times.map(time => `
+          <tr>
+              <td>${time.id}</td>
+              <td>${escapeHtml(time.startAt)}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteTime(${time.id})">삭제</button></td>
+          </tr>
+      `).join('');
+    } catch (error) {
+      document.getElementById('timeList').innerHTML =
+          emptyRow(3, error.data?.message || '시간 목록을 불러오지 못했습니다.');
+    }
+  }
+
+  async function createTime(event) {
+    event.preventDefault();
+    clearFormErrors(['startAt'], 'timeFormError');
+
+    try {
+      await requestJson('/api/admin/times', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startAt: document.getElementById('startAt').value })
+      });
+      event.target.reset();
+      await loadTimes();
+      await loadAvailableReservationTimes();
+    } catch (error) {
+      showFormError(error.data, 'timeFormError', { startAt: 'startAt' });
+    }
+  }
+
+  async function deleteTime(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      await requestOk(`/api/admin/times/${id}`, { method: 'DELETE' });
+      await loadTimes();
+      await loadAvailableReservationTimes();
+    } catch (error) {
+      showErrorModal(error.data, '시간 삭제 실패');
+    }
+  }
+
+  document.getElementById('reservationForm').addEventListener('submit', createReservation);
+  document.getElementById('reservationDate').addEventListener('change', loadAvailableReservationTimes);
+  document.getElementById('reservationThemeId').addEventListener('change', loadAvailableReservationTimes);
+  document.getElementById('reservationKeywordFilter').addEventListener('input', () => applyReservationFilters());
+  document.getElementById('reservationStartDateFilter').addEventListener('change', () => applyReservationFilters());
+  document.getElementById('reservationEndDateFilter').addEventListener('change', () => applyReservationFilters());
+  document.getElementById('reservationThemeFilter').addEventListener('change', () => applyReservationFilters());
+  document.getElementById('reservationSortFilter').addEventListener('change', () => applyReservationFilters());
+  document.getElementById('themeForm').addEventListener('submit', createTheme);
+  document.getElementById('timeForm').addEventListener('submit', createTime);
+
+  window.onload = () => {
+    loadReservations();
+    loadThemes();
+    loadTimes();
+  };
+</script>
+</body>
+</html>

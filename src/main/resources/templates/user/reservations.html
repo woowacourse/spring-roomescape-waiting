@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>예약 신청</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    .form-error-summary {
+      display: none;
+      border: 1px solid #f1aeb5;
+      background: #fff5f6;
+      color: #842029;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 20px rgba(132, 32, 41, 0.06);
+    }
+
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      color: #b42318;
+      font-size: 0.875rem;
+      line-height: 1.35;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.08);
+    }
+
+    .reservation-mode-notice {
+      display: none;
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
+      color: #495057;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .reservation-mode-notice.waiting {
+      border-color: #ffe8cc;
+      background: #fff9db;
+      color: #7c5c00;
+    }
+
+    .reservation-mode-notice.available {
+      border-color: #d3f9d8;
+      background: #ebfbee;
+      color: #2b8a3e;
+    }
+  </style>
+</head>
+<body class="container mt-5">
+<div style="max-width: 500px; margin: auto;">
+  <h3>방탈출 예약</h3>
+  <form id="resForm" class="mt-4">
+    <div id="reservationErrorSummary" class="form-error-summary" role="alert"></div>
+    <div class="mb-3">
+      <label>이름</label>
+      <input type="text" id="name" class="form-control" required>
+      <div id="nameError" class="field-error"></div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">선택한 테마</label>
+      <select id="themeSelect" class="form-select" disabled>
+        <option id="themeOption">테마 로딩 중...</option>
+      </select>
+      <input type="hidden" id="themeId">
+      <div id="themeIdError" class="field-error"></div>
+    </div>
+    <div class="mb-3">
+      <label>날짜</label>
+      <input type="date" id="date" class="form-control" onchange="loadTimes()" required>
+      <div id="dateError" class="field-error"></div>
+    </div>
+    <div class="mb-3">
+      <label>시간</label>
+      <select id="timeId" class="form-select" onchange="syncReservationModeFromSelectedTime()" required>
+        <option value="">날짜와 테마를 선택하세요</option>
+      </select>
+      <div id="timeIdError" class="field-error"></div>
+      <div id="reservationModeNotice" class="reservation-mode-notice" aria-live="polite"></div>
+    </div>
+    <button type="button" id="submitReservationButton" class="btn btn-primary w-100" onclick="submitReservation()">예약하기</button>
+  </form>
+</div>
+
+<script>
+  const RESERVATION_MODE = {
+    ACTIVE: 'active',
+    WAITING: 'waiting'
+  };
+  let reservationMode = RESERVATION_MODE.ACTIVE;
+
+  function getVal(id) {
+    const el = document.getElementById(id);
+    if (!el) {
+      console.error(`ID가 '${id}'인 요소를 찾을 수 없습니다.`);
+      return null;
+    }
+    return el.value;
+  }
+
+  function clearReservationErrors() {
+    document.getElementById('reservationErrorSummary').style.display = 'none';
+    ['name', 'date', 'timeId', 'themeId'].forEach(id => {
+      const field = document.getElementById(id);
+      const error = document.getElementById(`${id}Error`);
+      field?.classList.remove('is-invalid');
+      if (error) {
+        error.innerText = '';
+        error.style.display = 'none';
+      }
+    });
+  }
+
+  function showReservationError(errorData) {
+    clearReservationErrors();
+
+    const summary = document.getElementById('reservationErrorSummary');
+    summary.innerText = errorData?.message || '요청을 처리하지 못했습니다.';
+    summary.style.display = 'block';
+
+    const parameterErrors = errorData?.parameterErrors || [];
+    parameterErrors.forEach(({ parameter, message }) => {
+      const field = document.getElementById(parameter);
+      const error = document.getElementById(`${parameter}Error`);
+      field?.classList.add('is-invalid');
+      if (error) {
+        error.innerText = message;
+        error.style.display = 'block';
+      }
+    });
+  }
+
+  async function parseErrorResponse(response) {
+    try {
+      return await response.json();
+    } catch (error) {
+      return { message: '요청 처리에 실패했습니다.' };
+    }
+  }
+
+  function createRequestError(errorData) {
+    const error = new Error(errorData?.message || '요청 처리에 실패했습니다.');
+    error.data = errorData || {};
+    return error;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+  }
+
+  async function requestJson(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw createRequestError(await parseErrorResponse(response));
+    }
+    return response.json();
+  }
+
+  function setReservationMode(mode, message = '') {
+    reservationMode = mode;
+
+    const notice = document.getElementById('reservationModeNotice');
+    notice.innerText = message;
+    notice.style.display = message ? 'block' : 'none';
+    notice.classList.toggle('waiting', mode === RESERVATION_MODE.WAITING);
+    notice.classList.toggle('available', mode === RESERVATION_MODE.ACTIVE && Boolean(message));
+
+    const button = document.getElementById('submitReservationButton');
+    button.innerText = mode === RESERVATION_MODE.WAITING ? '대기 신청하기' : '예약하기';
+    button.classList.toggle('btn-primary', mode !== RESERVATION_MODE.WAITING);
+    button.classList.toggle('btn-dark', mode === RESERVATION_MODE.WAITING);
+  }
+
+  function renderTimeOptions(times, placeholder, suffix = '') {
+    return `<option value="">${placeholder}</option>` +
+        times.map(time => {
+          const availabilityLabel = time.available ? '예약 가능' : '대기 가능';
+          const label = suffix ? `${time.startAt} · ${suffix}` : `${time.startAt} · ${availabilityLabel}`;
+          return `<option value="${time.id}" data-available="${time.available}">${escapeHtml(label)}</option>`;
+        }).join('');
+  }
+
+  function syncReservationModeFromSelectedTime() {
+    const selectedOption = document.getElementById('timeId').selectedOptions[0];
+    if (!selectedOption?.value) {
+      setReservationMode(RESERVATION_MODE.ACTIVE);
+      return;
+    }
+
+    if (selectedOption.dataset.available === 'true') {
+      setReservationMode(RESERVATION_MODE.ACTIVE, '선택한 시간은 바로 예약할 수 있습니다.');
+      return;
+    }
+
+    setReservationMode(
+        RESERVATION_MODE.WAITING,
+        '선택한 시간은 이미 예약되어 있습니다. 같은 시간으로 대기 신청할 수 있습니다.'
+    );
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeIdFromUrl = urlParams.get('themeId');
+
+    if (!themeIdFromUrl) {
+      showReservationError({ message: '잘못된 접근입니다. 테마를 다시 선택해주세요.' });
+      setTimeout(() => location.href = '/', 1200);
+      return;
+    }
+
+    const hiddenInput = document.getElementById('themeId');
+    if (hiddenInput) {
+      hiddenInput.value = themeIdFromUrl;
+    }
+
+    try {
+      const themes = await requestJson(`/api/themes`);
+      const selectedTheme = themes.find(t => t.id == themeIdFromUrl);
+
+      if (selectedTheme) {
+        const themeOption = document.getElementById('themeOption');
+        if (themeOption) {
+          themeOption.innerText = selectedTheme.name;
+          themeOption.value = selectedTheme.id;
+        }
+      } else {
+        showReservationError({
+          message: '선택한 테마를 찾을 수 없습니다.',
+          parameterErrors: [{ parameter: 'themeId', message: '존재 하지 않는 테마입니다.' }]
+        });
+      }
+    } catch (error) {
+      console.error('테마 정보를 불러오는데 실패했습니다:', error);
+      showReservationError(error.data);
+    }
+  });
+
+  async function loadTimes() {
+    const date = getVal('date');
+    const themeId = getVal('themeId');
+    const timeSelect = document.getElementById('timeId');
+
+    if (!date || !themeId) {
+      setReservationMode(RESERVATION_MODE.ACTIVE);
+      timeSelect.innerHTML = '<option value="">날짜와 테마를 선택하세요</option>';
+      return;
+    }
+
+    try {
+      const times = await requestJson(`/api/times?date=${encodeURIComponent(date)}&themeId=${encodeURIComponent(themeId)}`);
+
+      if (!timeSelect) return;
+
+      if (times.length === 0) {
+        setReservationMode(RESERVATION_MODE.ACTIVE);
+        timeSelect.innerHTML = '<option value="">등록된 시간이 없습니다</option>';
+        return;
+      }
+
+      setReservationMode(RESERVATION_MODE.ACTIVE, '시간을 선택하면 예약 또는 대기 신청으로 자동 전환됩니다.');
+      timeSelect.innerHTML = renderTimeOptions(times, '시간을 선택하세요');
+    } catch (error) {
+      console.error("시간 로드 중 오류:", error);
+      setReservationMode(RESERVATION_MODE.ACTIVE);
+      document.getElementById('timeId').innerHTML = '<option value="">시간을 불러오지 못했습니다</option>';
+      showReservationError(error.data);
+    }
+  }
+
+  async function submitReservation() {
+    clearReservationErrors();
+
+    const name = getVal('name')?.trim();
+    const date = getVal('date');
+    const timeId = getVal('timeId');
+    const themeId = getVal('themeId');
+    const selectedTimeOption = document.getElementById('timeId').selectedOptions[0];
+
+    if (!name || !date || !timeId || !themeId) {
+      showReservationError({ message: '모든 항목을 입력해주세요.' });
+      return;
+    }
+
+    const body = { name, date, timeId, themeId };
+    const button = document.getElementById('submitReservationButton');
+    const previousButtonText = button.innerText;
+    const endpoint = selectedTimeOption?.dataset.available === 'false'
+        ? '/api/reservations/waitings'
+        : '/api/reservations';
+
+    try {
+      button.disabled = true;
+      button.innerText = '처리 중...';
+
+      await requestJson(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      location.href = `/?reservationName=${encodeURIComponent(name)}`;
+    } catch (error) {
+      console.error("전송 중 오류:", error);
+      showReservationError(error.data || { message: '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' });
+    } finally {
+      button.disabled = false;
+      button.innerText = previousButtonText;
+    }
+  }
+</script>
+</body>
+</html>
