@@ -74,12 +74,6 @@ public class ReservationService {
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command);
 
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(reservation.getDate(),
-            reservation.getTime(),
-            reservation.getTheme())) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
-
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
         } catch (DuplicateKeyException e) {
@@ -126,11 +120,6 @@ public class ReservationService {
         }
 
         Reservation updateReservation = createUpdateReservation(existingReservation, command);
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-            updateReservation.getDate(), updateReservation.getTime(), updateReservation.getTheme(), id)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
-
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.update(updateReservation));
         } catch (DuplicateKeyException e) {
@@ -220,10 +209,6 @@ public class ReservationService {
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command);
         Reservation waitingReservation = reservation.toWaiting();
-
-        if (reservationRepository.existsReservationAndStatus(waitingReservation, ReservationStatus.WAITING)) {
-            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
-        }
 
         if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);

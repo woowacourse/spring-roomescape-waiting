@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
@@ -201,8 +202,6 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
-                .thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
             // when
@@ -262,8 +261,7 @@ class ReservationServiceTest {
                 new ReserverName("예약자"), date, 1L, 1L);
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
-                .thenReturn(true);
+            when(reservationRepository.save(any(Reservation.class))).thenThrow(new DuplicateKeyException("duplicate"));
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveReservation(command))
@@ -311,15 +309,33 @@ class ReservationServiceTest {
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(
                 any(Reservation.class), any(ReservationStatus.class)))
-                .thenAnswer(invocation -> {
-                    ReservationStatus status = invocation.getArgument(1);
-                    return status == ReservationStatus.WAITING;
-                });
+                .thenReturn(false);
+            when(reservationRepository.save(any(Reservation.class))).thenThrow(new DuplicateKeyException("duplicate"));
 
             // when & then
             assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 대기 중인 이름, 날짜, 시간, 테마입니다.");
+        }
+
+        @Test
+        void 같은_이름_날짜_시간_테마로_이미_활성_예약이_있으면_예외가_발생한다() {
+            // given
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            LocalDate date = LocalDate.of(2026, 5, 20);
+            ReservationCreateCommand command = new ReservationCreateCommand(
+                new ReserverName("예약자"), date, 1L, 1L);
+            when(timeRepository.findTimeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(theme));
+            when(reservationRepository.existsReservationAndStatus(
+                any(Reservation.class), any(ReservationStatus.class)))
+                .thenReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.saveWaitingReservation(command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
         }
 
         @Test
@@ -362,8 +378,6 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTime));
             when(themeRepository.findThemeByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(newTheme));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                newDate, newTime, newTheme, 1L)).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -389,8 +403,6 @@ class ReservationServiceTest {
                 1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                futureDate, existingTime, existingTheme, 1L)).thenReturn(false);
             when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
 
             // when
@@ -510,8 +522,8 @@ class ReservationServiceTest {
                 new ReserverName("예약자"), futureDate, null, null);
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
-                futureDate, time, theme, 1L)).thenReturn(true);
+            when(reservationRepository.update(any(Reservation.class))).thenThrow(
+                new DuplicateKeyException("duplicate"));
 
             // when & then
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
