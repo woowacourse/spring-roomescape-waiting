@@ -1,16 +1,20 @@
 package roomescape.domain.reservation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import common.exception.RoomEscapeException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class RankTest {
-    @ValueSource(ints = {1, 2, 3})
     @ParameterizedTest
-    void 순번_값을_반환한다(int value) {
-        Rank rank = new Rank(value);
+    @ValueSource(ints = {1, 999})
+    void 정상적인_입력은_예외가_발생하지_않는다(int value) {
+        Assertions.assertThatNoException().isThrownBy(() -> new Rank(value));
+    }
 
-        assertThat(rank.getValue()).isEqualTo(value);
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void 잘못된_입력은_예외가_발생한다(int value) {
+        Assertions.assertThatException().isThrownBy(() -> new Rank(value)).isInstanceOf(RoomEscapeException.class);
     }
 }
