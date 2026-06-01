@@ -3,7 +3,6 @@ package roomescape.service.reservationwaiting;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
@@ -45,14 +44,7 @@ public class ReservationWaitingService {
 
         validateWaitableName(reservation, nonIdReservationWaiting.getName());
 
-        try {
-            return reservationWaitingRepository.save(nonIdReservationWaiting);
-        } catch (DataIntegrityViolationException exception) {
-            throw new ConflictException(
-                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
-                    "이미 같은 예약에 대기 중입니다."
-            );
-        }
+        return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 
     private void validateWaitableName(final Reservation reservation, final String waitingName) {
