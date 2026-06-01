@@ -13,18 +13,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeFactory;
 
 @JdbcTest
-@Import({JdbcThemeRepository.class, ThemeFactory.class})
+@Import({JdbcThemeRepository.class})
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private ThemeFactory themeFactory;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -47,14 +43,10 @@ class ThemeRepositoryTest {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('u1', ?, 3, 3)", LocalDate.now().minusDays(1));
     }
 
-    private Theme 테마() {
-        return themeFactory.create("테마5", "설명", "https://image.com");
-    }
-
     @Test
     @DisplayName("테마 저장 성공")
     void 테마_저장_성공() {
-        Theme saved = themeRepository.save(테마());
+        Theme saved = themeRepository.save(Theme.of("테마5", "설명", "https://image.com"));
         assertThat(saved.getId()).isNotNull();
     }
 
@@ -79,7 +71,7 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("테마 삭제 성공")
     void 테마_삭제_성공() {
-        Theme saved = themeRepository.save(테마());
+        Theme saved = themeRepository.save(Theme.of("테마5", "설명", "https://image.com"));
         themeRepository.deleteById(saved.getId());
         assertThat(themeRepository.findAll()).hasSize(4);
     }

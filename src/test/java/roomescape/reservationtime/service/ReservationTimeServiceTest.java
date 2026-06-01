@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.reservationtime.domain.ReservationTimeFactory;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,8 +20,6 @@ class ReservationTimeServiceTest {
 
     @Mock
     private ReservationTimeRepository timeRepository;
-    @Mock
-    private ReservationTimeFactory reservationTimeFactory;
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;

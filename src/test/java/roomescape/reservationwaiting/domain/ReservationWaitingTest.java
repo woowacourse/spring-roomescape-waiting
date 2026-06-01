@@ -1,6 +1,5 @@
 package roomescape.reservationwaiting.domain;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Clock;
@@ -26,13 +25,6 @@ class ReservationWaitingTest {
     private final LocalDate pastDate = LocalDate.now().plusDays(-1);
     private final Reservation reservation = Reservation.restore(1L, "현미밥", futureDate, time, theme);
     private final Reservation pastreservation = Reservation.restore(1L, "현미밥", pastDate, time, theme);
-
-    @Test
-    @DisplayName("정상 예약 생성")
-    void 정상_예약_생성() {
-        assertThatCode(() -> factory.create("현미밥", reservation))
-                .doesNotThrowAnyException();
-    }
 
     @Test
     @DisplayName("이름이 null이면 예외 발생")

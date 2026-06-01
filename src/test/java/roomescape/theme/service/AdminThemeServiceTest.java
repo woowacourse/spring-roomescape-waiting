@@ -12,14 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.theme.domain.ThemeFactory;
 import roomescape.theme.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AdminThemeServiceTest {
 
     @Mock private ThemeRepository themeRepository;
-    @Mock private ThemeFactory themeFactory;
 
     @InjectMocks
     private AdminThemeService adminThemeService;

@@ -14,18 +14,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.ReservationTimeFactory;
 
 @JdbcTest
-@Import({JdbcReservationTimeRepository.class, ReservationTimeFactory.class})
+@Import({JdbcReservationTimeRepository.class})
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository timeRepository;
-
-    @Autowired
-    private ReservationTimeFactory reservationTimeFactory;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -43,7 +39,7 @@ class ReservationTimeRepositoryTest {
     @Test
     @DisplayName("시간 저장 성공")
     void 시간_저장_성공() {
-        ReservationTime saved = timeRepository.save(reservationTimeFactory.create(LocalTime.of(20, 0), LocalTime.of(21, 0)));
+        ReservationTime saved = timeRepository.save(ReservationTime.of(LocalTime.of(20, 0), LocalTime.of(21, 0)));
         assertThat(saved.getId()).isNotNull();
     }
 
@@ -69,7 +65,7 @@ class ReservationTimeRepositoryTest {
     @Test
     @DisplayName("시간 삭제 성공")
     void 시간_삭제_성공() {
-        ReservationTime saved = timeRepository.save(reservationTimeFactory.create(LocalTime.of(20, 0), LocalTime.of(21, 0)));
+        ReservationTime saved = timeRepository.save(ReservationTime.of(LocalTime.of(20, 0), LocalTime.of(21, 0)));
         timeRepository.deleteById(saved.getId());
         assertThat(timeRepository.findAll()).hasSize(3);
     }
