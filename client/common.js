@@ -21,7 +21,8 @@ const confirmMessageEl = document.getElementById("confirm-message");
 const confirmOkEl = document.getElementById("confirm-ok");
 const confirmCancelEl = document.getElementById("confirm-cancel");
 const myReservationOwnerEl = document.getElementById("my-reservation-owner");
-const myReservationCardsEl = document.getElementById("my-reservation-cards");
+const myUpcomingReservationCardsEl = document.getElementById("my-upcoming-reservation-cards");
+const myPastReservationCardsEl = document.getElementById("my-past-reservation-cards");
 const myReservationSectionEl = document.getElementById("my-reservation-section");
 const editReservationModalEl = document.getElementById("edit-reservation-modal");
 const editReservationFormEl = document.getElementById("edit-reservation-form");
@@ -31,7 +32,6 @@ const editReservationThemeEl = document.getElementById("edit-reservation-theme")
 const editAvailableTimesEl = document.getElementById("edit-available-times");
 const editReservationCancelEl = document.getElementById("edit-reservation-cancel");
 const AUTH_TOKEN_KEY = "roomescapeAccessToken";
-const DEMO_DATE = "2026-05-05";
 let selectedThemeId = null;
 let selectedTimeId = null;
 let selectedTimeLabel = null;
@@ -78,7 +78,8 @@ function setCommonAuthState(authenticated) {
     selectedThemeLabelEl.textContent = "테마: 미선택";
     selectedTimeLabelEl.textContent = "시간: 미선택";
     myReservationOwnerEl.textContent = "로그인 후 조회됩니다.";
-    myReservationCardsEl.innerHTML = "";
+    myUpcomingReservationCardsEl.innerHTML = "";
+    myPastReservationCardsEl.innerHTML = "";
     myReservationSectionEl.classList.add("hidden");
     reservationSubmitEl.disabled = true;
     renderAvailableTimes([]);
@@ -306,13 +307,13 @@ function renderPopular(themes) {
   });
 }
 
-function renderMyReservationCards(reservations) {
-  myReservationCardsEl.innerHTML = "";
+function renderMyReservationCards(reservations, cardsEl, emptyMessage) {
+  cardsEl.innerHTML = "";
   if (!reservations.length) {
     const empty = document.createElement("p");
     empty.className = "empty-message";
-    empty.textContent = "조회된 내 예약이 없습니다.";
-    myReservationCardsEl.appendChild(empty);
+    empty.textContent = emptyMessage;
+    cardsEl.appendChild(empty);
     return;
   }
 
@@ -361,15 +362,27 @@ function renderMyReservationCards(reservations) {
         ${isWaiting ? `<p><span>대기 순번</span><strong>${reservation.waitingOrder}번째</strong></p>` : ""}
       </div>
     `;
-    myReservationCardsEl.appendChild(card);
+    cardsEl.appendChild(card);
   });
 }
 
 async function loadMyReservations() {
   if (!isAuthenticated) return;
-  const reservations = await api("/user/reservations/me");
+  const [upcomingReservations, pastReservations] = await Promise.all([
+    api("/user/reservations/me?period=UPCOMING"),
+    api("/user/reservations/me?period=HISTORY"),
+  ]);
   myReservationOwnerEl.textContent = `${currentLoginName ?? "현재 사용자"}님의 예약 목록`;
-  renderMyReservationCards(reservations);
+  renderMyReservationCards(
+    upcomingReservations,
+    myUpcomingReservationCardsEl,
+    "조회된 다가올 예약/대기가 없습니다.",
+  );
+  renderMyReservationCards(
+    pastReservations,
+    myPastReservationCardsEl,
+    "조회된 지난 예약/대기가 없습니다.",
+  );
 }
 
 function closeMenuPanels() {
@@ -541,7 +554,6 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
         date,
         timeId: selectedTimeId,
         themeId: selectedThemeId,
-        storeId: 1,
       }),
     });
     setStatus(`예약 완료: ${currentLoginName} / ${date} / ${selectedTimeLabel}`);
@@ -572,7 +584,7 @@ document.getElementById("popular-refresh").addEventListener("click", async () =>
   }
 });
 
-myReservationCardsEl.addEventListener("click", async (e) => {
+myReservationSectionEl.addEventListener("click", async (e) => {
   const menuButton = e.target.closest(".menu-button");
   if (menuButton) {
     const menuId = menuButton.dataset.menuId;
@@ -703,7 +715,7 @@ document.addEventListener("click", (e) => {
 });
 
 function setTodayDefault() {
-  document.getElementById("theme-date").value = DEMO_DATE;
+  document.getElementById("theme-date").value = new Date().toISOString().slice(0, 10);
 }
 
 loginFormEl.addEventListener("submit", async (e) => {
