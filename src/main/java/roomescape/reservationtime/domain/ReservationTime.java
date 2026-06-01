@@ -4,12 +4,14 @@ import java.time.LocalTime;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.With;
 import roomescape.global.exception.RoomEscapeException;
 
 @Getter
 @EqualsAndHashCode(of = "startAt")
 public class ReservationTime {
 
+    @With
     private final Long id;
     private final LocalTime startAt;
 
@@ -17,13 +19,6 @@ public class ReservationTime {
     public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = requireStartAt(startAt);
-    }
-
-    public ReservationTime withId(Long generatedId) {
-        return ReservationTime.builder()
-                .id(generatedId)
-                .startAt(this.startAt)
-                .build();
     }
 
     private static LocalTime requireStartAt(LocalTime startAt) {

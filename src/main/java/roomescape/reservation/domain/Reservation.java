@@ -6,10 +6,12 @@ import java.time.LocalTime;
 import java.util.Objects;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.With;
 
 @Getter
 public class Reservation {
 
+    @With
     private final Long id;
     private final User user;
     private final ReservationSlot slot;
@@ -27,14 +29,6 @@ public class Reservation {
         return Reservation.builder()
                 .user(user)
                 .slot(slot)
-                .build();
-    }
-
-    public Reservation withId(Long generatedId) {
-        return Reservation.builder()
-                .id(generatedId)
-                .user(this.user)
-                .slot(this.slot)
                 .build();
     }
 
