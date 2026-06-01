@@ -473,20 +473,27 @@ async function loadMyReservations() {
             myWaitingsEmpty.textContent = "신청한 대기가 없습니다.";
         } else {
             myWaitingsEmpty.classList.add("hidden");
-            myWaitingsList.innerHTML = waitings.map(w => `
+            myWaitingsList.innerHTML = waitings.map(w => {
+                const r = w.reservation;
+                return `
                 <div class="reservation-row">
                     <div class="info">
                         <div class="info-line">
-                            <span class="info-main">예약 #${w.reservationId}</span>
+                            <span class="info-main">${r.date}</span>
+                            <span class="info-main">${r.time.startAt.slice(0, 5)}</span>
                             <span class="info-main">대기 ${w.order}순위</span>
                         </div>
                         <div class="info-line">
-                            <span class="info-sub">신청 ${w.createdAt}</span>
+                            <span class="info-sub">${r.theme.name} · ${r.store.name} · 예약 ID ${r.id}</span>
+                        </div>
+                        <div class="info-line">
+                            <span class="info-sub">신청 ${w.createdAt.replace("T", " ")}</span>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" data-cancel-wait="${w.reservationId}">대기 취소</button>
+                    <button type="button" class="btn btn-sm btn-danger" data-cancel-wait="${r.id}">대기 취소</button>
                 </div>
-            `).join("");
+            `;
+            }).join("");
 
             myWaitingsList.querySelectorAll("[data-cancel-wait]").forEach(el => {
                 el.addEventListener("click", async () => {
