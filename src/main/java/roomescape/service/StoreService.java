@@ -7,7 +7,7 @@ import roomescape.dao.StoreDao;
 import roomescape.domain.Store;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class StoreService {
     private final StoreDao storeDao;
 
@@ -15,6 +15,7 @@ public class StoreService {
         this.storeDao = storeDao;
     }
 
+    @Transactional(readOnly = true)
     public List<Store> findAll() {
         return storeDao.findAll();
     }
