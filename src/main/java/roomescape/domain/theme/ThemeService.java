@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.theme.admin.dto.AdminThemeResponse;
 import roomescape.domain.theme.admin.dto.CreateThemeRequest;
@@ -33,22 +34,10 @@ public class ThemeService {
             .toList();
     }
 
-    public CreateThemeResponse createTheme(CreateThemeRequest request) {
-        Theme theme = themeRepository.save(request.toEntity());
-        return CreateThemeResponse.from(theme);
-    }
-
-    public void deleteTheme(Long id) {
-        if (reservationSlotRepository.countByThemeId(id) > 0) {
-            throw new ConflictException(ThemeErrors.THEME_IN_USE);
-        }
-        themeRepository.deleteById(id);
-    }
-
     public List<ThemeResponse> getAllTheme() {
         return themeRepository.findAll().stream()
-            .map(ThemeResponse::from)
-            .toList();
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     public List<ThemeRankResponse> getThemeRank() {
@@ -56,7 +45,21 @@ public class ThemeService {
         LocalDate startDay = today.minusDays(RANK_DAYS_LIMIT);
         List<ThemeRankResult> popularThemes = themeRepository.findPopularThemes(RANK_LIMIT, startDay, today);
         return popularThemes.stream()
-            .map(ThemeRankResponse::from)
-            .toList();
+                .map(ThemeRankResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public CreateThemeResponse createTheme(CreateThemeRequest request) {
+        Theme theme = themeRepository.save(request.toEntity());
+        return CreateThemeResponse.from(theme);
+    }
+
+    @Transactional
+    public void deleteTheme(Long id) {
+        if (reservationSlotRepository.countByThemeId(id) > 0) {
+            throw new ConflictException(ThemeErrors.THEME_IN_USE);
+        }
+        themeRepository.deleteById(id);
     }
 }

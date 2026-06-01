@@ -3,6 +3,7 @@ package roomescape.domain.reservationdate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
@@ -24,11 +25,13 @@ public class ReservationDateService {
             .toList();
     }
 
+    @Transactional
     public CreateReservationDateResponse createReservationDate(CreateReservationDateRequest request) {
         ReservationDate reservationDate = reservationDateRepository.save(request.toEntity());
         return CreateReservationDateResponse.from(reservationDate);
     }
 
+    @Transactional
     public void deleteReservationDate(Long id) {
         if (reservationSlotRepository.countByReservationDateId(id) > 0) {
             throw new ConflictException(ReservationDateErrors.RESERVATION_DATE_IN_USE);
