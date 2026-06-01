@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.ReservationAdminCommandService;
-import roomescape.service.ReservationCommandService;
+import roomescape.service.ReservationUserCommandService;
 import roomescape.service.ReservationQueryService;
 import roomescape.web.dto.request.ReservationRequest;
 import roomescape.web.dto.response.ReservationResponse;
@@ -21,7 +21,7 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationAdminCommandService reservationAdminCommandService;
-    private final ReservationCommandService reservationCommandService;
+    private final ReservationUserCommandService reservationUserCommandService;
     private final ReservationQueryService reservationQueryService;
 
     @GetMapping
@@ -38,7 +38,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationRequest request
     ) {
-        Reservation reservation = reservationCommandService.create(ReservationRequest.toCommand(request));
+        Reservation reservation = reservationUserCommandService.create(ReservationRequest.toCommand(request));
 
         Long savedId = reservation.getId();
         URI location = ServletUriComponentsBuilder

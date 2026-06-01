@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationCommandService {
+public class ReservationUserCommandService {
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;

@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.common.UserName;
-import roomescape.service.ReservationCommandService;
+import roomescape.service.ReservationUserCommandService;
 import roomescape.service.ReservationQueryService;
 import roomescape.service.WaitingQueryService;
 import roomescape.web.dto.request.ReservationRequest;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ReservationController {
 
-    private final ReservationCommandService reservationCommandService;
+    private final ReservationUserCommandService reservationUserCommandService;
     private final ReservationQueryService reservationQueryService;
     private final WaitingQueryService waitingQueryService;
 
@@ -43,7 +43,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationRequest request
     ) {
         ReservationResponse reservationResponse = ReservationResponse.from(
-                reservationCommandService.create(ReservationRequest.toCommand(request)));
+                reservationUserCommandService.create(ReservationRequest.toCommand(request)));
 
         Long savedId = reservationResponse.id();
 
@@ -61,7 +61,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCommandService.cancel(id, UserName.from(name));
+        reservationUserCommandService.cancel(id, UserName.from(name));
         return ResponseEntity.noContent().build();
     }
 
@@ -72,7 +72,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.update(id, UserName.from(name), ReservationUpdateRequest.toCommand(request)));
+                reservationUserCommandService.update(id, UserName.from(name), ReservationUpdateRequest.toCommand(request)));
         return ResponseEntity.ok(response);
     }
 }
