@@ -24,7 +24,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public ReservationTime save(ReservationTime reservationTimeWithoutId) {
-        String sql = "INSERT INTO `reservation_time`(`start_at`) VALUES (?)";
+        String sql = "INSERT INTO reservation_time(start_at) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -40,7 +40,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
-        String sql = "SELECT * FROM `reservation_time` WHERE `id` = (?)";
+        String sql = "SELECT * FROM reservation_time WHERE id = (?)";
 
         try {
             return Optional.ofNullable(
@@ -55,8 +55,10 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAll() {
-        String sql = "SELECT * FROM `reservation_time` "
-                + "ORDER BY start_at ASC";
+        String sql = """
+                SELECT * FROM reservation_time
+                ORDER BY start_at ASC
+                """;
 
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             Long id = resultSet.getLong("id");
@@ -67,16 +69,18 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public void delete(Long id) {
-        String sql = "DELETE FROM `reservation_time` WHERE `id` = (?)";
+        String sql = "DELETE FROM reservation_time WHERE id = (?)";
         jdbcTemplate.update(sql, id);
     }
 
     @Override
     public List<Long> findReservedTimeIdByDateAndTheme(LocalDate date, Long themeId) {
-        String sql = "SELECT t.id as time_id "
-                + "FROM `reservation_time` t "
-                + "INNER JOIN `reservation` r ON r.time_id = t.id "
-                + "WHERE r.date = (?) AND r.theme_id = (?) ";
+        String sql = """
+                SELECT t.id as time_id
+                FROM reservation_time t
+                INNER JOIN reservation r ON r.time_id = t.id
+                WHERE r.date = (?) AND r.theme_id = (?)
+                """;
 
         return jdbcTemplate.query(sql,
                 (resultSet, rowNum) ->
@@ -88,9 +92,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `reservation_time` WHERE `start_at` = (?) "
-                + ") AS exist";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation_time WHERE start_at = (?)
+                ) AS exist
+                """;
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, startAt));
     }
