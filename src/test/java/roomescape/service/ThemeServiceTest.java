@@ -1,29 +1,26 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.SlotDao;
-import roomescape.dao.ThemeDao;
+import roomescape.dao.*;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
+import roomescape.dto.request.WaitingRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.code.ThemeErrorCode;
 import roomescape.exception.domain.ThemeException;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ThemeServiceTest extends ServiceTest {
 
@@ -31,10 +28,16 @@ class ThemeServiceTest extends ServiceTest {
     private ThemeService themeService;
 
     @Autowired
+    private WaitingService waitingService;
+
+    @Autowired
     private ReservationDao reservationDao;
 
     @Autowired
     private ReservationTimeDao reservationTimeDao;
+
+    @Autowired
+    private WaitingDao waitingDao;
 
     @Autowired
     private ThemeDao themeDao;
@@ -214,6 +217,23 @@ class ThemeServiceTest extends ServiceTest {
                 .hasMessage(ThemeErrorCode.THEME_HAS_RESERVATION.getMessage());
     }
 
+    @Test
+    void 테마_삭제시_관련_대기가_존재하면_예외가_발생한다() {
+        // given
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+
+        LocalDate reservationDate = LocalDate.of(2026, 5, 8);
+        Reservation reservation = saveReservation("예약1", reservationDate, reservationTime, theme);
+        saveWaiting(reservationDate, reservationTime, theme, "대기1");
+        reservationDao.delete(reservation.getId());
+
+        // when & then
+        assertThatThrownBy(() -> themeService.delete(theme.getId()))
+                .isInstanceOf(ThemeException.class)
+                .hasMessage(ThemeErrorCode.THEME_HAS_WAITING.getMessage());
+    }
+
     private Theme saveTheme(String name) {
         Theme theme = new Theme(
                 name,
@@ -240,5 +260,11 @@ class ThemeServiceTest extends ServiceTest {
                 name
         );
         return reservationDao.save(reservation);
+    }
+
+    private WaitingRequest saveWaiting(LocalDate date, ReservationTime reservationTime, Theme theme, String name) {
+        WaitingRequest request1 = new WaitingRequest(date, reservationTime.getId(), theme.getId(), name);
+        waitingService.create(request1);
+        return request1;
     }
 }

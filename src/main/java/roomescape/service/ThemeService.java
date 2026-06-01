@@ -1,16 +1,18 @@
 package roomescape.service;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.code.ThemeErrorCode;
 import roomescape.exception.domain.ThemeException;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ThemeService {
@@ -20,11 +22,13 @@ public class ThemeService {
 
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
+    private final WaitingDao waitingDao;
     private final Clock clock;
 
-    public ThemeService(ThemeDao themeDao, ReservationDao reservationDao, Clock clock) {
+    public ThemeService(ThemeDao themeDao, ReservationDao reservationDao, WaitingDao waitingDao, Clock clock) {
         this.themeDao = themeDao;
         this.reservationDao = reservationDao;
+        this.waitingDao = waitingDao;
         this.clock = clock;
     }
 
@@ -69,6 +73,10 @@ public class ThemeService {
     private void validateReservationNotExistsBy(long themeId) {
         if (reservationDao.existsByTheme(themeId)) {
             throw new ThemeException(ThemeErrorCode.THEME_HAS_RESERVATION);
+        }
+
+        if (waitingDao.existsByTheme(themeId)) {
+            throw new ThemeException(ThemeErrorCode.THEME_HAS_WAITING);
         }
     }
 }

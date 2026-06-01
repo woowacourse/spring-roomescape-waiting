@@ -113,7 +113,7 @@ public class WaitingDao {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId, name));
     }
 
-    public boolean existsById(long waitingId) {
+    public boolean existsByWaitingId(long waitingId) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -122,6 +122,18 @@ public class WaitingDao {
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, waitingId));
+    }
+
+    public boolean existsByTheme(long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM waiting AS w
+                    INNER JOIN slot AS s ON w.slot_id = s.id
+                    WHERE s.theme_id = ?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, themeId));
     }
 
     public int delete(long waitingId) {

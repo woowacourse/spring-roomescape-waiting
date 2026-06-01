@@ -88,7 +88,7 @@ public class WaitingService {
     }
 
     private void validateWaitingExists(long waitingId) {
-        if (!waitingDao.existsById(waitingId)) {
+        if (!waitingDao.existsByWaitingId(waitingId)) {
             throw new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND);
         }
     }
