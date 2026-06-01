@@ -1,9 +1,10 @@
 package roomescape.time.domain;
 
+import roomescape.error.ErrorCode;
+import roomescape.reservation.exception.PastReservationException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import roomescape.reservation.exception.PastReservationException;
 
 public class ReservationTime {
     private final Long id;
@@ -50,25 +51,9 @@ public class ReservationTime {
         return startAt.toLocalDate();
     }
 
-    public void validateReservableSchedule() {
-        if (isPast()) {
-            throw PastReservationException.pastReservation();
+    public void validateExpired(LocalDateTime dateTime) {
+        if (startAt.isBefore(dateTime)) {
+            throw PastReservationException.of(ErrorCode.RESERVATION_EXPIRED);
         }
-    }
-
-    public void validateUpdatableReservation() {
-        if (isPast()) {
-            throw PastReservationException.pastUpdate();
-        }
-    }
-
-    public void validateNotPastForCancel() {
-        if (startAt.isBefore(LocalDateTime.now())) {
-            throw PastReservationException.pastCancel();
-        }
-    }
-
-    private boolean isPast() {
-        return startAt.isBefore(LocalDateTime.now());
     }
 }
