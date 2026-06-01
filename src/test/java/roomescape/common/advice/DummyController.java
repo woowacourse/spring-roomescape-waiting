@@ -2,6 +2,7 @@ package roomescape.common.advice;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -54,9 +55,22 @@ public class DummyController {
         throw new ConflictException("충돌");
     }
 
+    @GetMapping("/dummy/dataIntegrity")
+    public void dataIntegrity() {
+        throw new DataIntegrityViolationException("무결성");
+    }
+
     @GetMapping("/dummy/internal")
     public void internal() {
         throw new RuntimeException();
+    }
+
+    @GetMapping("/api/admin")
+    public void accessCheck() {
+    }
+
+    @GetMapping("/api/admin/auth/test")
+    public void loginCheck() {
     }
 
     private static class BusinessException extends CustomException {

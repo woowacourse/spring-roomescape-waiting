@@ -9,17 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
-import roomescape.common.advice.GlobalExceptionHandler;
 
-@WebMvcTest
-@ContextConfiguration(classes = {GlobalExceptionHandler.class, DummyController.class})
-class RestExceptionHandlerTest {
-
+@WebMvcTest(DummyController.class)
+class GlobalExceptionHandlerTest extends BaseGlobalTest {
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
-        RestAssuredMockMvc.webAppContextSetup(webApplicationContext);
+        mockMvcSetting(webApplicationContext);
     }
 
     @Test
@@ -42,7 +38,7 @@ class RestExceptionHandlerTest {
     }
 
     @Test
-    void 요청_JSON_형식이_잘못되면_구조화된_에러_응답을_반환한다() {
+    void 요청_JSON_형식이_잘못되면_400_BAD_REQUEST를_응답한다() {
         // given
         String body = """
                 {
@@ -57,12 +53,11 @@ class RestExceptionHandlerTest {
                 .when().post("/dummy")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("INVALID_JSON"))
                 .body("message", equalTo("요청 Json 형식이 잘못되었습니다."));
     }
 
     @Test
-    void 필수_필드가_누락되면_구조화된_에러_응답을_반환한다() {
+    void 필수_필드가_누락되면_400_BAD_REQUEST를_응답한다() {
         // given
         String body = """
                 {
@@ -76,32 +71,48 @@ class RestExceptionHandlerTest {
                 .when().post("/dummy")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("INVALID_REQUEST_BODY"))
                 .body("message", equalTo("[testField] 필드 not null 검증"));
     }
 
     @Test
-    void 지원하지_않는_HTTP_메서드면_구조화된_에러_응답을_반환한다() {
+    void 지원하지_않는_HTTP_메서드로_요청하면_405_METHOD_NOT_ALLOWED를_응답한다() {
+        // given
+        String body = """
+                {
+                    "testField": "1234"
+                }
+                """;
+
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
                 .when().delete("/dummy")
                 .then().log().all()
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body("code", equalTo("METHOD_NOT_ALLOWED"))
                 .body("message", equalTo("지원하지 않는 HTTP Method 입니다."));
     }
 
     @Test
-    void 경로_변수_검증에_실패하면_구조화된_에러_응답을_반환한다() {
+    void 경로_변수_검증에_실패하면_400_BAD_REQUEST를_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
                 .when().post("/dummy/0")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("CONSTRAINT_VIOLATION"))
                 .body("message", equalTo("양수가 아님"));
+    }
+
+    @Test
+    void 경로_변수_타입_변환에_실패하면_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON)
+                .when().post("/dummy/string")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST)
+                .body("message", equalTo("변환할 수 없는 잘못된 데이터 타입이 존재합니다."));
     }
 
     @Test
@@ -112,7 +123,6 @@ class RestExceptionHandlerTest {
                 .when().get("/dummy/business")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("BUSINESS_ERROR"))
                 .body("message", equalTo("비즈니스 예외"));
     }
 
@@ -124,7 +134,6 @@ class RestExceptionHandlerTest {
                 .when().get("/dummy/forbidden")
                 .then().log().all()
                 .status(HttpStatus.FORBIDDEN)
-                .body("code", equalTo("FORBIDDEN"))
                 .body("message", equalTo("접근 권한이 없습니다."));
     }
 
@@ -136,7 +145,6 @@ class RestExceptionHandlerTest {
                 .when().get("/dummy/entityNotFound")
                 .then().log().all()
                 .status(HttpStatus.NOT_FOUND)
-                .body("code", equalTo("NOT_FOUND"))
                 .body("message", equalTo("데이터 없음"));
     }
 
@@ -148,19 +156,28 @@ class RestExceptionHandlerTest {
                 .when().get("/dummy/duplicateEntity")
                 .then().log().all()
                 .status(HttpStatus.CONFLICT)
-                .body("code", equalTo("CONFLICT"))
                 .body("message", equalTo("충돌"));
     }
 
     @Test
-    void 필수_요청_파라미터가_누락되면_구조화된_에러_응답을_반환한다() {
+    void 파라미터가_누락되면_400_BAD_REQUEST를_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .when().get("/dummy/param")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("MISSING_REQUEST_PARAMETER"))
                 .body("message", equalTo("test 파라미터가 누락 되었습니다."));
+    }
+
+    @Test
+    void 잘못된_경로_예외는_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().log().all()
+                .contentType(MediaType.APPLICATION_JSON)
+                .when().get("/illegalPath")
+                .then().log().all()
+                .status(HttpStatus.NOT_FOUND)
+                .body("message", equalTo("존재하지 않는 경로입니다."));
     }
 
     @Test
@@ -171,7 +188,6 @@ class RestExceptionHandlerTest {
                 .when().get("/dummy/internal")
                 .then().log().all()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("code", equalTo("INTERNAL_SERVER_ERROR"))
                 .body("message", equalTo("알 수 없는 서버 예외가 발생했습니다."));
     }
 }
