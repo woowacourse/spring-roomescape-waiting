@@ -6,6 +6,7 @@ import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.error.DataInconsistencyException;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -138,7 +139,7 @@ public class ReservationServiceImpl implements ReservationService {
             reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
                     .ifPresent(waitingId -> {
                         if (!reservationRepository.promoteToReserved(waitingId)) {
-                            throw new IllegalStateException("대기 예약 승격에 실패했습니다. id: " + waitingId);
+                            throw new DataInconsistencyException("대기 예약 승격에 실패했습니다. id: " + waitingId);
                         }
                     });
         }
