@@ -8,4 +8,5 @@ public interface ReservationWaitingRepository {
     Optional<ReservationWaiting> findById(Long id);
     int deleteById(Long id);
     boolean existsByReservationIdAndName(Long reservationId, String name);
+    boolean existsByReservationId(Long reservationId);
 }

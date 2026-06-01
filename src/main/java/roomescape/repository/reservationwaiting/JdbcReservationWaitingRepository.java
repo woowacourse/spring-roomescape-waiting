@@ -111,4 +111,11 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId, name));
     }
+
+    @Override
+    public boolean existsByReservationId(final Long reservationId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE reservation_id = ?)";
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
+    }
 }

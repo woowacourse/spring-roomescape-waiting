@@ -14,23 +14,27 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
+            final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
             final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
@@ -55,6 +59,8 @@ public class ReservationService {
     }
 
     public void deleteById(final long id) {
+        validateNoWaiting(id);
+
         int affectedRowCount = reservationRepository.deleteById(id);
 
         if (affectedRowCount <= 0) {
@@ -72,6 +78,7 @@ public class ReservationService {
                 ));
 
         validateCancelable(reservation);
+        validateNoWaiting(reservation.getId());
 
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
@@ -150,6 +157,15 @@ public class ReservationService {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
                     "이미 지난 예약은 변경할 수 없습니다."
+            );
+        }
+    }
+
+    private void validateNoWaiting(final long reservationId) {
+        if (reservationWaitingRepository.existsByReservationId(reservationId)) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_HAS_WAITING,
+                    "예약 대기가 존재하는 예약은 바로 삭제할 수 없습니다."
             );
         }
     }

@@ -20,6 +20,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -119,6 +120,15 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 대기가 존재하는 예약은 삭제할 수 없다")
+    void deleteByIdWithWaiting() {
+        Fixture fixture = new Fixture();
+        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> fixture.reservationService.deleteById(1L));
+    }
+
+    @Test
     @DisplayName("지난 예약은 취소할 수 없다")
     void deleteByIdAndNamePastReservation() {
         Fixture fixture = new Fixture();
@@ -212,12 +222,14 @@ class ReservationServiceTest {
 
     private static class Fixture {
         private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationAvailabilityPolicy reservationAvailabilityPolicy = new ReservationAvailabilityPolicy();
         private final ReservationService reservationService =
                 new ReservationService(
                         reservationRepository,
+                        reservationWaitingRepository,
                         reservationTimeService,
                         themeService,
                         reservationAvailabilityPolicy
