@@ -24,7 +24,7 @@ public class WaitService {
                 waitWithoutId.getTheme().getId());
 
         for (Wait wait : waits) {
-            if (wait.isWaitedBy(waitWithoutId.getName())) {
+            if (wait.isWaitedBy(waitWithoutId)) {
                 throw new RoomEscapeException(DomainErrorCode.DUPLICATED_WAIT);
             }
         }

@@ -58,8 +58,8 @@ public class Wait {
         return theme;
     }
 
-    public boolean isWaitedBy(String name) {
-        return this.name.equals(name);
+    public boolean isWaitedBy(Wait other) {
+        return this.name.equals(other.name);
     }
 
     public boolean isPast(LocalDateTime now) {
