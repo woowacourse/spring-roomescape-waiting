@@ -51,9 +51,20 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 rs.getString("theme_description"),
                 rs.getString("theme_thumbnail")
         );
-        Member reserver = new Member(rs.getString("name"));
-        Slot slot = new Slot(rs.getDate("date").toLocalDate(), time, theme);
-        return new Reservation(rs.getLong("reservation_id"), reserver, slot);
+        Member reserver = new Member(
+                rs.getString("name")
+        );
+        Slot slot = new Slot(
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme
+        );
+
+        return new Reservation(
+                rs.getLong("reservation_id"),
+                reserver,
+                slot
+        );
     };
 
     public List<Reservation> findAll(int offset, int limit) {

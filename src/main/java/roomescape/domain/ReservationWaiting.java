@@ -13,48 +13,19 @@ public class ReservationWaiting {
 
     private final Long id;
     private final Member waiter;
-    private final LocalDateTime createdAt;
     private final Slot slot;
+    private final LocalDateTime createdAt;
 
     public ReservationWaiting(
             Long id,
             Member waiter,
-            LocalDateTime createdAt,
-            Slot slot
+            Slot slot,
+            LocalDateTime createdAt
     ) {
         this.id = id;
         this.waiter = Objects.requireNonNull(waiter);
-        this.createdAt = Objects.requireNonNull(createdAt);
         this.slot = Objects.requireNonNull(slot);
-    }
-
-    // TODO: 테스트에서 사용하는 메서드
-    public ReservationWaiting(
-            Long id,
-            String name,
-            LocalDateTime createdAt,
-            Slot slot
-    ) {
-        this(id, new Member(name), createdAt, slot);
-    }
-
-    // TODO: 테스트에서 사용하는 메서드
-    public ReservationWaiting(
-            String name,
-            LocalDateTime createdAt,
-            Slot slot
-    ) {
-        this(null, new Member(name), createdAt, slot);
-    }
-
-    // TODO: 테스트에서 사용하는 메서드
-    public static ReservationWaiting createWith(
-            String name,
-            Member reserver,
-            Slot slot,
-            LocalDateTime now
-    ) {
-        return createWith(new Member(name), reserver, slot, now);
+        this.createdAt = Objects.requireNonNull(createdAt);
     }
 
     // TODO: 이미 있는 예약과 겹치는지는 외부에서 판단하는 것이 좋아보임
@@ -65,7 +36,12 @@ public class ReservationWaiting {
             LocalDateTime now
     ) {
         validateWaitable(waiter, reserver, slot, now);
-        return new ReservationWaiting(null, waiter, now, slot);
+        return new ReservationWaiting(
+                null,
+                waiter,
+                slot,
+                now
+        );
     }
 
     private static void validateWaitable(Member waiter, Member reserver, Slot slot, LocalDateTime now) {
@@ -77,13 +53,14 @@ public class ReservationWaiting {
         }
     }
 
-    // TODO: 테스트에서 사용하는 메서드
-    public void cancelBy(String name) {
-        cancelBy(new Member(name));
-    }
-
     public void cancelBy(Member member) {
         validateOwner(member);
+    }
+
+    private void validateOwner(Member member) {
+        if (!waiter.equals(member)) {
+            throw new ForbiddenException(NOT_OWNER);
+        }
     }
 
     public Long getId() {
@@ -121,11 +98,5 @@ public class ReservationWaiting {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    private void validateOwner(Member member) {
-        if (!waiter.equals(member)) {
-            throw new ForbiddenException(NOT_OWNER);
-        }
     }
 }

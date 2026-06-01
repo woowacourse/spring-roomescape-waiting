@@ -68,8 +68,8 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         return new ReservationWaiting(
                 rs.getLong("waiting_id"),
                 member,
-                rs.getTimestamp("created_at").toLocalDateTime(),
-                slot
+                slot,
+                rs.getTimestamp("created_at").toLocalDateTime()
         );
     };
 
@@ -99,8 +99,8 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         return new ReservationWaiting(
                 id,
                 reservationWaiting.getWaiter(),
-                reservationWaiting.getCreatedAt(),
-                reservationWaiting.getSlot()
+                reservationWaiting.getSlot(),
+                reservationWaiting.getCreatedAt()
         );
     }
 

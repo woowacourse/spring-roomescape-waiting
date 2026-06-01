@@ -24,8 +24,10 @@ import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
@@ -99,7 +101,7 @@ class ReservationUseCaseMockTest {
                 currentTime.getId(),
                 THEME.getId()
         );
-        Reservation saved = new Reservation(1L, request.name(), request.date(), currentTime, THEME);
+        Reservation saved = reservation(1L, request.name(), request.date(), currentTime, THEME);
         given(reservationTimeQueryService.getById(currentTime.getId())).willReturn(currentTime);
         given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
         given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
@@ -118,7 +120,7 @@ class ReservationUseCaseMockTest {
 
     @Test
     void getById는_예약이_있으면_예약을_반환한다() {
-        Reservation reservation = new Reservation(1L, "민욱", FUTURE, TIME, THEME);
+        Reservation reservation = reservation(1L, "민욱", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThat(reservationQueryService.getById(1L)).isEqualTo(reservation);
@@ -126,7 +128,7 @@ class ReservationUseCaseMockTest {
 
     @Test
     void deleteMine은_본인_예약이_아니면_ForbiddenException을_던진다() {
-        Reservation reservation = new Reservation(1L, "티뉴", FUTURE, TIME, THEME);
+        Reservation reservation = reservation(1L, "티뉴", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
@@ -135,7 +137,7 @@ class ReservationUseCaseMockTest {
 
     @Test
     void deleteMine은_지난_예약이면_BusinessRuleViolationException을_던진다() {
-        Reservation reservation = new Reservation(1L, "민욱", PAST, TIME, THEME);
+        Reservation reservation = reservation(1L, "민욱", PAST, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
@@ -144,7 +146,7 @@ class ReservationUseCaseMockTest {
 
     @Test
     void deleteMine은_미래_예약이면_삭제를_위임한다() {
-        Reservation reservation = new Reservation(1L, "민욱", FUTURE, TIME, THEME);
+        Reservation reservation = reservation(1L, "민욱", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         reservationApplicationService.deleteMine(1L, "민욱");
@@ -160,5 +162,15 @@ class ReservationUseCaseMockTest {
         reservationQueryService.findPage(2, 5);
 
         verify(reservationRepository).findAll(10, 5);
+    }
+
+    private Reservation reservation(
+            Long id,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
+        return new Reservation(id, new Member(name), new Slot(date, time, theme));
     }
 }

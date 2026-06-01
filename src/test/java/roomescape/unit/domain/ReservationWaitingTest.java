@@ -27,7 +27,7 @@ class ReservationWaitingTest {
     @Test
     void 본인이_예약한_슬롯에는_대기를_생성할_수_없다() {
         assertThatThrownBy(() -> ReservationWaiting.createWith(
-                "티뉴",
+                new Member("티뉴"),
                 RESERVER,
                 SLOT,
                 WAITING_CREATED_AT
@@ -39,7 +39,7 @@ class ReservationWaitingTest {
     @Test
     void 지난_예약에는_대기를_생성할_수_없다() {
         assertThatThrownBy(() -> ReservationWaiting.createWith(
-                "민욱",
+                new Member("민욱"),
                 RESERVER,
                 PAST_SLOT,
                 WAITING_CREATED_AT
@@ -51,7 +51,7 @@ class ReservationWaitingTest {
     @Test
     void 다른_사람의_미래_예약에는_대기를_생성할_수_있다() {
         ReservationWaiting waiting = ReservationWaiting.createWith(
-                "민욱",
+                new Member("민욱"),
                 RESERVER,
                 SLOT,
                 WAITING_CREATED_AT
@@ -64,17 +64,21 @@ class ReservationWaitingTest {
 
     @Test
     void 본인_대기가_아니면_취소할_수_없다() {
-        ReservationWaiting waiting = new ReservationWaiting("민욱", WAITING_CREATED_AT, SLOT);
+        ReservationWaiting waiting = waiting("민욱");
 
-        assertThatThrownBy(() -> waiting.cancelBy("브라운"))
+        assertThatThrownBy(() -> waiting.cancelBy(new Member("브라운")))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("본인의 예약 대기");
     }
 
     @Test
     void 본인_대기는_취소할_수_있다() {
-        ReservationWaiting waiting = new ReservationWaiting("민욱", WAITING_CREATED_AT, SLOT);
+        ReservationWaiting waiting = waiting("민욱");
 
-        waiting.cancelBy("민욱");
+        waiting.cancelBy(new Member("민욱"));
+    }
+
+    private ReservationWaiting waiting(String name) {
+        return new ReservationWaiting(null, new Member(name), SLOT, WAITING_CREATED_AT);
     }
 }

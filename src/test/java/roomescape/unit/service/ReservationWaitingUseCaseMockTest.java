@@ -27,6 +27,7 @@ import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.application.query.ThemeQueryService;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -91,15 +92,20 @@ class ReservationWaitingUseCaseMockTest {
 
     @Test
     void save는_저장소에_위임하고_저장된_대기를_반환한다() {
-        Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
         Slot slot = new Slot(RESERVATION_DATE, RESERVATION_TIME, THEME);
+        Reservation reservation = reservation(1L, "티뉴", slot);
         ReservationWaitingRequest request = new ReservationWaitingRequest(
                 "민욱",
                 RESERVATION_DATE,
                 RESERVATION_TIME.getId(),
                 THEME.getId()
         );
-        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", WAITING_CREATED_AT, reservation.getSlot());
+        ReservationWaiting saved = new ReservationWaiting(
+                1L,
+                new Member("민욱"),
+                reservation.getSlot(),
+                WAITING_CREATED_AT
+        );
         ReservationWaitingWithOrder savedWithOrder = new ReservationWaitingWithOrder(
                 saved.getId(),
                 saved.getName(),
@@ -174,7 +180,11 @@ class ReservationWaitingUseCaseMockTest {
     }
 
     private ReservationWaiting waitingOwnedBy(Long id, String name) {
-        Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
-        return new ReservationWaiting(id, name, WAITING_CREATED_AT, reservation.getSlot());
+        Slot slot = new Slot(RESERVATION_DATE, RESERVATION_TIME, THEME);
+        return new ReservationWaiting(id, new Member(name), slot, WAITING_CREATED_AT);
+    }
+
+    private Reservation reservation(Long id, String name, Slot slot) {
+        return new Reservation(id, new Member(name), slot);
     }
 }

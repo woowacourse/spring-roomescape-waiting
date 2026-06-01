@@ -28,24 +28,11 @@ public class Reservation {
         this.slot = Objects.requireNonNull(slot);
     }
 
-    // TODO: 테스트에서 사용하는 메서드
     public Reservation(
-            Long id,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
+            Member reserver,
+            Slot slot
     ) {
-        this(id, new Member(name), new Slot(date, time, theme));
-    }
-
-    public Reservation(
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        this(null, new Member(name), new Slot(date, time, theme));
+        this(null, reserver, slot);
     }
 
     public static Reservation createWith(
@@ -54,7 +41,11 @@ public class Reservation {
             LocalDateTime now
     ) {
         validateCreatable(slot, now);
-        return new Reservation(null, reserver, slot);
+        return new Reservation(
+                null,
+                reserver,
+                slot
+        );
     }
 
     private static void validateCreatable(Slot slot, LocalDateTime now) {
@@ -70,8 +61,7 @@ public class Reservation {
     ) {
         validateOwner(requester);
         validatePast(now, EXPIRED_RESERVATION_UPDATE_REJECTED);
-        validateTargetNotPast(targetSlot, now);
-
+        validateTargetSlotNotPast(targetSlot, now);
         return new Reservation(
                 this.id,
                 this.reserver,
@@ -79,23 +69,27 @@ public class Reservation {
         );
     }
 
-    // TODO: 테스트에서 사용하는 메서드
-    public void cancelBy(String name, LocalDateTime now) {
-        cancelBy(new Member(name), now);
-    }
-
     public void cancelBy(Member member, LocalDateTime now) {
         validateOwner(member);
         validatePast(now, PAST_RESERVATION_CANCEL_REJECTED);
     }
 
-    // TODO: 테스트에서 사용하는 메서드
-    public boolean isOwnedBy(Member other) {
-        return reserver.equals(other);
+    private void validateOwner(Member member) {
+        if (!reserver.equals(member)) {
+            throw new ForbiddenException(NOT_OWNER);
+        }
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return slot.isPast(now);
+    private void validatePast(LocalDateTime now, String message) {
+        if (slot.isPast(now)) {
+            throw new BusinessRuleViolationException(message);
+        }
+    }
+
+    private void validateTargetSlotNotPast(Slot slot, LocalDateTime now) {
+        if (slot.isPast(now)) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_UPDATE_REJECTED);
+        }
     }
 
     public Long getId() {
@@ -141,23 +135,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    private void validateOwner(Member member) {
-        if (!reserver.equals(member)) {
-            throw new ForbiddenException(NOT_OWNER);
-        }
-    }
-
-    private void validatePast(LocalDateTime now, String message) {
-        if (isPast(now)) {
-            throw new BusinessRuleViolationException(message);
-        }
-    }
-
-    private void validateTargetNotPast(Slot slot, LocalDateTime now) {
-        if (slot.isPast(now)) {
-            throw new BusinessRuleViolationException(PAST_RESERVATION_UPDATE_REJECTED);
-        }
     }
 }

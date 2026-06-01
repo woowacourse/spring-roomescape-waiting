@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
-import roomescape.domain.exception.BusinessRuleViolationException;
 
 class SlotTest {
 
@@ -34,7 +33,7 @@ class SlotTest {
     @Test
     void 슬롯은_날짜_시간_테마가_모두_필요하다() {
         assertThatThrownBy(() -> new Slot(null, TWO_PM, THEME))
-                .isInstanceOf(BusinessRuleViolationException.class)
-                .hasMessageContaining("슬롯");
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("슬롯에 날짜");
     }
 }
