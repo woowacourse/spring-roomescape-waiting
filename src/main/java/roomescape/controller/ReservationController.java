@@ -18,25 +18,28 @@ import roomescape.dto.WaitingResponseResult;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.MyReservationsAndWaitsResponse;
-import roomescape.dto.response.PostReservationWaitResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.ReservationWaitService;
 
 @RequestMapping("/api/v1/reservations")
 @RestController
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitService reservationWaitService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 ReservationWaitService reservationWaitService) {
         this.reservationService = reservationService;
+        this.reservationWaitService = reservationWaitService;
     }
 
     @GetMapping
     public ResponseEntity<MyReservationsAndWaitsResponse> getReservations(@LoginMember Long memberId) {
         List<Reservation> reservations = reservationService.getReservations(memberId);
-        List<WaitingResponseResult> waitingResponseResults = reservationService.getWaitings(memberId);
+        List<WaitingResponseResult> waitingResponseResults = reservationWaitService.getWaitings(memberId);
         MyReservationsAndWaitsResponse myReservationsAndWaitsResponse = new MyReservationsAndWaitsResponse(
                 ReservationResponse.fromAll(reservations), WaitingResponse.fromAll(waitingResponseResults));
         return ResponseEntity.ok().body(myReservationsAndWaitsResponse);
@@ -58,12 +61,6 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
-    @PostMapping("/{id}/waits")
-    public ResponseEntity<PostReservationWaitResponse> createWait(@LoginMember Long memberId, @PathVariable Long id) {
-        return ResponseEntity.created(URI.create("/api/v1/reservations/" + id + "/waits"))
-                .body(PostReservationWaitResponse.from(reservationService.createWait(memberId, id)));
-    }
-
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable Long id,
@@ -83,12 +80,6 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id, @LoginMember Long memberId) {
         reservationService.deleteReservation(id, memberId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/{reservationId}/waits/mine")
-    public ResponseEntity<Void> deleteReservationWait(@PathVariable Long reservationId, @LoginMember Long memberId) {
-        reservationService.deleteReservationWait(reservationId, memberId);
         return ResponseEntity.noContent().build();
     }
 }
