@@ -1,0 +1,14 @@
+MERGE INTO reservation_time(id, start_at) KEY (id) VALUES
+    (1, '10:00'),
+    (2, '11:00'),
+    (3, '12:00'),
+    (4, '13:00'),
+    (5, '14:00'),
+    (6, '15:00'),
+    (7, '16:00'),
+    (8, '17:00'),
+    (9, '18:00'),
+    (10, '19:00'),
+    (11, '20:00');
+
+ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 12;
