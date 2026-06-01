@@ -73,9 +73,9 @@ public class ReservationService {
         Reservation existed = getReservation(id);
 
         if (existed.isSameSlot(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
-            Reservation renamed = existed.update(reservationRequest.name());
+            Reservation updated = existed.update(reservationRequest.name());
             reservationUpdatingDao.updateName(id, reservationRequest.name());
-            return ReservationResponse.from(renamed);
+            return ReservationResponse.from(updated);
         }
 
         cancel(existed);
@@ -86,7 +86,7 @@ public class ReservationService {
     public void delete(Long id) {
         Optional<Reservation> optionalReservation = reservationQueryingDao.findReservationById(id);
         if (optionalReservation.isEmpty()) {
-            return;
+            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
         }
         Reservation reservation = optionalReservation.get();
         if (reservation.isExpired()) {
@@ -98,7 +98,7 @@ public class ReservationService {
     private void cancel(Reservation reservation) {
         long deleted = reservationUpdatingDao.delete(reservation.getId());
         if (deleted == 0) {
-            return;
+            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
         }
         Long slotId = reservation.getSlot().getId();
 
