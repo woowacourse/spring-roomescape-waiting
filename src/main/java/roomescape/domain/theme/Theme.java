@@ -59,7 +59,7 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(final Object o){
         if(!(o instanceof Theme)) {
             return false;
         }

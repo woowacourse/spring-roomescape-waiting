@@ -39,15 +39,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     };
 
-    private static final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> {
-        return Theme.of(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail_url")
-        );
-    };
-
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcReservationRepository(final JdbcTemplate jdbcTemplate) {

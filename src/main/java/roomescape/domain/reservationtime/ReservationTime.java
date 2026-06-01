@@ -13,7 +13,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    private void validateStartAt(LocalTime startAt) {
+    private void validateStartAt(final LocalTime startAt) {
         if (startAt == null) {
             throw new IllegalArgumentException("예약 시간을 비어있을 수 없습니다.");
         }
@@ -48,7 +48,7 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(final Object o){
         if(!(o instanceof ReservationTime)) {
             return false;
         }

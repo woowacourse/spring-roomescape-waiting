@@ -25,7 +25,7 @@ public class ReservationWaitingService {
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
-    public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
+    public ReservationWaiting save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
         String waitingName = validateName(name);
         Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -68,7 +68,7 @@ public class ReservationWaitingService {
         }
     }
 
-    public void deleteByIdAndName(Long waitingId, String name) {
+    public void deleteByIdAndName(final Long waitingId, final String name) {
         int affectedRowCount = reservationWaitingRepository.deleteByIdAndName(waitingId, name);
 
         if (affectedRowCount <= 0) {

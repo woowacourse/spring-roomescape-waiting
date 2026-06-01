@@ -12,12 +12,12 @@ import roomescape.domain.reservationwaiting.ReservationWaiting;
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationWaitingRepository(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+    public ReservationWaiting save(final ReservationWaiting reservationWaiting) {
         String sql = "INSERT INTO reservation_waiting (reservation_id, name, requested_at) VALUES (?, ?, ?) ";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -39,7 +39,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public int deleteByIdAndName(Long id, String name) {
+    public int deleteByIdAndName(final Long id, final String name) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ? AND name = ?";
         return jdbcTemplate.update(sql, id, name);
     }
