@@ -18,9 +18,9 @@ public class Reservation {
 
     private final Long id;
     private final Theme theme;
-    private LocalDate date;
-    private ReservationTime time;
-    private ReservationEntries entries;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final ReservationEntries entries;
 
     public Reservation(Long id, LocalDate date, Theme theme, ReservationTime time, List<ReservationEntry> entries) {
         validateReservation(date, theme, time);

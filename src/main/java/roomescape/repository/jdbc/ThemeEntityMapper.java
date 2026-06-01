@@ -13,5 +13,6 @@ public final class ThemeEntityMapper {
             rs.getBoolean("is_active")
     );
 
-    private ThemeEntityMapper() {}
+    private ThemeEntityMapper() {
+    }
 }

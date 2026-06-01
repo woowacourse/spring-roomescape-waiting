@@ -47,7 +47,8 @@ class ReservationServiceTest {
         this.reservationTimeRepository = new FakeReservationTimeRepository();
         this.themeRepository = new FakeThemeRepository();
         Clock clock = Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.systemDefault());
-        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+                themeRepository,
                 Mockito.mock(ReservationQueryRepository.class), clock);
     }
 
@@ -124,7 +125,8 @@ class ReservationServiceTest {
         Reservation first = reservationRepository.save(createDefaultReservationWithName("이프"));
         Reservation second = reservationRepository.save(createWithNameAndDate("두둠", first.getDate().plusDays(1)));
 
-        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(second.getDate(), time.getId());
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(second.getDate(),
+                time.getId());
 
         // when
         ReservationResult result = reservationService.change(reservedEntryId(first), command);

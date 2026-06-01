@@ -1,268 +1,269 @@
 .admin-header,
 .tab-bar,
 .tab-content {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding-left: 24px;
-  padding-right: 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
 }
 
 .admin-header {
-  padding-top: 32px;
+    padding-top: 32px;
 }
 
 .admin-title {
-  margin-bottom: 4px;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: -0.6px;
+    margin-bottom: 4px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
 }
 
 .admin-sub {
-  color: var(--text-secondary);
-  font-size: 14px;
+    color: var(--text-secondary);
+    font-size: 14px;
 }
 
 .tab-bar {
-  display: flex;
-  gap: 4px;
-  margin-top: 24px;
-  border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 4px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--border);
 }
 
 .tab-btn {
-  margin-bottom: -1px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 10px 18px;
-  transition: color 0.15s, border-color 0.15s;
-  font-size: 14px;
-  font-weight: 600;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 10px 18px;
+    transition: color 0.15s, border-color 0.15s;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .tab-btn:hover {
-  color: var(--text-primary);
+    color: var(--text-primary);
 }
 
 .tab-btn.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
 .tab-content {
-  padding-top: 32px;
-  padding-bottom: 80px;
+    padding-top: 32px;
+    padding-bottom: 80px;
 }
 
 .tab-panel {
-  display: none;
+    display: none;
 }
 
 .tab-panel.active {
-  display: block;
+    display: block;
 }
 
 .section-wrap {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 24px;
-  align-items: start;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
 }
 
 .card-title {
-  margin-bottom: 20px;
-  font-size: 15px;
-  font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 15px;
+    font-weight: 700;
 }
 
 .form-group {
-  margin-bottom: 14px;
+    margin-bottom: 14px;
 }
 
 .form-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .form-input {
-  width: 100%;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
-  color: var(--text-primary);
-  padding: 11px 14px;
-  transition: border-color 0.15s;
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text-primary);
+    padding: 11px 14px;
+    transition: border-color 0.15s;
 }
 
 .form-input:focus {
-  border-color: var(--accent);
-  outline: none;
+    border-color: var(--accent);
+    outline: none;
 }
 
 .form-input::placeholder {
-  color: var(--text-tertiary);
+    color: var(--text-tertiary);
 }
 
 select.form-input {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7684' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7684' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
 }
 
 .btn-primary {
-  width: 100%;
-  margin-top: 4px;
-  padding: 13px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.15s;
-  font-size: 14px;
-  font-weight: 700;
+    width: 100%;
+    margin-top: 4px;
+    padding: 13px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
+    background: var(--accent-hover);
 }
 
 .table-wrap {
-  overflow-x: auto;
+    overflow-x: auto;
 }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 thead th {
-  border-bottom: 1px solid var(--border);
-  color: var(--text-tertiary);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 0 12px 12px;
-  text-align: left;
-  white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 12px 12px;
+    text-align: left;
+    white-space: nowrap;
 }
 
 tbody tr {
-  border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
 tbody tr:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 tbody td {
-  padding: 14px 12px;
-  vertical-align: middle;
-  font-size: 14px;
+    padding: 14px 12px;
+    vertical-align: middle;
+    font-size: 14px;
 }
 
 .td-name {
-  font-weight: 500;
+    font-weight: 500;
 }
 
 .td-description {
-  max-width: 200px;
-  color: var(--text-secondary);
-  font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    max-width: 200px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .btn-delete, .btn-toggle {
-  border: 0;
-  border-radius: 7px;
-  background: #fff5f5;
-  color: var(--danger);
-  cursor: pointer;
-  padding: 5px 12px;
-  white-space: nowrap;
-  transition: all 0.15s;
-  font-size: 13px;
-  font-weight: 600;
+    border: 0;
+    border-radius: 7px;
+    background: #fff5f5;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 5px 12px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .btn-delete:hover {
-  background: #ffe0e0;
+    background: #ffe0e0;
 }
+
 .btn-activate {
-  background: #e6fcf5;
-  color: #0ca678;
+    background: #e6fcf5;
+    color: #0ca678;
 }
 
 .btn-activate:hover {
-  background: #c3fae8;
+    background: #c3fae8;
 }
 
 .btn-deactivate {
-  background: #fff5f5;
-  color: var(--danger);
+    background: #fff5f5;
+    color: var(--danger);
 }
 
 .btn-deactivate:hover {
-  background: #ffe0e0;
+    background: #ffe0e0;
 }
 
 .text-gray {
-  color: var(--text-tertiary);
-  opacity: 0.6;
-  text-decoration: line-through;
+    color: var(--text-tertiary);
+    opacity: 0.6;
+    text-decoration: line-through;
 }
 
 .empty-row td,
 .loading-row td {
-  color: var(--text-tertiary);
-  text-align: center;
+    color: var(--text-tertiary);
+    text-align: center;
 }
 
 .empty-row td {
-  padding: 40px;
+    padding: 40px;
 }
 
 .loading-row td {
-  padding: 30px;
-  font-size: 13px;
+    padding: 30px;
+    font-size: 13px;
 }
 
 .badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 .badge-blue {
-  background: #ebf3ff;
-  color: var(--accent);
+    background: #ebf3ff;
+    color: var(--accent);
 }
 
 .badge-gray {
-  background: var(--bg);
-  color: var(--text-secondary);
+    background: var(--bg);
+    color: var(--text-secondary);
 }
 
 @media (max-width: 768px) {
-  .section-wrap {
-    grid-template-columns: 1fr;
-  }
+    .section-wrap {
+        grid-template-columns: 1fr;
+    }
 }

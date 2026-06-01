@@ -102,7 +102,7 @@ public class ReservationQueryRepository {
         String countSql = "SELECT COUNT(*) " + joinClause + whereClause;
         long totalElements = jdbcTemplate.queryForObject(countSql, Long.class, params.toArray());
 
-        StringBuilder contentSql = new StringBuilder("""
+        String contentSql = """
                    SELECT re.id AS res_id,
                           re.name AS res_name,
                           r.date AS res_date,
@@ -118,15 +118,14 @@ public class ReservationQueryRepository {
                                            OR (re2.created_at = re.created_at AND re2.id < re.id)))
                                ELSE NULL
                           END AS waiting_rank
-                """);
-        contentSql.append(joinClause);
-        contentSql.append(whereClause);
-        contentSql.append(" ORDER BY r.date DESC, rt.start_at DESC");
-        contentSql.append(" LIMIT ? OFFSET ?");
+                """ + joinClause
+                + whereClause
+                + " ORDER BY r.date DESC, rt.start_at DESC"
+                + " LIMIT ? OFFSET ?";
         params.add(pageable.size());
         params.add(pageable.offset());
 
         return Page.of(totalElements, pageable.size(),
-                jdbcTemplate.query(contentSql.toString(), SEARCH_ROW_MAPPER, params.toArray()));
+                jdbcTemplate.query(contentSql, SEARCH_ROW_MAPPER, params.toArray()));
     }
 }

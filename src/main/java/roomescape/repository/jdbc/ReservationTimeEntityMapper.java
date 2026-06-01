@@ -12,5 +12,6 @@ public final class ReservationTimeEntityMapper {
             TimeStatus.valueOf(rs.getString("status"))
     );
 
-    private ReservationTimeEntityMapper() {}
+    private ReservationTimeEntityMapper() {
+    }
 }

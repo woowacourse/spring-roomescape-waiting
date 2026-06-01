@@ -21,6 +21,9 @@ public final class ReservationEntityMapper {
                     rs.getTimestamp("entry_created_at").toLocalDateTime()
             );
 
+    private ReservationEntityMapper() {
+    }
+
     public static Reservation mapReservation(ResultSet rs) throws SQLException {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
@@ -42,6 +45,4 @@ public final class ReservationEntityMapper {
                 List.of()
         );
     }
-
-    private ReservationEntityMapper() {}
 }

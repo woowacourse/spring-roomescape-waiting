@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
-
 import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
 import java.time.LocalDateTime;

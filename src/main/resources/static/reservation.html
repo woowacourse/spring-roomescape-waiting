@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>예약하기 · RoomEscape</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect" />
-  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="/styles/common.css" rel="stylesheet" />
-  <link href="/styles/reservation.css" rel="stylesheet" />
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>예약하기 · RoomEscape</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"/>
+    <link href="/styles/common.css" rel="stylesheet"/>
+    <link href="/styles/reservation.css" rel="stylesheet"/>
 </head>
 <body>
-  <nav class="top-nav">
+<nav class="top-nav">
     <div class="nav-inner">
-      <a class="nav-logo" href="/">RoomEscape</a>
-      <div class="nav-links">
-        <a href="/">홈</a>
-        <a class="active" href="/reserve">예약하기</a>
-        <a href="/search">예약확인</a>
-        <a href="/admin">관리자</a>
-      </div>
+        <a class="nav-logo" href="/">RoomEscape</a>
+        <div class="nav-links">
+            <a href="/">홈</a>
+            <a class="active" href="/reserve">예약하기</a>
+            <a href="/search">예약확인</a>
+            <a href="/admin">관리자</a>
+        </div>
     </div>
-  </nav>
+</nav>
 
-  <main class="reservation-page">
+<main class="reservation-page">
     <h1 class="page-title">예약하기</h1>
 
     <form data-role="reservation-form">
-      <section class="card">
-        <div class="card-label">테마</div>
-        <select id="themeSelect" name="themeId">
-          <option value="">테마를 선택하세요</option>
-        </select>
-      </section>
+        <section class="card">
+            <div class="card-label">테마</div>
+            <select id="themeSelect" name="themeId">
+                <option value="">테마를 선택하세요</option>
+            </select>
+        </section>
 
-      <section class="card">
-        <div class="card-label">예약자 이름</div>
-        <input class="text-input" id="nameInput" maxlength="20" name="name" placeholder="이름을 입력하세요" type="text" />
-      </section>
+        <section class="card">
+            <div class="card-label">예약자 이름</div>
+            <input class="text-input" id="nameInput" maxlength="20" name="name" placeholder="이름을 입력하세요" type="text"/>
+        </section>
 
-      <section class="card">
-        <div class="card-label">날짜</div>
-        <input id="dateInput" name="date" type="date" />
-      </section>
+        <section class="card">
+            <div class="card-label">날짜</div>
+            <input id="dateInput" name="date" type="date"/>
+        </section>
 
-      <section class="card">
-        <div class="card-label">시간</div>
-        <div class="slot-grid" data-role="slot-grid">
-          <div class="slot-empty">테마와 날짜를 먼저 선택하세요.</div>
-        </div>
-      </section>
+        <section class="card">
+            <div class="card-label">시간</div>
+            <div class="slot-grid" data-role="slot-grid">
+                <div class="slot-empty">테마와 날짜를 먼저 선택하세요.</div>
+            </div>
+        </section>
 
-      <button class="btn-submit" data-role="submit-button" disabled type="submit">예약 확정</button>
+        <button class="btn-submit" data-role="submit-button" disabled type="submit">예약 확정</button>
     </form>
-  </main>
+</main>
 
-  <div class="toast" data-role="toast"></div>
+<div class="toast" data-role="toast"></div>
 
-  <script src="/js/reservation/main.js" type="module"></script>
+<script src="/js/reservation/main.js" type="module"></script>
 </body>
 </html>

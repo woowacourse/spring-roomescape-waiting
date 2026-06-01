@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import roomescape.service.command.ReservationCommand;
 
 public record ReservationCondition(
-       LocalDate date,
-       long themeId,
-       long timeId
+        LocalDate date,
+        long themeId,
+        long timeId
 ) {
 
     public static ReservationCondition from(ReservationCommand command) {

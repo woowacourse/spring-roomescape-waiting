@@ -34,7 +34,7 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
     private ThemeService themeService;
 
     @BeforeEach
-    public void setUp(WebApplicationContext webApplicationContext) {
+    void setUp(WebApplicationContext webApplicationContext) {
         mockMvcSetting(webApplicationContext);
     }
 
@@ -43,7 +43,8 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
         // given
         AdminThemeRequest body = new AdminThemeRequest("공포", "공포 방탈출입니다.", "http://image.com/image.png");
 
-        ThemeRegisterResult result = new ThemeRegisterResult(1L, "공포", "공포 방탈출입니다.", "http://image.com/image.png", true);
+        ThemeRegisterResult result = new ThemeRegisterResult(1L, "공포", "공포 방탈출입니다.", "http://image.com/image.png",
+                true);
         when(themeService.register(any(ThemeRegisterCommand.class))).thenReturn(result);
 
         AdminThemeResponse expected = AdminThemeResponse.from(result);

@@ -49,9 +49,9 @@ public class ReservationTimeDataSource {
         Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
         jdbcTemplate.update(
                 """
-                INSERT INTO reservation_entry (name, reservation_id, status, created_at)
-                VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
-                """,
+                        INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+                        VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
+                        """,
                 "이프", reservationId
         );
     }

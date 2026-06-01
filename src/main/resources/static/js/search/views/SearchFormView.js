@@ -11,11 +11,11 @@ export default class SearchFormView extends View {
     bindEvents() {
         on(this.element, "submit", (event) => {
             event.preventDefault();
-            this.emit("@search", { name: this.nameInput.value.trim() });
+            this.emit("@search", {name: this.nameInput.value.trim()});
         });
     }
 
-    sync({ name }) {
+    sync({name}) {
         this.nameInput.value = name || "";
     }
 }

@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 public abstract class ReservationEntry {
 
-    private Long id;
-    private String name;
-    private LocalDateTime createdAt;
+    private final Long id;
+    private final String name;
+    private final LocalDateTime createdAt;
 
     protected ReservationEntry(Long id, String name, LocalDateTime createdAt) {
         this.id = id;

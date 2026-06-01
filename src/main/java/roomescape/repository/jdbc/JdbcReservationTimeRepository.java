@@ -1,6 +1,7 @@
 package roomescape.repository.jdbc;
 
 import static roomescape.repository.jdbc.ReservationTimeEntityMapper.RESERVATION_TIME_MAPPER;
+
 import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.time.LocalTime;
@@ -12,7 +13,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.TimeStatus;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.util.RepositoryExceptionTranslator;
 
@@ -27,14 +27,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "INSERT INTO reservation_time (start_at, status) VALUES (?, ?)";
 
-        RepositoryExceptionTranslator.execute(() -> {
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-                ps.setTime(1, Time.valueOf(reservationTime.getStartAt()));
-                ps.setString(2, reservationTime.getStatus().toString());
-                return ps;
-            }, keyHolder);
-        }, "이미 존재하는 시간 정보입니다.");
+        RepositoryExceptionTranslator.execute(() -> jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
+            ps.setTime(1, Time.valueOf(reservationTime.getStartAt()));
+            ps.setString(2, reservationTime.getStatus().toString());
+            return ps;
+        }, keyHolder), "이미 존재하는 시간 정보입니다.");
 
         return new ReservationTime(
                 keyHolder.getKey().longValue(),

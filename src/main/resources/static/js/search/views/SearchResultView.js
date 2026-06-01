@@ -14,7 +14,7 @@ export default class SearchResultView extends View {
             ".btn-change:not(:disabled)",
             (event) => {
                 const id = event.target.closest(".reservation-item").dataset.id;
-                this.emit("@change", { id });
+                this.emit("@change", {id});
             }
         );
 
@@ -24,7 +24,7 @@ export default class SearchResultView extends View {
             ".btn-cancel:not(:disabled)",
             (event) => {
                 const id = event.target.closest(".reservation-item").dataset.id;
-                this.emit("@cancel", { id });
+                this.emit("@cancel", {id});
             }
         );
     }

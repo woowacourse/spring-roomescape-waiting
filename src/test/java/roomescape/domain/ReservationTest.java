@@ -3,7 +3,6 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
-
 import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
 import java.time.LocalDate;
@@ -21,8 +20,8 @@ import roomescape.exception.RoomEscapeException;
 
 class ReservationTest {
 
-    private ReservationTime reservationTime = ReservationTimeFixture.createDefault();
-    private Theme theme = ThemeFixture.createDefaultTheme();
+    private final ReservationTime reservationTime = ReservationTimeFixture.createDefault();
+    private final Theme theme = ThemeFixture.createDefaultTheme();
 
     @Test
     void 정상적인_예약_정보를_생성한다() {

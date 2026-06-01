@@ -26,10 +26,10 @@ import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ReservationApiController;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.api.dto.request.ReservationRequest;
 import roomescape.controller.client.api.dto.response.ReservationResponse;
-import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 import roomescape.controller.client.fixture.ReservationApiRequestFixture;
 import roomescape.service.ReservationService;
@@ -88,7 +88,8 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         ReservationSearchResult searchResult =
                 new ReservationSearchResult(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
         Page<ReservationSearchResult> serviceResult = Page.of(10, 10, List.of(searchResult));
-        when(reservationService.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(serviceResult);
+        when(reservationService.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(
+                serviceResult);
 
         // when
         Page<ReservationSearchResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()

@@ -19,8 +19,6 @@ import roomescape.repository.util.RepositoryExceptionTranslator;
 @RequiredArgsConstructor
 public class ReservationSlotDao {
 
-    private final JdbcTemplate jdbcTemplate;
-
     private static final String BASE_RESERVATION_SQL = """
             SELECT r.id AS res_id, r.date AS res_date,
                    rt.id AS time_id, rt.start_at AS time_start, rt.status AS time_status,
@@ -29,7 +27,6 @@ public class ReservationSlotDao {
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
             """;
-
     private static final String BASE_ENTRY_SQL = """
             SELECT r.id AS res_id, r.date AS res_date,
                    rt.id AS time_id, rt.start_at AS time_start, rt.status AS time_status,
@@ -39,6 +36,7 @@ public class ReservationSlotDao {
             JOIN reservation_time rt ON r.time_id = rt.id
             JOIN theme t ON r.theme_id = t.id
             """;
+    private final JdbcTemplate jdbcTemplate;
 
     public Long insert(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -86,7 +84,8 @@ public class ReservationSlotDao {
                     AND r.theme_id = ?
                 FOR UPDATE
                 """;
-        return queryOptional(BASE_RESERVATION_SQL + whereBySlotForUpdate, condition.date(), condition.timeId(), condition.themeId());
+        return queryOptional(BASE_RESERVATION_SQL + whereBySlotForUpdate, condition.date(), condition.timeId(),
+                condition.themeId());
     }
 
     private Optional<Reservation> queryOptional(String sql, Object... params) {

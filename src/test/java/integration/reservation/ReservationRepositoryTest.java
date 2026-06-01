@@ -28,8 +28,8 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Autowired
     private ReservationDataSource dataSource;
 
-    private ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
-    private Theme theme = new Theme(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
+    private final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+    private final Theme theme = new Theme(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
 
     @BeforeEach
     void setUp() {
@@ -42,7 +42,8 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Test
     void 예약을_저장하면_예약_슬롯과_엔트리를_함께_저장한다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
+        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme,
+                reservationTime);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -60,7 +61,8 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     void 동일한_날짜와_시간으로_저장하면_DB_제약조건_에러가_발생한다() {
         // given
         Reservation first = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        Reservation second = ReservationFixture.createWithAll("아루", LocalDate.now().plusDays(1), theme, reservationTime);
+        Reservation second = ReservationFixture.createWithAll("아루", LocalDate.now().plusDays(1), theme,
+                reservationTime);
         reservationRepository.save(first);
 
         // when & then: DB의 UK Constraint 발생 후 비즈니스 예외로 변환
@@ -72,7 +74,8 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     @Test
     void 존재하는_ID로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
-        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);
+        Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme,
+                reservationTime);
         Reservation saved = reservationRepository.save(reservation);
 
         // when:
@@ -149,7 +152,8 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
         Reservation saved = reservationRepository.save(
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
-        ReservationCondition condition = new ReservationCondition(saved.getDate(), theme.getId(), reservationTime.getId());
+        ReservationCondition condition = new ReservationCondition(saved.getDate(), theme.getId(),
+                reservationTime.getId());
 
         // when
         Optional<Reservation> find = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition);

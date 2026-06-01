@@ -21,9 +21,9 @@ public class PageableHandlerMethodArgumentResolver implements HandlerMethodArgum
 
     @Override
     public Pageable resolveArgument(MethodParameter parameter,
-                                                      ModelAndViewContainer mavContainer,
-                                                      NativeWebRequest webRequest,
-                                                      WebDataBinderFactory binderFactory) {
+                                    ModelAndViewContainer mavContainer,
+                                    NativeWebRequest webRequest,
+                                    WebDataBinderFactory binderFactory) {
         int page = parsePage(webRequest);
         int size = parseSize(webRequest);
         return new Pageable(page, size);
