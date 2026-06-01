@@ -156,6 +156,32 @@ class ReservationServiceTest {
                 .hasMessage("본인의 예약만 변경하거나 취소할 수 있습니다.");
     }
 
+    @DisplayName("이미 예약된 날짜/테마/시간에 예약 요청 시 대기로 저장되어야 한다.")
+    @Test
+    void save_as_waiting_when_reservation_already_exists() {
+        themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
+        timeService.save(new ReservationTimeCreateCommand(LocalTime.of(10, 0)));
+
+        reservationService.save(
+                new ReservationCreateCommand("타스", LocalDate.of(2026, 5, 6), 1L, 1L),
+                LocalDateTime.of(2000, 1, 1, 0, 0)
+        );
+
+        ReservationQueryResult waitingResult = reservationService.save(
+                new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
+                LocalDateTime.of(2000, 1, 1, 0, 0)
+        );
+
+        SoftAssertions.assertSoftly(assertSoftly -> {
+            assertSoftly.assertThat(waitingResult.name()).isEqualTo("카야");
+            assertSoftly.assertThat(waitingResult.date()).isEqualTo(LocalDate.of(2026, 5, 6));
+            assertSoftly.assertThat(waitingResult.time())
+                    .isEqualTo(new ReservationTimeQueryResult(1L, LocalTime.of(10, 0)));
+            assertSoftly.assertThat(waitingResult.theme())
+                    .isEqualTo(new ThemeQueryResult(1L, "theme name", "theme description", "theme img url"));
+        });
+    }
+
     @DisplayName("지난 예약은 취소할 수 없습니다.")
     @Test
     void cancel_past_reservation() {
