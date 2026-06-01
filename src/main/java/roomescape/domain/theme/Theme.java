@@ -45,11 +45,12 @@ public class Theme {
             return false;
         }
         Theme theme = (Theme) o;
-        return id == theme.id;
+        return id == theme.id && Objects.equals(name, theme.name) && Objects.equals(description,
+                theme.description) && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id, name, description, thumbnailUrl);
     }
 }

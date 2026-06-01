@@ -7,7 +7,7 @@ import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
-    private final Long id;
+    private final long id;
     private final ReservationName name;
     private final ReservationDate date;
     private final ReservationTime time;
@@ -15,7 +15,7 @@ public class Reservation {
     private final Status status;
     private final LocalDateTime createdAt;
 
-    private Reservation(Long id, ReservationName name, ReservationDate date, ReservationTime time,
+    private Reservation(long id, ReservationName name, ReservationDate date, ReservationTime time,
                         Theme theme, Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = Objects.requireNonNull(name);
@@ -26,9 +26,9 @@ public class Reservation {
         this.createdAt = Objects.requireNonNull(createdAt);
     }
 
-    public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
+    public static Reservation load(long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
                                    Theme theme, Status status, LocalDateTime dateTime) {
-        return new Reservation(Objects.requireNonNull(id), reservationName, date, time, theme, status, dateTime);
+        return new Reservation(id, reservationName, date, time, theme, status, dateTime);
     }
 
     public static Reservation reserve(
@@ -40,7 +40,7 @@ public class Reservation {
             LocalDateTime now
     ) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(null, reservationName, date, time, theme, status, now);
+        Reservation reservation = new Reservation(0L, reservationName, date, time, theme, status, now);
         reservation.ensureNotPast(now);
         return reservation;
     }
@@ -82,24 +82,17 @@ public class Reservation {
     }
 
     @Override
-    public final boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof Reservation that)) {
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        if (id == null || that.id == null) {
-            return false;
-        }
-
-        return id.equals(that.id);
+        Reservation that = (Reservation) o;
+        return id == that.id && Objects.equals(name, that.name) && Objects.equals(date, that.date)
+                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : System.identityHashCode(this);
+        return Objects.hash(id, name, date, time, theme);
     }
 }
