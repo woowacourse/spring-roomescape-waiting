@@ -5,10 +5,17 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -35,6 +42,9 @@ public class PolicyAcceptanceTest {
 
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
@@ -196,10 +206,10 @@ public class PolicyAcceptanceTest {
     @Test
     @DisplayName("[대기] 예약된 슬롯에 새 사용자가 예약하면 대기 예약으로 생성된다.")
     void 예약된_슬롯에_예약_등록시_대기_예약으로_생성된다() {
-        // theme_slot_id=83 은 Theme 4의 2026-05-30 14:00 슬롯이며 포비가 확정 예약함
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
         Map<String, Object> body = Map.of(
                 "name", "새대기",
-                "themeSlotId", 83
+                "themeSlotId", themeSlotId
         );
 
         RestAssured.given().log().all()
@@ -215,10 +225,11 @@ public class PolicyAcceptanceTest {
     @Test
     @DisplayName("[대기] 같은 사용자가 같은 슬롯에 중복 대기하면 409를 반환한다.")
     void 같은_사용자가_중복_대기_등록시_409() {
-        // theme_slot_id=83 에 브라운이 이미 PENDING 상태로 대기 중
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
+        insertReservation("브라운", "PENDING", themeSlotId);
         Map<String, Object> body = Map.of(
                 "name", "브라운",
-                "themeSlotId", 83
+                "themeSlotId", themeSlotId
         );
 
         RestAssured.given().log().all()
@@ -232,9 +243,10 @@ public class PolicyAcceptanceTest {
     @Test
     @DisplayName("[대기] 대기 예약을 취소하면 내 예약 조회에서 취소 예약으로 조회된다.")
     void 대기_예약_취소시_내_예약_조회에서_취소_예약으로_조회된다() {
+        long themeSlotId = createReservedThemeSlotWithConfirmedReservation("포비");
         Map<String, Object> body = Map.of(
                 "name", "취소대기",
-                "themeSlotId", 83
+                "themeSlotId", themeSlotId
         );
 
         Number reservationId = RestAssured.given().log().all()
@@ -283,5 +295,38 @@ public class PolicyAcceptanceTest {
                 .when().delete("/times/1")
                 .then().log().all()
                 .statusCode(422);
+    }
+
+    private long createReservedThemeSlotWithConfirmedReservation(String name) {
+        long themeSlotId = insertThemeSlot(LocalDate.now().plusDays(30));
+        insertReservation(name, "CONFIRMED", themeSlotId);
+        return themeSlotId;
+    }
+
+    private long insertThemeSlot(LocalDate date) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement("""
+                    INSERT INTO theme_slot (theme_id, date, time_id, is_reserved)
+                    VALUES (?, ?, ?, ?)
+                    """, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, 4L);
+            ps.setObject(2, date);
+            ps.setLong(3, 6L);
+            ps.setBoolean(4, true);
+            return ps;
+        }, keyHolder);
+        return keyHolder.getKey().longValue();
+    }
+
+    private void insertReservation(String name, String status, long themeSlotId) {
+        jdbcTemplate.update("""
+                        INSERT INTO reservation (name, status, theme_slot_id)
+                        VALUES (?, ?, ?)
+                        """,
+                name,
+                status,
+                themeSlotId
+        );
     }
 }
