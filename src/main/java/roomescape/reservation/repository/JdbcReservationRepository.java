@@ -23,6 +23,14 @@ import java.util.Optional;
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
     private static final Logger log = LoggerFactory.getLogger(JdbcReservationRepository.class);
+    private static final String QUEUE_POSITION_SUBQUERY = """
+            SELECT COUNT(*)
+            FROM reservation same_slot
+            WHERE same_slot.date = r.date
+             AND same_slot.time_id = r.time_id
+             AND same_slot.theme_id = r.theme_id
+             AND same_slot.request_order <= r.request_order
+            """;
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
@@ -125,14 +133,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
+                               (""" + QUEUE_POSITION_SUBQUERY + """
+                                ) AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
@@ -186,14 +188,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
+                               (""" + QUEUE_POSITION_SUBQUERY + """
+                                ) AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
@@ -267,14 +263,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
+                               (""" + QUEUE_POSITION_SUBQUERY + """
+                                ) AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
