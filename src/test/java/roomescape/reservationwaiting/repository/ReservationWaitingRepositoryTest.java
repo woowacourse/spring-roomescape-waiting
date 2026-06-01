@@ -43,8 +43,8 @@ public class ReservationWaitingRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private Long pastReservationId;
-    private Long futureReservationId;
+    private Reservation pastReservation;
+    private Reservation futureReservation;
 
     @BeforeEach
     void setUp() {
@@ -53,39 +53,37 @@ public class ReservationWaitingRepositoryTest {
 
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
                 LocalDate.now().minusDays(1));
-        pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        Long pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
 
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
-        futureReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        Long futureReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+
+        pastReservation = reservationRepository.findById(pastReservationId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+        futureReservation = reservationRepository.findById(futureReservationId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     @Test
     @DisplayName("예약 대기 신청에 성공한다.")
     void 예약_대기_성공() {
-        Reservation reservation = reservationRepository.findById(futureReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥", reservation));
+                reservationWaitingFactory.create("현미밥", futureReservation));
         assertThat(saved.getId()).isNotNull();
     }
 
     @Test
     @DisplayName("이미 지난 시간과 날짜에 대해서는 대기를 신청할 수 없다")
     void 예약_대기_실패() {
-        Reservation reservation = reservationRepository.findById(pastReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-        assertThatThrownBy(() -> reservationWaitingFactory.create("현미밥", reservation))
+        assertThatThrownBy(() -> reservationWaitingFactory.create("현미밥", pastReservation))
                 .isInstanceOf(BusinessException.class);
     }
 
     @Test
     @DisplayName("예약 대기 삭제한다.")
     void 예약_대기_삭제() {
-        Reservation reservation = reservationRepository.findById(futureReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥", reservation));
+                reservationWaitingFactory.create("현미밥", futureReservation));
         jdbcReservationWaitingRepository.deleteById(saved.getId());
         assertThat(jdbcReservationWaitingRepository.findByName("현미밥")).hasSize(0);
     }
@@ -93,10 +91,8 @@ public class ReservationWaitingRepositoryTest {
     @Test
     @DisplayName("이름으로 예약 대기 목록을 조회한다.")
     void 예약_대기_findByName() {
-        Reservation reservation = reservationRepository.findById(futureReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", reservation));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", reservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥", futureReservation));
 
         List<ReservationWaiting> result = jdbcReservationWaitingRepository.findByName("현미밥");
 
@@ -108,12 +104,10 @@ public class ReservationWaitingRepositoryTest {
     @Test
     @DisplayName("대기 순번을 계산한다.")
     void 예약_대기_calculateTurn() {
-        Reservation reservation = reservationRepository.findById(futureReservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", reservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", futureReservation));
         ReservationWaiting waiting2 = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥2", reservation));
-        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
+                reservationWaitingFactory.create("현미밥2", futureReservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", futureReservation));
 
         Map<Long, Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
         assertThat(turns.get(waiting2.getId())).isEqualTo(2L);

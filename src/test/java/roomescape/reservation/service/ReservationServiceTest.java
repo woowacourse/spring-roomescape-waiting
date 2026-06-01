@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,38 +36,29 @@ class ReservationServiceTest {
             LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
             ZoneId.systemDefault()
     );
-    @Mock
-    private ReservationRepository reservationRepository;
-    @Mock
-    private ReservationTimeService reservationTimeService;
-    @Mock
-    private ThemeService themeService;
-    @Mock
-    private ReservationFactory reservationFactory;
-    @Mock
-    private Clock clock;
+
+    @Mock private ReservationRepository reservationRepository;
+    @Mock private ReservationTimeService reservationTimeService;
+    @Mock private ThemeService themeService;
+    @Mock private ReservationFactory reservationFactory;
+    @Mock private Clock clock;
 
     @InjectMocks
     private ReservationService reservationService;
 
-    private ReservationTime sampleTime1() {
-        return ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-    }
+    private ReservationTime time1;
+    private ReservationTime time2;
+    private Theme theme;
+    private Reservation futureReservation;
+    private Reservation pastReservation;
 
-    private ReservationTime sampleTime2() {
-        return ReservationTime.restore(2L, LocalTime.of(16, 0), LocalTime.of(17, 0));
-    }
-
-    private Theme sampleTheme() {
-        return Theme.restore(1L, "테마A", "설명A", "https://a.com");
-    }
-
-    private Reservation futureReservation(Long id) {
-        return Reservation.restore(id, "user1", LocalDate.of(2099, 12, 1), sampleTime1(), sampleTheme());
-    }
-
-    private Reservation pastReservation(Long id) {
-        return Reservation.restore(id, "user1", LocalDate.now().minusDays(1), sampleTime1(), sampleTheme());
+    @BeforeEach
+    void setUp() {
+        time1 = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        time2 = ReservationTime.restore(2L, LocalTime.of(16, 0), LocalTime.of(17, 0));
+        theme = Theme.restore(1L, "테마A", "설명A", "https://a.com");
+        futureReservation = Reservation.restore(1L, "user1", LocalDate.of(2099, 12, 1), time1, theme);
+        pastReservation = Reservation.restore(1L, "user1", LocalDate.now().minusDays(1), time1, theme);
     }
 
     @Test
@@ -84,7 +76,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 themeId로 예약 생성 시 예외 발생")
     void 존재하지_않는_themeId_예외() {
-        when(reservationTimeService.getById(1L)).thenReturn(sampleTime1());
+        when(reservationTimeService.getById(1L)).thenReturn(time1);
         when(themeService.getById(Long.MAX_VALUE)).thenThrow(new BusinessException(ErrorCode.THEME_NOT_FOUND));
 
         assertThatThrownBy(() -> reservationService.createReservation(
@@ -97,7 +89,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이미 지난 예약은 취소할 수 없다")
     void 과거_예약_취소_불가() {
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation(1L)));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
 
@@ -111,7 +103,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("이미 지난 예약은 수정할 수 없다")
     void 과거_예약_수정_불가() {
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation(1L)));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(pastReservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
 
@@ -126,12 +118,11 @@ class ReservationServiceTest {
     @Test
     @DisplayName("변경하려는 날짜·시간이 과거면 수정 불가")
     void 새시간_과거면_수정_불가() {
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation(1L)));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(any(), any(), any(), any())).thenReturn(
-                false);
-        when(reservationTimeService.getById(2L)).thenReturn(sampleTime2());
+        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(any(), any(), any(), any())).thenReturn(false);
+        when(reservationTimeService.getById(2L)).thenReturn(time2);
 
         assertThatThrownBy(() -> reservationService.updateReservation(
                 1L, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
@@ -144,8 +135,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("오늘 날짜에 이미 지난 시각으로 예약 불가")
     void 오늘_날짜_지난_시각_예약_불가() {
-        when(reservationTimeService.getById(1L)).thenReturn(sampleTime1());
-        when(themeService.getById(1L)).thenReturn(sampleTheme());
+        when(reservationTimeService.getById(1L)).thenReturn(time1);
+        when(themeService.getById(1L)).thenReturn(theme);
         when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(false);
         when(reservationFactory.create(any(), any(), any(), any())).thenThrow(
                 new BusinessException(ErrorCode.PAST_TIME_CREATE));
@@ -153,16 +144,14 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.createReservation(
                 new ReservationRequest("현미밥", LocalDate.now(), 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(
-                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_CREATE))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_CREATE))
                 .hasMessage(ErrorCode.PAST_TIME_CREATE.getMessage());
     }
 
     @Test
     @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
     void 중복_예약_수정_불가() {
-        Reservation reservation = Reservation.restore(2L, "user2", LocalDate.of(2099, 12, 1), sampleTime2(),
-                sampleTheme());
+        Reservation reservation = Reservation.restore(2L, "user2", LocalDate.of(2099, 12, 1), time2, theme);
         when(reservationRepository.findById(2L)).thenReturn(Optional.of(reservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
