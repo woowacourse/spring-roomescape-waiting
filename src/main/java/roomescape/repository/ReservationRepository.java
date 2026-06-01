@@ -19,6 +19,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findBySchedule(LocalDate date, long timeId, long themeId);
 
+    Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId);
+
     Reservation save(Reservation reservation);
 
     boolean existsByTimeId(long id);

@@ -2,7 +2,6 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -74,13 +73,13 @@ public class WaitingService {
     }
 
     private void checkWaitable(Waiting waiting) {
-        Reservation reservation = reservationRepository.findBySchedule(
+        String reserverName = reservationRepository.findReserverNameByScheduleForUpdate(
                         waiting.getDate(),
                         waiting.getTime().getId(),
                         waiting.getTheme().getId())
                 .orElseThrow(() -> new BusinessConflictException(ErrorCode.WAITING_WITHOUT_RESERVATION));
 
-        if (waiting.isSameName(reservation.getName())) {
+        if (waiting.isSameName(reserverName)) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }

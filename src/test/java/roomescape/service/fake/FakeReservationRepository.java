@@ -36,6 +36,12 @@ public class FakeReservationRepository implements ReservationRepository {
                 .findFirst();
     }
 
+    @Override
+    public Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId) {
+        return findBySchedule(date, timeId, themeId)
+                .map(Reservation::getName);
+    }
+
     public List<Reservation> findAll() {
         return List.copyOf(reservations);
     }

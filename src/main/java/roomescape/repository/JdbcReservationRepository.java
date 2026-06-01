@@ -160,6 +160,22 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT name
+                FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ?
+                FOR UPDATE
+                """;
+        try {
+            String reserverName = jdbcTemplate.queryForObject(sql, String.class, date, timeId, themeId);
+            return Optional.ofNullable(reserverName);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
 
