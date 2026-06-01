@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -97,10 +96,9 @@ public class Reservation {
     }
 
     private void validateModifiable() {
-        if (date.isBefore(LocalDate.now())) {
-            throw new BusinessException(ReservationErrorCode.RESERVATION_MODIFY_IN_PAST);
-        }
-        if (date.isEqual(LocalDate.now()) && time.getStartAt().isBefore(LocalTime.now())) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        if (dateTime.isBefore(now)) {
             throw new BusinessException(ReservationErrorCode.RESERVATION_MODIFY_IN_PAST);
         }
     }
