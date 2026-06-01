@@ -240,10 +240,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Long countByReservationSlotId(Long reservationSlotId) {
-        Long count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_SLOT_ID_SQL, Long.class, reservationSlotId);
+    public Integer countByReservationSlotId(Long reservationSlotId) {
+        Integer count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_SLOT_ID_SQL, Integer.class, reservationSlotId);
         if (count == null) {
-            return 0L;
+            return 0;
         }
         return count;
     }
@@ -361,7 +361,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getLong(COLUMN_USER_ID),
                 rs.getString(COLUMN_USER_NAME)
             ),
-            rs.getObject(COLUMN_WAITING_NUMBER, Long.class),
+            rs.getInt(COLUMN_WAITING_NUMBER),
             ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
             rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
             rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()

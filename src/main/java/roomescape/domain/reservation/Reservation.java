@@ -14,7 +14,7 @@ public class Reservation {
     private final Long id;
     private final ReservationSlot reservationSlot;
     private final User user;
-    private final Long waitingNumber;
+    private final Integer waitingNumber;
     private final ReservationStatus status;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
@@ -23,7 +23,7 @@ public class Reservation {
         Long id,
         ReservationSlot reservationSlot,
         User user,
-        Long waitingNumber,
+        Integer waitingNumber,
         ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -41,7 +41,7 @@ public class Reservation {
     public static Reservation createWithoutId(
         ReservationSlot reservation,
         User user,
-        Long waitingNumber,
+        Integer waitingNumber,
         ReservationStatus status,
         Clock clock
     ) {
@@ -70,7 +70,7 @@ public class Reservation {
 
     public Reservation update(
         ReservationSlot updatedReservationSlot,
-        Long reservationCount,
+        Integer waitingNumber,
         ReservationStatus reservationStatus,
         Clock clock
     ) {
@@ -78,7 +78,7 @@ public class Reservation {
             id,
             updatedReservationSlot,
             user,
-            reservationCount,
+            waitingNumber,
             reservationStatus,
             createdAt,
             LocalDateTime.now(clock)
@@ -101,7 +101,7 @@ public class Reservation {
         long id,
         ReservationSlot reservation,
         User user,
-        Long waitingNumber,
+        Integer waitingNumber,
         ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -112,7 +112,7 @@ public class Reservation {
     private static void validate(
         ReservationSlot reservation,
         User user,
-        Long waitingNumber,
+        Integer waitingNumber,
         ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

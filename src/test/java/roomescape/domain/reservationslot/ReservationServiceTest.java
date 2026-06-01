@@ -486,7 +486,7 @@ class ReservationServiceTest {
                 Reservation.createWithoutId(slot, confirmedUser, null, ReservationStatus.CONFIRMED, now)
         );
         Reservation waitingReservation = reservationRepository.save(
-                Reservation.createWithoutId(slot, waitingUser, 1L, ReservationStatus.WAITING, next)
+                Reservation.createWithoutId(slot, waitingUser, 1, ReservationStatus.WAITING, next)
         );
 
         ReservationService reservationService = new ReservationService(
@@ -672,13 +672,13 @@ class ReservationServiceTest {
         Reservation firstWaitingReservation = saveWaitingReservation(
             savedReservation,
             firstWaitingUser,
-            1L,
+            1,
             firstWaitingClock
         );
         Reservation secondWaitingReservation = saveWaitingReservation(
             savedReservation,
             secondWaitingUser,
-            2L,
+            2,
             secondWaitingClock
         );
         ReservationService reservationService = new ReservationService(
@@ -977,7 +977,7 @@ class ReservationServiceTest {
     private Reservation saveWaitingReservation(
         ReservationSlot reservationSlot,
         User user,
-        Long waitingNumber,
+        Integer waitingNumber,
         Clock clock
     ) {
         return reservationRepository.save(Reservation.createWithoutId(

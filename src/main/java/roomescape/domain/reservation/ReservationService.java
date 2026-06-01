@@ -135,19 +135,12 @@ public class ReservationService {
         List<Reservation> orderedReservations = reservationRepository.findAllByReservationIdOrder(
                 reservationSlot.getId());
         if (orderedReservations.isEmpty()) {
-            deleteReservationSlotIfEmpty(reservationSlot);
+            reservationSlotRepository.deleteById(reservationSlot.getId());
             return;
         }
         reservationRepository.updateWaitingNumbers(orderedReservations);
         reservationRepository.updateStatus(orderedReservations.getFirst().getId(), ReservationStatus.CONFIRMED);
         reservationRepository.updateAllStatus(orderedReservations.subList(1, orderedReservations.size()));
-    }
-
-    private void deleteReservationSlotIfEmpty(ReservationSlot reservationSlot) {
-        Long remainingReservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
-        if (remainingReservationCount == 0) {
-            reservationSlotRepository.deleteById(reservationSlot.getId());
-        }
     }
 
     private boolean hasSameReservationSlot(ReservationSlot oldSlot, ReservationSlot newSlot) {
@@ -164,7 +157,7 @@ public class ReservationService {
             ReservationSlot currentSlot,
             ReservationSlot updatedSlot
     ) {
-        Long currentReservationCount = reservationRepository.countByReservationSlotId(updatedSlot.getId());
+        Integer currentReservationCount = reservationRepository.countByReservationSlotId(updatedSlot.getId());
         ReservationStatus updatedStatus = decideWaitingStatus(currentReservationCount);
 
         Reservation reservationToSave = reservation.update(
@@ -181,7 +174,7 @@ public class ReservationService {
     }
 
     private Reservation buildReservation(ReservationSlot reservationSlot, User user) {
-        Long currentReservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
+        Integer currentReservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
         ReservationStatus newReservationStatus = decideWaitingStatus(currentReservationCount);
         return Reservation.createWithoutId(
                 reservationSlot,
@@ -198,12 +191,12 @@ public class ReservationService {
         }
     }
 
-    private ReservationStatus decideWaitingStatus(Long reservationCount) {
-        ReservationStatus waitingStatus = ReservationStatus.WAITING;
+    private ReservationStatus decideWaitingStatus(Integer reservationCount) {
+        ReservationStatus status = ReservationStatus.WAITING;
         if (reservationCount == 0) {
-            waitingStatus = ReservationStatus.CONFIRMED;
+            status = ReservationStatus.CONFIRMED;
         }
-        return waitingStatus;
+        return status;
     }
 
     private void validateReservationSchedule(

@@ -48,10 +48,10 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Long countByReservationSlotId(Long reservationSlotId) {
-        return storage.values().stream()
-            .filter(userReservation -> reservationSlotId.equals(userReservation.getReservationSlot().getId()))
-            .count();
+    public Integer countByReservationSlotId(Long reservationSlotId) {
+        return Math.toIntExact(storage.values().stream()
+                .filter(userReservation -> reservationSlotId.equals(userReservation.getReservationSlot().getId()))
+                .count());
     }
 
     @Override
@@ -112,7 +112,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 userReservation.getId(),
                 userReservation.getReservationSlot(),
                 userReservation.getUser(),
-                (long) index,
+                index,
                 status,
                 userReservation.getCreatedAt(),
                 userReservation.getUpdatedAt()

@@ -54,7 +54,7 @@ class AdminReservationControllerTest {
             ReservationTimePayload.from(ReservationTime.of(2L, LocalTime.of(10, 10))),
             ThemePayload.from(Theme.of(3L, "공포", "으악 무서워!", "theme-url")),
             "보예",
-            0L,
+            0,
             ReservationStatus.CONFIRMED
         );
         when(validator.isUnauthorized(any(HttpServletRequest.class))).thenReturn(false);

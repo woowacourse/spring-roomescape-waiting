@@ -28,7 +28,7 @@ public record UserReservationsResponse(
         Long id,
         ReservationSlotPayload reservationSlot,
         String status,
-        Long waitingNumber
+        Integer waitingNumber
     ) {
 
         private static ReservationPayload from(Reservation reservation) {

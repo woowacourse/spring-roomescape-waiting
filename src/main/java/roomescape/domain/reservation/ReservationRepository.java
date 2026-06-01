@@ -14,7 +14,7 @@ public interface ReservationRepository {
 
     List<Reservation> findReservations(String username);
 
-    Long countByReservationSlotId(Long reservationSlotId);
+    Integer countByReservationSlotId(Long reservationSlotId);
 
     List<Reservation> findAllByReservationIdOrder(Long reservationId);
 

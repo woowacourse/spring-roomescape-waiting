@@ -14,7 +14,7 @@ public record ReservationResponse(
     ReservationTimePayload time,
     ThemePayload theme,
     String userName,
-    Long waitingNumber,
+    Integer waitingNumber,
     ReservationStatus reservationStatus
 ) {
 
