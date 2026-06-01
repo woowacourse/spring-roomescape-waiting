@@ -7,11 +7,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 
 class ReservationWaitingTest {
@@ -78,6 +80,29 @@ class ReservationWaitingTest {
         );
 
         assertThat(waiting).isNotEqualTo(sameValuesWaiting);
+    }
+
+    @Test
+    @DisplayName("예약 대기 줄은 요청 시각과 ID 순서로 순번을 계산한다")
+    void sequenceOf() {
+        ReservationWaitingLine waitingLine = new ReservationWaitingLine(List.of(
+                new ReservationWaitingLine.ReservationWaitingOrder(
+                        3L,
+                        LocalDateTime.parse("2026-08-05T12:01:00")
+                ),
+                new ReservationWaitingLine.ReservationWaitingOrder(
+                        2L,
+                        LocalDateTime.parse("2026-08-05T12:00:00")
+                ),
+                new ReservationWaitingLine.ReservationWaitingOrder(
+                        1L,
+                        LocalDateTime.parse("2026-08-05T12:00:00")
+                )
+        ));
+
+        assertThat(waitingLine.sequenceOf(1L)).isOne();
+        assertThat(waitingLine.sequenceOf(2L)).isEqualTo(2);
+        assertThat(waitingLine.sequenceOf(3L)).isEqualTo(3);
     }
 
     private Reservation createReservation(final LocalDate date, final LocalTime time) {

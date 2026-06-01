@@ -2,6 +2,9 @@ package roomescape.repository.history;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,7 +23,13 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
             resultSet.getDate("date").toLocalDate(),
             mapTheme(resultSet),
             mapReservationTime(resultSet),
-            resultSet.getInt("sequence")
+            getNullableLocalDateTime(resultSet, "requested_at")
+    );
+
+    private static final RowMapper<MyWaitingOrder> waitingOrderRowMapper = (resultSet, rowNumber) -> new MyWaitingOrder(
+            resultSet.getLong("reservation_id"),
+            resultSet.getLong("waiting_id"),
+            resultSet.getTimestamp("requested_at").toLocalDateTime()
     );
 
     private final JdbcTemplate jdbcTemplate;
@@ -43,7 +52,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        t.thumbnail_url,
                        rt.id AS time_id,
                        rt.start_at,
-                       0 AS sequence
+                       CAST(NULL AS TIMESTAMP) AS requested_at
                 FROM reservation AS r
                 INNER JOIN theme AS t ON r.theme_id = t.id
                 INNER JOIN reservation_time AS rt ON r.time_id = rt.id
@@ -62,15 +71,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        t.thumbnail_url,
                        rt.id AS time_id,
                        rt.start_at,
-                       (
-                           SELECT COUNT(*)
-                           FROM reservation_waiting AS earlier
-                           WHERE earlier.reservation_id = rw.reservation_id
-                             AND (
-                                 earlier.requested_at < rw.requested_at
-                                 OR (earlier.requested_at = rw.requested_at AND earlier.id <= rw.id)
-                             )
-                       ) AS sequence
+                       rw.requested_at
                 FROM reservation_waiting AS rw
                 INNER JOIN reservation AS r ON rw.reservation_id = r.id
                 INNER JOIN theme AS t ON r.theme_id = t.id
@@ -80,6 +81,24 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                 """;
 
         return jdbcTemplate.query(sql, historyRowMapper, name, name);
+    }
+
+    @Override
+    public List<MyWaitingOrder> findWaitingOrdersByReservationIds(final List<Long> reservationIds) {
+        if (reservationIds.isEmpty()) {
+            return List.of();
+        }
+
+        String placeholders = String.join(",", Collections.nCopies(reservationIds.size(), "?"));
+        String sql = """
+                SELECT reservation_id,
+                       id AS waiting_id,
+                       requested_at
+                FROM reservation_waiting
+                WHERE reservation_id IN (%s)
+                """.formatted(placeholders);
+
+        return jdbcTemplate.query(sql, waitingOrderRowMapper, reservationIds.toArray());
     }
 
     private static Theme mapTheme(final ResultSet resultSet) throws SQLException {
@@ -106,5 +125,18 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
         }
 
         return value;
+    }
+
+    private static LocalDateTime getNullableLocalDateTime(
+            final ResultSet resultSet,
+            final String columnName
+    ) throws SQLException {
+        Timestamp value = resultSet.getTimestamp(columnName);
+
+        if (value == null) {
+            return null;
+        }
+
+        return value.toLocalDateTime();
     }
 }

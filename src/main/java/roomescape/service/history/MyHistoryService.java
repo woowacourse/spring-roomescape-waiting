@@ -1,13 +1,17 @@
 package roomescape.service.history;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.controller.history.ReservationHistoryStatus;
 import roomescape.controller.history.dto.HistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.repository.history.MyHistory;
 import roomescape.repository.history.MyHistoryRepository;
+import roomescape.repository.history.MyWaitingOrder;
 
 @Service
 public class MyHistoryService {
@@ -19,12 +23,47 @@ public class MyHistoryService {
     }
 
     public List<HistoryResponse> getAllByName(final String name) {
-        return myHistoryRepository.findByUserName(name).stream()
-                .map(this::toResponse)
+        List<MyHistory> histories = myHistoryRepository.findByUserName(name);
+        Map<Long, Integer> waitingSequences = findWaitingSequences(histories);
+
+        return histories.stream()
+                .map(history -> toResponse(history, waitingSequences))
                 .toList();
     }
 
-    private HistoryResponse toResponse(final MyHistory history) {
+    private Map<Long, Integer> findWaitingSequences(final List<MyHistory> histories) {
+        List<Long> waitingReservationIds = histories.stream()
+                .filter(history -> ReservationHistoryStatus.WAITING.name().equals(history.status()))
+                .map(MyHistory::reservationId)
+                .distinct()
+                .toList();
+
+        Map<Long, List<MyWaitingOrder>> ordersByReservationId = myHistoryRepository
+                .findWaitingOrdersByReservationIds(waitingReservationIds)
+                .stream()
+                .collect(Collectors.groupingBy(MyWaitingOrder::reservationId));
+
+        return ordersByReservationId.entrySet().stream()
+                .flatMap(entry -> toSequenceEntries(entry.getValue()).entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<Long, Integer> toSequenceEntries(final List<MyWaitingOrder> orders) {
+        ReservationWaitingLine waitingLine = new ReservationWaitingLine(orders.stream()
+                .map(order -> new ReservationWaitingLine.ReservationWaitingOrder(
+                        order.waitingId(),
+                        order.requestedAt()
+                ))
+                .toList());
+
+        return orders.stream()
+                .collect(Collectors.toMap(
+                        MyWaitingOrder::waitingId,
+                        order -> waitingLine.sequenceOf(order.waitingId())
+                ));
+    }
+
+    private HistoryResponse toResponse(final MyHistory history, final Map<Long, Integer> waitingSequences) {
         return new HistoryResponse(
                 history.reservationId(),
                 history.waitingId(),
@@ -33,7 +72,15 @@ public class MyHistoryService {
                 history.date(),
                 ThemeResponse.from(history.theme()),
                 ReservationTimeResponse.from(history.time()),
-                history.sequence()
+                resolveSequence(history, waitingSequences)
         );
+    }
+
+    private Integer resolveSequence(final MyHistory history, final Map<Long, Integer> waitingSequences) {
+        if (ReservationHistoryStatus.RESERVATION.name().equals(history.status())) {
+            return 0;
+        }
+
+        return waitingSequences.get(history.waitingId());
     }
 }
