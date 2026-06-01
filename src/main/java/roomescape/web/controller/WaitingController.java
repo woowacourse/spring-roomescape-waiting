@@ -42,7 +42,7 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelWaiting(
-            @PathVariable("id") long id,
+            @PathVariable Long id,
             @RequestParam String name
     ) {
         waitingCommandService.cancel(id, name);

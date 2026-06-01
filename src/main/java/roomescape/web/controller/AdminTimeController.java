@@ -32,7 +32,9 @@ public class AdminTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> createReservationTime(@Valid @RequestBody ReservationTimeRequest request) {
+    public ResponseEntity<ReservationTimeResponse> createReservationTime(
+            @Valid @RequestBody ReservationTimeRequest request
+    ) {
         ReservationTime reservationTime = reservationTimeCommandService.create(request.startAt());
         Long savedId = reservationTime.getId();
 
@@ -46,7 +48,9 @@ public class AdminTimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteReservationTime(
+            @PathVariable Long id
+    ) {
         reservationTimeCommandService.delete(id);
         return ResponseEntity.noContent().build();
     }

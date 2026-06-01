@@ -33,8 +33,8 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getSortedPopularThemesAtPeriod(
-            @RequestParam("limit") int limit) {
-
+            @RequestParam("limit") int limit
+    ) {
         LocalDate today = LocalDate.now(clock);
         LocalDate startAt = today.minusWeeks(1L);
         LocalDate endAt = today.minusDays(1);

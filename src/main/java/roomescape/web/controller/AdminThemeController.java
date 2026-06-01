@@ -32,7 +32,9 @@ public class AdminThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeRequest request) {
+    public ResponseEntity<ThemeResponse> createTheme(
+            @Valid @RequestBody ThemeRequest request
+    ) {
         Theme theme = themeCommandService.create(ThemeRequest.toCommand(request));
         Long savedId = theme.getId();
 
@@ -46,7 +48,9 @@ public class AdminThemeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteTheme(
+            @PathVariable Long id
+    ) {
         themeCommandService.delete(id);
         return ResponseEntity.noContent().build();
     }

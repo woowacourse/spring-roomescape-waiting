@@ -33,7 +33,9 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createReservation(
+            @Valid @RequestBody ReservationRequest request
+    ) {
         Reservation reservation = reservationCommandService.create(ReservationRequest.toCommand(request));
 
         Long savedId = reservation.getId();
@@ -47,7 +49,9 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable Long id
+    ) {
         reservationCommandService.deleteByAdmin(id);
         return ResponseEntity.noContent().build();
     }
