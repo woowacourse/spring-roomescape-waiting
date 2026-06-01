@@ -90,24 +90,26 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAll() {
+        LocalDateTime now = LocalDateTime.now();
         return reservationDao.findAll()
                 .stream()
-                .map(this::toReservationResponse)
+                .map(reservation -> toReservationResponse(reservation, now))
                 .toList();
     }
 
     public List<ReservationResponse> findByName(String name) {
+        LocalDateTime now = LocalDateTime.now();
         return reservationDao.findByName(name)
                 .stream()
-                .map(this::toReservationResponse)
+                .map(reservation -> toReservationResponse(reservation, now))
                 .toList();
     }
 
-    private ReservationResponse toReservationResponse(Reservation reservation) {
+    private ReservationResponse toReservationResponse(Reservation reservation, LocalDateTime now) {
         return ReservationResponse.from(
                 reservation,
                 reservationDao.findOrderByReservationId(reservation.getId()),
-                LocalDateTime.now()
+                now
         );
     }
 
