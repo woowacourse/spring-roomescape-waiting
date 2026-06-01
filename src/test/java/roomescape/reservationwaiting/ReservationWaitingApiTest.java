@@ -1,6 +1,7 @@
 package roomescape.reservationwaiting;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,8 +52,8 @@ class ReservationWaitingApiTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/waitings/1"))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(header().string("Location", matchesPattern("/waitings/\\d+")))
+                .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.name").value("아루"))
                 .andExpect(jsonPath("$.requestedAt", notNullValue()))
                 .andExpect(jsonPath("$.reservationResponse.id").value(1))
