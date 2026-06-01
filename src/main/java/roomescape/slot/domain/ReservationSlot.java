@@ -1,5 +1,8 @@
 package roomescape.slot.domain;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
@@ -10,29 +13,27 @@ import java.time.LocalDateTime;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
 
-public record ReservationSlot(
-        ReservationDate date,
-        ReservationTime time,
-        Theme theme
-) {
+@Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class ReservationSlot {
+
+    private Long id;
+    private ReservationDate date;
+    private ReservationTime time;
+    private Theme theme;
 
     public static ReservationSlot of(ReservationDate date, ReservationTime time, Theme theme) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-        return new ReservationSlot(date, time, theme);
+        return new ReservationSlot(null, date, time, theme);
     }
 
-    public Long getDateId() {
-        return date.getId();
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
+    public static ReservationSlot load(Long id, ReservationDate date, ReservationTime time, Theme theme) {
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
+        return new ReservationSlot(id, date, time, theme);
     }
 
     private static void validateDate(ReservationDate date) {
@@ -58,5 +59,18 @@ public record ReservationSlot(
             throw new ReservationException(RESERVATION_ALREADY_PAST);
         }
     }
+
+    public Long getDateId() {
+        return date.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
 
 }
