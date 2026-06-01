@@ -28,7 +28,7 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<ThemeResponses> themes() {
+    public ResponseEntity<ThemeResponses> getThemes() {
         return ResponseEntity.ok(ThemeResponses.from(themeService.allTheme()));
     }
 
@@ -39,7 +39,7 @@ public class ThemeController {
     }
 
     @GetMapping(params = {"topCount", "during"})
-    public ResponseEntity<ThemeResponses> popularThemes(
+    public ResponseEntity<ThemeResponses> getPopularThemes(
             @RequestParam("topCount") Long topCount,
             @RequestParam("during") Long during
     ) {

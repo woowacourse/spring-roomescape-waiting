@@ -2,31 +2,20 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 import java.util.Objects;
-import java.util.Optional;
 
 public class TimeSlot {
 
-    private Long id;
-    private LocalTime startAt;
+    private final Long id;
+    private final LocalTime startAt;
 
     public TimeSlot(Long id, LocalTime startAt) {
-        validate(startAt);
+        validateTime(startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    public static TimeSlot transientOf(LocalTime startAt) {
-        return new TimeSlot(null, startAt);
-    }
-
-    public void changeTime(LocalTime startAt) {
-        this.startAt = Optional.ofNullable(startAt).orElse(this.startAt);
-    }
-
-    private void validate(LocalTime startAt) {
-        if (startAt == null) {
-            throw new IllegalArgumentException("시작 시간은 필수입니다.");
-        }
+    public TimeSlot(LocalTime startAt) {
+        this(null, startAt);
     }
 
     public Long getId() {
@@ -35,6 +24,12 @@ public class TimeSlot {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    private void validateTime(LocalTime startAt) {
+        if (startAt == null) {
+            throw new IllegalArgumentException("시작 시간은 필수입니다.");
+        }
     }
 
     @Override

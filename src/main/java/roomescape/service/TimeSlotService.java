@@ -39,7 +39,7 @@ public class TimeSlotService {
     @Transactional
     public TimeSlot saveTime(LocalTime startAt) {
         checkDuplicatedStartAt(startAt);
-        TimeSlot timeSlot = TimeSlot.transientOf(startAt);
+        TimeSlot timeSlot = new TimeSlot(startAt);
         return timeSlotRepository.save(timeSlot);
     }
 

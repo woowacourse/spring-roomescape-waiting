@@ -33,7 +33,7 @@ public class ThemeService {
 
     @Transactional
     public Theme saveTheme(String name, String description, String thumbnailUrl) {
-        Theme theme = Theme.transientOf(name, description, thumbnailUrl);
+        Theme theme = new Theme(name, description, thumbnailUrl);
         return themeRepository.save(theme);
     }
 

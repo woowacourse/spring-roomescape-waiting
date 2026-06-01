@@ -29,7 +29,7 @@ public class TimeController {
     }
 
     @GetMapping
-    public ResponseEntity<TimeResponses> times() {
+    public ResponseEntity<TimeResponses> getTimes() {
         return ResponseEntity.ok(TimeResponses.from(reservationTimeSlotService.allTimes()));
     }
 
