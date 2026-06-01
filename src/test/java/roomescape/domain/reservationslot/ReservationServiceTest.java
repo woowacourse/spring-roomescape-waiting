@@ -460,36 +460,56 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("사용자는 미래 예약을 삭제할 수 있다.")
-    void deleteFutureReservationForUser() {
+    @DisplayName("사용자가 미래 예약을 삭제하면 맨 앞 대기자는 CONFIRMED로 자동 승급한다.")
+    void deleteFutureReservationForUser_promoteFirstWaiting() {
         // given
-        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        LocalDateTime nowDateTime = LocalDateTime.of(2026, 5, 12, 13, 0);
+        LocalDateTime nextDateTime = nowDateTime.plusMinutes(1);
+        Clock now = fixedClockAt(nowDateTime);
+        Clock next = fixedClockAt(nextDateTime);
+
         ReservationTime reservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+                ReservationTime.createWithoutId(LocalTime.of(10, 0))
         );
         ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+                ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationSlot savedReservation = reservationSlotRepository.save(
-            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot slot = reservationSlotRepository.save(
+                ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
+
+        User confirmedUser = userRepository.save(User.createWithoutId("확정"));
+        User waitingUser = userRepository.save(User.createWithoutId("대기"));
+
+        Reservation confirmedReservation = reservationRepository.save(
+                Reservation.createWithoutId(slot, confirmedUser, null, ReservationStatus.CONFIRMED, now)
+        );
+        Reservation waitingReservation = reservationRepository.save(
+                Reservation.createWithoutId(slot, waitingUser, 1L, ReservationStatus.WAITING, next)
+        );
+
         ReservationService reservationService = new ReservationService(
-            reservationSlotRepository,
-            reservationTimeRepository,
-            reservationDateRepository,
-            reservationRepository,
-            themeRepository,
-            userRepository,
-            now
+                reservationSlotRepository,
+                reservationTimeRepository,
+                reservationDateRepository,
+                reservationRepository,
+                themeRepository,
+                userRepository,
+                now
         );
 
         // when
-        reservationService.cancelUserReservation(savedUserReservation.getId());
+        reservationService.cancelUserReservation(confirmedReservation.getId());
 
         // then
-        assertThat(reservationRepository.findById(savedUserReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(waitingReservation.getId()))
+                .get()
+                .satisfies(reservation -> {
+                    assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+                    assertThat(reservation.getWaitingNumber()).isEqualTo(0L);
+                });
     }
 
     @Test
