@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
@@ -13,6 +12,7 @@ import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
@@ -56,12 +56,12 @@ public class ReservationWaitingService {
         Long id = reservationWaitingUpdatingDao.create(reservationWaiting);
 
         return ReservationWaitingResponse.from(reservationWaitingQueryingDao.findReservationWaitingById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다.")));
+                .orElseThrow(() -> new WaitingNotFoundException(id)));
     }
 
     public void delete(Long id, String name) {
         ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
+                .orElseThrow(() -> new WaitingNotFoundException(id));
 
         reservationWaiting.validateOwner(name);
         reservationWaiting.validatePastDateTime();

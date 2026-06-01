@@ -49,4 +49,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_INPUT", e.getMessage()));
     }
+
+    @ExceptionHandler(WaitingNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(WaitingNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("WAITING_NOT_FOUND", e.getMessage()));
+    }
 }
