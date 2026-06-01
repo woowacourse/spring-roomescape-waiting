@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static roomescape.config.FixedClockConfig.TODAY;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.ForbiddenException;
+import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
@@ -53,7 +56,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("예약 시간이 null 이면 예외가 발생한다.")
-    void createReservation_WhenTimeIsNull_ThrowException() {
+    void createReservation_WhenTimeIsNull_ThrowNullPointerException() {
         ReservationTime time = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
@@ -63,11 +66,79 @@ class ReservationTest {
 
     @Test
     @DisplayName("테마가 null 이면 예외가 발생한다.")
-    void createReservation_WhenThemeIsNull_ThrowException() {
+    void createReservation_WhenThemeIsNull_ThrowNullPointerException() {
         Theme theme = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("테마가 비어 있습니다.");
+    }
+
+    @Test
+    @DisplayName("과거 날짜로 예약하면 예외가 발생한다.")
+    void verifyBookable_WhenDateIsPast_ThrowUnprocessableEntityException() {
+        Reservation reservation = new Reservation(userName, date, time, theme);
+        LocalDateTime now = LocalDateTime.now().plusDays(1);
+
+        assertThatThrownBy(() -> reservation.verifyBookable(now))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("과거 날짜로는 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("과거 시간으로 예약하면 예외가 발생한다.")
+    void verifyBookable_WhenTimeIsPast_ThrowUnprocessableEntityException() {
+        Reservation reservation = new Reservation(userName, date, time, theme);
+        LocalDateTime now = LocalDateTime.of(date, time.getStartAt().plusMinutes(1));
+
+        assertThatThrownBy(() -> reservation.verifyBookable(now))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("이미 지난 시간으로 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("다른 사람의 예약을 변경하면 예외가 발생한다.")
+    void change_WhenNotOwner_ThrowForbiddenException() {
+        Reservation reservation = new Reservation(userName, date, time, theme);
+        UserName otherUser = UserName.parse("다른사람");
+        LocalDateTime now = LocalDateTime.now();
+
+        assertThatThrownBy(() -> reservation.change(otherUser, date.plusDays(1), time, now))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약은 변경할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("과거 시간으로 예약을 변경하면 예외가 발생한다.")
+    void change_WhenTimeIsPastDateTime_ThrowUnprocessableEntityException() {
+        Reservation reservation = new Reservation(userName, date, time, theme);
+        LocalDateTime now = LocalDateTime.now();
+
+        assertThatThrownBy(() -> reservation.change(userName, date.minusDays(1), time, now))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("과거의 시간으로 예약을 변경할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("다른 사람의 예약을 취소하면 예외가 발생한다.")
+    void cancel_WhenNotOwner_ThrowForbiddenException() {
+        Reservation reservation = new Reservation(userName, date, time, theme);
+        UserName otherUser = UserName.parse("다른사람");
+        LocalDateTime now = LocalDateTime.now().minusDays(1);
+
+        assertThatThrownBy(() -> reservation.cancel(otherUser, now))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약은 취소할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("이미 지난 예약을 취소하면 예외가 발생한다.")
+    void cancel_WhenAlreadyPassed_ThrowUnprocessableEntityException() {
+        Reservation reservation = new Reservation(userName, date, time, theme); //10:00
+        LocalDateTime now = LocalDateTime.of(date, time.getStartAt()).plusMinutes(1); // 10:01
+
+        assertThatThrownBy(() -> reservation.cancel(userName, now))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("이미 지난 예약은 취소할 수 없습니다.");
     }
 }

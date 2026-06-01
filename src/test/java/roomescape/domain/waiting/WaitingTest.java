@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
@@ -87,5 +88,24 @@ public class WaitingTest {
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("대기 신청 시간이 비어 있습니다.");
+    }
+
+    @Test
+    @DisplayName("본인의 예약 대기를 취소하면 성공한다.")
+    void cancel_WhenOwner_Success() {
+        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+
+        assertDoesNotThrow(() -> waiting.cancel(userName));
+    }
+
+    @Test
+    @DisplayName("다른 사람의 예약 대기를 취소하면 예외가 발생한다.")
+    void cancel_WhenNotOwner_ThrowException() {
+        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+        UserName otherUser = UserName.parse("다른사람");
+
+        assertThatThrownBy(() -> waiting.cancel(otherUser))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약 대기는 취소할 수 없습니다.");
     }
 }
