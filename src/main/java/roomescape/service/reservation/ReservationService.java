@@ -44,7 +44,7 @@ public class ReservationService {
         Reservation nonIdReservation = Reservation.createNew(name, date, theme, reservationTime);
         reservationValidator.validateReservable(nonIdReservation);
 
-        if(reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)){
+        if (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
@@ -54,7 +54,7 @@ public class ReservationService {
     public void deleteById(final long id) {
         int affectedRowCount = reservationRepository.deleteById(id);
 
-        if(affectedRowCount <= 0) {
+        if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
         }
     }
@@ -72,7 +72,7 @@ public class ReservationService {
 
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
-        if(affectedRowCount <= 0) {
+        if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
         }
     }
