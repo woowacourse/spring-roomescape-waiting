@@ -18,9 +18,6 @@ import roomescape.repository.ThemeRepository;
 @Service
 @Transactional(readOnly = true)
 public class ThemeService {
-    private static final long DEFAULT_DAYS = 7;
-    private static final long DEFAULT_LIMIT = 10;
-
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
