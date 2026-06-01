@@ -6,9 +6,9 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationTimeRequest;
-import roomescape.application.service.ReservationQueryService;
-import roomescape.application.service.ReservationTimeCommandService;
-import roomescape.application.service.ReservationTimeQueryService;
+import roomescape.application.command.ReservationTimeCommandService;
+import roomescape.application.query.ReservationQueryService;
+import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.projection.ReservationTimeAvailability;
 

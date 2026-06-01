@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.service.ThemeQueryService;
+import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;

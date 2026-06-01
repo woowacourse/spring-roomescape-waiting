@@ -1,4 +1,4 @@
-package roomescape.application.service;
+package roomescape.application.command;
 
 import java.time.Clock;
 import java.time.LocalDateTime;

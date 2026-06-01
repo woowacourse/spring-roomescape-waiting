@@ -1,4 +1,4 @@
-package roomescape.application.service;
+package roomescape.application.query;
 
 import java.util.List;
 import org.springframework.stereotype.Service;

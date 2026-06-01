@@ -1,4 +1,4 @@
-package roomescape.application.service;
+package roomescape.application.query;
 
 import java.time.LocalDate;
 import java.util.HashSet;

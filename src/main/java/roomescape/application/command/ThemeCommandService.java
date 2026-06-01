@@ -1,4 +1,4 @@
-package roomescape.application.service;
+package roomescape.application.command;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
