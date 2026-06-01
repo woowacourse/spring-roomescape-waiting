@@ -18,13 +18,10 @@ import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.ReservationUpdateRequest;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
-import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
-import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.domain.theme.ThemeService;
 import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
@@ -51,17 +48,11 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository();
         waitingReservationRepository = new FakeWaitingReservationRepository();
 
-        ReservationDateService reservationDateService = new ReservationDateService(
-                reservationRepository, reservationDateRepository);
-        ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository, reservationRepository);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
-
         reservationService = new ReservationService(
                 reservationRepository,
-                reservationDateService,
-                reservationTimeService,
-                themeService,
+                reservationDateRepository,
+                reservationTimeRepository,
+                themeRepository,
                 waitingReservationRepository,
                 CLOCK
         );
@@ -234,6 +225,24 @@ class ReservationServiceTest {
 
         assertThat(updateResponse.date()).isEqualTo(newDate.getPlayDay());
         assertThat(updateResponse.time().id()).isEqualTo(newTime.getId());
+    }
+
+    @Test
+    @DisplayName("기존 예약과 같은 날짜와 시간으로 예약 수정 시 예외가 발생한다.")
+    void updateReservationWithoutChange() {
+        ReservationDate date = reservationDateRepository.save(
+                ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
+
+        ReservationCreationResponse creationResponse = reservationService.createReservation(
+                new ReservationCreationRequest("테스터", date.getId(), time.getId(), theme.getId()));
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(date.getId(), time.getId());
+
+        assertThatThrownBy(() -> reservationService.updateReservation(creationResponse.id(), updateRequest))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining(ReservationErrorCode.RESERVATION_NOT_CHANGED.getMessage());
     }
 
     @Test

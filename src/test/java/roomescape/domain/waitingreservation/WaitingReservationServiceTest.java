@@ -14,15 +14,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateService;
+import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeService;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeService;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
 import roomescape.support.exception.RoomescapeException;
@@ -36,24 +37,24 @@ class WaitingReservationServiceTest {
 
     private ReservationRepository reservationRepository;
     private WaitingReservationRepository waitingReservationRepository;
-    private ReservationDateService reservationDateService;
-    private ReservationTimeService reservationTimeService;
-    private ThemeService themeService;
+    private ReservationDateRepository reservationDateRepository;
+    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
     private WaitingReservationService waitingReservationService;
 
     @BeforeEach
     void setUp() {
         reservationRepository = mock(ReservationRepository.class);
         waitingReservationRepository = mock(WaitingReservationRepository.class);
-        reservationDateService = mock(ReservationDateService.class);
-        reservationTimeService = mock(ReservationTimeService.class);
-        themeService = mock(ThemeService.class);
+        reservationDateRepository = mock(ReservationDateRepository.class);
+        reservationTimeRepository = mock(ReservationTimeRepository.class);
+        themeRepository = mock(ThemeRepository.class);
         waitingReservationService = new WaitingReservationService(
             waitingReservationRepository,
             reservationRepository,
-            reservationDateService,
-            reservationTimeService,
-            themeService,
+            reservationDateRepository,
+            reservationTimeRepository,
+            themeRepository,
             FIXED_CLOCK
         );
     }
@@ -73,9 +74,9 @@ class WaitingReservationServiceTest {
             LocalDateTime.of(2026, 5, 5, 14, 0)
         );
 
-        when(reservationDateService.findById(1L)).thenReturn(date);
-        when(reservationTimeService.findById(2L)).thenReturn(time);
-        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationDateRepository.findById(1L)).thenReturn(Optional.of(date));
+        when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(time));
+        when(themeRepository.findById(3L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.save(any(WaitingReservation.class))).thenReturn(savedWaiting);
 
@@ -95,9 +96,9 @@ class WaitingReservationServiceTest {
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
-        when(reservationDateService.findById(1L)).thenReturn(date);
-        when(reservationTimeService.findById(2L)).thenReturn(time);
-        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationDateRepository.findById(1L)).thenReturn(Optional.of(date));
+        when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(time));
+        when(themeRepository.findById(3L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(false);
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
@@ -112,9 +113,9 @@ class WaitingReservationServiceTest {
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
-        when(reservationDateService.findById(1L)).thenReturn(date);
-        when(reservationTimeService.findById(2L)).thenReturn(time);
-        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationDateRepository.findById(1L)).thenReturn(Optional.of(date));
+        when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(time));
+        when(themeRepository.findById(3L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId("고래", 1L, 2L, 3L)).thenReturn(true);
 
@@ -130,9 +131,9 @@ class WaitingReservationServiceTest {
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
-        when(reservationDateService.findById(1L)).thenReturn(date);
-        when(reservationTimeService.findById(2L)).thenReturn(time);
-        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationDateRepository.findById(1L)).thenReturn(Optional.of(date));
+        when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(time));
+        when(themeRepository.findById(3L)).thenReturn(Optional.of(theme));
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)

@@ -12,33 +12,35 @@ import roomescape.domain.reservation.dto.ReservationCreationResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.ReservationUpdateRequest;
 import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateService;
+import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeService;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeService;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
+import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.RoomescapeErrorCode;
+import roomescape.support.exception.ThemeErrorCode;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationDateService reservationDateService;
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
+    private final ReservationDateRepository reservationDateRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
     private final WaitingReservationRepository waitingReservationRepository;
     private final Clock clock;
 
     public ReservationCreationResponse createReservation(ReservationCreationRequest request) {
-        ReservationDate reservationDate = reservationDateService.findById(request.dateId());
-        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
-        Theme theme = themeService.findById(request.themeId());
+        ReservationDate reservationDate = getReservationDate(request.dateId());
+        ReservationTime reservationTime = getReservationTime(request.timeId());
+        Theme theme = getTheme(request.themeId());
         ReservationSlot slot = new ReservationSlot(reservationDate, reservationTime, theme);
         validateReservableDate(slot);
         validateNotDuplicated(slot);
@@ -53,17 +55,17 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> getReservationsByName(String name) {
+        return reservationRepository.findByName(name).stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
     public void deleteReservation(Long id) {
         int deletedCount = reservationRepository.deleteById(id);
         if (deletedCount == 0) {
             throw new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
         }
-    }
-
-    public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 
     @Transactional
@@ -80,21 +82,20 @@ public class ReservationService {
         Reservation reservation = findById(id);
         validateReservableDate(reservation);
 
-        ReservationDate newReservationDate = reservationDateService.findById(request.dateId());
-        ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
+        ReservationDate newReservationDate = getReservationDate(request.dateId());
+        ReservationTime newReservationTime = getReservationTime(request.timeId());
         ReservationSlot currentSlot = ReservationSlot.from(reservation);
         ReservationSlot newSlot = new ReservationSlot(newReservationDate, newReservationTime, reservation.getTheme());
 
-        boolean slotChanged = !currentSlot.isSameSlot(newSlot);
-        if (slotChanged) {
-            validateReservableDate(newSlot);
-            validateNotDuplicated(newSlot);
+        boolean sameSlot = currentSlot.isSameSlot(newSlot);
+        if (sameSlot) {
+            throw new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_CHANGED);
         }
 
+        validateReservableDate(newSlot);
+        validateNotDuplicated(newSlot);
         updateReservationOrThrow(id, request);
-        if (slotChanged) {
-            promoteOldestWaiting(currentSlot);
-        }
+        promoteOldestWaiting(currentSlot);
         return ReservationResponse.from(findById(id));
     }
 
@@ -142,6 +143,21 @@ public class ReservationService {
     private Reservation findById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    private ReservationDate getReservationDate(Long id) {
+        return reservationDateRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ReservationDateErrorCode.RESERVATION_DATE_NOT_EXIST));
+    }
+
+    private ReservationTime getReservationTime(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_EXIST));
+    }
+
+    private Theme getTheme(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ThemeErrorCode.THEME_NOT_EXIST));
     }
 
     private void validateNotDuplicated(ReservationSlot slot) {
