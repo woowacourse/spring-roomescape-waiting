@@ -47,6 +47,10 @@ public class Reservation {
         return slot.isExpired();
     }
 
+    public boolean isSameSlot(LocalDate date, Long timeId, Long themeId) {
+        return slot.isEqualSlot(date, timeId, themeId);
+    }
+
     private static void validateNotExpired(Slot slot) {
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
