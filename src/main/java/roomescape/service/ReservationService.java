@@ -72,7 +72,7 @@ public class ReservationService {
     public ReservationResponse update(Long id, ReservationRequest reservationRequest) {
         Reservation existed = getReservation(id);
 
-        if (isSameSlot(existed, reservationRequest)) {
+        if (existed.isSameSlot(reservationRequest.date(), reservationRequest.timeId(), reservationRequest.themeId())) {
             Reservation renamed = existed.update(reservationRequest.name());
             reservationUpdatingDao.updateName(id, reservationRequest.name());
             return ReservationResponse.from(renamed);
@@ -146,11 +146,5 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationQueryingDao.findReservationById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약을 찾을 수 없습니다."));
-    }
-
-    private boolean isSameSlot(Reservation existed, ReservationRequest request) {
-        return existed.getDate().equals(request.date())
-                && existed.getTime().getId().equals(request.timeId())
-                && existed.getTheme().getId().equals(request.themeId());
     }
 }
