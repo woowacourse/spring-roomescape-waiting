@@ -245,7 +245,7 @@ public class ReservationService {
             throw new BadRequestException(ReservationDateErrors.PAST_RESERVATION_DATE_CANNOT_BE_DELETED, today);
         }
         if (isPastTimeToday(reservationSlot.getDate(), reservationSlot.getTime(), today, currentTime)) {
-            throw new BadRequestException(ReservationTimeErrors.PAST_RESERVATION_TiME_CANNOT_BE_DELETED, currentTime);
+            throw new BadRequestException(ReservationTimeErrors.PAST_RESERVATION_TIME_CANNOT_BE_DELETED, currentTime);
         }
     }
 
