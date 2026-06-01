@@ -66,6 +66,10 @@
   → 맥락: 다음 키 삽입 공간을 어떻게 막는지 — 인덱스 구조 레벨에서
   → 출처: log_17
 
+- [ ] **insert intention lock이 "충돌해서 대기하는" 상대는 누구인가**
+  → 맥락: intention끼리는 호환(안 막음)을 배움. 그럼 막히는 경우는? 누군가 먼저 그 gap에 일반 gap/next-key락을 걸어둔 경우 — SELECT ... FOR UPDATE/FOR SHARE, 범위 UPDATE/DELETE. 아래 "FOR SHARE 필요 시나리오"와 연결
+  → 출처: log_26
+
 ---
 
 ## 실전 판단 (DB 락)
