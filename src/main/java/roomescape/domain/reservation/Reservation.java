@@ -17,7 +17,7 @@ public class Reservation {
 
     private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
                         Theme theme, Status status, LocalDateTime dateTime) {
-        this.id = Objects.requireNonNull(id);
+        this.id = id;
         this.reservationName = Objects.requireNonNull(reservationName);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
@@ -28,7 +28,7 @@ public class Reservation {
 
     public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
                                    Theme theme, Status status, LocalDateTime dateTime) {
-        return new Reservation(id, reservationName, date, time, theme, status, dateTime);
+        return new Reservation(Objects.requireNonNull(id), reservationName, date, time, theme, status, dateTime);
     }
 
     public static Reservation reserve(
