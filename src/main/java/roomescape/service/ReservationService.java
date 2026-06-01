@@ -65,7 +65,14 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(ReservationRequest reservationReq) {
-        return createReservation(reservationReq);
+        try {
+            Slot slot = createSlot(reservationReq);
+            Reservation reservation = Reservation.create(reservationReq.name(), slot);
+            Long reservationId = reservationUpdatingDao.insert(reservation);
+            return ReservationResponse.from(reservation.withId(reservationId));
+        } catch (DuplicateKeyException e) {
+            throw new ReservationAlreadyExistException();
+        }
     }
 
     @Transactional
@@ -78,8 +85,14 @@ public class ReservationService {
             return ReservationResponse.from(updated);
         }
 
-        cancel(existed);
-        return createReservation(reservationRequest);
+        try {
+            Long previousSlotId = existed.getSlot().getId();
+            Reservation moved = updateSlot(existed, reservationRequest);
+            promoteOrCleanup(previousSlotId);
+            return ReservationResponse.from(moved);
+        } catch (DuplicateKeyException e) {
+            throw new ReservationAlreadyExistException();
+        }
     }
 
     @Transactional
@@ -92,54 +105,63 @@ public class ReservationService {
         if (reservation.isExpired()) {
             throw new ExpiredDateTimeException();
         }
-        cancel(reservation);
-    }
 
-    private void cancel(Reservation reservation) {
         long deleted = reservationUpdatingDao.delete(reservation.getId());
         if (deleted == 0) {
             throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
         }
-        Long slotId = reservation.getSlot().getId();
+        promoteOrCleanup(reservation.getSlot().getId());
+    }
 
+    private void promoteOrCleanup(Long slotId) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstBySlotId(slotId);
         if (firstWaiting.isEmpty()) {
-            long slotDeleted = slotDao.deleteIfNoWaiting(slotId);
-            if (slotDeleted == 0) {
-                throw new DataIntegrityViolationException("대기열이 변경되었습니다. 다시 시도해주세요.");
-            }
+            deleteSlot(slotId);
             return;
         }
 
-        ReservationWaiting waiting = firstWaiting.get();
-        long claimed = reservationWaitingDao.delete(waiting.getId());
+        promoteWaiting(firstWaiting.get());
+    }
+
+    private void promoteWaiting(ReservationWaiting reservationWaiting) {
+        long claimed = reservationWaitingDao.delete(reservationWaiting.getId());
         if (claimed == 0) {
             throw new DataIntegrityViolationException("대기열이 변경되었습니다. 다시 시도해주세요.");
         }
-        reservationUpdatingDao.insert(waiting.promote());
+        reservationUpdatingDao.insert(reservationWaiting.promote());
     }
 
-    private ReservationResponse createReservation(ReservationRequest request) {
+    private Reservation updateSlot(Reservation existed, ReservationRequest request) {
+        Slot newSlot = createSlot(request);
+        Reservation moved = existed.update(request.name(), newSlot);
+
+        long updated = reservationUpdatingDao.update(moved.getId(), moved.getName(), newSlot.getId(), moved.getCreatedAt());
+        if (updated == 0) {
+            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
+        }
+        return moved;
+    }
+
+    private Slot createSlot(ReservationRequest request) {
         ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(request.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
         Theme theme = themeQueryingDao.findThemeById(request.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
 
         Slot slot = Slot.create(request.date(), time, theme);
+
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
         }
-        if (slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId()).isPresent()) {
-            throw new ReservationAlreadyExistException();
-        }
 
-        try {
-            Long slotId = slotDao.insert(slot);
-            Reservation reservation = Reservation.create(request.name(), slot.withId(slotId));
-            Long reservationId = reservationUpdatingDao.insert(reservation);
-            return ReservationResponse.from(reservation.withId(reservationId));
-        } catch (DuplicateKeyException e) {
-            throw new ReservationAlreadyExistException();
+        Long slotId = slotDao.insert(slot);
+        return slot.withId(slotId);
+    }
+
+    private void deleteSlot(long slotId) {
+        long slotDeleted = slotDao.deleteIfNoWaiting(slotId);
+        if (slotDeleted == 0) {
+            throw new DataIntegrityViolationException("대기열이 변경되었습니다. 다시 시도해주세요.");
         }
     }
 

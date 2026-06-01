@@ -10,11 +10,12 @@ import roomescape.exception.ExpiredDateTimeException;
 public class Reservation {
 
     private final Long id;
-    private final Slot slot;
     private final String name;
+    private final Slot slot;
+
     private final LocalDateTime createdAt;
 
-    private Reservation(Long id, Slot slot, String name, LocalDateTime createdAt) {
+    private Reservation(Long id, String name, Slot slot, LocalDateTime createdAt) {
         this.id = id;
         this.slot = slot;
         this.name = name;
@@ -23,20 +24,25 @@ public class Reservation {
 
     public static Reservation create(String name, Slot slot) {
         validateNotExpired(slot);
-        return new Reservation(null, slot, name, LocalDateTime.now());
+        return new Reservation(null, name, slot, LocalDateTime.now());
     }
 
     public static Reservation restore(Long id, Slot slot, String name, LocalDateTime createdAt) {
-        return new Reservation(id, slot, name, createdAt);
+        return new Reservation(id, name, slot, createdAt);
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, this.slot, this.name, this.createdAt);
+        return new Reservation(id, this.name, this.slot, this.createdAt);
     }
 
     public Reservation update(String name) {
         validateNotExpired(this.slot);
-        return new Reservation(this.id, this.slot, name, this.createdAt);
+        return new Reservation(this.id, name, this.slot, this.createdAt);
+    }
+
+    public Reservation update(String name, Slot slot) {
+        validateNotExpired(this.slot);
+        return new Reservation(this.id, name, slot, LocalDateTime.now());
     }
 
     public boolean isReservedBy(String name) {
