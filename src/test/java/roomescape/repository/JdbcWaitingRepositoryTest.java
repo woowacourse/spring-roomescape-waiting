@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -21,13 +23,13 @@ import roomescape.domain.Waiting;
 class JdbcWaitingRepositoryTest {
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    ThemeRepository themeRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
-    WaitingRepository waitingRepository;
+    private WaitingRepository waitingRepository;
 
     @Test
     void 대기를_등록하면_id를_부여한다() {
@@ -266,9 +268,50 @@ class JdbcWaitingRepositoryTest {
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
         // when
-        Optional<Long> maxNum = waitingRepository.findMaxWaitingNumberBy(date, reservationTime, theme);
+        Optional<Long> maxNum = waitingRepository.findMaxWaitingNumberBy(date, reservationTime,
+                theme);
 
         // then
         assertThat(maxNum).isEmpty();
+    }
+
+    @Test
+    void 한_슬롯에_동일한_사용자의_대기를_등록하려고_하면_DuplicateKeyException이_발생한다() {
+        // given
+        String name = "코코";
+        LocalDate date = LocalDate.parse("2026-05-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        ReservationTime otherReservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("11:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+
+        // when
+        waitingRepository.save(Waiting.create(name, date, reservationTime, theme, 1L));
+
+        // then
+        assertThatThrownBy(() -> waitingRepository.save(
+                Waiting.create(name, date, reservationTime, theme, 4L))
+        ).isInstanceOf(DuplicateKeyException.class);
+    }
+
+    @Test
+    void 한_슬롯에_중복되는_대기번호로_대기를_등록하려고_하면_DuplicateKeyException이_발생한다() {
+        // given
+        LocalDate date = LocalDate.parse("2026-05-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        ReservationTime otherReservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("11:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        Long waitingNumber = 3L;
+
+        // when
+        waitingRepository.save(Waiting.create("루드비코", date, reservationTime, theme, waitingNumber));
+
+        // then
+        assertThatThrownBy(() -> waitingRepository.save(
+                Waiting.create("코코", date, reservationTime, theme, waitingNumber))
+        ).isInstanceOf(DuplicateKeyException.class);
     }
 }
