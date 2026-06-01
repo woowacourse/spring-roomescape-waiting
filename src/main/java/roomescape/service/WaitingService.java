@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -34,6 +36,7 @@ public class WaitingService {
         this.clock = clock;
     }
 
+    @Transactional
     public WaitingResult createWaiting(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND));
@@ -52,11 +55,12 @@ public class WaitingService {
         return WaitingResult.of(waiting, order);
     }
 
+    @Transactional
     public void deleteWaiting(Long id, String name) {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        waiting.validateOwner(name);
+        waiting.validateCancelableBy(name);
         waitingRepository.delete(waiting);
     }
 

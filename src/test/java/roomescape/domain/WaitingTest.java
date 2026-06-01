@@ -73,7 +73,7 @@ class WaitingTest {
         Waiting waiting = new Waiting(
                 7L, "브라운", LocalDate.of(2026, 5, 10), TIME, THEME);
 
-        assertThatThrownBy(() -> waiting.validateOwner("어셔"))
+        assertThatThrownBy(() -> waiting.validateCancelableBy("어셔"))
                 .isInstanceOf(DomainConflictException.class);
     }
 }
