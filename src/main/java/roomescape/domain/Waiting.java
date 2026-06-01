@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Waiting {
     private final Long id;
@@ -23,6 +24,10 @@ public class Waiting {
 
     public Waiting(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
         this(null, member, date, time, theme, storeId, null);
+    }
+
+    public boolean isOwnedBy(Long memberId) {
+        return Objects.equals(this.member.getId(), memberId);
     }
 
     public Long getId() {

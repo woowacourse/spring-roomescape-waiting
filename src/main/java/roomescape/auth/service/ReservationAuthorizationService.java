@@ -20,7 +20,7 @@ public class ReservationAuthorizationService {
 
     public void validateMemberCanAccess(Long memberId, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
-        if (!reservation.getMember().getId().equals(memberId)) {
+        if (!reservation.isOwnedBy(memberId)) {
             throw new HiddenResourceException();
         }
     }

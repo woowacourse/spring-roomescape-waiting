@@ -114,7 +114,8 @@ public class WaitingJdbcDao implements WaitingDao {
 
         long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return findById(id).orElse(null);
+        return findById(id)
+                .orElseThrow(() -> new IllegalStateException("방금 저장한 대기를 조회하지 못했습니다. id=" + id));
     }
 
     @Override

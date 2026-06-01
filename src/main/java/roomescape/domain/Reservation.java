@@ -34,7 +34,11 @@ public class Reservation {
             throw new BusinessRuleViolationException("지난 시간에 대한 예약 생성은 불가능합니다.");
         }
         return new Builder()
-                .member(member).date(date).time(time).theme(theme).storeId(storeId)
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .storeId(storeId)
                 .build();
     }
 
@@ -44,7 +48,11 @@ public class Reservation {
 
     public static Reservation createByAdmin(Member member, LocalDate date, Time time, Theme theme, Long storeId) {
         return new Builder()
-                .member(member).date(date).time(time).theme(theme).storeId(storeId)
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .storeId(storeId)
                 .build();
     }
 
@@ -52,8 +60,15 @@ public class Reservation {
                                           ReservationStatus status, LocalDateTime deletedAt, long version,
                                           Long storeId) {
         return new Builder()
-                .id(id).member(member).date(date).time(time).theme(theme).storeId(storeId)
-                .status(status).deletedAt(deletedAt).version(version)
+                .id(id)
+                .member(member)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .storeId(storeId)
+                .status(status)
+                .deletedAt(deletedAt)
+                .version(version)
                 .build();
     }
 
@@ -92,6 +107,10 @@ public class Reservation {
 
     public boolean isSameMember(Member member) {
         return Objects.equals(this.member.getId(), member.getId());
+    }
+
+    public boolean isOwnedBy(Long memberId) {
+        return Objects.equals(this.member.getId(), memberId);
     }
 
     @Override
