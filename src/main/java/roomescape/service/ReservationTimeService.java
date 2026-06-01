@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -13,9 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.dto.command.ReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -70,7 +70,7 @@ public class ReservationTimeService {
     private void validateTimeIncludeReservation(long reservationTimeId) {
         boolean existsByTimeId = reservationDao.existsByTimeId(reservationTimeId);
         if (existsByTimeId) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_CANNOT_DELETE);
+            throw new RoomEscapeException(ReservationTimeErrorCode.RESERVATION_TIME_CANNOT_DELETE);
         }
     }
 }
