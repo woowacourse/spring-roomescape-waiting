@@ -74,6 +74,22 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Reservation update(Reservation reservation) {
+        jdbcTemplate.update(
+                "UPDATE reservation " +
+                        "SET name = ?, time_id = ?, theme_id =?, status = ?, created_at = ? " +
+                        "WHERE id = ?",
+                reservation.getName(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getStatus().name(),
+                reservation.getCreatedAt(),
+                reservation.getId()
+        );
+        return reservation;
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         Number id = reservationInsert.executeAndReturnKey(new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
@@ -234,6 +250,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByName(String name) {
+        return jdbcTemplate.query(
+                BASE_SELECT + "WHERE r.name = ?",
+                new ReservationRowMapper(),
+                name
+        );
+    }
+
+    @Override
     public boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time) {
         Integer exists = jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE name = ? AND theme_id = ? AND time_id = ?)",
@@ -244,4 +269,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
         return exists != null && exists == 1;
     }
+
+    @Override
+    public List<Reservation> findAllWaitingBy(Long timeId, Long themeId) {
+        return jdbcTemplate.query(
+                BASE_SELECT + "WHERE r.time_id = ? AND r.theme_id = ? AND r.status = 'WAITING'",
+                new ReservationRowMapper(),
+                timeId, themeId
+        );
+    }
+
 }

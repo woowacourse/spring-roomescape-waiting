@@ -18,6 +18,8 @@ public interface ReservationRepository {
 
     boolean update(Long id, Long timeId, LocalDateTime now);
 
+    Reservation update(Reservation reservation);
+
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
     boolean deleteById(Long id);
@@ -32,5 +34,9 @@ public interface ReservationRepository {
 
     List<ReservationWithWaitingOrder> findAllByName(String name);
 
+    List<Reservation> findByName(String name);
+
     boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time);
+
+    List<Reservation> findAllWaitingBy(Long timeId, Long themeId);
 }
