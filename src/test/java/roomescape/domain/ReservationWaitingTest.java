@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
@@ -22,8 +23,8 @@ public class ReservationWaitingTest {
 
     @Test
     void 예약_대기가_제대로_생성되었는지_확인한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.now(), reservationTime,
-                theme, 1L,
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now(), reservationTime,
+                theme), 1L,
                 LocalDateTime.now());
 
         assertThat(reservationWaiting.getId()).isEqualTo(1L);
@@ -35,8 +36,8 @@ public class ReservationWaitingTest {
     void 미래_날짜_시간으로_예약_대기하면_정상_작동한다(int day, int time) {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(time));
 
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.now().plusDays(day), reservationTime,
-                theme, 1L,
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(day), reservationTime,
+                theme), 1L,
                 LocalDateTime.now());
 
         assertThatCode(reservationWaiting::validatePastDateTime).doesNotThrowAnyException();
@@ -47,8 +48,8 @@ public class ReservationWaitingTest {
     void 과거_날짜_시간으로_예약_대기하면_예외가_발생한다(int day, int time) {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(time));
 
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.now().minusDays(day), reservationTime,
-                theme, 1L,
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(day), reservationTime,
+                theme), 1L,
                 LocalDateTime.now());
 
         assertThatThrownBy(reservationWaiting::validatePastDateTime)

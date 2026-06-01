@@ -12,34 +12,29 @@ public class Reservation {
 
     private Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
     private final LocalDateTime createdAt;
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(String name, ReservationSlot slot) {
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
         this.createdAt = LocalDateTime.now();
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    public Reservation(Long id, String name, ReservationSlot slot, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
         this.createdAt = createdAt;
     }
 
     public Reservation withReservationId(Long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme, this.createdAt);
+        return new Reservation(id, this.name, this.slot, this.createdAt);
     }
 
     public Reservation withUpdatedDateAndTime(LocalDate date, ReservationTime time) {
-        return new Reservation(id, this.name, date, time, this.theme, this.createdAt);
+        ReservationSlot updatedSlot = new ReservationSlot(date, time, slot.getTheme());
+        return new Reservation(id, this.name, updatedSlot, this.createdAt);
     }
 
     public Long getId() {
@@ -51,15 +46,15 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public LocalDateTime getCreatedAt() {
@@ -78,7 +73,7 @@ public class Reservation {
     }
 
     public void validatePastDateTime() {
-        validateNoPast(this.date, this.time);
+        validateNoPast(this.slot.getDate(), this.slot.getTime());
     }
 
     public static void validateNoPast(LocalDate date, ReservationTime time) {

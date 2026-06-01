@@ -7,31 +7,33 @@ import java.time.LocalDate;
 public class ReservationSlot {
 
     private final LocalDate date;
-    private final Long timeId;
-    private final Long themeId;
+    private final ReservationTime time;
+    private final Theme theme;
 
     public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
         this.date = date;
-        this.timeId = time.getId();
-        this.themeId = theme.getId();
-    }
-
-    public ReservationSlot(LocalDate date, Long timeId, Long themeId) {
-        this.date = date;
-        this.timeId = timeId;
-        this.themeId = themeId;
+        this.time = time;
+        this.theme = theme;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
     public Long getTimeId() {
-        return timeId;
+        return time.getId();
     }
 
     public Long getThemeId() {
-        return themeId;
+        return theme.getId();
     }
 
     @Override
@@ -39,12 +41,12 @@ public class ReservationSlot {
         if (this == o) return true;
         if (!(o instanceof ReservationSlot that)) return false;
         return java.util.Objects.equals(date, that.date)
-                && java.util.Objects.equals(timeId, that.timeId)
-                && java.util.Objects.equals(themeId, that.themeId);
+                && java.util.Objects.equals(getTimeId(), that.getTimeId())
+                && java.util.Objects.equals(getThemeId(), that.getThemeId());
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(date, timeId, themeId);
+        return java.util.Objects.hash(date, getTimeId(), getThemeId());
     }
 }

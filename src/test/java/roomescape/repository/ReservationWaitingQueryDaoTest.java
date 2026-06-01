@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 @JdbcTest
 public class ReservationWaitingQueryDaoTest {
@@ -36,8 +39,11 @@ public class ReservationWaitingQueryDaoTest {
 
     @Test
     void 예약_대기가_제대로_존재하는_지_조회한다() {
-        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-27"), 1L, 1L))).isTrue();
-        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-26"), 1L, 1L))).isFalse();
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        Theme theme = new Theme(1L, "테스트", "설명", "url");
+
+        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-27"), reservationTime, theme))).isTrue();
+        assertThat(reservationWaitingQueryingDao.isExistByNameAndSlot("테스트", new ReservationSlot(LocalDate.parse("2027-05-26"), reservationTime, theme))).isFalse();
     }
 
     @Test

@@ -52,7 +52,7 @@ public class ReservationWaitingQueryDao {
     private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = new ReservationTime(
                 resultSet.getLong("time_id"),
-                resultSet.getObject("start_at", LocalTime.class)
+                resultSet.getObject("time_start_at", LocalTime.class)
         );
 
         Theme theme = new Theme(
@@ -62,12 +62,16 @@ public class ReservationWaitingQueryDao {
                 resultSet.getString("theme_url")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class),
+                reservationTime,
+                theme
+        );
+
         return new ReservationWaiting(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
-                resultSet.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
+                slot,
                 resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );

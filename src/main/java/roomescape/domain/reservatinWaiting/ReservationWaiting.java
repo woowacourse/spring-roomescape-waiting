@@ -2,6 +2,8 @@ package roomescape.domain.reservatinWaiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
@@ -11,32 +13,27 @@ public class ReservationWaiting {
 
     private Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
     private Long sequence;
     private final LocalDateTime createdAt;
 
-    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationWaiting(String name, ReservationSlot slot) {
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
         this.createdAt = LocalDateTime.now();
     }
 
-    public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot, Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
         this.sequence = sequence;
         this.createdAt = createdAt;
     }
 
     public ReservationWaiting withReservationWaitingId(Long id) {
-        return new ReservationWaiting(id, this.name, this.date, this.time, this.theme, this.sequence, this.createdAt);
+        ReservationSlot reservationSlot = new ReservationSlot(slot.getDate(), slot.getTime(), slot.getTheme());
+        return new ReservationWaiting(id, this.name, reservationSlot, this.sequence, this.createdAt);
     }
 
     public Long getId() {
@@ -48,15 +45,15 @@ public class ReservationWaiting {
     }
 
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public Long getSequence() {
@@ -68,7 +65,7 @@ public class ReservationWaiting {
     }
 
     public void validatePastDateTime() {
-        if(LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+        if(LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt()).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();
         }
     }

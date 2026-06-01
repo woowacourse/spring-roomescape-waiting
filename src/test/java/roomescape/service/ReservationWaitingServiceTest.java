@@ -26,6 +26,7 @@ import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
@@ -61,13 +62,13 @@ public class ReservationWaitingServiceTest {
     @Test
     void 예약_대기열이_정상_생성된다() {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("테스트", now, 1L, 1L);
-        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
+        ReservationWaiting createdWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(false);
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
-                Optional.of(new Reservation("test2", now, reservationTime, theme))
+        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(false);
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+                Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(createdWaiting));
@@ -104,11 +105,11 @@ public class ReservationWaitingServiceTest {
         ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("test",
                 pastDate, 1L, 1L);
 
-        Reservation pastReservation = new Reservation(1L, "다른사람", pastDate, reservationTime, theme, LocalDateTime.now());
+        Reservation pastReservation = new Reservation(1L, "다른사람", new ReservationSlot(pastDate, reservationTime, theme), LocalDateTime.now());
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(pastDate, 1L, 1L))).thenReturn(Optional.of(pastReservation));
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(pastDate, reservationTime, theme))).thenReturn(Optional.of(pastReservation));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ExpiredDateTimeException.class);
@@ -120,7 +121,7 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
                 Optional.empty()
         );
 
@@ -134,8 +135,8 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(now, 1L, 1L)))
-                .thenReturn(Optional.of(new Reservation("테스트", now, reservationTime, theme)));
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(now, reservationTime, theme)))
+                .thenReturn(Optional.of(new Reservation("테스트", new ReservationSlot(now, reservationTime, theme))));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(InvalidInputException.class);
@@ -143,7 +144,7 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_삭제된다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(now, reservationTime, theme), 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트")).doesNotThrowAnyException();
@@ -151,7 +152,7 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 과거_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", LocalDate.now().minusDays(1), reservationTime, theme, 1L, LocalDateTime.now());
+        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme), 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId(), "테스트"))
@@ -163,7 +164,7 @@ public class ReservationWaitingServiceTest {
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "테스트"))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(WaitingNotFoundException.class);
     }
 
     @Test
@@ -172,10 +173,10 @@ public class ReservationWaitingServiceTest {
 
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(
-                Optional.of(new Reservation("test2", now, reservationTime, theme))
+        when(reservationQueryingDao.findReservationBySlot(new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(
+                Optional.of(new Reservation("test2", new ReservationSlot(now, reservationTime, theme)))
         );
-        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.themeId()))).thenReturn(true);
+        when(reservationWaitingQueryingDao.isExistByNameAndSlot(reservationWaitingRequest.name(), new ReservationSlot(reservationWaitingRequest.date(), reservationTime, theme))).thenReturn(true);
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest)).isInstanceOf(
                 InvalidInputException.class);

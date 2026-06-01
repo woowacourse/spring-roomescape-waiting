@@ -37,12 +37,16 @@ public class ReservationQueryDao {
                 resultSet.getString("theme_url")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("reservation_date", LocalDate.class),
+                reservationTime,
+                theme
+        );
+
         return new Reservation(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
-                resultSet.getObject("reservation_date", LocalDate.class),
-                reservationTime,
-                theme,
+                slot,
                 resultSet.getObject("reservation_created_at", LocalDateTime.class)
         );
     };

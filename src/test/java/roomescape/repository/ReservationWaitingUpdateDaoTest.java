@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -62,12 +63,16 @@ public class ReservationWaitingUpdateDaoTest {
                 resultSet.getString("theme_url")
         );
 
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class),
+                reservationTime,
+                theme
+        );
+
         return new ReservationWaiting(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
-                resultSet.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
+                slot,
                 resultSet.getLong("sequence"),
                 resultSet.getObject("created_at", LocalDateTime.class)
         );
@@ -95,7 +100,7 @@ public class ReservationWaitingUpdateDaoTest {
 
     @Test
     void 예약_대기를_제대로_생성한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting("테스트", LocalDate.parse("2027-05-27"), reservationTime, theme);
+        ReservationWaiting reservationWaiting = new ReservationWaiting("테스트", new ReservationSlot(LocalDate.parse("2027-05-27"), reservationTime, theme));
 
         reservationWaitingUpdateDao.create(reservationWaiting);
 

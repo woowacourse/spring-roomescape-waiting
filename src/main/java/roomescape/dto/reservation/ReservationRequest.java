@@ -1,6 +1,7 @@
 package roomescape.dto.reservation;
 
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.InvalidInputException;
@@ -36,6 +37,6 @@ public record ReservationRequest(String name, LocalDate date, Long timeId, Long 
     }
 
     public Reservation toReservation(ReservationTime reservationTime, Theme theme) {
-        return new Reservation(name, date, reservationTime, theme);
+        return new Reservation(name, new ReservationSlot(date, reservationTime, theme));
     }
 }
