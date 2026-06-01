@@ -32,8 +32,8 @@ class MyHistoryApiTest {
         createReservationTime(2L, "11:00:00");
         createReservation(1L, "아루", LocalDate.parse("2026-08-06"), 1L, 1L);
         createReservation(2L, "쿠다", LocalDate.parse("2026-08-07"), 1L, 2L);
-        createReservationWaiting(1L, 2L, "다른이름", "11:59:00");
-        createReservationWaiting(2L, 2L, "아루", "12:00:00");
+        createReservationWaiting(1L, 2L, "다른이름", "2026-08-05 11:59:00");
+        createReservationWaiting(2L, 2L, "아루", "2026-08-05 12:00:00");
     }
 
     @Test

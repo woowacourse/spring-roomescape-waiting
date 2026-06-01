@@ -1,7 +1,7 @@
 package roomescape.repository.reservationwaiting;
 
 import java.sql.PreparedStatement;
-import java.sql.Time;
+import java.sql.Timestamp;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -26,7 +26,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setLong(1, reservationWaiting.getReservation().getId());
             preparedStatement.setString(2, reservationWaiting.getName());
-            preparedStatement.setTime(3, Time.valueOf(reservationWaiting.getRequestAt()));
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(reservationWaiting.getRequestAt()));
             return preparedStatement;
         }, keyHolder);
 

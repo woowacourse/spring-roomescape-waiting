@@ -34,7 +34,7 @@ CREATE TABLE reservation_waiting
     id             BIGINT       NOT NULL AUTO_INCREMENT,
     reservation_id BIGINT       NOT NULL,
     name           VARCHAR(255) NOT NULL,
-    requested_at   TIME         NOT NULL,
+    requested_at   TIMESTAMP    NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
     UNIQUE (reservation_id, name)

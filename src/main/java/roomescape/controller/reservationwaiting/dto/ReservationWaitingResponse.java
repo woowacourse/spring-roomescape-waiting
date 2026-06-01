@@ -1,13 +1,13 @@
 package roomescape.controller.reservationwaiting.dto;
 
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import roomescape.controller.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 
 public record ReservationWaitingResponse(
         Long id,
         String name,
-        LocalTime requestAt,
+        LocalDateTime requestAt,
         ReservationResponse reservationResponse
 ) {
     public static ReservationWaitingResponse from(final ReservationWaiting reservationWaiting) {
