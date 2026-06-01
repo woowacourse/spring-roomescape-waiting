@@ -9,7 +9,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
@@ -20,7 +19,6 @@ import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
 @ServiceTest
-@Transactional
 public class ReservationTimeCommandServiceTest {
 
     @Autowired

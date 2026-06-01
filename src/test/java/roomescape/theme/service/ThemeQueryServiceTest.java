@@ -7,7 +7,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -16,7 +15,6 @@ import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.application.service.ThemeQueryService;
 
 @ServiceTest
-@Transactional
 public class ThemeQueryServiceTest {
 
     private static final LocalDate CURRENT_DATE = LocalDate.of(2026, 5, 6);

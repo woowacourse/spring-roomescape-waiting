@@ -10,7 +10,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
@@ -25,7 +24,6 @@ import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
 @ServiceTest
-@Transactional
 class WaitingCommandServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 1, 0, 0);

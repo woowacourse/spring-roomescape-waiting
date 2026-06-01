@@ -7,7 +7,6 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
@@ -17,7 +16,6 @@ import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
 @ServiceTest
-@Transactional
 class ReservationQueryServiceTest {
 
     @Autowired

@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
@@ -19,7 +18,6 @@ import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.application.service.ThemeCommandService;
 
 @ServiceTest
-@Transactional
 public class ThemeCommandServiceTest {
 
     @Autowired
