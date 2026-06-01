@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
+import roomescape.reservation.domain.MyReservation;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationWaitings;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -78,7 +80,15 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
-        return reservationRepository.findAllByName(name).stream()
+        List<Reservation> myReservations = reservationRepository.findByName(name);
+
+        return myReservations.stream()
+                .map(reservation -> MyReservation.of(
+                        reservation,
+                        new ReservationWaitings(
+                                reservationRepository.findAllWaitingBy(
+                                        reservation.getTime().getId(),
+                                        reservation.getTheme().getId()))))
                 .map(ReservationWithWaitingOrderResponse::from)
                 .toList();
     }
@@ -91,8 +101,13 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.validateCancelBy(name, LocalDateTime.now());
 
         if (reservation.isReserved()) {
-            reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
-                    .ifPresent(reservationRepository::promoteToReserved);
+            ReservationWaitings waitings = new ReservationWaitings(
+                    reservationRepository.findAllWaitingBy(
+                            reservation.getTime().getId(),
+                            reservation.getTheme().getId()));
+            waitings.earliest()
+                    .map(Reservation::promote)
+                    .ifPresent(reservationRepository::update);
         }
         reservationRepository.deleteById(id);
     }
@@ -102,10 +117,11 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation update(Long id, Long timeId, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.validateUpdateBy(name, LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+        reservation.validateUpdateBy(name, now);
 
         ReservationTime newTime = timeService.findById(timeId);
-        newTime.validateExpired(LocalDateTime.now());
+        newTime.validateExpired(now);
 
         if (holidayService.isHoliday(newTime.getDate())) {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
@@ -115,10 +131,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new DuplicateReservationException();
         }
 
-        boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now());
-        if (!updated) {
-            throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
-        }
-        return reservation.withTime(newTime);
+        Reservation updatedReservation = reservation.withTime(newTime).withCreatedAt(now);
+        return reservationRepository.update(updatedReservation);
     }
 }
