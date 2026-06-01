@@ -43,6 +43,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler
+    public ErrorResponse handleUnexpected(Exception e) {
+        return new ErrorResponse("서버 내부 오류가 발생했습니다.");
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
     public ErrorResponse handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
