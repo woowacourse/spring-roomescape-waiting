@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoomEscape</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0d1a;
+      --surface: #111827;
+      --card: #1a2236;
+      --card-hover: #1f2a40;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245,158,11,0.15);
+      --danger: #ef4444;
+      --success: #10b981;
+      --text: #f3f4f6;
+      --muted: #6b7280;
+      --border: #1f2937;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .username-badge {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .username-badge strong {
+      color: var(--accent);
+    }
+
+    .btn-logout {
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 12px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      background: var(--accent-dim);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 16px; }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+    }
+
+    /* Section */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* Theme cards grid */
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .theme-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-card:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(245,158,11,0.15);
+    }
+
+    .theme-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+      background: #1f2937;
+    }
+
+    .theme-card-body {
+      padding: 16px;
+    }
+
+    .theme-card-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .theme-card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Popular theme rank badge */
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .rank-1 { background: #f59e0b; color: #0a0d1a; }
+    .rank-2 { background: #9ca3af; color: #0a0d1a; }
+    .rank-3 { background: #b45309; color: #f3f4f6; }
+    .rank-n { background: var(--border); color: var(--muted); }
+
+    /* Booking flow */
+    .booking-steps {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      align-items: center;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step.done .step-num { background: var(--success); color: white; }
+    .step.active .step-num { background: var(--accent); color: #0a0d1a; }
+    .step.active { color: var(--text); }
+
+    .step-arrow { color: var(--border); font-size: 10px; }
+
+    .booking-step { display: none; }
+    .booking-step.active { display: block; }
+
+    /* Date picker section */
+    .date-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 500px;
+    }
+
+    .selected-theme-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .selected-theme-info img {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .selected-theme-info h3 { font-size: 15px; font-weight: 700; }
+    .selected-theme-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    input[type="date"] {
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      width: 100%;
+      max-width: 220px;
+      margin-bottom: 20px;
+    }
+
+    input[type="date"]:focus { border-color: var(--accent); }
+
+    /* Time slots grid */
+    .reservationTime-slots {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .reservationTime-slot {
+      padding: 10px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .reservationTime-slot small {
+      display: block;
+      margin-top: 4px;
+      font-size: 11px;
+      color: inherit;
+      opacity: 0.82;
+    }
+
+    .reservationTime-slot:hover:not(.unavailable) {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .reservationTime-slot.selected {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #0a0d1a;
+      font-weight: 700;
+    }
+
+    .reservationTime-slot.unavailable {
+      opacity: 0.72;
+      cursor: pointer;
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .reservationTime-slot.unavailable:hover {
+      border-color: var(--muted);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      text-decoration: line-through;
+    }
+
+    .reservationTime-slot.unavailable.selected {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: line-through;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0a0d1a;
+    }
+
+    .btn-accent:hover {
+      background: #d97706;
+      transform: translateY(-1px);
+    }
+
+    .btn-wait {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-wait:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--muted);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.1);
+      border-color: var(--danger);
+    }
+
+    .reservationSlot-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    /* Reservation list */
+    .reservationSlot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 700px;
+    }
+
+    .reservationSlot-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left-width: 4px;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .reservationSlot-item.status-confirmed { border-left-color: #22c55e; }
+    .reservationSlot-item.status-waiting { border-left-color: #f59e0b; }
+    .reservationSlot-item.status-canceled { border-left-color: var(--danger); }
+    .reservationSlot-item.status-expired { border-left-color: var(--muted); }
+
+    .reservationSlot-item img {
+      width: 56px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .reservationSlot-info { flex: 1; }
+
+    .reservationSlot-theme {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .reservationSlot-meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .reservation-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .reservation-status.canceled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .reservation-status.confirmed {
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+    }
+
+    .reservation-status.waiting {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+    }
+
+    .reservation-status.expired {
+      background: rgba(107, 114, 128, 0.14);
+      color: #9ca3af;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state p { font-size: 14px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: var(--success);
+      color: white;
+    }
+
+    .toast.error {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-center {
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Confirmation box */
+    .confirm-box {
+      background: var(--card);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 400px;
+    }
+
+    .confirm-box h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .confirm-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .confirm-row:last-of-type { border-bottom: none; }
+    .confirm-row span:first-child { color: var(--muted); }
+    .confirm-row span:last-child { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Room<span>Escape</span></div>
+  <div class="header-right">
+    <span class="username-badge">안녕하세요, <strong id="headerName">-</strong> 님</span>
+    <button class="btn-logout" onclick="logout()">나가기</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-label">메뉴</div>
+    <button class="nav-item" onclick="switchSection('popular')" id="nav-popular">
+      <span class="nav-icon">🔥</span> 인기 테마
+    </button>
+    <button class="nav-item" onclick="switchSection('booking')" id="nav-booking">
+      <span class="nav-icon">🎭</span> 예약하기
+    </button>
+    <button class="nav-item" onclick="switchSection('my')" id="nav-my">
+      <span class="nav-icon">📋</span> 내 예약
+    </button>
+  </nav>
+
+  <main class="main">
+
+    <!-- Popular themes -->
+    <div class="section active" id="section-popular">
+      <h2 class="section-title">🔥 인기 테마</h2>
+      <p class="section-desc">최근 7일간 가장 많이 예약된 테마를 확인하세요.</p>
+      <div class="loading-center" id="popular-loading"><div class="spinner"></div></div>
+      <div class="themes-grid" id="popular-grid" style="display:none"></div>
+      <div class="empty-state" id="popular-empty" style="display:none">
+        <div class="icon">📊</div>
+        <p>아직 예약 데이터가 없습니다.</p>
+      </div>
+    </div>
+
+    <!-- Booking -->
+    <div class="section" id="section-booking">
+      <h2 class="section-title" id="booking-title">🎭 예약하기</h2>
+      <p class="section-desc" id="booking-desc">테마를 선택하고 원하는 날짜와 시간을 예약하세요.</p>
+
+      <div class="booking-steps" id="booking-steps">
+        <div class="step active" id="step-indicator-1">
+          <div class="step-num">1</div><span>테마 선택</span>
+        </div>
+        <div class="step-arrow">›</div>
+        <div class="step" id="step-indicator-2">
+          <div class="step-num">2</div><span>날짜 선택</span>
+        </div>
+        <div class="step-arrow">›</div>
+        <div class="step" id="step-indicator-3">
+          <div class="step-num">3</div><span>시간 선택</span>
+        </div>
+        <div class="step-arrow">›</div>
+        <div class="step" id="step-indicator-4">
+          <div class="step-num">4</div><span>확인</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Theme selection -->
+      <div class="booking-step active" id="booking-step-1">
+        <div class="loading-center" id="booking-themes-loading"><div class="spinner"></div></div>
+        <div class="themes-grid" id="booking-themes-grid" style="display:none"></div>
+      </div>
+
+      <!-- Step 2: Date selection -->
+      <div class="booking-step" id="booking-step-2">
+        <div class="date-section">
+          <div class="selected-theme-info" id="selected-theme-info"></div>
+          <label for="booking-date">날짜 선택</label>
+          <input type="date" id="booking-date" />
+          <div class="btn-row">
+            <button class="btn btn-accent" onclick="goToStep3()">시간 선택 →</button>
+            <button class="btn btn-ghost" onclick="backFromDateStep()">← 뒤로</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Time selection -->
+      <div class="booking-step" id="booking-step-3">
+        <div class="date-section" style="max-width:600px">
+          <div class="selected-theme-info" id="selected-theme-info-2"></div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="selected-date-label"></p>
+          <div class="loading-center" id="times-loading"><div class="spinner"></div></div>
+          <div class="reservationTime-slots" id="reservationTime-slots" style="display:none"></div>
+          <div class="btn-row" id="reservationTime-btn-row" style="display:none">
+            <button class="btn btn-accent" onclick="goToStep4()" id="confirm-reservationTime-btn">예약 확인 →</button>
+            <button class="btn btn-wait" onclick="submitWaiting()" id="wait-reservationTime-btn" style="display:none">예약 대기</button>
+            <button class="btn btn-ghost" onclick="goToStep(2)">← 뒤로</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirm -->
+      <div class="booking-step" id="booking-step-4">
+        <div class="confirm-box">
+          <h3 id="confirm-box-title">예약 확인</h3>
+          <div class="confirm-row" id="confirm-id-row" style="display:none">
+            <span>예약 번호</span><span id="confirm-id">-</span>
+          </div>
+          <div class="confirm-row">
+            <span>테마</span><span id="confirm-theme">-</span>
+          </div>
+          <div class="confirm-row">
+            <span>날짜</span><span id="confirm-date">-</span>
+          </div>
+          <div class="confirm-row">
+            <span>시간</span><span id="confirm-reservationTime">-</span>
+          </div>
+          <div class="confirm-row">
+            <span>예약자</span><span id="confirm-reserver">-</span>
+          </div>
+          <div class="btn-row" id="confirm-actions" style="margin-top:20px">
+            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
+            <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My reservations -->
+    <div class="section" id="section-my">
+      <h2 class="section-title">📋 내 예약</h2>
+      <p class="section-desc">나의 예약 내역을 확인하고 관리하세요.</p>
+      <div class="loading-center" id="my-loading"><div class="spinner"></div></div>
+      <div class="reservationSlot-list" id="my-list" style="display:none"></div>
+      <div class="empty-state" id="my-empty" style="display:none">
+        <div class="icon">📭</div>
+        <p>예약 내역이 없습니다.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '';
+  let username = '';
+  let selectedTheme = null;
+  let selectedDate = null;
+  let selectedTime = null;
+  let selectedWaitingTarget = null;
+  let editingReservationId = null;
+  let cachedThemes = null;
+  let cachedAdminReservations = null;
+
+  function init() {
+    username = localStorage.getItem('username');
+    if (!username) {
+      window.location.href = '/index.html';
+      return;
+    }
+    document.getElementById('headerName').textContent = username;
+    switchSection('popular');
+  }
+
+  function logout() {
+    localStorage.removeItem('username');
+    window.location.href = '/index.html';
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  async function readErrorMessage(res, fallback) {
+    try {
+      const data = await res.json();
+      return {
+        message: data.message || data.errors?.[0]?.defaultMessage || data.error || fallback,
+        code: data.code,
+        status: data.status
+      };
+    } catch (e) {
+      return { message: fallback };
+    }
+  }
+
+  async function fetchJson(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const error = await readErrorMessage(res, fallback);
+      throw Object.assign(new Error(error.message), error);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  async function fetchEmpty(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const error = await readErrorMessage(res, fallback);
+      throw Object.assign(new Error(error.message), error);
+    }
+  }
+
+  function switchSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`section-${name}`).classList.add('active');
+    document.getElementById(`nav-${name}`).classList.add('active');
+
+    if (name === 'popular') loadPopular();
+    else if (name === 'booking') loadBookingThemes();
+    else if (name === 'my') loadMyReservations();
+  }
+
+  // Popular themes
+  async function loadPopular() {
+    document.getElementById('popular-loading').style.display = 'flex';
+    document.getElementById('popular-grid').style.display = 'none';
+    document.getElementById('popular-empty').style.display = 'none';
+
+    try {
+      let themes = await fetchJson(`${API}/themes/popular`, {}, '인기 테마를 불러올 수 없습니다.');
+      if (!themes.length) {
+        themes = await buildPopularThemesFromReservations();
+      }
+
+      document.getElementById('popular-loading').style.display = 'none';
+
+      if (!themes.length) {
+        document.getElementById('popular-empty').style.display = 'block';
+        return;
+      }
+
+      const grid = document.getElementById('popular-grid');
+      grid.innerHTML = themes.map((t, i) => `
+        <div class="theme-card">
+          <img src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22250%22><rect fill=%22%231f2937%22 width=%22400%22 height=%22250%22/><text fill=%22%236b7280%22 x=%22200%22 y=%22130%22 text-anchor=%22middle%22 font-size=%2220%22>${t.name}</text></svg>'">
+          <div class="theme-card-body">
+            <div class="${rankClass(i+1)} rank-badge">${i+1}</div>
+            <div class="theme-card-name">${t.name}</div>
+            <div class="theme-card-desc">${t.description}</div>
+          </div>
+        </div>
+      `).join('');
+      grid.style.display = 'grid';
+    } catch (e) {
+      document.getElementById('popular-loading').style.display = 'none';
+      showToast(e.message, 'error');
+    }
+  }
+
+  function rankClass(n) {
+    return ['rank-1','rank-2','rank-3'][n-1] || 'rank-n';
+  }
+
+  async function buildPopularThemesFromReservations() {
+    const [themes, reservations] = await Promise.all([
+      getThemes(),
+      getAdminReservationsSafely()
+    ]);
+    const counts = reservations.reduce((acc, reservationSlot) => {
+      acc[reservationSlot.themeName] = (acc[reservationSlot.themeName] || 0) + 1;
+      return acc;
+    }, {});
+
+    return themes
+      .map(theme => ({ ...theme, reservationCount: counts[theme.name] || 0 }))
+      .filter(theme => theme.reservationCount > 0)
+      .sort((a, b) => b.reservationCount - a.reservationCount)
+      .slice(0, 10);
+  }
+
+  // Booking themes
+  async function loadBookingThemes() {
+    resetBookingState();
+    setBookingMode('create');
+    goToStep(1);
+    document.getElementById('booking-themes-loading').style.display = 'flex';
+    document.getElementById('booking-themes-grid').style.display = 'none';
+
+    try {
+      const themes = await getThemes();
+
+      document.getElementById('booking-themes-loading').style.display = 'none';
+      const grid = document.getElementById('booking-themes-grid');
+      grid.innerHTML = themes.map(t => `
+        <div class="theme-card" onclick="selectTheme(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+          <img src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.style.background='#1f2937'">
+          <div class="theme-card-body">
+            <div class="theme-card-name">${t.name}</div>
+            <div class="theme-card-desc">${t.description}</div>
+          </div>
+        </div>
+      `).join('');
+      grid.style.display = 'grid';
+    } catch (e) {
+      document.getElementById('booking-themes-loading').style.display = 'none';
+      showToast(e.message, 'error');
+    }
+  }
+
+  function setBookingMode(mode) {
+    const editing = mode === 'edit';
+    document.getElementById('booking-title').textContent = editing ? '📋 예약 수정' : '🎭 예약하기';
+    document.getElementById('booking-desc').textContent = editing
+      ? '예약할 날짜와 시간을 다시 선택하세요.'
+      : '테마를 선택하고 원하는 날짜와 시간을 예약하세요.';
+    document.getElementById('confirm-box-title').textContent = editing ? '수정 확인' : '예약 확인';
+    document.getElementById('confirm-id-row').style.display = 'none';
+    document.getElementById('confirm-actions').innerHTML = `
+      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">${editing ? '수정 완료' : '예약 확정'}</button>
+      <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
+    `;
+  }
+
+  async function getThemes() {
+    if (!cachedThemes) {
+      cachedThemes = await fetchJson(`${API}/themes`, {}, '테마 목록을 불러올 수 없습니다.');
+    }
+    return cachedThemes;
+  }
+
+  function showBookingSection() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-booking').classList.add('active');
+    document.getElementById('nav-booking').classList.add('active');
+  }
+
+  function selectTheme(theme) {
+    selectedTheme = theme;
+    document.getElementById('booking-date').removeAttribute('min');
+    document.getElementById('booking-date').value = '';
+
+    const themeInfoHtml = `
+      <img src="${theme.thumbnailUrl}" alt="${theme.name}" onerror="this.style.background='#1f2937'">
+      <div>
+        <h3>${theme.name}</h3>
+        <p>${theme.description}</p>
+      </div>
+    `;
+    document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
+    document.getElementById('selected-theme-info-2').innerHTML = themeInfoHtml;
+
+    goToStep(2);
+  }
+
+  async function goToStep3() {
+    const dateInput = document.getElementById('booking-date');
+    selectedDate = dateInput.value;
+    document.getElementById('selected-date-label').textContent = `📅 ${formatDate(selectedDate)}`;
+    selectedTime = null;
+
+    goToStep(3);
+    document.getElementById('times-loading').style.display = 'flex';
+    document.getElementById('reservationTime-slots').style.display = 'none';
+    document.getElementById('reservationTime-btn-row').style.display = 'none';
+
+    try {
+      const times = await fetchJson(
+        `${API}/themes/${selectedTheme.id}/available-times?date=${selectedDate}`,
+        {},
+        '시간 정보를 불러올 수 없습니다.'
+      );
+
+      await renderTimeSlots(times);
+    } catch (e) {
+      document.getElementById('times-loading').style.display = 'none';
+      showToast(e.message, 'error');
+      goToStep(2);
+    }
+  }
+
+  async function renderTimeSlots(times) {
+    document.getElementById('times-loading').style.display = 'none';
+    const container = document.getElementById('reservationTime-slots');
+    container.innerHTML = times.map(t => {
+      const waitLabel = !t.isAvailable && t.waitNumber > 0 ? `<small>대기 ${t.waitNumber}명</small>` : '';
+      return `
+        <div class="reservationTime-slot ${t.isAvailable ? '' : 'unavailable'}"
+             onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}', ${t.waitNumber ?? 0})`}"
+             id="slot-${t.id}">
+          <span>${t.startAt}</span>${waitLabel}
+        </div>
+      `;
+    }).join('');
+    container.style.display = 'grid';
+    document.getElementById('reservationTime-btn-row').style.display = 'flex';
+    document.getElementById('confirm-reservationTime-btn').disabled = true;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'inline-flex';
+    document.getElementById('wait-reservationTime-btn').style.display = 'none';
+  }
+
+  function pickTime(id, startAt) {
+    selectedTime = { id, startAt };
+    selectedWaitingTarget = null;
+    document.querySelectorAll('.reservationTime-slot').forEach(s => s.classList.remove('selected'));
+    document.getElementById(`slot-${id}`).classList.add('selected');
+    document.getElementById('confirm-reservationTime-btn').disabled = false;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'inline-flex';
+    document.getElementById('wait-reservationTime-btn').style.display = 'none';
+  }
+
+  function pickWaitingTime(id, startAt, waitNumber = 0) {
+    selectedTime = { id, startAt, waitNumber };
+    selectedWaitingTarget = { id, startAt, waitNumber };
+    document.querySelectorAll('.reservationTime-slot').forEach(s => s.classList.remove('selected'));
+    document.getElementById(`slot-${id}`).classList.add('selected');
+    document.getElementById('confirm-reservationTime-btn').disabled = true;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'none';
+    document.getElementById('wait-reservationTime-btn').style.display = 'inline-flex';
+  }
+
+  async function getAdminReservationsSafely() {
+    if (cachedAdminReservations) return cachedAdminReservations;
+
+    try {
+      cachedAdminReservations = await fetchJson(`${API}/admin/reservations`, {}, '예약 목록을 불러올 수 없습니다.');
+      return cachedAdminReservations;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function backFromDateStep() {
+    if (editingReservationId !== null) {
+      resetBookingState();
+      switchSection('my');
+      return;
+    }
+
+    goToStep(1);
+  }
+
+  function goToStep4() {
+    renderReservationSummary({
+      themeName: selectedTheme.name,
+      date: selectedDate,
+      time: selectedTime?.startAt || '-',
+      name: username
+    });
+    document.getElementById('confirm-id-row').style.display = 'none';
+    goToStep(4);
+  }
+
+  function renderReservationSummary(reservationSlot) {
+    document.getElementById('confirm-theme').textContent = reservationSlot.themeName;
+    document.getElementById('confirm-date').textContent = formatDate(reservationSlot.date);
+    document.getElementById('confirm-reservationTime').textContent = reservationSlot.time;
+    document.getElementById('confirm-reserver').textContent = reservationSlot.name || username;
+  }
+
+  function showReservationComplete(reservationSlot) {
+    document.getElementById('booking-title').textContent = '예약 완료';
+    document.getElementById('booking-desc').textContent = '예약이 정상적으로 등록되었습니다.';
+    document.getElementById('confirm-box-title').textContent = '예약 완료';
+    document.getElementById('confirm-id-row').style.display = 'none';
+    renderReservationSummary(reservationSlot);
+    document.getElementById('confirm-actions').innerHTML = `
+      <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
+      <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
+    `;
+    goToStep(4);
+  }
+
+  async function submitReservation() {
+    try {
+      const isEditing = editingReservationId !== null;
+      const request = {
+        method: isEditing ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: username,
+          date: selectedDate || null,
+          timeId: selectedTime?.id || null,
+          themeId: selectedTheme.id
+        })
+      };
+
+      if (isEditing) {
+        await fetchEmpty(`${API}/reservations/${editingReservationId}`, request, '예약 수정에 실패했습니다.');
+        showToast('예약이 수정되었습니다!');
+        resetBookingState();
+        switchSection('my');
+      } else {
+        await fetchEmpty(`${API}/reservations`, request, '예약에 실패했습니다.');
+        cachedAdminReservations = null;
+        if (selectedWaitingTarget) {
+          showWaitingComplete({
+            themeName: selectedTheme.name,
+            date: selectedDate,
+            time: selectedTime?.startAt || '-',
+            name: username,
+            order: Number(selectedWaitingTarget.waitNumber ?? 0) + 1
+          });
+        } else {
+          showToast('예약이 완료되었습니다!');
+          showReservationComplete({
+            themeName: selectedTheme.name,
+            date: selectedDate,
+            time: selectedTime?.startAt || '-',
+            name: username
+          });
+          resetBookingState();
+        }
+      }
+    } catch (e) {
+      showToast(e.message, 'error');
+      recoverReservationFlow(e);
+    }
+  }
+
+  async function recoverReservationFlow(error) {
+    if (!selectedTheme) {
+      goToStep(1);
+      return;
+    }
+
+    if (!selectedDate) {
+      goToStep(2);
+      return;
+    }
+
+    if (error.code === 'RESERVATION_409_1' || error.code === 'DUPLICATE_RESERVATION') {
+      selectedTime = null;
+      await reloadTimesForSelection();
+      return;
+    }
+
+    goToStep(3);
+  }
+
+  async function reloadTimesForSelection() {
+    goToStep(3);
+    document.getElementById('times-loading').style.display = 'flex';
+    document.getElementById('reservationTime-slots').style.display = 'none';
+    document.getElementById('reservationTime-btn-row').style.display = 'none';
+
+    try {
+      const times = await fetchJson(
+        `${API}/themes/${selectedTheme.id}/available-times?date=${selectedDate}`,
+        {},
+        '시간 정보를 다시 불러올 수 없습니다.'
+      );
+      await renderTimeSlots(times);
+    } catch (e) {
+      document.getElementById('times-loading').style.display = 'none';
+      showToast(e.message, 'error');
+      goToStep(2);
+    }
+  }
+
+  function goToStep(n) {
+    document.querySelectorAll('.booking-step').forEach((s, i) => {
+      s.classList.toggle('active', i + 1 === n);
+    });
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById(`step-indicator-${i}`);
+      el.classList.remove('active', 'done');
+      if (i < n) el.classList.add('done');
+      else if (i === n) el.classList.add('active');
+    }
+  }
+
+  function resetBookingState() {
+    selectedTheme = null;
+    selectedDate = null;
+    selectedTime = null;
+    selectedWaitingTarget = null;
+    editingReservationId = null;
+  }
+
+  async function submitWaiting() {
+    // 대기도 동일한 POST /reservations 엔드포인트를 사용한다.
+    await submitReservation();
+  }
+
+  function showWaitingComplete(reservation) {
+    const waitingOrder = Number(reservation.order ?? 1);
+    document.getElementById('booking-title').textContent = '예약 대기 완료';
+    document.getElementById('booking-desc').textContent = '예약 대기가 정상적으로 등록되었습니다.';
+    document.getElementById('confirm-box-title').textContent = '예약 대기 완료';
+    document.querySelector('#confirm-id-row span:first-child').textContent = '대기 번호';
+    document.getElementById('confirm-id').textContent = `${waitingOrder}번째`;
+    document.getElementById('confirm-id-row').style.display = 'flex';
+    renderReservationSummary({
+      themeName: reservation.themeName,
+      date: reservation.date,
+      time: reservation.time,
+      name: reservation.name || username
+    });
+    document.getElementById('confirm-actions').innerHTML = `
+      <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
+      <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
+    `;
+    showToast(`예약 대기가 등록되었습니다. 대기 ${waitingOrder}번`);
+    resetBookingState();
+    goToStep(4);
+  }
+
+  // My reservations
+  async function loadMyReservations() {
+    document.getElementById('my-loading').style.display = 'flex';
+    document.getElementById('my-list').style.display = 'none';
+    document.getElementById('my-empty').style.display = 'none';
+
+    try {
+      const reservations = await fetchJson(
+        `${API}/reservations?name=${encodeURIComponent(username)}`,
+        {},
+        '예약 목록을 불러올 수 없습니다.'
+      );
+
+      document.getElementById('my-loading').style.display = 'none';
+
+      if (!reservations.length) {
+        document.getElementById('my-empty').style.display = 'block';
+        return;
+      }
+
+      const list = document.getElementById('my-list');
+      list.innerHTML = reservations.map(r => `
+        <div class="reservationSlot-item status-${reservationState(r)}" id="res-${r.reservationId}">
+          <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
+          <div class="reservationSlot-info">
+            <div class="reservationSlot-theme">${r.themeName}</div>
+            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
+          </div>
+          <div class="reservationSlot-actions">${reservationActions(r)}</div>
+        </div>
+      `).join('');
+      list.style.display = 'flex';
+    } catch (e) {
+      document.getElementById('my-loading').style.display = 'none';
+      showToast(e.message, 'error');
+    }
+  }
+
+  async function startReservationEdit(reservationSlot) {
+    try {
+      const themes = await getThemes();
+      const theme = themes.find(t => t.name === reservationSlot.themeName);
+
+      if (!theme) {
+        showToast('수정할 예약의 테마 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+
+      editingReservationId = reservationSlot.reservationId;
+      selectedTheme = theme;
+      selectedDate = reservationSlot.date;
+      selectedTime = null;
+
+      const themeInfoHtml = `
+        <img src="${reservationSlot.themeThumbnailUrl}" alt="${reservationSlot.themeName}" onerror="this.style.background='#1f2937'">
+        <div>
+          <h3>${reservationSlot.themeName}</h3>
+          <p>${reservationSlot.themeDescription}</p>
+        </div>
+      `;
+      document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
+      document.getElementById('selected-theme-info-2').innerHTML = themeInfoHtml;
+      document.getElementById('booking-date').removeAttribute('min');
+      document.getElementById('booking-date').value = reservationSlot.date;
+
+      setBookingMode('edit');
+      showBookingSection();
+      goToStep(2);
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  function waitingMeta(r) {
+    const order = Number(r.order ?? 0);
+    return order > 0 ? ` &nbsp; 대기 ${order}번` : '';
+  }
+
+  function isCanceledReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'CANCELED';
+  }
+
+  function isCompletedReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'COMPLETED';
+  }
+
+  function isExpiredReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'EXPIRED';
+  }
+
+  function reservationState(r) {
+    if (isCanceledReservation(r)) return 'canceled';
+    if (isExpiredReservation(r)) return 'expired';
+    if (isCompletedReservation(r)) return 'confirmed';
+    return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
+  }
+
+  function reservationStatusLabel(r) {
+    const state = reservationState(r);
+    if (isCompletedReservation(r)) return '이용 완료';
+    if (isExpiredReservation(r)) return '대기 만료';
+    if (state === 'canceled') return '예약 취소';
+    if (state === 'waiting') return '대기';
+    return '예약 확정';
+  }
+
+  function reservationStatusBadge(r) {
+    const state = reservationState(r);
+    return `<span class="reservation-status ${state}">${reservationStatusLabel(r)}</span>`;
+  }
+
+  function reservationActions(r) {
+    if (isCanceledReservation(r) || isCompletedReservation(r) || isExpiredReservation(r)) {
+      return reservationStatusBadge(r);
+    }
+
+    return `
+      ${reservationStatusBadge(r)}
+      <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
+      <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
+    `;
+  }
+
+  async function deleteMyReservation(id) {
+    if (!confirm('예약을 삭제하시겠습니까?')) return;
+    try {
+      await fetchEmpty(
+        `${API}/reservations/${id}?name=${encodeURIComponent(username)}`,
+        { method: 'DELETE' },
+        '삭제에 실패했습니다.'
+      );
+      showToast('예약이 삭제되었습니다.');
+      await loadMyReservations();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const days = ['일','월','화','수','목','금','토'];
+    return `${dateStr} (${days[d.getDay()]})`;
+  }
+
+  init();
+</script>
+</body>
+</html>
