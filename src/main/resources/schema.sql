@@ -32,6 +32,7 @@ CREATE TABLE waiting
     created_at TIMESTAMP   NOT NULL,
     slot_id    BIGINT,
     name       VARCHAR(10) NOT NULL,
+    PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES slot (id),
     CONSTRAINT UQ_waiting_slot_name UNIQUE (slot_id, name)
 );
