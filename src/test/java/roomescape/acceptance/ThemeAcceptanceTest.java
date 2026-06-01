@@ -2,37 +2,30 @@ package roomescape.acceptance;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.acceptance.step.ReservationSteps;
-import roomescape.acceptance.step.ReservationTimeSteps;
-import roomescape.acceptance.step.ThemeSteps;
+import roomescape.acceptance.assertion.ThemeAssertions;
+import roomescape.acceptance.fixture.ReservationFixture;
+import roomescape.acceptance.fixture.ReservationTimeFixture;
+import roomescape.acceptance.fixture.ThemeFixture;
 
 public class ThemeAcceptanceTest extends AcceptanceTest {
 
     @Test
-    @DisplayName("테마를 추가하고 삭제할 수 있으며, 예약 수를 기반으로 랭킹을 조회할 수 있다")
+    @DisplayName("테마를 생성하고 삭제할 수 있다")
+    void createAndDeleteTheme() {
+        ThemeFixture.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");
+        ThemeAssertions.checkAllThemeSize(1);
+
+        ThemeFixture.deleteTheme(1L);
+        ThemeAssertions.checkAllThemeSize(0);
+    }
+
+    @Test
+    @DisplayName("예약 수를 기반으로 테마 랭킹을 조회할 수 있다")
     void themeApiSuccessTest() {
-        // 1. 테마 추가
-        ThemeSteps.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");
+        ThemeFixture.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");
+        ReservationTimeFixture.createReservationTime(FUTURE_TIME);
+        ReservationFixture.createReservation("예약자", NOW_DATE, 1L, 1L);
 
-        // 2. 전체 테마 조회 사이즈로 테마 추가 확인
-        ThemeSteps.checkAllThemeSize(1);
-
-        // 3. 시간 추가
-        ReservationTimeSteps.createReservationTime(FUTURE_TIME);
-
-        // 4. 예약 추가
-        ReservationSteps.createReservation("예약자", NOW_DATE, 1L, 1L);
-
-        // 5. 특정 기간 내의 테마 랭킹 조회
-        ThemeSteps.checkThemeRanking("2026-04-20", "2026-05-02", 1);
-
-        // 5. 예약 삭제
-        ReservationSteps.deleteReservation(1L);
-
-        // 6. 테마 삭제
-        ThemeSteps.deleteTheme(1L);
-
-        // 7. 전체 테마 조회 사이즈로 테마 삭제 확인
-        ThemeSteps.checkAllThemeSize(0);
+        ThemeAssertions.checkThemeRanking("2026-04-20", "2026-05-02", 1);
     }
 }

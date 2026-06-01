@@ -1,13 +1,11 @@
-package roomescape.acceptance.step;
-
-import static org.hamcrest.Matchers.is;
+package roomescape.acceptance.fixture;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ReservationSteps {
+public class ReservationFixture {
 
     public static void createReservation(String name, String date, Long timeId, Long themeId) {
         Map<String, Object> params = new HashMap<>();
@@ -22,24 +20,6 @@ public class ReservationSteps {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
-    }
-
-    public static void readMyName(String name, int expectedSize, String reservationStatus) {
-        RestAssured.given().log().all()
-                .queryParam("name", name)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(expectedSize))
-                .body("[0].status", is(reservationStatus));
-    }
-
-    public static void checkAllReservationSize(int expectedSize) {
-        RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(expectedSize));
     }
 
     public static void deleteReservation(Long id) {

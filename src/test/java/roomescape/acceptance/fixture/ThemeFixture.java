@@ -1,13 +1,11 @@
-package roomescape.acceptance.step;
-
-import static org.hamcrest.Matchers.is;
+package roomescape.acceptance.fixture;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ThemeSteps {
+public class ThemeFixture {
 
     public static void createTheme(String name, String description, String thumbnailUrl) {
         Map<String, String> theme = new HashMap<>();
@@ -23,28 +21,10 @@ public class ThemeSteps {
                 .statusCode(201);
     }
 
-    public static void checkAllThemeSize(int expectedSize) {
-        RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(expectedSize));
-    }
-
     public static void deleteTheme(Long id) {
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/" + id)
                 .then().log().all()
                 .statusCode(204);
-    }
-
-    public static void checkThemeRanking(String startDate, String endDate, int expectedRanking) {
-        RestAssured.given().log().all()
-                .param("startDate", startDate)
-                .param("endDate", endDate)
-                .when().get("/themes/ranking")
-                .then().log().all()
-                .statusCode(200)
-                .body("[0].id", is(expectedRanking));
     }
 }
