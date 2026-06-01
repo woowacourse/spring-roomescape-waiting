@@ -65,8 +65,6 @@ public class Reservation {
     }
 
     private static void validateNotPast(Schedule schedule, LocalDateTime now) {
-        requireNonNull(schedule, INVALID_INPUT, "예약 스케줄은 비어있을 수 없습니다.");
-        requireNonNull(now, INVALID_INPUT, "기준 일시는 비어있을 수 없습니다.");
         if (isPast(schedule, now)) {
             throw new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "과거 시각으로는 수정 및 예약할 수 없습니다.");
         }
