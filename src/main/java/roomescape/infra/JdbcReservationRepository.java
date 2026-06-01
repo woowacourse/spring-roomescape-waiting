@@ -30,6 +30,26 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .usingGeneratedKeyColumns("id");
     }
 
+    private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
+            rs.getLong("r_id"),
+            rs.getString("name"),
+            new ThemeSlot(
+                    rs.getLong("theme_slot_id"),
+                    new Theme(
+                            rs.getLong("theme_id"),
+                            rs.getString("theme_name"),
+                            rs.getString("theme_description"),
+                            rs.getString("theme_thumbnail_url")
+                    ),
+                    rs.getObject("date", LocalDate.class),
+                    new Time(
+                            rs.getLong("t_id"),
+                            rs.getObject("start_at", LocalTime.class)),
+                    rs.getBoolean("is_reserved")
+            ),
+            toStatus(rs.getString("status"))
+    );
+
     @Override
     public List<Reservation> findAll() {
         String sql = """
@@ -55,7 +75,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         INNER JOIN 
                         theme theme ON ts.theme_id = theme.id
                 """;
-        return jdbcTemplate.query(sql, rowMapper());
+        return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     @Override
@@ -85,7 +105,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE r.id = ?
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper(), reservationId).stream().findFirst();
+        return jdbcTemplate.query(sql, reservationRowMapper, reservationId).stream().findFirst();
     }
 
     @Override
@@ -115,7 +135,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE r.name = ?
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper(), name).stream().toList();
+        return jdbcTemplate.query(sql, reservationRowMapper, name).stream().toList();
     }
 
     @Override
@@ -217,28 +237,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
     }
 
-    private RowMapper<Reservation> rowMapper() {
-        return (rs, rowNum) -> new Reservation(
-                rs.getLong("r_id"),
-                rs.getString("name"),
-                new ThemeSlot(
-                        rs.getLong("theme_slot_id"),
-                        new Theme(
-                                rs.getLong("theme_id"),
-                                rs.getString("theme_name"),
-                                rs.getString("theme_description"),
-                                rs.getString("theme_thumbnail_url")
-                        ),
-                        rs.getObject("date", LocalDate.class),
-                        new Time(
-                                rs.getLong("t_id"),
-                                rs.getObject("start_at", LocalTime.class)),
-                        rs.getBoolean("is_reserved")
-                ),
-                toStatus(rs.getString("status"))
-        );
-    }
-
     private ReservationStatus toStatus(String statue) {
         return switch (statue) {
             case "PENDING" -> PendingStatus.getInstance();
@@ -278,7 +276,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 AND r.status = 'PENDING'
                 ORDER BY r.id
                 """;
-        return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().toList();
+        return jdbcTemplate.query(sql, reservationRowMapper, themeSlotId).stream().toList();
     }
 
     @Override
@@ -325,6 +323,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.id
                 LIMIT 1
                 """;
-        return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().findFirst();
+        return jdbcTemplate.query(sql, reservationRowMapper, themeSlotId).stream().findFirst();
     }
 }
