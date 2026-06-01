@@ -164,6 +164,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 슬롯_변경_시_id는_유지되고_생성시각은_갱신된다() {
+        setUpTimeAndTheme();
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+        ReservationResponse beforeUpdate = reservationService.read(created.id());
+
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        ReservationResponse updated = reservationService.update(created.id(),
+                new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId));
+
+        assertThat(updated.id()).isEqualTo(created.id());
+        assertThat(updated.createdAt()).isAfter(beforeUpdate.createdAt());
+        assertThat(updated.date()).isEqualTo(LocalDate.now().plusDays(2));
+    }
+
+    @Test
     void 과거_날짜로_변경시_예외가_발생한다() {
         setUpTimeAndTheme();
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
