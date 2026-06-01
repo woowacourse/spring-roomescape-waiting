@@ -12,10 +12,9 @@ public class ReservationWaiting {
     private final LocalDateTime requestAt;
 
     public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestAt) {
-        validateName(name);
         this.id = id;
         this.reservation = reservation;
-        this.name = name;
+        this.name = validateName(name);
         this.requestAt = requestAt;
     }
 
