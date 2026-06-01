@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방탈출 예약 - 공통 페이지</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="container">
+  <header class="page-header">
+    <h1>방탈출 예약하기</h1>
+    <div class="link-row">
+      <a class="link-button" href="./index.html">홈</a>
+      <button type="button" id="my-info-open" class="link-button">내정보</button>
+      <button type="button" id="login-open" class="link-button">로그인</button>
+      <a class="link-button admin-link" href="./admin.html">관리자 페이지</a>
+    </div>
+    <p id="auth-status" class="empty-message">로그인이 필요합니다.</p>
+  </header>
+
+  <!-- 예약 섹션 -->
+  <section class="booking-section">
+    <div class="section-title-area">
+      <h2>01. 날짜 및 테마 선택</h2>
+    </div>
+
+    <form id="theme-by-date-form" class="row-form">
+      <label>예약 방문 날짜 <input type="date" id="theme-date" required></label>
+      <button type="submit" class="search-button">조회하기</button>
+    </form>
+
+    <div class="selection-summary">
+      <span id="selected-theme-label" class="summary-pill">테마: 미선택</span>
+      <span id="selected-time-label" class="summary-pill">시간: 미선택</span>
+    </div>
+
+    <ul id="theme-list" class="list theme-list"></ul>
+
+    <div class="section-title-area mt-40">
+      <h3>02. 예약 가능 시간</h3>
+    </div>
+    <div id="available-times" class="chips-container"></div>
+
+    <div class="section-title-area mt-40">
+      <h3>03. 예약 정보 입력</h3>
+    </div>
+    <form id="reservation-form" class="row-form reservation-form">
+      <button type="submit" id="reservation-submit" class="primary-button" disabled>지금 예약하기</button>
+    </form>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 인기 테마 섹션 -->
+  <section class="popular-section">
+    <h2>🔥 인기 테마 TOP</h2>
+    <div class="row-form popular-filter">
+      <button type="button" id="popular-refresh" class="search-button">인기테마조회</button>
+    </div>
+    <ol id="popular-list" class="list popular-ranking"></ol>
+  </section>
+
+  <hr class="divider">
+
+  <section id="my-reservation-section" class="my-reservation-section hidden">
+    <h2>내 예약 정보</h2>
+    <p id="my-reservation-owner" class="empty-message">로그인 후 조회됩니다.</p>
+    <div class="section-title-area mt-40">
+      <h3>다가올 예약/대기</h3>
+    </div>
+    <div id="my-upcoming-reservation-cards" class="reservation-cards"></div>
+    <div class="section-title-area mt-40">
+      <h3>지난 예약/대기</h3>
+    </div>
+    <div id="my-past-reservation-cards" class="reservation-cards"></div>
+  </section>
+
+<!--  <p id="status" class="status-bar"></p>-->
+</main>
+
+<div id="confirm-modal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3 id="confirm-title">확인</h3>
+    <p id="confirm-message" class="modal-message"></p>
+    <div class="modal-actions">
+      <button type="button" id="confirm-cancel" class="link-button">취소</button>
+      <button type="button" id="confirm-ok" class="danger-button">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-reservation-modal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3>예약 수정</h3>
+    <form id="edit-reservation-form" class="row-form admin-form modal-form">
+      <input type="hidden" id="edit-reservation-id">
+      <p id="edit-reservation-theme" class="empty-message"></p>
+      <label>방문 날짜
+        <input type="date" id="edit-reservation-date" required>
+      </label>
+      <div>
+        <p class="empty-message">예약 시간 선택</p>
+        <div id="edit-available-times" class="chips-container"></div>
+      </div>
+      <button type="submit" class="search-button">수정 저장</button>
+    </form>
+    <div class="modal-actions">
+      <button type="button" id="edit-reservation-cancel" class="link-button">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div id="result-modal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3 id="result-title">처리 결과</h3>
+    <p id="result-message" class="modal-message"></p>
+    <div class="modal-actions">
+      <button type="button" id="result-ok" class="search-button">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="login-modal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3>로그인</h3>
+    <form id="login-form" class="row-form admin-form modal-form">
+      <label>아이디
+        <input type="text" id="login-name" required>
+      </label>
+      <label>비밀번호
+        <input type="password" id="login-password" required>
+      </label>
+      <button type="submit" class="search-button">로그인</button>
+    </form>
+    <div class="modal-actions">
+      <button type="button" id="login-cancel" class="link-button">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script src="./common.js"></script>
+</body>
+</html>
