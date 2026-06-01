@@ -17,7 +17,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationControllerTest {
 
-    public static final int DEFALUT_RESERVATION_COUNT = 21;
+    private static final int DEFAULT_RESERVATION_COUNT = 21;
 
     @LocalServerPort
     int port;
@@ -42,7 +42,7 @@ public class ReservationControllerTest {
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all().statusCode(200)
-                .body("size()", is(DEFALUT_RESERVATION_COUNT + 1));
+                .body("size()", is(DEFAULT_RESERVATION_COUNT + 1));
     }
 
     @Test

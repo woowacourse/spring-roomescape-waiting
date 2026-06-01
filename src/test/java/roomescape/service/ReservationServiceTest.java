@@ -20,7 +20,7 @@ import roomescape.exception.IdNotFoundException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
-    public static final Long UNAVAILABLE_ID = 999L;
+    private static final Long UNAVAILABLE_ID = 999L;
 
     @Autowired
     private ReservationService reservationService;

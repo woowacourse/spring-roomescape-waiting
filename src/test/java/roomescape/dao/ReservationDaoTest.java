@@ -20,10 +20,10 @@ import roomescape.domain.Theme;
 @Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
 class ReservationDaoTest {
 
-    public static final int DEFALUT_RESERVATION_COUNT = 21;
-    public static final Long AVAILABLE_RESERVATION_ID = 1L;
-    public static final Long AVAILABLE_TIME_ID = 1L;
-    public static final Long AVAILABLE_THEME_ID = 1L;
+    private static final int DEFAULT_RESERVATION_COUNT = 21;
+    private static final Long AVAILABLE_RESERVATION_ID = 1L;
+    private static final Long AVAILABLE_TIME_ID = 1L;
+    private static final Long AVAILABLE_THEME_ID = 1L;
 
     @Autowired
     private ReservationDao reservationDao;
@@ -38,7 +38,7 @@ class ReservationDaoTest {
     void 전체_예약_조회() {
         List<Reservation> reservations = reservationDao.findAll();
 
-        assertThat(reservations).hasSize(DEFALUT_RESERVATION_COUNT);
+        assertThat(reservations).hasSize(DEFAULT_RESERVATION_COUNT);
     }
 
     @Test

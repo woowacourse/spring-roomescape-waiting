@@ -15,7 +15,7 @@ import roomescape.dto.response.ThemeResponse;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeServiceTest {
 
-    public static final int DEFALUT_THEME_COUNT = 15;
+    private static final int DEFAULT_THEME_COUNT = 15;
 
     @Autowired
     private ThemeService themeService;
@@ -24,7 +24,7 @@ class ThemeServiceTest {
     void 전체_테마_조회() {
         List<ThemeResponse> result = themeService.findAllThemes();
 
-        assertThat(result).hasSize(DEFALUT_THEME_COUNT);
+        assertThat(result).hasSize(DEFAULT_THEME_COUNT);
     }
 
     @Test
@@ -46,7 +46,7 @@ class ThemeServiceTest {
 
         themeService.create(request);
 
-        assertThat(themeService.findAllThemes()).hasSize(DEFALUT_THEME_COUNT + 1);
+        assertThat(themeService.findAllThemes()).hasSize(DEFAULT_THEME_COUNT + 1);
     }
 
     @Test
@@ -55,6 +55,6 @@ class ThemeServiceTest {
 
         themeService.delete(unAvailableThemeId);
 
-        assertThat(themeService.findAllThemes()).hasSize(DEFALUT_THEME_COUNT - 1);
+        assertThat(themeService.findAllThemes()).hasSize(DEFAULT_THEME_COUNT - 1);
     }
 }

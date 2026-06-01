@@ -19,8 +19,8 @@ import roomescape.dto.response.ReservationTimeStatusResponse;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
-    public static final int DEFALUT_TIME_COUNT = 9;
-    public static final Long AVAILABLE_TIME_ID = 1L;
+    private static final int DEFAULT_TIME_COUNT = 9;
+    private static final Long AVAILABLE_TIME_ID = 1L;
 
     @Autowired
     private ReservationTimeService reservationTimeService;
@@ -29,7 +29,7 @@ class ReservationTimeServiceTest {
     void 전체_예약_시간_목록_조회() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
-        assertThat(result).hasSize(DEFALUT_TIME_COUNT);
+        assertThat(result).hasSize(DEFAULT_TIME_COUNT);
     }
 
     @Test
@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
         ReservationTimeResponse result = reservationTimeService.save(request);
 
         assertThat(result.startAt()).isEqualTo(LocalTime.of(19, 0));
-        assertThat(reservationTimeService.findAll()).hasSize(DEFALUT_TIME_COUNT + 1);
+        assertThat(reservationTimeService.findAll()).hasSize(DEFAULT_TIME_COUNT + 1);
     }
 
     @Test
@@ -74,7 +74,7 @@ class ReservationTimeServiceTest {
 
         reservationTimeService.delete(timeIdWithNoReservation);
 
-        assertThat(reservationTimeService.findAll()).hasSize(DEFALUT_TIME_COUNT - 1);
+        assertThat(reservationTimeService.findAll()).hasSize(DEFAULT_TIME_COUNT - 1);
     }
 
     @Test
@@ -103,6 +103,6 @@ class ReservationTimeServiceTest {
 
         List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(AVAILABLE_TIME_ID, date);
 
-        assertThat(result).hasSize(DEFALUT_TIME_COUNT);
+        assertThat(result).hasSize(DEFAULT_TIME_COUNT);
     }
 }

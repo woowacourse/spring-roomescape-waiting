@@ -14,7 +14,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationTimeControllerTest {
 
-    public static final int DEFALUT_TIME_COUNT = 9;
+    private static final int DEFAULT_TIME_COUNT = 9;
 
     @LocalServerPort
     int port;
@@ -30,6 +30,6 @@ public class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(DEFALUT_TIME_COUNT));
+                .body("size()", is(DEFAULT_TIME_COUNT));
     }
 }
