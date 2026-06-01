@@ -121,15 +121,15 @@ public class Reservation {
     }
 
     public ReservationDate getDate() {
-        return slot.date();
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return slot.time();
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return slot.theme();
+        return slot.getTheme();
     }
 
 }
