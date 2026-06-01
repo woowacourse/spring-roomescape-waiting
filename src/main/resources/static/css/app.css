@@ -322,12 +322,12 @@ select {
     line-height: 1;
 }
 
-.status-badge.active {
+.status-badge.reserved {
     background: rgba(27, 77, 62, 0.11);
     color: var(--accent);
 }
 
-.status-badge.pending {
+.status-badge.waiting {
     background: rgba(180, 79, 44, 0.12);
     color: var(--primary-strong);
 }

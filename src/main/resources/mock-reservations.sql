@@ -1,7 +1,7 @@
 -- 🥇 1등 (Theme 1: 버려진 정신병원) - 총 10건 (RESERVEWAITING 3건)
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 1, 1, 'RESERVED', '2026-05-26 10:00:00');
 -- 💡 ★ 대기 순번 검증 슬롯 1 (2026-05-03 / Time 1 / Theme 1)
--- 포비가 이미 ACTIVE인 상태에서 어피치와 네오가 순서대로 대기를 건 상황입니다.
+-- 포비가 이미 RESERVED인 상태에서 어피치와 네오가 순서대로 대기를 건 상황입니다.
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('어피치', '2026-05-03', 1, 1, 'WAITING', '2026-05-26 10:00:10'); -- 대기 1번 예상
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-05-03', 1, 1, 'WAITING', '2026-05-26 10:01:15'); -- 대기 2번 예상
 

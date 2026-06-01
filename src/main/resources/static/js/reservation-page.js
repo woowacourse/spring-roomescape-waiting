@@ -29,10 +29,10 @@ function formatTime(time) {
 }
 
 function formatStatus(reservation) {
-    if (reservation.status === "ACTIVE") {
+    if (reservation.status === "RESERVED") {
         return "예약 확정";
     }
-    if (reservation.status === "PENDING") {
+    if (reservation.status === "WAITING") {
         return reservation.pendingOrder ? `예약 대기 ${reservation.pendingOrder}순위` : "예약 대기";
     }
     if (reservation.status === "CANCELED") {
@@ -51,6 +51,11 @@ async function request(url, options = {}) {
         ...options
     });
     if (!response.ok) {
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+            const error = await response.json();
+            throw new Error(error.message || "요청 처리 중 문제가 발생했습니다.");
+        }
         const message = await response.text();
         throw new Error(message || "요청 처리 중 문제가 발생했습니다.");
     }
@@ -147,7 +152,7 @@ reservationForm.addEventListener("submit", async (event) => {
 
     try {
         const reservation = await request("/reservations", { method: "POST", body: JSON.stringify(payload) });
-        showFeedback(reservationFeedback, "success", reservation.status === "PENDING"
+        showFeedback(reservationFeedback, "success", reservation.status === "WAITING"
             ? "이미 예약된 시간이라 대기 예약으로 등록되었습니다."
             : "예약이 등록되었습니다.");
         reservationNameInput.value = "";
@@ -242,7 +247,7 @@ function renderMyReservations(reservations, username) {
                     ]);
                     const availableTimeIds = new Set((availableData.times ?? []).map((time) => time.id));
                     inlineEditState.times = (allTimes ?? []).map((time) => {
-                        const isCurrentActiveReservation = reservation.status === "ACTIVE"
+                        const isCurrentActiveReservation = reservation.status === "RESERVED"
                             && date === reservation.date
                             && String(themeId) === String(reservation.theme.id)
                             && time.id === reservation.time.id;
@@ -327,16 +332,15 @@ function renderMyReservations(reservations, username) {
                     themeId: Number(themeInput.value),
                     timeId: inlineEditState.selectedTimeId
                 };
-                const targetStatus = selectedTime?.available ? "active" : "pending";
                 try {
-                    await request(`/reservations/${reservation.id}/${targetStatus}`, {
+                    const changedReservation = await request(`/reservations/${reservation.id}`, {
                         method: "PATCH",
                         body: JSON.stringify(payload)
                     });
 
-                    showFeedback(checkFeedback, "success", targetStatus === "active"
-                        ? "예약이 확정 상태로 변경되었습니다."
-                        : "이미 예약된 시간이라 대기 상태로 변경되었습니다.");
+                    showFeedback(checkFeedback, "success", changedReservation.status === "WAITING"
+                        ? "이미 예약된 시간이라 대기 상태로 변경되었습니다."
+                        : "예약이 확정 상태로 변경되었습니다.");
                     inlineEditState.reservationId = null;
 
                     // 이름을 변경했다면, 검색창 이름도 갱신하여 재검색 유도

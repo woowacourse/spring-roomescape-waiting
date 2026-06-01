@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.page;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -23,15 +23,15 @@ public class PageController {
     public String reservationPage(Model model) {
         LocalDate startDate = LocalDate.now(clock).minusDays(7);
         LocalDate endDate = LocalDate.now(clock).minusDays(1);
-        model.addAttribute("themes", themeService.getThemes());
+        model.addAttribute("themes", themeService.getThemes(0, 10));
         model.addAttribute("popularThemes", themeService.getWeeksTopThemes(startDate, endDate, 10));
-        model.addAttribute("today", LocalDate.now());
+        model.addAttribute("today", LocalDate.now(clock));
         return "reservation";
     }
 
     @GetMapping("/admin")
     public String adminPage(Model model) {
-        model.addAttribute("themes", themeService.getThemes());
+        model.addAttribute("themes", themeService.getThemes(0, 10));
         model.addAttribute("times", reservationTimeService.getReservationTimes());
         model.addAttribute("reservations", reservationService.getReservations(0, 10));
         return "admin";

@@ -48,18 +48,12 @@
                         <div class="list-title">
                             <strong th:text="${reservation.name}">포비</strong>
                             <span th:class="'status-badge ' + ${#strings.toLowerCase(reservation.status)}"
-                                  th:text="${reservation.status.name() == 'ACTIVE' ? '확정' : (reservation.status.name() == 'PENDING' ? '대기' : '취소')}">
+                                  th:text="${reservation.status.name() == 'RESERVED' ? '확정' : (reservation.status.name() == 'WAITING' ? '대기' : '취소')}">
                                 확정
                             </span>
                         </div>
                         <p th:text="${reservation.theme.name + ' · ' + reservation.date + ' · ' + reservation.time.startAt}">테마 · 날짜 · 시간</p>
                     </div>
-                    <button class="button danger"
-                            type="button"
-                            data-action="delete-reservation"
-                            th:data-id="${reservation.id}">
-                        예약 취소
-                    </button>
                 </article>
                 <div class="empty-card" th:if="${#lists.isEmpty(reservations)}">
                     아직 등록된 예약이 없습니다.
@@ -118,10 +112,6 @@
                 <span>설명</span>
                 <input id="theme-description" name="description" type="text" required>
             </label>
-            <label class="field">
-                <span>소요 시간</span>
-                <input id="theme-duration-time" name="durationTime" type="time" required>
-            </label>
             <button class="button primary fit-content" type="submit">테마 추가</button>
         </form>
 
@@ -131,7 +121,6 @@
                 <div class="theme-card-body">
                     <div class="theme-card-head">
                         <strong th:text="${theme.name}">테마</strong>
-                        <span th:text="${theme.durationTime}">01:30</span>
                     </div>
                     <p th:text="${theme.description}">설명</p>
                     <button class="button danger"

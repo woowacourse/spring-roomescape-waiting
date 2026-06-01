@@ -34,6 +34,11 @@ async function request(url, options = {}) {
     });
 
     if (!response.ok) {
+        const contentType = response.headers.get("content-type") ?? "";
+        if (contentType.includes("application/json")) {
+            const error = await response.json();
+            throw new Error(error.message || "요청 처리 중 문제가 발생했습니다.");
+        }
         const message = await response.text();
         throw new Error(message || "요청 처리 중 문제가 발생했습니다.");
     }
@@ -61,10 +66,10 @@ function formatTime(time) {
 }
 
 function formatStatus(status) {
-    if (status === "ACTIVE") {
+    if (status === "RESERVED") {
         return "확정";
     }
-    if (status === "PENDING") {
+    if (status === "WAITING") {
         return "대기";
     }
     if (status === "CANCELED") {
@@ -94,9 +99,6 @@ function renderReservations(reservations) {
                 </div>
                 <p>${reservation.theme.name} · ${reservation.date} · ${formatTime(reservation.time.startAt)}</p>
             </div>
-            <button class="button danger" type="button" data-action="delete-reservation" data-id="${reservation.id}">
-                예약 취소
-            </button>
         </article>
     `).join("");
 }
@@ -135,7 +137,6 @@ function renderThemes(themes) {
             <div class="theme-card-body">
                 <div class="theme-card-head">
                     <strong>${theme.name}</strong>
-                    <span>${formatTime(theme.durationTime)}</span>
                 </div>
                 <p>${theme.description}</p>
                 <button class="button danger" type="button" data-action="delete-theme" data-id="${theme.id}">
@@ -190,7 +191,6 @@ themeForm.addEventListener("submit", async (event) => {
         name: document.getElementById("theme-name").value.trim(),
         thumbnailImageUrl: document.getElementById("theme-thumbnail-image-url").value.trim(),
         description: document.getElementById("theme-description").value.trim(),
-        durationTime: document.getElementById("theme-duration-time").value
     };
 
     try {
@@ -203,27 +203,6 @@ themeForm.addEventListener("submit", async (event) => {
         showFeedback(themeFeedback, "success", "테마가 추가되었습니다.");
     } catch (error) {
         showFeedback(themeFeedback, "error", error.message);
-    }
-});
-
-reservationList.addEventListener("click", async (event) => {
-    const target = event.target.closest('[data-action="delete-reservation"]');
-    if (!target) {
-        return;
-    }
-
-    if (!window.confirm("이 예약을 취소할까요?")) {
-        return;
-    }
-
-    clearFeedback(reservationFeedback);
-
-    try {
-        await request(`/admin/reservations/${target.dataset.id}`, { method: "DELETE" });
-        await refreshReservations();
-        showFeedback(reservationFeedback, "success", "예약이 취소되었습니다.");
-    } catch (error) {
-        showFeedback(reservationFeedback, "error", error.message);
     }
 });
 
