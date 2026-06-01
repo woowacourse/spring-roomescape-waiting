@@ -1,5 +1,6 @@
 package roomescape.theme.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import roomescape.exception.AppException;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
+import roomescape.theme.dto.response.ReservedThemeResponse;
 import roomescape.theme.dto.response.ThemeResponse;
 
 @Service
@@ -31,5 +33,13 @@ public class ThemeService {
         if (!deleted) {
             throw new AppException(HttpStatus.NOT_FOUND, "삭제할 테마를 조회하지 못했습니다. id = " + id);
         }
+    }
+
+    public List<ReservedThemeResponse> findMostReserved(long limit, LocalDate startDate, LocalDate endDate) {
+        if (endDate != null) {
+            return themeDao.findMostReserved(limit, startDate, endDate);
+        }
+
+        return themeDao.findMostReserved(limit, startDate, LocalDate.now().minusDays(1));
     }
 }
