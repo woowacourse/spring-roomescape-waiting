@@ -113,14 +113,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS r_id,
                     r.name,
                     r.date,
-                    t.id AS t_id,
-                    t.start_at,
+                    ts.id AS t_id,
+                    ts.start_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url
                 FROM reservation r
-                INNER JOIN time_slot t ON r.time_id = t.id
+                INNER JOIN time_slot ts ON r.time_id = ts.id
                 INNER JOIN theme th ON r.theme_id = th.id
                 WHERE r.date = ? 
                   AND r.time_id = ? 

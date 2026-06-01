@@ -12,28 +12,30 @@ public class Waiting {
     private final LocalDate date;
     private final TimeSlot timeSlot;
     private final Theme theme;
-    private final Integer waitingNumber;
+    private final LocalDateTime createdAt;
 
-    public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, Integer waitingNumber) {
-        validateNullOrBlank(name, date, timeSlot, theme);
+    public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime createdAt) {
+        validateNullOrBlank(name, date, timeSlot, theme, createdAt);
         this.id = id;
         this.name = name;
         this.date = date;
         this.timeSlot = timeSlot;
         this.theme = theme;
-        this.waitingNumber = waitingNumber;
+        this.createdAt = createdAt;
     }
 
-    public Waiting(String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime now) {
-        this(null, name, date, timeSlot, theme, null);
-        validateCreatable(date, timeSlot, now);
+    public Waiting(String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime createdAt) {
+        this(null, name, date, timeSlot, theme, createdAt);
+        validateCreatable(date, timeSlot, createdAt);
     }
 
-    private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme,
+                                     LocalDateTime createdAt) {
         validateName(name);
         validateDate(date);
         validateTimeSlot(timeSlot);
         validateTheme(theme);
+        validateCreatedAt(createdAt);
     }
 
     private void validateCreatable(LocalDate date, TimeSlot time, LocalDateTime now) {
@@ -81,6 +83,12 @@ public class Waiting {
         }
     }
 
+    private void validateCreatedAt(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            throw new IllegalArgumentException("예약 대기 생성 시각은 필수입니다.");
+        }
+    }
+
     private void validateOwnedBy(String userName) {
         if (!this.name.equals(userName)) {
             throw new InvalidOwnershipException();
@@ -107,7 +115,7 @@ public class Waiting {
         return theme;
     }
 
-    public Integer getWaitingNumber() {
-        return waitingNumber;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

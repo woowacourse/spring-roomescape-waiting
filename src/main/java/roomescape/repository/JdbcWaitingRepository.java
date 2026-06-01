@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.repository.dto.WaitingWithNumber;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -58,13 +60,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByName(String name) {
+    public List<WaitingWithNumber> findByName(String name) {
         String sql = """
                 SELECT *
                 FROM (
                     SELECT w.id,
                            w.name,
                            w.date,
+                           w.created_at,
                            ts.id AS time_id,
                            ts.start_at,
                            th.id AS theme_id,
@@ -82,7 +85,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 WHERE ranked.name = ?
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper(), name);
+        return jdbcTemplate.query(sql, waitingWithNumberRowMapper(), name);
     }
 
     @Override
@@ -93,6 +96,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     SELECT w.id,
                            w.name,
                            w.date,
+                           w.created_at,
                            ts.id AS time_id,
                            ts.start_at,
                            th.id AS theme_id,
@@ -110,14 +114,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 WHERE ranked.id = ?
                 """;
 
-        List<Waiting> waitings = jdbcTemplate.query(sql, rowMapper(), waitingId);
+        List<Waiting> waitings = jdbcTemplate.query(sql, waitingRowMapper(), waitingId);
         return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
     }
 
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
-                .usingColumns("name", "date", "time_id", "theme_id");
+                .usingColumns("name", "date", "time_id", "theme_id", "created_at");
     }
 
     private Map<String, Object> createParams(Waiting waiting) {
@@ -125,11 +129,19 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 "name", waiting.getName(),
                 "date", waiting.getDate(),
                 "time_id", waiting.getTimeSlot().getId(),
-                "theme_id", waiting.getTheme().getId()
+                "theme_id", waiting.getTheme().getId(),
+                "created_at", waiting.getCreatedAt()
         );
     }
 
-    private RowMapper<Waiting> rowMapper() {
+    private RowMapper<WaitingWithNumber> waitingWithNumberRowMapper() {
+        return (rs, rowNum) -> new WaitingWithNumber(
+                waitingRowMapper().mapRow(rs, rowNum),
+                rs.getInt("waiting_number")
+        );
+    }
+
+    private RowMapper<Waiting> waitingRowMapper() {
         return (rs, rowNum) -> new Waiting(
                 rs.getLong("id"),
                 rs.getString("name"),
@@ -144,7 +156,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                         rs.getString("theme_description"),
                         rs.getString("theme_thumbnail_url")
                 ),
-                rs.getInt("waiting_number")
+                rs.getObject("created_at", LocalDateTime.class)
         );
     }
 }

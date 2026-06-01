@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.repository.dto.WaitingWithNumber;
 import roomescape.domain.Waiting;
 
 public interface WaitingRepository {
@@ -13,7 +14,7 @@ public interface WaitingRepository {
 
     boolean exists(String name, LocalDate date, Long timeId, Long themeId);
 
-    List<Waiting> findByName(String name);
+    List<WaitingWithNumber> findByName(String name);
 
     Optional<Waiting> findById(long id);
 }
