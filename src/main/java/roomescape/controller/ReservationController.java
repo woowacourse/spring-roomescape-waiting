@@ -23,7 +23,7 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<ReservationResponses> reservations() {
+    public ResponseEntity<ReservationResponses> getAllReservations() {
         return ResponseEntity.ok(ReservationResponses.from(reservationService.findAllReservations()));
     }
 
@@ -34,9 +34,9 @@ public class ReservationController {
     }
 
     @GetMapping(params = {"userName"})
-    public ResponseEntity<ReservationAndWaitingResponses> getReservationByName(@RequestParam String userName) {
+    public ResponseEntity<ReservationAndWaitingResponses> getReservationAndWaitingByName(@RequestParam String userName) {
         return ResponseEntity.ok(
-                ReservationAndWaitingResponses.from(reservationService.findReservationByName(userName)));
+                ReservationAndWaitingResponses.from(reservationService.findReservationAndWaitingByName(userName)));
     }
 
     @PostMapping
