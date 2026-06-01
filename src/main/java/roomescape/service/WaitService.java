@@ -11,6 +11,7 @@ import roomescape.repository.WaitRepository;
 @Service
 public class WaitService {
 
+    private static final int MAX_WAIT_SIZE = 3;
     private final WaitRepository waitRepository;
 
     public WaitService(WaitRepository waitRepository) {
@@ -29,7 +30,7 @@ public class WaitService {
             }
         }
 
-        if (waits.size() >= 3) {
+        if (waits.size() >= MAX_WAIT_SIZE) {
             throw new RoomEscapeException(DomainErrorCode.WAIT_IS_FULL);
         }
 
