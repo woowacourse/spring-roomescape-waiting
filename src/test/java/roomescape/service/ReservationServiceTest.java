@@ -79,6 +79,23 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("확정 예약을 삭제하면 첫 번째 대기 예약이 확정된다.")
+    void promoteFirstPendingReservationWhenRemoveConfirmedReservation() {
+        Reservation confirmedReservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        Reservation firstPendingReservation = reservationService.saveReservation("김대기", savedThemeSlot1.getId());
+        Reservation secondPendingReservation = reservationService.saveReservation("나대기", savedThemeSlot1.getId());
+
+        reservationService.removeReservation(confirmedReservation.getId());
+
+        Reservation promotedReservation = reservationService.findReservation(firstPendingReservation.getId());
+        Reservation waitingReservation = reservationService.findReservation(secondPendingReservation.getId());
+        ThemeSlot themeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
+        assertThat(promotedReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+        assertThat(waitingReservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(themeSlot.isReserved()).isTrue();
+    }
+
+    @Test
     @DisplayName("모든 예약 목록을 조회하여 반환한다.")
     void allReservations() {
         reservationService.saveReservation("브라운", savedThemeSlot1.getId());
@@ -226,6 +243,22 @@ class ReservationServiceTest {
         ThemeSlot modifiedThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot2.getId()).orElseThrow();
         assertThat(modifiedReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
         assertThat(previousThemeSlot.isReserved()).isTrue();
+        assertThat(modifiedThemeSlot.isReserved()).isTrue();
+    }
+
+    @Test
+    @DisplayName("예약이 이미 예약된 슬롯으로 변경되면 대기 예약이 된다.")
+    void changeReservationToPendingWhenModifiedToReservedThemeSlot() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        reservationService.saveReservation("네오", savedThemeSlot2.getId());
+
+        Reservation modifiedReservation = reservationService.modifyReservation(reservation.getId(), savedThemeSlot2.getId());
+
+        ThemeSlot previousThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
+        ThemeSlot modifiedThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot2.getId()).orElseThrow();
+        assertThat(modifiedReservation.getThemeSlot().getId()).isEqualTo(savedThemeSlot2.getId());
+        assertThat(modifiedReservation.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(previousThemeSlot.isReserved()).isFalse();
         assertThat(modifiedThemeSlot.isReserved()).isTrue();
     }
 

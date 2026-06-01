@@ -9,6 +9,7 @@ import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.WaitingReservation;
+import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -40,7 +41,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation saveReservation(String name, Long themeSlotId) {
-        ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
+        ThemeSlot themeSlot = getThemeSlotForUpdateOrElseThrow(themeSlotId);
         validateBeforeDate(themeSlot);
         validateDuplicatedReservation(name, themeSlotId);
         validateDateTime(themeSlot);
@@ -60,10 +61,22 @@ public class ReservationService {
     @Transactional
     public void removeReservation(long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
-        Long themeSlotId = reservation.getThemeSlotId();
+        boolean wasConfirmed = reservation.isConfirmedStatus();
+
+        if (wasConfirmed) {
+            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+        }
+
         reservationRepository.deleteById(reservationId);
-        boolean hasActiveReservation = reservationRepository.existsByThemeSlotId(themeSlotId);
-        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), hasActiveReservation));
+
+        if (wasConfirmed) {
+            promoteWaitingReservationOrReleaseSlot(reservation);
+            return;
+        }
+
+        boolean hasActiveReservation = reservationRepository.existsByThemeSlotId(reservation.getThemeSlotId());
+        updateThemeSlotReserved(reservation.getThemeSlot(), hasActiveReservation);
     }
 
     public Reservation findReservation(long reservationId) {
@@ -119,6 +132,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void completeReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
         reservation.complete();
@@ -129,7 +143,7 @@ public class ReservationService {
     public Reservation modifyReservation(Long reservationId, Long themeSlotId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
         validateModifiable(reservation);
-        ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
+        ThemeSlot themeSlot = getThemeSlotForUpdateOrElseThrow(themeSlotId);
 
         validateBeforeDate(themeSlot);
         validateDateTime(themeSlot);
@@ -149,13 +163,18 @@ public class ReservationService {
     }
 
     private void changeThemeSlot(Reservation reservation, Long themeSlotId, ThemeSlot themeSlot) {
-        validateIsExistBy(themeSlotId);
-        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
+        validateDuplicatedReservation(reservation.getName(), themeSlotId);
+        boolean targetSlotHasActiveReservation = reservationRepository.existsByThemeSlotId(themeSlotId);
+        updateThemeSlotReserved(themeSlot, true);
 
         if (reservation.isConfirmedStatus()) {
             themeSlotRepository.findByIdForUpdate(reservation.getThemeSlotId())
                     .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
             promoteWaitingReservationOrReleaseSlot(reservation);
+        }
+
+        if (targetSlotHasActiveReservation) {
+            reservation.changeStatus(PendingStatus.getInstance());
             return;
         }
 
@@ -179,7 +198,7 @@ public class ReservationService {
         }
 
         if (waitingReservation.isEmpty()) {
-            themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+            updateThemeSlotReserved(reservation.getThemeSlot(), false);
         }
     }
 
@@ -189,8 +208,8 @@ public class ReservationService {
     }
 
     @NonNull
-    private ThemeSlot getThemeSlotOrElseThrow(Long themeSlotId) {
-        return themeSlotRepository.findById(themeSlotId)
+    private ThemeSlot getThemeSlotForUpdateOrElseThrow(Long themeSlotId) {
+        return themeSlotRepository.findByIdForUpdate(themeSlotId)
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
@@ -206,12 +225,6 @@ public class ReservationService {
         }
     }
 
-    private void validateIsExistBy(Long themeSlotId) {
-        if (reservationRepository.existsByThemeSlotId(themeSlotId)) {
-            throw new CustomException(ErrorCode.RESERVATION_ALREADY_EXIST);
-        }
-    }
-
     private void validateDateTime(ThemeSlot themeSlot) {
         if (themeSlot.getDate().equals(java.time.LocalDate.now()) && themeSlot.getTime().isBefore(LocalTime.now())) {
             throw new CustomException(ErrorCode.RESERVATION_TIME_OUT);
@@ -222,5 +235,9 @@ public class ReservationService {
         if (reservationRepository.existsByThemeSlotIdAndMemberName(name, themeSlotId)) {
             throw new CustomException(RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT);
         }
+    }
+
+    private void updateThemeSlotReserved(ThemeSlot themeSlot, boolean isReserved) {
+        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), isReserved));
     }
 }
