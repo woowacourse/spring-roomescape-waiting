@@ -28,7 +28,7 @@ public interface ReservationRepository {
 
     Optional<Long> findEarliestWaiting(Long timeId, Long themeId);
 
-    boolean promoteToReserved(Long waitingId);
+    void promoteToReserved(Long waitingId);
 
     List<ReservationWithWaitingOrder> findAllByName(String name);
 

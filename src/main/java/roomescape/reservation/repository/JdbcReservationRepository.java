@@ -141,11 +141,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean promoteToReserved(Long waitingId) {
-        int affected = jdbcTemplate.update(
+    public void promoteToReserved(Long waitingId) {
+        jdbcTemplate.update(
                 "UPDATE reservation SET status = 'RESERVED' where id = ?",
                 waitingId);
-        return affected > 0;
     }
 
     private static class ReservationRowMapper implements RowMapper<Reservation> {
