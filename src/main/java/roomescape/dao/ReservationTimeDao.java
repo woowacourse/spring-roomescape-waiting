@@ -9,9 +9,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeStatus;
+import roomescape.domain.TimeSlot;
 
 @Repository
 @Transactional(readOnly = true)
@@ -94,7 +94,7 @@ public class ReservationTimeDao {
         return reservationTimes.stream().findFirst();
     }
 
-    public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {
+    public List<TimeSlot> findAvailableTime(Long id, String date) {
         return jdbcTemplate.query("""
                                SELECT t.id AS time_id, t.start_at,
                                       CASE WHEN EXISTS (
@@ -111,7 +111,7 @@ public class ReservationTimeDao {
                             rs.getLong("time_id"),
                             rs.getTime("start_at").toLocalTime());
 
-                    return new ReservationTimeStatus(time, ReservationStatus.valueOf(rs.getString("status")));
+                    return new TimeSlot(time, ReservationTimeStatus.valueOf(rs.getString("status")));
 
                 }, id, date
         );

@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeStatus;
+import roomescape.domain.TimeSlot;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeStatusResponse;
+import roomescape.dto.response.TimeSlotResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.AlreadyInUseException;
 
@@ -27,11 +27,11 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<ReservationTimeStatusResponse> findAvailableTime(Long id, String date) {
-        List<ReservationTimeStatus> availableTimes = reservationTimeDao.findAvailableTime(id, date);
+    public List<TimeSlotResponse> findAvailableTime(Long id, String date) {
+        List<TimeSlot> availableTimes = reservationTimeDao.findAvailableTime(id, date);
 
         return availableTimes.stream()
-                .map(ReservationTimeStatusResponse::from)
+                .map(TimeSlotResponse::from)
                 .toList();
     }
 

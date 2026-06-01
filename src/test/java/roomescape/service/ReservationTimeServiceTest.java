@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTimeStatus;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeStatusResponse;
+import roomescape.dto.response.TimeSlotResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.AlreadyInUseException;
 
@@ -91,10 +91,10 @@ class ReservationTimeServiceTest {
     void 예약된_시간_제외_가용_시간_조회() {
         String date = LocalDate.now().minusDays(6).toString();
 
-        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(1L, date);
 
         long availableCount = result.stream()
-                .filter(r -> r.status() == ReservationStatus.AVAILABLE)
+                .filter(r -> r.status() == ReservationTimeStatus.AVAILABLE)
                 .count();
 
         assertThat(availableCount).isEqualTo(4);
@@ -104,7 +104,7 @@ class ReservationTimeServiceTest {
     void 예약_없는_날짜의_전체_가용_시간_조회() {
         String date = LocalDate.now().plusDays(30).toString();
 
-        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+        List<TimeSlotResponse> result = reservationTimeService.findAvailableTime(1L, date);
 
         assertThat(result).hasSize(9);
     }

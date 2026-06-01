@@ -2,11 +2,11 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 
-public class ReservationTimeStatus {
+public class TimeSlot {
     private ReservationTime time;
-    private ReservationStatus status;
+    private ReservationTimeStatus status;
 
-    public ReservationTimeStatus(ReservationTime time, ReservationStatus status) {
+    public TimeSlot(ReservationTime time, ReservationTimeStatus status) {
         this.time = time;
         this.status = status;
     }
@@ -19,7 +19,7 @@ public class ReservationTimeStatus {
         return time.getStartAt();
     }
 
-    public ReservationStatus getStatus() {
+    public ReservationTimeStatus getStatus() {
         return status;
     }
 }
