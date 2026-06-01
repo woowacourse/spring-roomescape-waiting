@@ -2,16 +2,13 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import roomescape.domain.Wait;
-
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.WaitRepository;
 
-@Component
-@Transactional(readOnly = true)
+@Service
 public class WaitService {
 
     private final WaitRepository waitRepository;
@@ -20,7 +17,6 @@ public class WaitService {
         this.waitRepository = waitRepository;
     }
 
-    @Transactional
     public Wait save(Wait waitWithoutId) {
         List<Wait> waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),

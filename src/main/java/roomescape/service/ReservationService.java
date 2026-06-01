@@ -3,19 +3,16 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 
-@Component
-@Transactional(readOnly = true)
+@Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -24,7 +21,6 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-    @Transactional
     public Reservation save(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
         return reservationRepository.save(reservationWithoutId);
@@ -43,7 +39,6 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_RESERVATION));
     }
 
-    @Transactional
     public void delete(Long id) {
         reservationRepository.delete(id);
     }

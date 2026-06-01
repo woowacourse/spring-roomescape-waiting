@@ -3,16 +3,14 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 
-@Component
-@Transactional(readOnly = true)
+@Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -21,7 +19,6 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    @Transactional
     public ReservationTime save(ServiceReservationTimeCreateRequest request) {
         validateDuplicatedReservationTime(request.startAt());
         return reservationTimeRepository.save(request.toEntity());
@@ -35,7 +32,6 @@ public class ReservationTimeService {
         return reservationTimeRepository.findReservedTimeIdByDateAndTheme(date, themeId);
     }
 
-    @Transactional
     public void delete(Long id) {
         reservationTimeRepository.delete(id);
     }

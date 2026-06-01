@@ -4,21 +4,18 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
-
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 
-@Component
-@Transactional(readOnly = true)
+@Service
 public class ThemeService {
 
-    public static final int RANKING_LIMIT = 10;
-    public static final int MAX_RANKING_PERIOD = 366;
+    private static final int RANKING_LIMIT = 10;
+    private static final int MAX_RANKING_PERIOD = 366;
 
     private final ThemeRepository themeRepository;
     private final Clock clock;
@@ -28,7 +25,6 @@ public class ThemeService {
         this.clock = clock;
     }
 
-    @Transactional
     public Theme save(ServiceThemeCreateRequest requestDto) {
         return themeRepository.save(requestDto.toEntity());
     }
@@ -37,7 +33,6 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    @Transactional
     public void delete(Long id) {
         themeRepository.delete(id);
     }
