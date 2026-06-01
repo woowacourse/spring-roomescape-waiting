@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,9 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import roomescape.controller.dto.ReservationPatchRequest;
-import roomescape.controller.dto.ReservationPutRequest;
 import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.UpdateReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -54,27 +52,29 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("전체 예약을 조회하고 200 상태 코드를 반환한다.")
-    void getReservations() throws Exception {
-        given(reservationService.allReservations()).willReturn(List.of(createMockReservation()));
-        mockMvc.perform(get("/reservations")).andExpect(status().isOk()).andExpect(jsonPath("$").isArray());
+    void 전체_예약_조회() throws Exception {
+        given(reservationService.findAllReservations()).willReturn(List.of(createMockReservation()));
+        mockMvc.perform(get("/reservations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservationResponses").isArray());
     }
 
     @Test
     @DisplayName("식별자를 통해 단건 예약을 조회하고 200 상태 코드를 반환한다.")
-    void getReservationById() throws Exception {
+    void 식별자로_예약_조회() throws Exception {
         given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
         mockMvc.perform(get("/reservations/1")).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("브라운"));
     }
 
     @Test
     @DisplayName("필수 쿼리 파라미터(userName) 누락 시 400 상태 코드를 반환한다.")
-    void missingRequestParam() throws Exception {
+    void 필수_쿼리_파라미터_누락_예외_발생() throws Exception {
         mockMvc.perform(delete("/reservations/1")).andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("JSON 형식이 잘못된 경우 400 상태 코드를 반환한다.")
-    void malformedJsonRequest() throws Exception {
+    void 잘못된_JSON_형식_예외_발생() throws Exception {
         String invalidJson = "{\"name\": \"브라운\", \"date\": \"잘못된날짜포맷\"}";
         performPostWithRawJson("/reservations", invalidJson)
                 .andExpect(status().isBadRequest())
@@ -84,7 +84,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("유효한 데이터로 예약을 생성하고 201 상태 코드와 Location 헤더를 반환한다.")
-    void createReservation() throws Exception {
+    void 예약_생성() throws Exception {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now(), 1L, 1L);
         given(reservationService.saveReservation(any(), any(), any(), any())).willReturn(createMockReservation());
         performPost("/reservations", request).andExpect(status().isCreated()).andExpect(header().exists("Location"));
@@ -92,7 +92,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("DTO 검증 실패 시 400 예외와 ProblemDetail 포맷을 반환한다.")
-    void createReservationWithInvalidData() throws Exception {
+    void 예약_생성_DTO_검증() throws Exception {
         ReservationRequest request = new ReservationRequest("", LocalDate.now(), 1L, 1L);
         performPost("/reservations", request)
                 .andExpect(status().isBadRequest())
@@ -102,40 +102,31 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약의 전체 정보를 수정하고 200 상태 코드를 반환한다.")
-    void rescheduleAll() throws Exception {
-        ReservationPutRequest request = new ReservationPutRequest("네오", LocalDate.now(), 1L, 1L);
-        given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
-        performPut("/reservations/1", "브라운", request).andExpect(status().isOk());
-    }
-
-    @Test
     @DisplayName("존재하지 않는 자원 요청 시 404 예외와 커스텀 코드를 반환한다.")
-    void findNonExistentReservation() throws Exception {
-        given(reservationService.findReservationById(anyLong())).willThrow(new ReservationNotFoundException(999L));
-        ReservationPutRequest request = new ReservationPutRequest("네오", LocalDate.now(), 1L, 1L);
-        performPut("/reservations/999", "브라운", request)
+    void 존재하지_않는_예약_조회_예외_발생() throws Exception {
+        given(reservationService.findReservationById(anyLong())).willThrow(new ReservationNotFoundException());
+        mockMvc.perform(get("/reservations/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));
     }
 
     @Test
-    @DisplayName("예약의 부분 정보를 수정하고 200 상태 코드를 반환한다.")
-    void reschedulePart() throws Exception {
-        ReservationPatchRequest request = new ReservationPatchRequest("네오", null, null, null);
+    @DisplayName("예약 날짜와 시간을 수정하고 200 상태 코드를 반환한다.")
+    void 예약_날짜_시간_수정() throws Exception {
+        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.now(), 1L);
         given(reservationService.findReservationById(anyLong())).willReturn(createMockReservation());
         performReschedule("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("예약을 삭제하고 204 상태 코드를 반환한다.")
-    void deleteReservation() throws Exception {
+    void 예약_삭제() throws Exception {
         performDelete("/reservations/1", "브라운").andExpect(status().isNoContent());
     }
 
     @Test
     @DisplayName("권한이 없는 예약 제어 시 403 예외와 커스텀 코드를 반환한다.")
-    void deleteWithoutOwnership() throws Exception {
+    void 예약_소유자_불일치_예외_발생() throws Exception {
         doThrow(new InvalidOwnershipException()).when(reservationService).removeReservation(anyLong(), any());
         performDelete("/reservations/1", "해커")
                 .andExpect(status().isForbidden())
@@ -144,7 +135,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("도메인 검증 실패(IllegalArgument) 시 400 상태 코드를 반환한다.")
-    void createReservationIllegalArgument() throws Exception {
+    void 예약_생성_도메인_검증_예외_발생() throws Exception {
         given(reservationService.saveReservation(any(), any(), any(), any()))
                 .willThrow(new IllegalArgumentException("테스트용 에러 메시지"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
@@ -155,7 +146,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("데이터 중복 발생(DuplicateKey) 시 409 상태 코드를 반환한다.")
-    void createReservationDuplicateKey() throws Exception {
+    void 예약_생성_중복키_예외_발생() throws Exception {
         given(reservationService.saveReservation(any(), any(), any(), any()))
                 .willThrow(new DuplicateKeyException("중복 데이터 발생"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
@@ -166,7 +157,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("데이터 무결성 위반(DataIntegrity) 시 400 상태 코드를 반환한다.")
-    void createReservationDataIntegrity() throws Exception {
+    void 예약_생성_데이터_무결성_예외_발생() throws Exception {
         given(reservationService.saveReservation(any(), any(), any(), any()))
                 .willThrow(new DataIntegrityViolationException("외래키 위반"));
         performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
@@ -182,11 +173,6 @@ class ReservationControllerTest {
 
     private ResultActions performPostWithRawJson(String url, String jsonBody) throws Exception {
         return mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(jsonBody));
-    }
-
-    private ResultActions performPut(String url, String userName, Object request) throws Exception {
-        return mockMvc.perform(put(url).param("userName", userName).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
     }
 
     private ResultActions performReschedule(String url, String userName, Object request) throws Exception {

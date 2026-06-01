@@ -37,7 +37,7 @@ class ReservationServiceExperiment {
     private ReservationService reservationService;
 
     @Test
-    void saveReservationReturnsSavedReservation() {
+    void 예약_저장_결과_검증() {
         LocalDate date = LocalDate.now().plusDays(1);
         TimeSlot timeSlot = mock(TimeSlot.class);
         Theme theme = mock(Theme.class);

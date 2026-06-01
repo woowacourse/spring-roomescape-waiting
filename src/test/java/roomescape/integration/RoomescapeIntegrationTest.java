@@ -37,7 +37,7 @@ public class RoomescapeIntegrationTest {
 
     @Test
     @DisplayName("ProblemDetail 에러 응답 규격을 정확히 준수하여 반환한다.")
-    void problemDetailFormatTest() {
+    void 에러_응답_규격_검증() {
         insertTestData();
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().minusDays(1), 1L, 1L);
 
@@ -55,7 +55,7 @@ public class RoomescapeIntegrationTest {
 
     @Test
     @DisplayName("특정 사용자의 이름으로 본인의 예약과 대기 목록만 조회할 수 있다.")
-    void getMyReservations() {
+    void 내_예약_대기_조회() {
         insertTestData();
 
         RestAssured.given().log().all()
@@ -69,7 +69,7 @@ public class RoomescapeIntegrationTest {
 
     @Test
     @DisplayName("날짜와 테마를 선택하면 해당 조건에 맞는 예약 가능한 시간 목록이 표시된다.")
-    void fetchAvailableTimes() {
+    void 예약_가능_시간_조회() {
         insertTestData();
         String dateStr = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
 
@@ -85,7 +85,7 @@ public class RoomescapeIntegrationTest {
 
     @Test
     @DisplayName("같은 날짜와 시간이라도 테마가 다르면 각각 예약에 성공한다.")
-    void independentThemeReservation() {
+    void 테마별_독립_예약_검증() {
         insertTestData();
 
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now().plusDays(1), 1L, 2L);
@@ -100,7 +100,7 @@ public class RoomescapeIntegrationTest {
 
     @Test
     @DisplayName("최근 7일(기간 파라미터) 동안의 예약 데이터를 기반으로 인기 테마 상위 목록을 조회한다.")
-    void getPopularThemesBoundary() {
+    void 인기_테마_기간_경계_검증() {
         insertTestData();
         LocalDate today = LocalDate.now();
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저1",

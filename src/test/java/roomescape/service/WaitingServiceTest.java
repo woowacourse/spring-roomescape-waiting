@@ -46,7 +46,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("존재하는 예약 대기를 삭제한다.")
-    void deleteWaiting() {
+    void 대기_삭제() {
         Waiting waiting = createWaitingEntity();
         given(waitingRepository.findById(1L)).willReturn(Optional.of(waiting));
 
@@ -55,7 +55,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 대기를 삭제하면, 예외가 발생한다.")
-    void deleteNotExistsWaiting() {
+    void 존재하지_않는_대기_삭제_예외_발생() {
         given(waitingRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> waitingService.removeWaiting(1L, "브라운"))
@@ -64,7 +64,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
-    void saveDuplicateWaiting() {
+    void 중복_대기_예외_발생() {
         Waiting waiting = createTransientWaiting();
         given(waitingRepository.isExists(waiting)).willReturn(true);
 
@@ -74,7 +74,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("존재하는 예약에 대기를 추가하면, 예외가 발생한다.")
-    void saveReservedWaiting() {
+    void 예약된_시간_대기_예외_발생() {
         Waiting waiting = createTransientWaiting();
         given(reservationRepository.findByDateAndTimeIdAndThemeId(waiting.getDate(),
                 waiting.getTimeSlotId(), waiting.getThemeId())).willReturn(Optional.of(
@@ -87,7 +87,7 @@ class WaitingServiceTest {
 
     @Test
     @DisplayName("이미 지난 시간으로 대기를 추가하면, 예외가 발생한다.")
-    void savePassedWaiting() {
+    void 지난_시간_대기_예외_발생() {
         Waiting waiting = createTransientWaiting();
         given(timeSlotRepository.findById(1L)).willReturn(Optional.of(new TimeSlot(1L, LocalTime.of(0, 0))));
 

@@ -46,16 +46,16 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약을 저장하고 영속화된 객체를 반환한다.")
-    void save() {
-        Reservation reservation = Reservation.transientOf("브라운", LocalDate.now(), savedTimeSlot, savedTheme);
+    void 예약_저장() {
+        Reservation reservation = new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme);
         Reservation savedReservation = jdbcReservationRepository.save(reservation);
         assertThat(savedReservation.getId()).isPositive();
     }
 
     @Test
     @DisplayName("식별자로 예약 객체를 조회한다.")
-    void findById() {
-        Reservation savedReservation = jdbcReservationRepository.save(Reservation.transientOf(
+    void 식별자로_예약_조회() {
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
                 LocalDate.now(),
                 savedTimeSlot,
@@ -68,8 +68,8 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("모든 예약 객체 목록을 조회한다.")
-    void findAll() {
-        jdbcReservationRepository.save(Reservation.transientOf(
+    void 전체_예약_조회() {
+        jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
                 LocalDate.now(), savedTimeSlot,
                 savedTheme
@@ -80,8 +80,8 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("식별자로 예약을 삭제한다.")
-    void deleteById() {
-        Reservation savedReservation = jdbcReservationRepository.save(Reservation.transientOf(
+    void 식별자로_예약_삭제() {
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
                 LocalDate.now(),
                 savedTimeSlot,
@@ -93,8 +93,8 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마에 해당하는 예약이 이미 존재하면 해당 예약을 반환한다.")
-    void findByDateAndTimeIdAndThemeId() {
-        Reservation reservation = Reservation.transientOf("브라운", LocalDate.now(), savedTimeSlot, savedTheme);
+    void 날짜_시간_테마로_예약_조회() {
+        Reservation reservation = new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme);
         jdbcReservationRepository.save(reservation);
         Optional<Reservation> existingReservation = jdbcReservationRepository.findByDateAndTimeIdAndThemeId(
                 LocalDate.now(),
@@ -108,8 +108,8 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("존재하는 예약을 변경 불가능한 날짜, 시간, 테마으로 수정 시도 시 예외가 발생한다.")
-    void updateByDuplicatedDateAndTimeIdAndThemeId() {
-        jdbcReservationRepository.save(Reservation.transientOf(
+    void 중복_날짜_시간_테마_예약_수정_예외_발생() {
+        jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
                 LocalDate.now(),
                 savedTimeSlot,
@@ -117,7 +117,7 @@ class JdbcReservationRepositoryTest {
         ));
 
         Reservation newReservation = jdbcReservationRepository.save(
-                Reservation.transientOf(
+                new Reservation(null,
                         "네오",
                         LocalDate.now().plusDays(7),
                         savedTimeSlot,
@@ -140,16 +140,16 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("존재하는 예약을 삭제한다.")
-    void deleteExisting() {
+    void 존재하는_예약_삭제() {
         Reservation saved = jdbcReservationRepository.save(
-                Reservation.transientOf("브라운", LocalDate.now(), savedTimeSlot, savedTheme));
+                new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme));
         jdbcReservationRepository.deleteById(saved.getId());
         assertThat(jdbcReservationRepository.findAll()).isEmpty();
     }
 
     @Test
     @DisplayName("존재하지 않는 예약을 삭제해도 예외가 발생하지 않는다.")
-    void deleteNonExisting() {
+    void 존재하지_않는_예약_삭제() {
         assertThatCode(() -> jdbcReservationRepository.deleteById(999L))
                 .doesNotThrowAnyException();
     }

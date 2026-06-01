@@ -30,15 +30,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Long> findByThemeIdAndDate(long themeId, LocalDate date) {
-        return storage.values().stream()
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId) && reservation.getDate()
-                        .equals(date))
-                .map(reservation -> reservation.getTimeSlot().getId())
-                .toList();
-    }
-
-    @Override
     public Reservation save(Reservation reservation) {
         long id = sequence++;
         Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getDate(),
@@ -67,6 +58,12 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         storage.put(reservation.getId(), reservation);
         return 1;
+    }
+
+    @Override
+    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        return storage.values().stream()
+                .anyMatch(reservation -> isDuplicate(reservation, date, timeId, themeId));
     }
 
     private boolean isDuplicate(Reservation reservation, LocalDate date, Long timeId, Long themeId) {

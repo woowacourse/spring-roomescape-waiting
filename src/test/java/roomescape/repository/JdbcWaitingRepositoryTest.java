@@ -41,14 +41,14 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("예약 대기를 저장한다.")
-    void save() {
+    void 대기_저장() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
     }
 
     @Test
     @DisplayName("저장된 예약 대기 존재를 확인하면, 참을 반환한다.")
-    void existsWaiting() {
+    void 대기_존재_검증() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
         assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(true);
@@ -56,14 +56,14 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("저장되지 않은 예약 대기 존재를 확인하면, 거짓을 반환한다.")
-    void notExistsWaiting() {
+    void 대기_미존재_검증() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(false);
     }
 
     @Test
     @DisplayName("예약 대기를 삭제한다.")
-    void deleteById() {
+    void 식별자로_대기_삭제() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
         jdbcWaitingRepository.deleteById(1L);

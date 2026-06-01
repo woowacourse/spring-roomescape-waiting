@@ -39,7 +39,7 @@ class JdbcTimeSlotRepositoryTest {
 
     @Test
     @DisplayName("예약 시간을 저장하고 영속화된 객체를 반환한다.")
-    void save() {
+    void 예약_시간_저장() {
         TimeSlot timeSlot = TimeSlot.transientOf(LocalTime.of(10, 0));
         TimeSlot savedTimeSlot = timeRepository.save(timeSlot);
         assertThat(savedTimeSlot.getId()).isPositive();
@@ -47,7 +47,7 @@ class JdbcTimeSlotRepositoryTest {
 
     @Test
     @DisplayName("식별자로 예약 시간 객체를 조회한다.")
-    void findById() {
+    void 식별자로_예약_시간_조회() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Optional<TimeSlot> foundTimeSlot = timeRepository.findById(savedTimeSlot.getId());
         assertThat(foundTimeSlot).isPresent();
@@ -56,7 +56,7 @@ class JdbcTimeSlotRepositoryTest {
 
     @Test
     @DisplayName("존재하는 예약 시간을 삭제한다.")
-    void deleteExisting() {
+    void 존재하는_예약_시간_삭제() {
         int defaultSize = timeRepository.findAll().size();
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         timeRepository.deleteById(savedTimeSlot.getId());
@@ -65,14 +65,14 @@ class JdbcTimeSlotRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 시간을 삭제해도 예외가 발생하지 않는다.")
-    void deleteNonExisting() {
+    void 존재하지_않는_예약_시간_삭제() {
         assertThatCode(() -> timeRepository.deleteById(999L))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("존재하는 예약 시간 정보를 수정한다.")
-    void updateExisting() {
+    void 존재하는_예약_시간_수정() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         TimeSlot updateTime = new TimeSlot(savedTimeSlot.getId(), LocalTime.of(12, 0));
         assertThat(timeRepository.update(updateTime)).isEqualTo(1);
@@ -80,18 +80,18 @@ class JdbcTimeSlotRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 예약 시간을 수정하면 0을 반환한다.")
-    void updateNonExisting() {
+    void 존재하지_않는_예약_시간_수정_검증() {
         TimeSlot updateTime = new TimeSlot(999L, LocalTime.of(12, 0));
         assertThat(timeRepository.update(updateTime)).isZero();
     }
 
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제할 수 없다.")
-    void deleteTimeSlot_WithReservation() {
+    void 예약이_존재하는_시간_삭제_예외_발생() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(Theme.transientOf("공포", "설명", "url"));
         reservationRepository.save(
-                Reservation.transientOf("브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
+                new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
 
         assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId()))
                 .isInstanceOf(DataIntegrityViolationException.class);

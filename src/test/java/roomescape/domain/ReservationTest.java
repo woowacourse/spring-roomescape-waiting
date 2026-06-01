@@ -12,7 +12,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("정상적인 값을 입력하면 예약 객체가 생성된다.")
-    void create_ValidParameters_CreatesReservation() {
+    void 예약_생성() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
         Reservation reservation = new Reservation(
@@ -27,7 +27,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("예약자 이름이 null이거나 비어있으면 예외가 발생한다.")
-    void create_InvalidName_ThrowsException() {
+    void 예약자_이름_공백_예외_발생() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         assertThatThrownBy(() -> new Reservation(1L, " ", LocalDate.now().plusDays(1), timeSlot,
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com")))
@@ -36,16 +36,16 @@ class ReservationTest {
 
     @Test
     @DisplayName("예약 시간 객체가 null이면 예외가 발생한다.")
-    void create_NullTime_ThrowsException() {
+    void 예약_시간_null_예외_발생() {
         assertThatThrownBy(() -> new Reservation(1L, "브라운", LocalDate.now().plusDays(1), null,
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com")))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    @DisplayName("transientOf를 통해 비영속 상태의 예약 객체를 생성할 수 있다.")
-    void transientOf_ValidParameters_CreatesTransientReservation() {
-        Reservation reservation = Reservation.transientOf("브라운", LocalDate.now().plusDays(1),
+    @DisplayName("식별자 없이 예약 객체를 생성할 수 있다.")
+    void 식별자_없는_예약_생성() {
+        Reservation reservation = new Reservation(null, "브라운", LocalDate.now().plusDays(1),
                 new TimeSlot(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
         assertThat(reservation.getId()).isNull();
