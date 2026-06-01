@@ -117,7 +117,6 @@ class ReservationControllerTest {
                 User.of(1L, "보예"),
                 null,
                 ReservationStatus.CONFIRMED,
-                LocalDate.of(2026, 5, 16).atStartOfDay(),
                 LocalDate.of(2026, 5, 16).atStartOfDay()
             ))
         );

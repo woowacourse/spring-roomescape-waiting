@@ -18,6 +18,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationIntegrationTest {
 
+    private static final String RESERVATION_DATE = "2099-06-01";
+    private static final String UPDATED_RESERVATION_DATE = "2099-06-02";
+
     @LocalServerPort
     private int port;
 
@@ -39,7 +42,7 @@ class ReservationIntegrationTest {
     @DisplayName("예약 생성을 end-to-end로 확인한다.")
     void createReservation() {
         Long themeId = saveTheme("공포");
-        Long dateId = saveDate("2026-06-01");
+        Long dateId = saveDate(RESERVATION_DATE);
         Long timeId = saveTime("10:00");
 
         String request = """
@@ -57,7 +60,7 @@ class ReservationIntegrationTest {
             .when().post("/reservations")
             .then().log().all()
             .statusCode(201)
-            .body("date", is("2026-06-01"))
+            .body("date", is(RESERVATION_DATE))
             .body("time", is("10:00"))
             .body("theme.name", is("공포"))
             .body("theme.content", is("무서운 테마"))
@@ -77,7 +80,7 @@ class ReservationIntegrationTest {
     @DisplayName("예약 생성 시 시간 필드가 누락되었을 경우 400 에러가 발생한다.")
     void createReservationWithoutTimeId() {
         Long themeId = saveTheme("공포");
-        Long dateId = saveDate("2026-06-01");
+        Long dateId = saveDate(RESERVATION_DATE);
 
         String request = """
             {
@@ -100,7 +103,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약자 이름으로 예약 조회를 end-to-end로 확인한다.")
     void getUserReservations() {
-        saveReservation("보예", "2026-06-01", "10:00", "공포");
+        saveReservation("보예", RESERVATION_DATE, "10:00", "공포");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -109,7 +112,7 @@ class ReservationIntegrationTest {
             .then().log().all()
             .statusCode(200)
             .body("username", is("보예"))
-            .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-01"))
+            .body("reservations[0].reservationSlot.date.startWhen", is(RESERVATION_DATE))
             .body("reservations[0].reservationSlot.time.startAt", is("10:00"))
             .body("reservations[0].reservationSlot.theme.name", is("공포"))
             .body("reservations[0].status", is("CONFIRMED"));
@@ -130,7 +133,7 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 삭제를 end-to-end로 확인한다.")
     void deleteUserReservation() {
-        Long reservationId = saveReservation("보예", "2026-06-01", "10:00", "공포");
+        Long reservationId = saveReservation("보예", RESERVATION_DATE, "10:00", "공포");
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -151,8 +154,8 @@ class ReservationIntegrationTest {
     @Test
     @DisplayName("예약 수정을 end-to-end로 확인한다.")
     void updateReservation() {
-        Long reservationId = saveReservation("보예", "2026-06-01", "10:00", "공포");
-        Long dateId = saveDate("2026-06-02");
+        Long reservationId = saveReservation("보예", RESERVATION_DATE, "10:00", "공포");
+        Long dateId = saveDate(UPDATED_RESERVATION_DATE);
         Long timeId = saveTime("11:00");
 
         String request = """
@@ -175,7 +178,7 @@ class ReservationIntegrationTest {
             .when().get("/reservations")
             .then()
             .statusCode(200)
-            .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-02"))
+            .body("reservations[0].reservationSlot.date.startWhen", is(UPDATED_RESERVATION_DATE))
             .body("reservations[0].reservationSlot.time.startAt", is("11:00"));
     }
 

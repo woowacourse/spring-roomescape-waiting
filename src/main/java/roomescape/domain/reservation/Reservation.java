@@ -16,8 +16,7 @@ public class Reservation {
     private final User user;
     private final Integer waitingNumber;
     private final ReservationStatus status;
-    private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private final LocalDateTime reservedAt;
 
     private Reservation(
         Long id,
@@ -25,17 +24,15 @@ public class Reservation {
         User user,
         Integer waitingNumber,
         ReservationStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime reservedAt
     ) {
-        validate(reservationSlot, user, waitingNumber, status, createdAt, updatedAt);
+        validate(reservationSlot, user, waitingNumber, status, reservedAt);
         this.id = id;
         this.reservationSlot = reservationSlot;
         this.user = user;
         this.waitingNumber = waitingNumber;
         this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.reservedAt = reservedAt;
     }
 
     public static Reservation createWithoutId(
@@ -51,7 +48,6 @@ public class Reservation {
             user,
             waitingNumber,
             status,
-            LocalDateTime.now(clock),
             LocalDateTime.now(clock)
         );
     }
@@ -63,8 +59,7 @@ public class Reservation {
             userReservation.getUser(),
             userReservation.getWaitingNumber(),
             userReservation.getStatus(),
-            userReservation.getCreatedAt(),
-            userReservation.getUpdatedAt()
+            userReservation.getReservedAt()
         );
     }
 
@@ -80,7 +75,6 @@ public class Reservation {
             user,
             waitingNumber,
             reservationStatus,
-            createdAt,
             LocalDateTime.now(clock)
         );
     }
@@ -92,7 +86,6 @@ public class Reservation {
             user,
             waitingNumber,
             status,
-            createdAt,
             LocalDateTime.now(clock)
         );
     }
@@ -103,10 +96,9 @@ public class Reservation {
         User user,
         Integer waitingNumber,
         ReservationStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime reservedAt
     ) {
-        return new Reservation(id, reservation, user, waitingNumber, status, createdAt, updatedAt);
+        return new Reservation(id, reservation, user, waitingNumber, status, reservedAt);
     }
 
     private static void validate(
@@ -114,10 +106,9 @@ public class Reservation {
         User user,
         Integer waitingNumber,
         ReservationStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime reservedAt
     ) {
-        if (reservation == null || user == null || status == null || createdAt == null || updatedAt == null) {
+        if (reservation == null || user == null || status == null || reservedAt == null) {
             throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
         if (status == ReservationStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
@@ -132,7 +123,6 @@ public class Reservation {
                 this.user,
                 waitingNumber,
                 status,
-                this.createdAt,
                 LocalDateTime.now(clock)
         );
     }

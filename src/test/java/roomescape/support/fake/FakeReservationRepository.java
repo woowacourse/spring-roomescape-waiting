@@ -57,7 +57,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
-            .sorted(Comparator.comparing(Reservation::getUpdatedAt)
+            .sorted(Comparator.comparing(Reservation::getReservedAt)
                 .thenComparing(Reservation::getId))
             .toList();
     }

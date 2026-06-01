@@ -35,13 +35,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String COLUMN_THEME_URL = "theme_url";
     private static final String COLUMN_WAITING_NUMBER = "waiting_number";
     private static final String COLUMN_STATUS = "status";
-    private static final String COLUMN_CREATED_AT = "created_at";
-    private static final String COLUMN_UPDATED_AT = "updated_at";
+    private static final String COLUMN_RESERVED_AT = "reserved_at";
 
     private static final String INSERT_SQL =
             """
-                    insert into reservation(reservation_slot_id, user_id, waiting_number, status, created_at, updated_at)
-                    values (?, ?, ?, ?, ?, ?)
+                    insert into reservation(reservation_slot_id, user_id, waiting_number, status, reserved_at)
+                    values (?, ?, ?, ?, ?)
                     """;
     private static final String FIND_ALL_SQL =
             """
@@ -59,8 +58,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                            th.name as theme_name,
                            th.content as theme_content,
                            th.url as theme_url,
-                           r.created_at,
-                           r.updated_at
+                           r.reserved_at
                     from reservation r
                     join users u on r.user_id = u.id
                     join reservation_slot rs on r.reservation_slot_id = rs.id
@@ -85,8 +83,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                            th.name as theme_name,
                            th.content as theme_content,
                            th.url as theme_url,
-                           r.created_at,
-                           r.updated_at
+                           r.reserved_at
                     from reservation r
                     join users u on r.user_id = u.id
                     join reservation_slot rs on r.reservation_slot_id = rs.id
@@ -111,8 +108,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                            th.name as theme_name,
                            th.content as theme_content,
                            th.url as theme_url,
-                           r.created_at,
-                           r.updated_at
+                           r.reserved_at
                     from reservation r
                     join users u on r.user_id = u.id
                     join reservation_slot rs on r.reservation_slot_id = rs.id
@@ -138,8 +134,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                            th.name as theme_name,
                            th.content as theme_content,
                            th.url as theme_url,
-                           r.created_at,
-                           r.updated_at
+                           r.reserved_at
                     from reservation r
                     join users u on r.user_id = u.id
                     join reservation_slot rs on r.reservation_slot_id = rs.id
@@ -147,7 +142,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     join reservation_time rt on rs.time_id = rt.id
                     join theme th on rs.theme_id = th.id
                     where r.reservation_slot_id = ?
-                    order by r.updated_at, r.id
+                    order by r.reserved_at, r.id
                     """;
     private static final String COUNT_BY_RESERVATION_SLOT_ID_SQL =
             """
@@ -167,7 +162,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String UPDATE_SQL =
             """
                     update reservation
-                    set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, created_at = ?, updated_at = ?
+                    set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, reserved_at = ?
                     where id = ?
                     """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
@@ -202,8 +197,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ps.setLong(3, userReservation.getWaitingNumber());
             }
             ps.setString(4, userReservation.getStatus().name());
-            ps.setTimestamp(5, Timestamp.valueOf(userReservation.getCreatedAt()));
-            ps.setTimestamp(6, Timestamp.valueOf(userReservation.getUpdatedAt()));
+            ps.setTimestamp(5, Timestamp.valueOf(userReservation.getReservedAt()));
             return ps;
         }, keyHolder);
         long id = extractId(keyHolder);
@@ -248,8 +242,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 updatedReservation.getUser().getId(),
                 updatedReservation.getWaitingNumber(),
                 updatedReservation.getStatus().name(),
-                Timestamp.valueOf(updatedReservation.getCreatedAt()),
-                Timestamp.valueOf(updatedReservation.getUpdatedAt()),
+                Timestamp.valueOf(updatedReservation.getReservedAt()),
                 id
         );
         if (updatedCount == 0) {
@@ -299,9 +292,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ps.setLong(2, reservation.getUser().getId());
                     ps.setInt(3, reservation.getWaitingNumber());
                     ps.setString(4, reservation.getStatus().name());
-                    ps.setTimestamp(5, Timestamp.valueOf(reservation.getCreatedAt()));
-                    ps.setTimestamp(6, Timestamp.valueOf(reservation.getUpdatedAt()));
-                    ps.setLong(7, reservation.getId());
+                    ps.setTimestamp(5, Timestamp.valueOf(reservation.getReservedAt()));
+                    ps.setLong(6, reservation.getId());
                 }
         );
     }
@@ -340,8 +332,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ),
                 rs.getObject(COLUMN_WAITING_NUMBER, Integer.class),
                 ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
-                rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
-                rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()
+                rs.getTimestamp(COLUMN_RESERVED_AT).toLocalDateTime()
         );
     }
 
