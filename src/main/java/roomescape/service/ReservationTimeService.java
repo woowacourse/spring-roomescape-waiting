@@ -12,8 +12,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
-    private static final String NOT_FOUND_RESERVATION_TIME = "존재하지 않는 예약 시간입니다. (ID: %d)";
-
     private final ReservationTimeRepository timeRepository;
 
     public ReservationTimeService(ReservationTimeRepository timeRepository) {
@@ -26,7 +24,7 @@ public class ReservationTimeService {
 
     public ReservationTime findById(Long id) {
         return timeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_RESERVATION_TIME, id)));
+                .orElseThrow(() -> NotFoundException.reservationTime(id));
     }
 
     @Transactional

@@ -18,7 +18,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
@@ -45,7 +44,7 @@ public class ReservationService {
 
     public Reservation findMyReservation(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_FORMAT.formatted(id)));
+                .orElseThrow(() -> NotFoundException.reservation(id));
         if (!reservation.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
         }

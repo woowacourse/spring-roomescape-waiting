@@ -13,8 +13,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ThemeService {
 
-    private static final String NOT_FOUND_THEME = "존재하지 않는 테마입니다. (ID: %d)";
-
     private final ThemeRepository themeRepository;
 
     public ThemeService(ThemeRepository themeRepository) {
@@ -37,7 +35,7 @@ public class ThemeService {
 
     public Theme findById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format(NOT_FOUND_THEME, id)));
+                .orElseThrow(() -> NotFoundException.theme(id));
     }
 
     public List<Theme> getPopularThemes(Integer days, Integer limit) {
