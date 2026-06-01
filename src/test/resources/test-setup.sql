@@ -25,7 +25,7 @@ CREATE TABLE time_slot
 CREATE TABLE waiting
 (
     id         BIGINT       NOT NULL AUTO_INCREMENT,
-    created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMP   NOT NULL,
     name       VARCHAR(250) NOT NULL,
     date       DATE         NOT NULL,
     time_id    BIGINT       NOT NULL,
