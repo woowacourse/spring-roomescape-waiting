@@ -167,4 +167,82 @@ public class JdbcWaitingRepositoryTest {
             assertSoftly.assertThat(waitingOrderDetails.getFirst().order()).isEqualTo(2);
         });
     }
+
+    @DisplayName("여러 대기 순번이 존재할 때 순번이 제대로 나오는지 테스트합니다.")
+    @Test
+    void find_by_name_returns_correct_order() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 4);
+
+        Waiting firstWaiting = waitingRepository.save(Waiting.builder()
+                .name("other")
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .build());
+        Waiting savedWaiting = waitingRepository.save(Waiting.builder()
+                .name("카야")
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .build());
+
+        List<WaitingOrderDetail> waitingOrderDetails = waitingRepository.findByName("카야");
+
+        SoftAssertions.assertSoftly(assertSoftly -> {
+            assertSoftly.assertThat(firstWaiting.getId()).isPositive();
+            assertSoftly.assertThat(firstWaiting.getId()).isLessThan(savedWaiting.getId());
+            assertSoftly.assertThat(waitingOrderDetails).hasSize(1);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().waitingId()).isEqualTo(savedWaiting.getId());
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().username()).isEqualTo("카야");
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().date()).isEqualTo(date);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().themeId()).isEqualTo(themeId);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().themeName()).isEqualTo("theme name");
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().themeDescription()).isEqualTo("theme description");
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().thumbnailImgUrl()).isEqualTo("theme img url");
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().timeId()).isEqualTo(timeId);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().startAt()).isEqualTo(LocalTime.of(9, 0));
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().order()).isEqualTo(2);
+        });
+    }
+
+    @DisplayName("다른 테마의 대기가 있어도 같은 테마 대기의 순번만 계산된다")
+    @Test
+    void find_by_name_returns_order_excluding_waiting_with_other_theme() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long otherThemeId = testHelper.insertTheme("other theme", "other description", "other img url");
+        LocalDate date = LocalDate.of(2026, 5, 4);
+
+        waitingRepository.save(Waiting.builder()
+                .name("other")
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .build());
+
+        waitingRepository.save(Waiting.builder()
+                .name("other theme waiting")
+                .date(date)
+                .themeId(otherThemeId)
+                .timeId(timeId)
+                .build());
+
+        Waiting savedWaiting = waitingRepository.save(Waiting.builder()
+                .name("name")
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .build());
+
+        List<WaitingOrderDetail> waitingOrderDetails = waitingRepository.findByName("name");
+
+        SoftAssertions.assertSoftly(assertSoftly -> {
+            assertSoftly.assertThat(waitingOrderDetails).hasSize(1);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().waitingId()).isEqualTo(savedWaiting.getId());
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().themeId()).isEqualTo(themeId);
+            assertSoftly.assertThat(waitingOrderDetails.getFirst().order()).isEqualTo(2);
+        });
+    }
 }
