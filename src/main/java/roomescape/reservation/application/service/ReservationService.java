@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +15,6 @@ import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
@@ -29,7 +27,7 @@ import roomescape.theme.application.service.ThemeService;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
+    private final WaitingService waitingService;
     private final ThemeService themeService;
     private final ReservationTimeService timeService;
 
@@ -57,7 +55,7 @@ public class ReservationService {
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
         if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
-            Waiting savedWaitingResult = waitingRepository.save(Waiting.of(
+            Waiting savedWaitingResult = waitingService.save(Waiting.of(
                     null,
                     reservation.getName(),
                     reservation.getDate(),
@@ -90,32 +88,17 @@ public class ReservationService {
         validateOwner(name, reservation);
         validateReservationNotPast(reservationDetail, currentDateTime);
 
-        Optional<Waiting> oldestWaiting = waitingRepository.findOldestByDateAndThemeIdAndTimeId(
-                reservation.getDate(), reservation.getThemeId(),
-                reservation.getTimeId());
-
-        if (oldestWaiting.isPresent()) {
-            Waiting waiting = oldestWaiting.get();
-            reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
-            return waitingRepository.delete(waiting.getId());
-        }
-
-        return reservationRepository.delete(id);
+        return waitingService.findOldestByReservation(reservation)
+                .map(waiting -> {
+                    reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
+                    return waitingService.delete(waiting.getId());
+                })
+                .orElseGet(() -> reservationRepository.delete(id));
     }
 
     private ReservationDetail getReservationDetail(Long id) {
         return reservationRepository.findDetailById(id)
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
-    }
-
-    private void validateDuplicateReservation(ReservationCreateCommand request) {
-        Boolean existsByDateAndTime = reservationRepository.existsByDateAndThemeAndTime(request.date(),
-                request.themeId(),
-                request.timeId()
-        );
-        if (existsByDateAndTime) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
     }
 
     private void validateDuplicateReservation(ReservationUpdateCommand request, Reservation reservation) {

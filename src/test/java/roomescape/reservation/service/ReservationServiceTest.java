@@ -20,6 +20,7 @@ import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
@@ -33,6 +34,7 @@ class ReservationServiceTest {
     private ThemeService themeService;
     private ReservationTimeService timeService;
     private ReservationService reservationService;
+    private WaitingService waitingService;
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository timeRepository;
     private FakeWaitingRepository fakeWaitingRepository;
@@ -51,7 +53,8 @@ class ReservationServiceTest {
                 new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
         timeService = new ReservationTimeService(timeRepository, availableReservationTimeRepository,
                 reservationQueryService);
-        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, themeService,
+        waitingService = new WaitingService(fakeWaitingRepository);
+        reservationService = new ReservationService(reservationRepository, waitingService, themeService,
                 timeService);
     }
 

@@ -1,17 +1,20 @@
 package roomescape.reservation.application.service;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.dto.WaitingQueryResult;
 import roomescape.reservation.application.exception.ReservationErrorCode;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class WaitingService {
 
@@ -24,6 +27,10 @@ public class WaitingService {
                 .toList();
     }
 
+    public Waiting save(Waiting waiting) {
+        return waitingRepository.save(waiting);
+    }
+
     public int delete(Long id, String name) {
         WaitingDetail waitingDetail = getWaitingDetail(id);
         Waiting waiting = toWaiting(waitingDetail);
@@ -33,6 +40,17 @@ public class WaitingService {
         return waitingRepository.delete(id);
     }
 
+    public Optional<Waiting> findOldestByReservation(Reservation reservation) {
+        return waitingRepository.findOldestByDateAndThemeIdAndTimeId(
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId()
+        );
+    }
+
+    public int delete(Long id) {
+        return waitingRepository.delete(id);
+    }
 
     private WaitingDetail getWaitingDetail(Long id) {
         return waitingRepository.findDetailById(id)
