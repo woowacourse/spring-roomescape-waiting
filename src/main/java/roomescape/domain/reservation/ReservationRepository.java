@@ -24,7 +24,7 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    List<ReservationCountResult> countReservation(Long themeId, Long dateId);
+    List<ReservationCountResult> countWaitingReservationsByThemeAndDate(Long themeId, Long dateId);
 
     void batchUpdate(List<Reservation> reservations);
 }

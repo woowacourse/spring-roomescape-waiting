@@ -41,7 +41,7 @@ class ReservationSlotServiceTest {
         ReservationDate reservationDate = reservationDateRepository.save(
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 16))
         );
-        given(reservationRepository.countReservation(theme.getId(), reservationDate.getId()))
+        given(reservationRepository.countWaitingReservationsByThemeAndDate(theme.getId(), reservationDate.getId()))
             .willReturn(List.of(
                 ReservationCountResult.of(1L, LocalTime.of(10, 0), 2L),
                 ReservationCountResult.of(2L, LocalTime.of(11, 0), 0L)

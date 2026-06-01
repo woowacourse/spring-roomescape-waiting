@@ -21,6 +21,8 @@ import roomescape.domain.user.User;
 @RequiredArgsConstructor
 public class JdbcReservationRepository implements ReservationRepository {
 
+    private static final String WAITING_STATUS = ReservationStatus.WAITING.name();
+
     private static final String COLUMN_ID = "user_reservation_id";
     private static final String COLUMN_USER_ID = "user_id";
     private static final String COLUMN_USER_NAME = "user_name";
@@ -178,6 +180,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     and rs.theme_id = ?
                     left join reservation r
                     on r.reservation_slot_id = rs.id
+                    and r.status = ?
                     group by rt.id, rt.start_at
                     order by rt.start_at;
                     """;
@@ -268,12 +271,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
+    public List<ReservationCountResult> countWaitingReservationsByThemeAndDate(Long themeId, Long dateId) {
         return jdbcTemplate.query(
                 COUNT_RESERVATION_BY_THEME_AND_DATE,
-                reservationCountResultRowMapper(),
+                waitingReservationCountResultRowMapper(),
                 dateId,
-                themeId
+                themeId,
+                WAITING_STATUS
         );
     }
 
@@ -298,7 +302,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
-    private RowMapper<ReservationCountResult> reservationCountResultRowMapper() {
+    private RowMapper<ReservationCountResult> waitingReservationCountResultRowMapper() {
         return (rs, rowNum) -> ReservationCountResult.of(
                 rs.getLong(COLUMN_TIME_ID),
                 rs.getTime(COLUMN_START_AT).toLocalTime(),

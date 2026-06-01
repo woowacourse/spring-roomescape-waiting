@@ -22,9 +22,10 @@ public class ReservationSlotService {
 
     public List<ReservationSlotResponse> getReservationSlots(Long themeId, Long dateId) {
         validateThemeAndDateExists(themeId, dateId);
-        List<ReservationCountResult> reservationCountResults = reservationRepository.countReservation(themeId, dateId);
+        List<ReservationCountResult> waitingReservationCounts =
+                reservationRepository.countWaitingReservationsByThemeAndDate(themeId, dateId);
 
-        return reservationCountResults.stream()
+        return waitingReservationCounts.stream()
             .map(ReservationSlotResponse::from)
             .toList();
     }

@@ -43,6 +43,7 @@ class ReservationSlotIntegrationTest {
         Long secondTimeId = saveTime("11:00");
         Long reservationSlotId = saveReservationSlot(dateId, firstTimeId, themeId);
         saveReservation("보예", reservationSlotId, null, "CONFIRMED");
+        saveReservation("대기", reservationSlotId, 1L, "WAITING");
 
         given().log().all()
             .contentType(ContentType.JSON)

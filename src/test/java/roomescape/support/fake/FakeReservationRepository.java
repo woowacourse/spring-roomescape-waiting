@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -97,10 +98,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
+    public List<ReservationCountResult> countWaitingReservationsByThemeAndDate(Long themeId, Long dateId) {
         return storage.values().stream()
             .filter(reservation -> themeId.equals(reservation.getReservationSlot().getTheme().getId()))
             .filter(reservation -> dateId.equals(reservation.getReservationSlot().getDate().getId()))
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
             .collect(java.util.stream.Collectors.groupingBy(
                 reservation -> reservation.getReservationSlot().getTime().getId(),
                 LinkedHashMap::new,
