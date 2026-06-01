@@ -39,3 +39,13 @@ CREATE TABLE reservation_waiting
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
     UNIQUE (reservation_id, name)
 );
+
+CREATE INDEX idx_reservation_name ON reservation (name);
+
+CREATE INDEX idx_reservation_theme_id ON reservation (theme_id);
+
+CREATE INDEX idx_reservation_time_id ON reservation (time_id);
+
+CREATE INDEX idx_reservation_waiting_name ON reservation_waiting (name);
+
+CREATE INDEX idx_reservation_waiting_sequence ON reservation_waiting (reservation_id, requested_at, id);
