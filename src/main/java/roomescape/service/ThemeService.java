@@ -7,7 +7,7 @@ import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
-import roomescape.dto.command.ThemeCommand;
+import roomescape.dto.command.CreateThemeCommand;
 import roomescape.dto.response.ThemeResponse;
 
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse addTheme(ThemeCommand command) {
+    public ThemeResponse addTheme(CreateThemeCommand command) {
         validateUniqueTheme(command.name());
 
         Theme theme = Theme.createWithoutId(command.name(), command.description(), command.thumbnail());

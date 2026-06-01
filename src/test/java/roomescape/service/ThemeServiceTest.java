@@ -20,7 +20,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
-import roomescape.dto.command.ThemeCommand;
+import roomescape.dto.command.CreateThemeCommand;
 import roomescape.dto.response.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -49,7 +49,7 @@ class ThemeServiceTest {
     @Test
     void 테마를_추가한다() {
         // given
-        ThemeCommand command = new ThemeCommand("방탈출1", "설명", "https://thumb.com");
+        CreateThemeCommand command = new CreateThemeCommand("방탈출1", "설명", "https://thumb.com");
 
         // when
         ThemeResponse response = themeService.addTheme(command);
@@ -61,7 +61,7 @@ class ThemeServiceTest {
     @Test
     void 이미_존재하는_테마명으로_추가하면_예외가_발생한다() {
         // given
-        ThemeCommand command = new ThemeCommand("방탈출1", "설명2", "https://thumb2.com");
+        CreateThemeCommand command = new CreateThemeCommand("방탈출1", "설명2", "https://thumb2.com");
         saveTheme("방탈출1", "설명", "https://thumb.com");
 
         // when & then

@@ -17,7 +17,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.command.ReservationTimeCommand;
+import roomescape.dto.command.CreateReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dao.ThemeDao;
@@ -42,7 +42,7 @@ class ReservationTimeServiceTest {
     @Test
     void 예약_시간을_추가한다() {
         // given
-        ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
+        CreateReservationTimeCommand command = new CreateReservationTimeCommand(LocalTime.of(10, 0));
 
         // when
         CreateReservationTimeResponse response = reservationTimeService.addReservationTime(command);

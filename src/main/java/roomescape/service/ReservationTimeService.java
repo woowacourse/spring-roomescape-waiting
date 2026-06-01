@@ -13,7 +13,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.command.ReservationTimeCommand;
+import roomescape.dto.command.CreateReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 
@@ -32,7 +32,7 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public CreateReservationTimeResponse addReservationTime(ReservationTimeCommand command) {
+    public CreateReservationTimeResponse addReservationTime(CreateReservationTimeCommand command) {
         ReservationTime reservationTime = ReservationTime.createWithoutId(command.startAt());
         ReservationTime newReservationTime = reservationTimeDao.insert(reservationTime);
         return CreateReservationTimeResponse.from(newReservationTime);
