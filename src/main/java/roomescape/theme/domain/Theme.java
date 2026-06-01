@@ -25,7 +25,7 @@ public class Theme {
     }
 
     public static Theme create(String name, String thumbnailImageUrl, String description) {
-        validate(name, thumbnailImageUrl, description);
+        validateRequiredFields(name, thumbnailImageUrl, description);
         return new Theme(null, name, thumbnailImageUrl, description, true);
     }
 
@@ -43,7 +43,7 @@ public class Theme {
         }
     }
 
-    private static void validate(String name, String thumbnailImageUrl, String description) {
+    private static void validateRequiredFields(String name, String thumbnailImageUrl, String description) {
         validateName(name);
         validateThumbnailImageUrl(thumbnailImageUrl);
         validateDescription(description);

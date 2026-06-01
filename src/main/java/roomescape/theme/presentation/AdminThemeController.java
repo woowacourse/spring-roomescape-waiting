@@ -23,13 +23,13 @@ public class AdminThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeRequest request) {
-        ThemeResponse response = ThemeResponse.from(service.addTheme(request.toCommand()));
+        ThemeResponse response = ThemeResponse.from(service.create(request.toCommand()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
-        service.deleteTheme(id);
+        service.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

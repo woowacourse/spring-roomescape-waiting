@@ -1,5 +1,6 @@
 package roomescape.presentation;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,11 +17,14 @@ public class PageController {
     private final ThemeService themeService;
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
+    private final Clock clock;
 
     @GetMapping({"/", "/reservation"})
     public String reservationPage(Model model) {
+        LocalDate startDate = LocalDate.now(clock).minusDays(7);
+        LocalDate endDate = LocalDate.now(clock).minusDays(1);
         model.addAttribute("themes", themeService.getThemes());
-        model.addAttribute("popularThemes", themeService.getWeeksTopThemes());
+        model.addAttribute("popularThemes", themeService.getWeeksTopThemes(startDate, endDate, 10));
         model.addAttribute("today", LocalDate.now());
         return "reservation";
     }

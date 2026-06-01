@@ -1,6 +1,5 @@
 package roomescape.theme.application;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +18,6 @@ import roomescape.theme.domain.ThemeRepository;
 @RequiredArgsConstructor
 public class ThemeService {
 
-    private static final int WEEKS_BOUND = 1;
-    private static final int DAYS_BOUND = 1;
-    private static final int THEME_SIZE_LIMIT = 10;
-
-    private final Clock clock;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -55,12 +49,16 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<ThemeInfo> getWeeksTopThemes() {
-        return themeRepository.findByReservationCountWithLimit(
-                        LocalDate.now(clock).minusWeeks(WEEKS_BOUND),
-                        LocalDate.now(clock).minusDays(DAYS_BOUND),
-                        THEME_SIZE_LIMIT
-                ).stream()
+    public List<ThemeInfo> getThemes(int page, int size) {
+        return themeRepository.findAll(page, size)
+                .stream()
+                .map(ThemeInfo::from)
+                .toList();
+    }
+
+    public List<ThemeInfo> getWeeksTopThemes(LocalDate startDate, LocalDate endDate, int size) {
+        return themeRepository.findByReservationCountWithLimit(startDate, endDate, size)
+                .stream()
                 .map(ThemeInfo::from)
                 .toList();
     }

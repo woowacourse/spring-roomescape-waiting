@@ -31,13 +31,16 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        String sql = "INSERT INTO theme(name, thumbnail_image_url, description) "
-                + "VALUES(:name, :thumbnailImageUrl, :description)";
+        String sql = """
+                INSERT INTO theme(name, thumbnail_image_url, description, is_active)
+                VALUES(:name, :thumbnailImageUrl, :description, :isActive)
+                """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
-                .addValue("description", theme.getDescription());
+                .addValue("description", theme.getDescription())
+                .addValue("isActive", theme.isActive());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -53,32 +56,53 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int delete(Theme theme) {
-        String sql = "UPDATE theme SET is_active=:active WHERE id = :id";
-        return jdbcTemplate.update(sql, Map.of("id", theme.getId(), "active", theme.isActive()));
-    }
-
-    @Override
     public Optional<Theme> findById(Long id) {
-        String sql = "SELECT id, name, description, thumbnail_image_url, is_active FROM theme WHERE id = :id AND is_active = 1";
+        String sql = """
+                SELECT id, name, description, thumbnail_image_url, is_active
+                FROM theme
+                WHERE id = :id
+                """;
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
     }
 
     @Override
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail_image_url, is_active FROM theme WHERE is_active = 1";
+        String sql = """
+                SELECT id, name, description, thumbnail_image_url, is_active
+                FROM theme
+                """;
         return jdbcTemplate.query(sql, rowMapper);
     }
 
     @Override
+    public List<Theme> findAll(int page, int size) {
+        String sql = """
+                SELECT id, name, description, thumbnail_image_url, is_active FROM theme
+                WHERE is_active = 1
+                ORDER BY id ASC
+                LIMIT :size OFFSET :offset
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("size", size)
+                .addValue("offset", page * size);
+
+        return jdbcTemplate.query(sql, params, rowMapper);
+    }
+
+    @Override
     public List<Theme> findByReservationCountWithLimit(LocalDate startDate, LocalDate endDate, int limit) {
-        String sql = "SELECT t.id, t.name, t.description, t.thumbnail_image_url, t.is_active "
-                + "FROM theme t "
-                + "INNER JOIN reservation r ON t.id = r.theme_id "
-                + "WHERE r.date BETWEEN :startDate AND :endDate AND t.is_active = 1 AND r.status = 'ACTIVE' "
-                + "GROUP BY t.id, t.name, t.description, t.thumbnail_image_url, t.is_active "
-                + "ORDER BY COUNT(r.id) DESC "
-                + "LIMIT :limit";
+        String sql = """
+                SELECT t.id, t.name, t.description, t.thumbnail_image_url, t.is_active
+                FROM theme t
+                INNER JOIN reservation r ON t.id = r.theme_id
+                WHERE r.date BETWEEN :startDate AND :endDate
+                    AND t.is_active = 1
+                    AND r.status = 'ACTIVE'
+                GROUP BY t.id, t.name, t.description, t.thumbnail_image_url, t.is_active
+                ORDER BY COUNT(r.id) DESC
+                LIMIT :limit
+                """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("startDate", startDate)
@@ -90,7 +114,34 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public boolean existsByName(String name) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM theme WHERE name=:name AND is_active = 1)";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM theme
+                    WHERE name = :name
+                )
+                """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("name", name), Boolean.class));
+    }
+
+    @Override
+    public void update(Theme theme) {
+        String sql = """
+                UPDATE theme
+                SET name = :name,
+                    thumbnail_image_url = :thumbnailImageUrl,
+                    description = :description,
+                    is_active = :isActive
+                WHERE id = :id
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", theme.getId())
+                .addValue("name", theme.getName())
+                .addValue("thumbnailImageUrl", theme.getThumbnailImageUrl())
+                .addValue("description", theme.getDescription())
+                .addValue("isActive", theme.isActive());
+
+        jdbcTemplate.update(sql, params);
     }
 }
