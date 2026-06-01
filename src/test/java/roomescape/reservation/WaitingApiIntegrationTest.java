@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.support.ApiIntegrationTestHelper;
 
@@ -79,5 +80,29 @@ class WaitingApiIntegrationTest {
         );
 
         assertThat(savedCount).isZero();
+    }
+
+    @DisplayName("타인 대기 취소 시 403을 반환한다.")
+    @Test
+    void cancel_other_users_waiting() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long waitingId = testHelper.insertWaiting("타스", LocalDate.of(2028, 5, 6), themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "카야")
+                .when().delete("/waitings/{id}", waitingId)
+                .then().log().all()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @DisplayName("존재하지 않는 대기 취소 시 404를 반환한다.")
+    @Test
+    void cancel_non_existing_waiting() {
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().delete("/waitings/{id}", 999)
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }
