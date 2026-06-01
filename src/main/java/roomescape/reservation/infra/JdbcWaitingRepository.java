@@ -2,7 +2,7 @@ package roomescape.reservation.infra;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -84,7 +84,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
             return waiting.withId(id);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }
