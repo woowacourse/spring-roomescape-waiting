@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.exception.UniqueConstraintViolationException;
@@ -118,6 +119,50 @@ class JdbcReservationRepositoryTest {
 
         assertThatThrownBy(() -> reservationRepository.save(reservation))
                 .isInstanceOf(UniqueConstraintViolationException.class);
+    }
+
+    @DisplayName("존재하지 않는 timeId로 예약 추가 시 DataIntegrityViolationException 발생을 테스트합니다.")
+    @Test
+    void save_not_exists_time_id_exception() {
+        Long notExistTimeId = 999L;
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        LocalDate date = LocalDate.of(2026, 5, 4);
+        User stark = ReservationFixture.userNameStark();
+
+        Reservation reservation = Reservation.builder()
+                .user(stark)
+                .slot(ReservationSlot.builder()
+                        .date(date)
+                        .themeId(themeId)
+                        .timeId(notExistTimeId)
+                        .startAt(LocalTime.of(9, 0))
+                        .build())
+                .build();
+
+        assertThatThrownBy(() -> reservationRepository.save(reservation))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @DisplayName("존재하지 않는 themeId로 예약 추가 시 DataIntegrityViolationException 발생을 테스트합니다.")
+    @Test
+    void save_not_exists_theme_id_exception() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long notExistThemeId = 999L;
+        LocalDate date = LocalDate.of(2026, 5, 4);
+        User stark = ReservationFixture.userNameStark();
+
+        Reservation reservation = Reservation.builder()
+                .user(stark)
+                .slot(ReservationSlot.builder()
+                        .date(date)
+                        .themeId(notExistThemeId)
+                        .timeId(timeId)
+                        .startAt(LocalTime.of(9, 0))
+                        .build())
+                .build();
+
+        assertThatThrownBy(() -> reservationRepository.save(reservation))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @DisplayName("방탈출 예약 삭제를 테스트합니다.")
