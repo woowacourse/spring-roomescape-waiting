@@ -22,5 +22,4 @@ public interface TimeSlotRepository {
 
     void deleteById(long id);
 
-    int update(TimeSlot timeSlot);
 }

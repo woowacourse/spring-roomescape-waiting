@@ -5,16 +5,12 @@ import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.ThemePatchRequest;
-import roomescape.controller.dto.ThemePutRequest;
 import roomescape.controller.dto.ThemeRequest;
 import roomescape.controller.dto.ThemeResponse;
 import roomescape.controller.dto.ThemeResponses;
@@ -61,23 +57,5 @@ public class ThemeController {
     public ResponseEntity<Void> deleteTheme(@PathVariable long id) {
         themeService.removeTheme(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ThemeResponse> updateTheme(
-            @PathVariable long id,
-            @RequestBody @Valid ThemePutRequest request
-    ) {
-        themeService.putTheme(id, request.name(), request.description(), request.thumbnailUrl());
-        return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<ThemeResponse> patchTheme(
-            @PathVariable long id,
-            @RequestBody ThemePatchRequest request
-    ) {
-        themeService.patchTheme(id, request.name(), request.description(), request.thumbnailUrl());
-        return ResponseEntity.ok(ThemeResponse.from(themeService.findThemeById(id)));
     }
 }

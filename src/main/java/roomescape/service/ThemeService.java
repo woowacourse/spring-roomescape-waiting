@@ -28,7 +28,7 @@ public class ThemeService {
 
     public Theme findThemeById(long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeNotFoundException(id));
+                .orElseThrow(ThemeNotFoundException::new);
     }
 
     @Transactional
@@ -45,19 +45,6 @@ public class ThemeService {
         } catch (DataIntegrityViolationException e) {
             throw new ResourceInUseException("테마");
         }
-    }
-
-    @Transactional
-    public void putTheme(long id, String name, String description, String thumbnailUrl) {
-        findThemeById(id);
-        themeRepository.update(new Theme(id, name, description, thumbnailUrl));
-    }
-
-    @Transactional
-    public void patchTheme(long id, String name, String description, String thumbnailUrl) {
-        Theme theme = findThemeById(id);
-        theme.renewal(name, description, thumbnailUrl);
-        themeRepository.update(theme);
     }
 
     public List<Theme> findPopularThemes(Long topCount, Long during) {

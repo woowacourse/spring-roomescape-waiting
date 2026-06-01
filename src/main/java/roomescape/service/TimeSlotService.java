@@ -33,7 +33,7 @@ public class TimeSlotService {
 
     public TimeSlot findTimeSlotById(long id) {
         return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new TimeSlotNotFoundException(id));
+                .orElseThrow(TimeSlotNotFoundException::new);
     }
 
     @Transactional
@@ -53,27 +53,9 @@ public class TimeSlotService {
         }
     }
 
-    @Transactional
-    public void putTime(long id, LocalTime startAt) {
-        TimeSlot exists = findTimeSlotById(id);
-        TimeSlot timeSlot = new TimeSlot(id, startAt);
-        if (!exists.equals(timeSlot)) {
-            checkDuplicatedStartAt(startAt);
-            timeSlotRepository.update(timeSlot);
-        }
-    }
-
-    @Transactional
-    public void patchTime(long id, LocalTime startAt) {
-        TimeSlot timeSlot = findTimeSlotById(id);
-        checkDuplicatedStartAt(startAt);
-        timeSlot.changeTime(startAt);
-        timeSlotRepository.update(timeSlot);
-    }
-
     public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {
         themeRepository.findById(themeId)
-                .orElseThrow(() -> new ThemeNotFoundException(themeId));
+                .orElseThrow(ThemeNotFoundException::new);
         return timeSlotRepository.findAvailableTimeSlots(themeId, date);
     }
 
