@@ -5,8 +5,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,5 +88,78 @@ class WaitingApiIntegrationTest {
         );
 
         assertThat(savedCount).isZero();
+    }
+
+    @DisplayName("동일한 대기 요청이 동시에 들어오면 1건만 성공하고 나머지는 409를 반환한다.")
+    @Test
+    void save_waiting_concurrently() throws Exception {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertReservation("카야", LocalDate.of(2028, 5, 18), themeId, timeId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "스타크");
+        params.put("date", "2028-05-18");
+        params.put("themeId", themeId);
+        params.put("timeId", timeId);
+
+        int requestCount = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(requestCount);
+        CountDownLatch readyLatch = new CountDownLatch(requestCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(requestCount);
+
+        List<Integer> statusCodes = Collections.synchronizedList(new ArrayList<>());
+
+        for (int i = 0; i < requestCount; i++) {
+            executorService.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await();
+
+                    int statusCode = RestAssured.given()
+                            .contentType(ContentType.JSON)
+                            .body(params)
+                            .when()
+                            .post("/reservations")
+                            .then()
+                            .extract()
+                            .statusCode();
+
+                    statusCodes.add(statusCode);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        long successCount = statusCodes.stream()
+                .filter(code -> code == 201)
+                .count();
+
+        long conflictCount = statusCodes.stream()
+                .filter(code -> code == 409)
+                .count();
+
+        assertThat(successCount).isEqualTo(1);
+        assertThat(conflictCount).isEqualTo(requestCount - 1);
+
+        Integer savedCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE name = ? AND date = ? AND theme_id = ? AND time_id = ?",
+                Integer.class,
+                "스타크",
+                LocalDate.of(2028, 5, 18),
+                themeId,
+                timeId
+        );
+
+        assertThat(savedCount).isEqualTo(1);
     }
 }
