@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import java.util.ArrayList;
-
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,20 +77,10 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
 
-        List<WaitingReservationResponse> waitingReservationResponses = new ArrayList<>();
-        // 예약이 PENDING이라면 themeSlot으로 repository에서 대기 순번을 함께 조회한다.
-        for (Reservation reservation : reservations) {
-            if (reservation.isPendingStatus()) {
-                List<WaitingReservation> pendingReservations = findWaitingReservationsWithOrder(reservation.getThemeSlotId());
-                WaitingReservationResponse waitingReservationResponse = pendingReservations.stream()
-                        .filter(each -> each.name().equals(reservation.getName()))
-                        .map(WaitingReservationResponse::from)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않습니다."));
-
-                waitingReservationResponses.add(waitingReservationResponse);
-            }
-        }
+        List<WaitingReservationResponse> waitingReservationResponses = reservationRepository.findWaitingReservationsWithOrderByName(name)
+                .stream()
+                .map(WaitingReservationResponse::from)
+                .toList();
         return new MyReservationResponse(myNotPendingReservation, waitingReservationResponses);
     }
 

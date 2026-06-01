@@ -311,6 +311,50 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql, waitingReservationRowMapper(), themeSlotId).stream().toList();
     }
 
+    @Override
+    public List<WaitingReservation> findWaitingReservationsWithOrderByName(String name) {
+        String sql = """
+                SELECT
+                    r_id,
+                    name,
+                    status,
+                    date,
+                    t_id,
+                    start_at,
+                    theme_id,
+                    theme_name,
+                    theme_description,
+                    theme_thumbnail_url,
+                    waiting_order
+                FROM (
+                    SELECT
+                        r.id AS r_id,
+                        r.name,
+                        r.status,
+                        ts.date,
+                        t.id AS t_id,
+                        t.start_at,
+                        theme.id AS theme_id,
+                        theme.name AS theme_name,
+                        theme.description AS theme_description,
+                        theme.thumbnail_url AS theme_thumbnail_url,
+                        ROW_NUMBER() OVER (PARTITION BY ts.id ORDER BY r.id ASC) AS waiting_order
+                    FROM
+                        reservation r
+                            INNER JOIN
+                            theme_slot ts ON r.theme_slot_id = ts.id
+                            INNER JOIN
+                            time t ON ts.time_id = t.id
+                            INNER JOIN
+                            theme theme ON ts.theme_id = theme.id
+                    WHERE r.status = 'PENDING'
+                ) waiting_reservation
+                WHERE name = ?
+                ORDER BY r_id
+                """;
+        return jdbcTemplate.query(sql, waitingReservationRowMapper(), name).stream().toList();
+    }
+
     private RowMapper<WaitingReservation> waitingReservationRowMapper() {
         return (rs, rowNum) -> new WaitingReservation(
                 rs.getLong("r_id"),

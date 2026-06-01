@@ -75,6 +75,25 @@ public class FakeReservationDao implements ReservationRepository {
     @Override
     public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
         List<Reservation> reservations = findByThemeSlotAndPending(themeSlotId);
+        return createWaitingReservations(reservations);
+    }
+
+    @Override
+    public List<WaitingReservation> findWaitingReservationsWithOrderByName(String name) {
+        return storage.values().stream()
+                .filter(reservation -> "PENDING".equals(reservation.getReservationStatusName()))
+                .collect(java.util.stream.Collectors.groupingBy(Reservation::getThemeSlotId))
+                .values()
+                .stream()
+                .flatMap(reservations -> createWaitingReservations(reservations.stream()
+                        .sorted(Comparator.comparing(Reservation::getId))
+                        .toList()).stream())
+                .filter(waitingReservation -> waitingReservation.name().equals(name))
+                .sorted(Comparator.comparing(WaitingReservation::id))
+                .toList();
+    }
+
+    private List<WaitingReservation> createWaitingReservations(List<Reservation> reservations) {
         List<WaitingReservation> waitingReservations = new ArrayList<>();
         for (int index = 0; index < reservations.size(); index++) {
             Reservation reservation = reservations.get(index);

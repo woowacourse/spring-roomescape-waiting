@@ -165,4 +165,23 @@ class JdbcReservationRepositoryTest {
                 .extracting(WaitingReservation::waitingOrder)
                 .containsExactly(1, 2, 3);
     }
+
+    @Test
+    @DisplayName("사용자의 PENDING 예약을 슬롯별 대기 순번과 함께 조회한다.")
+    void findWaitingReservationsWithOrderByName() {
+        ThemeSlot firstThemeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        ThemeSlot secondThemeSlot = saveThemeSlot(THEME_2, LocalDate.now().plusDays(1), TIME_14, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", firstThemeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("김대기1", firstThemeSlot));
+        jdbcReservationRepository.save(new Reservation("김대기2", firstThemeSlot));
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", secondThemeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("김대기2", secondThemeSlot));
+        jdbcReservationRepository.save(new Reservation("김대기1", secondThemeSlot));
+
+        List<WaitingReservation> waitingReservations = jdbcReservationRepository.findWaitingReservationsWithOrderByName("김대기2");
+
+        assertThat(waitingReservations)
+                .extracting(WaitingReservation::waitingOrder)
+                .containsExactly(2, 1);
+    }
 }

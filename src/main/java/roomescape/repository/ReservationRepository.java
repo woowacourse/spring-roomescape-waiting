@@ -26,6 +26,8 @@ public interface ReservationRepository {
 
     List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId);
 
+    List<WaitingReservation> findWaitingReservationsWithOrderByName(String name);
+
     void updateStatus(Reservation reservation);
 
     void updateThemeSlot(Reservation reservation);
