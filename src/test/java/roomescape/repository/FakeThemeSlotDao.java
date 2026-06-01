@@ -39,13 +39,8 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
     }
 
     @Override
-    public void update(ThemeSlot themeSlot) {
-        storage.values().stream()
-                .filter(ts -> ts.getTheme().getId().equals(themeSlot.getTheme().getId())
-                        && ts.getDate().equals(themeSlot.getDate())
-                        && ts.getTime().getId().equals(themeSlot.getTime().getId()))
-                .findFirst()
-                .ifPresent(ts -> storage.put(ts.getId(), ThemeSlot.of(ts.getId(), themeSlot)));
+    public void updateReserved(ThemeSlot themeSlot) {
+        storage.computeIfPresent(themeSlot.getId(), (id, saved) -> ThemeSlot.of(id, themeSlot));
     }
 
 }

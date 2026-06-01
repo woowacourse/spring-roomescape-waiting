@@ -48,8 +48,7 @@ public class ReservationService {
 
         // RESERVATION 테이블에 ThemeSlot id가 없다면, 바로 themeSlot은 true로, reservation을 confirm로 변경 후 저장
         if (!reservationRepository.existsConfirmedByThemeSlotId(themeSlotId)) {
-            themeSlot.reserve();
-            themeSlotRepository.update(themeSlot);
+            updateThemeSlotReserved(themeSlot, true);
             reservation.confirm();
         }
 
@@ -215,6 +214,11 @@ public class ReservationService {
     }
 
     private void updateThemeSlotReserved(ThemeSlot themeSlot, boolean isReserved) {
-        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), isReserved));
+        if (isReserved) {
+            themeSlot.reserve();
+        } else {
+            themeSlot.release();
+        }
+        themeSlotRepository.updateReserved(themeSlot);
     }
 }

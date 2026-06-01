@@ -112,20 +112,16 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     }
 
     @Override
-    public void update(ThemeSlot themeSlot) {
+    public void updateReserved(ThemeSlot themeSlot) {
         String sql = """
                 UPDATE theme_slot
                 SET is_reserved = ?
-                WHERE theme_id = ?
-                AND date = ?
-                AND time_id = ?
+                WHERE id = ?
                 """;
 
         jdbcTemplate.update(sql,
                 themeSlot.isReserved(),
-                themeSlot.getTheme().getId(),
-                themeSlot.getDate(),
-                themeSlot.getTime().getId()
+                themeSlot.getId()
         );
     }
 
