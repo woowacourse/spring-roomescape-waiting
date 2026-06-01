@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.ReservationToken;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -42,10 +43,11 @@ public class SQLFixtureGenerator {
             LocalDateTime lastModifiedAt
     ) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
+        ReservationToken reservationToken = ReservationToken.from(status);
 
         jdbcTemplate.update("""
-                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
-                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt)
+                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at, confirm_token, waiting_token)
+                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt, :confirmToken, :waitingToken)
                         """,
                 new MapSqlParameterSource()
                         .addValue("guestName", guestName)
@@ -53,7 +55,9 @@ public class SQLFixtureGenerator {
                         .addValue("timeId", time.getId())
                         .addValue("themeId", theme.getId())
                         .addValue("status", status.toString())
-                        .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt)),
+                        .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt))
+                        .addValue("confirmToken", reservationToken.confirmToken())
+                        .addValue("waitingToken", reservationToken.waitingToken()),
                 keyHolder,
                 new String[]{"id"});
 

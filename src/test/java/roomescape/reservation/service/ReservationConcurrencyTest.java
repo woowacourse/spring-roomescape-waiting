@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,7 +76,7 @@ class ReservationConcurrencyTest {
 
         // then
         long confirmedCount = countConfirmedReservations(date, time.getId(), theme.getId());
-//        assertThat(confirmedCount).isEqualTo(1);
+        assertThat(confirmedCount).isEqualTo(1);
     }
 
     private void executeConcurrently(Runnable first, Runnable second) throws Exception {
@@ -141,6 +142,7 @@ class ReservationConcurrencyTest {
 
         private final ReservationRepository delegate;
         private final CyclicBarrier concurrentCreateBarrier = new CyclicBarrier(2);
+        private final AtomicInteger confirmedStatusCheckCount = new AtomicInteger();
 
         private SynchronizedReservationRepository(ReservationRepository delegate) {
             this.delegate = delegate;
@@ -202,7 +204,9 @@ class ReservationConcurrencyTest {
         @Override
         public boolean existsBySlotAndStatusConfirmed(LocalDate date, Long timeId, Long themeId) {
             boolean exists = delegate.existsBySlotAndStatusConfirmed(date, timeId, themeId);
-            awaitConcurrentCreate();
+            if (confirmedStatusCheckCount.incrementAndGet() <= 2) {
+                awaitConcurrentCreate();
+            }
             return exists;
         }
 

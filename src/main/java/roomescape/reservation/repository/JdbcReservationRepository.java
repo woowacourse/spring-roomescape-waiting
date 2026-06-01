@@ -20,6 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import static roomescape.reservation.domain.Status.CANCELED;
 
 @Repository
 @RequiredArgsConstructor
@@ -227,10 +230,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
+        ReservationToken reservationToken = ReservationToken.from(reservation.getStatus());
 
         jdbcTemplate.update("""
-                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
-                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt)
+                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at, confirm_token, waiting_token)
+                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt, :confirmToken, :waitingToken)
                         """,
                 new MapSqlParameterSource()
                         .addValue("guestName", reservation.getGuestName())
@@ -238,7 +242,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                         .addValue("timeId", reservation.getTime().getId())
                         .addValue("themeId", reservation.getTheme().getId())
                         .addValue("status", reservation.getStatus().toString())
-                        .addValue("lastModifiedAt", Timestamp.valueOf(reservation.getLastModifiedAt())),
+                        .addValue("lastModifiedAt", Timestamp.valueOf(reservation.getLastModifiedAt()))
+                        .addValue("confirmToken", reservationToken.confirmToken())
+                        .addValue("waitingToken", reservationToken.waitingToken()),
                 keyHolder,
                 new String[]{"id"});
 
@@ -250,35 +256,52 @@ public class JdbcReservationRepository implements ReservationRepository {
             Long id, LocalDate date, Long timeId, Status status, LocalDateTime lastModifiedAt) {
         String sql = """
                 UPDATE reservation
-                SET date = :date, time_id = :timeId, status = :status, last_modified_at = :lastModifiedAt
+                SET date = :date, time_id = :timeId, status = :status, last_modified_at = :lastModifiedAt, 
+                    confirm_token = :confirmToken, waiting_token = :waitingToken
                 WHERE id = :id
                 """;
 
+        ReservationToken reservationToken = ReservationToken.from(status);
         int count = jdbcTemplate.update(sql, new MapSqlParameterSource()
                 .addValue("date", Date.valueOf(date))
                 .addValue("timeId", timeId)
                 .addValue("status", status.toString())
                 .addValue("lastModifiedAt", Timestamp.valueOf(lastModifiedAt))
-                .addValue("id", id));
+                .addValue("id", id)
+                .addValue("confirmToken", reservationToken.confirmToken())
+                .addValue("waitingToken", reservationToken.waitingToken())
+        );
         return count == 1;
     }
 
     @Override
     public boolean updateStatus(Long id, Status status) {
-        String sql = "UPDATE reservation SET status = :status WHERE id = :id";
+        String sql = """
+                UPDATE reservation SET status = :status, confirm_token = :confirmToken, waiting_token = :waitingToken
+                WHERE id = :id
+                """;
+        ReservationToken reservationToken = ReservationToken.from(status);
         int count = jdbcTemplate.update(sql, new MapSqlParameterSource()
                 .addValue("status", status.toString())
-                .addValue("id", id));
+                .addValue("id", id)
+                .addValue("confirmToken", reservationToken.confirmToken())
+                .addValue("waitingToken", reservationToken.waitingToken())
+        );
         return count == 1;
     }
 
     @Override
     public boolean cancelById(Long id) {
+        ReservationToken reservationToken = ReservationToken.from(CANCELED);
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET cancel_token = :id, status = 'CANCELED'
+                SET status = 'CANCELED', confirm_token = :confirmToken, waiting_token = :waitingToken
                 WHERE id = :id
-                """, new MapSqlParameterSource("id", id));
+                """, new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("confirmToken", reservationToken.confirmToken())
+                .addValue("waitingToken", reservationToken.waitingToken())
+        );
 
         return rowCount == 1;
     }
