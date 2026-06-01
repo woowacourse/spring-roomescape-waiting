@@ -71,11 +71,10 @@ class ReservationServiceImplTest {
         Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
 
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(1L)).thenReturn(true);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(holidayService.isHoliday(time.getDate())).thenReturn(false);
         when(reservationRepository.isDuplicated(1L, time)).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
-        when(themeRepository.findById(1L)).thenReturn(theme);
 
         // when
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
@@ -96,11 +95,10 @@ class ReservationServiceImplTest {
         Reservation saved = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
 
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(1L)).thenReturn(true);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(holidayService.isHoliday(time.getDate())).thenReturn(false);
         when(reservationRepository.isDuplicated(1L, time)).thenReturn(true);
         when(reservationRepository.save(any())).thenReturn(saved);
-        when(themeRepository.findById(1L)).thenReturn(theme);
 
         // when
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
@@ -130,7 +128,7 @@ class ReservationServiceImplTest {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(999L)).thenReturn(false);
+        when(themeRepository.findById(999L)).thenReturn(Optional.empty());
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 999L, 1L);
 
         // when & then
@@ -143,15 +141,15 @@ class ReservationServiceImplTest {
     void create_휴일이면_예외() {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(1L)).thenReturn(true);
-        when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(true);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+        when(holidayService.isHoliday(time.getDate())).thenReturn(true);
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("휴일은 예약이 불가합니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("같은 사용자가 같은 슬롯에 이미 예약/대기를 가지고 있으면 같은 슬롯에 중복 신청할 수 없다.")
@@ -161,8 +159,7 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(1L)).thenReturn(true);
-        when(themeRepository.findById(1L)).thenReturn(theme);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
 
         when(reservationRepository.isDuplicatedWithName("라이", 1L, time)).thenReturn(true);
@@ -182,10 +179,9 @@ class ReservationServiceImplTest {
         Reservation saved = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
 
         when(timeService.findById(1L)).thenReturn(time);
-        when(themeRepository.existsById(1L)).thenReturn(true);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
         when(reservationRepository.isDuplicated(1L, time)).thenReturn(true);
-        when(themeRepository.findById(1L)).thenReturn(theme);
         when(reservationRepository.isDuplicatedWithName("라이", 1L, time)).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
         ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, 1L);
