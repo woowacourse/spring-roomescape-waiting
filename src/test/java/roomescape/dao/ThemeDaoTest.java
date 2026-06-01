@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 
 @JdbcTest
@@ -28,9 +29,13 @@ class ThemeDaoTest {
     void ID로_테마_조회() {
         Optional<Theme> theme = themeDao.findThemeById(1L);
 
-        assertThat(theme).isNotNull();
-        assertThat(theme.get().getId()).isEqualTo(1L);
-        assertThat(theme.get().getName()).isEqualTo("우테코 공포물");
+        assertThat(theme)
+                .map(Theme::getId)
+                .hasValue(1L);
+
+        assertThat(theme)
+                .map(Theme::getName)
+                .hasValue("우테코 공포물");
     }
 
     @Test

@@ -29,9 +29,13 @@ class ReservationTimeDaoTest {
     void ID로_시간_조회() {
         Optional<ReservationTime> time = reservationTimeDao.findTimeById(1L);
 
-        assertThat(time).isNotNull();
-        assertThat(time.get().getId()).isEqualTo(1L);
-        assertThat(time.get().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(time)
+                .map(ReservationTime::getId)
+                .hasValue(1L);
+
+        assertThat(time)
+                .map(ReservationTime::getStartAt)
+                .hasValue(LocalTime.of(10, 0));
     }
 
     @Test

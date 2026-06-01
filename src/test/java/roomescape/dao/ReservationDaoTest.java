@@ -39,8 +39,9 @@ class ReservationDaoTest {
     void ID로_예약_조회() {
         Optional<Reservation> reservation = reservationDao.findById(1L);
 
-        assertThat(reservation).isNotNull();
-        assertThat(reservation.get().getId()).isEqualTo(1L);
+        assertThat(reservation)
+                .map(Reservation::getId)
+                .hasValue(1L);
     }
 
     @Test
