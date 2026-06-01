@@ -10,6 +10,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.slot.domain.ReservationSlot;
+import roomescape.slot.repository.JdbcReservationSlotRepository;
+import roomescape.slot.repository.ReservationSlotRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.theme.repository.JdbcThemeRepository;
@@ -21,6 +24,7 @@ import roomescape.time.repository.ReservationTimeRepository;
 @JdbcTest
 @Import({
         JdbcReservationRepository.class,
+        JdbcReservationSlotRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcReservationDateRepository.class,
         JdbcThemeRepository.class
@@ -29,6 +33,9 @@ public abstract class ServiceSupport {
 
     @Autowired
     protected ReservationRepository reservationRepository;
+
+    @Autowired
+    protected ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     protected ReservationTimeRepository reservationTimeRepository;
@@ -67,4 +74,7 @@ public abstract class ServiceSupport {
         return reservationRepository.save(ReservationFixture.waitReservation(name, date, time, theme));
     }
 
+    protected ReservationSlot saveSlot(ReservationSlot slot) {
+        return reservationSlotRepository.save(slot);
+    }
 }
