@@ -83,24 +83,21 @@ class WaitingRepositoryTest {
     }
 
     @Test
-    void 동일한_일정과_이름의_예약_대기를_조회한다() {
+    void 동일한_일정과_이름의_예약_대기가_존재하면_true를_반환한다() {
         waitingRepository.save(new Waiting(null, "레서", date, time, theme));
 
-        Optional<Waiting> result = waitingRepository.findByScheduleAndName(
-                new Waiting(null, "레서", date, time, theme));
+        boolean result = waitingRepository.existsByScheduleAndName(date, time.getId(), theme.getId(), "레서");
 
-        assertThat(result).isPresent();
-        assertThat(result.get().getName()).isEqualTo("레서");
+        assertThat(result).isTrue();
     }
 
     @Test
-    void 동일한_일정과_이름의_예약_대기가_없으면_빈_Optional을_반환한다() {
+    void 동일한_일정과_이름의_예약_대기가_없으면_false를_반환한다() {
         waitingRepository.save(new Waiting(null, "레서", date, time, theme));
 
-        Optional<Waiting> result = waitingRepository.findByScheduleAndName(
-                new Waiting(null, "밍구", date, time, theme));
+        boolean result = waitingRepository.existsByScheduleAndName(date, time.getId(), theme.getId(), "밍구");
 
-        assertThat(result).isEmpty();
+        assertThat(result).isFalse();
     }
 
     @Test

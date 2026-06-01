@@ -64,7 +64,7 @@ class WaitingServiceTest {
     void 예약_대기를_생성하고_대기_순번을_반환한다() {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any())).thenReturn(Optional.empty());
+        when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(false);
         when(reservationRepository.findBySchedule(futureDate, 1L, 1L)).thenReturn(Optional.empty());
         Waiting saved = new Waiting(1L, "레서", futureDate, time, theme);
         when(waitingRepository.save(any())).thenReturn(saved);
@@ -113,8 +113,7 @@ class WaitingServiceTest {
     void 동일한_일정에_이미_대기_중이면_예외가_발생한다() {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any()))
-                .thenReturn(Optional.of(new Waiting(1L, "레서", futureDate, time, theme)));
+        when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);
@@ -125,7 +124,7 @@ class WaitingServiceTest {
     void 동일한_일정에_본인의_예약이_이미_있으면_예외가_발생한다() {
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(waitingRepository.findByScheduleAndName(any())).thenReturn(Optional.empty());
+        when(waitingRepository.existsByScheduleAndName(any(), anyLong(), anyLong(), any())).thenReturn(false);
         when(reservationRepository.findBySchedule(futureDate, 1L, 1L))
                 .thenReturn(Optional.of(new Reservation(1L, "레서", futureDate, time, theme)));
 

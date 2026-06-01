@@ -26,7 +26,9 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public WaitingService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, WaitingRepository waitingRepository, ReservationRepository reservationRepository, Clock clock) {
+    public WaitingService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                          WaitingRepository waitingRepository, ReservationRepository reservationRepository,
+                          Clock clock) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -47,7 +49,8 @@ public class WaitingService {
         checkDuplicatedReservation(waiting);
 
         waiting = waitingRepository.save(waiting);
-        Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime());
+        Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(waiting.getId(),
+                waiting.getTheme(), waiting.getDate(), waiting.getTime());
 
         return WaitingResult.of(waiting, order);
     }
@@ -61,7 +64,8 @@ public class WaitingService {
     }
 
     private void checkDuplicatedWaiting(Waiting waiting) {
-        boolean duplicated = waitingRepository.findByScheduleAndName(waiting).isPresent();
+        boolean duplicated = waitingRepository.existsByScheduleAndName(waiting.getDate(), waiting.getTime().getId(),
+                waiting.getTheme().getId(), waiting.getName());
 
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_WAITING);
@@ -70,9 +74,9 @@ public class WaitingService {
 
     private void checkDuplicatedReservation(Waiting waiting) {
         boolean duplicated = reservationRepository.findBySchedule(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId())
+                        waiting.getDate(),
+                        waiting.getTime().getId(),
+                        waiting.getTheme().getId())
                 .filter(found -> waiting.isSameName(found.getName()))
                 .isPresent();
 

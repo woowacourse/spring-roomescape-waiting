@@ -46,34 +46,14 @@ public class WaitingRepository {
                 waiting.getTheme());
     }
 
-    public Optional<Waiting> findByScheduleAndName(Waiting waiting) {
+    public boolean existsByScheduleAndName(LocalDate date, long timeId, long themeId, String name) {
         String sql = """
-                SELECT w.id          AS waiting_id,
-                       w.name        AS waiting_name,
-                       w.date        AS waiting_date,
-                       t.id          AS time_id,
-                       t.start_at    AS time_start_at,
-                       th.id         AS theme_id,
-                       th.name       AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail  AS theme_thumbnail
-                FROM waiting w
-                JOIN reservation_time t ON w.time_id = t.id
-                JOIN theme th ON w.theme_id = th.id
-                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ? AND w.name = ?
-                ORDER BY w.id
-                LIMIT 1
+                SELECT count(*)
+                FROM waiting
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
                 """;
-        try {
-            Waiting found = jdbcTemplate.queryForObject(sql, reservationRowsMapper(),
-                    waiting.getDate(),
-                    waiting.getTime().getId(),
-                    waiting.getTheme().getId(),
-                    waiting.getName());
-            return Optional.ofNullable(found);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId, name);
+        return count != null && count > 0;
     }
 
     public Optional<Waiting> findById(long id) {
