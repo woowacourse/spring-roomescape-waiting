@@ -26,19 +26,7 @@ public class AdminThemeControllerTest extends AcceptanceTest {
 
     @Test
     void 테마를_삭제한다() {
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "방탈출11");
-        themeParams.put("description", "다함께 탈출해요 방탈출.");
-        themeParams.put("thumbnail", "https://asdfsdf.sdfs");
-
-        int themeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .path("id");
+        long themeId = apiFixtureGenerator.createTheme("방탈출11", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
 
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/" + themeId)

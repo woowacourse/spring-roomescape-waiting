@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -15,6 +16,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.fixture.FixtureGenerator;
 
 @JdbcTest
 @Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, SlotDao.class})
@@ -29,14 +31,21 @@ class ReservationDaoTest {
     @Autowired
     private SlotDao slotDao;
 
+    private FixtureGenerator fixture;
+
+    @BeforeEach
+    void setUp() {
+        fixture = new FixtureGenerator(themeDao, timeDao, slotDao, reservationDao);
+    }
+
     @Test
     void 예약을_생성한다() {
         // given
-        ReservationTime savedReservationTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime savedReservationTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        Theme savedTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         LocalDate date = LocalDate.of(2026, 5, 5);
-        Slot savedSlot = slotDao.save(new Slot(date, savedReservationTime, savedTheme));
+        Slot savedSlot = fixture.saveSlot(date, savedReservationTime, savedTheme);
         Reservation reservation = new Reservation(savedSlot, "브라운");
 
         // when
@@ -55,16 +64,16 @@ class ReservationDaoTest {
     @Test
     void 예약_목록을_조회한다() {
         // given
-        ReservationTime savedReservationTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime savedReservationTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        Theme savedTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        saveReservation("브라운", date, savedReservationTime, savedTheme);
-        saveReservation("로지", date, savedReservationTime, savedTheme);
-        saveReservation("러키", date, savedReservationTime, savedTheme);
-        saveReservation("러로", date, savedReservationTime, savedTheme);
-        saveReservation("밤밤", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("브라운", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("로지", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("러키", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("러로", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("밤밤", date, savedReservationTime, savedTheme);
 
         // when
         List<Reservation> reservations = reservationDao.findAll();
@@ -88,18 +97,18 @@ class ReservationDaoTest {
     @Test
     void 이름에_따른_예약_목록을_조회한다() {
         // given
-        ReservationTime time10 = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime time20 = saveReservationTime(LocalTime.of(20, 0));
-        ReservationTime time22 = saveReservationTime(LocalTime.of(22, 0));
+        ReservationTime time10 = fixture.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime time20 = fixture.saveReservationTime(LocalTime.of(20, 0));
+        ReservationTime time22 = fixture.saveReservationTime(LocalTime.of(22, 0));
 
-        Theme theme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme theme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
-        saveReservation("브라운", LocalDate.of(2026, 5, 5), time10, theme);
-        saveReservation("브라운", LocalDate.of(2026, 5, 7), time20, theme);
-        saveReservation("브라운", LocalDate.of(2026, 5, 7), time22, theme);
+        fixture.saveReservation("브라운", LocalDate.of(2026, 5, 5), time10, theme);
+        fixture.saveReservation("브라운", LocalDate.of(2026, 5, 7), time20, theme);
+        fixture.saveReservation("브라운", LocalDate.of(2026, 5, 7), time22, theme);
 
-        saveReservation("로지", LocalDate.of(2026, 5, 8), time22, theme);
-        saveReservation("러키", LocalDate.of(2026, 5, 9), time22, theme);
+        fixture.saveReservation("로지", LocalDate.of(2026, 5, 8), time22, theme);
+        fixture.saveReservation("러키", LocalDate.of(2026, 5, 9), time22, theme);
 
         // when
         List<Reservation> reservations = reservationDao.findAllByName("브라운");
@@ -128,16 +137,16 @@ class ReservationDaoTest {
     @Test
     void 테마와_날짜_및_시간이_일치하는_예약이_존재하는지_확인한다() {
         // given
-        ReservationTime savedReservationTime = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime otherReservationTime = saveReservationTime(LocalTime.of(11, 0));
+        ReservationTime savedReservationTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime otherReservationTime = fixture.saveReservationTime(LocalTime.of(11, 0));
 
-        Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        Theme otherTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:Fasdg/dfgt");
+        Theme savedTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme otherTheme = fixture.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:Fasdg/dfgt");
 
         LocalDate date = LocalDate.of(2026, 5, 5);
         LocalDate otherDate = LocalDate.of(2026, 5, 6);
 
-        saveReservation("브라운", date, savedReservationTime, savedTheme);
+        fixture.saveReservation("브라운", date, savedReservationTime, savedTheme);
 
         // when & then
         assertAll(
@@ -170,20 +179,20 @@ class ReservationDaoTest {
     @Test
     void 자신의_예약이_아닌_다른_예약이_같은_테마_날짜_시간에_존재하면_중복이라_판단한다() {
         // given
-        ReservationTime originalTime = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime alreadyReservedTime = saveReservationTime(LocalTime.of(20, 0));
+        ReservationTime originalTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime alreadyReservedTime = fixture.saveReservationTime(LocalTime.of(20, 0));
 
-        Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        Theme alreadyReservedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
+        Theme originalTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme alreadyReservedTheme = fixture.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
-        Reservation myReservation = saveReservation(
+        Reservation myReservation = fixture.saveReservation(
                 "러키",
                 LocalDate.of(2026, 5, 10),
                 originalTime,
                 originalTheme
         );
 
-        saveReservation(
+        fixture.saveReservation(
                 "브라운",
                 LocalDate.of(2026, 5, 12),
                 alreadyReservedTime,
@@ -205,10 +214,10 @@ class ReservationDaoTest {
     @Test
     void 자기_자신의_예약만_있으면_같은_테마_날짜_시간의_예약이_존재하지_않는다고_판단한다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme theme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime reservationTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        Theme theme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate date = LocalDate.of(2026, 5, 10);
-        Reservation existReservation = saveReservation("브라운", date, reservationTime, theme);
+        Reservation existReservation = fixture.saveReservation("브라운", date, reservationTime, theme);
 
         // when
         boolean exists = reservationDao.existsByThemeAndDateAndTimeAndIdNot(
@@ -225,20 +234,20 @@ class ReservationDaoTest {
     @Test
     void 예약을_수정한다() {
         // given
-        ReservationTime originalTime = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime changedTime = saveReservationTime(LocalTime.of(20, 0));
+        ReservationTime originalTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime changedTime = fixture.saveReservationTime(LocalTime.of(20, 0));
 
-        Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        Theme changedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
+        Theme originalTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme changedTheme = fixture.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
-        Reservation savedReservation = saveReservation(
+        Reservation savedReservation = fixture.saveReservation(
                 "브라운",
                 LocalDate.of(2026, 5, 5),
                 originalTime,
                 originalTheme
         );
 
-        Slot changedSlot = slotDao.save(new Slot(LocalDate.of(2026, 5, 10), changedTime, changedTheme));
+        Slot changedSlot = fixture.saveSlot(LocalDate.of(2026, 5, 10), changedTime, changedTheme);
         Reservation changedReservation = new Reservation(
                 savedReservation.getId(),
                 changedSlot,
@@ -279,11 +288,11 @@ class ReservationDaoTest {
     @Test
     void 예약을_삭제한다() {
         // given
-        ReservationTime savedReservationTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime savedReservationTime = fixture.saveReservationTime(LocalTime.of(10, 0));
+        Theme savedTheme = fixture.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate date = LocalDate.of(2026, 5, 5);
 
-        Reservation savedReservation = saveReservation("예약1", date, savedReservationTime, savedTheme);
+        Reservation savedReservation = fixture.saveReservation("예약1", date, savedReservationTime, savedTheme);
 
         // when
         reservationDao.delete(savedReservation.getId());
@@ -291,21 +300,5 @@ class ReservationDaoTest {
         // then
         List<Reservation> reservations = reservationDao.findAll();
         assertThat(reservations).hasSize(0);
-    }
-
-    private ReservationTime saveReservationTime(LocalTime startAt) {
-        ReservationTime time = new ReservationTime(startAt);
-        return timeDao.save(time);
-    }
-
-    private Theme saveTheme(String name, String description, String thumbnail) {
-        Theme theme = new Theme(name, description, thumbnail);
-        return themeDao.save(theme);
-    }
-
-    private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        Slot savedSlot = slotDao.save(new Slot(date, time, theme));
-        Reservation reservation = new Reservation(savedSlot, name);
-        return reservationDao.save(reservation);
     }
 }

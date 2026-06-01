@@ -8,8 +8,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,7 +22,7 @@ class ThemeControllerTest extends AcceptanceTest {
 
     @Test
     void 테마_목록을_조회한다() {
-        createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
+        apiFixtureGenerator.createTheme("방탈출1", "다함께 탈출해요 방탈출.", "https://asdfsdf.sdfs");
 
         RestAssured.given().log().all()
                 .when().get("/themes")
@@ -62,27 +60,27 @@ class ThemeControllerTest extends AcceptanceTest {
     private void createRankingData() {
         LocalDate baseDate = LocalDate.now();
 
-        long time10 = createTime("10:00");
-        long time11 = createTime("11:00");
-        long time12 = createTime("12:00");
-        long time13 = createTime("13:00");
-        long time14 = createTime("14:00");
-        long time15 = createTime("15:00");
-        long time16 = createTime("16:00");
-        long time17 = createTime("17:00");
-        long time18 = createTime("18:00");
+        long time10 = apiFixtureGenerator.createTime("10:00");
+        long time11 = apiFixtureGenerator.createTime("11:00");
+        long time12 = apiFixtureGenerator.createTime("12:00");
+        long time13 = apiFixtureGenerator.createTime("13:00");
+        long time14 = apiFixtureGenerator.createTime("14:00");
+        long time15 = apiFixtureGenerator.createTime("15:00");
+        long time16 = apiFixtureGenerator.createTime("16:00");
+        long time17 = apiFixtureGenerator.createTime("17:00");
+        long time18 = apiFixtureGenerator.createTime("18:00");
 
-        long horror = createTheme("공포의 저택", "오래된 저택에서 탈출하세요", "https://example.com/theme1.jpg");
-        long lab = createTheme("사라진 연구소", "비밀 연구소의 진실을 밝혀내세요", "https://example.com/theme2.jpg");
-        long timeTravel = createTheme("시간 여행자", "시간의 틈에서 탈출하세요", "https://example.com/theme3.jpg");
-        long prison = createTheme("감옥 탈출", "제한 시간 안에 감옥을 탈출하세요", "https://example.com/theme4.jpg");
-        long wizard = createTheme("마법사의 방", "마법사의 숨겨진 방을 탐험하세요", "https://example.com/theme5.jpg");
-        long zombie = createTheme("좀비 바이러스", "바이러스가 퍼진 도시에서 살아남으세요", "https://example.com/theme6.jpg");
-        long pirate = createTheme("해적의 보물", "해적선에 숨겨진 보물을 찾으세요", "https://example.com/theme7.jpg");
-        long spy = createTheme("스파이 미션", "비밀 요원이 되어 임무를 완수하세요", "https://example.com/theme8.jpg");
-        long space = createTheme("우주 정거장", "고장난 우주 정거장에서 탈출하세요", "https://example.com/theme9.jpg");
-        long ancient = createTheme("고대 유적", "고대 유적의 수수께끼를 풀어보세요", "https://example.com/theme10.jpg");
-        long bunker = createTheme("지하 벙커", "폐쇄된 지하 벙커에서 탈출하세요", "https://example.com/theme12.jpg");
+        long horror = apiFixtureGenerator.createTheme("공포의 저택", "오래된 저택에서 탈출하세요", "https://example.com/theme1.jpg");
+        long lab = apiFixtureGenerator.createTheme("사라진 연구소", "비밀 연구소의 진실을 밝혀내세요", "https://example.com/theme2.jpg");
+        long timeTravel = apiFixtureGenerator.createTheme("시간 여행자", "시간의 틈에서 탈출하세요", "https://example.com/theme3.jpg");
+        long prison = apiFixtureGenerator.createTheme("감옥 탈출", "제한 시간 안에 감옥을 탈출하세요", "https://example.com/theme4.jpg");
+        long wizard = apiFixtureGenerator.createTheme("마법사의 방", "마법사의 숨겨진 방을 탐험하세요", "https://example.com/theme5.jpg");
+        long zombie = apiFixtureGenerator.createTheme("좀비 바이러스", "바이러스가 퍼진 도시에서 살아남으세요", "https://example.com/theme6.jpg");
+        long pirate = apiFixtureGenerator.createTheme("해적의 보물", "해적선에 숨겨진 보물을 찾으세요", "https://example.com/theme7.jpg");
+        long spy = apiFixtureGenerator.createTheme("스파이 미션", "비밀 요원이 되어 임무를 완수하세요", "https://example.com/theme8.jpg");
+        long space = apiFixtureGenerator.createTheme("우주 정거장", "고장난 우주 정거장에서 탈출하세요", "https://example.com/theme9.jpg");
+        long ancient = apiFixtureGenerator.createTheme("고대 유적", "고대 유적의 수수께끼를 풀어보세요", "https://example.com/theme10.jpg");
+        long bunker = apiFixtureGenerator.createTheme("지하 벙커", "폐쇄된 지하 벙커에서 탈출하세요", "https://example.com/theme12.jpg");
 
         // 공포의 저택: 최근 7일 안에 12건
         saveReservationFixture("예약자일", baseDate.minusDays(1), time10, horror);
@@ -185,38 +183,6 @@ class ThemeControllerTest extends AcceptanceTest {
         saveReservationFixture("미래예약자일", baseDate.plusDays(1), time10, bunker);
         saveReservationFixture("미래예약자이", baseDate.plusDays(2), time11, bunker);
         saveReservationFixture("미래예약자삼", baseDate.plusDays(2), time12, bunker);
-    }
-
-    private long createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .jsonPath()
-                .getLong("id");
-    }
-
-    private long createTheme(String name, String description, String thumbnail) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", name);
-        params.put("description", description);
-        params.put("thumbnail", thumbnail);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .jsonPath()
-                .getLong("id");
     }
 
     private void saveReservationFixture(String name, LocalDate date, long timeId, long themeId) {

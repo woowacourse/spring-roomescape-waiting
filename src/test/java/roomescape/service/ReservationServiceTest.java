@@ -11,8 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
@@ -31,20 +29,14 @@ class ReservationServiceTest extends ServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
-    private ReservationTimeDao reservationTimeDao;
-
-    @Autowired
-    private ThemeDao themeDao;
-
     @Test
     void 예약을_생성할_수_있다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
-        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
 
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), reservationDate);
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId());
 
         // when
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
@@ -67,11 +59,11 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약_생성시_예약시간이_존재하지_않으면_예외가_발생한다() {
         // given
-        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
         long invalidTimeId = 0L;
 
-        ReservationRequest request = createReservationRequest(invalidTimeId, theme.getId(), reservationDate);
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, invalidTimeId, theme.getId());
 
         // when & then
         assertThatThrownBy(() -> {
@@ -85,11 +77,11 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약_생성시_테마가_존재하지_않으면_예외가_발생한다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
         long invalidThemeId = 0L;
 
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), invalidThemeId, reservationDate);
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), invalidThemeId);
 
         // when & then
         assertThatThrownBy(() -> {
@@ -102,10 +94,10 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약_생성시_동일한_조건의_예약이_이미_존재하면_예외가_발생한다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
-        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 8);
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), reservationDate);
+        ReservationRequest request = new ReservationRequest("예약1", reservationDate, reservationTime.getId(), theme.getId());
 
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         reservationService.create(request, currentDateTime);
@@ -119,17 +111,18 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약을_수정할_수_있다() {
         // given
-        ReservationTime originalTime = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime changedTime = saveReservationTime(LocalTime.of(20, 0));
+        ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime changedTime = fixtureGenerator.saveReservationTime(LocalTime.of(20, 0));
 
-        Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        Theme changedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
+        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme changedTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
         LocalDate reservationDate = LocalDate.of(2026, 5, 10);
-        ReservationRequest createRequest = createReservationRequest(
+        ReservationRequest createRequest = new ReservationRequest(
+                "예약1",
+                reservationDate,
                 originalTime.getId(),
-                originalTheme.getId(),
-                reservationDate
+                originalTheme.getId()
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
@@ -186,8 +179,8 @@ class ReservationServiceTest extends ServiceTest {
     void 이미_예약된_날짜_시간_테마로는_예약을_수정할_수_없다() {
         // given
         LocalDate alreadyReservedDate = LocalDate.of(2026, 5, 12);
-        ReservationTime alreadyReservedTime = saveReservationTime(LocalTime.of(20, 0));
-        Theme alreadyReservedTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
+        ReservationTime alreadyReservedTime = fixtureGenerator.saveReservationTime(LocalTime.of(20, 0));
+        Theme alreadyReservedTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
         ReservationRequest alreadyReservedRequest = new ReservationRequest(
                 "로지",
                 alreadyReservedDate,
@@ -198,12 +191,13 @@ class ReservationServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         reservationService.create(alreadyReservedRequest, currentDateTime);
 
-        ReservationTime originalTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        ReservationRequest createRequest = createReservationRequest(
+        ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationRequest createRequest = new ReservationRequest(
+                "예약1",
+                LocalDate.of(2026, 5, 10),
                 originalTime.getId(),
-                originalTheme.getId(),
-                LocalDate.of(2026, 5, 10)
+                originalTheme.getId()
         );
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
@@ -222,8 +216,8 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     void 현재_시간보다_이전_날짜로_예약을_수정하면_예외가_발생한다() {
-        ReservationTime originalTime = saveReservationTime(LocalTime.of(11, 0));
-        Theme originalTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(11, 0));
+        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         ReservationRequest createRequest = new ReservationRequest(
                 "러키",
@@ -234,8 +228,8 @@ class ReservationServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
-        ReservationTime pastTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme updateTheme = saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
+        ReservationTime pastTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        Theme updateTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
 
         ReservationRequest updateRequest = new ReservationRequest(
                 "러키",
@@ -253,10 +247,10 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약을_삭제할_수_있다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
-        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
-        ReservationRequest request = createReservationRequest(reservationTime.getId(), theme.getId(), LocalDate.of(2026, 5, 8));
+        ReservationRequest request = new ReservationRequest("예약1", LocalDate.of(2026, 5, 8), reservationTime.getId(), theme.getId());
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse response = reservationService.create(request, currentDateTime);
 
@@ -290,14 +284,15 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약_취소_마감_기한이_지난_예약은_삭제할_수_없다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(13, 0));
-        Theme theme = saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(13, 0));
+        Theme theme = fixtureGenerator.saveTheme("테마1", "로지와 러키의 방탈출", "https:fsof/ommff");
         LocalDate reservationDate = LocalDate.of(2026, 5, 5);
 
-        ReservationRequest request = createReservationRequest(
+        ReservationRequest request = new ReservationRequest(
+                "예약1",
+                reservationDate,
                 reservationTime.getId(),
-                theme.getId(),
-                reservationDate
+                theme.getId()
         );
         LocalDateTime currentDateTimeWhenReserve = LocalDateTime.of(2026, 5, 1, 10, 0);
         ReservationResponse response = reservationService.create(request, currentDateTimeWhenReserve);
@@ -316,25 +311,6 @@ class ReservationServiceTest extends ServiceTest {
                 () -> assertThat(reservations)
                         .extracting(ReservationResponse::id)
                         .contains(response.id())
-        );
-    }
-
-    private ReservationTime saveReservationTime(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
-        return reservationTimeDao.save(reservationTime);
-    }
-
-    private Theme saveTheme(String name, String description, String thumbnail) {
-        Theme theme = new Theme(name, description, thumbnail);
-        return themeDao.save(theme);
-    }
-
-    private ReservationRequest createReservationRequest(long timeId, long themeId, LocalDate localDate) {
-        return new ReservationRequest(
-                "예약1",
-                localDate,
-                timeId,
-                themeId
         );
     }
 }

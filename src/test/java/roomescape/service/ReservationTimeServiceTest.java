@@ -11,13 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.SlotDao;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
@@ -33,18 +27,6 @@ class ReservationTimeServiceTest extends ServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
-
-    @Autowired
-    private ReservationDao reservationDao;
-
-    @Autowired
-    private ReservationTimeDao reservationTimeDao;
-
-    @Autowired
-    private ThemeDao themeDao;
-
-    @Autowired
-    private SlotDao slotDao;
 
     @Test
     void 예약_시간을_생성할_수_있다() {
@@ -63,7 +45,7 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 이미_존재하는_예약_시간을_저장_시_예외를_반환한다() {
         // given
         LocalTime startAt = LocalTime.of(10, 0);
-        saveReservationTime(startAt);
+        fixtureGenerator.saveReservationTime(startAt);
         ReservationTimeRequest request = new ReservationTimeRequest(startAt);
 
         // when & then
@@ -75,18 +57,13 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void 테마_및_날짜에_따른_예약시간을_조회할_수_있다() {
         // given
-        Theme theme = saveTheme("테마1");
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
         LocalDate baseDate = LocalDate.of(2026, 5, 31);
 
-        ReservationTime reservedTime = saveReservationTime(LocalTime.of(10, 0));
-        ReservationTime notReservedTime = saveReservationTime(LocalTime.of(11, 0));
+        ReservationTime reservedTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime notReservedTime = fixtureGenerator.saveReservationTime(LocalTime.of(11, 0));
 
-        Slot savedSlot = slotDao.save(new Slot(baseDate, reservedTime, theme));
-        Reservation reservation = new Reservation(
-                savedSlot,
-                "예약1"
-        );
-        reservationDao.save(reservation);
+        fixtureGenerator.saveReservation("예약1", baseDate, reservedTime, theme);
 
         // when
         LocalDate currentDate = LocalDate.of(2026, 5, 30);
@@ -109,7 +86,7 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void 예약시간_조회시_날짜가_오늘_이전이면_예외가_발생한다() {
         // given
-        Theme theme = saveTheme("테마1");
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
         LocalDate today = LocalDate.of(2026, 5, 31);
         LocalDate invalidDate = today.minusDays(1);
 
@@ -134,7 +111,7 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void 예약시간을_삭제할_수_있다() {
         // given
-        Theme theme = saveTheme("테마1");
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
         LocalDate today = LocalDate.of(2026, 5, 31);
         LocalTime startAt = LocalTime.of(10, 0);
 
@@ -159,15 +136,10 @@ class ReservationTimeServiceTest extends ServiceTest {
     @Test
     void 예약시간_삭제시_관련_예약이_존재하면_예외를_반환한다() {
         // given
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2026, 5, 8);
-        Theme theme = saveTheme("테마1");
-        Slot savedSlot = slotDao.save(new Slot(date, reservationTime, theme));
-        Reservation reservation = new Reservation(
-                savedSlot,
-                "예약1"
-        );
-        reservationDao.save(reservation);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        fixtureGenerator.saveReservation("예약1", date, reservationTime, theme);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTime.getId()))
@@ -181,15 +153,5 @@ class ReservationTimeServiceTest extends ServiceTest {
         assertThatThrownBy(() -> reservationTimeService.delete(0L))
                 .isInstanceOf(ReservationTimeException.class)
                 .hasMessage(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
-    }
-
-    private Theme saveTheme(String name) {
-        Theme theme = new Theme(name, "설명", "https://adsf.dsaf");
-        return themeDao.save(theme);
-    }
-
-    private ReservationTime saveReservationTime(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
-        return reservationTimeDao.save(reservationTime);
     }
 }

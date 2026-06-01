@@ -27,16 +27,7 @@ public class AdminReservationTimeControllerTest extends AcceptanceTest {
 
     @Test
     void 예약_시간을_삭제할_수_있다() {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", "10:00");
-
-        int timeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().path("id");
+        long timeId = apiFixtureGenerator.createTime("10:00");
 
         RestAssured.given().log().all()
                 .when().delete("/admin/times/" + timeId)

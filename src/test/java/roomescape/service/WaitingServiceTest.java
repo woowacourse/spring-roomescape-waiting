@@ -11,13 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
-import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.SlotDao;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.WaitingRequest;
 import roomescape.dto.response.WaitingResponse;
@@ -31,27 +25,15 @@ WaitingServiceTest extends ServiceTest {
     @Autowired
     private WaitingService waitingService;
 
-    @Autowired
-    private ThemeDao themeDao;
-
-    @Autowired
-    private ReservationTimeDao reservationTimeDao;
-
-    @Autowired
-    private ReservationDao reservationDao;
-
-    @Autowired
-    private SlotDao slotDao;
-
     @Test
     void 예약이_없는_상태에서_대기를_신청한_경우_예외가_발생한다() {
         // given
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        Theme theme = saveTheme("테마1");
-        saveSlot(reservationDate, reservationTime, theme);
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        fixtureGenerator.saveSlot(reservationDate, reservationTime, theme);
 
         WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "대기신청자");
 
@@ -67,9 +49,9 @@ WaitingServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        Theme theme = saveTheme("테마1");
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        fixtureGenerator.saveReservation("기존예약자", reservationDate, reservationTime, theme);
 
         WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "대기신청자");
         waitingService.create(request, currentDateTime);
@@ -86,9 +68,9 @@ WaitingServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, Month.MAY, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        Theme theme = saveTheme("테마1");
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        fixtureGenerator.saveReservation("기존예약자", reservationDate, reservationTime, theme);
 
         WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), "기존예약자");
 
@@ -104,9 +86,9 @@ WaitingServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, Month.MAY, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        Theme theme = saveTheme("테마1");
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        saveReservation("예약자", theme, reservationTime, reservationDate);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        fixtureGenerator.saveReservation("예약자", reservationDate, reservationTime, theme);
 
         String testUser = "첫번째대기신청자";
         saveWaiting(reservationDate, reservationTime, theme, testUser, currentDateTime);
@@ -125,15 +107,24 @@ WaitingServiceTest extends ServiceTest {
                 });
     }
 
+    private void saveWaiting(LocalDate date,
+                             ReservationTime reservationTime,
+                             Theme theme,
+                             String name,
+                             LocalDateTime createdAt) {
+        WaitingRequest request = new WaitingRequest(date, reservationTime.getId(), theme.getId(), name);
+        waitingService.create(request, createdAt);
+    }
+
     @Test
     void 대기를_삭제할_수_있다() {
         // given
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        Theme theme = saveTheme("테마1");
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        fixtureGenerator.saveReservation("기존예약자", reservationDate, reservationTime, theme);
 
         String name = "대기신청자";
         WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), name);
@@ -154,9 +145,9 @@ WaitingServiceTest extends ServiceTest {
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 31, 10, 0);
         LocalDate reservationDate = currentDateTime.toLocalDate();
 
-        Theme theme = saveTheme("테마1");
-        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
-        saveReservation("기존예약자", theme, reservationTime, reservationDate);
+        Theme theme = fixtureGenerator.saveTheme("테마1", "설명", "https://dsf.sdaf");
+        ReservationTime reservationTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
+        fixtureGenerator.saveReservation("기존예약자", reservationDate, reservationTime, theme);
 
         String name = "대기신청자";
         WaitingRequest request = new WaitingRequest(reservationDate, reservationTime.getId(), theme.getId(), name);
@@ -166,47 +157,5 @@ WaitingServiceTest extends ServiceTest {
         assertThatThrownBy(() -> waitingService.delete(waitingResponse.id(), "다른사람"))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
-    }
-
-    private Theme saveTheme(String name) {
-        Theme theme = new Theme(
-                name,
-                "설명",
-                "https://dsf.sdaf"
-        );
-        return themeDao.save(theme);
-    }
-
-    private ReservationTime saveReservationTime(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
-        return reservationTimeDao.save(reservationTime);
-    }
-
-    private Reservation saveReservation(
-            String name,
-            Theme theme,
-            ReservationTime reservationTime,
-            LocalDate date
-    ) {
-        Slot savedSlot = saveSlot(date, reservationTime, theme);
-        Reservation reservation = new Reservation(
-                savedSlot,
-                name
-        );
-        return reservationDao.save(reservation);
-    }
-
-    private Slot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
-        Slot slot = new Slot(date, time, theme);
-        return slotDao.save(slot);
-    }
-
-    private void saveWaiting(LocalDate date,
-                             ReservationTime reservationTime,
-                             Theme theme,
-                             String name,
-                             LocalDateTime createdAt) {
-        WaitingRequest request = new WaitingRequest(date, reservationTime.getId(), theme.getId(), name);
-        waitingService.create(request, createdAt);
     }
 }
