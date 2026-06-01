@@ -81,14 +81,24 @@ public class WaitingService {
                 .toList();
     }
 
-    public void delete(long waitingId) {
+    public void delete(long waitingId, String name) {
         validateWaitingExists(waitingId);
+        validateIsOwner(waitingId, name);
         waitingDao.delete(waitingId);
     }
 
     private void validateWaitingExists(long waitingId) {
         if (!waitingDao.existsById(waitingId)) {
             throw new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND);
+        }
+    }
+
+    private void validateIsOwner(long waitingId, String name) {
+        Waiting waiting = waitingDao.findById(waitingId)
+                .orElseThrow(() -> new WaitingException(WaitingErrorCode.WAITING_NOT_FOUND));
+
+        if (!waiting.getName().equals(name)) {
+            throw new WaitingException(WaitingErrorCode.WAITING_FORBIDDEN);
         }
     }
 }

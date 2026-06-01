@@ -731,6 +731,16 @@ Content-Type: application/json
 ### 사용자 - 예약 대기 취소
 
 <details>
+<summary>Query Parameter</summary>
+<div markdown="1">
+
+- name (필수・string)
+    - 대기자 이름입니다.
+
+</div>
+</details>
+
+<details>
 <summary>Request</summary>
 <div markdown="1">
 

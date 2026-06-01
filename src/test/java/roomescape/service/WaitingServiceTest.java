@@ -117,11 +117,33 @@ class WaitingServiceTest extends ServiceTest {
     void 존재하지_않는_ID로_대기_삭제를_시도하면_예외가_발생한다() {
         // given
         long id = 999L;
+        String name = "user999";
 
         // when & then
-        assertThatThrownBy(() -> waitingService.delete(id))
+        assertThatThrownBy(() -> waitingService.delete(id, name))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage(WaitingErrorCode.WAITING_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void 본인의_대기가_아닌_경우_삭제를_시도하면_예외가_발생한다() {
+        // given
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        saveReservation("예약자", theme, reservationTime);
+
+        String ownerName = "owner";
+        saveWaiting(reservationTime, theme, ownerName);
+
+        List<WaitingWithRankResponse> waitings = waitingService.getWaitingsByName(ownerName);
+        long waitingId = waitings.getFirst().id();
+
+        String hackerName = "hacker";
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.delete(waitingId, hackerName))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage(WaitingErrorCode.WAITING_FORBIDDEN.getMessage());
     }
 
     private Theme saveTheme(String name) {

@@ -106,6 +106,7 @@ public class WaitingControllerTest extends AcceptanceTest {
         long waitingId = createWaiting("조이", "2026-05-05", timeId, themeId);
 
         RestAssured.given().log().all()
+                .queryParam("name", "조이")
                 .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);

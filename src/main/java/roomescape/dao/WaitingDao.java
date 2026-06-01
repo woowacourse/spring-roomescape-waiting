@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class WaitingDao {
@@ -54,6 +56,23 @@ public class WaitingDao {
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
 
         return waiting.createWithId(generatedId.longValue());
+    }
+
+    public Optional<Waiting> findById(long waitingId) {
+        String sql = """
+                SELECT id, 
+                       created_at, 
+                       slot_id,
+                       name
+                FROM waiting
+                WHERE id = ?
+                """;
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, waitingId));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
     }
 
     public List<RankedWaiting> findAllWithRankByName(String name) {
