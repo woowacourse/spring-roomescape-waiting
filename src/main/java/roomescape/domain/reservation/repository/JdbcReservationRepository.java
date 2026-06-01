@@ -24,6 +24,18 @@ import roomescape.global.error.exception.GeneralException;
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
 
+    private static final String WAITING_NUMBER_EXPRESSION = """
+        CASE
+            WHEN r.status = 'WAITING' THEN
+                SUM(CASE WHEN r.status = 'WAITING' THEN 1 ELSE 0 END) OVER (
+                    PARTITION BY r.date, r.time_id, r.theme_id
+                    ORDER BY r.id ASC
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                )
+            ELSE NULL
+        END AS waiting_number
+        """;
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
@@ -36,21 +48,25 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByNotDeleted() {
-        return jdbcTemplate.query(
-            """
-                SELECT r.id, r.name, r.date, r.status,
-                       rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                       t.deleted_at AS theme_deleted_at
-                FROM reservation r
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id
-                WHERE r.deleted_at IS NULL
-                ORDER BY r.id ASC
-                """,
-            (rs, rowNum) -> mapReservation(rs)
-        );
+    public List<ReservationWithWaitingNumber> findReservationsByNotDeletedWithWaitingNumber() {
+        String sql = """
+            SELECT r.id, r.name, r.date, r.status,
+                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                   t.deleted_at AS theme_deleted_at,
+                   %s
+            FROM reservation r
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            WHERE r.deleted_at IS NULL
+            ORDER BY r.id ASC
+            """.formatted(WAITING_NUMBER_EXPRESSION);
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapReservationWithWaitingNumber(rs));
+    }
+
+    private ReservationWithWaitingNumber mapReservationWithWaitingNumber(ResultSet rs) throws SQLException {
+        return new ReservationWithWaitingNumber(mapReservation(rs), getNullableInteger(rs, "waiting_number"));
     }
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {
@@ -74,6 +90,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
+    private Integer getNullableInteger(ResultSet rs, String columnLabel) throws SQLException {
+        Number number = (Number) rs.getObject(columnLabel);
+        if (number == null) {
+            return null;
+        }
+        return number.intValue();
+    }
+
     private LocalDateTime getNullableLocalDateTime(ResultSet rs, String columnLabel)
         throws SQLException {
         java.sql.Timestamp timestamp = rs.getTimestamp(columnLabel);
@@ -84,26 +108,29 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByNameAndNotDeleted(String name) {
+    public List<ReservationWithWaitingNumber> findReservationsByNameAndNotDeletedWithWaitingNumber(String name) {
         String sql = """
-            SELECT r.id, r.name, r.date, r.status,
-                   rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
-                   t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
-                   t.deleted_at AS theme_deleted_at
-            FROM reservation r
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
-            WHERE r.name = :name
-              AND r.deleted_at IS NULL
-            ORDER BY r.date ASC, rt.start_at ASC
-            """;
+            SELECT ranked.id, ranked.name, ranked.date, ranked.status,
+                   ranked.time_id, ranked.start_at, ranked.time_deleted_at,
+                   ranked.theme_id, ranked.theme_name, ranked.description, ranked.image_url,
+                   ranked.theme_deleted_at, ranked.waiting_number
+            FROM (
+                SELECT r.id, r.name, r.date, r.status,
+                       rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.image_url,
+                       t.deleted_at AS theme_deleted_at,
+                       %s
+                FROM reservation r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE r.deleted_at IS NULL
+            ) ranked
+            WHERE ranked.name = :name
+            ORDER BY ranked.date ASC, ranked.start_at ASC, ranked.id ASC
+            """.formatted(WAITING_NUMBER_EXPRESSION);
         SqlParameterSource parameters = new MapSqlParameterSource("name", name);
 
-        return jdbcTemplate.query(
-            sql,
-            parameters,
-            (rs, rowNum) -> mapReservation(rs)
-        );
+        return jdbcTemplate.query(sql, parameters, (rs, rowNum) -> mapReservationWithWaitingNumber(rs));
     }
 
     @Override
@@ -196,28 +223,6 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),
             reservation.getTime(), reservation.getTheme(), reservation.getStatus());
-    }
-
-    @Override
-    public int countByIdLessThanEqualAndDateAndTimeAndTheme(Long reservationId, LocalDate date, Time time,
-        Theme theme) {
-        String countSql = """
-            SELECT COUNT(*)
-            FROM reservation
-            WHERE id <= :id
-              AND date = :date
-              AND time_id = :timeId
-              AND theme_id = :themeId
-              AND status = 'WAITING'
-              AND deleted_at IS NULL
-            """;
-        SqlParameterSource parameters = new MapSqlParameterSource()
-            .addValue("id", reservationId)
-            .addValue("date", date)
-            .addValue("timeId", time.getId())
-            .addValue("themeId", theme.getId());
-
-        return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
     }
 
     @Override

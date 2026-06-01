@@ -30,6 +30,7 @@ import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
+import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
 import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.mapper.ThemeMapper;
@@ -78,7 +79,7 @@ class ReservationServiceTest {
 
         @Test
         void 예약이_없으면_빈_목록을_반환한다() {
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of());
+            when(reservationRepository.findReservationsByNotDeletedWithWaitingNumber()).thenReturn(List.of());
 
             assertThat(reservationService.getReservations()).isEmpty();
         }
@@ -91,7 +92,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of(reservation));
+            when(reservationRepository.findReservationsByNotDeletedWithWaitingNumber())
+                .thenReturn(List.of(new ReservationWithWaitingNumber(reservation, null)));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservations();
@@ -109,7 +111,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of(canceled));
+            when(reservationRepository.findReservationsByNotDeletedWithWaitingNumber())
+                .thenReturn(List.of(new ReservationWithWaitingNumber(canceled, null)));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservations();
@@ -124,7 +127,8 @@ class ReservationServiceTest {
 
         @Test
         void 이름에_해당하는_예약이_없으면_빈_목록을_반환한다() {
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자")).thenReturn(List.of());
+            when(reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("예약자"))
+                .thenReturn(List.of());
 
             assertThat(reservationService.getReservationsByName("예약자")).isEmpty();
         }
@@ -137,16 +141,15 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 2L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
-                .thenReturn(List.of(waiting));
-            when(reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(2L, date, time, theme))
-                .thenReturn(2);
+            when(reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("예약자"))
+                .thenReturn(List.of(new ReservationWithWaitingNumber(waiting, 2)));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");
 
             // then
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.WAITING);
+
             assertThat(result.getFirst().waitingNumber()).isEqualTo(2);
         }
 
@@ -158,8 +161,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation past = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
-                .thenReturn(List.of(past));
+            when(reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("예약자"))
+                .thenReturn(List.of(new ReservationWithWaitingNumber(past, null)));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");
@@ -176,8 +179,8 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, deletedTime, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNameAndNotDeleted("예약자"))
-                .thenReturn(List.of(reservation));
+            when(reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("예약자"))
+                .thenReturn(List.of(new ReservationWithWaitingNumber(reservation, null)));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservationsByName("예약자");

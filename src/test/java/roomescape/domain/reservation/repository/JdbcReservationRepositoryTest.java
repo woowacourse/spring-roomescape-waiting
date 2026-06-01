@@ -103,8 +103,11 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date, time, theme));
 
             // then
-            assertThat(reservationRepository.findReservationsByNotDeleted())
-                .extracting(Reservation::getId, r -> r.getName().value())
+            assertThat(findReservationsByNotDeleted())
+                .extracting(
+                    Reservation::getId,
+                    reservation -> reservation.getName().value()
+                )
                 .containsExactly(tuple(actual.getId(), "예약자2"));
         }
 
@@ -150,16 +153,16 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), LocalDate.of(2026, 5, 2), time2, theme2));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
+            List<Reservation> actual = findReservationsByNotDeleted();
 
             // then
             assertThat(actual)
                 .extracting(
                     Reservation::getId,
-                    r -> r.getName().value(),
+                    reservation -> reservation.getName().value(),
                     Reservation::getDate,
-                    r -> r.getTime().getStartAt(),
-                    r -> r.getTheme().getName()
+                    reservation -> reservation.getTime().getStartAt(),
+                    reservation -> reservation.getTheme().getName()
                 )
                 .containsExactly(
                     tuple(reservation1.getId(), "예약자1", LocalDate.of(2026, 5, 1), LocalTime.of(10, 0), "테마1"),
@@ -180,7 +183,7 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
+            List<Reservation> actual = findReservationsByNotDeleted();
 
             // then
             assertThat(actual)
@@ -218,11 +221,16 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("브라운");
 
             // then
             assertThat(actual)
-                .extracting(Reservation::getId, r -> r.getName().value(), Reservation::getDate)
+                .extracting(
+                    reservationWithWaitingNumber -> reservationWithWaitingNumber.reservation().getId(),
+                    reservationWithWaitingNumber -> reservationWithWaitingNumber.reservation().getName().value(),
+                    reservationWithWaitingNumber -> reservationWithWaitingNumber.reservation().getDate()
+                )
                 .containsExactly(tuple(reservation1.getId(), "브라운", LocalDate.of(2026, 5, 1)));
         }
 
@@ -235,7 +243,8 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("제이슨");
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("제이슨");
 
             // then
             assertThat(actual).isEmpty();
@@ -252,12 +261,13 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("브라운");
 
             // then
             assertThat(actual).hasSize(1);
-            assertThat(actual.getFirst().getTime().isDeleted()).isTrue();
-            assertThat(actual.getFirst().getTheme().isDeleted()).isTrue();
+            assertThat(actual.getFirst().reservation().getTime().isDeleted()).isTrue();
+            assertThat(actual.getFirst().reservation().getTheme().isDeleted()).isTrue();
         }
 
         @Test
@@ -276,11 +286,12 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), date.minusDays(1), time3, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("브라운");
 
             // then
             assertThat(actual)
-                .extracting(Reservation::getId)
+                .extracting(reservationWithWaitingNumber -> reservationWithWaitingNumber.reservation().getId())
                 .containsExactly(reservation3.getId(), reservation2.getId(), reservation1.getId());
         }
     }
@@ -334,60 +345,60 @@ class JdbcReservationRepositoryTest {
         }
 
         @Test
-        void 대기가_하나일_때_1을_반환한다() {
+        void 예약_목록을_조회할_때_대기_순번을_함께_반환한다() {
             // given
             LocalDate date = LocalDate.of(2026, 5, 1);
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation waiting = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자"), date, time, theme).toWaiting());
-
-            // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                waiting.getId(), date, time, theme);
-
-            // then
-            assertThat(actual).isEqualTo(1);
-        }
-
-        @Test
-        void 자신보다_이전에_등록된_대기를_포함하여_카운트한다() {
-            // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme).toWaiting());
-            reservationRepository.save(Reservation.create(new ReserverName("예약자2"), date, time, theme).toWaiting());
-            Reservation last = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자3"), date, time, theme).toWaiting());
-
-            // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                last.getId(), date, time, theme);
-
-            // then
-            assertThat(actual).isEqualTo(3);
-        }
-
-        @Test
-        void WAITING이_아닌_상태의_예약은_카운트하지_않는다() {
-            // given
-            LocalDate date = LocalDate.of(2026, 5, 1);
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            reservationRepository.save(Reservation.create(new ReserverName("예약자1"), date, time, theme));
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("활성예약자"), date, time, theme));
+            Reservation firstWaiting = reservationRepository.save(
+                Reservation.create(new ReserverName("대기예약자1"), date, time, theme).toWaiting());
             Reservation canceledWaiting = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자2"), date, time, theme).toWaiting());
+                Reservation.create(new ReserverName("대기예약자2"), date, time, theme).toWaiting());
             reservationRepository.update(canceledWaiting.cancel());
-            Reservation waiting = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자3"), date, time, theme).toWaiting());
+            Reservation secondWaiting = reservationRepository.save(
+                Reservation.create(new ReserverName("대기예약자3"), date, time, theme).toWaiting());
 
             // when
-            int actual = reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(
-                waiting.getId(), date, time, theme);
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNotDeletedWithWaitingNumber();
 
             // then
-            assertThat(actual).isEqualTo(1);
+            assertThat(actual)
+                .extracting(
+                    reservation -> reservation.reservation().getId(),
+                    ReservationWithWaitingNumber::waitingNumber
+                )
+                .containsExactly(
+                    tuple(active.getId(), null),
+                    tuple(firstWaiting.getId(), 1),
+                    tuple(canceledWaiting.getId(), null),
+                    tuple(secondWaiting.getId(), 2)
+                );
+        }
+
+        @Test
+        void 이름으로_조회해도_전체_대기열_기준의_순번을_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            reservationRepository.save(Reservation.create(new ReserverName("제이슨"), date, time, theme).toWaiting());
+            Reservation brown = reservationRepository.save(
+                Reservation.create(new ReserverName("브라운"), date, time, theme).toWaiting());
+
+            // when
+            List<ReservationWithWaitingNumber> actual =
+                reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber("브라운");
+
+            // then
+            assertThat(actual)
+                .extracting(
+                    reservation -> reservation.reservation().getId(),
+                    ReservationWithWaitingNumber::waitingNumber
+                )
+                .containsExactly(tuple(brown.getId(), 2));
         }
     }
 
@@ -492,7 +503,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(reservation1.getId());
 
             // then
-            assertThat(reservationRepository.findReservationsByNotDeleted())
+            assertThat(findReservationsByNotDeleted())
                 .extracting(Reservation::getId)
                 .containsExactly(reservation2.getId());
             assertThat(countDeletedReservationById(reservation1.getId())).isEqualTo(1);
@@ -521,5 +532,12 @@ class JdbcReservationRepositoryTest {
             Integer.class,
             id
         );
+    }
+
+    private List<Reservation> findReservationsByNotDeleted() {
+        return reservationRepository.findReservationsByNotDeletedWithWaitingNumber()
+            .stream()
+            .map(ReservationWithWaitingNumber::reservation)
+            .toList();
     }
 }

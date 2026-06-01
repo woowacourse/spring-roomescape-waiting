@@ -17,6 +17,7 @@ import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
+import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -44,30 +45,24 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> getReservations() {
-        List<Reservation> reservations = reservationRepository.findReservationsByNotDeleted();
-        return convertReservationsToDto(reservations);
+        List<ReservationWithWaitingNumber> reservationsWithWaitingNumbers =
+            reservationRepository.findReservationsByNotDeletedWithWaitingNumber();
+        return convertReservationsToDto(reservationsWithWaitingNumbers);
     }
 
-    private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
+    private List<ReservationResponseDto> convertReservationsToDto(List<ReservationWithWaitingNumber> reservations) {
         return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+            .map(reservationWithWaitingNumber -> reservationMapper.toResponseDto(
+                reservationWithWaitingNumber.reservation(),
+                reservationWithWaitingNumber.waitingNumber()
+            ))
             .toList();
-    }
-
-    private Integer getWaitingNumber(Reservation reservation) {
-        if (reservation.getStatus() != ReservationStatus.WAITING) {
-            return null;
-        }
-
-        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(),
-            reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     public List<ReservationResponseDto> getReservationsByName(String name) {
-        List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
-        return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-            .toList();
+        List<ReservationWithWaitingNumber> reservationsWithWaitingNumber =
+            reservationRepository.findReservationsByNameAndNotDeletedWithWaitingNumber(name);
+        return convertReservationsToDto(reservationsWithWaitingNumber);
     }
 
     @Transactional

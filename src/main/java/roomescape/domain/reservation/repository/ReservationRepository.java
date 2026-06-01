@@ -5,14 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
-import roomescape.domain.theme.entity.Theme;
-import roomescape.domain.time.entity.Time;
 
 public interface ReservationRepository {
 
-    List<Reservation> findReservationsByNotDeleted();
+    List<ReservationWithWaitingNumber> findReservationsByNotDeletedWithWaitingNumber();
 
-    List<Reservation> findReservationsByNameAndNotDeleted(String name);
+    List<ReservationWithWaitingNumber> findReservationsByNameAndNotDeletedWithWaitingNumber(String name);
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);
 
@@ -21,8 +19,6 @@ public interface ReservationRepository {
     Reservation save(Reservation reservation);
 
     Reservation update(Reservation reservation);
-
-    int countByIdLessThanEqualAndDateAndTimeAndTheme(Long id, LocalDate date, Time time, Theme theme);
 
     void deleteReservationById(Long id);
 
