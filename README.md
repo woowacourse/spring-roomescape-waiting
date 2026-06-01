@@ -79,7 +79,7 @@
 |--------|-------------------------|-----------------------------------|------------------------------------------------------------|
 | GET    | `/times/availability`   | `?date=YYYY-MM-DD&themeId={id}`   | 200 `{ times: [{ id, startAt, reserved }] }`               |
 | POST   | `/reservations`         | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme }`                      |
-| GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                              |
+| GET    | `/reservations/me`      | `?name={이름}&page=0&size=20` (page·size 선택) | 200 `{ reservations: [...] }`                  |
 | PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`                      |
 | DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                                        |
 | POST   | `/waitings`             | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme, order }`               |

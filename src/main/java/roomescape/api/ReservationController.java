@@ -41,8 +41,12 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationResponses> searchMine(@RequestParam String name) {
-        return ResponseEntity.ok().body(reservationService.getMyReservations(name));
+    public ResponseEntity<ReservationResponses> searchMine(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok().body(reservationService.getMyReservations(name, page, size));
     }
 
     @PostMapping

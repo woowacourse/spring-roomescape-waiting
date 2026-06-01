@@ -103,10 +103,33 @@ class ReservationJdbcRepositoryTest {
         repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 5), time, theme));
         repository.save(new Reservation("티뉴", LocalDate.of(2026, 8, 6), time, theme));
 
-        assertThat(repository.findByName("민욱"))
+        assertThat(repository.findByName("민욱", 0, 10))
                 .hasSize(1)
                 .first()
                 .extracting(Reservation::getName)
                 .isEqualTo("민욱");
+    }
+
+    @Test
+    void findByName은_offset과_limit으로_페이지를_잘라_반환한다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 5), time, theme));
+        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 6), time, theme));
+        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 7), time, theme));
+
+        assertThat(repository.findByName("민욱", 0, 2)).hasSize(2);
+        assertThat(repository.findByName("민욱", 2, 2)).hasSize(1);
+    }
+
+    @Test
+    void countByName은_이름이_일치하는_예약_수를_반환한다() {
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
+        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 5), time, theme));
+        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 6), time, theme));
+        repository.save(new Reservation("티뉴", LocalDate.of(2026, 8, 7), time, theme));
+
+        assertThat(repository.countByName("민욱")).isEqualTo(2L);
     }
 }

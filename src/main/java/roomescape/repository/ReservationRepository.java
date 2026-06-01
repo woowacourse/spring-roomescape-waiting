@@ -27,5 +27,7 @@ public interface ReservationRepository {
 
     Reservations findByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByName(String name, int offset, int limit);
+
+    long countByName(String name);
 }

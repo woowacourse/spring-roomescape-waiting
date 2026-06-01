@@ -138,8 +138,14 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
-        String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC";
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+    public List<Reservation> findByName(String name, int offset, int limit) {
+        String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC LIMIT ? OFFSET ?";
+        return jdbcTemplate.query(sql, reservationRowMapper, name, limit, offset);
+    }
+
+    @Override
+    public long countByName(String name) {
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation WHERE name = ?", Long.class, name);
+        return count != null ? count : 0L;
     }
 }
