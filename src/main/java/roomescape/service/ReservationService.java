@@ -88,11 +88,7 @@ public class ReservationService {
 
         Reservation updated = reservationRepository.update(id, target);
 
-        if (reservation.isApproved()) {
-            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
-                            reservation.getTime(), reservation.getTheme(), reservation.getDate())
-                    .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
-        }
+        promoteFirstWaiting(reservation);
 
         return updated;
     }
@@ -111,11 +107,7 @@ public class ReservationService {
 
         reservationRepository.deleteById(reservationId);
 
-        if (reservation.isApproved()) {
-            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
-                            reservation.getTime(), reservation.getTheme(), reservation.getDate())
-                    .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
-        }
+        promoteFirstWaiting(reservation);
     }
 
     private ReservationTime findReservationTimeByTimeId(long id) {
@@ -137,5 +129,13 @@ public class ReservationService {
     private Reservation findReservationById(long id) {
         return reservationRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("존재하지 않는 예약입니다. 입력을 확인해 주세요."));
+    }
+
+    private void promoteFirstWaiting(Reservation reservation) {
+        if (reservation.isApproved()) {
+            reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
+                            reservation.getTime(), reservation.getTheme(), reservation.getDate())
+                    .ifPresent(waiting -> reservationRepository.updateStatusById(waiting.getId(), Status.APPROVED));
+        }
     }
 }
