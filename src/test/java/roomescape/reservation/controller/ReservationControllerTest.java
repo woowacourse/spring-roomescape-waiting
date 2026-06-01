@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.error.ErrorCode;
 import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
@@ -24,6 +25,9 @@ import roomescape.time.domain.ReservationTime;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,7 +83,7 @@ class ReservationControllerTest {
     @Test
     void 존재하지_않는_예약_취소_404_반환_테스트() throws Exception {
         // given
-        Mockito.doThrow(new ReservationNotFoundException(999L))
+        doThrow(new ReservationNotFoundException(999L))
                 .when(reservationService).cancelForUser(999L, "name");
 
         // when & then
@@ -92,7 +96,7 @@ class ReservationControllerTest {
     @Test
     void 지난_예약_취소_400_반환_테스트() throws Exception {
         // given
-        Mockito.doThrow(PastReservationException.pastCancel())
+        doThrow(new PastReservationException(ErrorCode.RESERVATION_EXPIRED))
                 .when(reservationService).cancelForUser(1L, "name");
 
         // when & then
@@ -109,7 +113,7 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation updated = new Reservation("라이", newTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationService.update(1L, 2L)).thenReturn(updated);
+        when(reservationService.update(1L, 2L, "라이")).thenReturn(updated);
 
         String requestBody = """
                 {
@@ -119,6 +123,7 @@ class ReservationControllerTest {
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", 1L)
+                        .param("name", "라이")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -130,7 +135,7 @@ class ReservationControllerTest {
     @Test
     void 존재하지_않는_예약_변경_404_반환_테스트() throws Exception {
         // given
-        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
+        when(reservationService.update(anyLong(), anyLong(), any()))
                 .thenThrow(new ReservationNotFoundException(999L));
 
         String requestBody = """
@@ -141,6 +146,7 @@ class ReservationControllerTest {
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", 999L)
+                        .param("name", "라이")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isNotFound());
@@ -150,8 +156,8 @@ class ReservationControllerTest {
     @Test
     void 과거_슬롯으로_예약_변경_400_반환_테스트() throws Exception {
         // given
-        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
-                .thenThrow(PastReservationException.pastReservation());
+        when(reservationService.update(anyLong(), anyLong(), any()))
+                .thenThrow(new PastReservationException(ErrorCode.RESERVATION_EXPIRED));
 
         String requestBody = """
                 {
@@ -161,6 +167,7 @@ class ReservationControllerTest {
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", 1L)
+                        .param("name", "라이")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest());
@@ -170,7 +177,7 @@ class ReservationControllerTest {
     @Test
     void 이미_찬_시간으로_예약_변경_409_반환_테스트() throws Exception {
         // given
-        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
+        when(reservationService.update(anyLong(), anyLong(), any()))
                 .thenThrow(new DuplicateReservationException());
 
         String requestBody = """
@@ -181,6 +188,7 @@ class ReservationControllerTest {
 
         // when & then
         mockMvc.perform(put("/reservations/{id}", 1L)
+                        .param("name", "라이")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isConflict());

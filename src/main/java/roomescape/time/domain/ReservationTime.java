@@ -53,7 +53,7 @@ public class ReservationTime {
 
     public void validateExpired(LocalDateTime dateTime) {
         if (startAt.isBefore(dateTime)) {
-            throw PastReservationException.of(ErrorCode.RESERVATION_EXPIRED);
+            throw new PastReservationException(ErrorCode.RESERVATION_EXPIRED);
         }
     }
 }

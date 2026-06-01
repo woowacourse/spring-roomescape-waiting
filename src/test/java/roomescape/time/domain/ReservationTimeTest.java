@@ -79,69 +79,25 @@ class ReservationTimeTest {
         assertThat(date).isEqualTo(LocalDate.of(2030, 6, 1));
     }
 
-    @DisplayName("미래 시간은 예약 가능하다.")
+    @DisplayName("미래 시간이면 예약 가능하다")
     @Test
-    void validateReservableSchedule_미래이면_정상() {
+    void validateExpired_미래이면_정상() {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
 
         // when & then
-        assertThatCode(time::validateReservableSchedule)
+        assertThatCode(() -> time.validateExpired(LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
-    @DisplayName("과거 시간에 예약을 시도하면 PastReservationException이 발생한다.")
+    @DisplayName("미래 시간이면 예약 가능하다")
     @Test
-    void validateReservableSchedule_과거이면_예외() {
+    void validateExpired_과거이면_예외() {
         // given
         ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
 
         // when & then
-        assertThatThrownBy(time::validateReservableSchedule)
-                .isInstanceOf(PastReservationException.class);
-    }
-
-    @DisplayName("미래 시간은 변경 가능하다.")
-    @Test
-    void validateUpdatableReservation_미래이면_정상() {
-        // given
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-
-        // when & then
-        assertThatCode(time::validateUpdatableReservation)
-                .doesNotThrowAnyException();
-    }
-
-    @DisplayName("과거 시간을 변경하려고 하면 PastReservationException이 발생한다.")
-    @Test
-    void validateUpdatableReservation_과거이면_예외() {
-        // given
-        ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
-
-        // when & then
-        assertThatThrownBy(time::validateUpdatableReservation)
-                .isInstanceOf(PastReservationException.class);
-    }
-
-    @DisplayName("미래 시간은 취소 가능하다.")
-    @Test
-    void validateNotPastForCancel_미래이면_정상() {
-        // given
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-
-        // when & then
-        assertThatCode(time::validateNotPastForCancel)
-                .doesNotThrowAnyException();
-    }
-
-    @DisplayName("과거 시간을 취소하려고 하면 PastReservationException이 발생한다.")
-    @Test
-    void validateNotPastForCancel_과거이면_예외() {
-        // given
-        ReservationTime time = new ReservationTime(1L, PAST_START, PAST_END);
-
-        // when & then
-        assertThatThrownBy(time::validateNotPastForCancel)
+        assertThatThrownBy(() -> time.validateExpired(LocalDateTime.now()))
                 .isInstanceOf(PastReservationException.class);
     }
 }

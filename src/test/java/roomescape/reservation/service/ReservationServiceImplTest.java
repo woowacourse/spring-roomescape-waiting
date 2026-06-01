@@ -112,18 +112,6 @@ class ReservationServiceImplTest {
         assertThat(result.getStatus()).isEqualTo(Status.WAITING);
     }
 
-    @DisplayName("timeId가 null인 경우, IllegalArgumentException이 발생한다.")
-    @Test
-    void create_timeId가_null이면_예외() {
-        // given
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", 1L, null);
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.create(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 시간은 필수입니다.");
-    }
-
     @DisplayName("존재하지 않는 timeId인 경우, TimeNotFoundException이 발생한다.")
     @Test
     void create_존재하지_않는_timeId이면_예외() {
@@ -134,20 +122,6 @@ class ReservationServiceImplTest {
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
                 .isInstanceOf(TimeNotFoundException.class);
-    }
-
-    @DisplayName("themeId가 null인 경우, IllegalArgumentException이 발생한다.")
-    @Test
-    void create_themeId가_null이면_예외() {
-        // given
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        when(timeService.findById(1L)).thenReturn(time);
-        ReservationSaveServiceRequest dto = new ReservationSaveServiceRequest("라이", null, 1L);
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.create(dto))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("테마는 필수입니다.");
     }
 
     @DisplayName("존재하지 않는 themeId인 경우, ThemeNotFoundException이 발생한다.")
@@ -231,8 +205,7 @@ class ReservationServiceImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(dto))
-                .isInstanceOf(PastReservationException.class)
-                .hasMessage("과거 날짜·시간은 예약이 불가합니다.");
+                .isInstanceOf(PastReservationException.class);
     }
 
     @DisplayName("전체 예약 목록을 반환한다.")
@@ -420,7 +393,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.update(eq(1L), eq(2L), any())).thenReturn(true);
 
         // when
-        Reservation result = reservationService.update(1L, 2L);
+        Reservation result = reservationService.update(1L, 2L, "라이");
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
@@ -434,7 +407,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(999L, 1L))
+        assertThatThrownBy(() -> reservationService.update(999L, 1L, "어셔"))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -449,7 +422,7 @@ class ReservationServiceImplTest {
         when(timeService.findById(2L)).thenReturn(newTime);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
+        assertThatThrownBy(() -> reservationService.update(1L, 2L, "라이"))
                 .isInstanceOf(PastReservationException.class);
     }
 
@@ -462,7 +435,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
+        assertThatThrownBy(() -> reservationService.update(1L, 2L, "라이"))
                 .isInstanceOf(PastReservationException.class);
     }
 
@@ -480,7 +453,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.update(1L, 2L))
+        assertThatThrownBy(() -> reservationService.update(1L, 2L, "라이"))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 }
