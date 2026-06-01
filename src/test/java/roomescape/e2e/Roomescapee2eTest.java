@@ -36,9 +36,8 @@ class Roomescapee2eTest {
                 "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
         reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
 
-        // 기존 대기자 1명 등록 (user1 = turn 1)
         existingWaiting1Id = RestAssured.given().contentType(ContentType.JSON)
-                .body(Map.of("name", "user1", "reservationId", reservationId))
+                .body(Map.of("name", "user2", "reservationId", reservationId))
                 .post("/waitings").then().extract().path("id");
     }
 
@@ -71,9 +70,8 @@ class Roomescapee2eTest {
                 .body("[0].id", equalTo(waiting3Id))
                 .body("[0].turn", equalTo(3));
 
-        // 가장 먼저 등록한 user1은 turn=1
         RestAssured.given().log().all()
-                .queryParam("name", "user1")
+                .queryParam("name", "user2")
                 .when().get("/waitings")
                 .then().log().all()
                 .statusCode(200)

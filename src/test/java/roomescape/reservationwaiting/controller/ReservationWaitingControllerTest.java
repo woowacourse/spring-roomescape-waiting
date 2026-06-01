@@ -40,7 +40,7 @@ public class ReservationWaitingControllerTest {
 
         // 순번 테스트를 위해 대기 2개 미리 생성 (user1=1번, user3=2번)
         waiting1Id = RestAssured.given().contentType(ContentType.JSON)
-                .body(Map.of("name", "user1", "reservationId", futureReservationId))
+                .body(Map.of("name", "user2", "reservationId", futureReservationId))
                 .post("/waitings").then().extract().path("id");
 
         waiting2Id = RestAssured.given().contentType(ContentType.JSON)

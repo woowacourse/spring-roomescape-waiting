@@ -40,8 +40,13 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(request.reservationId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
+        if (reservationWaitingRepository.existsByNameAndSlot(request.name(), reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
+        }
+        if (reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(request.name(), reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId())) {
+            throw new BusinessException(ErrorCode.WAITING_ON_OWN_RESERVATION);
         }
         ReservationWaiting reservationWaiting = reservationWaitingRepository.save(
                 reservationWaitingFactory.create(request.name(), reservation));
