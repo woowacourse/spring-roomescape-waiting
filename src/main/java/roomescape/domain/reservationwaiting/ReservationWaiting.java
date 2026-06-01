@@ -27,7 +27,6 @@ public class ReservationWaiting {
             final String name,
             final LocalDateTime requestAt
     ) {
-        validateWaitable(reservation, requestAt);
         return new ReservationWaiting(null, reservation, name, requestAt);
     }
 
@@ -68,11 +67,5 @@ public class ReservationWaiting {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    private static void validateWaitable(final Reservation reservation, final LocalDateTime requestAt) {
-        if (reservation.isPastAt(requestAt)) {
-            throw new IllegalArgumentException("지난 예약에는 대기를 생성할 수 없습니다.");
-        }
     }
 }

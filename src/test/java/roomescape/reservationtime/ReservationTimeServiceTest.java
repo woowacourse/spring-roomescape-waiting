@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -34,7 +35,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
         ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
@@ -55,7 +57,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
 
         when(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).thenReturn(true);
@@ -72,7 +75,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
         ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
         ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
@@ -98,7 +102,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
         LocalDate pastDate = LocalDate.now().minusDays(1);
 
@@ -125,7 +130,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
@@ -154,7 +160,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
@@ -171,7 +178,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
@@ -191,7 +199,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
@@ -209,7 +218,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
         ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
@@ -229,7 +239,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                new ReservationAvailabilityPolicy()
         );
 
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());

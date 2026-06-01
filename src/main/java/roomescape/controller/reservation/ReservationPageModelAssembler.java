@@ -2,6 +2,7 @@ package roomescape.controller.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.domain.history.ReservationHistoryStatus;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -24,15 +26,18 @@ public class ReservationPageModelAssembler {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MyHistoryService myHistoryService;
+    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationPageModelAssembler(
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final MyHistoryService myHistoryService
+            final MyHistoryService myHistoryService,
+            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.myHistoryService = myHistoryService;
+        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public ThemeResponse resolveSelectedTheme(final Long themeId) {
@@ -105,10 +110,10 @@ public class ReservationPageModelAssembler {
 
     private ReservationTimeSlotStatus resolveSlotStatus(
             final LocalDate selectedDate,
-            final java.time.LocalTime startAt,
+            final LocalTime startAt,
             final boolean reservable
     ) {
-        if (LocalDateTime.of(selectedDate, startAt).isBefore(LocalDateTime.now())) {
+        if (reservationAvailabilityPolicy.isPast(selectedDate, startAt, LocalDateTime.now())) {
             return ReservationTimeSlotStatus.PAST;
         }
 

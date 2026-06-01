@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -16,13 +17,16 @@ import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationWaitingService(
             final ReservationRepository reservationRepository,
-            final ReservationWaitingRepository reservationWaitingRepository
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
@@ -35,10 +39,13 @@ public class ReservationWaitingService {
 
         validateWaitableName(reservation, waitingName);
 
+        LocalDateTime requestedAt = LocalDateTime.now();
+        validateWaitableReservation(reservation, requestedAt);
+
         ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(
                 reservation,
                 waitingName,
-                LocalDateTime.now()
+                requestedAt
         );
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
@@ -69,6 +76,14 @@ public class ReservationWaitingService {
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 같은 예약에 대기 중입니다."
             );
+        }
+    }
+
+    private void validateWaitableReservation(final Reservation reservation, final LocalDateTime requestedAt) {
+        try {
+            reservationAvailabilityPolicy.validateWaitable(reservation, requestedAt);
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
         }
     }
 

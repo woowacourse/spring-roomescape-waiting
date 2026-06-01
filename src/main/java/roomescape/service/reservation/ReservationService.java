@@ -5,14 +5,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
-import roomescape.repository.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
-import roomescape.domain.theme.Theme;
 import roomescape.service.theme.ThemeService;
 
 @Service
@@ -21,17 +22,20 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationValidator reservationValidator;
+    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final ReservationValidator reservationValidator
+            final ReservationValidator reservationValidator,
+            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationValidator = reservationValidator;
+        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
     public List<Reservation> getAll() {
@@ -117,7 +121,8 @@ public class ReservationService {
             final ReservationTime reservationTime
     ) {
         try {
-            return Reservation.createNew(name, date, theme, reservationTime, LocalDateTime.now());
+            reservationAvailabilityPolicy.validateReservable(date, reservationTime, LocalDateTime.now());
+            return Reservation.createNew(name, date, theme, reservationTime);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
@@ -129,14 +134,15 @@ public class ReservationService {
             final ReservationTime reservationTime
     ) {
         try {
-            return reservation.withDateAndTime(date, reservationTime, LocalDateTime.now());
+            reservationAvailabilityPolicy.validateReservable(date, reservationTime, LocalDateTime.now());
+            return reservation.withDateAndTime(date, reservationTime);
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
     }
 
     private InvalidInputException toInvalidInputException(final IllegalArgumentException exception) {
-        if (Reservation.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
+        if (ReservationAvailabilityPolicy.PAST_RESERVATION_MESSAGE.equals(exception.getMessage())) {
             return new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, exception.getMessage());
         }
 

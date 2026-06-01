@@ -3,12 +3,18 @@ package roomescape.service.reservation;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 
 @Component
 public class ReservationValidator {
+    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
+
+    public ReservationValidator(final ReservationAvailabilityPolicy reservationAvailabilityPolicy) {
+        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
+    }
 
     public void validateLookupName(final String name) {
         if (name == null || name.isBlank()) {
@@ -37,7 +43,7 @@ public class ReservationValidator {
     }
 
     public void validateCancelable(final Reservation reservation) {
-        if (reservation.isPastAt(LocalDateTime.now())) {
+        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_CANCELLED,
                     "이미 지난 예약은 취소할 수 없습니다."
@@ -46,7 +52,7 @@ public class ReservationValidator {
     }
 
     public void validateUpdatable(final Reservation reservation) {
-        if (reservation.isPastAt(LocalDateTime.now())) {
+        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
             throw new ConflictException(
                     ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
                     "이미 지난 예약은 변경할 수 없습니다."

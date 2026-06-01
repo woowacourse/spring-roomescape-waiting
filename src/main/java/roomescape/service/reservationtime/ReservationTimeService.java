@@ -1,16 +1,18 @@
 package roomescape.service.reservationtime;
 
-import java.time.LocalTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.ReservationAvailabilityPolicy;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.theme.ThemeService;
 
@@ -20,17 +22,19 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeService themeService;
+    private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
             final ReservationRepository reservationRepository,
-            final ThemeService themeService
+            final ThemeService themeService,
+            final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeService = themeService;
+        this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
-
 
     public ReservationTime save(final LocalTime startAt) {
         ReservationTime reservationTime;
@@ -53,7 +57,11 @@ public class ReservationTimeService {
 
         return reservationTimeRepository.findAll().stream()
                 .filter(reservationTime -> !reservedTimeIds.contains(reservationTime.getId()))
-                .filter(reservationTime -> isAvailableOn(date, reservationTime))
+                .filter(reservationTime -> reservationAvailabilityPolicy.isReservable(
+                        date,
+                        reservationTime,
+                        LocalDateTime.now()
+                ))
                 .toList();
     }
 
@@ -63,7 +71,7 @@ public class ReservationTimeService {
         }
         int affectedRowCount = reservationTimeRepository.deleteById(timeId);
 
-        if(affectedRowCount <= 0) {
+        if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "삭제된 시간 데이터가 없습니다.");
         }
     }
@@ -77,17 +85,4 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "찾는 시간이 없습니다"));
     }
 
-    private boolean isAvailableOn(final LocalDate date, final ReservationTime reservationTime) {
-        LocalDate today = LocalDate.now();
-
-        if (date.isBefore(today)) {
-            return false;
-        }
-
-        if (date.isAfter(today)) {
-            return true;
-        }
-
-        return !reservationTime.getStartAt().isBefore(LocalTime.now());
-    }
 }
