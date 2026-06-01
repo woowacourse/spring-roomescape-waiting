@@ -17,7 +17,7 @@ public class Reservation {
 
     private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
                         Theme theme, Status status, LocalDateTime dateTime) {
-        this.id = id;
+        this.id = Objects.requireNonNull(id);
         this.reservationName = Objects.requireNonNull(reservationName);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
