@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,10 +32,10 @@ public class WaitlistWriter {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReservationWithStatus save(Reservation reservation) {
+    public ReservationWithStatus save(Reservation reservation, LocalDateTime createdAt) {
         verifyNoDuplicateReservation(reservation);
 
-        Long savedId = waitlistRepository.save(reservation);
+        Long savedId = waitlistRepository.save(reservation, createdAt);
         Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
         int waitOrder = calculateWaitingOrder(waitlist);
 

@@ -18,12 +18,14 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
+import roomescape.domain.Waitlist;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @SpringBootTest
 @Import(TestClockConfig.class)
@@ -42,6 +44,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitlistRepository waitlistRepository;
 
     @Autowired
     private ReservationTimeRepository timeRepository;
@@ -159,6 +164,13 @@ class ReservationServiceTest {
         assertThat(reservationWithStatus.getTheme().getId()).isEqualTo(theme.getId());
         assertThat(reservationWithStatus.getStatus()).isEqualTo(ReservationStatus.WAITING);
         assertThat(reservationWithStatus.getWaitingOrder()).isEqualTo(2);
+
+        Waitlist waitlist = waitlistRepository.getById(
+                reservationWithStatus.getId(),
+                "존재하지 않는 예약 대기입니다."
+        );
+
+        assertThat(waitlist.getCreatedAt()).isEqualTo(TestClockConfig.FIXED_NOW);
     }
 
     @Test

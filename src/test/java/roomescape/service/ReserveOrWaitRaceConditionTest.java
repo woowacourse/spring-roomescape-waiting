@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ import roomescape.repository.WaitlistRepository;
 @SpringBootTest
 public class ReserveOrWaitRaceConditionTest {
     private static final LocalDate FUTURE_FIRST_DATE = LocalDate.now().plusDays(1);
-    private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
+    private static final LocalDateTime WAITLIST_CREATED_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
     private static final LocalTime TEN = LocalTime.of(10, 0);
 
     @Autowired
@@ -116,7 +117,7 @@ public class ReserveOrWaitRaceConditionTest {
         )).isInstanceOf(DataIntegrityViolationException.class);
 
         Long waitlistId = transactionTemplate.execute(
-                status -> waitlistRepository.save(duplicateReservation)
+                status -> waitlistRepository.save(duplicateReservation, WAITLIST_CREATED_AT)
         );
 
         Waitlist savedWaitlist = waitlistRepository.findById(waitlistId).orElseThrow();
@@ -139,7 +140,7 @@ public class ReserveOrWaitRaceConditionTest {
             try {
                 reservationRepository.save(duplicateReservation);
             } catch (DataIntegrityViolationException e) {
-                return waitlistRepository.save(duplicateReservation);
+                return waitlistRepository.save(duplicateReservation, WAITLIST_CREATED_AT);
             }
 
             throw new AssertionError("같은 슬롯 예약 저장은 unique 충돌이 발생해야 합니다.");

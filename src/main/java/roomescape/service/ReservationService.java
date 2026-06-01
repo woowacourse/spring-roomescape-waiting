@@ -104,13 +104,14 @@ public class ReservationService {
                 getReservationTime(request.timeId()),
                 getTheme(request.themeId()));
 
-        reservation.verifyReservable(LocalDateTime.now(clock));
+        LocalDateTime now = LocalDateTime.now(clock);
+        reservation.verifyReservable(now);
 
         try {
             Reservation saved = reservationWriter.save(reservation);
             return ReservationWithStatus.reserved(saved);
         } catch (DuplicateKeyException e) {
-            return waitlistWriter.save(reservation);
+            return waitlistWriter.save(reservation, now);
         }
     }
 

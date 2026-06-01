@@ -3,6 +3,7 @@ package roomescape.repository;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
@@ -15,7 +16,7 @@ public interface WaitlistRepository {
 
     boolean existsBySameUser(Reservation reservation);
 
-    Long save(Reservation reservation);
+    Long save(Reservation reservation, LocalDateTime createdAt);
 
     void deleteById(Long id);
 

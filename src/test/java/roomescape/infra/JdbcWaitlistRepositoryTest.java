@@ -3,13 +3,13 @@ package roomescape.infra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -23,12 +23,12 @@ import roomescape.repository.WaitlistRepository;
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
-        JdbcWaitlistRepository.class,
-        TestClockConfig.class
+        JdbcWaitlistRepository.class
 })
 class JdbcWaitlistRepositoryTest {
 
     private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
+    private static final LocalDateTime CREATED_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
     private static final LocalTime TEN = LocalTime.of(10, 0);
 
     @Autowired
@@ -45,9 +45,12 @@ class JdbcWaitlistRepositoryTest {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
-        Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme));
-        Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme));
-        Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme));
+        Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme),
+                CREATED_AT);
+        Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme),
+                CREATED_AT);
+        Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme),
+                CREATED_AT);
 
         List<Waitlist> waitlists = waitlistRepository.findBySlot(
                 FUTURE_SECOND_DATE,
