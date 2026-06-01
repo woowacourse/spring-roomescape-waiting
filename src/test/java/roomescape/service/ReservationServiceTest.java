@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.config.TestClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
@@ -21,19 +21,27 @@ import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
+@Import(TestClockConfig.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
-    private static final LocalDate FUTURE_FIRST_DATE = LocalDate.now().plusDays(1);
-    private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
+    private static final LocalDate FIXED_TODAY = TestClockConfig.FIXED_NOW.toLocalDate();
+    private static final LocalTime FIXED_TIME = TestClockConfig.FIXED_NOW.toLocalTime();
+    private static final LocalTime BEFORE_FIXED_TIME = FIXED_TIME.minusHours(1);
+    private static final LocalDate FUTURE_FIRST_DATE = FIXED_TODAY.plusDays(1);
+    private static final LocalDate FUTURE_SECOND_DATE = FIXED_TODAY.plusDays(2);
     private static final LocalTime TEN = LocalTime.of(10, 0);
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationTimeRepository timeRepository;
@@ -62,6 +70,25 @@ class ReservationServiceTest {
         assertThat(reservationWithStatus.getTime().getStartAt()).isEqualTo(reservationTime.getStartAt());
         assertThat(reservationWithStatus.getTheme().getId()).isEqualTo(theme.getId());
         assertThat(reservationWithStatus.getTheme().getName()).isEqualTo(theme.getName());
+    }
+
+    @Test
+    void 현재시각과_같은_예약은_추가할_수_있다() {
+        ReservationTime reservationTime = createReservationTime(FIXED_TIME);
+        Theme theme = createTheme();
+
+        ReservationRequest request = new ReservationRequest(
+                "브라운",
+                FIXED_TODAY,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(request);
+
+        assertThat(reservationWithStatus.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservationWithStatus.getDate()).isEqualTo(FIXED_TODAY);
+        assertThat(reservationWithStatus.getTime().getStartAt()).isEqualTo(FIXED_TIME);
     }
 
     @Test
@@ -329,18 +356,18 @@ class ReservationServiceTest {
     }
 
     @Test
-    @Sql("/data_relative_dates.sql")
     void 예약을_취소할_때_이미_지난_예약이면_예외() {
-        String name = "김민수";
-        ReservationWithStatus pastReservation = reservationService.getMyReservations(name).getFirst();
+        ReservationTime pastTime = createReservationTime(BEFORE_FIXED_TIME);
+        Theme theme = createTheme();
+        String name = "브라운";
+        Long reservationId = reservationRepository.save(new Reservation(
+                name,
+                FIXED_TODAY,
+                pastTime,
+                theme
+        ));
 
-        LocalDateTime dateTime = LocalDateTime.of(
-                pastReservation.getDate(),
-                pastReservation.getTime().getStartAt()
-        );
-
-        assertThat(dateTime.isBefore(LocalDateTime.now())).isTrue();
-        assertThatThrownBy(() -> reservationService.cancelMyReservation(pastReservation.getId(), name))
+        assertThatThrownBy(() -> reservationService.cancelMyReservation(reservationId, name))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
