@@ -223,34 +223,6 @@ class ReservationRepositoryTest {
         }
     }
 
-    @Nested
-    @DisplayName("findByTimeAndThemeAndDate")
-    class FindByTimeAndThemeAndDate {
-
-        @Test
-        void 같은_시간_테마_날짜의_예약을_모두_반환한다() {
-            Theme theme = giveTheme("테마1");
-            ReservationTime time = giveTime(10);
-
-            reservationRepository.save(reservation("달수", FUTURE, time, theme));
-            reservationRepository.save(reservation("민구", FUTURE, time, theme));
-
-            assertThat(reservationRepository.findByTimeAndThemeAndDate(time, theme,
-                    new ReservationDate(FUTURE))).hasSize(2);
-        }
-
-        @Test
-        void 다른_날짜의_예약은_포함되지_않는다() {
-            Theme theme = giveTheme("테마1");
-            ReservationTime time = giveTime(10);
-
-            reservationRepository.save(reservation("달수", FUTURE, time, theme));
-            reservationRepository.save(reservation("민구", FUTURE.plusDays(1), time, theme));
-
-            assertThat(reservationRepository.findByTimeAndThemeAndDate(time, theme,
-                    new ReservationDate(FUTURE))).hasSize(1);
-        }
-    }
 
     @Nested
     @DisplayName("existsByTimeId / existsByThemeId")

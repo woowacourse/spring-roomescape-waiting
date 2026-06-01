@@ -171,9 +171,4 @@ public class ReservationRepository {
         List<Reservation> result = jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
         return result.stream().findFirst();
     }
-
-    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
-        String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ? ORDER BY r.id ASC";
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
-    }
 }
