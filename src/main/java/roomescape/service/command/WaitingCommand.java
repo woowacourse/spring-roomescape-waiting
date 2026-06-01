@@ -1,11 +1,13 @@
 package roomescape.service.command;
 
+import roomescape.domain.common.UserName;
+
 import java.time.LocalDate;
 
 public record WaitingCommand(
-        String name,
+        UserName name,
         LocalDate date,
-        long timeId,
-        long themeId
+        Long timeId,
+        Long themeId
 ) {
 }

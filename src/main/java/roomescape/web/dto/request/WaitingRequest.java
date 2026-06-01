@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import roomescape.domain.common.UserName;
 import roomescape.service.command.WaitingCommand;
 
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ public record WaitingRequest(
 ) {
     public static WaitingCommand toCommand(WaitingRequest request) {
         return new WaitingCommand(
-                request.name,
+                UserName.from(request.name),
                 request.date,
                 request.timeId,
                 request.themeId

@@ -5,7 +5,12 @@ import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.*;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
@@ -24,7 +29,7 @@ public class ReservationCommandService {
     private final ThemeDao themeDao;
     private final Clock clock;
 
-    private ReservationTime findTimeReference(long timeId) {
+    private ReservationTime findTimeReference(Long timeId) {
         try {
             return reservationTimeDao.findById(timeId);
         } catch (ResourceNotFoundException e) {
@@ -32,7 +37,7 @@ public class ReservationCommandService {
         }
     }
 
-    private Theme findThemeReference(long themeId) {
+    private Theme findThemeReference(Long themeId) {
         try {
             return themeDao.findById(themeId);
         } catch (ResourceNotFoundException e) {
@@ -55,19 +60,19 @@ public class ReservationCommandService {
         return reservationDao.save(Reservation.create(command.name(), slot, LocalDateTime.now(clock)));
     }
 
-    public void deleteByAdmin(long reservationId) {
+    public void deleteByAdmin(Long reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
         reservationDao.delete(reservation);
     }
 
-    public void cancelByUser(long reservationId, String name) {
+    public void cancelByUser(Long reservationId, UserName name) {
         Reservation reservation = reservationDao.findById(reservationId);
         reservation.validateOwnedBy(name);
         reservation.validateCancelable(LocalDateTime.now(clock));
         reservationDao.delete(reservation);
     }
 
-    public Reservation updateByUser(long reservationId, String name, ReservationUpdateCommand command) {
+    public Reservation updateByUser(Long reservationId, UserName name, ReservationUpdateCommand command) {
         Reservation current = reservationDao.findById(reservationId);
         current.validateOwnedBy(name);
 

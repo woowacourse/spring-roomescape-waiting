@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.service.command.ThemeCommand;
 

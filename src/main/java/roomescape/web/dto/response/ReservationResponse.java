@@ -2,7 +2,8 @@ package roomescape.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.dao.dto.WaitingWithRank;
-import roomescape.domain.Reservation;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,12 +24,12 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getUsername(),
+                reservation.getUserName().getName(),
                 reservation.getReservationDate(),
                 new TimeInfo(reservation.getReservationTime().getId(), reservation.getReservationTime().getStartAt()),
                 new ThemeInfo(
                         reservation.getReservationTheme().getId(),
-                        reservation.getReservationTheme().getName(),
+                        reservation.getReservationTheme().getThemeName(),
                         reservation.getReservationTheme().getThumbnailUrl(),
                         reservation.getReservationTheme().getDescription()),
                 "예약",
@@ -44,7 +45,7 @@ public record ReservationResponse(
                 new TimeInfo(waiting.reservationTime().getId(), waiting.reservationTime().getStartAt()),
                 new ThemeInfo(
                         waiting.reservationTheme().getId(),
-                        waiting.reservationTheme().getName(),
+                        waiting.reservationTheme().getThemeName(),
                         waiting.reservationTheme().getThumbnailUrl(),
                         waiting.reservationTheme().getDescription()),
                 "예약대기",

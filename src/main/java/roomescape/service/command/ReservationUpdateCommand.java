@@ -4,6 +4,6 @@ import java.time.LocalDate;
 
 public record ReservationUpdateCommand(
         LocalDate date,
-        long timeId
+        Long timeId
 ) {
 }

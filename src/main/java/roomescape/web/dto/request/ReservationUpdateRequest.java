@@ -13,7 +13,7 @@ public record ReservationUpdateRequest(
         LocalDate date,
 
         @Min(value = 1, message = "유효한 시간 ID가 필요합니다.")
-        long timeId
+        Long timeId
 ) {
     public static ReservationUpdateCommand toCommand(ReservationUpdateRequest request) {
         return new ReservationUpdateCommand(

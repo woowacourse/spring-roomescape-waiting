@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.dto.WaitingWithRank;
-import roomescape.domain.Slot;
-import roomescape.domain.Waiting;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.reservation.ReservationWaiting;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class WaitingQueryService {
 
     private final WaitingDao waitingDao;
 
-    public List<Waiting> getBySlot(Slot slot) {
+    public List<ReservationWaiting> getBySlot(Slot slot) {
         return waitingDao.findAllBySlot(slot);
     }
 

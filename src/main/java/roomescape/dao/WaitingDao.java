@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import org.apache.catalina.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -7,7 +8,12 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.WaitingWithRank;
-import roomescape.domain.*;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationWaiting;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
@@ -21,7 +27,7 @@ public class WaitingDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
 
-    private final RowMapper<Waiting> rowMapper = (rs, rowNum) -> {
+    private final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) -> {
         Theme theme = Theme.from(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
@@ -34,9 +40,9 @@ public class WaitingDao {
                 rs.getObject("time_value", LocalTime.class)
         );
 
-        return Waiting.from(
+        return ReservationWaiting.from(
                 rs.getLong("waiting_id"),
-                rs.getString("name"),
+                UserName.from(rs.getString("name")),
                 Slot.from(
                         Schedule.from(
                                 rs.getObject("date", LocalDate.class),
@@ -78,9 +84,9 @@ public class WaitingDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Waiting save(Waiting waiting) {
+    public ReservationWaiting save(ReservationWaiting waiting) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", waiting.getName())
+                .addValue("name", waiting.getUserNameValue())
                 .addValue("date", waiting.getWaitingDate())
                 .addValue("time_id", waiting.getWaitingTime().getId())
                 .addValue("theme_id", waiting.getWaitingTheme().getId())
@@ -91,7 +97,7 @@ public class WaitingDao {
         return findById(waitingId.longValue());
     }
 
-    public void delete(Waiting waiting) {
+    public void delete(ReservationWaiting waiting) {
         String sql = """
                 DELETE FROM reservation_waiting WHERE id = ?
                 """;
@@ -102,7 +108,7 @@ public class WaitingDao {
         }
     }
 
-    public Waiting findById(long waitingId) {
+    public ReservationWaiting findById(long waitingId) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -128,7 +134,7 @@ public class WaitingDao {
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
     }
 
-    public List<Waiting> findAllBySlot(Slot slot) {
+    public List<ReservationWaiting> findAllBySlot(Slot slot) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,

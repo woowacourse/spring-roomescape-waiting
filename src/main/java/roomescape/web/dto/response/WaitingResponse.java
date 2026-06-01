@@ -1,7 +1,7 @@
 package roomescape.web.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.domain.Waiting;
+import roomescape.domain.reservation.ReservationWaiting;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,15 +16,15 @@ public record WaitingResponse(
         TimeInfo time,
         ThemeInfo theme
 ) {
-    public static WaitingResponse from(Waiting waiting) {
+    public static WaitingResponse from(ReservationWaiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                waiting.getName(),
+                waiting.getUserNameValue(),
                 waiting.getWaitingDate(),
                 new TimeInfo(waiting.getWaitingTime().getId(), waiting.getWaitingTime().getStartAt()),
                 new ThemeInfo(
                         waiting.getWaitingTheme().getId(),
-                        waiting.getWaitingTheme().getName(),
+                        waiting.getWaitingTheme().getThemeName(),
                         waiting.getWaitingTheme().getThumbnailUrl(),
                         waiting.getWaitingTheme().getDescription())
         );

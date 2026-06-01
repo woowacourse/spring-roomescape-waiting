@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.domain.common.UserName;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
 import roomescape.service.WaitingQueryService;
@@ -60,7 +61,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCommandService.cancelByUser(id, name);
+        reservationCommandService.cancelByUser(id, UserName.from(name));
         return ResponseEntity.noContent().build();
     }
 
@@ -71,7 +72,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.updateByUser(id, name, ReservationUpdateRequest.toCommand(request)));
+                reservationCommandService.updateByUser(id, UserName.from(name), ReservationUpdateRequest.toCommand(request)));
         return ResponseEntity.ok(response);
     }
 }

@@ -6,7 +6,9 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
-import roomescape.domain.*;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.*;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
@@ -14,6 +16,7 @@ import roomescape.service.command.WaitingCommand;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +43,7 @@ public class WaitingCommandService {
         }
     }
 
-    public Waiting create(WaitingCommand command) {
+    public ReservationWaiting create(WaitingCommand command) {
         ReservationTime time = findTimeReference(command.timeId());
         Theme theme = findThemeReference(command.themeId());
 
@@ -54,15 +57,15 @@ public class WaitingCommandService {
         }
 
         if (waitingDao.findAllBySlot(slot).stream()
-                .anyMatch(waiting -> command.name().equals(waiting.getName()))) {
+                .anyMatch(waiting -> Objects.equals(command.name(), waiting.getUserName()))) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
 
-        return waitingDao.save(Waiting.create(command.name(), slot, LocalDateTime.now(clock)));
+        return waitingDao.save(ReservationWaiting.create(command.name(), slot, LocalDateTime.now(clock)));
     }
 
-    public void cancel(long waitingId, String name) {
-        Waiting waiting = waitingDao.findById(waitingId);
+    public void cancel(Long waitingId, UserName name) {
+        ReservationWaiting waiting = waitingDao.findById(waitingId);
         waiting.validateCancelable(LocalDateTime.now(clock));
         waiting.validateOwnedBy(name);
 

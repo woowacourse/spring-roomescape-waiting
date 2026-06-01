@@ -6,7 +6,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.*;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
@@ -34,7 +39,7 @@ public class ReservationDao {
 
         return Reservation.from(
                 rs.getLong("reservation_id"),
-                rs.getString("name"),
+                UserName.from(rs.getString("name")),
                 Slot.from(
                         Schedule.from(
                                 rs.getObject("date", LocalDate.class),
@@ -54,7 +59,7 @@ public class ReservationDao {
 
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", reservation.getUsername())
+                .addValue("name", reservation.getUserNameValue())
                 .addValue("date", reservation.getReservationDate())
                 .addValue("time_id", reservation.getReservationTime().getId())
                 .addValue("theme_id", reservation.getReservationTheme().getId());

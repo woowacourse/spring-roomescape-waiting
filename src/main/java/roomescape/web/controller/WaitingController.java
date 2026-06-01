@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Waiting;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.service.WaitingCommandService;
 import roomescape.service.WaitingQueryService;
 import roomescape.web.dto.request.WaitingRequest;
@@ -25,7 +26,7 @@ public class WaitingController {
     ResponseEntity<WaitingResponse> createWaiting(
             @Valid @RequestBody WaitingRequest request
     ) {
-        Waiting waiting = waitingCommandService.create(WaitingRequest.toCommand(request));
+        ReservationWaiting waiting = waitingCommandService.create(WaitingRequest.toCommand(request));
 
         WaitingResponse waitingResponse = WaitingResponse.from(waiting);
 
@@ -45,7 +46,7 @@ public class WaitingController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        waitingCommandService.cancel(id, name);
+        waitingCommandService.cancel(id, UserName.from(name));
         return ResponseEntity.noContent().build();
     }
 }

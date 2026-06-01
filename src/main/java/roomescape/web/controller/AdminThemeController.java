@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.service.ThemeCommandService;
 import roomescape.service.ThemeQueryService;
 import roomescape.web.dto.request.ThemeRequest;

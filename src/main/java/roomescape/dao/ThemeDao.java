@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Theme;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
@@ -33,7 +33,7 @@ public class ThemeDao {
 
     public Theme save(Theme theme) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", theme.getName())
+                .addValue("name", theme.getThemeName())
                 .addValue("thumbnail_url", theme.getThumbnailUrl())
                 .addValue("description", theme.getDescription());
 
