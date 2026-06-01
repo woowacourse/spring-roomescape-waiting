@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.holiday.service.HolidayService;
-import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -16,9 +15,7 @@ import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.reservation.service.dto.ReservationSaveServiceRequest;
-import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
@@ -241,23 +238,32 @@ class ReservationServiceImplTest {
     @Test
     void getAllByName_예약_전체_정보_조회_테스트() {
         // given
-        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        List<ReservationWithWaitingOrder> reservationWithWaitingOrders = List.of(
-                new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme), Status.RESERVED, 0),
-                new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponse.from(time),
-                        ThemeResponse.from(theme2), Status.WAITING, 3)
-        );
-        when(reservationRepository.findAllByName("라이")).thenReturn(reservationWithWaitingOrders);
+        ReservationTime time1 = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        ReservationTime time2 = new ReservationTime(2L,
+                LocalDateTime.of(2030, 6, 1, 14, 0),
+                LocalDateTime.of(2030, 6, 1, 16, 0));
+        Theme theme1 = new Theme("테마1", "설명", "test-url").withId(1L);
+        Theme theme2 = new Theme("테마2", "설명", "test-url").withId(2L);
+
+        Reservation myReserved = new Reservation("라이", time1, theme1, Status.RESERVED,
+                LocalDateTime.of(2030, 5, 1, 10, 0)).withId(1L);
+        Reservation myWaiting = new Reservation("라이", time2, theme2, Status.WAITING,
+                LocalDateTime.of(2030, 5, 2, 10, 0)).withId(2L);
+        Reservation otherEarlierWaiting = new Reservation("어셔", time2, theme2, Status.WAITING,
+                LocalDateTime.of(2030, 5, 1, 10, 0)).withId(3L);
+
+        when(reservationRepository.findByName("라이")).thenReturn(List.of(myReserved, myWaiting));
+        when(reservationRepository.findAllWaitingBy(time1.getId(), theme1.getId())).thenReturn(List.of());
+        when(reservationRepository.findAllWaitingBy(time2.getId(), theme2.getId()))
+                .thenReturn(List.of(otherEarlierWaiting, myWaiting));
 
         // when
         List<ReservationWithWaitingOrderResponse> result = reservationService.getAllByName("라이");
 
         // then
         assertThat(result).hasSize(2);
-        verify(reservationRepository, times(1)).findAllByName("라이");
+        assertThat(result).extracting(ReservationWithWaitingOrderResponse::waitingOrder)
+                .containsExactly(0, 2);
     }
 
     @DisplayName("예약 대기가 없는 경우, RESERVED인 예약이 정상 취소된다.")
@@ -268,14 +274,14 @@ class ReservationServiceImplTest {
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.empty());
+        when(reservationRepository.findAllWaitingBy(1L, 1L)).thenReturn(List.of());
 
         // when
         reservationService.cancelForUser(1L, "라이");
 
         // then
         verify(reservationRepository).deleteById(1L);
-        verify(reservationRepository, never()).promoteToReserved(any());
+        verify(reservationRepository, never()).update(any(Reservation.class));
     }
 
     @DisplayName("예약 상태가 WAITING인 경우, 승격없이 WAITING인 예약만 정상 취소된다")
@@ -292,8 +298,8 @@ class ReservationServiceImplTest {
 
         // then
         verify(reservationRepository).deleteById(1L);
-        verify(reservationRepository, never()).findEarliestWaiting(any(), any());
-        verify(reservationRepository, never()).promoteToReserved(any());
+        verify(reservationRepository, never()).findAllWaitingBy(any(), any());
+        verify(reservationRepository, never()).update(any(Reservation.class));
     }
 
     @DisplayName("자신의 예약이 아닌 예약을 취소하려는 경우, ForbiddenRequestException이 발생한다.")
@@ -341,16 +347,22 @@ class ReservationServiceImplTest {
         // given
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
-        when(reservationRepository.deleteById(1L)).thenReturn(true);
+        Reservation reserved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation oldestWaiting = new Reservation("어셔1", time, theme, Status.WAITING,
+                LocalDateTime.of(2030, 5, 1, 10, 0)).withId(2L);
+        Reservation newerWaiting = new Reservation("어셔2", time, theme, Status.WAITING,
+                LocalDateTime.of(2030, 5, 2, 10, 0)).withId(3L);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reserved));
+        when(reservationRepository.findAllWaitingBy(1L, 1L))
+                .thenReturn(List.of(newerWaiting, oldestWaiting));
 
         // when
         reservationService.cancelForUser(1L, "라이");
 
         // then
-        verify(reservationRepository).promoteToReserved(2L);
+        verify(reservationRepository).update(argThat(r ->
+                r.getId().equals(oldestWaiting.getId()) && r.getStatus() == Status.RESERVED));
         verify(reservationRepository).deleteById(1L);
     }
 
@@ -363,18 +375,20 @@ class ReservationServiceImplTest {
                 LocalDateTime.of(2030, 6, 1, 14, 0),
                 LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        Reservation updatedReservation = existing.withTime(newTime);
+
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
-        when(reservationRepository.update(eq(1L), eq(2L), any())).thenReturn(true);
+        when(reservationRepository.update(any(Reservation.class))).thenReturn(updatedReservation);
 
         // when
         Reservation result = reservationService.update(1L, 2L, "라이");
 
         // then
-        assertThat(result.getTime().getId()).isEqualTo(2L);
-        verify(reservationRepository).update(eq(1L), eq(2L), any());
+        assertThat(result).isSameAs(updatedReservation);
     }
 
     @DisplayName("존재하지 않는 예약을 변경하는 경우, ReservationNotFoundException이 발생한다.")

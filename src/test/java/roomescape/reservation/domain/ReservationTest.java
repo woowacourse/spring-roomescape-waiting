@@ -103,4 +103,52 @@ class ReservationTest {
         // then
         assertThat(result).isFalse();
     }
+
+    @DisplayName("WAITING 상태면 promote 시 RESERVED 상태로 새 객체를 반환한다")
+    @Test
+    void promote_WAITING이면_RESERVED로_반환() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        Theme theme = new Theme("테마", "설명", "test-url");
+        Reservation waiting = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
+
+        // when
+        Reservation promoted = waiting.promote();
+
+        // then
+        assertThat(promoted.getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(promoted.getId()).isEqualTo(waiting.getId());
+        assertThat(waiting.getStatus()).isEqualTo(Status.WAITING);
+    }
+
+    @DisplayName("RESERVED 상태에서 promote하면 IllegalStateException이 발생한다")
+    @Test
+    void promote_RESERVED는_예외() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        Theme theme = new Theme("테마", "설명", "test-url");
+        Reservation reserved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+
+        // when & then
+        assertThatThrownBy(reserved::promote)
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @DisplayName("withCreatedAt은 새 createdAt이 반영된 새 객체를 반환한다")
+    @Test
+    void withCreatedAt_새_createdAt_반영() {
+        // given
+        ReservationTime time = new ReservationTime(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        Theme theme = new Theme("테마", "설명", "test-url");
+        LocalDateTime original = LocalDateTime.of(2030, 5, 1, 10, 0);
+        LocalDateTime updated = LocalDateTime.of(2030, 5, 1, 11, 0);
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, original).withId(1L);
+
+        // when
+        Reservation result = reservation.withCreatedAt(updated);
+
+        // then
+        assertThat(result.getCreatedAt()).isEqualTo(updated);
+        assertThat(reservation.getCreatedAt()).isEqualTo(original);
+    }
 }
