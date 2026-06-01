@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
+import roomescape.controller.client.dto.condition.ReservationSearchCondition;
 import roomescape.service.result.ReservationEntryResult;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
+import roomescape.controller.client.dto.condition.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationTime;

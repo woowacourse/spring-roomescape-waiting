@@ -3,7 +3,7 @@ package roomescape.controller.admin.fixture;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
-import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
+import roomescape.controller.admin.dto.request.AdminReservationRequest;
 
 public class AdminReservationApiRequestFixture {
 

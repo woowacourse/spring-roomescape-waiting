@@ -2,7 +2,7 @@ package roomescape.controller.admin.fixture;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.params.provider.Arguments;
-import roomescape.controller.admin.api.dto.request.AdminThemeRequest;
+import roomescape.controller.admin.dto.request.AdminThemeRequest;
 
 public class AdminThemeApiRequestFixture {
 
