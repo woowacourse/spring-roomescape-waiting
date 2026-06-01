@@ -47,8 +47,9 @@ public class FixtureGenerator {
     }
 
     public Slot saveSlot(LocalDate date, ReservationTime time, Theme theme) {
-        Slot slot = new Slot(date, time, theme);
-        return slotDao.save(slot);
+        return slotDao.findByDateAndTimeAndTheme(date, time.getId(), theme.getId())
+                .orElseGet(() -> slotDao.save(new Slot(date, time, theme))
+                );
     }
 
     public Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {

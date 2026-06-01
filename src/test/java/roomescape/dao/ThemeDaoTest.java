@@ -248,8 +248,10 @@ class ThemeDaoTest {
         fixture.saveReservation("예약자", oldDate, time7, theme12);
         fixture.saveReservation("예약자", oldDate, time8, theme12);
         fixture.saveReservation("예약자", oldDate, time9, theme12);
-        fixture.saveReservation("예약자", oldDate, time1, theme12);
-        fixture.saveReservation("예약자", oldDate, time2, theme12);
+
+        LocalDate oldDate2 = oldDate.minusDays(1);
+        fixture.saveReservation("예약자", oldDate2, time1, theme12);
+        fixture.saveReservation("예약자", oldDate2, time2, theme12);
     }
 
     }

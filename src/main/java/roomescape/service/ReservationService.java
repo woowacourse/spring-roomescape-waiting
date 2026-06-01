@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
@@ -43,18 +44,31 @@ public class ReservationService {
     public ReservationResponse create(ReservationRequest request, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = getTime(request.timeId());
         Theme theme = getTheme(request.themeId());
-
         Slot slot = createSlot(request.date(), reservationTime, theme);
+
         Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
-
-        Reservation savedReservation = reservationDao.save(reservation);
-        return ReservationResponse.from(savedReservation);
+        try {
+            Reservation savedReservation = reservationDao.save(reservation);
+            return ReservationResponse.from(savedReservation);
+        } catch (DuplicateKeyException e) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
         Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId());
-        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date, reservationTime, theme)));
+        return dateAndTimeAndTheme.orElseGet(() -> {
+            try {
+                return slotDao.save(new Slot(date, reservationTime, theme));
+            } catch (DuplicateKeyException e) {
+                return slotDao.findByDateAndTimeAndTheme(
+                        date,
+                        reservationTime.getId(),
+                        theme.getId()
+                ).get();
+            }
+        });
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -90,18 +104,22 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse update(long reservationId, ReservationRequest request, LocalDateTime currentDateTime) {
-        Reservation reservation = getReservation(reservationId);
-        validateModifiable(reservation, currentDateTime);
+        try {
+            Reservation reservation = getReservation(reservationId);
+            validateModifiable(reservation, currentDateTime);
 
-        ReservationTime reservationTime = getTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
-        validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
-        validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
+            ReservationTime reservationTime = getTime(request.timeId());
+            Theme theme = getTheme(request.themeId());
+            validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
+            validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
 
-        Slot slot = createSlot(request.date(), reservationTime, theme);
-        Reservation updatedReservation = new Reservation(reservationId, slot, request.name());
-        reservationDao.update(updatedReservation);
-        return ReservationResponse.from(updatedReservation);
+            Slot slot = createSlot(request.date(), reservationTime, theme);
+            Reservation updatedReservation = new Reservation(reservationId, slot, request.name());
+            reservationDao.update(updatedReservation);
+            return ReservationResponse.from(updatedReservation);
+        } catch (DuplicateKeyException e) {
+            throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     private void validateNotPastDateTime(LocalDate date, ReservationTime time, LocalDateTime now) {
