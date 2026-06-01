@@ -1,0 +1,301 @@
+package roomescape.service;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.RoomEscapeFixture;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.UnauthorizedException;
+import roomescape.common.exception.UnprocessableException;
+import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.controller.dto.request.ReservationUpdateRequest;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Status;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
+import roomescape.domain.theme.ThumbnailUrl;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+
+@ExtendWith(MockitoExtension.class)
+class ReservationServiceTest {
+    private static final String URL = "https://zeze.com/thumb.jpg";
+    private static final String NAME = "제제";
+    private static final LocalDateTime TODAY = LocalDateTime.of(2026, 5, 10, 10, 0, 0);
+    private static final Reservation DUMMY = Reservation.load(
+            1L,
+            new ReservationName(NAME),
+            new ReservationDate(LocalDate.of(2099, 1, 1)),
+            ReservationTime.of(1L, LocalTime.of(10, 0)),
+            Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
+            Status.APPROVED,
+            1
+    );
+    private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
+    private static final long EXISTS_ID = 1L;
+
+    @Mock private ReservationRepository reservationRepository;
+    @Mock private ReservationTimeRepository reservationTimeRepository;
+    @Mock private ThemeRepository themeRepository;
+    @InjectMocks private ReservationService reservationService;
+
+    @Test
+    void 예약_취소_성공() {
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
+        reservationService.cancel(1L, NAME, LocalDateTime.MIN);
+        verify(reservationRepository).deleteById(1L);
+    }
+
+    @Test
+    void 존재하지_않는_예약_취소시_예외_발생() {
+        given(reservationRepository.findById(999L)).willReturn(Optional.empty());
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, NAME, LocalDateTime.MIN))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 존재하지_않는_시간으로_예약시_예외() {
+        given(reservationTimeRepository.findById(999L)).willReturn(Optional.empty());
+        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-05-03"), 999L, 1L);
+        Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MAX))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 지나간_날짜로_예약_시_예외가_발생해야_한다() {
+        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
+        Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
+        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MAX));
+    }
+
+    @Test
+    void 같은_날짜이며_시간이_1초_전이면_예약에_성공해야_한다() {
+        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
+        Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
+        ReservationCreateRequest request = new ReservationCreateRequest(NAME, LocalDate.of(2026, 4, 5), 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(reservationRepository.save(any())).willReturn(DUMMY);
+        Assertions.assertThatNoException()
+                .isThrownBy(() -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));
+    }
+
+    @Test
+    void 같은_날짜이며_시간이_1초_지났다면_예약에_실패해야_한다() {
+        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
+        Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
+        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        Assertions.assertThatThrownBy(
+                () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 11, 0, 1)));
+    }
+
+    @Test
+    void 미래로_예약하면_성공해야_한다() {
+        ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
+        Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
+        ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(reservationRepository.save(any())).willReturn(DUMMY);
+        Assertions.assertThatNoException().isThrownBy(
+                () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));
+    }
+
+    @Test
+    void 예약_수정시_ID가_없으면_예외가_발생한다() {
+        ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
+        given(reservationRepository.findById(999L)).willReturn(Optional.empty());
+        Assertions.assertThatThrownBy(() -> reservationService.update(request, 999L, LocalDateTime.MIN))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다. 입력을 확인해 주세요.");
+    }
+
+    @Test
+    void 예약_수정시_과거_날짜의_예약이면_예외가_발생한다() {
+        ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2000-04-06"), 1L, 1L);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(ReservationTime.of(1L, LocalTime.parse("11:00"))));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL))));
+        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MAX))
+                .isInstanceOf(UnprocessableException.class)
+                .hasMessage("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
+    }
+
+    @Test
+    void 예약_수정시_시간을_찾을_수_없으면_예외가_발생한다() {
+        ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
+        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 시간입니다. 입력을 확인해 주세요.");
+    }
+
+    @Test
+    void 예약_수정시_사용_불가능한_날짜가_들어오면_예외가_발생한다() {
+        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("11:00"));
+        ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL))));
+        given(reservationRepository.existsByTimeAndThemeAndDateAndNameExcludingId(request.getTimeId(), request.getThemeId(),
+                request.getDate(), request.getName(), 1L)).willReturn(true);
+        Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
+
+    @Test
+    void 예약_수정시_같은_슬롯이면_자기_자신이므로_중복이_아니어야_한다() {
+        // given
+        LocalDate date = LocalDate.of(2099, 1, 1);
+        LocalTime startAt = LocalTime.of(10, 0);
+        long timeId = 1L;
+        long themeId = 1L;
+        String name = "zeze";
+
+        ReservationTime time = ReservationTime.of(timeId, startAt);
+        Theme theme = Theme.load(themeId, new ThemeName("any"), "any", new ThumbnailUrl(URL));
+        Reservation existing = Reservation.load(
+                1L, new ReservationName(name),
+                new ReservationDate(date), time, theme, Status.APPROVED, 1);
+
+        // 같은 슬롯, 같은 이름으로 수정 요청 (예: 프론트에서 저장 버튼을 다시 누른 경우)
+        ReservationUpdateRequest request = new ReservationUpdateRequest(name, date, timeId, themeId);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(existing));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(time));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+
+        // 자기 자신은 제외되므로 false 반환
+        given(reservationRepository.existsByTimeAndThemeAndDateAndNameExcludingId(timeId, themeId, date, name, 1L))
+                .willReturn(false);
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(timeId, themeId, date))
+                .willReturn(true);
+        given(reservationRepository.update(eq(1L), any())).willReturn(existing);
+
+        // when & then — 자기 자신이므로 성공해야 한다
+        Assertions.assertThatCode(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약_삭제_시_ID가_존재하지_않으면_예외가_발생한다() {
+        given(reservationRepository.findById(NOT_EXISTS_ID)).willThrow(NotFoundException.class);
+        Assertions.assertThatThrownBy(() -> reservationRepository.findById(NOT_EXISTS_ID))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_이름이_다르면_예외가_발생한다() {
+        Reservation reservation = RoomEscapeFixture.reservation();
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff", TODAY))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
+        Reservation reservation = RoomEscapeFixture.reservation();
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
+        assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue(),
+                TODAY)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void 단건_조회시_존재하는_ID면_결과를_반환한다() {
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
+
+        Reservation result = reservationService.find(EXISTS_ID);
+
+        Assertions.assertThat(result.getId()).isEqualTo(EXISTS_ID);
+        Assertions.assertThat(result.getRank()).isEqualTo(1);
+    }
+
+    @Test
+    void 단건_조회시_존재하지_않는_ID면_예외가_발생한다() {
+        given(reservationRepository.findById(NOT_EXISTS_ID)).willReturn(Optional.empty());
+        Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다. 입력을 확인해 주세요.");
+    }
+
+    @Test
+    void 이름_없이_목록_조회시_전체_예약을_반환한다() {
+        given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
+
+        List<Reservation> results = reservationService.findList(null);
+
+        Assertions.assertThat(results).hasSize(1);
+        Assertions.assertThat(results.get(0).getId()).isEqualTo(EXISTS_ID);
+    }
+
+    @Test
+    void 이름으로_목록_조회시_해당_이름의_예약만_반환한다() {
+        given(reservationRepository.findAllByName(NAME)).willReturn(List.of(DUMMY));
+
+        List<Reservation> results = reservationService.findList(NAME);
+
+        Assertions.assertThat(results).hasSize(1);
+        Assertions.assertThat(results.get(0).getName().getValue()).isEqualTo(NAME);
+    }
+
+    @Test
+    void 첫번째_예약은_승인_상태이다() {
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
+
+        Reservation result = reservationService.find(EXISTS_ID);
+
+        Assertions.assertThat(result.getStatus()).isEqualTo(Status.APPROVED);
+    }
+
+    @Test
+    void 두번째_이후_예약은_대기_상태이고_대기번호_1번이다() {
+        Reservation waiting = Reservation.load(
+                2L,
+                new ReservationName("대기자"),
+                new ReservationDate(LocalDate.of(2099, 1, 1)),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
+                Status.WAITING,
+                1
+        );
+        given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
+
+        Reservation result = reservationService.find(2L);
+
+        Assertions.assertThat(result.getStatus()).isEqualTo(Status.WAITING);
+        Assertions.assertThat(result.getRank()).isEqualTo(1);
+    }
+}

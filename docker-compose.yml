@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Asia/Seoul
+
+  frontend:
+    image: dalsu1904/spring-roomescape-member-front:latest
+    ports:
+      - "4173:4173"
+    environment:
+      - TZ=Asia/Seoul
+    depends_on:
+      - backend
