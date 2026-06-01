@@ -34,8 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/reservations/**", "/waitings/**")
-                .excludePathPatterns("/reservations/id");
+                .addPathPatterns("/reservations/**", "/waitings/**");
     }
 
     @Override

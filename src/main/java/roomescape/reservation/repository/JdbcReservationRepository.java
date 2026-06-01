@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -123,9 +122,4 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(query, id);
     }
 
-    @Override
-    public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
-        String query = "SELECT id FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?";
-        return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
-    }
 }

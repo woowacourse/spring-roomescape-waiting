@@ -12,7 +12,6 @@ import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
@@ -98,7 +97,4 @@ public class ReservationService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
-    public ReservationIdResponse getReservationId(LocalDate date, Long themeId, Long timeId) {
-        return reservationRepository.findReservationId(date, themeId, timeId);
-    }
 }

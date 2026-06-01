@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.ReservationIdResponse;
 
 public interface ReservationRepository {
 
@@ -22,5 +21,4 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId);
 }
