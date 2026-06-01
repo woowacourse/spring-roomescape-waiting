@@ -20,8 +20,11 @@ CREATE TABLE IF NOT EXISTS reservation (
     theme_id BIGINT,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uk_reservation_schedule UNIQUE (date, time_id, theme_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_reservation_name ON reservation (name);
 
 CREATE TABLE IF NOT EXISTS waiting (
     id BIGINT NOT NULL AUTO_INCREMENT,
@@ -31,5 +34,9 @@ CREATE TABLE IF NOT EXISTS waiting (
     theme_id BIGINT,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uk_waiting_schedule_name UNIQUE (date, time_id, theme_id, name)
 );
+
+CREATE INDEX IF NOT EXISTS idx_waiting_schedule ON waiting (theme_id, date, time_id, id);
+CREATE INDEX IF NOT EXISTS idx_waiting_name ON waiting (name);
