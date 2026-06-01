@@ -32,12 +32,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     public ReservationTime save(ReservationTime reservationTime) {
         String sql = """
                 INSERT INTO reservation_time(start_at, is_active)
-                VALUES(:startAt, :active)
+                VALUES(:startAt, :isActive)
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("startAt", reservationTime.getStartAt())
-                .addValue("active", reservationTime.isActive());
+                .addValue("isActive", reservationTime.isActive());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 

@@ -27,6 +27,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    @PostMapping
+    public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request) {
+        ReservationResponse response = ReservationResponse.from(reservationService.create(request.toCommand()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<ReservationPendingResponse>> getReservationsByName(@RequestParam String username) {
         List<ReservationPendingResponse> responses = reservationService.getReservationsByName(username)
@@ -36,27 +42,15 @@ public class ReservationController {
         return ResponseEntity.ok(responses);
     }
 
-    @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
-        ReservationResponse response = ReservationResponse.from(reservationService.addReservation(request.toCommand()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReservationResponse> modify(@PathVariable Long id, @Valid @RequestBody ReservationChangeRequest request) {
+        ReservationResponse response = ReservationResponse.from(reservationService.modify(id, request.toCommand()));
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, @RequestParam String username) {
-        reservationService.cancelReservation(id, username);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam String username) {
+        reservationService.cancel(id, username);
         return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/active")
-    public ResponseEntity<ReservationResponse> changeReservation(@PathVariable Long id, @Valid @RequestBody ReservationChangeRequest request) {
-        ReservationResponse response = ReservationResponse.from(reservationService.changeReservation(id, request.toCommand()));
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{id}/pending")
-    public ResponseEntity<ReservationResponse> pendingReservation(@PathVariable Long id, @Valid @RequestBody ReservationChangeRequest request){
-        ReservationResponse response = ReservationResponse.from(reservationService.changeReservationPendingStatus(id, request.toCommand()));
-        return ResponseEntity.ok(response);
     }
 }

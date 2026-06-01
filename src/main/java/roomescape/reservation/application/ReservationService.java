@@ -6,21 +6,18 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.application.exception.ReservationInUseException;
-import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.dto.ReservationQueryResult;
-import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -28,112 +25,90 @@ import roomescape.time.domain.ReservationTimeRepository;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationService {
-
-    private static final int DELETE_ROW_COUNTS = 0;
 
     private final Clock clock;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
-    @Transactional(readOnly = true)
-    public List<ReservationInfo> getReservations() {
-        return reservationRepository.findAll()
+    @Transactional
+    public ReservationInfo create(ReservationCreateCommand command) {
+        ReservationTime time = timeRepository.getById(command.timeId());
+        Theme theme = themeRepository.getById(command.themeId());
+
+        checkDuplicateReservation(command.name(), command.date(), time, theme);
+
+        Status status = decideReservationStatus(command.date(), time.getId(), theme.getId());
+        Reservation reservation = command.toEntity(time, theme, status, clock);
+
+        return ReservationInfo.from(reservationRepository.save(reservation));
+
+    }
+
+    @Transactional
+    public void cancel(Long id, String username) {
+        Reservation reservation = reservationRepository.getById(id);
+        if (!reservation.isOwner(username)) {
+            throw new ForbiddenException("예약 취소 권한이 없습니다.");
+        }
+
+        reservationRepository.update(reservation.cancel());
+
+        if (reservation.getStatus().equals(Status.RESERVED)) {
+            Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+
+            nextPendingReservation.ifPresent(pending -> {
+                Reservation activeReservation = pending.reserved();
+                reservationRepository.update(activeReservation);
+            });
+        }
+    }
+
+    @Transactional
+    public ReservationInfo modify(Long id, ReservationChangeCommand command) {
+        Reservation reservation = reservationRepository.getById(id);
+        ReservationTime time = timeRepository.getById(command.timeId());
+        Theme theme = themeRepository.getById(command.themeId());
+
+        checkDuplicateReservation(command.username(), command.date(), time, theme);
+
+        Status status = decideReservationStatus(command.date(), time.getId(), theme.getId());
+
+        Reservation changedReservation = reservation.modify(command.date(), time, theme, status, clock);
+        reservationRepository.update(changedReservation);
+
+        return ReservationInfo.from(changedReservation);
+    }
+
+    public List<ReservationInfo> getReservations(int page, int size) {
+        return reservationRepository.findAll(page, size)
                 .stream()
                 .map(ReservationInfo::from)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationPendingInfo> getReservationsByName(String username) {
-        List<ReservationQueryResult> results =
-                reservationRepository.findAllByName(username);
+        List<ReservationQueryResult> results = reservationRepository.findAllByName(username);
 
         return results.stream()
                 .map(ReservationPendingInfo::from)
                 .toList();
     }
 
-    public ReservationInfo addReservation(ReservationCreateCommand command) {
-        ReservationTime time = timeRepository.getById(command.timeId());
-        Theme theme = themeRepository.getById(command.themeId());
-        Reservation reservation = command.toEntity(time, theme, clock);
-        if (reservationRepository.existsByReservationTimeAndThemeAndDate(time.getId(), theme.getId(), command.date())) {
-            checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
-            reservation = reservation.modify(
-                    command.date(),
-                    time,
-                    theme,
-                    Status.WAITING,
-                    clock
-            );
+    private Status decideReservationStatus(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsActiveReservationByDateTimeAndTheme(timeId, themeId, date)) {
+            return Status.WAITING;
         }
-        try {
-            return ReservationInfo.from(reservationRepository.save(reservation));
-        } catch (DataIntegrityViolationException e) {
-            throw new ReservationInUseException("이미 예약이 존재합니다.");
-        }
+        return Status.RESERVED;
     }
 
-    public void hardDeleteReservation(Long id) {
-        if (reservationRepository.deleteById(id) == DELETE_ROW_COUNTS) {
-            throw new ReservationNotFoundException("존재하지 않는 예약ID 입니다.");
-        }
-    }
-
-    public void cancelReservation(Long id, String username) {
-        if (!reservationRepository.existsByIdAndUsernameAndActiveOrPending(id, username)) {
-            throw new ReservationNotFoundException("해당 예약을 찾을 수 없거나 취소할 권한이 없습니다.");
-        }
-        Reservation reservation = reservationRepository.getById(id);
-        Reservation canceledReservation = reservation.cancel();
-        reservationRepository.cancel(canceledReservation);
-        if (reservation.getStatus().equals(Status.ACTIVE)) {
-            Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
-                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-            nextPendingReservation.ifPresent(pending -> {
-                Reservation activeReservation = pending.active();
-                reservationRepository.updateById(activeReservation.getId(), activeReservation);
-            });
-        }
-    }
-
-    public ReservationInfo changeReservation(Long id, ReservationChangeCommand command) {
-        Reservation reservation = reservationRepository.getById(id);
-        ReservationTime time = timeRepository.getById(command.timeId());
-        Theme theme = themeRepository.getById(command.themeId());
-        if (reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(id, time.getId(), theme.getId(),
-                command.date())) {
-            throw new ReservationInUseException("이미 다른 예약이 존재합니다.");
-        }
-        Reservation changedReservation = reservation.modify(command.date(), time, theme, Status.ACTIVE, clock);
-        reservationRepository.updateById(id, changedReservation);
-        return ReservationInfo.from(changedReservation);
-    }
-
-    public ReservationInfo changeReservationPendingStatus(Long id, ReservationChangeCommand command) {
-        Reservation reservation = reservationRepository.getById(id);
-        ReservationTime time = timeRepository.getById(command.timeId());
-        Theme theme = themeRepository.getById(command.themeId());
-
-        if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(),
-                command.date())) {
-            throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
-        }
-
-        checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
-
-        Reservation pendingReservation = reservation.modify(command.date(), time, theme, Status.WAITING, clock);
-        reservationRepository.updateById(id, pendingReservation);
-        return ReservationInfo.from(pendingReservation);
-    }
-
-    private void checkDuplicatePendingReservation(LocalDate date, String username, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, username)) {
-            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+    private void checkDuplicateReservation(String username, LocalDate date, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsByUsernameAndDateTimeAndTheme(time.getId(), theme.getId(), date, username)) {
+            throw new ConflictException("해당 날짜와 해당 시간대에 해당 이름으로 예약된 예약이 존재합니다.");
         }
     }
 }

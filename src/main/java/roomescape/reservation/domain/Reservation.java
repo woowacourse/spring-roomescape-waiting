@@ -5,11 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ValidationException;
-import roomescape.reservation.domain.exception.IllegalReservationDateTimeException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
-import roomescape.reservation.domain.exception.PastDateTimeException;
-import roomescape.reservation.domain.exception.UnauthorizedReservationChangeException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -36,15 +33,10 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme, Clock clock) {
+    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme, Status status,
+                                     Clock clock) {
         validateRequiredFields(name, date, time, theme, clock);
-        return new Reservation(null, name, date, time, theme, Status.ACTIVE, LocalDateTime.now(clock));
-    }
-
-    public static Reservation createWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
-                                            Clock clock) {
-        validateRequiredFields(name, date, time, theme, clock);
-        return new Reservation(null, name, date, time, theme, Status.WAITING, LocalDateTime.now(clock));
+        return new Reservation(null, name, date, time, theme, status, LocalDateTime.now(clock));
     }
 
     public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
@@ -53,23 +45,23 @@ public class Reservation {
     }
 
     public Reservation modify(LocalDate date, ReservationTime time, Theme theme, Status status, Clock clock) {
+        validateRequiredFields(name, date, time, theme, clock);
         validateModifiable(clock);
+        validateNotPast(clock, date, time);
 
         return restore(this.id, this.name, date, time, theme, status, createdAt);
     }
 
-    public void validateOwner(String username) {
-        if (!this.name.equals(username)) {
-            throw new UnauthorizedReservationChangeException("예약 변경 권한이 없습니다.");
-        }
+    public boolean isOwner(String username) {
+        return this.name.equals(username);
     }
 
     public Reservation cancel() {
         return restore(id, name, date, time, theme, Status.CANCELED, createdAt);
     }
 
-    public Reservation active() {
-        return restore(id, name, date, time, theme, Status.ACTIVE, createdAt);
+    public Reservation reserved() {
+        return restore(id, name, date, time, theme, Status.RESERVED, createdAt);
     }
 
     private static void validateRequiredFields(String name, LocalDate date, ReservationTime time, Theme theme,
@@ -89,6 +81,7 @@ public class Reservation {
         if (theme == null) {
             throw new ValidationException("테마는 필수입니다.");
         }
+        theme.validateInactive();
     }
 
     private static void validateDateTime(LocalDate date, ReservationTime time, Clock clock) {
@@ -101,17 +94,25 @@ public class Reservation {
         }
 
         if (!time.isAvailableAt(date, clock)) {
-            throw new PastDateTimeException("현재보다 이전 시간대로 예약할 수 없습니다.");
+            throw new ConflictException("현재보다 이전 시간대로 예약할 수 없습니다.");
         }
+
+        time.validateInactive();
     }
 
     private void validateModifiable(Clock clock) {
         if (status == Status.CANCELED) {
-            throw new IllegalStateReservationException("이미 취소된 예약은 변경할 수 없습니다.");
+            throw new ConflictException("이미 취소된 예약은 변경할 수 없습니다.");
         }
 
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock))) {
-            throw new IllegalReservationDateTimeException("이미 지난 예약은 변경할 수 없습니다.");
+            throw new ConflictException("이미 지난 예약은 변경할 수 없습니다.");
+        }
+    }
+
+    private void validateNotPast(Clock clock, LocalDate date, ReservationTime time) {
+        if (!time.isAvailableAt(date, clock)) {
+            throw new ConflictException("이미 지난 예약은 변경할 수 없습니다.");
         }
     }
 }

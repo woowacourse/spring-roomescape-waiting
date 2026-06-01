@@ -18,12 +18,19 @@ class ReservationTest {
     private Clock clock;
 
     @Test
-    @DisplayName("Active 상태인 예약을 대기 상태로 변경하면 pending 상태로 변한다.")
+    @DisplayName("Reserved 상태인 예약을 대기 상태로 변경하면 waiting 상태로 변한다.")
     void pendingTest() {
         Theme theme = Theme.create("판타지", "https://example.com/theme.png", "설명");
         ReservationTime time = ReservationTime.create(LocalDateTime.now(clock).plusHours(1).toLocalTime());
 
-        Reservation reservation = Reservation.create("포비", LocalDate.now(clock).plusDays(1), time, theme, clock);
+        Reservation reservation = Reservation.create(
+                "포비",
+                LocalDate.now(clock).plusDays(1),
+                time,
+                theme,
+                Status.RESERVED,
+                clock
+        );
 
         Reservation pendingReservation = reservation.modify(
                 LocalDate.now(clock).plusDays(2),

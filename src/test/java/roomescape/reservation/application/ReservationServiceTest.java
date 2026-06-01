@@ -14,12 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ConflictException;
 import roomescape.config.TestTimeConfig;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.exception.DuplicatedReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -59,32 +59,32 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("해당 타겟 시간에 예약이 전혀 없으면, ACTIVE(확정) 상태로 DB에 정상 저장된다.")
-    void addReservation_success_active() {
+    @DisplayName("해당 타겟 시간에 예약이 전혀 없으면, RESERVED(확정) 상태로 DB에 정상 저장된다.")
+    void create_success_reserved() {
         ReservationCreateCommand command = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         );
 
-        ReservationInfo result = reservationService.addReservation(command);
+        ReservationInfo result = reservationService.create(command);
 
         assertThat(result.id()).isNotNull();
-        assertThat(result.status()).isEqualTo(Status.ACTIVE);
+        assertThat(result.status()).isEqualTo(Status.RESERVED);
         assertThat(result.name()).isEqualTo("포비");
     }
 
     @Test
     @DisplayName("해당 타겟 시간에 이미 예약이 존재하면, 동일 인물이 아닐 때 WAITING(대기) 상태로 DB에 정상 저장된다.")
-    void addReservation_success_pending() {
+    void create_success_pending() {
         ReservationCreateCommand firstCommand = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        reservationService.addReservation(firstCommand);
+        reservationService.create(firstCommand);
 
         ReservationCreateCommand secondCommand = new ReservationCreateCommand(
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         );
 
-        ReservationInfo result = reservationService.addReservation(secondCommand);
+        ReservationInfo result = reservationService.create(secondCommand);
 
         assertThat(result.status()).isEqualTo(Status.WAITING);
         assertThat(result.name()).isEqualTo("리사");
@@ -92,76 +92,75 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("동일한 사람이 이미 대기를 걸어둔 상태에서 또 예약을 시도하면 중복 대기 예외가 발생한다.")
-    void addReservation_fail_duplicated_pending() {
+    void create_fail_duplicated_pending() {
         ReservationCreateCommand activeCommand = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        reservationService.addReservation(activeCommand);
+        reservationService.create(activeCommand);
 
         ReservationCreateCommand pendingCommand = new ReservationCreateCommand(
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        reservationService.addReservation(pendingCommand);
+        reservationService.create(pendingCommand);
 
-        assertThatThrownBy(() -> reservationService.addReservation(pendingCommand))
-                .isInstanceOf(DuplicatedReservationException.class)
-                .hasMessageContaining("이미 예약 대기 중입니다.");
+        assertThatThrownBy(() -> reservationService.create(pendingCommand))
+                .isInstanceOf(ConflictException.class);
     }
 
     @Test
     @DisplayName("Active인 예약을 취소하면 Pending 상태인 예약중 첫번째 예약이 Active로 바뀐다.")
-    void modifyPendingReservationToActive() {
+    void modifyPendingReservationToReserved() {
         ReservationCreateCommand activeCommand = new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        ReservationInfo reservationInfo = reservationService.addReservation(activeCommand);
+        ReservationInfo reservationInfo = reservationService.create(activeCommand);
         ReservationCreateCommand pendingFirstCommand = new ReservationCreateCommand(
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        reservationService.addReservation(pendingFirstCommand);
+        reservationService.create(pendingFirstCommand);
         ReservationCreateCommand pendingSecondCommand = new ReservationCreateCommand(
                 "브리", targetDate, savedTime.getId(), savedTheme.getId()
         );
-        reservationService.addReservation(pendingSecondCommand);
-        reservationService.cancelReservation(reservationInfo.id(), reservationInfo.name());
+        reservationService.create(pendingSecondCommand);
+        reservationService.cancel(reservationInfo.id(), reservationInfo.name());
 
         Assertions.assertThat(reservationService.getReservationsByName(pendingFirstCommand.name()).getFirst().status())
-                .isEqualTo(Status.ACTIVE);
+                .isEqualTo(Status.RESERVED);
     }
 
     @Test
     @DisplayName("대기 예약을 다른 시간으로 확정 예약 변경할 수 있다.")
-    void changePendingReservationToActive() {
-        reservationService.addReservation(new ReservationCreateCommand(
+    void changePendingReservationToReserved() {
+        reservationService.create(new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         ));
-        ReservationInfo pendingReservation = reservationService.addReservation(new ReservationCreateCommand(
+        ReservationInfo pendingReservation = reservationService.create(new ReservationCreateCommand(
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         ));
         ReservationTime anotherTime = timeRepository.save(
                 ReservationTime.create(LocalTime.of(15, 0))
         );
 
-        ReservationInfo changedReservation = reservationService.changeReservation(
+        ReservationInfo changedReservation = reservationService.modify(
                 pendingReservation.id(),
                 new ReservationChangeCommand("리사", anotherTime.getId(), savedTheme.getId(), targetDate)
         );
 
-        assertThat(changedReservation.status()).isEqualTo(Status.ACTIVE);
+        assertThat(changedReservation.status()).isEqualTo(Status.RESERVED);
         assertThat(changedReservation.time().id()).isEqualTo(anotherTime.getId());
     }
 
     @Test
     @DisplayName("대기 예약도 예약자 본인이 취소할 수 있다.")
     void cancelPendingReservation() {
-        reservationService.addReservation(new ReservationCreateCommand(
+        reservationService.create(new ReservationCreateCommand(
                 "포비", targetDate, savedTime.getId(), savedTheme.getId()
         ));
-        ReservationInfo pendingReservation = reservationService.addReservation(new ReservationCreateCommand(
+        ReservationInfo pendingReservation = reservationService.create(new ReservationCreateCommand(
                 "리사", targetDate, savedTime.getId(), savedTheme.getId()
         ));
 
-        reservationService.cancelReservation(pendingReservation.id(), "리사");
+        reservationService.cancel(pendingReservation.id(), "리사");
 
         Assertions.assertThat(reservationService.getReservationsByName("리사").size())
                 .isZero();

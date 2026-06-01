@@ -33,7 +33,7 @@ public class PageController {
     public String adminPage(Model model) {
         model.addAttribute("themes", themeService.getThemes());
         model.addAttribute("times", reservationTimeService.getReservationTimes());
-        model.addAttribute("reservations", reservationService.getReservations());
+        model.addAttribute("reservations", reservationService.getReservations(0, 10));
         return "admin";
     }
 }

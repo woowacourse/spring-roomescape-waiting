@@ -39,7 +39,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약이 존재할 때, 새 예약을 저장하면 대기 상태로 저장된다.")
-    void pendingReservationTest() {
+    void modifyToReservationToWaitingTest() {
         ReservationTimeRequest timeRequest = new ReservationTimeRequest(
                 LocalTime.now(clock)
         );
@@ -151,7 +151,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationChangeRequest)
-                .when().patch("/reservations/" + reservationId + "/pending")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200);
     }

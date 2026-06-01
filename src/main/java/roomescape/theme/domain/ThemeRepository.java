@@ -22,6 +22,6 @@ public interface ThemeRepository {
 
     default Theme getById(Long id) {
         return findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않은 테마입니다."));
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 }
