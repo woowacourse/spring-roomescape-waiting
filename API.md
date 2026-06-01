@@ -270,13 +270,47 @@
   "waitings": [
     {
       "order": 1,
-      "reservationId": 1,
+      "reservation": {
+        "id": 1,
+        "date": "2026-05-27",
+        "time": {
+          "id": 1,
+          "startAt": "10:00"
+        },
+        "theme": {
+          "id": 1,
+          "name": "이든의 공포 하우스",
+          "description": "이든이 귀신으로 나오는 공포 테마",
+          "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+        },
+        "store": {
+          "id": 1,
+          "name": "강남점"
+        }
+      },
       "memberId": 1,
       "createdAt": "2026-05-27T12:00:01"
     },
     {
       "order": 2,
-      "reservationId": 3,
+      "reservation": {
+        "id": 3,
+        "date": "2026-05-29",
+        "time": {
+          "id": 1,
+          "startAt": "10:00"
+        },
+        "theme": {
+          "id": 1,
+          "name": "이든의 공포 하우스",
+          "description": "이든이 귀신으로 나오는 공포 테마",
+          "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+        },
+        "store": {
+          "id": 1,
+          "name": "강남점"
+        }
+      },
       "memberId": 1,
       "createdAt": "2026-05-27T12:00:05"
     }
@@ -291,7 +325,12 @@
 | `reservations[]` | `Array<ReservationResponse>` | 확정된 예약 목록 |
 | `waitings[]` | `Array<WaitingResponse>` | 대기 중인 예약 목록 |
 | `waitings[].order` | `Long` | 같은 슬롯 안에서의 대기 순번 (1부터 시작) |
-| `waitings[].reservationId` | `Long` | 대기 중인 원본 예약 ID |
+| `waitings[].reservation` | `Object` | 대기 중인 원본 예약 정보 |
+| `waitings[].reservation.id` | `Long` | 대기 중인 원본 예약 ID |
+| `waitings[].reservation.date` | `String` | 예약 날짜 (`yyyy-MM-dd`) |
+| `waitings[].reservation.time` | `Object` | 예약 시간 (`id`, `startAt`) |
+| `waitings[].reservation.theme` | `Object` | 테마 정보 (`id`, `name`, `description`, `imgUrl`) |
+| `waitings[].reservation.store` | `Object` | 매장 정보 (`id`, `name`) |
 | `waitings[].memberId` | `Long` | 회원 ID |
 | `waitings[].createdAt` | `String` | 대기 신청 시각 (ISO-8601) |
 

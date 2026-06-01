@@ -6,10 +6,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
+import roomescape.domain.Store;
+import roomescape.domain.Theme;
 import roomescape.dto.WaitingResponseProjection;
 
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -51,9 +57,19 @@ public class ReservationWaitDao {
         String sql = """
                 SELECT
                     ranked.order_num,
-                    ranked.reservation_id,
-                    ranked.member_id,
-                    ranked.created_at
+                    ranked.member_id AS wait_member_id,
+                    ranked.created_at,
+                    r.id AS reservation_id,
+                    r.member_id AS reservation_member_id,
+                    r.date,
+                    t.id AS time_id,
+                    t.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.img_url AS theme_img_url,
+                    s.id AS store_id,
+                    s.name AS store_name
                 FROM (
                     SELECT
                         reservation_id,
@@ -65,16 +81,45 @@ public class ReservationWaitDao {
                         ) AS order_num
                     FROM reservation_wait
                 ) AS ranked
+                INNER JOIN reservation AS r ON ranked.reservation_id = r.id
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                INNER JOIN store AS s ON r.store_id = s.id
                 WHERE ranked.member_id = ?
                 ORDER BY ranked.created_at
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingResponseProjection(
-                rs.getLong("order_num"),
-                rs.getLong("reservation_id"),
-                rs.getLong("member_id"),
-                rs.getTimestamp("created_at").toLocalDateTime()
-        ), memberId);
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Reservation reservation = new Reservation(
+                    rs.getLong("reservation_id"),
+                    rs.getLong("reservation_member_id"),
+                    LocalDate.parse(rs.getString("date")),
+                    new ReservationTime(
+                            rs.getLong("time_id"),
+                            LocalTime.parse(rs.getString("start_at"))
+                    ),
+                    rs.getLong("theme_id"),
+                    rs.getLong("store_id")
+            );
+            Theme theme = new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_img_url")
+            );
+            Store store = new Store(
+                    rs.getLong("store_id"),
+                    rs.getString("store_name")
+            );
+            return new WaitingResponseProjection(
+                    rs.getLong("order_num"),
+                    reservation,
+                    theme,
+                    store,
+                    rs.getLong("wait_member_id"),
+                    rs.getTimestamp("created_at").toLocalDateTime()
+            );
+        }, memberId);
     }
 
     public Long findWaitOrder(Long waitId) {

@@ -591,7 +591,11 @@ public class ReservationControllerTest {
                     .body("reservations.id", containsInAnyOrder(1, 2))
                     .body("waitings.size()", is(1))
                     .body("waitings[0].order", is(2))
-                    .body("waitings[0].reservationId", is(3))
+                    .body("waitings[0].reservation.id", is(3))
+                    .body("waitings[0].reservation.date", is("2026-12-03"))
+                    .body("waitings[0].reservation.time.startAt", is("10:00"))
+                    .body("waitings[0].reservation.theme.id", is(1))
+                    .body("waitings[0].reservation.store.id", is(1))
                     .body("waitings[0].memberId", is(1));
         }
 

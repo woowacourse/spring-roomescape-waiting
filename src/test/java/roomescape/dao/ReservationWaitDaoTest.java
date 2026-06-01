@@ -201,7 +201,7 @@ class ReservationWaitDaoTest {
         assertThat(waitingResponseProjections)
                 .hasSize(3)
                 .extracting(
-                        WaitingResponseProjection::reservationId,
+                        projection -> projection.reservation().getId(),
                         WaitingResponseProjection::memberId
                 )
                 .containsExactly(
