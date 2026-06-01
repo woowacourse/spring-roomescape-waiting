@@ -49,12 +49,13 @@ CREATE TABLE reservation
     CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
 );
 
-INSERT INTO time_slot (start_at)
-VALUES ('10:00:00'),
-       ('12:00:00');
+CREATE INDEX IF NOT EXISTS idx_reservation_name
+    ON reservation (name);
 
-INSERT INTO theme (name, description, thumbnail_url)
-VALUES ('Theme1', 'Desc1', 'url1'),
-       ('Theme2', 'Desc2', 'url2');
+CREATE INDEX IF NOT EXISTS idx_waiting_name
+    ON waiting (name);
+
+CREATE INDEX IF NOT EXISTS idx_waiting_date_time_id_theme_id_created_at
+    ON waiting (date, time_id, theme_id, created_at, id);
 
 SET REFERENTIAL_INTEGRITY TRUE;

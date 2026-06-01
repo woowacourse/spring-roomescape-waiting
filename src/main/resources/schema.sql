@@ -23,7 +23,7 @@ CREATE TABLE time_slot
 CREATE TABLE waiting
 (
     id              BIGINT      NOT NULL AUTO_INCREMENT,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMP   NOT NULL
     name            VARCHAR(250) NOT NULL,
     date            DATE         NOT NULL,
     time_id         BIGINT       NOT NULL,
@@ -46,3 +46,12 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_reservation_name
+    ON reservation (name);
+
+CREATE INDEX IF NOT EXISTS idx_waiting_name
+    ON waiting (name);
+
+CREATE INDEX IF NOT EXISTS idx_waiting_date_time_id_theme_id_created_at
+    ON waiting (date, time_id, theme_id, created_at, id);
