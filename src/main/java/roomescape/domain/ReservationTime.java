@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class ReservationTime {
@@ -20,6 +22,10 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public boolean isPastOn(LocalDate date) {
+        return LocalDateTime.now().isAfter(LocalDateTime.of(date, startAt));
     }
 
     private void validateStartAt(LocalTime startAt) {

@@ -2,7 +2,6 @@ package roomescape.dao;
 
 import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
@@ -22,18 +21,20 @@ public class ReservationWaitDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Long createReservationWait(Long memberId, Long reservationId) {
+    public ReservationWait insert(ReservationWait reservationWait) {
         String sql = "INSERT INTO reservation_wait (member_id, reservation_id) VALUES (?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(
                 conn -> {
                     PreparedStatement ps = conn.prepareStatement(sql, new String[]{"id"});
-                    ps.setLong(1, memberId);
-                    ps.setLong(2, reservationId);
+                    ps.setLong(1, reservationWait.getMemberId());
+                    ps.setLong(2, reservationWait.getReservationId());
                     return ps;
                 }, keyHolder);
-        return Objects.requireNonNull(keyHolder.getKey()).longValue();
+
+        Long id = keyHolder.getKey().longValue();
+        return findReservationWaitById(id).orElseThrow();
     }
 
     public Optional<ReservationWait> findReservationWaitById(Long waitId) {

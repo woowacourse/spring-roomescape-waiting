@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import java.time.LocalDateTime;
+import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
+import roomescape.exception.reservationwait.SelfReservationWaitNotAllowedException;
 
 public class ReservationWait {
 
@@ -12,12 +14,21 @@ public class ReservationWait {
     public ReservationWait(Long id, Long reservationId, Long memberId, LocalDateTime createdAt) {
         validateReservationId(reservationId);
         validateMemberId(memberId);
-        validateCreatedAt(createdAt);
 
         this.id = id;
         this.reservationId = reservationId;
         this.memberId = memberId;
         this.createdAt = createdAt;
+    }
+
+    public static ReservationWait create(Reservation reservation, Long memberId) {
+        if (reservation.isPast()) {
+            throw new PastReservationWaitNotAllowedException();
+        }
+        if (reservation.isReservedBy(memberId)) {
+            throw new SelfReservationWaitNotAllowedException();
+        }
+        return new ReservationWait(null, reservation.getId(), memberId, null);
     }
 
     public Long getId() {
@@ -45,12 +56,6 @@ public class ReservationWait {
     private void validateMemberId(Long memberId) {
         if (memberId == null) {
             throw new IllegalArgumentException("회원 ID는 null일 수 없습니다.");
-        }
-    }
-
-    private void validateCreatedAt(LocalDateTime createdAt) {
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시간은 null일 수 없습니다.");
         }
     }
 }

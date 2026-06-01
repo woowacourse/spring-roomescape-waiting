@@ -31,7 +31,7 @@ public class AdminStoreReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getStoreReservations(
             @LoginMember(role = Role.MANAGER) Member manager) {
-        List<Reservation> reservations = reservationService.findByStoreId(manager.getStoreId());
+        List<Reservation> reservations = reservationService.findReservationsByStoreId(manager.getStoreId());
         return ResponseEntity.ok().body(ReservationResponse.fromAll(reservations));
     }
 
@@ -40,7 +40,7 @@ public class AdminStoreReservationController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateRequest reservationUpdateRequest,
             @LoginMember(role = Role.MANAGER) Member manager) {
-        Reservation reservation = reservationService.updateByManager(
+        Reservation reservation = reservationService.updateReservationByManager(
                 id, reservationUpdateRequest.date(), reservationUpdateRequest.timeId(), manager
         );
         return ResponseEntity.ok().body(ReservationResponse.from(reservation));
@@ -50,7 +50,7 @@ public class AdminStoreReservationController {
     public ResponseEntity<Void> deleteReservationByManager(
             @PathVariable Long id,
             @LoginMember(role = Role.MANAGER) Member manager) {
-        reservationService.deleteByManager(id, manager);
+        reservationService.deleteReservationByManager(id, manager);
         return ResponseEntity.noContent().build();
     }
 }

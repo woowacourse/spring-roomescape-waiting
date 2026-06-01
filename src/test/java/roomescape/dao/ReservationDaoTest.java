@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 
 @JdbcTest
 @ActiveProfiles("test")
@@ -157,11 +158,19 @@ public class ReservationDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void 예약을_수정한다() {
-        int updatedCount = reservationDao.updateById(1L, LocalDate.of(2026, 5, 03), 2L);
+        Reservation current = reservationDao.findReservationById(1L);
+        Reservation modified = new Reservation(
+                current.getId(),
+                current.getMemberId(),
+                LocalDate.of(2026, 5, 3),
+                new ReservationTime(2L, LocalTime.of(11, 0)),
+                current.getThemeId(),
+                current.getStoreId()
+        );
+
+        reservationDao.update(modified);
 
         Reservation updatedReservation = reservationDao.findReservationById(1L);
-
-        assertThat(updatedCount).isEqualTo(1);
         assertThat(updatedReservation)
                 .extracting(
                         Reservation::getId,
@@ -189,17 +198,20 @@ public class ReservationDaoTest {
             INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_추가한다() {
-        long id = reservationDao.insertWithKeyHolder(
+        Reservation candidate = new Reservation(
+                null,
                 1L,
                 LocalDate.of(2026, 5, 1),
-                1L,
+                new ReservationTime(1L, LocalTime.of(10, 0)),
                 1L,
                 1L
         );
 
-        Reservation reservation = reservationDao.findReservationById(id);
+        Reservation inserted = reservationDao.insert(candidate);
 
-        assertThat(id).isPositive();
+        Reservation reservation = reservationDao.findReservationById(inserted.getId());
+
+        assertThat(inserted.getId()).isPositive();
         assertThat(reservation)
                 .extracting(
                         Reservation::getId,
@@ -210,7 +222,7 @@ public class ReservationDaoTest {
                         Reservation::getThemeId
                 )
                 .containsExactly(
-                        id,
+                        inserted.getId(),
                         1L,
                         LocalDate.of(2026, 5, 1),
                         1L,
@@ -244,13 +256,17 @@ public class ReservationDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void 같은_날짜_시간_테마의_예약을_추가하면_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationDao.insertWithKeyHolder(
+        Reservation duplicate = new Reservation(
+                null,
                 2L,
                 LocalDate.of(2026, 5, 1),
-                1L,
+                new ReservationTime(1L, LocalTime.of(10, 0)),
                 1L,
                 1L
-        )).isInstanceOf(DataIntegrityViolationException.class);
+        );
+
+        assertThatThrownBy(() -> reservationDao.insert(duplicate))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
@@ -261,8 +277,8 @@ public class ReservationDaoTest {
             INSERT_TWO_STORES_SQL,
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
-    void findByStoreId는_해당_매장의_예약만_조회한다() {
-        List<Reservation> gangnamReservations = reservationDao.findByStoreId(1L);
+    void findReservationsByStoreId는_해당_매장의_예약만_조회한다() {
+        List<Reservation> gangnamReservations = reservationDao.findReservationsByStoreId(1L);
 
         assertThat(gangnamReservations).hasSize(2);
         assertThat(gangnamReservations)
@@ -281,8 +297,8 @@ public class ReservationDaoTest {
             INSERT_TWO_STORES_SQL,
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
-    void 다른_매장의_예약은_findByStoreId_결과에_포함되지_않는다() {
-        List<Reservation> hongdaeReservations = reservationDao.findByStoreId(2L);
+    void 다른_매장의_예약은_findReservationsByStoreId_결과에_포함되지_않는다() {
+        List<Reservation> hongdaeReservations = reservationDao.findReservationsByStoreId(2L);
 
         assertThat(hongdaeReservations).hasSize(1);
         assertThat(hongdaeReservations)
@@ -297,8 +313,8 @@ public class ReservationDaoTest {
             INSERT_TWO_MEMBERS_SQL,
             INSERT_TWO_STORES_SQL
     })
-    void 예약이_없는_매장은_findByStoreId가_빈_리스트를_반환한다() {
-        List<Reservation> reservations = reservationDao.findByStoreId(1L);
+    void 예약이_없는_매장은_findReservationsByStoreId가_빈_리스트를_반환한다() {
+        List<Reservation> reservations = reservationDao.findReservationsByStoreId(1L);
 
         assertThat(reservations).isEmpty();
     }
@@ -312,7 +328,11 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void 예약한_사용자id를_수정한다() {
-        reservationDao.updateMemberId(1L, 2L);
+        Reservation current = reservationDao.findReservationById(1L);
+        Reservation promoted = current.promoteTo(2L);
+
+        reservationDao.update(promoted);
+
         Reservation updatedReservation = reservationDao.findReservationById(1L);
         assertThat(updatedReservation.getMemberId()).isEqualTo(2L);
     }

@@ -64,7 +64,7 @@ public class ReservationDao {
         return reservations;
     }
 
-    public List<Reservation> findByStoreId(Long storeId) {
+    public List<Reservation> findReservationsByStoreId(Long storeId) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -108,12 +108,7 @@ public class ReservationDao {
         return reservation;
     }
 
-    public int updateById(Long id, LocalDate date, Long timeId) {
-        String sql = "update reservation set date = ?, time_id = ? where id = ?";
-        return jdbcTemplate.update(sql, date.toString(), timeId, id);
-    }
-
-    public Long insertWithKeyHolder(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
+    public Reservation insert(Reservation reservation) {
         String sql = "insert into reservation (member_id, date, time_id, theme_id, store_id) values (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -122,15 +117,37 @@ public class ReservationDao {
                     sql,
                     new String[]{"id"}
             );
-            ps.setLong(1, memberId);
-            ps.setString(2, date.toString());
-            ps.setLong(3, timeId);
-            ps.setLong(4, themeId);
-            ps.setLong(5, storeId);
+            ps.setLong(1, reservation.getMemberId());
+            ps.setString(2, reservation.getDate().toString());
+            ps.setLong(3, reservation.getTime().getId());
+            ps.setLong(4, reservation.getThemeId());
+            ps.setLong(5, reservation.getStoreId());
             return ps;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        Long id = keyHolder.getKey().longValue();
+        return new Reservation(
+                id,
+                reservation.getMemberId(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getThemeId(),
+                reservation.getStoreId()
+        );
+    }
+
+    public Reservation update(Reservation reservation) {
+        String sql = "update reservation set member_id = ?, date = ?, time_id = ?, theme_id = ?, store_id = ? where id = ?";
+        jdbcTemplate.update(
+                sql,
+                reservation.getMemberId(),
+                reservation.getDate().toString(),
+                reservation.getTime().getId(),
+                reservation.getThemeId(),
+                reservation.getStoreId(),
+                reservation.getId()
+        );
+        return reservation;
     }
 
     public int delete(Long id) {
@@ -154,8 +171,4 @@ public class ReservationDao {
         };
     }
 
-    public void updateMemberId(Long reservationId, Long memberId) {
-        String sql = "update reservation set member_id = ? where id = ?";
-        jdbcTemplate.update(sql, memberId, reservationId);
-    }
 }

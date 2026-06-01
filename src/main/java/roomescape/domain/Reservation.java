@@ -2,6 +2,9 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import roomescape.exception.auth.WrongStoreAccessException;
+import roomescape.exception.reservation.PastReservationCancelNotAllowedException;
+import roomescape.exception.reservation.PastReservationNotAllowedException;
+import roomescape.exception.reservation.ReservationOwnerMismatchException;
 
 public class Reservation {
 
@@ -25,6 +28,14 @@ public class Reservation {
         this.time = time;
         this.themeId = themeId;
         this.storeId = storeId;
+    }
+
+    public static Reservation create(Long memberId, LocalDate date, ReservationTime time, Long themeId, Long storeId) {
+        Reservation candidate = new Reservation(null, memberId, date, time, themeId, storeId);
+        if (candidate.isPast()) {
+            throw new PastReservationNotAllowedException();
+        }
+        return candidate;
     }
 
     public Long getId() {
@@ -55,6 +66,47 @@ public class Reservation {
         if (!this.storeId.equals(member.getStoreId())) {
             throw new WrongStoreAccessException();
         }
+    }
+
+    public boolean isReservedBy(Long memberId) {
+        return this.memberId.equals(memberId);
+    }
+
+    public boolean isPast() {
+        return this.time.isPastOn(this.date);
+    }
+
+    public Reservation changeTo(Long requestingMemberId, LocalDate newDate, ReservationTime newTime) {
+        if (!isReservedBy(requestingMemberId)) {
+            throw new ReservationOwnerMismatchException();
+        }
+        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId);
+        if (candidate.isPast()) {
+            throw new PastReservationNotAllowedException();
+        }
+        return candidate;
+    }
+
+    public Reservation changeToByManager(Member manager, LocalDate newDate, ReservationTime newTime) {
+        validateStoreOwnership(manager);
+        Reservation candidate = new Reservation(id, memberId, newDate, newTime, themeId, storeId);
+        if (candidate.isPast()) {
+            throw new PastReservationNotAllowedException();
+        }
+        return candidate;
+    }
+
+    public void cancelBy(Long requestingMemberId) {
+        if (!isReservedBy(requestingMemberId)) {
+            throw new ReservationOwnerMismatchException();
+        }
+        if (isPast()) {
+            throw new PastReservationCancelNotAllowedException();
+        }
+    }
+
+    public Reservation promoteTo(Long newOwnerId) {
+        return new Reservation(id, newOwnerId, date, time, themeId, storeId);
     }
 
     private void validateMemberId(Long memberId) {

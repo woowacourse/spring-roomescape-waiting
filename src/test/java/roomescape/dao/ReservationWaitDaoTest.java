@@ -70,20 +70,18 @@ class ReservationWaitDaoTest {
     void 예약대기를_생성한다() {
         long reservationId = 1L;
         long memberId = 2L;
+        ReservationWait candidate = new ReservationWait(null, reservationId, memberId, null);
 
-        long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
+        ReservationWait inserted = reservationWaitDao.insert(candidate);
 
-        assertThat(waitId).isPositive();
-        assertThat(waitId).isEqualTo(1);
-
-        ReservationWait wait = reservationWaitDao.findReservationWaitById(waitId).get();
-        assertThat(wait)
+        assertThat(inserted.getId()).isPositive();
+        assertThat(inserted)
                 .extracting(
-                        ReservationWait::getId,
                         ReservationWait::getReservationId,
                         ReservationWait::getMemberId
                 )
-                .containsExactly(waitId, reservationId, memberId);
+                .containsExactly(reservationId, memberId);
+        assertThat(inserted.getCreatedAt()).isNotNull();
     }
 
     @Test
