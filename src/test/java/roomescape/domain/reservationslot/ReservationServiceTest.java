@@ -14,9 +14,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationService;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -89,6 +91,56 @@ class ReservationServiceTest {
             assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 13));
             assertThat(response.time()).isEqualTo(LocalTime.of(10, 0));
             assertThat(response.theme().name()).isEqualTo("공포");
+        });
+    }
+
+    @Test
+    @DisplayName("같은 예약 슬롯에 두 번째 예약은 WAITING으로 생성된다.")
+    void createReservationAsWaitingWhenSlotIsAlreadyConfirmed() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
+        ReservationService reservationService = new ReservationService(
+            reservationSlotRepository,
+            reservationTimeRepository,
+            reservationDateRepository,
+            reservationRepository,
+            themeRepository,
+            userRepository,
+            now
+        );
+
+        CreateReservationRequest firstRequest = new CreateReservationRequest(
+            "보예",
+            reservationDate.getId(),
+            reservationTime.getId(),
+            theme.getId()
+        );
+        CreateReservationRequest secondRequest = new CreateReservationRequest(
+            "대기",
+            reservationDate.getId(),
+            reservationTime.getId(),
+            theme.getId()
+        );
+
+        // when
+        reservationService.createReservation(firstRequest);
+        CreateReservationResponse response = reservationService.createReservation(secondRequest);
+        Reservation waitingReservation = reservationRepository.findById(response.id()).orElseThrow();
+
+        // then
+        assertSoftly(softly -> {
+            assertThat(response.date()).isEqualTo(LocalDate.of(2026, 5, 13));
+            assertThat(response.time()).isEqualTo(LocalTime.of(10, 0));
+            assertThat(response.theme().name()).isEqualTo("공포");
+            assertThat(waitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(waitingReservation.getWaitingNumber()).isEqualTo(1);
         });
     }
 
@@ -452,6 +504,46 @@ class ReservationServiceTest {
             theme.getId()
         );
         reservationService.createReservation(request);
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.createReservation(request))
+            .isInstanceOf(BadRequestException.class)
+            .hasMessage("중복 예약입니다. 예약 정보를 다시 확인해주세요.");
+    }
+
+    @Test
+    @DisplayName("예약 저장 중 유니크 제약 위반이 발생하면 중복 예약 예외로 변환한다.")
+    void throwExceptionWhenSavingReservationFailsByUniqueConstraint() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
+        ReservationRepository duplicateReservationRepository = new FakeReservationRepository() {
+            @Override
+            public Reservation save(Reservation userReservation) {
+                throw new DuplicateKeyException("duplicate");
+            }
+        };
+        ReservationService reservationService = new ReservationService(
+            reservationSlotRepository,
+            reservationTimeRepository,
+            reservationDateRepository,
+            duplicateReservationRepository,
+            themeRepository,
+            userRepository,
+            now
+        );
+        CreateReservationRequest request = new CreateReservationRequest(
+            "보예",
+            reservationDate.getId(),
+            reservationTime.getId(),
+            theme.getId()
+        );
 
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))

@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -52,8 +53,7 @@ public class ReservationService {
         ReservationSlot targetReservationSlot = resolveReservationSlot(request);
         validateNoDuplicateReservation(reservationUser, targetReservationSlot);
 
-        Reservation savedReservation = reservationRepository.save(
-                buildReservation(targetReservationSlot, reservationUser));
+        Reservation savedReservation = saveReservationOrThrow(targetReservationSlot, reservationUser);
 
         return CreateReservationResponse.from(savedReservation);
     }
@@ -170,7 +170,7 @@ public class ReservationService {
     }
 
     private void updateReservationWhenSameSlot(Reservation reservation, ReservationSlot currentReservationSlot) {
-        reservationRepository.update(reservation.getId(), reservation.update(clock));
+        updateReservationOrThrow(reservation.getId(), reservation.update(clock));
         reorderReservationWaitingNumber(currentReservationSlot);
     }
 
@@ -189,7 +189,7 @@ public class ReservationService {
                 clock
         );
 
-        reservationRepository.update(reservation.getId(), reservationToSave);
+        updateReservationOrThrow(reservation.getId(), reservationToSave);
 
         reorderReservationWaitingNumber(currentSlot);
         reorderReservationWaitingNumber(updatedSlot);
@@ -277,7 +277,7 @@ public class ReservationService {
             ReservationTime reservationTime,
             Theme theme
     ) {
-        return reservationSlotRepository.findBySchedule(
+        return reservationSlotRepository.findByScheduleForUpdate(
                 reservationTime.getId(),
                 reservationDate.getId(),
                 theme.getId()
@@ -304,7 +304,31 @@ public class ReservationService {
             ReservationTime reservationTime,
             Theme theme
     ) {
-        return reservationSlotRepository.save(
-                ReservationSlot.createWithoutId(reservationDate, reservationTime, theme));
+        try {
+            return reservationSlotRepository.save(
+                    ReservationSlot.createWithoutId(reservationDate, reservationTime, theme));
+        } catch (DuplicateKeyException e) {
+            return reservationSlotRepository.findByScheduleForUpdate(
+                    reservationTime.getId(),
+                    reservationDate.getId(),
+                    theme.getId()
+            ).orElseThrow(() -> e);
+        }
+    }
+
+    private Reservation saveReservationOrThrow(ReservationSlot targetReservationSlot, User reservationUser) {
+        try {
+            return reservationRepository.save(buildReservation(targetReservationSlot, reservationUser));
+        } catch (DuplicateKeyException e) {
+            throw new BadRequestException(ReservationSlotErrors.DUPLICATED_RESERVATION);
+        }
+    }
+
+    private void updateReservationOrThrow(Long reservationId, Reservation reservationToSave) {
+        try {
+            reservationRepository.update(reservationId, reservationToSave);
+        } catch (DuplicateKeyException e) {
+            throw new BadRequestException(ReservationSlotErrors.DUPLICATED_RESERVATION);
+        }
     }
 }

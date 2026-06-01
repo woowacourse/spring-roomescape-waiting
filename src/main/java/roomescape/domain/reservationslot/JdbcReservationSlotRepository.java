@@ -101,6 +101,19 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             join theme th on rs.theme_id = th.id
             where rs.time_id = ? and rs.date_id = ? and rs.theme_id = ?
             """;
+    private static final String FIND_BY_SCHEDULE_FOR_UPDATE_SQL =
+        """
+            select rs.id,
+                   rd.id as date_id, rd.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.time_id = ? and rs.date_id = ? and rs.theme_id = ?
+            for update
+            """;
     private static final String FIND_BY_ID_SQL =
         """
             select rs.id,
@@ -199,6 +212,18 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
         List<ReservationSlot> result = jdbcTemplate.query(
             FIND_BY_SCHEDULE_SQL,
+            reservationRowMapper(),
+            timeId,
+            dateId,
+            themeId
+        );
+        return result.stream().findFirst();
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByScheduleForUpdate(Long timeId, Long dateId, Long themeId) {
+        List<ReservationSlot> result = jdbcTemplate.query(
+            FIND_BY_SCHEDULE_FOR_UPDATE_SQL,
             reservationRowMapper(),
             timeId,
             dateId,

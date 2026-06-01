@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
@@ -27,6 +28,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
         } else {
             sequence = Math.max(sequence, id + 1);
         }
+        validateUniqueSchedule(reservation, id);
         ReservationSlot savedReservation = ReservationSlot.createWithId(id, reservation);
         storage.put(id, savedReservation);
         return savedReservation;
@@ -111,12 +113,32 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
+    public Optional<ReservationSlot> findByScheduleForUpdate(Long timeId, Long dateId, Long themeId) {
+        return findBySchedule(timeId, dateId, themeId);
+    }
+
+    @Override
     public Optional<ReservationSlot> update(Long id, ReservationSlot withoutId) {
         if (!storage.containsKey(id)) {
             return Optional.empty();
         }
+        validateUniqueSchedule(withoutId, id);
         ReservationSlot updatedReservation = ReservationSlot.createWithId(id, withoutId);
         storage.put(id, updatedReservation);
         return Optional.of(updatedReservation);
+    }
+
+    private void validateUniqueSchedule(ReservationSlot reservation, Long id) {
+        boolean duplicated = storage.values().stream()
+                .filter(existing -> !existing.getId().equals(id))
+                .anyMatch(existing ->
+                        existing.getDate().getId().equals(reservation.getDate().getId())
+                                && existing.getTime().getId().equals(reservation.getTime().getId())
+                                && existing.getTheme().getId().equals(reservation.getTheme().getId())
+                );
+
+        if (duplicated) {
+            throw new DuplicateKeyException("중복 예약 슬롯입니다.");
+        }
     }
 }

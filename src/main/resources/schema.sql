@@ -50,6 +50,7 @@ CREATE TABLE reservation
     status              VARCHAR(30) NOT NULL,
     reserved_at         TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    CONSTRAINT uk_user_reservation_slot UNIQUE (user_id, reservation_slot_id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id) ON DELETE CASCADE
 );

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
@@ -24,6 +25,7 @@ public class FakeReservationRepository implements ReservationRepository {
         } else {
             sequence = Math.max(sequence, id + 1);
         }
+        validateUniqueReservation(userReservation, id);
         Reservation savedUserReservation = Reservation.createWithId(id, userReservation);
         storage.put(id, savedUserReservation);
         return savedUserReservation;
@@ -68,6 +70,7 @@ public class FakeReservationRepository implements ReservationRepository {
         if (!storage.containsKey(id)) {
             return Optional.empty();
         }
+        validateUniqueReservation(userReservation, id);
         Reservation updatedUserReservation = Reservation.createWithId(id, userReservation);
         storage.put(id, updatedUserReservation);
         return Optional.of(updatedUserReservation);
@@ -120,5 +123,18 @@ public class FakeReservationRepository implements ReservationRepository {
             })
             .sorted(Comparator.comparing(ReservationCountResult::startAt))
             .toList();
+    }
+
+    private void validateUniqueReservation(Reservation userReservation, Long id) {
+        boolean duplicated = storage.values().stream()
+            .filter(reservation -> !reservation.getId().equals(id))
+            .anyMatch(reservation ->
+                reservation.getUser().getId().equals(userReservation.getUser().getId())
+                    && reservation.getReservationSlot().getId().equals(userReservation.getReservationSlot().getId())
+            );
+
+        if (duplicated) {
+            throw new DuplicateKeyException("중복 예약입니다.");
+        }
     }
 }
