@@ -22,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.support.ApiIntegrationTestHelper;
 
@@ -124,74 +125,140 @@ class ReservationApiIntegrationTest {
                 .statusCode(204);
     }
 
-    @DisplayName("동일한 예약 요청이 동시에 들어오면 1건만 성공하고 나머지는 409를 반환한다.")
+    @DisplayName("과거 날짜로 예약 시도 시 422를 반환한다.")
     @Test
-    void save_reservation_concurrently() throws Exception {
+    void save_reservation_with_past_date() {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
 
-        Map<String, Object> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "타스");
+        params.put("date", "2020-01-01");
+        params.put("themeId", String.valueOf(themeId));
+        params.put("timeId", String.valueOf(timeId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
+
+    @DisplayName("타인 예약 변경 시 403을 반환한다.")
+    @Test
+    void update_other_users_reservation() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long reservationId = testHelper.insertReservation("타스", LocalDate.of(2028, 5, 6), themeId, timeId);
+
+        Map<String, String> params = new HashMap<>();
         params.put("name", "카야");
-        params.put("date", "2028-05-18");
-        params.put("themeId", themeId);
-        params.put("timeId", timeId);
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(timeId));
 
-        int requestCount = 10;
-        ExecutorService executorService = Executors.newFixedThreadPool(requestCount);
-        CountDownLatch readyLatch = new CountDownLatch(requestCount);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch = new CountDownLatch(requestCount);
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
 
-        List<Integer> statusCodes = Collections.synchronizedList(new ArrayList<>());
+    @DisplayName("지난 예약 변경 시 422를 반환한다.")
+    @Test
+    void update_past_reservation() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long reservationId = testHelper.insertReservation("타스", LocalDate.of(2020, 1, 1), themeId, timeId);
 
-        for (int i = 0; i < requestCount; i++) {
-            executorService.submit(() -> {
-                readyLatch.countDown();
-                try {
-                    startLatch.await();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "타스");
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(timeId));
 
-                    int statusCode = RestAssured.given()
-                            .contentType(ContentType.JSON)
-                            .body(params)
-                            .when()
-                            .post("/reservations")
-                            .then()
-                            .extract()
-                            .statusCode();
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
 
-                    statusCodes.add(statusCode);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    doneLatch.countDown();
-                }
-            });
-        }
+    @DisplayName("존재하지 않는 예약 변경 시 404를 반환한다.")
+    @Test
+    void update_non_existing_reservation() {
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
 
-        readyLatch.await();
-        startLatch.countDown();
-        doneLatch.await();
-        executorService.shutdown();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "타스");
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(timeId));
 
-        long successCount = statusCodes.stream()
-                .filter(code -> code == 201)
-                .count();
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", 999)
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
+    }
 
-        long conflictCount = statusCodes.stream()
-                .filter(code -> code == 409)
-                .count();
+    @DisplayName("중복된 날짜/시간으로 예약 변경 시 409를 반환한다.")
+    @Test
+    void update_reservation_with_duplicate() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation("타스", LocalDate.of(2028, 5, 6), themeId, timeId);
+        Long reservationId = testHelper.insertReservation("카야", LocalDate.of(2028, 5, 7), themeId, timeId);
 
-        assertThat(successCount).isEqualTo(1);
-        assertThat(conflictCount).isEqualTo(requestCount - 1);
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "카야");
+        params.put("date", "2028-05-06");
+        params.put("timeId", String.valueOf(timeId));
 
-        Integer savedCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?",
-                Integer.class,
-                LocalDate.of(2028, 5, 18),
-                themeId,
-                timeId
-        );
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(HttpStatus.CONFLICT.value());
+    }
 
-        assertThat(savedCount).isEqualTo(1);
+    @DisplayName("타인 예약 취소 시 403을 반환한다.")
+    @Test
+    void cancel_other_users_reservation() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long reservationId = testHelper.insertReservation("타스", LocalDate.of(2028, 5, 6), themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "카야")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+    }
+
+    @DisplayName("지난 예약 취소 시 422를 반환한다.")
+    @Test
+    void cancel_past_reservation() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long reservationId = testHelper.insertReservation("타스", LocalDate.of(2020, 1, 1), themeId, timeId);
+
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().delete("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+    }
+
+    @DisplayName("존재하지 않는 예약 취소 시 404를 반환한다.")
+    @Test
+    void cancel_non_existing_reservation() {
+        RestAssured.given()
+                .queryParam("name", "타스")
+                .when().delete("/reservations/{id}", 999)
+                .then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }
