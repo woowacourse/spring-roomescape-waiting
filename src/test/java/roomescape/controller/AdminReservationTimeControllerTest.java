@@ -120,7 +120,7 @@ public class AdminReservationTimeControllerTest {
 
         @Test
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 존재하지_않는_예약시간이면_404를_반환한다() {
+        void 존재하지_않는_예약시간_삭제는_멱등하게_204를_반환한다() {
             String cookie = authenticate();
             createDefaultTimes(cookie);
 
@@ -128,8 +128,7 @@ public class AdminReservationTimeControllerTest {
                     .header("Cookie", cookie)
                     .when().delete("/api/v1/admin/reservation-times/4")
                     .then().log().all()
-                    .statusCode(404)
-                    .body("errorCode", is("RESERVATION_TIME404_001"));
+                    .statusCode(204);
         }
 
         @Test

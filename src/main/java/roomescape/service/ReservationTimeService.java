@@ -11,7 +11,6 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.response.AvailableTimeResponse;
 import roomescape.exception.reservationtime.ReservationTimeInUseException;
-import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,16 +40,9 @@ public class ReservationTimeService {
     @Transactional
     public void deleteReservationTime(Long id) {
         try {
-            int deleteCount = reservationTimeDao.delete(id);
-            validateDeleted(deleteCount);
+            reservationTimeDao.delete(id);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationTimeInUseException();
-        }
-    }
-
-    private void validateDeleted(int deleteCount) {
-        if (deleteCount == 0) {
-            throw new ReservationTimeNotFoundException();
         }
     }
 }

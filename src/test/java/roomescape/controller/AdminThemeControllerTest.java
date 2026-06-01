@@ -137,7 +137,7 @@ public class AdminThemeControllerTest {
 
         @Test
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 테마가_존재하지_않으면_404를_반환한다() {
+        void 존재하지_않는_테마_삭제는_멱등하게_204를_반환한다() {
             String cookie = authenticate();
 
             RestAssured.given().log().all()
@@ -153,8 +153,7 @@ public class AdminThemeControllerTest {
                     .header("Cookie", cookie)
                     .when().delete("/api/v1/admin/themes/2")
                     .then().log().all()
-                    .statusCode(404)
-                    .body("errorCode", is("THEME404_001"));
+                    .statusCode(204);
         }
 
         @Test

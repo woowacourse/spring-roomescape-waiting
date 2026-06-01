@@ -1,7 +1,9 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.exception.reservationtime.ReservationTimeInUseException;
-import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 
 public class ReservationTimeServiceTest {
 
@@ -23,12 +24,13 @@ public class ReservationTimeServiceTest {
     }
 
     @Test
-    void 존재하지않는_시간은_삭제할_수_없다() {
+    void 존재하지_않는_시간_삭제는_멱등하게_성공한다() {
         when(reservationTimeDao.delete(1L))
                 .thenReturn(0);
 
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(ReservationTimeNotFoundException.class);
+        assertThatCode(() -> reservationTimeService.deleteReservationTime(1L))
+                .doesNotThrowAnyException();
+        verify(reservationTimeDao).delete(1L);
     }
 
     @Test

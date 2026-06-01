@@ -9,7 +9,6 @@ import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 import roomescape.dto.PopularThemeResult;
 import roomescape.exception.theme.ThemeInUseException;
-import roomescape.exception.theme.ThemeNotFoundException;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,16 +39,9 @@ public class ThemeService {
     @Transactional
     public void deleteTheme(Long id) {
         try {
-            int deleteCount = themeDao.delete(id);
-            validateDeleted(deleteCount);
+            themeDao.delete(id);
         } catch (DataIntegrityViolationException e) {
             throw new ThemeInUseException();
-        }
-    }
-
-    private void validateDeleted(int deleteCount) {
-        if (deleteCount == 0) {
-            throw new ThemeNotFoundException();
         }
     }
 }
