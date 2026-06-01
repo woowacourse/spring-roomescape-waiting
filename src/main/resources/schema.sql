@@ -43,5 +43,6 @@ CREATE TABLE reservation
     name    VARCHAR(10) NOT NULL,
     slot_id BIGINT,
     PRIMARY KEY (id),
-    FOREIGN KEY (slot_id) REFERENCES slot (id)
+    FOREIGN KEY (slot_id) REFERENCES slot (id),
+    CONSTRAINT UQ_slot_id UNIQUE (slot_id)
 );
