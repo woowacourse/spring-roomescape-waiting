@@ -43,10 +43,10 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
-        Waiting waiting = Waiting.create(name, date, time, theme, LocalDateTime.now(clock));
+        checkDuplicatedWaiting(date, timeId, themeId, name);
+        checkDuplicatedReservation(date, timeId, themeId, name);
 
-        checkDuplicatedWaiting(waiting);
-        checkDuplicatedReservation(waiting);
+        Waiting waiting = Waiting.create(name, date, time, theme, LocalDateTime.now(clock));
 
         waiting = waitingRepository.save(waiting);
         Long order = waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(waiting.getId(),
@@ -63,21 +63,17 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    private void checkDuplicatedWaiting(Waiting waiting) {
-        boolean duplicated = waitingRepository.existsByScheduleAndName(waiting.getDate(), waiting.getTime().getId(),
-                waiting.getTheme().getId(), waiting.getName());
+    private void checkDuplicatedWaiting(LocalDate date, long timeId, long themeId, String name) {
+        boolean duplicated = waitingRepository.existsByScheduleAndName(date, timeId, themeId, name);
 
         if (duplicated) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_WAITING);
         }
     }
 
-    private void checkDuplicatedReservation(Waiting waiting) {
-        boolean duplicated = reservationRepository.findBySchedule(
-                        waiting.getDate(),
-                        waiting.getTime().getId(),
-                        waiting.getTheme().getId())
-                .filter(found -> waiting.isSameName(found.getName()))
+    private void checkDuplicatedReservation(LocalDate date, long timeId, long themeId, String name) {
+        boolean duplicated = reservationRepository.findBySchedule(date, timeId, themeId)
+                .filter(found -> found.getName().equals(name))
                 .isPresent();
 
         if (duplicated) {
