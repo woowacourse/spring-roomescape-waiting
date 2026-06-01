@@ -29,53 +29,9 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 대기를_생성한다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
+        createDefaultReservaionSlot();
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("name", "코코");
-        waiting.put("date", "2026-08-05");
-        waiting.put("timeId", 1L);
-        waiting.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(waiting)
-                .when().post("/api/waitings")
-                .then().log().all()
-                .statusCode(201);
+        createWaiting("코코");
 
         RestAssured.given().log().all()
                 .when().get("/api/admin/waitings")
@@ -87,53 +43,9 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 이름으로_대기를_조회할_수_있다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
+        createDefaultReservaionSlot();
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("name", "코코");
-        waiting.put("date", "2026-08-05");
-        waiting.put("timeId", 1L);
-        waiting.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(waiting)
-                .when().post("/api/waitings")
-                .then().log().all()
-                .statusCode(201);
+        createWaiting("코코");
 
         RestAssured.given().log().all()
                 .queryParam("name", "코코")
@@ -147,53 +59,9 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 대기id로_대기를_삭제한다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
+        createDefaultReservaionSlot();
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> waiting = new HashMap<>();
-        waiting.put("name", "코코");
-        waiting.put("date", "2026-08-05");
-        waiting.put("timeId", 1L);
-        waiting.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(waiting)
-                .when().post("/api/waitings")
-                .then().log().all()
-                .statusCode(201);
+        createWaiting("코코");
 
         Long waitingId = RestAssured.given().log().all()
                 .when().get("/api/admin/waitings")
@@ -254,40 +122,7 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 내_예약에는_대기를_생성할_수_없다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/reservations")
-                .then().log().all()
-                .statusCode(201);
+        createDefaultReservaionSlot();
 
         Map<String, Object> waiting = new HashMap<>();
         waiting.put("name", "브라운");
@@ -306,41 +141,32 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 같은_이름으로_동일한_날짜_시간_테마에_하나의_대기만_생성할_수_있다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
+        createDefaultReservaionSlot();
+
+        createWaiting("코코");
+
+        Map<String, Object> duplicatedWaiting = new HashMap<>();
+        duplicatedWaiting.put("name", "코코");
+        duplicatedWaiting.put("date", "2026-08-05");
+        duplicatedWaiting.put("timeId", 1L);
+        duplicatedWaiting.put("themeId", 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
+                .body(duplicatedWaiting)
+                .when().post("/api/waitings")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(WaitingErrorCode.WAITING_DUPLICATE.getHttpStatus().value())
+                .body("code", is(WaitingErrorCode.WAITING_DUPLICATE.getErrorName()));
+    }
 
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
+    private void createDefaultReservaionSlot() {
+        createDefaultTime("10:00");
+        createDefaultTheme("귀신 찾기");
+        createDefaultReservation("브라운");
+    }
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/api/reservations")
-                .then().log().all()
-                .statusCode(201);
-
+    private void createWaiting(String name) {
         Map<String, Object> waiting = new HashMap<>();
         waiting.put("name", "코코");
         waiting.put("date", "2026-08-05");
@@ -353,19 +179,45 @@ public class WaitingAcceptanceTest {
                 .when().post("/api/waitings")
                 .then().log().all()
                 .statusCode(201);
-
-        Map<String, Object> duplicatedWaiting = new HashMap<>();
-        waiting.put("name", "코코");
-        waiting.put("date", "2026-08-05");
-        waiting.put("timeId", 1L);
-        waiting.put("themeId", 1L);
+    }
+    private void createDefaultTime(String startAt) {
+        Map<String, String> timeParams = new HashMap<>();
+        timeParams.put("startAt", startAt);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(waiting)
-                .when().post("/api/waitings")
+                .body(timeParams)
+                .when().post("/api/admin/times")
                 .then().log().all()
-                .statusCode(WaitingErrorCode.WAITING_DUPLICATE.getHttpStatus().value())
-                .body("code", is(WaitingErrorCode.WAITING_DUPLICATE.getErrorName()));
+                .statusCode(201);
+    }
+
+    private void createDefaultTheme(String name) {
+        Map<String, String> themeParams = new HashMap<>();
+        themeParams.put("name", "귀신찾기");
+        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
+        themeParams.put("imageUrl", "https://image.png");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(themeParams)
+                .when().post("/api/admin/themes")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    private void createDefaultReservation(String name) {
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", "2026-08-05");
+        reservation.put("timeId", 1L);
+        reservation.put("themeId", 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/api/reservations")
+                .then().log().all()
+                .statusCode(201);
     }
 }
