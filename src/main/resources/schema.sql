@@ -33,7 +33,7 @@ CREATE TABLE reservation (
 
 CREATE TABLE waiting (
                          id         BIGINT       NOT NULL AUTO_INCREMENT,
-                         name       VARCHAR(255) NOT NULL,
+                         name       VARCHAR(30) NOT NULL,
                          date       DATE NOT NULL,
                          time_id    BIGINT       NOT NULL,
                          theme_id   BIGINT       NOT NULL,
