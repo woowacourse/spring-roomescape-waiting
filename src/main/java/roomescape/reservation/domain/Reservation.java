@@ -28,7 +28,11 @@ public class Reservation {
 
     public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
         return Reservation.builder()
-                .id(id).name(name).date(date).time(time).theme(theme)
+                .id(id)
+                .name(name)
+                .date(date)
+                .time(time)
+                .theme(theme)
                 .build();
     }
 
