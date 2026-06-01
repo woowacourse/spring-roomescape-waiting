@@ -7,26 +7,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
+
 /**
  * 서비스 정책 검증 인수 테스트
- *
- * data.sql 기준 예약 ID:
+ * acceptance-reset.sql 기준 예약 ID:
  *   1  ~ 40 : Theme 1, CONFIRMED (미래 날짜)
  *  41  ~ 75 : Theme 2, CONFIRMED (미래 날짜)
  *  76       : COMPLETED, theme_slot_id=76 (2026-04-26, time_id=1, theme_id=1)
  *  77       : COMPLETED, theme_slot_id=77 (2026-04-26, time_id=4, theme_id=1)
  *  78       : CANCELLED, theme_slot_id=78 (2026-04-26, time_id=7, theme_id=2)
- *
- * 중복 예약 검증용 기존 예약:
- *   theme_slot_id=34 (theme_id=1, date=2026-05-27, time_id=3, CONFIRMED)
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = "/acceptance-reset.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class PolicyAcceptanceTest {
 
     @LocalServerPort
@@ -37,178 +35,172 @@ public class PolicyAcceptanceTest {
         RestAssured.port = port;
     }
 
-    // ── 공통 규칙: 유효하지 않은 입력값(400) ──────────────────────────────────────
+    // 성공 시나리오
 
     @Test
-    @DisplayName("[공통] 예약자 이름이 빈 문자열이면 400을 반환한다.")
-    void 빈_이름으로_예약_등록시_400() {
-        Map<String, Object> body = Map.of(
-                "name", "",
-                "themeSlotId", 1
-        );
+    @DisplayName("빈 슬롯에 예약하면 CONFIRMED 상태로 즉시 확정된다.")
+    void 빈_슬롯_예약시_CONFIRMED로_생성된다() {
+        long themeSlotId = 새_슬롯_조회(1);
 
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(Map.of("name", "브라운", "themeSlotId", themeSlotId))
                 .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+                .then().statusCode(201)
+                .body("name", equalTo("브라운"))
+                .body("status", equalTo("CONFIRMED"));
     }
 
     @Test
-    @DisplayName("[공통] 테마 슬롯 ID 없이 예약 요청하면 400을 반환한다.")
-    void 테마슬롯ID_없이_예약_등록시_400() {
-        Map<String, Object> body = Map.of(
-                "name", "브라운"
-        );
+    @DisplayName("이미 예약된 슬롯에 신청하면 PENDING 대기 상태로 생성된다.")
+    void 이미_예약된_슬롯_신청시_PENDING으로_생성된다() {
+        long themeSlotId = 새_슬롯_조회(1);
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(body)
+        RestAssured.given().contentType(ContentType.JSON)
+                .body(Map.of("name", "첫번째", "themeSlotId", themeSlotId))
                 .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
-    }
+                .then().statusCode(201)
+                .body("status", equalTo("CONFIRMED"));
 
-    // ── 예약 규칙: 존재하지 않는 예약(404) ────────────────────────────────────────
-
-    @Test
-    @DisplayName("[예약] 존재하지 않는 예약을 취소하면 404를 반환한다.")
-    void 존재하지_않는_예약_취소시_404() {
-        RestAssured.given().log().all()
-                .when().patch("/reservations/99999/cancel")
-                .then().log().all()
-                .statusCode(404);
+        RestAssured.given().contentType(ContentType.JSON)
+                .body(Map.of("name", "두번째", "themeSlotId", themeSlotId))
+                .when().post("/reservations")
+                .then().statusCode(201)
+                .body("status", equalTo("PENDING"));
     }
 
     @Test
-    @DisplayName("[예약] 존재하지 않는 예약을 변경하면 404를 반환한다.")
-    void 존재하지_않는_예약_변경시_404() {
-        Map<String, Object> body = Map.of(
-                "themeSlotId", 2
-        );
+    @DisplayName("CONFIRMED 예약 취소 시 첫 번째 PENDING 대기자가 자동으로 CONFIRMED로 승격된다.")
+    void CONFIRMED_취소시_대기자가_자동_승격된다() {
+        long themeSlotId = 새_슬롯_조회(1);
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(body)
-                .when().patch("/reservations/99999")
-                .then().log().all()
-                .statusCode(404);
+        long confirmedId = RestAssured.given().contentType(ContentType.JSON)
+                .body(Map.of("name", "첫번째", "themeSlotId", themeSlotId))
+                .when().post("/reservations")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        RestAssured.given().contentType(ContentType.JSON)
+                .body(Map.of("name", "두번째", "themeSlotId", themeSlotId))
+                .when().post("/reservations")
+                .then().statusCode(201);
+
+        RestAssured.given()
+                .when().patch("/reservations/" + confirmedId + "/cancel")
+                .then().statusCode(204);
+
+        RestAssured.given()
+                .when().get("/reservations?name=두번째")
+                .then().statusCode(200);
     }
 
-    // ── 예약 규칙: 이미 취소/완료된 예약 취소(409) ────────────────────────────────
-
-    // ── 예약 규칙: 과거 날짜·시간(422) ────────────────────────────────────────────
+    // 과거 날짜로 위반
 
     @Test
-    @DisplayName("[예약] 과거 날짜로 예약 등록하면 422를 반환한다.")
+    @DisplayName("과거 날짜로 예약 등록하면 422를 반환한다.")
     void 과거_날짜로_예약_등록시_422() {
-        Map<String, Object> body = Map.of(
-                "name", "브라운",
-                "themeSlotId", 76
-        );
-
-        RestAssured.given().log().all()
+        // theme_slot_id=76: 2026-04-26 (과거 날짜)
+        RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(Map.of("name", "브라운", "themeSlotId", 76))
                 .when().post("/reservations")
-                .then().log().all()
-                .statusCode(422);
+                .then().statusCode(422);
     }
 
     @Test
-    @DisplayName("[예약] 과거 날짜로 예약 변경하면 422를 반환한다.")
+    @DisplayName("과거 날짜로 예약 변경하면 422를 반환한다.")
     void 과거_날짜로_예약_변경시_422() {
-        Map<String, Object> body = Map.of(
-                "themeSlotId", 76
-        );
-
-        RestAssured.given().log().all()
+        // theme_slot_id=76: 2026-04-26 (과거 날짜)
+        RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(Map.of("themeSlotId", 76))
                 .when().patch("/reservations/1")
-                .then().log().all()
-                .statusCode(422);
+                .then().statusCode(422);
     }
 
+    // 예약 상태 위반
+
     @Test
-    @DisplayName("[예약] 이미 취소된 예약을 취소하면 422를 반환한다.")
+    @DisplayName("이미 취소된 예약을 취소하면 422를 반환한다.")
     void 이미_취소된_예약_취소시_422() {
-        // ID 78: CANCELLED 상태
-        RestAssured.given().log().all()
+        // reservation_id=78: CANCELLED 상태
+        RestAssured.given()
                 .when().patch("/reservations/78/cancel")
-                .then().log().all()
-                .statusCode(422);
+                .then().statusCode(422);
     }
 
     @Test
-    @DisplayName("[예약] 이미 완료된 예약을 취소하면 422를 반환한다.")
+    @DisplayName("이미 완료된 예약을 취소하면 422를 반환한다.")
     void 이미_완료된_예약_취소시_422() {
-        // ID 76: COMPLETED 상태
-        RestAssured.given().log().all()
+        // reservation_id=76: COMPLETED 상태
+        RestAssured.given()
                 .when().patch("/reservations/76/cancel")
-                .then().log().all()
-                .statusCode(422);
+                .then().statusCode(422);
     }
 
-    // ── 예약 규칙: 존재하지 않는 시간 ID로 변경(404) ──────────────────────────────
+    // 404
 
     @Test
-    @DisplayName("[예약] 존재하지 않는 테마 슬롯 ID로 예약 변경하면 404를 반환한다.")
+    @DisplayName("존재하지 않는 예약을 취소하면 404를 반환한다.")
+    void 존재하지_않는_예약_취소시_404() {
+        RestAssured.given()
+                .when().patch("/reservations/99999/cancel")
+                .then().statusCode(404);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약을 변경하면 404를 반환한다.")
+    void 존재하지_않는_예약_변경시_404() {
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("themeSlotId", 2))
+                .when().patch("/reservations/99999")
+                .then().statusCode(404);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 슬롯 ID로 예약 변경하면 404를 반환한다.")
     void 존재하지_않는_테마슬롯ID로_예약_변경시_404() {
-        Map<String, Object> body = Map.of(
-                "themeSlotId", 99999
-        );
-
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(Map.of("themeSlotId", 99999))
                 .when().patch("/reservations/1")
-                .then().log().all()
-                .statusCode(404);
+                .then().statusCode(404);
     }
 
-    // ── 예약 규칙: 중복 예약(409) ──────────────────────────────────────────────────
+    // 409
 
     @Test
-    @DisplayName("[예약] 같은 날짜·시간·테마에 이미 나의 예약이 있으면 409를 반환한다.")
+    @DisplayName("같은 사용자가 같은 슬롯에 중복 예약하면 409를 반환한다.")
     void 중복_예약_등록시_409() {
-        String futureDate = LocalDate.now().plusMonths(1).toString();
+        long themeSlotId = 새_슬롯_조회(1);
+        Map<String, Object> body = Map.of("name", "브라운", "themeSlotId", themeSlotId);
 
-        // 미래 날짜의 themeSlot 목록 조회 (없으면 자동 생성)
-        long themeSlotId = RestAssured.given()
-                .when().get("/times?themeId=1&date=" + futureDate)
-                .then().statusCode(200)
-                .extract().jsonPath().getLong("[0].id");
-
-        Map<String, Object> body = Map.of("name", "테스트사용자", "themeSlotId", themeSlotId);
-
-        // 첫 번째 예약 → 201
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(body)
+        RestAssured.given().contentType(ContentType.JSON).body(body)
                 .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+                .then().statusCode(201);
 
-        // 같은 사용자, 같은 슬롯으로 중복 예약 → 409
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(body)
+        RestAssured.given().contentType(ContentType.JSON).body(body)
                 .when().post("/reservations")
-                .then().log().all()
-                .statusCode(409);
+                .then().statusCode(409);
     }
 
-    // ── 예약 규칙: 예약이 존재하는 시간 삭제(422) ──────────────────────────────────
+    // 422
 
     @Test
-    @DisplayName("[시간] 예약이 존재하는 시간을 삭제하면 422를 반환한다.")
+    @DisplayName("예약이 존재하는 시간을 삭제하면 422를 반환한다.")
     void 예약이_존재하는_시간_삭제시_422() {
         // time_id=1 은 여러 예약에서 사용 중
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .when().delete("/times/1")
-                .then().log().all()
-                .statusCode(422);
+                .then().statusCode(422);
+    }
+
+    private long 새_슬롯_조회(int themeId) {
+        String futureDate = LocalDate.now().plusMonths(6).toString();
+        return RestAssured.given()
+                .when().get("/times?themeId=" + themeId + "&date=" + futureDate)
+                .then().statusCode(200)
+                .extract().jsonPath().getLong("[0].id");
     }
 }
