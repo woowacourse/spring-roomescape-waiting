@@ -31,6 +31,7 @@ public class ThemeService {
         this.popularThemeRepository = popularThemeRepository;
     }
 
+    @Transactional
     public Theme save(ThemeCreateCommand createCommand) {
         Theme theme = Theme.create(
                 createCommand.name(),
@@ -53,6 +54,7 @@ public class ThemeService {
         return popularThemeRepository.findTopNByPeriod(startAt, endAt, sortType, limit);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         themeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ThemeErrorCode.THEME_NOT_FOUND, id));
