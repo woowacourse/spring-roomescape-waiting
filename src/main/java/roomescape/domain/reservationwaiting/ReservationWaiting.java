@@ -46,6 +46,10 @@ public class ReservationWaiting {
         return name;
     }
 
+    public boolean hasName(final String name) {
+        return this.name.equals(name);
+    }
+
     public LocalDateTime getRequestAt() {
         return requestAt;
     }

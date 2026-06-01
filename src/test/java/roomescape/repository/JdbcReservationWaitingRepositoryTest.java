@@ -87,8 +87,8 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("대기 ID와 이름으로 예약 대기를 삭제한다")
-    void deleteByIdAndName() {
+    @DisplayName("대기 ID로 예약 대기를 조회한다")
+    void findById() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
@@ -96,7 +96,26 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
+        ReservationWaiting found = jdbcReservationWaitingRepository.findById(saved.getId())
+                .orElseThrow();
+
+        assertThat(found.getId()).isEqualTo(saved.getId());
+        assertThat(found.getName()).isEqualTo("아루");
+        assertThat(found.getReservation()).isEqualTo(reservation);
+        assertThat(found.getRequestAt()).isEqualTo(LocalDateTime.parse("2026-08-05T12:00:00"));
+    }
+
+    @Test
+    @DisplayName("대기 ID로 예약 대기를 삭제한다")
+    void deleteById() {
+        Reservation reservation = createReservation();
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        ));
+
+        int affectedRowCount = jdbcReservationWaitingRepository.deleteById(saved.getId());
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",
@@ -109,28 +128,6 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("대기 ID가 같아도 이름이 다르면 예약 대기를 삭제하지 않는다")
-    void deleteByIdAndDifferentName() {
-        Reservation reservation = createReservation();
-        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
-                "아루",
-                LocalDateTime.parse("2026-08-05T12:00:00")
-        ));
-
-        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
-
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT count(1) FROM reservation_waiting WHERE id = ?",
-                Integer.class,
-                saved.getId()
-        );
-
-        assertThat(affectedRowCount).isZero();
-        assertThat(count).isOne();
-    }
-
-    @Test
     @DisplayName("존재하지 않는 대기 ID는 삭제 건수가 0이다")
     void deleteByNotFoundId() {
         Reservation reservation = createReservation();
@@ -140,7 +137,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(999L, "아루");
+        int affectedRowCount = jdbcReservationWaitingRepository.deleteById(999L);
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",

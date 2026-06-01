@@ -73,7 +73,20 @@ public class ReservationWaitingService {
     }
 
     public void deleteByIdAndName(final Long waitingId, final String name) {
-        int affectedRowCount = reservationWaitingRepository.deleteByIdAndName(waitingId, name);
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                        "삭제된 대기 데이터가 없습니다."
+                ));
+
+        if (!reservationWaiting.hasName(name)) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.RESERVATION_WAITING_NOT_FOUND,
+                    "삭제된 대기 데이터가 없습니다."
+            );
+        }
+
+        int affectedRowCount = reservationWaitingRepository.deleteById(waitingId);
 
         if (affectedRowCount <= 0) {
             throw new ResourceNotFoundException(
