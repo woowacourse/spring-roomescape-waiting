@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.history.dto.HistoryResponse;
+import roomescape.controller.history.dto.MyHistoryResponse;
 import roomescape.service.history.MyHistoryService;
 
 @RestController
@@ -20,9 +20,9 @@ public class MyHistoryController {
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<List<HistoryResponse>> getHistorys(@PathVariable final String name) {
+    public ResponseEntity<List<MyHistoryResponse>> getHistorys(@PathVariable final String name) {
         return ResponseEntity.ok(myHistoryService.getAllByName(name).stream()
-                .map(HistoryResponse::from)
+                .map(MyHistoryResponse::from)
                 .toList());
     }
 }

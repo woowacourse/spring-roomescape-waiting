@@ -6,7 +6,7 @@ import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.service.history.MyHistoryResult;
 import roomescape.service.history.ReservationHistoryStatus;
 
-public record HistoryResponse(
+public record MyHistoryResponse(
         Long reservationId,
         Long waitingId,
         ReservationHistoryStatus status,
@@ -17,8 +17,8 @@ public record HistoryResponse(
         Integer sequence
 ) {
 
-    public static HistoryResponse from(final MyHistoryResult history) {
-        return new HistoryResponse(
+    public static MyHistoryResponse from(final MyHistoryResult history) {
+        return new MyHistoryResponse(
                 history.reservationId(),
                 history.waitingId(),
                 history.status(),

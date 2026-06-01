@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
-import roomescape.controller.history.dto.HistoryResponse;
+import roomescape.controller.history.dto.MyHistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
@@ -65,7 +65,7 @@ public class ReservationPageModelAssembler {
         model.addAttribute("reservationTimes", reservationTimeService.getAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList());
-        List<HistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
+        List<MyHistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
         model.addAttribute("availableTimes", getAvailableTimes(
                 selectedThemeId,
                 selectedTheme,
@@ -79,7 +79,7 @@ public class ReservationPageModelAssembler {
             final Long selectedThemeId,
             final ThemeResponse selectedTheme,
             final LocalDate selectedDate,
-            final List<HistoryResponse> myHistories
+            final List<MyHistoryResponse> myHistories
     ) {
         if (selectedTheme == null || selectedDate == null) {
             return List.of();
@@ -94,7 +94,7 @@ public class ReservationPageModelAssembler {
     }
 
     private Long findWaitingId(
-            final List<HistoryResponse> myHistories,
+            final List<MyHistoryResponse> myHistories,
             final LocalDate selectedDate,
             final Long selectedThemeId,
             final Long timeId
@@ -104,12 +104,12 @@ public class ReservationPageModelAssembler {
                 .filter(history -> history.date().equals(selectedDate))
                 .filter(history -> history.theme().id().equals(selectedThemeId))
                 .filter(history -> history.time().id().equals(timeId))
-                .map(HistoryResponse::waitingId)
+                .map(MyHistoryResponse::waitingId)
                 .findFirst()
                 .orElse(null);
     }
 
-    private List<HistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
+    private List<MyHistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
         if (reservationName == null || reservationName.isBlank()) {
             return List.of();
         }
@@ -119,7 +119,7 @@ public class ReservationPageModelAssembler {
         }
 
         return myHistoryService.getAllByName(reservationName).stream()
-                .map(HistoryResponse::from)
+                .map(MyHistoryResponse::from)
                 .toList();
     }
 }
