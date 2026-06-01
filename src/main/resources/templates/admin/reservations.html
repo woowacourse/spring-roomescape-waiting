@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>관리자 — 예약</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>예약 목록</h1>
+    <p class="muted"><a th:href="@{/admin}">← 관리자 홈</a></p>
+    <div class="panel">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>날짜</th>
+                <th>시간 ID</th>
+                <th>시작</th>
+                <th>테마</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+        <p id="empty" class="muted" style="display:none;">등록된 예약이 없습니다.</p>
+        <p id="err" class="status-msg err" style="display:none;"></p>
+    </div>
+</main>
+<script>
+    const tbody = document.getElementById('rows');
+    const empty = document.getElementById('empty');
+    const err = document.getElementById('err');
+
+    async function load() {
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/reservations');
+            if (!res.ok) throw new Error('조회 실패');
+            const list = await res.json();
+            tbody.innerHTML = '';
+            empty.style.display = list.length ? 'none' : 'block';
+            for (const r of list) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r.id}</td>
+                    <td>${escapeHtml(r.name)}</td>
+                    <td>${r.date}</td>
+                    <td>${r.time.id}</td>
+                    <td>${r.time.startAt}</td>
+                    <td>${escapeHtml(r.theme.name)}</td>
+                    <td><button type="button" class="btn btn-danger" data-id="${r.id}">삭제</button></td>`;
+                tbody.appendChild(tr);
+            }
+            tbody.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.addEventListener('click', () => remove(btn.dataset.id));
+            });
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    async function remove(id) {
+        if (!confirm('이 예약을 삭제할까요?')) return;
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/reservations/' + id, {method: 'DELETE'});
+            if (!res.ok) throw new Error('삭제 실패');
+            await load();
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    load();
+</script>
+</body>
+</html>
