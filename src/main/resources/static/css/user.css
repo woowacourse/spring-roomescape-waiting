@@ -1,0 +1,733 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #050607;
+  color: #f1f1f1;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.header {
+  height: 58px;
+  padding: 0 140px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #050607;
+  border-bottom: 1px solid #121417;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.logo {
+  color: #d2b44c;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 30px;
+}
+
+.nav a {
+  color: #a7a7a7;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: #ffffff;
+}
+
+.container {
+  width: 960px;
+  margin: 0 auto;
+}
+
+.hero {
+  padding-top: 70px;
+  text-align: center;
+  margin-bottom: 58px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+}
+
+.hero p {
+  width: 620px;
+  margin: 14px auto 0;
+  color: #b5b5b5;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* 인기 테마 */
+.popular-section {
+  margin-bottom: 64px;
+}
+
+.popular-heading {
+  margin-bottom: 24px;
+}
+
+.popular-heading p {
+  margin: 0 0 8px;
+  color: #d2b44c;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.popular-heading h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+}
+
+.popular-theme-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.popular-theme-card {
+  position: relative;
+  height: 240px;
+  border: 1px solid #1e2228;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b0d10;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.popular-theme-card:hover {
+  transform: translateY(-5px);
+  border-color: #d2b44c;
+}
+
+.popular-theme-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.74;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.popular-theme-card:hover img {
+  opacity: 0.92;
+  transform: scale(1.04);
+}
+
+.popular-theme-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.94), rgba(0, 0, 0, 0.2) 62%, rgba(0, 0, 0, 0.08));
+}
+
+.popular-rank-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(210, 180, 76, 0.96);
+  color: #070707;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.popular-theme-content {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1;
+}
+
+.popular-theme-content h3 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.popular-theme-content p {
+  margin: 0;
+  color: #d0d0d0;
+  font-size: 12px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.popular-empty-message {
+  grid-column: 1 / -1;
+  padding: 42px 0;
+  text-align: center;
+  color: #a9a9a9;
+  border: 1px solid #1e2228;
+  border-radius: 12px;
+  background: #0b0d10;
+}
+
+/* 날짜/테마 선택 */
+.step-section {
+  margin-bottom: 54px;
+}
+
+.step-section h2 {
+  margin: 0 0 22px;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.step-section h2 span {
+  color: #d2b44c;
+  margin-right: 8px;
+}
+
+.date-list {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.date-card {
+  width: 92px;
+  height: 92px;
+  border: 1px solid #1e2228;
+  border-radius: 7px;
+  background: #0b0d10;
+  color: #a9a9a9;
+  cursor: pointer;
+}
+
+.date-card:hover,
+.date-card.selected {
+  border-color: #d2b44c;
+  background: rgba(210, 180, 76, 0.12);
+  color: #ffffff;
+}
+
+.date-card .month {
+  display: block;
+  margin-top: 18px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.date-card .day {
+  display: block;
+  margin-top: 6px;
+  font-size: 28px;
+  font-family: Georgia, serif;
+}
+
+.theme-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.theme-card {
+  position: relative;
+  height: 260px;
+  border: 1px solid #1e2228;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0b0d10;
+  cursor: pointer;
+}
+
+.theme-card:hover,
+.theme-card.selected {
+  border-color: #d2b44c;
+}
+
+.theme-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.72;
+}
+
+.theme-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88), transparent 60%);
+}
+
+.theme-card-content {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1;
+}
+
+.theme-card-content h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.theme-card-content p {
+  margin: 0;
+  color: #dddddd;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.next-button-area {
+  display: flex;
+  justify-content: flex-end;
+  margin: 70px 0;
+}
+
+.primary-button {
+  border: none;
+  border-radius: 6px;
+  background: #8d7d31;
+  color: #080808;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #d2b44c;
+}
+
+.primary-button.small {
+  width: 190px;
+  height: 52px;
+}
+
+.primary-button.full {
+  width: 100%;
+  height: 52px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* 예약 확정 */
+.confirm-section {
+  width: 680px;
+  margin: 62px auto 0;
+}
+
+.back-button {
+  margin-bottom: 42px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirm-card {
+  border: 1px solid rgba(210, 180, 76, 0.28);
+  border-radius: 8px;
+  background: #0b0d10;
+  overflow: hidden;
+}
+
+.confirm-header {
+  padding: 32px;
+  text-align: center;
+  border-bottom: 1px solid #1e2228;
+}
+
+.confirm-header h1 {
+  margin: 0;
+  color: #d2b44c;
+  font-size: 30px;
+  letter-spacing: 4px;
+}
+
+.confirm-header p {
+  margin: 12px 0 0;
+  color: #b5b5b5;
+}
+
+.confirm-body {
+  padding: 26px;
+}
+
+.form-group {
+  margin-bottom: 28px;
+}
+
+.form-group h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.time-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.time-button {
+  height: 50px;
+  border: 1px solid #222832;
+  border-radius: 6px;
+  background: #07090c;
+  color: #bdbdbd;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.time-button:hover,
+.time-button.selected {
+  border-color: #d2b44c;
+  background: rgba(210, 180, 76, 0.12);
+  color: #ffffff;
+}
+
+.name-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid #222832;
+  border-radius: 6px;
+  background: #07090c;
+  color: #ffffff;
+  font-size: 15px;
+  outline: none;
+}
+
+.lookup-container {
+  padding-top: 70px;
+  padding-bottom: 80px;
+}
+
+.lookup-hero {
+  margin-bottom: 34px;
+}
+
+.lookup-hero h1 {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+}
+
+.lookup-hero p {
+  margin: 14px 0 0;
+  color: #b5b5b5;
+  font-size: 16px;
+}
+
+.lookup-search-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 42px;
+}
+
+.search-input-box {
+  width: 420px;
+  height: 52px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #222832;
+  border-radius: 8px;
+  background: #07090c;
+}
+
+.search-input-box span {
+  color: #8b8f97;
+  font-size: 15px;
+}
+
+.search-input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.primary-button.search {
+  width: 88px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+/* 예약 조회 */
+.lookup-result-section {
+  margin-top: 42px;
+}
+
+.reservation-result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reservation-card {
+  width: 560px;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 22px;
+  padding: 22px;
+  border: 1px solid #1e2228;
+  border-radius: 14px;
+  background: #0b0d10;
+  align-items: center;
+}
+
+.reservation-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.reservation-info h3 {
+  margin: 0 0 12px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.reservation-info p {
+  margin: 6px 0;
+  color: #bdbdbd;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cancel-button {
+  width: 120px;
+  height: 36px;
+  margin-top: 14px;
+  border: 1px solid #343944;
+  border-radius: 6px;
+  background: transparent;
+  color: #d8d8d8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  border-color: #d2b44c;
+  color: #ffffff;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (max-width: 1000px) {
+  .header {
+    padding: 0 30px;
+  }
+
+  .container {
+    width: calc(100% - 40px);
+  }
+
+  .popular-theme-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .theme-list {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 42px;
+  }
+
+  .hero p {
+    width: 100%;
+  }
+
+  .reservation-card {
+    width: 100%;
+    grid-template-columns: 100px 1fr;
+  }
+
+  .reservation-card img {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.reservation-result-card {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  padding: 48px;
+  border: 1px solid #242832;
+  border-radius: 24px;
+  background: #07090d;
+}
+
+.reservation-thumbnail-box {
+  flex: 0 0 260px;
+  width: 260px;
+  height: 180px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.reservation-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .reservation-result-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 28px;
+  }
+
+  .reservation-thumbnail-box {
+    width: 100%;
+    height: 220px;
+    flex: none;
+  }
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  overflow: auto;
+}
+
+.modal-content {
+  background-color: #0b0d10;
+  margin: 5% auto;
+  padding: 0;
+  border: 1px solid rgba(210, 180, 76, 0.3);
+  border-radius: 14px;
+  width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.modal-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #1e2228;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #d2b44c;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.close-button {
+  color: #a9a9a9;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #ffffff;
+}
+
+.modal-body {
+  padding: 32px;
+}
+
+.modal-footer {
+  padding: 24px 32px;
+  border-top: 1px solid #1e2228;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.secondary-button {
+  height: 42px;
+  padding: 0 24px;
+  border: 1px solid #343944;
+  border-radius: 6px;
+  background: transparent;
+  color: #d8d8d8;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  border-color: #d2b44c;
+  color: #ffffff;
+}
+
+.reschedule-button {
+  width: 120px;
+  height: 36px;
+  margin-top: 14px;
+  margin-right: 8px;
+  border: 1px solid #8d7d31;
+  border-radius: 6px;
+  background: rgba(210, 180, 76, 0.1);
+  color: #d2b44c;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reschedule-button:hover {
+  background: #8d7d31;
+  color: #080808;
+}

@@ -1,0 +1,66 @@
+### [Admin] 1. 전체 예약 목록 조회
+GET http://localhost:8080/admin/reservations
+Accept: application/json
+
+### [Admin] 2. 관리자 예약 생성
+POST http://localhost:8080/admin/reservations
+Content-Type: application/json
+
+{
+  "name": "관리자",
+  "dateId": 1,
+  "timeId": 2,
+  "themeId": 1
+}
+
+### [Admin] 3. 관리자 예약 취소
+PATCH http://localhost:8080/admin/reservations/1/cancel
+
+---
+
+### [Admin] 4. 관리자 예약 날짜/시간 변경
+PATCH http://localhost:8080/member/reservations/16/schedule
+Content-Type: application/json
+
+{
+  "dateId": 15,
+  "timeId": 4
+}
+
+### [Member] 5. 예약 생성
+POST http://localhost:8080/member/reservations
+Content-Type: application/json
+
+{
+  "name": "송송",
+  "dateId": 15,
+  "timeId": 1,
+  "themeId": 1
+}
+
+### [Member] 6. 내 예약 목록 조회
+< {%
+  request.variables.set("encodedName", encodeURIComponent("송송"))
+%}
+GET http://localhost:8080/member/reservations/{{encodedName}}
+Accept: application/json
+
+### [Member] 7. 예약 취소
+PATCH http://localhost:8080/member/reservations/16/cancel
+Content-Type: application/json
+
+{
+  "name": "송우석"
+}
+
+### [Member] 8. 예약 날짜/시간 변경
+< {%
+  request.variables.set("encodedName", encodeURIComponent("송송"))
+%}
+PATCH http://localhost:8080/member/reservations/16/schedule?name={{encodedName}}
+Content-Type: application/json
+
+{
+  "dateId": 15,
+  "timeId": 4
+}

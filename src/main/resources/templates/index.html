@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ENIGMA ROOMS</title>
+  <link rel="stylesheet" th:href="@{/css/user.css}">
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 40px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-container h2 {
+      margin-bottom: 24px;
+      text-align: center;
+      color: #d2b44c;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b5b5b5;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .toggle-auth {
+      text-align: center;
+      margin-top: 16px;
+      color: #888;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .admin-link {
+      text-align: center;
+      margin-top: 32px;
+      border-top: 1px solid #333;
+      padding-top: 16px;
+    }
+
+    .admin-link a {
+      color: #d2b44c;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <a class="logo" href="/">ENIGMA ROOMS</a>
+</header>
+
+<main class="container">
+  <div id="login-box" class="login-container">
+    <h2 id="auth-title">로그인</h2>
+    <div class="form-group">
+      <label for="name">이름</label>
+      <input type="text" id="name" placeholder="이름을 입력하세요">
+    </div>
+    <div class="form-group">
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="비밀번호를 입력하세요">
+    </div>
+    <div class="button-group">
+      <button id="auth-button" class="primary-button full" onclick="handleAuth()">로그인</button>
+    </div>
+    <p id="auth-toggle" class="toggle-auth" onclick="toggleAuthMode()">회원이 아니신가요? 회원가입</p>
+
+    <div class="admin-link">
+      <a href="/admin-login">관리자로 로그인하시겠습니까?</a>
+    </div>
+  </div>
+</main>
+
+<script th:src="@{/js/index.js}"></script>
+</body>
+</html>
