@@ -73,10 +73,13 @@ class WaitingServiceTest {
                 new ReserverName("예약자"), date, 1L, 1L);
             Reservation saved = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING);
+
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
+                .thenReturn(true);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
             // when
@@ -88,6 +91,28 @@ class WaitingServiceTest {
         }
 
         @Test
+        void 해당_날짜_시간_테마에_예약이_없으면_예외가_발생한다() {
+            // given
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            LocalDate date = LocalDate.now().plusYears(1);
+            ReservationCreateCommand command = new ReservationCreateCommand(
+                new ReserverName("예약자"), date, 1L, 1L);
+
+            when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
+            when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
+                .thenReturn(false);
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
+                .thenReturn(false);
+
+            // when & then
+            assertThatThrownBy(() -> waitingService.saveWaitingReservation(command))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("아직 예약되지 않은 날짜, 시간, 테마입니다.");
+        }
+
+        @Test
         void 같은_이름_날짜_시간_테마로_이미_대기_중이면_예외가_발생한다() {
             // given
             Time time = timeWithId(1L);
@@ -95,6 +120,7 @@ class WaitingServiceTest {
             LocalDate date = LocalDate.now().plusYears(1);
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), date, 1L, 1L);
+
             when(timeRepository.findTimeByIdAndNotDeleted(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(
@@ -115,6 +141,7 @@ class WaitingServiceTest {
             // given
             ReservationCreateCommand command = new ReservationCreateCommand(
                 new ReserverName("예약자"), LocalDate.now().plusDays(1), 999L, 999L);
+
             when(timeRepository.findTimeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
             when(themeRepository.findThemeByIdAndNotDeleted(999L)).thenReturn(Optional.empty());
 
@@ -141,6 +168,7 @@ class WaitingServiceTest {
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
             Reservation canceledWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
+
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
             when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
@@ -172,6 +200,7 @@ class WaitingServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
+
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
 
@@ -189,6 +218,7 @@ class WaitingServiceTest {
             Theme theme = themeWithId(1L);
             Reservation active = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
+
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(active));
 
@@ -206,6 +236,7 @@ class WaitingServiceTest {
             Theme theme = themeWithId(1L);
             Reservation pastWaiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), pastDate, time, theme, ReservationStatus.WAITING);
+
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(pastWaiting));
 

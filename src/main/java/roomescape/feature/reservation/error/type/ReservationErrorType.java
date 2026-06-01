@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import roomescape.global.error.type.ErrorType;
 
 public enum ReservationErrorType implements ErrorType {
+    NOT_RESERVED(HttpStatus.CONFLICT, "아직 예약되지 않은 날짜, 시간, 테마입니다."),
     ALREADY_RESERVED(HttpStatus.CONFLICT, "이미 예약된 날짜, 시간, 테마입니다."),
     ALREADY_WAITING(HttpStatus.CONFLICT, "이미 대기 중인 이름, 날짜, 시간, 테마입니다."),
     FIELD_RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "조회할 자원이 존재하지 않습니다."),

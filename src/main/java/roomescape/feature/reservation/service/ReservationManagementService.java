@@ -152,6 +152,7 @@ public class ReservationManagementService implements ReservationService, Waiting
 
         validateNotAlreadyWaitingByMySelf(reservation);
         validateNotReservedByMyself(reservation);
+        validateAlreadyReserved(reservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
@@ -187,6 +188,18 @@ public class ReservationManagementService implements ReservationService, Waiting
     private void validateNotAlreadyWaitingByMySelf(Reservation reservation) {
         if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.WAITING)) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
+        }
+    }
+
+    private void validateAlreadyReserved(Reservation reservation) {
+        boolean alreadyReserved = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        );
+
+        if (!alreadyReserved) {
+            throw new GeneralException(ReservationErrorType.NOT_RESERVED);
         }
     }
 }
