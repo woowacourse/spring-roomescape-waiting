@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.waiting;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.UserName;
 import roomescape.domain.slot.theme.Description;
 import roomescape.domain.slot.theme.Theme;
 import roomescape.domain.slot.theme.ThemeName;
 import roomescape.domain.slot.theme.ThumbnailUrl;
 import roomescape.domain.slot.time.ReservationTime;
-import roomescape.domain.waiting.Waiting;
 
 public class WaitingTest {
     private final UserName userName = UserName.parse("아나키");

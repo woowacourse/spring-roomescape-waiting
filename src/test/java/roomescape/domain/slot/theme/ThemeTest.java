@@ -1,14 +1,10 @@
-package roomescape.domain.reservation.theme;
+package roomescape.domain.slot.theme;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.slot.theme.Description;
-import roomescape.domain.slot.theme.Theme;
-import roomescape.domain.slot.theme.ThemeName;
-import roomescape.domain.slot.theme.ThumbnailUrl;
 
 class ThemeTest {
     private final Long id = 1L;
