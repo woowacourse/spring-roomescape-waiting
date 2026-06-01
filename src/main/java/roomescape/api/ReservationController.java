@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.ReservationApplicationService;
 import roomescape.domain.Reservation;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.dto.ReservationResponses;
 import roomescape.dto.ReservationUpdateRequest;
-import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -25,11 +25,12 @@ import roomescape.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationFacade reservationFacade;
+    private final ReservationApplicationService reservationApplicationService;
 
-    public ReservationController(ReservationService reservationService, ReservationFacade reservationFacade) {
+    public ReservationController(ReservationService reservationService,
+                                 ReservationApplicationService reservationApplicationService) {
         this.reservationService = reservationService;
-        this.reservationFacade = reservationFacade;
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @GetMapping
@@ -51,7 +52,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> add(@RequestBody @Valid ReservationRequest request) {
-        Reservation reservation = reservationFacade.addReservation(request);
+        Reservation reservation = reservationApplicationService.addReservation(request);
         ReservationResponse response = ReservationResponse.from(reservation);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -77,7 +78,7 @@ public class ReservationController {
             @RequestParam String name,
             @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        Reservation updated = reservationFacade.updateMyReservation(id, name, request);
+        Reservation updated = reservationApplicationService.updateMyReservation(id, name, request);
 
         return ResponseEntity.ok(ReservationResponse.from(updated));
     }

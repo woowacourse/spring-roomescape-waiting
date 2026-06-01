@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.ReservationApplicationService;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.dto.ReservationTimeResponse;
 import roomescape.dto.ReservationTimeResponses;
 import roomescape.dto.TimeWithStatusResponses;
-import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationTimeService;
 
 import java.time.LocalDate;
@@ -26,12 +26,12 @@ import java.time.LocalDate;
 public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
-    private final ReservationFacade reservationFacade;
+    private final ReservationApplicationService reservationApplicationService;
 
     public ReservationTimeController(ReservationTimeService reservationTimeService,
-                                     ReservationFacade reservationFacade) {
+                                     ReservationApplicationService reservationApplicationService) {
         this.reservationTimeService = reservationTimeService;
-        this.reservationFacade = reservationFacade;
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @GetMapping
@@ -43,7 +43,7 @@ public class ReservationTimeController {
     public ResponseEntity<TimeWithStatusResponses> searchAvailableReservationTime(@RequestParam LocalDate date,
                                                                                   @RequestParam Long themeId) {
         return ResponseEntity.ok().body(
-                TimeWithStatusResponses.of(reservationFacade.getTimesWithAvailability(date, themeId)));
+                TimeWithStatusResponses.of(reservationApplicationService.getTimesWithAvailability(date, themeId)));
     }
 
     @PostMapping
@@ -56,7 +56,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationFacade.deleteTime(id);
+        reservationApplicationService.deleteTime(id);
 
         return ResponseEntity.noContent().build();
     }

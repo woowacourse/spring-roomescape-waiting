@@ -12,29 +12,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.ReservationApplicationService;
 import roomescape.domain.WaitingWithOrder;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.dto.ReservationWaitingResponses;
-import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/waitings")
 public class ReservationWaitingController {
 
-    private final ReservationFacade reservationFacade;
+    private final ReservationApplicationService reservationApplicationService;
     private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationWaitingController(ReservationFacade reservationFacade,
+    public ReservationWaitingController(ReservationApplicationService reservationApplicationService,
                                         ReservationWaitingService reservationWaitingService) {
-        this.reservationFacade = reservationFacade;
+        this.reservationApplicationService = reservationApplicationService;
         this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> add(@RequestBody @Valid ReservationWaitingRequest request) {
-        WaitingWithOrder waitingWithOrder = reservationFacade.addWaiting(request);
+        WaitingWithOrder waitingWithOrder = reservationApplicationService.addWaiting(request);
         ReservationWaitingResponse response = ReservationWaitingResponse.from(waitingWithOrder);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

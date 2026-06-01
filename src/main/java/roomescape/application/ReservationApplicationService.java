@@ -1,9 +1,6 @@
-package roomescape.facade;
+package roomescape.application;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -22,9 +19,13 @@ import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.ThemeService;
 
-@Component
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
 @Transactional(readOnly = true)
-public class ReservationFacade {
+public class ReservationApplicationService {
 
     private static final String CANNOT_DELETE_TIME_IN_USE = "ID %d번 시간을 사용 중인 예약이 존재하여 시간을 삭제할 수 없습니다.";
     private static final String CANNOT_DELETE_THEME_IN_USE = "ID %d번 테마를 사용 중인 예약이 존재하여 테마를 삭제할 수 없습니다.";
@@ -40,7 +41,7 @@ public class ReservationFacade {
     private final ReservationWaitingService reservationWaitingService;
     private final ThemeService themeService;
 
-    public ReservationFacade(
+    public ReservationApplicationService(
             ReservationService reservationService,
             ReservationTimeService reservationTimeService,
             ReservationWaitingService reservationWaitingService,

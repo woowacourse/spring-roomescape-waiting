@@ -1,10 +1,11 @@
-package roomescape.unit.facade;
+package roomescape.unit.application;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.application.ReservationApplicationService;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -13,7 +14,6 @@ import roomescape.domain.Theme;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.exception.BusinessRuleViolationException;
-import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationFacadeMockTest {
+class ReservationApplicationServiceMockTest {
 
     private static final LocalDate DATE = LocalDate.of(2026, 8, 5);
     private static final LocalDate PAST_DATE = LocalDate.of(2020, 1, 1);
@@ -52,7 +52,7 @@ class ReservationFacadeMockTest {
     private ThemeService themeService;
 
     @InjectMocks
-    private ReservationFacade facade;
+    private ReservationApplicationService applicationService;
 
     @Test
     void 본인이_예약한_슬롯에는_대기를_신청할_수_없다() {
@@ -64,7 +64,7 @@ class ReservationFacadeMockTest {
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
 
-        assertThatThrownBy(() -> facade.addWaiting(request))
+        assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("본인이 예약한");
     }
@@ -78,7 +78,7 @@ class ReservationFacadeMockTest {
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
 
-        assertThatThrownBy(() -> facade.addWaiting(request))
+        assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("예약된 슬롯");
     }
@@ -93,7 +93,7 @@ class ReservationFacadeMockTest {
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", PAST_DATE, TIME_ID, THEME_ID);
 
-        assertThatThrownBy(() -> facade.addWaiting(request))
+        assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("지난 시각에는 대기");
         verify(reservationWaitingService, never()).addWaiting(any(ReservationWaiting.class));
@@ -109,7 +109,7 @@ class ReservationFacadeMockTest {
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
 
-        facade.addWaiting(request);
+        applicationService.addWaiting(request);
 
         verify(reservationWaitingService).addWaiting(any(ReservationWaiting.class));
     }
@@ -125,7 +125,7 @@ class ReservationFacadeMockTest {
 
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", DATE, TIME_ID, THEME_ID);
 
-        assertThatThrownBy(() -> facade.addWaiting(request))
+        assertThatThrownBy(() -> applicationService.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("이미 대기");
     }
@@ -139,7 +139,7 @@ class ReservationFacadeMockTest {
 
         ReservationUpdateRequest request = new ReservationUpdateRequest(DATE, TIME_ID);
 
-        assertThatThrownBy(() -> facade.updateMyReservation(reservationId, name, request))
+        assertThatThrownBy(() -> applicationService.updateMyReservation(reservationId, name, request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("이미 지난 예약");
     }
