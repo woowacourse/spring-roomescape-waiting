@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
@@ -76,7 +77,7 @@ public class WaitingService {
         }
 
         if (waitingDao.existsByUserNameAndSlot(userName, eventSlot)) {
-            throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
+            throw new ConflictException("예약 대기는 중복으로 생성할 수 없습니다.");
         }
     }
 
