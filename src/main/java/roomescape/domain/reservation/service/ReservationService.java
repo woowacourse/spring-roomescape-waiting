@@ -11,6 +11,7 @@ import roomescape.domain.reservation.dto.command.ReservationCreateCommand;
 import roomescape.domain.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
@@ -53,11 +54,35 @@ public class ReservationService {
 
     private List<ReservationResponseDto> convertReservationsToDto(List<ReservationWithWaitingNumber> reservations) {
         return reservations.stream()
-            .map(reservationWithWaitingNumber -> reservationMapper.toResponseDto(
-                reservationWithWaitingNumber.reservation(),
-                reservationWithWaitingNumber.waitingNumber()
-            ))
+            .map(reservationWithWaitingNumber -> {
+                Reservation reservation = reservationWithWaitingNumber.reservation();
+                return reservationMapper.toResponseDto(
+                    reservation,
+                    getEditableStatus(reservation),
+                    reservationWithWaitingNumber.waitingNumber()
+                );
+            })
             .toList();
+    }
+
+    private ReservationEditableStatus getEditableStatus(Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.CANCELED) {
+            return ReservationEditableStatus.CANCELED;
+        }
+
+        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
+            return ReservationEditableStatus.LOCKED;
+        }
+
+        if (reservation.getStatus() == ReservationStatus.WAITING) {
+            return ReservationEditableStatus.WAITING;
+        }
+
+        if (reservation.getTime().isDeleted() || reservation.getTheme().isDeleted()) {
+            return ReservationEditableStatus.EDIT_RECOMMENDED;
+        }
+
+        return ReservationEditableStatus.EDITABLE;
     }
 
     public List<ReservationResponseDto> getReservationsByName(String name) {
