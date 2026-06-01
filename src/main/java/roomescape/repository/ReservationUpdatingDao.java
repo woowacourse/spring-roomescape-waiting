@@ -17,47 +17,26 @@ public class ReservationUpdatingDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public long update(Long id, Reservation reservation) {
-        String sql = "update reservation set name = ?, date = ?, time_id = ?, theme_id = ?, version = ? where id = ?";
-        return jdbcTemplate.update(sql,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getVersion(),
-                id
-        );
-    }
-
-    public long updateIfVersion(Long id, String currentVersion, Reservation reservation) {
-        String sql = "update reservation set name=?, date=?, time_id=?, theme_id=?, version=? " +
-                "where id=? and version=?";
-        return jdbcTemplate.update(sql,
-                reservation.getName(), reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getVersion(), id, currentVersion);
-    }
-
-    public void delete(Long id) {
-        String sql = "delete from reservation where id = ?";
-        jdbcTemplate.update(sql, id);
-    }
-
     public Long insert(Reservation reservation) {
-        String sql = "insert into reservation(name, date, time_id, theme_id, created_at, version) values(?, ?, ?, ?, ?, ?)";
+        String sql = "insert into reservation(slot_id, name, created_at) values(?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setObject(2, reservation.getDate());
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
-            ps.setObject(5, reservation.getCreatedAt());
-            ps.setString(6, reservation.getVersion());
+            ps.setLong(1, reservation.getSlot().getId());
+            ps.setString(2, reservation.getName());
+            ps.setObject(3, reservation.getCreatedAt());
             return ps;
         }, keyHolder);
-
         return keyHolder.getKey().longValue();
+    }
+
+    public long updateName(Long id, String name) {
+        String sql = "update reservation set name = ? where id = ?";
+        return jdbcTemplate.update(sql, name, id);
+    }
+
+    public long delete(Long id) {
+        String sql = "delete from reservation where id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }

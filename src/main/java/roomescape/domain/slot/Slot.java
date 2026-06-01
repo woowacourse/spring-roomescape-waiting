@@ -35,10 +35,6 @@ public class Slot {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now());
     }
 
-    public boolean isEqualSlot(LocalDate date, Long timeId, Long themeId) {
-        return this.date.equals(date) && this.time.isEqual(timeId) && this.theme.isEqual(themeId);
-    }
-
     public Long getId() {
         return id;
     }

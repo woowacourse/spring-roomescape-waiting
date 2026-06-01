@@ -14,7 +14,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
-import roomescape.domain.slot.SlotRepository;
 import roomescape.domain.theme.Theme;
 
 @JdbcTest
@@ -27,11 +26,11 @@ public class SlotDaoTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private SlotRepository slotDao;
+    private SlotDao slotDao;
 
     @BeforeEach
     void setUp() {
-        this.slotDao = new JdbcSlotRepository(jdbcTemplate);
+        this.slotDao = new SlotDao(jdbcTemplate);
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");
@@ -100,19 +99,20 @@ public class SlotDaoTest {
     }
 
     @Test
-    void 참조하는_대기가_없으면_슬롯이_삭제된다() {
-        long deleted = slotDao.delete(1L);
+    void 대기가_없으면_슬롯이_삭제된다() {
+        long deleted = slotDao.deleteIfNoWaiting(1L);
 
         assertThat(deleted).isEqualTo(1L);
         assertThat(slotDao.findById(1L)).isEmpty();
     }
 
     @Test
-    void 대기가_참조하는_슬롯_삭제시_FK_제약으로_예외가_발생한다() {
+    void 대기가_있으면_슬롯이_삭제되지_않는다() {
         jdbcTemplate.update("insert into waiting (slot_id, name, created_at) values (1, '테스트', '2026-05-15 10:30:00')");
 
-        assertThatThrownBy(() -> slotDao.delete(1L))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        long deleted = slotDao.deleteIfNoWaiting(1L);
+
+        assertThat(deleted).isEqualTo(0L);
         assertThat(slotDao.findById(1L)).isPresent();
     }
 }

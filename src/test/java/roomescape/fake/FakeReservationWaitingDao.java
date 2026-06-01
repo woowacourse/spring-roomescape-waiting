@@ -18,10 +18,19 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
     }
 
     @Override
-    public boolean isExistByNameAndReservationId(String name, Long reservationId) {
+    public boolean isExistByNameAndSlotId(String name, Long slotId) {
         return store.stream().anyMatch(w ->
                 w.getName().equals(name)
-                && w.getReservation().getId().equals(reservationId));
+                && w.getSlot().getId().equals(slotId));
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findFirstBySlotId(Long slotId) {
+        return store.stream()
+                .filter(w -> w.getSlot().getId().equals(slotId))
+                .min(Comparator.comparing(ReservationWaiting::getCreatedAt)
+                        .thenComparing(w -> w.getId() == null ? Long.MAX_VALUE : w.getId()))
+                .map(this::withSequence);
     }
 
     @Override
@@ -49,7 +58,7 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
     public Long create(ReservationWaiting waiting) {
         Long id = idGenerator.getAndIncrement();
         ReservationWaiting withId = ReservationWaiting.restore(
-                id, waiting.getName(), waiting.getReservation(),
+                id, waiting.getSlot(), waiting.getName(),
                 waiting.getSequence(), waiting.getCreatedAt());
         store.add(withId);
         return id;
@@ -62,14 +71,14 @@ public class FakeReservationWaitingDao extends ReservationWaitingDao {
 
     private ReservationWaiting withSequence(ReservationWaiting waiting) {
         long sequence = store.stream()
-                .filter(w -> w.getReservation().getId().equals(waiting.getReservation().getId()))
+                .filter(w -> w.getSlot().getId().equals(waiting.getSlot().getId()))
                 .sorted(Comparator.comparing(ReservationWaiting::getCreatedAt)
                         .thenComparing(w -> w.getId() == null ? Long.MAX_VALUE : w.getId()))
                 .takeWhile(w -> !w.equals(waiting))
                 .count() + 1;
 
         return ReservationWaiting.restore(
-                waiting.getId(), waiting.getName(), waiting.getReservation(),
+                waiting.getId(), waiting.getSlot(), waiting.getName(),
                 sequence, waiting.getCreatedAt());
     }
 }
