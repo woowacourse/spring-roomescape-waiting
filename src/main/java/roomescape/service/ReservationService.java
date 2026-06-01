@@ -18,7 +18,6 @@ import roomescape.repository.ReservationUpdateDao;
 import roomescape.repository.ReservationWaitingQueryDao;
 import roomescape.repository.ThemeQueryDao;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -70,34 +69,33 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(ReservationRequest reservationReq) {
-        ReservationTime reservationTimeById = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
-                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
-        Theme themeById = themeQueryingDao.findThemeById(reservationReq.themeId())
-                .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
+    public ReservationResponse create(ReservationRequest reservationRequest) {
+        ReservationTime reservationTimeById = reservationTimeQueryingDao.findReservationTimeById(reservationRequest.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationRequest.timeId()));
+        Theme themeById = themeQueryingDao.findThemeById(reservationRequest.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(reservationRequest.themeId()));
 
-        Reservation reservationCommand = reservationReq.to(reservationTimeById, themeById);
+        Reservation reservationCommand = reservationRequest.toReservation(reservationTimeById, themeById);
         reservationCommand.validatePastDateTime();
 
-        validateDuplicatedReservation(new ReservationSlot(reservationReq.date(), reservationTimeById, themeById));
+        validateDuplicatedReservation(new ReservationSlot(reservationRequest.date(), reservationTimeById, themeById));
 
-        Reservation reservation = reservationReq.to(reservationTimeById, themeById);
+        Reservation reservation = reservationRequest.toReservation(reservationTimeById, themeById);
         Long generatedId = reservationUpdatingDao.insert(reservation);
         return ReservationResponse.from(reservation.withReservationId(generatedId));
     }
 
-    public ReservationResponse update(Long id, ReservationRequest reservationReq) {
+    public ReservationResponse update(Long id, ReservationRequest reservationRequest) {
         Reservation existedReservation = getReservation(id);
         existedReservation.validatePastDateTime();
 
-        ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
-                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
+        ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationRequest.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationRequest.timeId()));
 
-        Reservation reservationCommand = reservationReq.to(newTime, null);
-        reservationCommand.validatePastDateTime();
-        validateDuplicatedReservation(new ReservationSlot(reservationReq.date(), newTime, existedReservation.getTheme()));
+        Reservation.validateNoPast(reservationRequest.date(), newTime);
+        validateDuplicatedReservation(new ReservationSlot(reservationRequest.date(), newTime, existedReservation.getTheme()));
 
-        Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
+        Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationRequest.date(), newTime);
 
         reservationUpdatingDao.update(id, updatedReservation);
         return ReservationResponse.from(updatedReservation);
