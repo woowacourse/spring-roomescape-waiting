@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>테마 관리 — ESCAPE ROOM ADMIN</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry is-admin" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자 모드</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/admin/theme" class="active">테마 관리</a>
+      <a href="/admin/time">시간 관리</a>
+      <a href="/">사용자 페이지</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title"><i class="fas fa-theater-masks" style="color:var(--accent);margin-right:10px;"></i>테마 관리</h1>
+  <p class="page-subtitle">새 테마를 등록하거나 기존 테마를 삭제할 수 있습니다.</p>
+
+  <div class="table-header">
+    <div></div>
+    <button id="add-theme" class="btn btn-primary"><i class="fas fa-plus"></i> 테마 추가</button>
+  </div>
+
+  <div id="theme-form" class="filter-card d-none" style="margin-bottom:20px;">
+    <div class="filter-row" style="grid-template-columns: 1fr 2fr 2fr auto;">
+      <div>
+        <label class="form-label">이름</label>
+        <input id="new-name" type="text" class="form-control" placeholder="테마 이름">
+      </div>
+      <div>
+        <label class="form-label">설명</label>
+        <input id="new-desc" type="text" class="form-control" placeholder="테마 설명">
+      </div>
+      <div>
+        <label class="form-label">이미지 URL</label>
+        <input id="new-image" type="text" class="form-control" placeholder="https://...">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="save-theme" class="btn btn-success">확인</button>
+        <button id="cancel-theme" class="btn btn-ghost">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="theme-grid" class="theme-grid"></div>
+  <div id="theme-empty" class="empty d-none">등록된 테마가 없습니다. 우측 상단의 ‘테마 추가’ 버튼을 눌러 등록해 보세요.</div>
+</main>
+
+<script src="/js/nav.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+package roomescape.domain.reservation;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.dto.MyReservationsResponse;
+import roomescape.domain.reservation.dto.ReservationFixRequest;
+import roomescape.domain.reservation.dto.ReservationRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeRepository;
+import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
+
+@Service
+public class ReservationService {
+
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository reservationTimeRepository,
+            ThemeRepository themeRepository
+    ) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+    }
+
+    @Transactional
+    public ReservationResponse createReservation(ReservationRequest request) {
+        ReservationTime time = reservationTimeRepository.findByIdForUpdate(request.timeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+
+        validateDuplicateReservation(request.date(), request.timeId(), request.themeId());
+        time.validateIfTimePast(request.date());
+
+        Reservation reservation = Reservation.of(
+                request.name(),
+                request.date(),
+                time,
+                theme
+        );
+
+        try {
+            Reservation saved = reservationRepository.save(reservation);
+            return ReservationResponse.from(saved);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<TimeResponse> getReservations(LocalDate date, Long themeId) {
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<Long> bookedTimeIds = reservationRepository.findTimeByDateAndThemeId(date, themeId);
+
+        return reservationTimes.stream()
+                .filter(reservationTime -> !bookedTimeIds.contains(reservationTime.getId()))
+                .map(TimeResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public void deleteReservation(Long id) {
+        validateReservationId(id);
+        reservationRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public MyReservationsResponse getMyReservations(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        return MyReservationsResponse.from(reservations);
+    }
+
+    @Transactional
+    public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
+        ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+        newTime.validateIfTimePast(fixRequest.date());
+
+        if (!reservationRepository.existsByIdForUpdate(id)) {
+            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
+        }
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+        validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
+
+        reservation.validateOwner(fixRequest.name());
+
+        try {
+            reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+        }
+    }
+
+    private void validateReservationId(Long id) {
+        if (!reservationRepository.existsById(id)) {
+            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
+        }
+    }
+
+    private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
+        boolean isDuplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        if (isDuplicated) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+}
