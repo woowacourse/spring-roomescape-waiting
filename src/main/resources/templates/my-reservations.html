@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 예약 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations" class="active">내 예약</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title"><i class="fas fa-bookmark" style="color:var(--accent);margin-right:10px;"></i>내 예약</h1>
+  <p class="page-subtitle">이름으로 예약을 조회하고 취소·변경할 수 있습니다.</p>
+
+  <div class="filter-card">
+    <div style="display:flex;gap:12px;align-items:flex-end;">
+      <div style="flex:1;max-width:320px;">
+        <label class="form-label">예약자 이름</label>
+        <input id="search-name" type="text" class="form-control" placeholder="이름을 입력하세요">
+      </div>
+      <button id="search-btn" class="btn btn-primary"><i class="fas fa-search"></i> 조회</button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>날짜</th>
+          <th>테마</th>
+          <th>시간</th>
+          <th>상태</th>
+          <th style="width:180px;text-align:right;">관리</th>
+        </tr>
+      </thead>
+      <tbody id="reservation-tbody"></tbody>
+    </table>
+  </div>
+  <div id="reservation-empty" class="empty d-none" style="margin-top:16px;">조회된 예약이 없습니다.</div>
+</main>
+
+<div id="modal-overlay" class="modal-overlay d-none">
+  <div class="modal-card">
+    <h3 style="margin:0;font-size:1.1rem;font-weight:700;color:var(--text);">
+      <i class="fas fa-edit" style="color:var(--accent);margin-right:8px;"></i>예약 변경
+    </h3>
+    <div>
+      <label class="form-label">새 날짜</label>
+      <input id="edit-date" type="text" class="form-control" placeholder="날짜 선택" readonly>
+    </div>
+    <div>
+      <label class="form-label">새 시간</label>
+      <select id="edit-time" class="form-control">
+        <option value="">날짜를 먼저 선택해주세요.</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button id="edit-confirm" class="btn btn-primary">변경 확정</button>
+      <button id="edit-cancel" class="btn btn-secondary">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<script src="/js/scripts.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/my-reservations.js"></script>
+</body>
+</html>

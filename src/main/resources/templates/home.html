@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/" class="active">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations">내 예약</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <span class="hero-eyebrow">PREMIUM ESCAPE ROOM</span>
+      <h1 class="hero-title">잠긴 문 너머의 <em>또 다른 세계</em>로</h1>
+      <p class="hero-desc">
+        실감 나는 시나리오와 정교한 장치들 속에서 친구, 연인, 가족과 함께 60분의 모험을 즐겨 보세요.
+        지금 바로 원하는 테마와 시간을 골라 예약할 수 있습니다.
+      </p>
+      <div class="hero-actions">
+        <a href="/reservation" class="btn btn-primary btn-lg"><i class="fas fa-calendar-check"></i> 지금 예약하기</a>
+        <a href="/popular" class="btn btn-secondary btn-lg"><i class="fas fa-fire"></i> 인기 테마</a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="tile tall" style="background-image:url('https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/%EA%B3%A0%EB%B0%B1__sizedown.png')"></div>
+      <div class="tile" style="background-image:url('https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/%ED%99%80%EB%A6%AC%EB%8D%B0%EC%9D%B4_sizedown.png')"></div>
+      <div class="tile" style="background-image:url('https://d1kqa23lh2nxjx.cloudfront.net/file/theme_info/%EC%9B%94%EC%95%BC__sizedown.png')"></div>
+    </div>
+  </div>
+</section>
+
+<main class="container">
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">전체 테마</h2>
+        <p class="section-sub">취향에 맞는 시나리오를 골라 보세요</p>
+      </div>
+      <a href="/popular" class="section-link">인기 순위 보기 →</a>
+    </div>
+    <div id="all-themes" class="theme-grid"></div>
+    <div id="all-themes-empty" class="empty d-none">등록된 테마가 없습니다.</div>
+  </section>
+</main>
+
+<script src="/js/nav.js"></script>
+<script src="/js/home.js"></script>
+</body>
+</html>

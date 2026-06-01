@@ -1,0 +1,361 @@
+/* ─── Step layout: 날짜 → 테마 → 시간 (가로 배치) ─── */
+.reservation-cards {
+  display: grid;
+  grid-template-columns: 320px 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.r-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 카드 사이 단계 연결 화살표 — 카드 바깥 grid gap 영역에 표시 */
+.reservation-cards {
+  display: grid;
+  grid-template-columns: 320px 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  position: relative;
+}
+
+.reservation-cards::before,
+.reservation-cards::after {
+  content: '\f054';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 22px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 0.65rem;
+  z-index: 2;
+}
+
+/* 1→2 화살표: 첫 번째 카드 오른쪽 끝 */
+.reservation-cards::before {
+  left: calc(320px + 4px);
+}
+
+/* 2→3 화살표: 두 번째 카드 오른쪽 끝 */
+.reservation-cards::after {
+  left: calc(320px + 32px + ((100% - 320px - 64px) / 2) + 4px);
+}
+
+.r-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.r-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.r-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 480px;
+}
+
+.r-card-hint {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  padding: 14px 4px;
+}
+
+/* ─── 테마 리스트 (키이스케이프 스타일 카드, 세로 스크롤) ─── */
+.theme-scroll {
+  list-style: none;
+  padding: 4px 4px 4px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.theme-scroll::-webkit-scrollbar { width: 8px; }
+.theme-scroll::-webkit-scrollbar-track { background: transparent; }
+.theme-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+.theme-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  align-items: center;
+}
+
+.theme-item:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  transform: translateX(2px);
+}
+
+.theme-item.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 4px 12px rgba(255, 90, 54, 0.15);
+}
+
+.theme-item .theme-thumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--surface-2);
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.theme-item .theme-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-item .theme-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.theme-item.active .theme-name {
+  color: var(--accent);
+}
+
+.theme-item .theme-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── 시간 버튼 그리드 ─── */
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+  padding: 4px 0;
+  align-content: start;
+}
+
+.time-btn {
+  appearance: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 14px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.time-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.time-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255, 90, 54, 0.32);
+}
+
+.time-btn:disabled {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* ─── 예약 확정 바 ─── */
+.booking-bar {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 24px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(255, 90, 54, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.booking-summary {
+  font-weight: 600;
+  flex: 1 1 240px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.booking-summary strong {
+  color: var(--accent);
+}
+
+.booking-bar .form-control {
+  flex: 0 1 220px;
+  max-width: 240px;
+}
+
+/* ─── flatpickr inline overrides ─── */
+.flatpickr-calendar.inline {
+  box-shadow: none !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.flatpickr-calendar.inline .flatpickr-days,
+.flatpickr-calendar.inline .dayContainer {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.selected:hover {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.flatpickr-day.today {
+  border-color: var(--accent) !important;
+  color: var(--accent);
+}
+
+.flatpickr-day.today.selected {
+  color: #fff !important;
+}
+
+/* ─── 대기 신청 버튼 ─── */
+.time-btn--waiting {
+  border-color: #d1d5db;
+  color: var(--text-muted);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 10px;
+}
+
+.time-btn--waiting:hover:not(:disabled) {
+  border-color: #f59e0b;
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.time-btn--waiting.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.time-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #b45309;
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.02em;
+}
+
+.time-btn--waiting.active .time-badge {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
+/* ─── 반응형 ─── */
+@media (max-width: 720px) {
+  .reservation-cards {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .r-card + .r-card::before {
+    content: '\f078'; /* fa-chevron-down */
+    left: 50%;
+    top: -12px;
+    transform: translateX(-50%);
+  }
+  .r-card-body { min-height: 0; }
+  .theme-scroll { max-height: 320px; }
+  .time-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+}
