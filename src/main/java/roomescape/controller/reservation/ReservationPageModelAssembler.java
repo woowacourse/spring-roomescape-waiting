@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import roomescape.controller.history.ReservationHistoryStatus;
@@ -90,7 +91,7 @@ public class ReservationPageModelAssembler {
 
         Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
                 .map(reservationTime -> reservationTime.getId())
-                .collect(java.util.stream.Collectors.toSet());
+                .collect(Collectors.toSet());
 
         return reservationTimeService.getAll().stream()
                 .map(reservationTime -> new ReservationTimeSlotResponse(

@@ -1,6 +1,7 @@
 package roomescape.controller.reservation;
 
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,49 +22,43 @@ public class ReservationPageController {
 
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
-    private final ReservationPageRequestParser reservationPageRequestParser;
     private final ReservationPageModelAssembler reservationPageModelAssembler;
 
     public ReservationPageController(
             final ReservationService reservationService,
             final ReservationWaitingService reservationWaitingService,
-            final ReservationPageRequestParser reservationPageRequestParser,
             final ReservationPageModelAssembler reservationPageModelAssembler
     ) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
-        this.reservationPageRequestParser = reservationPageRequestParser;
         this.reservationPageModelAssembler = reservationPageModelAssembler;
     }
 
     @GetMapping
     public String getReservationPage(
-            @RequestParam(required = false) final String themeId,
-            @RequestParam(required = false) final String date,
+            @RequestParam(required = false) final Long themeId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(required = false) final LocalDate date,
             @RequestParam(required = false) final String reservationName,
             @RequestParam(defaultValue = "7") final int period,
             @RequestParam(defaultValue = "10") final int limit,
             @RequestParam(required = false) final String errorCode,
             final Model model
     ) {
-        Long selectedThemeId = null;
-        LocalDate selectedDate = null;
         ThemeResponse selectedTheme = null;
         String resolvedErrorCode = errorCode;
 
         try {
-            selectedThemeId = reservationPageRequestParser.parseLongValue(themeId);
-            selectedDate = reservationPageRequestParser.parseDate(date);
-            selectedTheme = reservationPageModelAssembler.resolveSelectedTheme(selectedThemeId);
+            selectedTheme = reservationPageModelAssembler.resolveSelectedTheme(themeId);
         } catch (ApiException exception) {
             resolvedErrorCode = resolveErrorCode(resolvedErrorCode, exception.getCode());
         }
 
         reservationPageModelAssembler.populateReservationPage(
                 model,
-                selectedThemeId,
+                themeId,
                 selectedTheme,
-                selectedDate,
+                date,
                 reservationName,
                 period,
                 limit,
@@ -76,42 +71,36 @@ public class ReservationPageController {
     @PostMapping
     public String createReservation(
             @RequestParam(required = false) final String name,
-            @RequestParam(required = false) final String date,
-            @RequestParam(required = false) final String themeId,
-            @RequestParam(required = false) final String timeId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(required = false) final LocalDate date,
+            @RequestParam(required = false) final Long themeId,
+            @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
-        Long parsedThemeId = null;
-        Long parsedTimeId = null;
-        LocalDate parsedDate = null;
-
         try {
-            parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
-            parsedTimeId = reservationPageRequestParser.parseLongValue(timeId);
-            parsedDate = reservationPageRequestParser.parseDate(date);
-            reservationService.save(name, parsedDate, parsedThemeId, parsedTimeId);
+            reservationService.save(name, date, themeId, timeId);
             addReservationNameAttribute(redirectAttributes, name);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     exception.getCode()
             );
         } catch (IllegalArgumentException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     ErrorCode.INVALID_INPUT.getCode()
             );
         } catch (Exception exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     ErrorCode.INTERNAL_SERVER_ERROR.getCode()
             );
@@ -123,43 +112,38 @@ public class ReservationPageController {
     @PostMapping("/waitings")
     public String createReservationWaiting(
             @RequestParam(required = false) final String name,
-            @RequestParam(required = false) final String date,
-            @RequestParam(required = false) final String themeId,
-            @RequestParam(required = false) final String timeId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(required = false) final LocalDate date,
+            @RequestParam(required = false) final Long themeId,
+            @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
-        Long parsedThemeId = null;
-        LocalDate parsedDate = null;
-
         try {
-            parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
-            Long parsedTimeId = reservationPageRequestParser.parseLongValue(timeId);
-            parsedDate = reservationPageRequestParser.parseDate(date);
-            reservationWaitingService.save(name, parsedDate, parsedThemeId, parsedTimeId);
+            reservationWaitingService.save(name, date, themeId, timeId);
             addReservationNameAttribute(redirectAttributes, name);
-            addThemeIdAttribute(redirectAttributes, parsedThemeId);
-            addDateAttribute(redirectAttributes, parsedDate);
+            addThemeIdAttribute(redirectAttributes, themeId);
+            addDateAttribute(redirectAttributes, date);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     exception.getCode()
             );
         } catch (IllegalArgumentException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     ErrorCode.INVALID_INPUT.getCode()
             );
         } catch (Exception exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     name,
                     ErrorCode.INTERNAL_SERVER_ERROR.getCode()
             );
@@ -172,41 +156,37 @@ public class ReservationPageController {
     public String deleteReservationWaiting(
             @PathVariable final Long id,
             @RequestParam(required = false) final String reservationName,
-            @RequestParam(required = false) final String themeId,
-            @RequestParam(required = false) final String date,
+            @RequestParam(required = false) final Long themeId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(required = false) final LocalDate date,
             final RedirectAttributes redirectAttributes
     ) {
-        Long parsedThemeId = null;
-        LocalDate parsedDate = null;
-
         try {
-            parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
-            parsedDate = reservationPageRequestParser.parseDate(date);
             reservationWaitingService.deleteByIdAndName(id, reservationName);
             addReservationNameAttribute(redirectAttributes, reservationName);
-            addThemeIdAttribute(redirectAttributes, parsedThemeId);
-            addDateAttribute(redirectAttributes, parsedDate);
+            addThemeIdAttribute(redirectAttributes, themeId);
+            addDateAttribute(redirectAttributes, date);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     reservationName,
                     exception.getCode()
             );
         } catch (IllegalArgumentException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     reservationName,
                     ErrorCode.INVALID_INPUT.getCode()
             );
         } catch (Exception exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
-                    parsedThemeId,
-                    parsedDate,
+                    themeId,
+                    date,
                     reservationName,
                     ErrorCode.INTERNAL_SERVER_ERROR.getCode()
             );
@@ -257,17 +237,13 @@ public class ReservationPageController {
     public String updateReservation(
             @PathVariable final Long id,
             @RequestParam(required = false) final String reservationName,
-            @RequestParam(required = false) final String date,
-            @RequestParam(required = false) final String timeId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            @RequestParam(required = false) final LocalDate date,
+            @RequestParam(required = false) final Long timeId,
             final RedirectAttributes redirectAttributes
     ) {
-        Long parsedTimeId = null;
-        LocalDate parsedDate = null;
-
         try {
-            parsedTimeId = reservationPageRequestParser.parseLongValue(timeId);
-            parsedDate = reservationPageRequestParser.parseDate(date);
-            reservationService.updateByIdAndName(id, reservationName, parsedDate, parsedTimeId);
+            reservationService.updateByIdAndName(id, reservationName, date, timeId);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
