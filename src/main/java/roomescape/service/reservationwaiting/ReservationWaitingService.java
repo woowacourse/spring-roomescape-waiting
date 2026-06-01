@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
@@ -73,14 +72,11 @@ public class ReservationWaitingService {
     }
 
     private Long findReservationId(final LocalDate date, final Long themeId, final Long timeId) {
-        try {
-            return reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, themeId, timeId);
-        } catch (EmptyResultDataAccessException exception) {
-            throw new ResourceNotFoundException(
-                    ErrorCode.RESERVATION_NOT_FOUND,
-                    "예약 정보가 없으면 대기 생성이 불가능합니다."
-            );
-        }
+        return reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, themeId, timeId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_NOT_FOUND,
+                        "예약 정보가 없으면 대기 생성이 불가능합니다."
+                ));
     }
 
     public void deleteByIdAndName(Long waitingId, String name) {

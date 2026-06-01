@@ -43,7 +43,8 @@ class ReservationWaitingServiceTest {
         LocalDate date = LocalDate.parse("2026-08-06");
         Reservation reservation = createReservation(date);
 
-        when(reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, 1L, 1L)).thenReturn(1L);
+        when(reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, 1L, 1L))
+                .thenReturn(Optional.of(1L));
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationWaitingRepository.existsByReservationIdAndName(1L, "아루")).thenReturn(false);
         when(reservationWaitingRepository.save(any(ReservationWaiting.class)))
