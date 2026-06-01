@@ -98,7 +98,17 @@ async function doSignup() {
       document.getElementById('err-msg').textContent = '이미 사용 중인 이메일입니다';
       btn.disabled = false;
     } else {
-      document.getElementById('err-msg').textContent = '회원가입에 실패했습니다';
+      let msg = '회원가입에 실패했습니다';
+      try {
+        const e = await r.json();
+        const params = e['invalid-params'];
+        if (params && params.length > 0) {
+          msg = params.map(p => p.reason).join(' ');
+        } else if (e.detail) {
+          msg = e.detail;
+        }
+      } catch {}
+      document.getElementById('err-msg').textContent = msg;
       btn.disabled = false;
     }
   } catch {
