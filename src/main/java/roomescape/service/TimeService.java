@@ -71,13 +71,11 @@ public class TimeService {
         return themeSlotRepository.saveAll(themeSlots);
     }
 
-    @NonNull
     private Theme getThemeOrElseThrow(long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_NOT_FOUND));
     }
 
-    @NonNull
     private Time getTimeOrElseThrow(long timeId) {
         return timeRepository.findById(timeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TIME_NOT_FOUND));

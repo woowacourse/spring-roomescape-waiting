@@ -43,7 +43,6 @@ public class ThemeService {
         return getThemeOrElseThrow(themeId);
     }
 
-    @NonNull
     private Theme getThemeOrElseThrow(long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_NOT_FOUND));

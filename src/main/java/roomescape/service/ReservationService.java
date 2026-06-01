@@ -155,13 +155,11 @@ public class ReservationService {
         return list;
     }
 
-    @NonNull
     private ThemeSlot getThemeSlotOrElseThrow(Long themeSlotId) {
         return themeSlotRepository.findById(themeSlotId)
                 .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
-    @NonNull
     private Reservation getReservationOrElseThrow(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
