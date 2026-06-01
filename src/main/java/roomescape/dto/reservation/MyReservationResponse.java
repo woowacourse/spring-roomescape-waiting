@@ -8,15 +8,17 @@ import roomescape.dto.theme.ThemeResponse;
 import java.time.LocalDate;
 
 public class MyReservationResponse {
-    private final Long id;
+    private final Long reservationId;
+    private final Long waitingId;
     private final LocalDate date;
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
     private final ReservationStatus status;
     private final Long sequence;
 
-    public MyReservationResponse(Long id, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, ReservationStatus status, Long sequence) {
-        this.id = id;
+    public MyReservationResponse(Long reservationId, Long waitingId, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, ReservationStatus status, Long sequence) {
+        this.reservationId = reservationId;
+        this.waitingId = waitingId;
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -27,6 +29,7 @@ public class MyReservationResponse {
     public static MyReservationResponse fromReservation(Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
+                null,
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
@@ -37,6 +40,7 @@ public class MyReservationResponse {
 
     public static MyReservationResponse fromWaiting(ReservationWaiting reservationWaiting) {
         return new MyReservationResponse(
+                null,
                 reservationWaiting.getId(),
                 reservationWaiting.getDate(),
                 ReservationTimeResponse.from(reservationWaiting.getTime()),
@@ -46,8 +50,12 @@ public class MyReservationResponse {
         );
     }
 
-    public Long getId() {
-        return id;
+    public Long getReservationId() {
+        return reservationId;
+    }
+
+    public Long getWaitingId() {
+        return waitingId;
     }
 
     public LocalDate getDate() {

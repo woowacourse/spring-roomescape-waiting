@@ -101,7 +101,7 @@ public class UserWaitingTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id", is(1))
+                .body("[0].waitingId", is(1))
                 .body("[0].date", is(TOMORROW.toString()))
                 .body("[0].time.id", is(1))
                 .body("[0].theme.id", is(1))
