@@ -44,6 +44,7 @@ public class Time {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Time time = (Time) o;
         return Objects.equals(id, time.id);
@@ -51,6 +52,6 @@ public class Time {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }
