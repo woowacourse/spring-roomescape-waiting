@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -133,8 +134,26 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 존재하지_않는_대기열_삭제_시_예외없이_무시된다() {
-        assertThatCode(() -> service.delete(999L)).doesNotThrowAnyException();
+    void 존재하지_않는_대기열_삭제_시_예외가_발생한다() {
+        assertThatThrownBy(() -> service.delete(999L))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void 중간_순번_대기를_취소하면_뒤_순번이_변경된다() {
+        Slot slot = reservedSlot(1L, tomorrow, "예약자");
+        LocalDateTime base = LocalDateTime.now();
+        waitingDao.create(ReservationWaiting.restore(null, slot, "대기1", null, base));
+        Long secondId = waitingDao.create(ReservationWaiting.restore(null, slot, "대기2", null, base.plusSeconds(1)));
+        waitingDao.create(ReservationWaiting.restore(null, slot, "대기3", null, base.plusSeconds(2)));
+
+        service.delete(secondId);
+
+        assertThat(service.readAll())
+                .extracting(ReservationWaitingResponse::name, ReservationWaitingResponse::sequence)
+                .containsExactlyInAnyOrder(
+                        tuple("대기1", 1L),
+                        tuple("대기3", 2L));
     }
 
     @Test
