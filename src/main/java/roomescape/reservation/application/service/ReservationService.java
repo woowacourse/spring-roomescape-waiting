@@ -108,16 +108,6 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 
-    private void validateDuplicateReservation(ReservationCreateCommand request) {
-        Boolean existsByDateAndTime = reservationRepository.existsByDateAndThemeAndTime(request.date(),
-                request.themeId(),
-                request.timeId()
-        );
-        if (existsByDateAndTime) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
-        }
-    }
-
     private void validateDuplicateReservation(ReservationUpdateCommand request, Reservation reservation) {
         Boolean existsByDateAndTime = reservationRepository.existsByDateAndThemeAndTimeExcludingId(
                 request.date(),
