@@ -102,7 +102,7 @@ public class ReservationTimeDao {
                                           WHERE r.time_id = t.id
                                             AND r.theme_id = ?
                                             AND r.date = ?
-                                      ) THEN 'CONFIRMED' ELSE 'AVAILABLE' END AS status
+                                      ) THEN 'RESERVED' ELSE 'AVAILABLE' END AS status
                                FROM reservation_time t
                                ORDER BY t.start_at
                         """,
