@@ -79,4 +79,4 @@ CREATE TABLE store_managers
 );
 
 ALTER TABLE reservation
-    ADD CONSTRAINT unique_reservation UNIQUE (date, time_id, theme_id, store_id, user_id);
+    ADD CONSTRAINT unique_reservation UNIQUE (date, theme_id, time_id, store_id, user_id);
