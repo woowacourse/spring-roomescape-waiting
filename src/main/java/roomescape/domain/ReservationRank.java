@@ -2,13 +2,13 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 
-public class ReservationOrder {
+public class ReservationRank {
     private Reservation reservation;
-    private Long order;
+    private Long rank;
 
-    public ReservationOrder(Reservation reservation, Long order) {
+    public ReservationRank(Reservation reservation, Long rank) {
         this.reservation = reservation;
-        this.order = order;
+        this.rank = rank;
     }
 
     public Long getId() {
@@ -35,7 +35,7 @@ public class ReservationOrder {
         return reservation.getStatus();
     }
 
-    public Long getOrder() {
-        return order;
+    public Long getRank() {
+        return rank;
     }
 }

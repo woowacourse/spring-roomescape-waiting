@@ -10,13 +10,13 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationOrder;
+import roomescape.domain.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
-import roomescape.dto.response.ReservationOrderResponse;
+import roomescape.dto.response.ReservationRankResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.AlreadyExistsException;
 import roomescape.exception.NotFoundException;
@@ -33,10 +33,10 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    public List<ReservationOrderResponse> find(String name) {
-        List<ReservationOrder> response = reservationDao.findByName(name);
+    public List<ReservationRankResponse> find(String name) {
+        List<ReservationRank> response = reservationDao.findByName(name);
         return response.stream()
-                .map(ReservationOrderResponse::from)
+                .map(ReservationRankResponse::from)
                 .toList();
     }
 
