@@ -10,7 +10,6 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRank;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -80,7 +79,6 @@ public class ReservationService {
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
 
         Reservation newReservation = new Reservation(
-                id,
                 reservation.getName(),
                 request.date(),
                 time,
@@ -89,9 +87,9 @@ public class ReservationService {
         );
 
         validateDuplicate(newReservation);
-        reservationDao.save(newReservation);
+        Reservation saved = reservationDao.save(newReservation);
 
-        return ReservationResponse.from(newReservation);
+        return ReservationResponse.from(saved);
     }
 
     @Transactional
