@@ -20,12 +20,12 @@ CREATE TABLE theme
 
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     VARCHAR(255) NOT NULL,
-    time_id  BIGINT,
-    theme_id BIGINT,
-    status   VARCHAR(255) NOT NULL,
+    id            BIGINT       NOT NULL AUTO_INCREMENT,
+    name          VARCHAR(255) NOT NULL,
+    date          VARCHAR(255) NOT NULL,
+    time_id       BIGINT,
+    theme_id      BIGINT,
+    status        VARCHAR(255) NOT NULL,
 
     confirmed_key INT INVISIBLE GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN 1 END),
 
