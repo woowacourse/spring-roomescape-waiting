@@ -62,7 +62,10 @@ public class ReservationWaitingService {
     }
 
     public void delete(Long id) {
-        reservationWaitingDao.delete(id);
+        long deleted = reservationWaitingDao.delete(id);
+        if (deleted == 0) {
+            throw new ResourceNotFoundException("해당 예약 대기가 존재하지 않습니다.");
+        }
     }
 
     public List<ReservationWaitingResponse> readAll() {
