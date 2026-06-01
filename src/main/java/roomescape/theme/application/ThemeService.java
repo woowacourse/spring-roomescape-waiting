@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ActiveReservationRepository;
 import roomescape.theme.application.dto.ThemeCommand;
 import roomescape.theme.application.dto.ThemeInfo;
 import roomescape.theme.application.exception.DuplicateThemeException;
@@ -25,7 +25,7 @@ public class ThemeService {
 
     private final Clock clock;
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ActiveReservationRepository reservationRepository;
 
     public ThemeInfo addTheme(final ThemeCommand theme) {
         if (themeRepository.existsByName(theme.name())) {
@@ -60,5 +60,9 @@ public class ThemeService {
         ).stream()
         .map(ThemeInfo::from)
         .toList();
+    }
+
+    public Theme getThemeById(Long id) {
+        return themeRepository.getById(id);
     }
 }

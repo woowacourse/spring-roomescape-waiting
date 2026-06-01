@@ -69,8 +69,9 @@ public class JdbcThemeRepository implements ThemeRepository {
     public List<Theme> findByReservationCountWithLimit(final LocalDate startDate, final LocalDate endDate, final int limit) {
         String sql = "SELECT t.id, t.name, t.description, t.thumbnail_image_url, t.duration_time "
                 + "FROM theme t "
-                + "INNER JOIN reservation r ON t.id = r.theme_id "
-                + "WHERE r.date BETWEEN :startDate AND :endDate AND t.deleted_at IS NULL AND r.is_deleted = 0 "
+                + "INNER JOIN time_slot ts ON t.id = ts.theme_id "
+                + "INNER JOIN reservation r ON ts.id = r.slot_id "
+                + "WHERE ts.date BETWEEN :startDate AND :endDate AND t.deleted_at IS NULL AND r.is_deleted = 0 "
                 + "GROUP BY t.id, t.name, t.description, t.thumbnail_image_url, t.duration_time "
                 + "ORDER BY COUNT(r.id) DESC "
                 + "LIMIT :limit";
