@@ -23,6 +23,7 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.service.ReservationService;
+import roomescape.domain.reservation.vo.ReserverName;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -57,9 +58,14 @@ public class ReservationController {
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationCreateResponseDto> updateReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
+        @RequestParam
+        @NotBlank(message = "예약자명은 필수입니다.")
+        @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
+        String name,
         @Valid @RequestBody ReservationUpdateRequestDto requestDto) {
         return ResponseEntity.ok(
-            reservationService.updateReservation(id, reservationMapper.toUpdateCommand(requestDto)));
+            reservationService.updateReservation(id, new ReserverName(name),
+                reservationMapper.toUpdateCommand(requestDto)));
     }
 
     @PatchMapping("/{id}/cancel")
@@ -70,7 +76,7 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelReservation(id, name));
+        return ResponseEntity.ok(reservationService.cancelReservation(id, new ReserverName(name)));
     }
 
     @PostMapping("/waitings")
@@ -88,6 +94,6 @@ public class ReservationController {
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
         String name
     ) {
-        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, name));
+        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, new ReserverName(name)));
     }
 }

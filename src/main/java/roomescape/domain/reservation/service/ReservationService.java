@@ -18,6 +18,7 @@ import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.repository.ReservationWithWaitingNumber;
+import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -98,11 +99,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
+    public ReservationCreateResponseDto updateReservation(Long id, ReserverName name,
+        ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!existingReservation.getName().equals(command.name())) {
+        if (!existingReservation.getName().equals(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
 
@@ -172,11 +174,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelReservation(Long id, String name) {
+    public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().value().equals(name)) {
+        if (!reservation.getName().equals(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
@@ -217,11 +219,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationCancelResponseDto cancelWaitingReservation(Long id, String name) {
+    public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!reservation.getName().value().equals(name)) {
+        if (!reservation.getName().equals(name)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 

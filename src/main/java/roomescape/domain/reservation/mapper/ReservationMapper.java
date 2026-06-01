@@ -36,8 +36,7 @@ public final class ReservationMapper {
     }
 
     public ReservationUpdateCommand toUpdateCommand(ReservationUpdateRequestDto requestDto) {
-        return new ReservationUpdateCommand(new ReserverName(requestDto.name()), requestDto.date(), requestDto.timeId(),
-            requestDto.themeId());
+        return new ReservationUpdateCommand(requestDto.date(), requestDto.timeId(), requestDto.themeId());
     }
 
     public ReservationResponseDto toResponseDto(Reservation reservation, Integer waitingNumber) {
