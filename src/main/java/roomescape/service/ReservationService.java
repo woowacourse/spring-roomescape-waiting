@@ -108,14 +108,17 @@ public class ReservationService {
     private ReservationResponse toReservationResponse(Reservation reservation) {
         return ReservationResponse.from(
                 reservation,
-                reservationDao.findOrderByReservationId(reservation.getId())
+                reservationDao.findOrderByReservationId(reservation.getId()),
+                reservation.getUpdateAt()
         );
     }
 
     private void promoteWaitingReservation(Reservation changed, long scheduleId) {
         if (changed.isReserved()) {
             Optional<Reservation> reservations = reservationDao.findFirstByScheduleIdAndStatus(scheduleId, ReservationStatus.WAITING);
-            reservations.ifPresent(reservation -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED));
+            reservations.ifPresent(reservation
+                    -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED)
+            );
         }
     }
 
