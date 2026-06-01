@@ -26,8 +26,12 @@ CREATE TABLE reservation
     time_id  BIGINT,
     theme_id BIGINT,
     status   VARCHAR(255) NOT NULL,
+
+    confirmed_key INT INVISIBLE GENERATED ALWAYS AS (CASE WHEN status = 'CONFIRMED' THEN 1 END),
+
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT unique_reservation UNIQUE (name, date, time_id, theme_id)
+    CONSTRAINT unique_reservation UNIQUE (name, date, time_id, theme_id),
+    CONSTRAINT unique_confirmed_reservation UNIQUE (date, time_id, theme_id, confirmed_key)
 );
