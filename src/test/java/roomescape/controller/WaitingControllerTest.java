@@ -37,7 +37,7 @@ class WaitingControllerTest {
     private WaitingService waitingService;
 
     @Test
-    void 예약_대기를_생성하면_204_created와_Location헤더를_반환한다() throws Exception {
+    void 예약_대기를_생성하면_201_created와_Location헤더를_반환한다() throws Exception {
         WaitingRequestDTO request = new WaitingRequestDTO(
                 "나무",
                 LocalDate.parse("2026-05-28"),
