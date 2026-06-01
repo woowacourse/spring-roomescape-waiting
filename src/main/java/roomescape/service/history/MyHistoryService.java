@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
-import roomescape.controller.history.dto.HistoryResponse;
-import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
-import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.repository.history.MyHistory;
@@ -22,12 +19,12 @@ public class MyHistoryService {
         this.myHistoryRepository = myHistoryRepository;
     }
 
-    public List<HistoryResponse> getAllByName(final String name) {
+    public List<MyHistoryResult> getAllByName(final String name) {
         List<MyHistory> histories = myHistoryRepository.findByUserName(name);
         Map<Long, Integer> waitingSequences = findWaitingSequences(histories);
 
         return histories.stream()
-                .map(history -> toResponse(history, waitingSequences))
+                .map(history -> toResult(history, waitingSequences))
                 .toList();
     }
 
@@ -63,15 +60,15 @@ public class MyHistoryService {
                 ));
     }
 
-    private HistoryResponse toResponse(final MyHistory history, final Map<Long, Integer> waitingSequences) {
-        return new HistoryResponse(
+    private MyHistoryResult toResult(final MyHistory history, final Map<Long, Integer> waitingSequences) {
+        return new MyHistoryResult(
                 history.reservationId(),
                 history.waitingId(),
                 history.status(),
                 history.name(),
                 history.date(),
-                ThemeResponse.from(history.theme()),
-                ReservationTimeResponse.from(history.time()),
+                history.theme(),
+                history.time(),
                 resolveSequence(history, waitingSequences)
         );
     }

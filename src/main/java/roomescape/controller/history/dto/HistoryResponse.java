@@ -1,9 +1,10 @@
 package roomescape.controller.history.dto;
 
 import java.time.LocalDate;
-import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.domain.history.ReservationHistoryStatus;
+import roomescape.service.history.MyHistoryResult;
 
 public record HistoryResponse(
         Long reservationId,
@@ -15,4 +16,16 @@ public record HistoryResponse(
         ReservationTimeResponse time,
         Integer sequence
 ) {
+    public static HistoryResponse from(final MyHistoryResult history) {
+        return new HistoryResponse(
+                history.reservationId(),
+                history.waitingId(),
+                history.status(),
+                history.name(),
+                history.date(),
+                ThemeResponse.from(history.theme()),
+                ReservationTimeResponse.from(history.time()),
+                history.sequence()
+        );
+    }
 }

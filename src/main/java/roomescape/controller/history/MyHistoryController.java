@@ -21,6 +21,10 @@ public class MyHistoryController {
 
     @GetMapping("/{name}")
     public ResponseEntity<List<HistoryResponse>> getHistorys(@PathVariable final String name) {
-        return ResponseEntity.ok(myHistoryService.getAllByName(name));
+        List<HistoryResponse> histories = myHistoryService.getAllByName(name).stream()
+                .map(HistoryResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(histories);
     }
 }

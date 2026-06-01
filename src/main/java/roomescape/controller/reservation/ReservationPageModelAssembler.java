@@ -144,6 +144,8 @@ public class ReservationPageModelAssembler {
             return List.of();
         }
 
-        return myHistoryService.getAllByName(reservationName);
+        return myHistoryService.getAllByName(reservationName).stream()
+                .map(HistoryResponse::from)
+                .toList();
     }
 }
