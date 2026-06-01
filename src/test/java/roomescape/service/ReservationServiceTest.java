@@ -283,6 +283,21 @@ class ReservationServiceTest {
         assertThat(responses.get(0).order()).isEqualTo(2);
     }
 
+    @DisplayName("지난 시간의 대기 예약은 EXPIRED 상태로 응답한다.")
+    @Test
+    void findByNameExpiredWaiting() {
+        Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
+        Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusDays(2));
+        given(reservationDao.findByName("러로")).willReturn(List.of(reservation));
+        given(reservationDao.findOrderByReservationId(1L)).willReturn(2);
+
+        List<ReservationResponse> responses = reservationService.findByName("러로");
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).status()).isEqualTo(DisplayStatus.EXPIRED);
+        assertThat(responses.get(0).order()).isEqualTo(2);
+    }
+
     private Reservation reservation(
             Long id,
             String name,

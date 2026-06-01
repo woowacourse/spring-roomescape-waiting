@@ -24,7 +24,7 @@ public record ReservationResponse(
         int order
 ) {
 
-    public static ReservationResponse from(Reservation reservation, int order, LocalDateTime updateAt) {
+    public static ReservationResponse from(Reservation reservation, int order, LocalDateTime now) {
         Schedule schedule = reservation.getSchedule();
         Theme theme = schedule.getTheme();
         ReservationTime reservationTime = schedule.getTime();
@@ -36,7 +36,7 @@ public record ReservationResponse(
 
         DisplayStatus displayStatus = DisplayStatus.from(
                 reservation.getStatus(),
-                updateAt,
+                now,
                 reservationDateTime
         );
 

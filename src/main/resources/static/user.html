@@ -470,6 +470,7 @@
     .reservationSlot-item.status-confirmed { border-left-color: #22c55e; }
     .reservationSlot-item.status-waiting { border-left-color: #f59e0b; }
     .reservationSlot-item.status-canceled { border-left-color: var(--danger); }
+    .reservationSlot-item.status-expired { border-left-color: var(--muted); }
 
     .reservationSlot-item img {
       width: 56px;
@@ -514,6 +515,11 @@
     .reservation-status.waiting {
       background: rgba(245, 158, 11, 0.12);
       color: #fbbf24;
+    }
+
+    .reservation-status.expired {
+      background: rgba(107, 114, 128, 0.14);
+      color: #9ca3af;
     }
 
     /* Empty state */
@@ -1297,8 +1303,13 @@
     return String(r.status ?? '').toUpperCase() === 'COMPLETED';
   }
 
+  function isExpiredReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'EXPIRED';
+  }
+
   function reservationState(r) {
     if (isCanceledReservation(r)) return 'canceled';
+    if (isExpiredReservation(r)) return 'expired';
     if (isCompletedReservation(r)) return 'confirmed';
     return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
   }
@@ -1306,6 +1317,7 @@
   function reservationStatusLabel(r) {
     const state = reservationState(r);
     if (isCompletedReservation(r)) return '이용 완료';
+    if (isExpiredReservation(r)) return '대기 만료';
     if (state === 'canceled') return '예약 취소';
     if (state === 'waiting') return '대기';
     return '예약 확정';
@@ -1317,7 +1329,7 @@
   }
 
   function reservationActions(r) {
-    if (isCanceledReservation(r) || isCompletedReservation(r)) {
+    if (isCanceledReservation(r) || isCompletedReservation(r) || isExpiredReservation(r)) {
       return reservationStatusBadge(r);
     }
 

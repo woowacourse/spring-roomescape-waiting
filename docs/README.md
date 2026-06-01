@@ -63,3 +63,6 @@
     - [x] Controller: `@WebMvcTest`
     - [x] Domain 단위 테스트 추가
     - [x] `@DirtiesContext` 의존 제거
+
+
+주목: DisplayStatus는 ReservationResponse 외에서 절대 참조하지 않는다.

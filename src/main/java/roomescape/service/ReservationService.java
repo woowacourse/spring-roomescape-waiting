@@ -107,7 +107,7 @@ public class ReservationService {
         return ReservationResponse.from(
                 reservation,
                 reservationDao.findOrderByReservationId(reservation.getId()),
-                reservation.getUpdateAt()
+                LocalDateTime.now()
         );
     }
 

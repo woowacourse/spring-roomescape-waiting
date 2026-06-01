@@ -639,6 +639,7 @@
   function displayReservationStatus(reservation) {
     const status = String(reservation.status ?? '').toUpperCase();
     if (status === 'COMPLETED') return '이용 완료';
+    if (status === 'EXPIRED') return '대기 만료';
     if (status === 'WAITING') return `대기 ${reservation.order ?? 0}번`;
     if (status === 'CANCELED') return '취소';
     return '예약 확정';
