@@ -64,6 +64,16 @@ public class Reservation {
         return this.status.equals(Status.RESERVED);
     }
 
+    public void validateCancelBy(String name, LocalDateTime dateTime) {
+        validateOwnedBy(name);
+        time.validateExpired(dateTime);
+    }
+
+    public void validateUpdateBy(String name, LocalDateTime dateTime) {
+        validateOwnedBy(name);
+        time.validateExpired(dateTime);
+    }
+
     public void validateOwnedBy(String name) {
         if (!this.name.equals(name)) {
             throw new ForbiddenRequestException();

@@ -1,22 +1,22 @@
 package roomescape.theme.service;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.repository.HolidayRepository;
-import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeSaveServiceRequest;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -71,10 +71,8 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public List<ReservationTime> getAvailableTimes(Long themeId, LocalDate date) {
-        validateThemeExists(themeId);
-
-        if (date == null) {
-            throw new IllegalArgumentException("예약 날짜는 필수입니다.");
+        if (!themeRepository.existsById(themeId)) {
+            throw new ThemeNotFoundException(themeId);
         }
 
         if (holidayRepository.existsByDate(date)) {
@@ -86,12 +84,6 @@ public class ThemeServiceImpl implements ThemeService {
                 .stream()
                 .filter(time -> !reservedTimeIds.contains(time.getId()))
                 .collect(Collectors.toList());
-    }
-
-    private void validateThemeExists(Long themeId) {
-        if (themeId == null || !themeRepository.existsById(themeId)) {
-            throw new ThemeNotFoundException(themeId);
-        }
     }
 
     @Override

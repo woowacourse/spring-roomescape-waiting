@@ -11,6 +11,6 @@ public interface ReservationService {
     Reservation create(ReservationSaveServiceRequest reservation);
     void cancel(Long id);
     void cancelForUser(Long id, String name);
-    Reservation update(Long id, Long timeId);
+    Reservation update(Long id, Long timeId, String name);
     List<ReservationWithWaitingOrderResponse> getAllByName(String name);
 }

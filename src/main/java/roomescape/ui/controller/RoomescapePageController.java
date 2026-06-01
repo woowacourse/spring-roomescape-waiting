@@ -158,7 +158,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.update(id, timeId);
+            reservationService.update(id, timeId, name);
             addSuccessMessage(redirectAttributes, "예약 시간을 변경했습니다.");
         } catch (ReservationNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "수정할 예약을 찾지 못했습니다.", e);

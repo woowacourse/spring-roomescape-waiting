@@ -47,17 +47,21 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
-        ReservationTime time = findTime(request.timeId());
+        ReservationTime time = timeService.findById(request.timeId());
         Long themeId = request.themeId();
-        time.validateReservableSchedule();
-        validateThemeId(themeId);
-        validateNotHoliday(time);
+        time.validateExpired(LocalDateTime.now());
+        if (!themeRepository.existsById(themeId)) {
+            throw new ThemeNotFoundException(themeId);
+        }
+        if (holidayService.isHoliday(time.getDate())) {
+            throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
+        }
         Theme theme = themeRepository.findById(themeId);
         Status status = Status.RESERVED;
         if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
             throw new DuplicateReservationException();
         }
-        if (isDuplicatedReservation(themeId, time)) {
+        if (reservationRepository.isDuplicated(themeId, time)) {
             status = Status.WAITING;
         }
         Reservation newReservation = new Reservation(request.name(),
@@ -66,33 +70,6 @@ public class ReservationServiceImpl implements ReservationService {
                 status,
                 LocalDateTime.now());
         return reservationRepository.save(newReservation);
-    }
-
-
-    private void validateThemeId(Long themeId) {
-        if (themeId == null) {
-            throw new IllegalArgumentException("테마는 필수입니다.");
-        }
-        if (!themeRepository.existsById(themeId)) {
-            throw new ThemeNotFoundException(themeId);
-        }
-    }
-
-    private void validateNotHoliday(ReservationTime time) {
-        if (holidayService.isHoliday(time.getDate())) {
-            throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
-        }
-    }
-
-    private boolean isDuplicatedReservation(Long themeId, ReservationTime time) {
-        return reservationRepository.isDuplicated(themeId, time);
-    }
-
-    private ReservationTime findTime(Long timeId) {
-        if (timeId == null) {
-            throw new IllegalArgumentException("예약 시간은 필수입니다.");
-        }
-        return timeService.findById(timeId);
     }
 
     @Override
@@ -116,8 +93,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancelForUser(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.validateOwnedBy(name);
-        reservation.getTime().validateNotPastForCancel();
+        reservation.validateCancelBy(name, LocalDateTime.now());
 
         if (reservation.isReserved()) {
             reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
@@ -131,19 +107,25 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    public Reservation update(Long id, Long timeId) {
+    public Reservation update(Long id, Long timeId, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.getTime().validateUpdatableReservation();
-        ReservationTime newTime = findTime(timeId);
-        newTime.validateReservableSchedule();
-        if (isDuplicatedReservation(reservation.getTheme().getId(), newTime)) {
+        reservation.validateUpdateBy(name, LocalDateTime.now());
+
+        ReservationTime newTime = timeService.findById(timeId);
+        newTime.validateExpired(LocalDateTime.now());
+
+        if (holidayService.isHoliday(newTime.getDate())) {
+            throw new IllegalArgumentException("휴일은 예약이 불가능합니다.");
+        }
+
+        if (reservationRepository.isDuplicated(reservation.getTheme().getId(), newTime)) {
             throw new DuplicateReservationException();
         }
+
         boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now());
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
-
         }
         return reservation.withTime(newTime);
     }
