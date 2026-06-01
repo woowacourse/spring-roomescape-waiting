@@ -16,7 +16,7 @@ public interface ReservationRepository {
 
     void deleteById(long id);
 
-    boolean existsByThemeSlotId(long themeSlotId);
+    boolean existsConfirmedByThemeSlotId(long themeSlotId);
 
     List<Reservation> findByName(String name);
 

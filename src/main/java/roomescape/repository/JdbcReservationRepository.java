@@ -140,13 +140,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByThemeSlotId(long themeSlotId) {
+    public boolean existsConfirmedByThemeSlotId(long themeSlotId) {
         String sql = """
                         SELECT EXISTS (
                             SELECT 1
                             FROM reservation 
                             WHERE theme_slot_id = ?
-                            AND status != 'CANCELLED'
+                            AND status = 'CONFIRMED'
                         ) 
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeSlotId));

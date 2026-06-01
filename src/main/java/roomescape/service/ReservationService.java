@@ -47,7 +47,7 @@ public class ReservationService {
         Reservation reservation = new Reservation(name, themeSlot);
 
         // RESERVATION 테이블에 ThemeSlot id가 없다면, 바로 themeSlot은 true로, reservation을 confirm로 변경 후 저장
-        if (!reservationRepository.existsByThemeSlotId(themeSlotId)) {
+        if (!reservationRepository.existsConfirmedByThemeSlotId(themeSlotId)) {
             themeSlot.reserve();
             themeSlotRepository.update(themeSlot);
             reservation.confirm();
@@ -74,8 +74,8 @@ public class ReservationService {
             return;
         }
 
-        boolean hasActiveReservation = reservationRepository.existsByThemeSlotId(reservation.getThemeSlotId());
-        updateThemeSlotReserved(reservation.getThemeSlot(), hasActiveReservation);
+        boolean hasConfirmedReservation = reservationRepository.existsConfirmedByThemeSlotId(reservation.getThemeSlotId());
+        updateThemeSlotReserved(reservation.getThemeSlot(), hasConfirmedReservation);
     }
 
     public MyReservationResponse findReservationBy(String name) {
@@ -146,7 +146,7 @@ public class ReservationService {
 
     private void changeThemeSlot(Reservation reservation, Long themeSlotId, ThemeSlot themeSlot) {
         validateDuplicatedReservation(reservation.getName(), themeSlotId);
-        boolean targetSlotHasActiveReservation = reservationRepository.existsByThemeSlotId(themeSlotId);
+        boolean targetSlotHasConfirmedReservation = reservationRepository.existsConfirmedByThemeSlotId(themeSlotId);
         updateThemeSlotReserved(themeSlot, true);
 
         if (reservation.isConfirmedStatus()) {
@@ -155,7 +155,7 @@ public class ReservationService {
             promoteWaitingReservationOrReleaseSlot(reservation);
         }
 
-        if (targetSlotHasActiveReservation) {
+        if (targetSlotHasConfirmedReservation) {
             reservation.changeStatus(PendingStatus.getInstance());
             return;
         }

@@ -7,7 +7,6 @@ import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
 
 public class FakeReservationDao implements ReservationRepository {
 
@@ -43,11 +42,11 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByThemeSlotId(long themeSlotId) {
+    public boolean existsConfirmedByThemeSlotId(long themeSlotId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
                         Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
-                                && !"CANCELLED".equals(reservation.getReservationStatusName())
+                                && "CONFIRMED".equals(reservation.getReservationStatusName())
                 );
     }
 
