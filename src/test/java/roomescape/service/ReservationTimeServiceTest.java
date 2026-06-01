@@ -20,12 +20,13 @@ import roomescape.repository.ReservationTimeQueryingDao;
 import roomescape.repository.ReservationTimeUpdatingDao;
 import roomescape.repository.ReservationUpdatingDao;
 import roomescape.repository.ReservationWaitingDao;
+import roomescape.repository.SlotDao;
 import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 @JdbcTest
 @Import({ReservationTimeService.class, ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
-        ReservationService.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
+        ReservationService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ThemeQueryingDao.class, ThemeUpdatingDao.class, ReservationWaitingDao.class})
 class ReservationTimeServiceTest {
 

@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -36,12 +35,8 @@ public class ReservationTimeQueryingDao {
 
     public Optional<ReservationTime> findReservationTimeById(long id) {
         String sql = "select id, start_at from reservation_time where id = ?";
-        try {
-            ReservationTime reservationTime = jdbcTemplate.queryForObject(sql, reservationTimeRowMapper, id);
-            return Optional.of(reservationTime);
-        } catch (EmptyResultDataAccessException ex) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, reservationTimeRowMapper, id).stream()
+                .findFirst();
     }
 
     public List<ReservationTime> findAllReservationTime() {
@@ -53,15 +48,16 @@ public class ReservationTimeQueryingDao {
         String sql = """
             SELECT t.id AS id, t.start_at AS start_at,
             CASE
-            WHEN r.time_id IS NULL THEN true
+            WHEN taken.time_id IS NULL THEN true
             ELSE false
             END AS available
             FROM reservation_time t
             LEFT JOIN (
-            SELECT r.time_id
-            FROM reservation r
-            WHERE r.date = ? AND r.theme_id = ?
-            ) AS r ON r.time_id = t.id
+            SELECT s.time_id
+            FROM slot s
+            JOIN reservation r ON r.slot_id = s.id
+            WHERE s.date = ? AND s.theme_id = ?
+            ) AS taken ON taken.time_id = t.id
             """;
         return jdbcTemplate.query(sql, availableReservationTimeRowMapper, date, themeId);
     }

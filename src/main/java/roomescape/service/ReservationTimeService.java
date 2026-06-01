@@ -25,15 +25,13 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> readAll() {
-        return reservationTimeQueryingDao.findAllReservationTime()
-                .stream()
+        return reservationTimeQueryingDao.findAllReservationTime().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public List<AvailableReservationTimeResponse> readAvailable(LocalDate date, Long themeId) {
-        return reservationTimeQueryingDao.findAvailableReservationTime(date, themeId)
-                .stream()
+        return reservationTimeQueryingDao.findAvailableReservationTime(date, themeId).stream()
                 .map(AvailableReservationTimeResponse::from)
                 .toList();
     }

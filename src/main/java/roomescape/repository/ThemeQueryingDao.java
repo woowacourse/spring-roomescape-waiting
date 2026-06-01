@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -19,15 +18,12 @@ public class ThemeQueryingDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> {
-        Theme theme = new Theme(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("url")
-        );
-        return theme;
-    };
+    private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> new Theme(
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getString("description"),
+            resultSet.getString("url")
+    );
 
     public Optional<Theme> findThemeById(long id) {
         String sql = """
@@ -35,13 +31,8 @@ public class ThemeQueryingDao {
                 FROM theme
                 WHERE id = ?
                 """;
-
-        try {
-            Theme theme = jdbcTemplate.queryForObject(sql, themeRowMapper, id);
-            return Optional.of(theme);
-        } catch (EmptyResultDataAccessException ex) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, themeRowMapper, id).stream()
+                .findFirst();
     }
 
     public List<Theme> findAllTheme() {
@@ -57,10 +48,11 @@ public class ThemeQueryingDao {
                 SELECT t.id, t.name, t.description, t.url
                 FROM theme as t
                 INNER JOIN (
-                    SELECT r.theme_id
+                    SELECT s.theme_id
                     FROM reservation as r
+                    JOIN slot as s ON r.slot_id = s.id
                     WHERE r.created_at >= ?
-                    GROUP BY r.theme_id
+                    GROUP BY s.theme_id
                     ORDER BY count(1) DESC
                     LIMIT 10
                 ) AS top_themes ON t.id = top_themes.theme_id;

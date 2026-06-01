@@ -29,11 +29,13 @@ public class ReservationTimeTest {
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");
         jdbcTemplate.update("delete from theme");
 
         jdbcTemplate.update("alter table waiting alter column id restart with 1");
         jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table slot alter column id restart with 1");
         jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
         jdbcTemplate.update("alter table theme alter column id restart with 1");
     }

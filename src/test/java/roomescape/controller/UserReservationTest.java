@@ -29,11 +29,13 @@ public class UserReservationTest {
 
         jdbcTemplate.update("delete from waiting");
         jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from slot");
         jdbcTemplate.update("delete from reservation_time");
         jdbcTemplate.update("delete from theme");
 
         jdbcTemplate.update("alter table waiting alter column id restart with 1");
         jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table slot alter column id restart with 1");
         jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
         jdbcTemplate.update("alter table theme alter column id restart with 1");
     }
@@ -177,12 +179,13 @@ public class UserReservationTest {
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
-        RestAssured.given().log().all()
+        String reservationId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .extract().jsonPath().getString("id");
 
         Map<String, Object> update = new HashMap<>();
         update.put("name", "브라운");
@@ -193,7 +196,7 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(update)
-                .when().patch("/reservations/1")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200);
     }
@@ -223,8 +226,9 @@ public class UserReservationTest {
         createTime("11:00");
 
         Map<String, Object> reservation1 = createReservationBody("브라운", "2026-08-05", 1, 1);
-        RestAssured.given().contentType(ContentType.JSON).body(reservation1)
-                .when().post("/reservations").then().statusCode(201);
+        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation1)
+                .when().post("/reservations").then().statusCode(201)
+                .extract().jsonPath().getString("id");
 
         Map<String, Object> reservation2 = createReservationBody("네오", "2026-08-05", 2, 1);
         RestAssured.given().contentType(ContentType.JSON).body(reservation2)
@@ -233,7 +237,7 @@ public class UserReservationTest {
         Map<String, Object> update = createReservationBody("브라운", "2026-08-05", 2, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/1")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(409)
                 .body("errorCode", is("DUPLICATE_RESERVATION"))
@@ -304,13 +308,14 @@ public class UserReservationTest {
         createTime("10:00");
 
         Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
-        RestAssured.given().contentType(ContentType.JSON).body(reservation)
-                .when().post("/reservations").then().statusCode(201);
+        String reservationId = RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201)
+                .extract().jsonPath().getString("id");
 
         Map<String, Object> update = createReservationBody("브라운", "2020-01-01", 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/1")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(400)
                 .body("errorCode", is("INVALID_DATE_OR_TIME"))

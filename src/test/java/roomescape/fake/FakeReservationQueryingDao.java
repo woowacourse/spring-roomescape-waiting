@@ -1,6 +1,5 @@
 package roomescape.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,23 +19,28 @@ public class FakeReservationQueryingDao extends ReservationQueryingDao {
     }
 
     @Override
-    public Optional<Reservation> findReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
+    public Optional<Reservation> findReservationById(long id) {
         return store.stream()
-                .filter(r -> r.getTheme().getId().equals(themeId)
-                          && r.getDate().equals(date)
-                          && r.getTime().getId().equals(timeId))
+                .filter(reservation -> reservation.getId().equals(id))
                 .findFirst();
     }
 
     @Override
-    public Optional<Reservation> findReservationById(long id) {
+    public Optional<Reservation> findReservationBySlotId(Long slotId) {
         return store.stream()
-                .filter(reservation->reservation.getId().equals(id))
+                .filter(reservation -> reservation.getSlot().getId().equals(slotId))
                 .findFirst();
     }
 
     @Override
     public List<Reservation> findAllReservations() {
         return List.copyOf(store);
+    }
+
+    @Override
+    public List<Reservation> findAllByName(String name) {
+        return store.stream()
+                .filter(reservation -> reservation.getName().equals(name))
+                .toList();
     }
 }
