@@ -132,4 +132,17 @@ public class JdbcThemeRepository implements ThemeRepository {
         ));
     }
 
+    public List<Theme> findThemesRegisteredSlot() {
+        String sql = """
+                SELECT DISTINCT t.*
+                FROM theme t
+                JOIN reservation_slot s ON t.id = s.theme_id
+                WHERE t.is_active = TRUE;
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        return jdbcTemplate.query(sql, params, themeRowMapper);
+
+    }
+
 }

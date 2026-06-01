@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import roomescape.reservation.exception.ReservationException;
+import roomescape.slot.domain.ReservationSlot;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

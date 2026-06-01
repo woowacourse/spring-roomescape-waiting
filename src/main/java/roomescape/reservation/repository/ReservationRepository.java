@@ -1,7 +1,7 @@
 package roomescape.reservation.repository;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 import java.util.List;

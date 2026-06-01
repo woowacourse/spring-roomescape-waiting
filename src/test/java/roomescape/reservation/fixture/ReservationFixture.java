@@ -5,7 +5,7 @@ import java.time.temporal.ChronoUnit;
 
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.service.dto.ReservationSaveCommand;

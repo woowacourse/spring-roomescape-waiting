@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.slot.domain;
 
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;

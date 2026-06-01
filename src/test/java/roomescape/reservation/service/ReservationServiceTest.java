@@ -20,7 +20,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.FakeReservationRepository;

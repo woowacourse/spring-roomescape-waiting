@@ -31,7 +31,7 @@ public class ReservationController {
             @Validated @RequestBody ReservationSaveDto dto,
             @LoginMember Member member
     ) {
-        Reservation reservation = reservationService.reserve(member.getName() , dto.toCommand());
+        Reservation reservation = reservationService.reserve(member.getName(), dto.toCommand());
         ReservationDetailDto responseData = ReservationDetailDto.from(reservation);
         return ResponseEntity.ok(responseData);
     }

@@ -8,7 +8,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;

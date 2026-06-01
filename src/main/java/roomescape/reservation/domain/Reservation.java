@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 

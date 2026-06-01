@@ -21,7 +21,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;

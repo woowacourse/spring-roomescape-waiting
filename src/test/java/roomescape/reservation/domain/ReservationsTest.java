@@ -7,6 +7,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.time.domain.ReservationTime;

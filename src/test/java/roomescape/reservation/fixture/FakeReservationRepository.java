@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
