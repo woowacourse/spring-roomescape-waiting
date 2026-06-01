@@ -38,7 +38,8 @@ public record EventSlot(
     }
 
     public boolean isBeforeDateTime(LocalDateTime otherDateTime) {
-        return isBeforeDate(otherDateTime.toLocalDate()) && isBeforeTime(otherDateTime.toLocalTime());
+        LocalDateTime thisDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
+        return thisDateTime.isBefore(otherDateTime);
     }
 
     public boolean isEqualDate(LocalDate otherDate) {
