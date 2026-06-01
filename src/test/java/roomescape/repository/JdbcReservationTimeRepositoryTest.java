@@ -70,7 +70,7 @@ public class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void findReservedTimeIdByDateAndThemeTest() {
+    void findReservedTimesByDateAndThemeTest() {
         String insertReservationTimeSql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
         jdbcTemplate.update(insertReservationTimeSql, "10:00");
         jdbcTemplate.update(insertReservationTimeSql, "11:00");
@@ -83,12 +83,12 @@ public class JdbcReservationTimeRepositoryTest {
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 1L, 1L);
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 2L, 1L);
 
-        List<Long> reservedTimeIds = reservationTimeRepository.findReservedTimeIdByDateAndTheme(
+        List<ReservationTime> reservedTimes = reservationTimeRepository.findReservedTimesByDateAndTheme(
                 LocalDate.of(2026, 5, 2),
                 1L);
 
-        assertThat(reservedTimeIds.get(0)).isEqualTo(1L);
-        assertThat(reservedTimeIds.get(1)).isEqualTo(2L);
+        assertThat(reservedTimes.get(0)).isEqualTo(new ReservationTime(1L, LocalTime.of(10, 0)));
+        assertThat(reservedTimes.get(1)).isEqualTo(new ReservationTime(2L, LocalTime.of(11, 0)));
     }
 
     @Test

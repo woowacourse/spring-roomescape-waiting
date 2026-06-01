@@ -31,8 +31,6 @@ import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 import roomescape.service.dto.response.ServiceReceptionResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 public class ReceptionFacadeTest {
 
@@ -69,16 +67,17 @@ public class ReceptionFacadeTest {
     void saveReservationTest() {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", reservationDate,
                 reservationTime.getId(), theme.getId());
-        Reservation newReservation = request.toReservation(reservationTime, theme);
+        Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
+        Reservation reservation = Reservation.of(1L, reservationWithoutId);
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
         when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.empty());
-        when(reservationService.save(request, reservationTime, theme)).thenReturn(newReservation);
+        when(reservationService.save(reservationWithoutId)).thenReturn(reservation);
 
-        assertThat(receptionFacade.save(request)).isEqualTo(ServiceReceptionResponse.of(newReservation, 0L,
-                ReservationStatus.CONFIRMED.name()));
+        assertThat(receptionFacade.save(request)).isEqualTo(ServiceReceptionResponse.of(reservation, 0L,
+                ReservationStatus.CONFIRMED));
     }
 
     @Test
@@ -86,15 +85,16 @@ public class ReceptionFacadeTest {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", reservationDate,
                 reservationTime.getId(), theme.getId());
         Reservation beforeReservation = new Reservation(1L, "luke", reservationDate, reservationTime, theme);
-
-        Wait newWait = request.toWait(now, reservationTime, theme);
-        ServiceReceptionResponse response = ServiceReceptionResponse.of(newWait, 1L, ReservationStatus.WAITING.name());
+        Wait waitWithoutId = request.toWait(now, reservationTime, theme);
+        Wait wait = Wait.of(1L, waitWithoutId);
+        ServiceReceptionResponse response = ServiceReceptionResponse.of(wait, 1L, ReservationStatus.WAITING);
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
         when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.of(beforeReservation));
-        when(waitService.save(request.toWait(now, reservationTime, theme))).thenReturn(response);
+        when(waitService.save(waitWithoutId)).thenReturn(wait);
+        when(waitService.calculateOrder(wait)).thenReturn(1L);
 
         assertThat(receptionFacade.save(request)).isEqualTo(response);
     }
@@ -130,24 +130,22 @@ public class ReceptionFacadeTest {
     @Test
     void findByNameTest() {
         LocalDate otherDate = LocalDate.of(2026, 5, 19);
-        ServiceReservationTimeResponse timeResponse = ServiceReservationTimeResponse.from(reservationTime);
 
-        ServiceThemeResponse themeResponse = ServiceThemeResponse.from(theme);
-
-        List<ServiceReceptionResponse> reservations = List.of(
-                new ServiceReceptionResponse(1L, 0L, "fizz", reservationDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()));
-
-        List<ServiceReceptionResponse> waits = List.of(
-                new ServiceReceptionResponse(1L, 1L, "fizz", otherDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()));
+        List<Reservation> reservations = List.of(new Reservation(1L, "fizz", reservationDate, reservationTime, theme));
+        List<ServiceReceptionResponse> reservationResponses = List.of(
+                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED)
+        );
+        List<Wait> waits = List.of(new Wait(1L, LocalDateTime.now(clock), "fizz", otherDate, reservationTime, theme));
+        List<ServiceReceptionResponse> waitResponses = List.of(
+                ServiceReceptionResponse.of(waits.get(0), 1L, ReservationStatus.WAITING));
 
         List<ServiceReceptionResponse> result = new ArrayList<>();
-        result.addAll(reservations);
-        result.addAll(waits);
+        result.addAll(reservationResponses);
+        result.addAll(waitResponses);
 
         when(reservationService.findByName("fizz")).thenReturn(reservations);
         when(waitService.findByName("fizz")).thenReturn(waits);
+        when(waitService.calculateOrder(waits.get(0))).thenReturn(1L);
 
         assertThat(receptionFacade.findByName("fizz")).isEqualTo(result);
     }
@@ -155,28 +153,33 @@ public class ReceptionFacadeTest {
     @Test
     void findAllTest() {
         LocalDate otherDate = LocalDate.of(2026, 5, 19);
-        ServiceReservationTimeResponse timeResponse = ServiceReservationTimeResponse.from(reservationTime);
 
-        ServiceThemeResponse themeResponse = ServiceThemeResponse.from(theme);
+        List<Reservation> reservations = List.of(
+                new Reservation(1L, "fizz", reservationDate, reservationTime, theme),
+                new Reservation(2L, "luke", otherDate, reservationTime, theme)
+        );
+        List<ServiceReceptionResponse> reservationResponses = List.of(
+                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED),
+                ServiceReceptionResponse.of(reservations.get(1), 0L, ReservationStatus.CONFIRMED)
+        );
 
-        List<ServiceReceptionResponse> reservations = List.of(
-                new ServiceReceptionResponse(1L, 0L, "fizz", reservationDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()),
-                new ServiceReceptionResponse(2L, 0L, "luke", otherDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()));
-
-        List<ServiceReceptionResponse> waits = List.of(
-                new ServiceReceptionResponse(1L, 1L, "fizz", otherDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()),
-                new ServiceReceptionResponse(2L, 1L, "luke", reservationDate, timeResponse, themeResponse,
-                        ReservationStatus.WAITING.name()));
+        List<Wait> waits = List.of(
+                new Wait(1L, LocalDateTime.now(clock), "fizz", otherDate, reservationTime, theme),
+                new Wait(2L, LocalDateTime.now(clock), "luke", reservationDate, reservationTime, theme)
+        );
+        List<ServiceReceptionResponse> waitResponses = List.of(
+                ServiceReceptionResponse.of(waits.get(0), 1L, ReservationStatus.WAITING),
+                ServiceReceptionResponse.of(waits.get(1), 1L, ReservationStatus.WAITING)
+        );
 
         List<ServiceReceptionResponse> result = new ArrayList<>();
-        result.addAll(reservations);
-        result.addAll(waits);
+        result.addAll(reservationResponses);
+        result.addAll(waitResponses);
 
         when(reservationService.findAll()).thenReturn(reservations);
         when(waitService.findAll()).thenReturn(waits);
+        when(waitService.calculateOrder(waits.get(0))).thenReturn(1L);
+        when(waitService.calculateOrder(waits.get(1))).thenReturn(1L);
 
         assertThat(receptionFacade.findAll()).isEqualTo(result);
     }
@@ -197,17 +200,16 @@ public class ReceptionFacadeTest {
     @Test
     void deleteReservationWithWaitTest() {
         Reservation reservation = new Reservation(1L, "fizz", reservationDate, reservationTime, theme);
-        Wait firstWait = new Wait(1L, now, "fizz", reservationDate, reservationTime, theme);
-        ServiceReservationCreateRequest waitRequest = new ServiceReservationCreateRequest(firstWait.getName(),
-                firstWait.getReservationDate(),
-                firstWait.getTime().getId(), firstWait.getTheme().getId());
+        Wait firstWait = new Wait(1L, now, "luke", reservationDate, reservationTime, theme);
+        Reservation newReservationWithoutId = new Reservation(firstWait.getName(), firstWait.getReservationDate(),
+                firstWait.getTime(), firstWait.getTheme());
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())).thenReturn(List.of(firstWait));
 
         receptionFacade.deleteReservation(reservation.getId());
-        verify(reservationService, times(1)).save(waitRequest, firstWait.getTime(), firstWait.getTheme());
+        verify(reservationService, times(1)).save(newReservationWithoutId);
         verify(reservationService, times(1)).delete(reservation.getId());
         verify(waitService, times(1)).delete(firstWait.getId());
     }

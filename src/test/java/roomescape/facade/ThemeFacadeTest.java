@@ -32,11 +32,12 @@ public class ThemeFacadeTest {
 
     @Test
     void saveTest() {
-        Theme theme = new Theme(1L, "루크의 모험", "모험 이야기", "url");
+        Theme themeWithoutId = new Theme("루크의 모험", "모험 이야기", "url");
+        Theme theme = Theme.of(1L, themeWithoutId);
         ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("루크의 모험", "모험 이야기", "url");
         ServiceThemeResponse response = ServiceThemeResponse.from(theme);
 
-        when(themeService.save(request)).thenReturn(response);
+        when(themeService.save(themeWithoutId)).thenReturn(theme);
 
         assertThat(themeFacade.save(request)).isEqualTo(response);
     }
@@ -45,11 +46,11 @@ public class ThemeFacadeTest {
     void findAllTest() {
         Theme themeLuke = new Theme(1L, "루크의 모험", "모험 이야기", "url");
         Theme themeFizz = new Theme(2L, "피즈의 모험", "모험 이야기", "url");
-
+        List<Theme> themes = List.of(themeLuke, themeFizz);
         List<ServiceThemeResponse> responses = List.of(ServiceThemeResponse.from(themeLuke),
                 ServiceThemeResponse.from(themeFizz));
 
-        when(themeService.findAll()).thenReturn(responses);
+        when(themeService.findAll()).thenReturn(themes);
 
         assertThat(themeFacade.findAll()).isEqualTo(responses);
     }
@@ -61,10 +62,11 @@ public class ThemeFacadeTest {
         LocalDate startDate = LocalDate.of(2026, 4, 20);
         LocalDate endDate = LocalDate.of(2026, 5, 1);
 
+        List<Theme> themeRanking = List.of(themeLuke, themeFizz);
         List<ServiceThemeResponse> responseRanking = List.of(ServiceThemeResponse.from(themeLuke),
                 ServiceThemeResponse.from(themeFizz));
 
-        when(themeService.findRanking(startDate, endDate)).thenReturn(responseRanking);
+        when(themeService.findRanking(startDate, endDate)).thenReturn(themeRanking);
 
         assertThat(themeFacade.findRanking(startDate, endDate)).isEqualTo(responseRanking);
     }

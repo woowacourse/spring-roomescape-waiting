@@ -10,9 +10,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 @Component
 @Transactional(readOnly = true)
@@ -27,18 +24,14 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ServiceReservationTimeResponse save(ServiceReservationTimeCreateRequest request) {
-        validateDuplicatedReservationTime(request.startAt());
+    public ReservationTime save(ReservationTime reservationTimeWithoutId) {
+        validateDuplicatedReservationTime(reservationTimeWithoutId.getStartAt());
 
-        ReservationTime reservationTime = reservationTimeRepository.save(request.toEntity());
-        return ServiceReservationTimeResponse.from(reservationTime);
+        return reservationTimeRepository.save(reservationTimeWithoutId);
     }
 
-    public List<ServiceReservationTimeResponse> findAll() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream()
-                .map(ServiceReservationTimeResponse::from)
-                .toList();
+    public List<ReservationTime> findAll() {
+        return reservationTimeRepository.findAll();
     }
 
     private void validateDuplicatedReservationTime(LocalTime startAt) {
@@ -47,21 +40,10 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ServiceReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(
-            LocalDate date, Long themeId) {
+    public List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId) {
         validateNotPastDate(date);
 
-        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
-        List<Long> reservedTimeIdByDateAndTheme = reservationTimeRepository.findReservedTimeIdByDateAndTheme(date,
-                themeId);
-
-        return allReservationTimes.stream()
-                .map(reservationTime -> {
-                    if (reservedTimeIdByDateAndTheme.contains(reservationTime.getId())) {
-                        return ServiceReservationTimeAvailabilityResponse.from(reservationTime, false);
-                    }
-                    return ServiceReservationTimeAvailabilityResponse.from(reservationTime, true);
-                }).toList();
+        return reservationTimeRepository.findReservedTimesByDateAndTheme(date, themeId);
     }
 
     private void validateNotPastDate(LocalDate date) {

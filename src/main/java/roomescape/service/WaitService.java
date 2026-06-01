@@ -4,18 +4,16 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.WaitRepository;
-import roomescape.service.dto.response.ServiceReceptionResponse;
 
 @Component
 @Transactional(readOnly = true)
 public class WaitService {
 
-    private static final int MAX_WAITING_COUNT = 3;
+    public static final int MAX_WAITING_COUNT = 3;
 
     private final WaitRepository waitRepository;
 
@@ -24,7 +22,7 @@ public class WaitService {
     }
 
     @Transactional
-    public ServiceReceptionResponse save(Wait waitWithoutId) {
+    public Wait save(Wait waitWithoutId) {
         List<Wait> waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),
                 waitWithoutId.getTime().getId(),
@@ -40,21 +38,15 @@ public class WaitService {
             throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
         }
 
-        Wait wait = waitRepository.save(waitWithoutId);
-
-        return ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name());
+        return waitRepository.save(waitWithoutId);
     }
 
-    public List<ServiceReceptionResponse> findByName(String name) {
-        return waitRepository.findByName(name).stream()
-                .map(wait -> ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name()))
-                .toList();
+    public List<Wait> findByName(String name) {
+        return waitRepository.findByName(name);
     }
 
-    public List<ServiceReceptionResponse> findAll() {
-        return waitRepository.findAll().stream()
-                .map(wait -> ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name()))
-                .toList();
+    public List<Wait> findAll() {
+        return waitRepository.findAll();
     }
 
     public void delete(Long id) {
@@ -70,7 +62,7 @@ public class WaitService {
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
     }
 
-    private Long calculateOrder(Wait wait) {
+    public Long calculateOrder(Wait wait) {
         return waitRepository.findOrderByWait(wait);
     }
 }

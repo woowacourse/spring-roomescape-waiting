@@ -2,6 +2,7 @@ package roomescape.service.dto.response;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Wait;
 
 public record ServiceReceptionResponse(
@@ -11,9 +12,9 @@ public record ServiceReceptionResponse(
         LocalDate reservationDate,
         ServiceReservationTimeResponse time,
         ServiceThemeResponse theme,
-        String status
+        ReservationStatus status
 ) {
-    public static ServiceReceptionResponse of(Reservation reservation, Long order, String status) {
+    public static ServiceReceptionResponse of(Reservation reservation, Long order, ReservationStatus status) {
         return new ServiceReceptionResponse(
                 reservation.getId(),
                 order,
@@ -25,7 +26,7 @@ public record ServiceReceptionResponse(
         );
     }
 
-    public static ServiceReceptionResponse of(Wait wait, Long order, String status) {
+    public static ServiceReceptionResponse of(Wait wait, Long order, ReservationStatus status) {
         return new ServiceReceptionResponse(
                 wait.getId(),
                 order,

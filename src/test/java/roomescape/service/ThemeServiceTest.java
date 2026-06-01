@@ -23,7 +23,6 @@ import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
-import roomescape.service.dto.response.ServiceThemeResponse;
 
 public class ThemeServiceTest {
 
@@ -43,32 +42,23 @@ public class ThemeServiceTest {
         ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
         Theme themeWithoutId = request.toEntity();
         Theme theme = Theme.of(1L, themeWithoutId);
-        ServiceThemeResponse response = ServiceThemeResponse.from(theme);
+
         when(themeRepository.save(themeWithoutId)).thenReturn(theme);
 
-        ServiceThemeResponse save = themeService.save(request);
-
-        assertThat(save).isEqualTo(response);
+        assertThat(themeService.save(themeWithoutId)).isEqualTo(theme);
     }
 
     @Test
     void findAllTest() {
         Theme themeFizz = new Theme(1L, "피즈의 모험", "모험 이야기", "url");
         Theme themeLuke = new Theme(2L, "루크의 모험", "모험 이야기", "url");
-        List<ServiceThemeResponse> result = List.of(
-                ServiceThemeResponse.from(themeFizz),
-                ServiceThemeResponse.from(themeLuke)
-        );
-
         List<Theme> themes = List.of(
                 themeFizz, themeLuke
         );
 
         when(themeRepository.findAll()).thenReturn(themes);
 
-        List<ServiceThemeResponse> all = themeService.findAll();
-
-        assertThat(all).isEqualTo(result);
+        assertThat(themeService.findAll()).isEqualTo(themes);
     }
 
     @Test
@@ -84,20 +74,14 @@ public class ThemeServiceTest {
         LocalDate endDate = LocalDate.of(2026, 5, 1);
         Theme themeFizz = new Theme(1L, "피즈의 모험", "모험 이야기", "url");
         Theme themeLuke = new Theme(2L, "루크의 모험", "모험 이야기", "url");
-        List<ServiceThemeResponse> result = List.of(
-                ServiceThemeResponse.from(themeFizz),
-                ServiceThemeResponse.from(themeLuke)
-        );
 
-        List<Theme> themes = List.of(
+        List<Theme> ranking = List.of(
                 themeFizz, themeLuke
         );
 
-        when(themeRepository.findRanking(startDate, endDate, 10)).thenReturn(themes);
+        when(themeRepository.findRanking(startDate, endDate, 10)).thenReturn(ranking);
 
-        List<ServiceThemeResponse> ranking = themeService.findRanking(startDate, endDate);
-
-        assertThat(ranking).isEqualTo(result);
+        assertThat(themeService.findRanking(startDate, endDate)).isEqualTo(ranking);
     }
 
     @Test

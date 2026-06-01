@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
@@ -22,15 +23,20 @@ public class ThemeFacade {
 
     @Transactional
     public ServiceThemeResponse save(ServiceThemeCreateRequest request) {
-        return themeService.save(request);
+        Theme themeWithoutId = request.toEntity();
+        return ServiceThemeResponse.from(themeService.save(themeWithoutId));
     }
 
     public List<ServiceThemeResponse> findAll() {
-        return themeService.findAll();
+        return themeService.findAll().stream()
+                .map(ServiceThemeResponse::from)
+                .toList();
     }
 
     public List<ServiceThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
-        return themeService.findRanking(startDate, endDate);
+        return themeService.findRanking(startDate, endDate).stream()
+                .map(ServiceThemeResponse::from)
+                .toList();
     }
 
     @Transactional

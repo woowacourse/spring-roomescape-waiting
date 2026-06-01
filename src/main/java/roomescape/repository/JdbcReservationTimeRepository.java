@@ -74,18 +74,17 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<Long> findReservedTimeIdByDateAndTheme(LocalDate date, Long themeId) {
-        String sql = "SELECT t.id as time_id "
+    public List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId) {
+        String sql = "SELECT t.id as time_id, t.start_at as start_at "
                 + "FROM `reservation_time` t "
                 + "INNER JOIN `reservation` r ON r.time_id = t.id "
                 + "WHERE r.date = (?) AND r.theme_id = (?) ";
 
-        return jdbcTemplate.query(sql,
-                (resultSet, rowNum) ->
-                        resultSet.getLong("time_id"),
-                date,
-                themeId
-        );
+        return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
+            Long id = resultSet.getLong("time_id");
+            LocalTime startAt = resultSet.getTime("start_at").toLocalTime();
+            return new ReservationTime(id, startAt);
+        }, date, themeId);
     }
 
     @Override

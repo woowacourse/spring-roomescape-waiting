@@ -20,9 +20,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
-import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
-import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
 public class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
@@ -38,26 +35,22 @@ public class ReservationTimeServiceTest {
 
     @Test
     void saveTest() {
-        ServiceReservationTimeCreateRequest request = new ServiceReservationTimeCreateRequest(LocalTime.of(10, 0));
-
-        ReservationTime reservationTimeWithoutId = request.toEntity();
+        ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
         ReservationTime reservationTime = ReservationTime.of(1L, reservationTimeWithoutId);
 
         when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(false);
         when(reservationTimeRepository.save(reservationTimeWithoutId)).thenReturn(reservationTime);
-        ServiceReservationTimeResponse result = reservationTimeService.save(request);
 
-        assertThat(result.id()).isEqualTo(1);
-        assertThat(result.startAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(reservationTimeService.save(reservationTimeWithoutId)).isEqualTo(reservationTime);
     }
 
     @Test
     void saveExceptionTest() {
-        ServiceReservationTimeCreateRequest request = new ServiceReservationTimeCreateRequest(LocalTime.of(10, 0));
+        ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
 
         when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(true);
 
-        assertThatThrownBy(() -> reservationTimeService.save(request))
+        assertThatThrownBy(() -> reservationTimeService.save(reservationTimeWithoutId))
                 .isInstanceOf(CustomInvalidRequestException.class);
     }
 
@@ -69,39 +62,31 @@ public class ReservationTimeServiceTest {
         );
 
         when(reservationTimeRepository.findAll()).thenReturn(reservationTimes);
-        List<ServiceReservationTimeResponse> results = reservationTimeService.findAll();
 
-        assertThat(results.get(0)).isEqualTo(ServiceReservationTimeResponse.from(reservationTimes.get(0)));
-        assertThat(results.get(1)).isEqualTo(ServiceReservationTimeResponse.from(reservationTimes.get(1)));
+        assertThat(reservationTimeService.findAll()).isEqualTo(reservationTimes);
     }
 
     @Test
-    void findAvailabilityByDateAndThemeTest() {
+    void findReservedTimesByDateAndThemeTest() {
         LocalDate date = LocalDate.of(2026, 5, 3);
         Theme theme = new Theme(1L, "피즈의 모험", "모험 이야기", "url.jpg");
 
-        List<ReservationTime> reservationTimes = List.of(
+        List<ReservationTime> reservedTimes = List.of(
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new ReservationTime(2L, LocalTime.of(11, 0)),
                 new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
-        when(reservationTimeRepository.findAll()).thenReturn(reservationTimes);
-        when(reservationTimeRepository.findReservedTimeIdByDateAndTheme(date, theme.getId())).thenReturn(
-                List.of(1L, 3L));
-
-        List<ServiceReservationTimeAvailabilityResponse> results = reservationTimeService.findAvailabilityByDateAndTheme(
-                date, theme.getId());
-        assertThat(results.get(0).available()).isFalse();
-        assertThat(results.get(1).available()).isTrue();
-        assertThat(results.get(2).available()).isFalse();
+        when(reservationTimeRepository.findReservedTimesByDateAndTheme(date, theme.getId())).thenReturn(reservedTimes);
+        assertThat(reservationTimeService.findReservedTimesByDateAndTheme(date, theme.getId())).isEqualTo(
+                reservedTimes);
     }
 
     @Test
     void findAvailabilityByDateAndThemeExceptionTest() {
         LocalDate date = LocalDate.of(2026, 5, 1);
 
-        assertThatThrownBy(() -> reservationTimeService.findAvailabilityByDateAndTheme(date, 1L))
+        assertThatThrownBy(() -> reservationTimeService.findReservedTimesByDateAndTheme(date, 1L))
                 .isInstanceOf(CustomInvalidRequestException.class);
     }
 

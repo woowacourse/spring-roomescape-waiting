@@ -57,19 +57,45 @@ public class ReceptionFacade {
     public List<ServiceReceptionResponse> findByName(String name) {
         List<ServiceReceptionResponse> receptions = new ArrayList<>();
 
-        receptions.addAll(reservationService.findByName(name));
-        receptions.addAll(waitService.findByName(name));
+        receptions.addAll(findReservationByName(name));
+        receptions.addAll(findWaitByName(name));
 
         return receptions;
+    }
+
+    private List<ServiceReceptionResponse> findReservationByName(String name) {
+        return reservationService.findByName(name).stream()
+                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED))
+                .toList();
+    }
+
+    private List<ServiceReceptionResponse> findWaitByName(String name) {
+        return waitService.findByName(name).stream()
+                .map(wait -> ServiceReceptionResponse.of(wait, waitService.calculateOrder(wait),
+                        ReservationStatus.WAITING))
+                .toList();
     }
 
     public List<ServiceReceptionResponse> findAll() {
         List<ServiceReceptionResponse> receptions = new ArrayList<>();
 
-        receptions.addAll(reservationService.findAll());
-        receptions.addAll(waitService.findAll());
+        receptions.addAll(findAllReservations());
+        receptions.addAll(findAllWaits());
 
         return receptions;
+    }
+
+    private List<ServiceReceptionResponse> findAllReservations() {
+        return reservationService.findAll().stream()
+                .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED))
+                .toList();
+    }
+
+    private List<ServiceReceptionResponse> findAllWaits() {
+        return waitService.findAll().stream()
+                .map(wait -> ServiceReceptionResponse.of(wait, waitService.calculateOrder(wait),
+                        ReservationStatus.WAITING))
+                .toList();
     }
 
     @Transactional
@@ -119,21 +145,37 @@ public class ReceptionFacade {
         Optional<Reservation> reservation = reservationService.findBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
         if (reservation.isEmpty()) {
-            Reservation newReservation = reservationService.save(request, reservationTime, theme);
-            return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED.name());
+            return saveReservation(request, reservationTime, theme);
         }
         if (reservation.get().getName().equals(request.name())) {
             throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
         }
 
-        return waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));
+        return saveWait(request, reservationTime, theme);
+    }
+
+    private ServiceReceptionResponse saveReservation(ServiceReservationCreateRequest request,
+                                                     ReservationTime reservationTime,
+                                                     Theme theme) {
+        Reservation newReservationWithoutId = request.toReservation(reservationTime, theme);
+        Reservation newReservation = reservationService.save(newReservationWithoutId);
+        return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED);
+    }
+
+    private ServiceReceptionResponse saveWait(ServiceReservationCreateRequest request, ReservationTime reservationTime,
+                                              Theme theme) {
+        Wait newWaitWithoutId = request.toWait(LocalDateTime.now(clock), reservationTime, theme);
+        Wait newWait = waitService.save(newWaitWithoutId);
+        return ServiceReceptionResponse.of(newWait, waitService.calculateOrder(newWait),
+                ReservationStatus.WAITING);
     }
 
     private void confirmFirstWait(Wait firstOrder) {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
                 firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
 
-        reservationService.save(request, firstOrder.getTime(), firstOrder.getTheme());
+        Reservation reservationWithoutId = request.toReservation(firstOrder.getTime(), firstOrder.getTheme());
+        reservationService.save(reservationWithoutId);
         waitService.delete(firstOrder.getId());
     }
 }
