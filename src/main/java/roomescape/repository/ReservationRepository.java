@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -25,4 +24,6 @@ public interface ReservationRepository {
     int update(Reservation reservation);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, Long timeId, Long themeId);
 }
