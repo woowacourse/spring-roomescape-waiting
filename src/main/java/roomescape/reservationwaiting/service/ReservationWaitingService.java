@@ -1,36 +1,25 @@
 package roomescape.reservationwaiting.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.ReservationWaiting;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 
 @Service
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationRepository reservationRepository;
 
     public ReservationWaitingService(
-            final ReservationRepository reservationRepository,
             final ReservationWaitingRepository reservationWaitingRepository
     ) {
-        this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
-    public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
-
-        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.RESERVATION_NOT_FOUND,
-                        "예약 정보가 없으면 대기 생성이 불가능합니다."
-                ));
+    public ReservationWaiting save(String name, Reservation reservation) {
 
         validateWaitableName(reservation, name);
 

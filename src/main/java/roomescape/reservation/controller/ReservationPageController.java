@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import roomescape.ReservationApplicationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.controller.dto.ThemeResponse;
@@ -19,17 +20,20 @@ public class ReservationPageController {
 
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final ReservationApplicationService reservationApplicationService;
     private final ReservationPageRequestParser reservationPageRequestParser;
     private final ReservationPageModelAssembler reservationPageModelAssembler;
 
     public ReservationPageController(
             final ReservationService reservationService,
             final ReservationWaitingService reservationWaitingService,
+            final ReservationApplicationService reservationApplicationService,
             final ReservationPageRequestParser reservationPageRequestParser,
             final ReservationPageModelAssembler reservationPageModelAssembler
     ) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
+        this.reservationApplicationService = reservationApplicationService;
         this.reservationPageRequestParser = reservationPageRequestParser;
         this.reservationPageModelAssembler = reservationPageModelAssembler;
     }
@@ -92,7 +96,7 @@ public class ReservationPageController {
         Long parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
         Long parsedTimeId = reservationPageRequestParser.parseLongValue(timeId);
         LocalDate parsedDate = reservationPageRequestParser.parseDate(date);
-        reservationWaitingService.save(name, parsedDate, parsedThemeId, parsedTimeId);
+        reservationApplicationService.saveWaiting(name, parsedDate, parsedThemeId, parsedTimeId);
 
         addReservationNameAttribute(redirectAttributes, name);
         addThemeIdAttribute(redirectAttributes, parsedThemeId);

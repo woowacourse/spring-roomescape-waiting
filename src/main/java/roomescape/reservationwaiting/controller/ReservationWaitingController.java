@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.ReservationApplicationService;
 import roomescape.reservationwaiting.controller.dto.ReservationWaitingCreateRequest;
 import roomescape.reservationwaiting.controller.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
@@ -19,9 +20,14 @@ import roomescape.reservationwaiting.service.ReservationWaitingService;
 public class ReservationWaitingController {
 
     private final ReservationWaitingService reservationWaitingService;
+    private final ReservationApplicationService reservationApplicationService;
 
-    public ReservationWaitingController(final ReservationWaitingService reservationWaitingService) {
+    public ReservationWaitingController(
+            final ReservationWaitingService reservationWaitingService,
+            final ReservationApplicationService reservationApplicationService
+    ) {
         this.reservationWaitingService = reservationWaitingService;
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @PostMapping
@@ -29,7 +35,7 @@ public class ReservationWaitingController {
             @Valid @RequestBody final ReservationWaitingCreateRequest reservationWaitingRequest
     ) {
         ReservationWaitingResponse reservationWaiting = ReservationWaitingResponse.from(
-                reservationWaitingService.save(
+                reservationApplicationService.saveWaiting(
                         reservationWaitingRequest.name(),
                         reservationWaitingRequest.date(),
                         reservationWaitingRequest.themeId(),
