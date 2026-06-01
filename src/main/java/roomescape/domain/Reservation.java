@@ -76,7 +76,7 @@ public class Reservation {
     }
 
     public boolean isSameMember(Member member) {
-        return member.equals(this.member);
+        return this.member.equals(member);
     }
 
     public boolean isInStore(Store store) {
