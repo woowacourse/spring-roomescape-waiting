@@ -1,158 +1,173 @@
 package roomescape.reservation.presentation;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.Clock;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import roomescape.config.TestTimeConfig;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.context.WebApplicationContext;
+import roomescape.presentation.BaseControllerUnitTest;
+import roomescape.presentation.fixture.ReservationRequestFixture;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.ReservationChangeCommand;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.presentation.ReservationController;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
+import roomescape.reservation.presentation.dto.ReservationPendingResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
-import roomescape.theme.presentation.dto.ThemeRequest;
-import roomescape.time.presentation.dto.ReservationTimeRequest;
+import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.time.application.dto.ReservationTimeInfo;
 
-@Import(TestTimeConfig.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationControllerTest {
+@WebMvcTest(ReservationController.class)
+class ReservationControllerTest extends BaseControllerUnitTest {
 
-    @LocalServerPort
-    private int port;
+    @MockitoBean
+    private ReservationService reservationService;
 
     @BeforeEach
-    void setPort() {
-        RestAssured.port = port;
+    void setUp(WebApplicationContext webApplicationContext) {
+        mockMvcSetting(webApplicationContext);
     }
 
-    @Autowired
-    private Clock clock;
-
-    @Test
-    @DisplayName("예약이 존재할 때, 새 예약을 저장하면 대기 상태로 저장된다.")
-    void modifyToReservationToWaitingTest() {
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(
-                LocalTime.now(clock)
-        );
-        long timeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
-        ThemeRequest themeRequest = ThemeRequest.builder()
-                .name("판타지")
-                .description("판타지래요")
-                .thumbnailImageUrl("https://example.com/theme.png")
-                .build();
-        long themeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeRequest)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
-
-        ReservationRequest reservationRequest = new ReservationRequest(
-                "포비",
-                LocalDate.now(clock),
-                timeId,
-                themeId
-        );
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
+    @ParameterizedTest(name = "요청 정보가 {0} 일 때, 예외 메세지 \"{1}\"가 발생한다.")
+    @MethodSource("roomescape.presentation.fixture.ReservationRequestFixture#reserveFailRequestFixture")
+    void 예약_요청_시_형식_검증에_실패하면_예외가_발생한다(ReservationRequest body, String exceptionMessage) {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
-
-        ReservationRequest newReservationRequest = new ReservationRequest(
-                "리사",
-                LocalDate.now(clock),
-                timeId,
-                themeId
-        );
-
-        RestAssured.given().log().all()
-                .when().contentType(ContentType.JSON)
-                .body(newReservationRequest)
-                .post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString(exceptionMessage));
     }
 
     @Test
-    @DisplayName("예약이 존재할 때, 기존 예약을 수정하면 대기 상태로 저장된다.")
-    void pendingExistsReservationTest() {
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(
-                LocalTime.now(clock)
-        );
-        long timeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
-        ThemeRequest themeRequest = ThemeRequest.builder()
-                .name("판타지")
-                .description("판타지래요")
-                .thumbnailImageUrl("https://example.com/theme.png")
-                .build();
-        long themeId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeRequest)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
+    void 예약_요청에_성공하면_201_CREATED와_정상_응답이_반환된다() {
+        // given
+        ReservationRequest request = ReservationRequestFixture.reserveSuccessRequestFixture();
+        ReservationInfo expectedInfo = reservationInfo(1L, "바니", Status.RESERVED);
+        when(reservationService.create(any(ReservationCreateCommand.class))).thenReturn(expectedInfo);
 
-        ReservationRequest reservationRequest = new ReservationRequest(
-                "포비",
-                LocalDate.now(clock),
-                timeId,
-                themeId
-        );
-
-        long reservationId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
+        // when & then
+        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(request)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
+                .status(HttpStatus.CREATED)
+                .extract().as(new TypeRef<>() {
+                });
 
-        ReservationRequest newReservationRequest = new ReservationRequest(
-                "리사",
-                LocalDate.now(clock).plusDays(1),
-                timeId,
-                themeId
-        );
+        assertThat(response).isEqualTo(ReservationResponse.from(expectedInfo));
+    }
 
-        RestAssured.given().log().all()
-                .when().contentType(ContentType.JSON)
-                .body(newReservationRequest)
-                .post("/reservations")
+    @Test
+    void 예약_목록_조회_요청에_성공하면_200_OK와_예약_목록이_반환된다() {
+        // given
+        ReservationPendingInfo expectedInfo = new ReservationPendingInfo(1L, "바니", LocalDate.now().plusDays(1),
+                new ReservationTimeInfo(1L, LocalTime.of(10, 0)),
+                new ThemeInfo(1L, "공포테마", "https://image.com/image.png", "설명", true),
+                Status.WAITING, 1L);
+        when(reservationService.getReservationsByName("바니")).thenReturn(List.of(expectedInfo));
+
+        // when & then
+        List<ReservationPendingResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .queryParam("username", "바니")
+                .when().get("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .status(HttpStatus.OK)
+                .extract().as(new TypeRef<>() {
+                });
 
-        ReservationChangeRequest reservationChangeRequest = new ReservationChangeRequest(reservationRequest.name(), reservationRequest.date().plusDays(1), reservationRequest.timeId(), reservationRequest.themeId());
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationChangeRequest)
-                .when().patch("/reservations/" + reservationId)
+        assertThat(response).containsExactly(ReservationPendingResponse.from(expectedInfo));
+    }
+
+    @Test
+    void 예약_목록_조회_요청_시_사용자_이름이_없으면_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .when().get("/reservations")
                 .then().log().all()
-                .statusCode(200);
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString("username 파라미터가 누락 되었습니다."));
+    }
+
+    @Test
+    void 정상적인_예약_ID로_예약_취소_요청_시_204_NO_CONTENT를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .queryParam("username", "바니")
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .status(HttpStatus.NO_CONTENT);
+
+        verify(reservationService, times(1)).cancel(anyLong(), anyString());
+    }
+
+    @Test
+    void 예약_취소_요청_시_사용자_이름이_없으면_400_BAD_REQUEST를_응답한다() {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString("username 파라미터가 누락 되었습니다."));
+    }
+
+    @ParameterizedTest(name = "요청 정보가 {0} 일 때, 예외 메세지 \"{1}\"가 발생한다.")
+    @MethodSource("roomescape.presentation.fixture.ReservationRequestFixture#modifyFailRequestFixture")
+    void 예약_수정_요청_시_형식_검증에_실패하면_예외가_발생한다(ReservationChangeRequest body, String exceptionMessage) {
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(body)
+                .when().patch("/reservations/1")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST)
+                .body(containsString(exceptionMessage));
+    }
+
+    @Test
+    void 정상적인_예약_ID로_예약_수정_요청_시_200_OK와_정상_응답을_반환한다() {
+        // given
+        ReservationChangeRequest request = ReservationRequestFixture.modifySuccessRequestFixture();
+        ReservationInfo expectedInfo = reservationInfo(1L, "바니", Status.RESERVED);
+        when(reservationService.modify(anyLong(), any(ReservationChangeCommand.class))).thenReturn(expectedInfo);
+
+        // when & then
+        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(request)
+                .when().patch("/reservations/1")
+                .then().log().all()
+                .status(HttpStatus.OK)
+                .extract().as(new TypeRef<>() {
+                });
+
+        assertThat(response).isEqualTo(ReservationResponse.from(expectedInfo));
+    }
+
+    private ReservationInfo reservationInfo(Long id, String name, Status status) {
+        return new ReservationInfo(id, name, LocalDate.now().plusDays(1),
+                new ReservationTimeInfo(1L, LocalTime.of(10, 0)),
+                new ThemeInfo(1L, "공포테마", "https://image.com/image.png", "설명", true),
+                status);
     }
 }

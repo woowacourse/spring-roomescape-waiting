@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import roomescape.theme.application.ThemeService;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @RestController
+@Validated
 @RequestMapping("/themes")
 @RequiredArgsConstructor
 public class ThemeController {

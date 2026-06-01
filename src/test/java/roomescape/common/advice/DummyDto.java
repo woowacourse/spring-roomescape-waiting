@@ -2,8 +2,11 @@ package roomescape.common.advice;
 
 import jakarta.validation.constraints.NotNull;
 
-record DummyDto(
-        @NotNull(message = "필드 not null 검증")
-        String testField
-) {
+public class DummyDto {
+
+    public record DummyData(
+            @NotNull(message = "필드 not null 검증")
+            Long testField
+    ) {
+    }
 }

@@ -98,7 +98,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 INNER JOIN reservation r ON t.id = r.theme_id
                 WHERE r.date BETWEEN :startDate AND :endDate
                     AND t.is_active = 1
-                    AND r.status = 'ACTIVE'
+                    AND r.status = 'RESERVED'
                 GROUP BY t.id, t.name, t.description, t.thumbnail_image_url, t.is_active
                 ORDER BY COUNT(r.id) DESC
                 LIMIT :limit

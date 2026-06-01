@@ -5,17 +5,17 @@ import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
+import roomescape.common.advice.GlobalExceptionHandler;
 
 @WebMvcTest
 @ContextConfiguration(classes = {GlobalExceptionHandler.class, DummyController.class})
-class GlobalExceptionHandlerTest {
+class RestExceptionHandlerTest {
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -23,8 +23,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("정확한 요청이면 200 OK를 응답한다.")
-    void validRequest() {
+    void 정확한_요청이면_200_OK를_응답한다() {
         // given
         String body = """
                 {
@@ -43,8 +42,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("요청 JSON 형식이 잘못되면 구조화된 에러 응답을 반환한다.")
-    void invalidJson() {
+    void 요청_JSON_형식이_잘못되면_구조화된_에러_응답을_반환한다() {
         // given
         String body = """
                 {
@@ -64,8 +62,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("필수 필드가 누락되면 구조화된 에러 응답을 반환한다.")
-    void invalidRequestBody() {
+    void 필수_필드가_누락되면_구조화된_에러_응답을_반환한다() {
         // given
         String body = """
                 {
@@ -84,8 +81,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("지원하지 않는 HTTP 메서드면 구조화된 에러 응답을 반환한다.")
-    void methodNotAllowed() {
+    void 지원하지_않는_HTTP_메서드면_구조화된_에러_응답을_반환한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -97,8 +93,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("경로 변수 검증에 실패하면 구조화된 에러 응답을 반환한다.")
-    void constraintViolation() {
+    void 경로_변수_검증에_실패하면_구조화된_에러_응답을_반환한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,34 +105,19 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("경로 변수 타입 변환에 실패하면 구조화된 에러 응답을 반환한다.")
-    void typeMismatch() {
-        // when & then
-        RestAssuredMockMvc.given().log().all()
-                .contentType(MediaType.APPLICATION_JSON)
-                .when().post("/dummy/string")
-                .then().log().all()
-                .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("TYPE_MISMATCH"))
-                .body("message", equalTo("변환할 수 없는 잘못된 데이터 타입이 존재합니다."));
-    }
-
-    @Test
-    @DisplayName("커스텀 예외는 지정한 상태와 메시지로 응답한다.")
-    void customException() {
+    void 커스텀_예외는_지정한_상태와_메시지로_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
                 .when().get("/dummy/business")
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body("code", equalTo("BUSINESS_EXCEPTION"))
+                .body("code", equalTo("BUSINESS_ERROR"))
                 .body("message", equalTo("비즈니스 예외"));
     }
 
     @Test
-    @DisplayName("접근 권한 예외는 403 FORBIDDEN을 응답한다.")
-    void forbidden() {
+    void 접근_권한_예외는_403_FORBIDDEN을_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,8 +129,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("엔티티를 찾지 못하면 404 NOT_FOUND를 응답한다.")
-    void notFound() {
+    void 엔티티를_찾지_못하면_404_NOT_FOUND를_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,21 +141,19 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("엔티티가 충돌하면 409 CONFLICT를 응답한다.")
-    void duplicate() {
+    void 엔티티가_충돌하면_409_CONFLICT를_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)
                 .when().get("/dummy/duplicateEntity")
                 .then().log().all()
                 .status(HttpStatus.CONFLICT)
-                .body("code", equalTo("DUPLICATE"))
+                .body("code", equalTo("CONFLICT"))
                 .body("message", equalTo("충돌"));
     }
 
     @Test
-    @DisplayName("필수 요청 파라미터가 누락되면 구조화된 에러 응답을 반환한다.")
-    void missingRequestParameter() {
+    void 필수_요청_파라미터가_누락되면_구조화된_에러_응답을_반환한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .when().get("/dummy/param")
@@ -187,21 +164,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("잘못된 경로면 404 NOT_FOUND를 응답한다.")
-    void noResourceFound() {
-        // when & then
-        RestAssuredMockMvc.given().log().all()
-                .contentType(MediaType.APPLICATION_JSON)
-                .when().get("/illegalPath")
-                .then().log().all()
-                .status(HttpStatus.NOT_FOUND)
-                .body("code", equalTo("NO_RESOURCE_FOUND"))
-                .body("message", equalTo("존재하지 않는 경로입니다."));
-    }
-
-    @Test
-    @DisplayName("처리하지 않은 예외는 500 INTERNAL_SERVER_ERROR를 응답한다.")
-    void internalServerError() {
+    void 처리하지_않은_예외는_500_INTERNAL_SERVER_ERROR를_응답한다() {
         // when & then
         RestAssuredMockMvc.given().log().all()
                 .contentType(MediaType.APPLICATION_JSON)

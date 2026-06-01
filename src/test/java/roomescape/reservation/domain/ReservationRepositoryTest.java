@@ -1,69 +1,138 @@
 package roomescape.reservation.domain;
 
-import java.time.Clock;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import roomescape.config.TestTimeConfig;
-import roomescape.reservation.infra.JdbcReservationRepository;
+import roomescape.reservation.domain.fixture.ReservationFixture;
+import roomescape.time.domain.fixture.ReservationTimeFixture;
+import roomescape.theme.domain.fixture.ThemeFixture;
+import roomescape.support.datasource.ReservationDataSource;
+import roomescape.support.datasource.BaseRepositoryTest;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.infra.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
-import roomescape.time.infra.JdbcReservationTimeRepository;
 
-@JdbcTest
-@Import({
-        TestTimeConfig.class,
-        JdbcReservationRepository.class,
-        JdbcThemeRepository.class,
-        JdbcReservationTimeRepository.class
-})
-class ReservationRepositoryTest {
+class ReservationRepositoryTest extends BaseRepositoryTest {
 
-    @Autowired
-    private Clock clock;
+    private final ReservationTime reservationTime = ReservationTimeFixture.createDefaultReservationTime();
+    private final Theme theme = ThemeFixture.createThemeWithId();
 
     @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationDataSource dataSource;
 
-    @Autowired
-    private ThemeRepository themeRepository;
+    @BeforeEach
+    void setUp() {
+        dataSource.clearTable();
+        dataSource.clearId();
+        dataSource.insertTheme(theme.getName(), theme.getThumbnailImageUrl(), theme.getDescription());
+        dataSource.insertReservationTime(reservationTime.getStartAt());
+    }
 
     @Test
-    @DisplayName("사용자 이름으로 예약 조회시 Pending 상태인 예약이 1개 있으면 대기 순번이 2번으로 조회된다.")
-    void findReservationByNameTest() {
-        Theme theme = Theme.create("판타지", "https://example.com/theme.png", "판타지래요");
+    void 예약을_저장하고_ID로_조회한다() {
+        // given
+        Reservation reservation = ReservationFixture.createDefaultReservation("바니", theme, reservationTime);
 
-        Theme savedTheme = themeRepository.save(theme);
+        // when
+        Reservation saved = reservationRepository.save(reservation);
 
-        ReservationTime reservationTime = ReservationTime.create(LocalTime.now(clock).plusHours(1));
+        // then
+        assertThat(saved.getId()).isEqualTo(1L);
+        assertThat(dataSource.hasReservationById(saved.getId())).isTrue();
+    }
 
-        ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
+    @Test
+    void 특정_테마의_특정_날짜와_시간에_승인된_예약이_존재하는지_확인한다() {
+        // given
+        LocalDate date = LocalDate.now(ReservationFixture.FIXED_CLOCK).plusDays(1);
+        reservationRepository.save(Reservation.create("바니", date, reservationTime, theme, Status.RESERVED,
+                ReservationFixture.FIXED_CLOCK));
 
-        Reservation pobi = Reservation.restore(
-                null, "포비", LocalDate.now(clock).plusDays(1), savedTime, savedTheme,
-                Status.WAITING, LocalDateTime.now(clock)
-        );
+        // when & then
+        assertThat(reservationRepository.existsActiveReservationByDateTimeAndTheme(reservationTime.getId(),
+                theme.getId(), date)).isTrue();
+        assertThat(reservationRepository.existsActiveReservationByDateTimeAndTheme(99L, theme.getId(), date)).isFalse();
+    }
 
-        Reservation lisa = Reservation.restore(
-                null, "리사", LocalDate.now(clock).plusDays(1), savedTime, savedTheme,
-                Status.WAITING, LocalDateTime.now(clock).plusSeconds(1)
-        );
+    @Test
+    void 예약_정보를_수정한다() {
+        // given
+        Reservation reservation = reservationRepository.save(
+                ReservationFixture.createDefaultReservation("바니", theme, reservationTime));
 
-        reservationRepository.save(pobi);
-        reservationRepository.save(lisa);
+        // when
+        reservationRepository.update(reservation.cancel());
 
-        Assertions.assertThat(reservationRepository.findAllByName("리사").getFirst().pendingIndex()).isEqualTo(2);
+        // then
+        Optional<Reservation> found = reservationRepository.findById(reservation.getId());
+        assertThat(found).isEmpty();
+    }
+
+    @Test
+    void 페이징_조건에_맞는_승인_예약_목록을_조회한다() {
+        // given
+        dataSource.insertReservation("바니", LocalDate.now().plusDays(1), 1L, 1L, "RESERVED");
+        dataSource.insertReservation("포비", LocalDate.now().plusDays(2), 1L, 1L, "WAITING");
+
+        // when
+        List<Reservation> reservations = reservationRepository.findAll(0, 10);
+
+        // then
+        assertThat(reservations).hasSize(1).extracting(Reservation::getStatus).containsExactly(Status.RESERVED);
+    }
+
+    @Test
+    void 다음_대기_예약을_조회한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        dataSource.insertReservation("바니", date, 1L, 1L, "RESERVED");
+        dataSource.insertReservation("포비", date, 1L, 1L, "WAITING");
+
+        // when
+        Optional<Reservation> reservation = reservationRepository.findNextPendingReservation(date, 1L, 1L);
+
+        // then
+        assertThat(reservation).isPresent().get().extracting(Reservation::getName).isEqualTo("포비");
+    }
+
+    @Test
+    void 특정_사용자_이름으로_예약과_대기순서를_조회한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        dataSource.insertReservation("바니", date, 1L, 1L, "RESERVED");
+        dataSource.insertReservation("포비", date, 1L, 1L, "WAITING");
+
+        // when
+        List<ReservationQueryResult> results = reservationRepository.findAllByName("포비");
+
+        // then
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().pendingIndex()).isEqualTo(1L);
+    }
+
+    @Test
+    void 특정_테마와_날짜로_승인_예약을_조회한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        dataSource.insertReservationTime(LocalTime.of(11, 0));
+        dataSource.insertReservation("바니", date, 1L, 1L, "RESERVED");
+        dataSource.insertReservation("포비", date, 1L, 2L, "WAITING");
+
+        // when
+        List<Reservation> reservations = reservationRepository.findByThemeAndDate(1L, date);
+
+        // then
+        assertThat(reservations).hasSize(1).extracting(Reservation::getName).containsExactly("바니");
     }
 }
