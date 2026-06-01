@@ -55,4 +55,14 @@ public class ThemeProvideTest {
                 .body("[8].name", is("사막의 오아시스"))
                 .body("[9].name", is("폐광"));
     }
+
+    @Test
+    @DisplayName("limit이 1 미만이면 400을 반환한다.")
+    void rejectNonPositiveLimit() {
+        RestAssured.given().log().all()
+                .queryParam("limit", 0)
+                .when().get("/themes/popular")
+                .then().log().all()
+                .statusCode(400);
+    }
 }

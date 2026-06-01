@@ -85,7 +85,7 @@ public class ThemeDao {
                 INNER JOIN theme ON reservation.theme_id = theme.id
                 WHERE reservation.date BETWEEN :startAt AND :endAt
                 GROUP BY theme.id
-                ORDER BY COUNT(reservation.id) DESC
+                ORDER BY COUNT(reservation.id) DESC, theme.id ASC
                 LIMIT :limit
                 """;
         SqlParameterSource params = new MapSqlParameterSource()

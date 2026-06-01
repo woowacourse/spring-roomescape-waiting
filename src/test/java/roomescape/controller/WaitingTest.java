@@ -78,4 +78,14 @@ public class WaitingTest {
                 .then().log().all()
                 .statusCode(403);
     }
+
+    @Test
+    @DisplayName("빈 이름으로 예약 대기를 취소하면 400을 반환한다.")
+    public void cancelWaitingWithBlankNameTest() {
+        RestAssured.given().log().all()
+                .queryParam("name", "")
+                .when().delete("/reservations/waitings/2")
+                .then().log().all()
+                .statusCode(400);
+    }
 }
