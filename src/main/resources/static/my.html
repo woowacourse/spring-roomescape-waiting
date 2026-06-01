@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Roomflow | 내 예약</title>
+    <link rel="stylesheet" href="/css/roomescape.css">
+    <script defer src="/js/roomescape.js"></script>
+</head>
+<body data-page="my">
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Roomflow 홈">
+        <span class="brand-mark"></span>
+        <span>Roomflow</span>
+    </a>
+    <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="nav-link" href="/">예약</a>
+        <a class="nav-link is-active" href="/my.html">내 예약</a>
+        <a class="nav-link" href="/admin.html">관리자</a>
+    </nav>
+</header>
+
+<main class="page-shell">
+    <section class="page-hero">
+        <p class="eyebrow">MY RESERVATIONS</p>
+        <h1>내 예약</h1>
+        <form id="lookupForm" class="lookup-form">
+            <label class="field">
+                <span>이름</span>
+                <input id="lookupName" maxlength="255" autocomplete="name" placeholder="예약자 이름" required>
+            </label>
+            <button class="button primary" type="submit">조회</button>
+        </form>
+    </section>
+
+    <section class="summary-row" aria-label="예약 요약">
+        <div class="metric">
+            <span>전체</span>
+            <strong id="myTotalCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>예약 확정</span>
+            <strong id="myReservedCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>대기</span>
+            <strong id="myWaitingCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>취소됨</span>
+            <strong id="myCanceledCount">0</strong>
+        </div>
+    </section>
+
+    <div class="segmented-tabs" aria-label="예약 목록 필터">
+        <button class="tab-button is-active" type="button" data-filter="active">진행 중</button>
+        <button class="tab-button" type="button" data-filter="canceled">취소됨</button>
+    </div>
+
+    <section id="myReservations" class="reservation-list" aria-live="polite"></section>
+</main>
+
+<dialog id="editDialog" class="modal">
+    <form id="editForm" method="dialog">
+        <div class="section-heading compact">
+            <p class="eyebrow">CHANGE</p>
+            <h2>예약 변경</h2>
+        </div>
+        <input id="editReservationId" type="hidden">
+        <label class="field">
+            <span>날짜</span>
+            <input id="editDate" type="date" required>
+        </label>
+        <label class="field">
+            <span>시간</span>
+            <select id="editTime" required></select>
+        </label>
+        <div class="modal-actions">
+            <button class="button ghost" value="cancel" type="button" data-action="close-edit">닫기</button>
+            <button class="button primary" type="submit">변경</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

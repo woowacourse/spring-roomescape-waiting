@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Roomflow | 관리자</title>
+    <link rel="stylesheet" href="/css/roomescape.css">
+    <script defer src="/js/roomescape.js"></script>
+</head>
+<body data-page="admin">
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Roomflow 홈">
+        <span class="brand-mark"></span>
+        <span>Roomflow</span>
+    </a>
+    <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="nav-link" href="/">예약</a>
+        <a class="nav-link" href="/my.html">내 예약</a>
+        <a class="nav-link is-active" href="/admin.html">관리자</a>
+    </nav>
+</header>
+
+<main class="page-shell admin-shell">
+    <section class="page-hero admin-hero">
+        <div>
+            <p class="eyebrow">ADMIN</p>
+            <h1>관리자 페이지</h1>
+        </div>
+        <button id="refreshAdmin" class="button ghost" type="button">새로고침</button>
+    </section>
+
+    <section class="summary-row" aria-label="관리 요약">
+        <div class="metric">
+            <span>활성 요청</span>
+            <strong id="adminReservationCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>대기</span>
+            <strong id="adminWaitingCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>테마</span>
+            <strong id="adminThemeCount">0</strong>
+        </div>
+        <div class="metric">
+            <span>시간</span>
+            <strong id="adminTimeCount">0</strong>
+        </div>
+    </section>
+
+    <section class="admin-grid">
+        <form id="adminReservationForm" class="admin-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">REQUEST</p>
+                <h2>예약 추가</h2>
+            </div>
+            <label class="field">
+                <span>이름</span>
+                <input id="adminGuestName" maxlength="255" placeholder="예약자 이름" required>
+            </label>
+            <div class="field-row">
+                <label class="field">
+                    <span>날짜</span>
+                    <input id="adminReservationDate" type="date" required>
+                </label>
+                <label class="field">
+                    <span>시간</span>
+                    <select id="adminReservationTime" required></select>
+                </label>
+            </div>
+            <label class="field">
+                <span>테마</span>
+                <select id="adminReservationTheme" required></select>
+            </label>
+            <button class="button primary wide" type="submit">추가</button>
+        </form>
+
+        <form id="themeForm" class="admin-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">THEME</p>
+                <h2>테마 추가</h2>
+            </div>
+            <label class="field">
+                <span>이름</span>
+                <input id="themeName" maxlength="255" placeholder="테마 이름" required>
+            </label>
+            <label class="field">
+                <span>설명</span>
+                <input id="themeDescription" maxlength="255" placeholder="테마 설명" required>
+            </label>
+            <label class="field">
+                <span>썸네일 URL</span>
+                <input id="themeThumbnail" maxlength="2048" type="url" placeholder="https://example.com/theme.png"
+                       required>
+            </label>
+            <button class="button primary wide" type="submit">추가</button>
+        </form>
+
+        <form id="timeForm" class="admin-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">TIME</p>
+                <h2>시간 추가</h2>
+            </div>
+            <label class="field">
+                <span>시작 시간</span>
+                <input id="timeStartAt" type="time" required>
+            </label>
+            <button class="button primary wide" type="submit">추가</button>
+        </form>
+    </section>
+
+    <section class="management-grid">
+        <div class="management-panel wide-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">ACTIVE</p>
+                <h2>활성 예약 요청</h2>
+            </div>
+            <div id="adminReservations" class="table-wrap" aria-live="polite"></div>
+        </div>
+
+        <div class="management-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">THEMES</p>
+                <h2>테마 목록</h2>
+            </div>
+            <div id="adminThemes" class="compact-list" aria-live="polite"></div>
+        </div>
+
+        <div class="management-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">TIMES</p>
+                <h2>시간 목록</h2>
+            </div>
+            <div id="adminTimes" class="compact-list" aria-live="polite"></div>
+        </div>
+    </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
