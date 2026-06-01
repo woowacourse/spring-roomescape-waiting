@@ -155,7 +155,7 @@ class ReservationTest {
         );
         LocalDateTime now = LocalDateTime.of(2026, 7, 1, 9, 59);
 
-        Reservation changed = reservation.cancelBy(reserver, schedule, now);
+        Reservation changed = reservation.cancelBy(reserver, now);
 
         assertThat(changed.getId()).isEqualTo(1L);
         assertThat(changed.getReserver()).isEqualTo(reserver);
@@ -177,11 +177,11 @@ class ReservationTest {
         );
 
         assertRoomescapeException(
-                () -> reservation.cancelBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 0)),
+                () -> reservation.cancelBy(reserver, LocalDateTime.of(2026, 7, 1, 10, 0)),
                 DomainErrorCode.PAST_RESERVATION
         );
         assertRoomescapeException(
-                () -> reservation.cancelBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 1)),
+                () -> reservation.cancelBy(reserver, LocalDateTime.of(2026, 7, 1, 10, 1)),
                 DomainErrorCode.PAST_RESERVATION
         );
     }
@@ -201,7 +201,6 @@ class ReservationTest {
         assertRoomescapeException(
                 () -> reservation.cancelBy(
                         new Reserver("다른사람"),
-                        schedule,
                         LocalDateTime.of(2026, 7, 1, 9, 59)
                 ),
                 DomainErrorCode.UNAUTHORIZED_RESERVATION

@@ -19,6 +19,7 @@ import roomescape.repository.ReservationDao;
 public class ReservationService {
 
     private static final int EMPTY_RESERVATION_COUNT = 0;
+
     private final ReservationDao reservationDao;
     private final ScheduleService scheduleService;
 
@@ -79,15 +80,13 @@ public class ReservationService {
             return;
         }
 
-        Schedule schedule = scheduleService.getById(reservation.getSchedule().getId());
         Reservation changed = reservation.cancelBy(
                 reserver,
-                schedule,
                 now
         );
 
         reservationDao.changeStatusWithUpdateAt(changed);
-        promoteWaitingReservation(reservation, schedule.getId());
+        promoteWaitingReservation(reservation, changed.getSchedule().getId());
     }
 
     public List<ReservationResponse> findAll() {
@@ -115,6 +114,7 @@ public class ReservationService {
     private void promoteWaitingReservation(Reservation changed, long scheduleId) {
         if (changed.isReserved()) {
             Optional<Reservation> reservations = reservationDao.findFirstByScheduleIdAndStatus(scheduleId, ReservationStatus.WAITING);
+
             reservations.ifPresent(reservation
                     -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED)
             );

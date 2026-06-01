@@ -127,7 +127,6 @@ class ReservationServiceTest {
         Reservation reserved = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
         Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         given(reservationDao.findById(1L)).willReturn(Optional.of(reserved));
-        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
         given(reservationDao.findFirstByScheduleIdAndStatus(schedule.getId(), ReservationStatus.WAITING))
                 .willReturn(Optional.of(waiting));
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
@@ -150,7 +149,6 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         given(reservationDao.findById(2L)).willReturn(Optional.of(waiting));
-        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
         reservationService.cancelReservation(2L, "현미밥");
@@ -172,7 +170,6 @@ class ReservationServiceTest {
 
         reservationService.cancelReservation(1L, "러로");
 
-        verify(scheduleService, never()).getById(any());
         verify(reservationDao, never()).changeStatusWithUpdateAt(any(Reservation.class));
         verify(reservationDao, never()).changeStatusOnly(any(), any());
     }
@@ -183,7 +180,6 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(1));
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
-        given(scheduleService.getById(schedule.getId())).willReturn(schedule);
 
         assertThatThrownBy(() -> reservationService.cancelReservation(1L, "다른사람"))
                 .isInstanceOf(RoomescapeException.class)

@@ -31,7 +31,7 @@ public class Reservation {
             ReservationStatus status,
             LocalDateTime now
     ) {
-        validateNotPast(schedule, now);
+        validateNotPastSchedule(schedule, now);
         return new Reservation(null, reserver, schedule, status, now);
     }
 
@@ -42,17 +42,17 @@ public class Reservation {
             LocalDateTime now
     ) {
         reserver.validateSameReserver(this.reserver);
-        validateNotPast(targetSchedule, now);
+        validateCanModify(now);
+        validateNotPastSchedule(targetSchedule, now);
         return new Reservation(this.id, this.reserver, targetSchedule, status, now);
     }
 
     public Reservation cancelBy(
             Reserver reserver,
-            Schedule schedule,
             LocalDateTime now
     ) {
         reserver.validateSameReserver(this.reserver);
-        validateNotPast(schedule, now);
+        validateCanModify(now);
         return new Reservation(this.id, this.reserver, schedule, ReservationStatus.CANCELED, now);
     }
 
@@ -64,7 +64,15 @@ public class Reservation {
         return this.status == ReservationStatus.CANCELED;
     }
 
-    private static void validateNotPast(Schedule schedule, LocalDateTime now) {
+    private void validateCanModify(LocalDateTime now) {
+        if (isPast(this.schedule, now)) {
+            throw new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "이미 지난 예약은 변경 및 취소할 수 없습니다.");
+        }
+    }
+
+    private static void validateNotPastSchedule(Schedule schedule, LocalDateTime now) {
+        requireNonNull(schedule, INVALID_INPUT, "예약 스케줄은 비어있을 수 없습니다.");
+        requireNonNull(now, INVALID_INPUT, "기준 일시는 비어있을 수 없습니다.");
         if (isPast(schedule, now)) {
             throw new RoomescapeException(DomainErrorCode.PAST_RESERVATION, "과거 시각으로는 수정 및 예약할 수 없습니다.");
         }
