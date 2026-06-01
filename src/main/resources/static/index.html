@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Roomflow | 방탈출 예약</title>
+    <link rel="stylesheet" href="/css/roomescape.css">
+    <script defer src="/js/roomescape.js"></script>
+</head>
+<body data-page="home">
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Roomflow 홈">
+        <span class="brand-mark"></span>
+        <span>Roomflow</span>
+    </a>
+    <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="nav-link is-active" href="/">예약</a>
+        <a class="nav-link" href="/my.html">내 예약</a>
+        <a class="nav-link" href="/admin.html">관리자</a>
+    </nav>
+</header>
+
+<main class="home-layout">
+    <section class="hero-section">
+        <div class="hero-copy">
+            <p class="eyebrow">ESCAPE RESERVATION</p>
+            <h1><span>방탈출 예약</span><span>대기까지 한 번에.</span></h1>
+            <p class="hero-text">예약 확정과 대기 상태를 한눈에.</p>
+            <div class="hero-actions">
+                <a class="button primary" href="#reservation-panel">예약하기</a>
+                <a class="button ghost" href="/my.html">내 예약 보기</a>
+            </div>
+        </div>
+        <figure class="hero-media" aria-label="방탈출 예약 공간">
+            <img src="/assets/room-visual.png" alt="미니멀한 방탈출 예약 공간">
+        </figure>
+    </section>
+
+    <section id="reservation-panel" class="booking-grid" aria-label="예약 신청">
+        <form id="reservationForm" class="booking-panel">
+            <div class="section-heading compact">
+                <p class="eyebrow">BOOKING</p>
+                <h2>예약 신청</h2>
+            </div>
+
+            <label class="field">
+                <span>이름</span>
+                <input id="guestName" name="name" maxlength="255" autocomplete="name" placeholder="예약자 이름" required>
+            </label>
+
+            <div class="field-row">
+                <label class="field">
+                    <span>날짜</span>
+                    <input id="reservationDate" name="date" type="date" required>
+                </label>
+                <label class="field">
+                    <span>테마</span>
+                    <select id="themeSelect" name="themeId" required></select>
+                </label>
+            </div>
+
+            <div class="selected-slot" id="selectedSlot">시간을 선택해 주세요.</div>
+
+            <button id="submitReservation" class="button primary wide" type="submit" disabled>예약 신청</button>
+        </form>
+
+        <section class="time-panel" aria-labelledby="time-title">
+            <div class="section-heading compact">
+                <p class="eyebrow">TIME</p>
+                <h2 id="time-title">시간 선택</h2>
+            </div>
+            <div id="timeGrid" class="time-grid" aria-live="polite"></div>
+        </section>
+    </section>
+
+    <section class="section-block" aria-labelledby="popular-title">
+        <div class="section-heading">
+            <p class="eyebrow">POPULAR</p>
+            <h2 id="popular-title">인기 테마</h2>
+        </div>
+        <div id="popularThemes" class="theme-strip" aria-live="polite"></div>
+    </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
