@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape Admin - 테마 관리</title>
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div class="auth-overlay" id="auth-overlay">
+    <section class="auth-card">
+        <h2>관리자 인증</h2>
+        <p>관리자 화면은 비밀번호 확인 후 사용할 수 있습니다.</p>
+        <input id="admin-password" type="password" placeholder="비밀번호">
+        <button class="primary-button" id="auth-button" type="button">확인</button>
+    </section>
+</div>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a class="brand" href="/">Roomescape Admin</a>
+        <div class="nav-links">
+            <a href="/">홈</a>
+            <a class="active" href="/admin-theme.html">테마 관리</a>
+            <a href="/admin-time.html">시간 관리</a>
+            <a href="/admin-reservation.html">예약 관리</a>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <section class="hero">
+        <div>
+            <h1>테마 관리</h1>
+            <p>사용자에게 노출되는 방탈출 테마를 추가하거나 삭제합니다.</p>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>새 테마 추가</h2>
+        <form class="grid-form theme" id="theme-form">
+            <div class="field">
+                <label for="theme-name">테마 이름</label>
+                <input id="theme-name" maxlength="30" required type="text" placeholder="새 테마">
+            </div>
+            <div class="field">
+                <label for="theme-description">설명</label>
+                <textarea id="theme-description" maxlength="100" required placeholder="100자 이내 설명"></textarea>
+            </div>
+            <div class="field">
+                <label for="theme-thumbnail">썸네일 URL</label>
+                <input id="theme-thumbnail" required type="url" placeholder="https://example.com/theme.jpg">
+            </div>
+            <button class="primary-button" type="submit">추가하기</button>
+        </form>
+    </section>
+
+    <section class="table-panel">
+        <div class="table-header">
+            <h2>전체 테마</h2>
+            <span class="count" id="theme-count">0개</span>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>이미지</th>
+                <th>이름</th>
+                <th>설명</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody id="theme-table-body"></tbody>
+        </table>
+        <div class="empty" id="theme-empty" hidden>등록된 테마가 없습니다.</div>
+    </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const $ = (selector) => document.querySelector(selector);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupAuth();
+        $('#theme-form').addEventListener('submit', addTheme);
+        fetchThemes();
+    });
+
+    function setupAuth() {
+        if (sessionStorage.getItem('admin-authorized') === 'true') {
+            $('#auth-overlay').classList.add('hidden');
+        }
+        $('#auth-button').addEventListener('click', checkPassword);
+        $('#admin-password').addEventListener('keydown', event => {
+            if (event.key === 'Enter') checkPassword();
+        });
+    }
+
+    function checkPassword() {
+        if ($('#admin-password').value === '1234') {
+            sessionStorage.setItem('admin-authorized', 'true');
+            $('#auth-overlay').classList.add('hidden');
+            return;
+        }
+        showToast('비밀번호가 틀렸습니다.');
+    }
+
+    function fetchThemes() {
+        fetch('/themes')
+            .then(toJson)
+            .then(themes => {
+                $('#theme-count').textContent = `${themes.length}개`;
+                $('#theme-empty').hidden = themes.length !== 0;
+                $('#theme-table-body').innerHTML = themes.map(theme => `
+                    <tr>
+                        <td>${theme.id}</td>
+                        <td><img class="thumb" src="${theme.thumbnail}" alt="${escapeHtml(theme.name)}" onerror="this.src='https://placehold.co/144x100/f2f4f6/8b95a1?text=Theme'"></td>
+                        <td><strong>${escapeHtml(theme.name)}</strong></td>
+                        <td>${escapeHtml(theme.description)}</td>
+                        <td><button class="danger-button" type="button" onclick="deleteTheme(${theme.id})">삭제</button></td>
+                    </tr>
+                `).join('');
+            })
+            .catch(error => showToast(error.message || '테마를 불러오지 못했습니다.'));
+    }
+
+    function addTheme(event) {
+        event.preventDefault();
+        const payload = {
+            name: $('#theme-name').value.trim(),
+            description: $('#theme-description').value.trim(),
+            thumbnail: $('#theme-thumbnail').value.trim()
+        };
+
+        fetch('/admin/themes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(toJson)
+            .then(() => {
+                showToast('테마가 추가되었습니다.');
+                $('#theme-form').reset();
+                fetchThemes();
+            })
+            .catch(error => showToast(error.message || '테마 추가에 실패했습니다.'));
+    }
+
+    function deleteTheme(id) {
+        if (!confirm('테마를 삭제할까요? 예약이 연결된 테마는 삭제할 수 없습니다.')) return;
+
+        fetch(`/admin/themes/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({})).then(body => {
+                        throw new Error(body.detail || body.message || '테마 삭제에 실패했습니다.');
+                    });
+                }
+                showToast('테마가 삭제되었습니다.');
+                fetchThemes();
+            })
+            .catch(error => showToast(error.message || '테마 삭제에 실패했습니다.'));
+    }
+
+    function toJson(response) {
+        return response.json().catch(() => ({})).then(body => {
+            if (!response.ok) throw new Error(body.detail || body.message || '요청을 처리하지 못했습니다.');
+            return body;
+        });
+    }
+
+    function showToast(message) {
+        const toast = $('#toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape</title>
+    <style>
+        :root {
+            --blue: #3182f6;
+            --blue-dark: #1b64da;
+            --blue-soft: #e8f3ff;
+            --gray-50: #f8fafc;
+            --gray-100: #f2f4f6;
+            --gray-200: #e5e8eb;
+            --gray-500: #8b95a1;
+            --gray-700: #4e5968;
+            --gray-900: #191f28;
+            --white: #ffffff;
+            --shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button {
+            border: 0;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(229, 232, 235, 0.9);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(18px);
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1120px;
+            min-height: 64px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .brand {
+            color: var(--gray-900);
+            font-size: 20px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            border-radius: 12px;
+            color: var(--gray-700);
+            font-size: 15px;
+            font-weight: 700;
+            padding: 10px 14px;
+            text-decoration: none;
+        }
+
+        .nav-links a.active,
+        .nav-links a:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 56px 24px 80px;
+        }
+
+        .hero {
+            display: grid;
+            align-items: center;
+            gap: 32px;
+            grid-template-columns: minmax(0, 1fr) 380px;
+            margin-bottom: 58px;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 48px;
+            line-height: 1.15;
+            letter-spacing: 0;
+        }
+
+        .hero p {
+            max-width: 580px;
+            margin: 18px 0 28px;
+            color: var(--gray-700);
+            font-size: 18px;
+            line-height: 1.65;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .primary-link,
+        .secondary-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            border-radius: 8px;
+            font-weight: 800;
+            padding: 0 20px;
+            text-decoration: none;
+        }
+
+        .primary-link {
+            background: var(--blue);
+            color: var(--white);
+        }
+
+        .primary-link:hover {
+            background: var(--blue-dark);
+        }
+
+        .secondary-link {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .hero-panel {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+            box-shadow: var(--shadow);
+            padding: 24px;
+        }
+
+        .hero-panel h2 {
+            margin: 0 0 18px;
+            font-size: 22px;
+        }
+
+        .flow {
+            display: grid;
+            gap: 12px;
+        }
+
+        .flow-item {
+            border-radius: 8px;
+            background: var(--gray-50);
+            padding: 16px;
+        }
+
+        .flow-item span {
+            color: var(--blue);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .flow-item strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .section-header p {
+            margin: 0;
+            color: var(--gray-500);
+            font-size: 14px;
+        }
+
+        .theme-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .theme-card {
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .theme-card img {
+            display: block;
+            width: 100%;
+            height: 150px;
+            background: var(--gray-100);
+            object-fit: cover;
+        }
+
+        .theme-body {
+            padding: 18px;
+        }
+
+        .theme-body h3 {
+            margin: 0 0 8px;
+            overflow-wrap: anywhere;
+            font-size: 18px;
+        }
+
+        .theme-body p {
+            display: -webkit-box;
+            min-height: 42px;
+            margin: 0 0 16px;
+            overflow: hidden;
+            color: var(--gray-700);
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .theme-body a {
+            color: var(--blue);
+            font-size: 14px;
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .empty {
+            border: 1px dashed var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--gray-500);
+            grid-column: 1 / -1;
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        @media (max-width: 860px) {
+            .hero,
+            .theme-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .nav-inner {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 10px;
+                padding: 16px 20px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+            }
+
+            .page {
+                padding: 36px 18px 64px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .section-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="nav">
+    <div class="nav-inner">
+        <a class="brand" href="/">Roomescape</a>
+        <div class="nav-links">
+            <a class="active" href="/">홈</a>
+            <a href="/reservation.html">예약하기</a>
+            <a href="/my-reservations.html">내 예약</a>
+            <a href="/admin-theme.html">관리자</a>
+        </div>
+    </div>
+</nav>
+
+<main class="page">
+    <section class="hero">
+        <div>
+            <h1>예약은 빠르게,<br>가득 찬 시간은 대기로.</h1>
+            <p>원하는 방탈출 테마와 시간을 고르고, 이미 예약된 슬롯에도 대기 순번을 받을 수 있습니다.</p>
+            <div class="cta-row">
+                <a class="primary-link" href="/reservation.html">예약 시작하기</a>
+                <a class="secondary-link" href="/my-reservations.html">내 예약 확인</a>
+            </div>
+        </div>
+        <aside class="hero-panel">
+            <h2>이용 흐름</h2>
+            <div class="flow">
+                <div class="flow-item"><span>01</span><strong>테마와 날짜를 선택</strong></div>
+                <div class="flow-item"><span>02</span><strong>가능 시간은 예약, 예약됨은 대기</strong></div>
+                <div class="flow-item"><span>03</span><strong>내 예약에서 상태와 순번 관리</strong></div>
+            </div>
+        </aside>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <h2>인기 테마</h2>
+            <p>최근 예약 기준으로 많이 선택된 테마입니다.</p>
+        </div>
+        <div class="theme-grid" id="popular-themes">
+            <div class="empty">인기 테마를 불러오는 중입니다.</div>
+        </div>
+    </section>
+</main>
+
+<script>
+    const popularThemes = document.querySelector('#popular-themes');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/themes/popular')
+            .then(response => response.json().then(body => {
+                if (!response.ok) {
+                    throw new Error(body.detail || body.message || '인기 테마를 불러오지 못했습니다.');
+                }
+                return body;
+            }))
+            .then(renderPopularThemes)
+            .catch(error => {
+                popularThemes.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+            });
+    });
+
+    function renderPopularThemes(themes) {
+        if (themes.length === 0) {
+            popularThemes.innerHTML = '<div class="empty">아직 인기 테마 데이터가 없습니다.</div>';
+            return;
+        }
+
+        popularThemes.innerHTML = themes.map(theme => `
+            <article class="theme-card">
+                <img src="${theme.thumbnail}" alt="${escapeHtml(theme.name)}" onerror="this.src='https://placehold.co/640x300/f2f4f6/8b95a1?text=No+Image'">
+                <div class="theme-body">
+                    <h3>${escapeHtml(theme.name)}</h3>
+                    <p>${escapeHtml(theme.description)}</p>
+                    <a href="/reservation.html">예약하러 가기</a>
+                </div>
+            </article>
+        `).join('');
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+</script>
+</body>
+</html>
