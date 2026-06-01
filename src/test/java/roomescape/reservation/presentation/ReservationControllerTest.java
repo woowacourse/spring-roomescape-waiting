@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.config.TestTimeConfig;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.theme.presentation.dto.ThemeRequest;
@@ -153,7 +154,7 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(201);
 
-        ReservationChangeRequest reservationChangeRequest = new ReservationChangeRequest(reservationRequest.name(), reservationRequest.date().plusDays(1), reservationRequest.timeId(), reservationRequest.themeId());
+        ReservationChangeRequest reservationChangeRequest = new ReservationChangeRequest(reservationRequest.name(), reservationRequest.date().plusDays(1), reservationRequest.timeId(), reservationRequest.themeId(), Status.ACTIVE);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationChangeRequest)
