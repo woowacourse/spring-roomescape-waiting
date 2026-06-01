@@ -134,14 +134,15 @@ public class JdbcReservationRepositoryTest {
 
     @Test
     void existsByThemeIdTest() {
-        boolean exist = reservationRepository.existsByThemeId(1L);
-        assertThat(exist).isFalse();
+        jdbcTemplate.update("INSERT INTO `theme` (`name`, `description`, `thumbnail_url`) VALUES (?, ?, ?)",
+                "방탈출2", "방탈출2 설명", "url2.jpg");
 
+        // time_id=1, theme_id=2 로 의도적으로 다르게 설정
         String sql = "INSERT INTO `reservation` (`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 1L);
+        jdbcTemplate.update(sql, "fizz", "2026-05-02", 1L, 2L);
 
-        exist = reservationRepository.existsByThemeId(1L);
-        assertThat(exist).isTrue();
+        assertThat(reservationRepository.existsByThemeId(2L)).isTrue();
+        assertThat(reservationRepository.existsByThemeId(1L)).isFalse();
     }
 
     @Test
