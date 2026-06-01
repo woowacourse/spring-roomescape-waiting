@@ -130,4 +130,13 @@ public class UserWaitingTest {
                 .body("errorCode", is("INVALID_INPUT"))
                 .body("message", is("이미 해당 예약에 대기열이 존재합니다."));
     }
+
+    @Test
+    void 다른_이름으로_타인의_대기를_취소하면_400을_반환한다() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waitings/1?name=다른사람")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_INPUT"));
+    }
 }
