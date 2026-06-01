@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ProblemDetail> handleNullPointerException(NullPointerException exception) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 exception.getMessage()
         );
         return ResponseEntity.of(problemDetail).build();
