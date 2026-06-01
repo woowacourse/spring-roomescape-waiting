@@ -14,7 +14,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.repository.ReservationDao;
 import roomescape.repository.ScheduleDao;
 import roomescape.repository.ThemeDao;
 

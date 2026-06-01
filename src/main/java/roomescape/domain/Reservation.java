@@ -46,7 +46,7 @@ public class Reservation {
         return new Reservation(this.id, this.reserver, targetSchedule, status, now);
     }
 
-    public Reservation changeBy(
+    public Reservation cancelBy(
             Reserver reserver,
             Schedule schedule,
             LocalDateTime now

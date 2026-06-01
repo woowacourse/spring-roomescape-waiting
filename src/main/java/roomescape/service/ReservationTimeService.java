@@ -15,7 +15,6 @@ import roomescape.controller.dto.ReservationTimeRequest;
 import roomescape.controller.dto.ReservationTimeResponse;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ScheduleDao;
 import roomescape.service.dto.AvailableTimeResult;

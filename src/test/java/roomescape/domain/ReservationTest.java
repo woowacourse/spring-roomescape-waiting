@@ -144,7 +144,7 @@ class ReservationTest {
 
     @DisplayName("미래 예약은 본인이 취소 상태로 변경할 수 있다.")
     @Test
-    void changeBy() {
+    void cancelBy() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
@@ -155,7 +155,7 @@ class ReservationTest {
         );
         LocalDateTime now = LocalDateTime.of(2026, 7, 1, 9, 59);
 
-        Reservation changed = reservation.changeBy(reserver, schedule, now);
+        Reservation changed = reservation.cancelBy(reserver, schedule, now);
 
         assertThat(changed.getId()).isEqualTo(1L);
         assertThat(changed.getReserver()).isEqualTo(reserver);
@@ -166,7 +166,7 @@ class ReservationTest {
 
     @DisplayName("현재와 같거나 과거인 예약은 취소 상태로 변경할 수 없다.")
     @Test
-    void changeByPastOrEqualReservation() {
+    void cancelByPastOrEqualReservation() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
@@ -177,18 +177,18 @@ class ReservationTest {
         );
 
         assertRoomescapeException(
-                () -> reservation.changeBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 0)),
+                () -> reservation.cancelBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 0)),
                 DomainErrorCode.PAST_RESERVATION
         );
         assertRoomescapeException(
-                () -> reservation.changeBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 1)),
+                () -> reservation.cancelBy(reserver, schedule, LocalDateTime.of(2026, 7, 1, 10, 1)),
                 DomainErrorCode.PAST_RESERVATION
         );
     }
 
     @DisplayName("본인 예약이 아니면 취소할 수 없다.")
     @Test
-    void changeByOtherReserver() {
+    void cancelByOtherReserver() {
         Schedule schedule = scheduleAt(LocalDate.of(2026, 7, 1), LocalTime.of(10, 0));
         Reservation reservation = new Reservation(
                 1L,
@@ -199,7 +199,7 @@ class ReservationTest {
         );
 
         assertRoomescapeException(
-                () -> reservation.changeBy(
+                () -> reservation.cancelBy(
                         new Reserver("다른사람"),
                         schedule,
                         LocalDateTime.of(2026, 7, 1, 9, 59)
