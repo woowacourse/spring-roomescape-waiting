@@ -77,7 +77,7 @@ public class ReservationService {
         ReservationTime newTime = findReservationTimeByTimeId(request.getTimeId());
         Theme newTheme = findThemeByThemeId(request.getThemeId());
 
-        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
+        validateIsDuplicateReservationExcluding(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName(), id);
 
         boolean hasApprovedInNewSlot = reservationRepository.existsApprovedByTimeAndThemeAndDate(
                 newTime.getId(), newTheme.getId(), newDate.getDate());
@@ -88,7 +88,9 @@ public class ReservationService {
 
         Reservation updated = reservationRepository.update(id, target);
 
-        promoteFirstWaiting(reservation);
+        if(reservation.isSlotChanged(updated)) {
+            promoteFirstWaiting(reservation);
+        }
 
         return updated;
     }
@@ -122,6 +124,12 @@ public class ReservationService {
 
     private void validateIsDuplicateReservation(long timeId, long themeId, LocalDate date, String name) {
         if (reservationRepository.existsByTimeAndThemeAndDateAndName(timeId, themeId, date, name)) {
+            throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+        }
+    }
+
+    private void validateIsDuplicateReservationExcluding(long timeId, long themeId, LocalDate date, String name, long excludeId) {
+        if (reservationRepository.existsByTimeAndThemeAndDateAndNameExcludingId(timeId, themeId, date, name, excludeId)) {
             throw new ConflictException("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
         }
     }

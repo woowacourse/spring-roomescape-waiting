@@ -64,6 +64,13 @@ public class ReservationRepository {
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
             )
             """;
+    private static final String EXISTS_BY_DATE_AND_TIME_AND_THEME_ID_EXCLUDING_ID = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ? AND id != ?
+            )
+            """;
     private static final String EXISTS_BY_TIME_ID = """
             SELECT EXISTS (
                 SELECT 1
@@ -142,6 +149,11 @@ public class ReservationRepository {
     public boolean existsByTimeAndThemeAndDateAndName(Long timeId, Long themeId, LocalDate date, String name) {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId, themeId, name));
+    }
+
+    public boolean existsByTimeAndThemeAndDateAndNameExcludingId(Long timeId, Long themeId, LocalDate date, String name, long excludeId) {
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID_EXCLUDING_ID, Boolean.class, date, timeId, themeId, name, excludeId));
     }
 
     public boolean existsApprovedByTimeAndThemeAndDate(long timeId, long themeId, LocalDate date) {

@@ -68,6 +68,11 @@ public class Reservation {
         return status == Status.APPROVED;
     }
 
+
+    public boolean isSlotChanged(Reservation updated) {
+        return !time.equals(updated.getTime()) || !theme.equals(updated.getTheme()) || !date.equals(updated.getDate());
+    }
+
     public long getId() {
         return id;
     }

@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -168,11 +169,45 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL))));
-        given(reservationRepository.existsByTimeAndThemeAndDateAndName(request.getTimeId(), request.getThemeId(),
-                request.getDate(), request.getName())).willReturn(true);
+        given(reservationRepository.existsByTimeAndThemeAndDateAndNameExcludingId(request.getTimeId(), request.getThemeId(),
+                request.getDate(), request.getName(), 1L)).willReturn(true);
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
+
+    @Test
+    void 예약_수정시_같은_슬롯이면_자기_자신이므로_중복이_아니어야_한다() {
+        // given
+        LocalDate date = LocalDate.of(2099, 1, 1);
+        LocalTime startAt = LocalTime.of(10, 0);
+        long timeId = 1L;
+        long themeId = 1L;
+        String name = "zeze";
+
+        ReservationTime time = ReservationTime.of(timeId, startAt);
+        Theme theme = Theme.load(themeId, new ThemeName("any"), "any", new ThumbnailUrl(URL));
+        Reservation existing = Reservation.load(
+                1L, new ReservationName(name),
+                new ReservationDate(date), time, theme, Status.APPROVED, 1);
+
+        // 같은 슬롯, 같은 이름으로 수정 요청 (예: 프론트에서 저장 버튼을 다시 누른 경우)
+        ReservationUpdateRequest request = new ReservationUpdateRequest(name, date, timeId, themeId);
+
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(existing));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(time));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+
+        // 자기 자신은 제외되므로 false 반환
+        given(reservationRepository.existsByTimeAndThemeAndDateAndNameExcludingId(timeId, themeId, date, name, 1L))
+                .willReturn(false);
+        given(reservationRepository.existsApprovedByTimeAndThemeAndDate(timeId, themeId, date))
+                .willReturn(true);
+        given(reservationRepository.update(eq(1L), any())).willReturn(existing);
+
+        // when & then — 자기 자신이므로 성공해야 한다
+        Assertions.assertThatCode(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
+                .doesNotThrowAnyException();
     }
 
     @Test
