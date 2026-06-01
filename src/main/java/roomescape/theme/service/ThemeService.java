@@ -4,7 +4,6 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
@@ -54,7 +53,7 @@ public class ThemeService {
         try {
             themeRepository.delete(deleteTarget);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException(ThemeErrorCode.THEME_IN_USE.getMessage());
+            throw new ConflictException(ThemeErrorCode.THEME_IN_USE.getMessage());
         }
     }
 }

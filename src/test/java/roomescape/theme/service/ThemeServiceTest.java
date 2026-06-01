@@ -152,7 +152,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(1L))
-                .isInstanceOf(BadRequestException.class)
+                .isInstanceOf(ConflictException.class)
                 .hasMessage(ThemeErrorCode.THEME_IN_USE.getMessage());
     }
 }

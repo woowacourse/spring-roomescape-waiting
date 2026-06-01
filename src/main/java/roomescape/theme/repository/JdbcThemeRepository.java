@@ -8,8 +8,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.theme.exception.ThemeErrorCode;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
@@ -65,10 +67,10 @@ public class JdbcThemeRepository implements ThemeRepository {
     public boolean existsByName(String name) {
         String sql = """
                 SELECT EXISTS(
-                    SELECT 1
-                    FROM theme
-                    WHERE name = ?   
-                )
+                     SELECT 1
+                     FROM theme
+                     WHERE name = ?   
+                 )
                 """;
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, name);
@@ -92,6 +94,9 @@ public class JdbcThemeRepository implements ThemeRepository {
                 WHERE id = ?
                 """;
 
-        jdbcTemplate.update(sql, theme.getId());
+        int affected = jdbcTemplate.update(sql, theme.getId());
+        if (affected == 0) {
+            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
+        }
     }
 }

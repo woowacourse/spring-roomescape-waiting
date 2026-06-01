@@ -127,8 +127,8 @@ public class ThemeAdminControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("현재 예약이나 슬롯에 의해 사용 중인 테마를 삭제하려고 하면 400 Bad Request를 반환한다.")
-    void deleteTheme_inUse_badRequest() throws Exception {
+    @DisplayName("현재 예약이나 슬롯에 의해 사용 중인 테마를 삭제하려고 하면 409 Conflict를 반환한다.")
+    void deleteTheme_inUse_conflict() throws Exception {
         // given
         createReservationTime("10:00");
 
@@ -152,7 +152,7 @@ public class ThemeAdminControllerIntegrationTest {
                 .contentType(ContentType.JSON)
                 .when().delete("/admin/themes/" + id)
                 .then().log().all()
-                .statusCode(400)
+                .statusCode(409)
                 .body("message", is(ThemeErrorCode.THEME_IN_USE.getMessage()));
     }
 }

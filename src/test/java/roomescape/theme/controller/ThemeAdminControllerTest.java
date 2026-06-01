@@ -124,15 +124,15 @@ class ThemeAdminControllerTest {
     }
 
     @Test
-    @DisplayName("사용 중인 테마 삭제 시 400 에러를 반환한다.")
-    void delete_InUse_BadRequest() throws Exception {
+    @DisplayName("사용 중인 테마 삭제 시 409 에러를 반환한다.")
+    void delete_InUse_Conflict() throws Exception {
         // given
-        willThrow(new BadRequestException(ThemeErrorCode.THEME_IN_USE.getMessage()))
+        willThrow(new ConflictException(ThemeErrorCode.THEME_IN_USE.getMessage()))
                 .given(themeService).delete(1L);
 
         // when & then
         mockMvc.perform(delete("/admin/themes/1"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value(ThemeErrorCode.THEME_IN_USE.getMessage()));
     }
 }
