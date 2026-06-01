@@ -71,16 +71,15 @@ public class ReservationService {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }
 
-        Reservation newReservation = Reservation.create(
+        Reservation updatedReservation = Reservation.create(
                 reservation.getName(),
                 date,
                 time,
                 reservation.getTheme(),
-                now);
+                now
+        ).withId(reservation.getId());
 
-        reservationRepository.update(reservation.cancel());
-
-        return save(newReservation);
+        return updateReservationDateTime(updatedReservation);
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +102,7 @@ public class ReservationService {
             throw new InvalidRequestException("이미 지난 예약은 취소할 수 없습니다.");
         }
 
-        reservationRepository.update(reservation.cancel());
+        reservationRepository.moveToHistory(reservation.cancel());
     }
 
     @Transactional
@@ -125,6 +124,14 @@ public class ReservationService {
     private Reservation save(Reservation reservation) {
         try {
             return reservationRepository.save(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
+        }
+    }
+
+    private Reservation updateReservationDateTime(Reservation reservation) {
+        try {
+            return reservationRepository.updateDateTime(reservation);
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }

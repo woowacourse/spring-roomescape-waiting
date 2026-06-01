@@ -181,28 +181,12 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     @Transactional
-    public Reservation update(Reservation reservation) {
-        if (reservation.isCanceled()) {
-            return moveToHistory(reservation);
-        }
-
-        return updateTable(reservation);
-    }
-
-    private Reservation moveToHistory(Reservation reservation) {
-        int insertedRowCount = insertHistory(reservation);
-        validateUpdatedRowCount(insertedRowCount, reservation);
-
-        int deletedRowCount = delete(reservation.getId());
-        validateUpdatedRowCount(deletedRowCount, reservation);
-
-        return reservation;
-    }
-
-    private Reservation updateTable(Reservation reservation) {
+    public Reservation updateDateTime(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?
+                SET date = ?,
+                    time_id = ?,
+                    request_order = NEXT VALUE FOR reservation_request_order_seq
                 WHERE id = ?
                 """;
 
@@ -217,6 +201,18 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return findById(reservation.getId())
                 .orElseThrow(() -> new InfrastructureException("예약 변경 결과를 조회하지 못했습니다."));
+    }
+
+    @Override
+    @Transactional
+    public Reservation moveToHistory(Reservation reservation) {
+        int insertedRowCount = insertHistory(reservation);
+        validateUpdatedRowCount(insertedRowCount, reservation);
+
+        int deletedRowCount = delete(reservation.getId());
+        validateUpdatedRowCount(deletedRowCount, reservation);
+
+        return reservation;
     }
 
     private int insertHistory(Reservation reservation) {

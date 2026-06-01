@@ -17,7 +17,9 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Reservation update(Reservation reservation);
+    Reservation updateDateTime(Reservation reservation);
+
+    Reservation moveToHistory(Reservation reservation);
 
     boolean existsByTimeId(Long timeId);
 

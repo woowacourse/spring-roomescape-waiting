@@ -270,16 +270,19 @@ class ReservationServiceTest {
         );
 
         // then
+        assertThat(updatedReservation.getId()).isEqualTo(reservation.getId());
         assertThat(updatedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
         assertThat(updatedReservation.getTime()).isEqualTo(newTime);
+        assertThat(countHistoryByReservationId(reservation.getId())).isZero();
 
         Reservation savedReservation = reservationService.findAll().get(0);
+        assertThat(savedReservation.getId()).isEqualTo(reservation.getId());
         assertThat(savedReservation.getDate()).isEqualTo(NEXT_FUTURE_DATE);
         assertThat(savedReservation.getTime()).isEqualTo(newTime);
 
         assertThat(reservationService.findByName(NAME))
                 .extracting(Reservation::getStatus)
-                .containsExactly(ReservationStatus.CANCELED, ReservationStatus.RESERVED);
+                .containsExactly(ReservationStatus.RESERVED);
     }
 
     @Test
@@ -302,10 +305,10 @@ class ReservationServiceTest {
         );
 
         // then
-        assertThat(updatedReservation.getId()).isNotEqualTo(reservation.getId());
+        assertThat(updatedReservation.getId()).isEqualTo(reservation.getId());
         assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         assertThat(updatedReservation.getWaitingRank()).isEqualTo(1L);
-        assertThat(countHistoryByReservationId(reservation.getId())).isEqualTo(1);
+        assertThat(countHistoryByReservationId(reservation.getId())).isZero();
     }
 
     @Test
