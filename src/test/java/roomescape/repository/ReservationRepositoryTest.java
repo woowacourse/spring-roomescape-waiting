@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.UserReservation;
@@ -212,9 +213,9 @@ class ReservationRepositoryTest {
         assertThat(result).hasSize(2);
         assertThat(result)
                 .extracting(UserReservation::status)
-                .containsExactlyInAnyOrder("RESERVED", "WAITING");
+                .containsExactlyInAnyOrder(ReservationStatus.RESERVED, ReservationStatus.WAITING);
         UserReservation waiting = result.stream()
-                .filter(it -> "WAITING".equals(it.status()))
+                .filter(it -> it.status() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow();
         assertThat(waiting.name()).isEqualTo("브라운");

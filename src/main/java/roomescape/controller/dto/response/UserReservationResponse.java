@@ -1,5 +1,6 @@
 package roomescape.controller.dto.response;
 
+import roomescape.domain.ReservationStatus;
 import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ public record UserReservationResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        String status,
+        ReservationStatus status,
         Long rank
 ) {
 
