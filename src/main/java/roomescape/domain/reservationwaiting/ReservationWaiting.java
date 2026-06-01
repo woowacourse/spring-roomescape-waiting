@@ -1,6 +1,7 @@
 package roomescape.domain.reservationwaiting;
 
 import java.time.LocalDateTime;
+import roomescape.domain.ReserverName;
 import roomescape.domain.reservation.Reservation;
 
 public class ReservationWaiting {
@@ -12,7 +13,7 @@ public class ReservationWaiting {
     public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestedAt) {
         this.id = id;
         this.reservation = reservation;
-        this.name = name;
+        this.name = ReserverName.from(name).value();
         this.requestedAt = requestedAt;
     }
 

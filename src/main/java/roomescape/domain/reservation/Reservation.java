@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.ReserverName;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -14,9 +15,9 @@ public class Reservation {
     private final ReservationTime time;
 
     private Reservation(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        validate(name, date, theme, time);
+        validate(date, theme, time);
         this.id = id;
-        this.name = name;
+        this.name = ReserverName.from(name).value();
         this.date = date;
         this.theme = theme;
         this.time = time;
@@ -54,15 +55,7 @@ public class Reservation {
         }
     }
 
-    private void validate(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약자 이름은 비어 있을 수 없습니다.");
-        }
-
-        if (name.length() >= 10) {
-            throw new IllegalArgumentException("예약자 이름은 10자 미만이어야 합니다.");
-        }
-
+    private void validate(final LocalDate date, final Theme theme, final ReservationTime time) {
         if(date == null) {
             throw new IllegalArgumentException("날짜는 비어있을 수 없습니다.");
         }
