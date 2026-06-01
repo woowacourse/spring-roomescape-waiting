@@ -11,7 +11,7 @@ class DescriptionTest {
 
     @Test
     @DisplayName("올바른 정보로 테마 설명을 생성하면 성공한다.")
-    void 테마_설명_생성_테스트() {
+    void createDescription_Success() {
         String description = "우테코";
 
         assertDoesNotThrow(() -> new Description(description));
@@ -19,7 +19,7 @@ class DescriptionTest {
 
     @Test
     @DisplayName("테마 설명이 빈칸 이면 예외가 발생한다")
-    void 테마_이름_빈칸_예외_테스트() {
+    void createDescription_WhenDescriptionIsBlank_ThrowException() {
         String description = "";
 
         assertThatThrownBy(() -> new Description(description))
@@ -29,7 +29,7 @@ class DescriptionTest {
 
     @Test
     @DisplayName("테마 설명 글자 수 제한을 초과하면 예외가 발생한다.")
-    void 테마_이름_글자_수_초과_예외_테스트() {
+    void createDescription_WhenDescriptionIsTooLong_ThrowException() {
         String description = "0".repeat(DESCRIPTION_NAME_MAX_LENGTH + 1);
 
         assertThatThrownBy(() -> new Description(description))

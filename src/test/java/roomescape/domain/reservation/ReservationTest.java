@@ -27,13 +27,13 @@ class ReservationTest {
 
     @Test
     @DisplayName("올바른 정보로 예약을 생성하면 성공한다.")
-    void 정상_예약_테스트() {
+    void createReservation_Success() {
         assertDoesNotThrow(() -> new Reservation(userName, date, time, theme));
     }
 
     @Test
     @DisplayName("예약자 이름이 null 이면 예외가 발생한다.")
-    void 이름이_null_예외_테스트() {
+    void createReservation_WhenUserNameIsNull_ThrowException() {
         UserName userName = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
@@ -43,7 +43,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("예약 날짜가 null 이면 예외가 발생한다.")
-    void 날짜가_null_예외_테스트() {
+    void createReservation_WhenDateIsNull_ThrowException() {
         LocalDate date = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
@@ -53,7 +53,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("예약 시간이 null 이면 예외가 발생한다.")
-    void 시간이_null_예외_테스트() {
+    void createReservation_WhenTimeIsNull_ThrowException() {
         ReservationTime time = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
@@ -63,7 +63,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("테마가 null 이면 예외가 발생한다.")
-    void 테마가_null_예외_테스트() {
+    void createReservation_WhenThemeIsNull_ThrowException() {
         Theme theme = null;
 
         assertThatThrownBy(() -> new Reservation(userName, date, time, theme))

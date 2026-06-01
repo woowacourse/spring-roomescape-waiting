@@ -11,7 +11,7 @@ class ThemeNameTest {
 
     @Test
     @DisplayName("올바른 정보로 테마 이름을 생성하면 성공한다.")
-    void 테마_이름_생성_테스트() {
+    void createThemeName_Success() {
         String themeName = "우테코";
 
         assertDoesNotThrow(() -> new ThemeName(themeName));
@@ -19,7 +19,7 @@ class ThemeNameTest {
 
     @Test
     @DisplayName("테마 이름이 빈칸 이면 예외가 발생한다.")
-    void 테마_이름_빈칸_예외_테스트() {
+    void createThemeName_WhenNameIsBlank_ThrowException() {
         String themeName = "";
 
         assertThatThrownBy(() -> new ThemeName(themeName))
@@ -29,7 +29,7 @@ class ThemeNameTest {
 
     @Test
     @DisplayName("테마 이름 글자 수 제한을 초과하면 예외가 발생한다.")
-    void 테마_이름_글자_수_초과_예외_테스트() {
+    void createThemeName_WhenNameIsTooLong_ThrowException() {
         String themeName = "0".repeat(THEME_NAME_MAX_LENGTH + 1);
 
         assertThatThrownBy(() -> new ThemeName(themeName))

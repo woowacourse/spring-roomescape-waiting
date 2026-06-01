@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -43,12 +44,11 @@ public class WaitingDaoTest {
     private WaitingDao waitingDao;
 
     @Test
-    void 예약_대기를_생성할_수_있다() {
-        // given
+    @DisplayName("예약 대기를 생성할 수 있다.")
+    void saveWaiting_Success() {
         EventSlot originEventSlot = EventSlot.from(date, time, theme);
         Waiting waiting = new Waiting(userName, originEventSlot, createdAt);
 
-        // when
         Waiting saved = waitingDao.save(waiting);
         EventSlot savedEventSlot = saved.getSlot();
 
@@ -61,14 +61,16 @@ public class WaitingDaoTest {
     }
 
     @Test
-    void 예약_대기_삭제_정상_테스트() {
+    @DisplayName("예약 대기를 삭제할 수 있다.")
+    void deleteWaiting_Success() {
         Long id = 1L;
 
         assertDoesNotThrow(() -> waitingDao.delete(id));
     }
 
     @Test
-    void 예약_대기_사용자_이름_조회_정상_테스트() {
+    @DisplayName("사용자 이름으로 예약 대기를 조회할 수 있다.")
+    void findWaitingByUserName_Success() {
         String userName = "토리";
 
         List<WaitingQueryResult> waitings = waitingDao.findByUserName(userName);
@@ -77,8 +79,10 @@ public class WaitingDaoTest {
     }
 
     @Test
-    void 동일한_슬롯에_대기하면_빠른_사람이_순번이_빠르다() {
-        List<WaitingQueryResult> results = waitingDao.findByUserName("토리");
+    @DisplayName("동일한 슬롯에 대기하면 먼저 온 순서대로 순번이 매겨진다.")
+    void findWaitingByUserName_WhenMultipleUsersWait_ReturnCorrectSequence() {
+        String userName = "토리";
+        List<WaitingQueryResult> results = waitingDao.findByUserName(userName);
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).sequence()).isEqualTo(1);

@@ -59,7 +59,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("테마 목록을 조회한다.")
-    void findThemes() {
+    void findThemes_Success() {
         given(themeDao.findAllThemes()).willReturn(List.of(theme1, theme2));
 
         List<ThemeResult> themes = themeService.findThemes();
@@ -71,7 +71,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("인기 테마 목록을 조회한다.")
-    void findPopularThemes() {
+    void findPopularThemes_Success() {
         given(themeDao.findPopularThemes(any(Integer.class), any(LocalDate.class))).willReturn(List.of(theme1, theme2));
 
         List<ThemeResult> themes = themeService.findPopularThemes(10);
@@ -82,7 +82,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("테마를 등록한다.")
-    void registerTheme() {
+    void registerTheme_Success() {
         MockMultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test".getBytes());
         ThemeCommand command = new ThemeCommand("새로운 테마", "설명", file);
         String imageUrl = "/images/test.jpg";
@@ -101,7 +101,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("예약이 없는 테마를 삭제한다.")
-    void deleteTheme() {
+    void deleteTheme_Success() {
         Long themeId = 1L;
         given(reservationDao.existsByThemeId(themeId)).willReturn(false);
 
@@ -110,7 +110,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("예약이 있는 테마를 삭제하면 예외가 발생한다.")
-    void deleteThemeWithExistingReservation() {
+    void deleteTheme_WhenExistingReservation_ThrowsConflictException() {
         Long themeId = 1L;
         given(reservationDao.existsByThemeId(themeId)).willReturn(true);
 
@@ -121,7 +121,7 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("특정 날짜의 테마 스케줄을 조회한다.")
-    void findThemeSchedulesByDate() {
+    void findThemeSchedulesByDate_Success() {
         Long themeId = 1L;
         LocalDate date = LocalDate.now();
         List<TimeQueryResult> timeQueryResults = List.of(

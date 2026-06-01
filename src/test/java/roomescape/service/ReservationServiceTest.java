@@ -74,7 +74,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 생성한다.")
-    void registerReservation() {
+    void registerReservation_Success() {
         ReservationCommand command = new ReservationCommand(name, futureDate, timeId, themeId);
         Reservation reservation = new Reservation(1L, UserName.parse(name), futureDate, time, theme);
 
@@ -94,7 +94,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 시간으로 예약하면 예외가 발생한다.")
-    void registerReservationWithNonExistentTime() {
+    void registerReservation_WhenNonExistTime_ThrowsNotFoundException() {
         Long invalidTimeId = 999L;
         ReservationCommand command = new ReservationCommand(name, futureDate, invalidTimeId, themeId);
 
@@ -107,7 +107,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("존재하지 않는 테마로 예약하면 예외가 발생한다.")
-    void registerReservationWithNonExistentTheme() {
+    void registerReservation_WhenNonExistTheme_ThrowsNotFoundException() {
         Long invalidThemeId = 999L;
         ReservationCommand command = new ReservationCommand(name, futureDate, timeId, invalidThemeId);
 
@@ -121,7 +121,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("이미 예약된 슬롯으로 예약하면 예외가 발생한다.")
-    void registerReservationWithAlreadyBookedSlot() {
+    void registerReservation_WhenAlreadyBookedSlot_ThrowsConflictException() {
         ReservationCommand command = new ReservationCommand(name, futureDate, timeId, themeId);
 
         given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
@@ -135,7 +135,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("모든 예약을 조회한다.")
-    void findReservations() {
+    void findReservations_Success() {
         given(reservationDao.findAll()).willReturn(
                 List.of(new Reservation(1L, UserName.parse(name), futureDate, time, theme)));
 
@@ -146,7 +146,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("사용자 이름으로 예약과 대기를 조회한다.")
-    void findReservationsByUserName() {
+    void findReservationsByUserName_Success() {
         given(reservationDao.findByUserName(name)).willReturn(
                 List.of(new Reservation(1L, UserName.parse(name), futureDate, time, theme)));
         given(waitingDao.findByUserName(name)).willReturn(Collections.emptyList());
@@ -159,7 +159,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 삭제한다.")
-    void deleteReservation() {
+    void deleteReservation_Success() {
         Long reservationId = 1L;
         given(reservationDao.findById(reservationId))
                 .willReturn(Optional.of(new Reservation(reservationId, UserName.parse(name), futureDate, time, theme)));

@@ -38,7 +38,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약 시간을 전체 조회한다.")
-    void find_all_reservation_times() {
+    void findReservationTimes_Success() {
         List<ReservationTime> times = List.of(
                 new ReservationTime(1L, LocalTime.parse("10:00")),
                 new ReservationTime(2L, LocalTime.parse("11:00"))
@@ -54,7 +54,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약 시간을 생성한다.")
-    void create_reservation_time() {
+    void registerReservationTime_Success() {
         String time = "19:00";
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.parse(time));
         ReservationTime savedTime = new ReservationTime(1L, LocalTime.parse(time));
@@ -68,7 +68,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약이 없는 예약 시간을 삭제한다.")
-    void delete_reservation_time_when_no_reservation_exists() {
+    void deleteReservationTime_Success() {
         Long timeId = 1L;
         given(reservationDao.existsByTimeId(timeId)).willReturn(false);
 
@@ -77,7 +77,7 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제하면 에러가 발생한다.")
-    void delete_reservation_time_when_reservation_exists() {
+    void deleteReservationTime_WhenReservationExists_ThrowsConflictException() {
         Long timeId = 1L;
         given(reservationDao.existsByTimeId(timeId)).willReturn(true);
 

@@ -14,13 +14,13 @@ class ThemeTest {
 
     @Test
     @DisplayName("올바른 정보로 테마를 생성하면 성공한다.")
-    void 정상_생성_테스트() {
+    void createTheme_Success() {
         assertDoesNotThrow(() -> new Theme(id, name, description, url));
     }
 
     @Test
     @DisplayName("테마 이름이 null이면 예외가 발생한다")
-    void 이름_null_예외_테스트() {
+    void createTheme_WhenNameIsNull_ThrowException() {
         ThemeName name = null;
 
         assertThatThrownBy(() -> new Theme(id, name, description, url))
@@ -30,7 +30,7 @@ class ThemeTest {
 
     @Test
     @DisplayName("테마 설명이 null이면 예외가 발생한다")
-    void 설명_null_예외_테스트() {
+    void createTheme_WhenDescriptionIsNull_ThrowException() {
         Description description = null;
 
         assertThatThrownBy(() -> new Theme(id, name, description, url))
@@ -40,7 +40,7 @@ class ThemeTest {
 
     @Test
     @DisplayName("테마 썸네일 주소가 null이면 예외가 발생한다")
-    void 썸네일_주소_null_예외_테스트() {
+    void createTheme_WhenThumbnailUrlIsNull_ThrowException() {
         ThumbnailUrl url = null;
 
         assertThatThrownBy(() -> new Theme(id, name, description, url))

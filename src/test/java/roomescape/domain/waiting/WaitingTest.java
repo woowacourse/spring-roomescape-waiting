@@ -35,13 +35,13 @@ public class WaitingTest {
 
     @Test
     @DisplayName("올바른 정보로 예약 대기를 생성하면 성공한다.")
-    void 정상_예약_테스트() {
+    void createWaiting_Success() {
         assertDoesNotThrow(() -> new Waiting(userName, date, time, theme, createdAt));
     }
 
     @Test
     @DisplayName("예약자 이름이 null 이면 예외가 발생한다.")
-    void 이름이_null_예외_테스트() {
+    void createWaiting_WhenUserNameIsNull_ThrowException() {
         UserName userName = null;
 
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
@@ -51,7 +51,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("예약 날짜가 null 이면 예외가 발생한다.")
-    void 날짜가_null_예외_테스트() {
+    void createWaiting_WhenDateIsNull_ThrowException() {
         LocalDate date = null;
 
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
@@ -61,7 +61,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("예약 시간이 null 이면 예외가 발생한다.")
-    void 시간이_null_예외_테스트() {
+    void createWaiting_WhenTimeIsNull_ThrowException() {
         ReservationTime time = null;
 
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
@@ -71,7 +71,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("테마가 null 이면 예외가 발생한다.")
-    void 테마가_null_예외_테스트() {
+    void createWaiting_WhenThemeIsNull_ThrowException() {
         Theme theme = null;
 
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
@@ -81,7 +81,7 @@ public class WaitingTest {
 
     @Test
     @DisplayName("대기 신청 시간이 null 이면 예외가 발생한다.")
-    void 대기_신청_시간_null_예외_테스트() {
+    void createWaiting_WhenCreatedAtIsNull_ThrowException() {
         LocalDateTime createdAt = null;
 
         assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))

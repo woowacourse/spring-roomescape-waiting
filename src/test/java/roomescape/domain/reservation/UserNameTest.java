@@ -11,7 +11,7 @@ class UserNameTest {
 
     @Test
     @DisplayName("올바른 정보로 예약을 생성하면 성공한다.")
-    void 이름_생성_테스트() {
+    void createUserName_Success() {
         String userName = "브라운";
 
         assertDoesNotThrow(() -> new UserName(userName));
@@ -19,7 +19,7 @@ class UserNameTest {
 
     @Test
     @DisplayName("예약자 이름의 값이 없으면 예외가 발생한다.")
-    void 이름_빈칸_예외_테스트() {
+    void createUserName_WhenNameIsBlank_ThrowException() {
         String userName = "";
 
         assertThatThrownBy(() -> new UserName(userName))
@@ -29,8 +29,8 @@ class UserNameTest {
 
     @Test
     @DisplayName("예약자 이름 글자 수 제한을 초과하면 예외가 발생한다.")
-    void 이름_글자_수_초과_예외_테스트() {
-        String userName = "0".repeat(NAME_MAX_LENGTH+1);
+    void createUserName_WhenNameIsTooLong_ThrowException() {
+        String userName = "0".repeat(NAME_MAX_LENGTH + 1);
 
         assertThatThrownBy(() -> new UserName(userName))
                 .isInstanceOf(IllegalArgumentException.class)

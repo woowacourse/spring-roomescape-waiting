@@ -39,7 +39,8 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_사용자_API() {
+    @DisplayName("사용자는 예약을 등록, 조회, 삭제할 수 있다.")
+    void manageReservation_Success() {
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", userName);
         reservation.put("date", FUTURE_DATE);
@@ -95,7 +96,8 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_사용자_시간_변경_API() {
+    @DisplayName("사용자는 예약 시간을 변경할 수 있다.")
+    void modifyReservationTime_Success() {
         long id = 24L;
         Long timeId = 2L;
         Map<String, Object> reservation = new HashMap<>();
@@ -116,7 +118,8 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_사용자_날짜_변경_API() {
+    @DisplayName("사용자는 예약 날짜를 변경할 수 있다.")
+    void modifyReservationDate_Success() {
         long id = 24L;
         String date = "2026-05-13";
         Map<String, Object> reservation = new HashMap<>();
@@ -137,7 +140,8 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약과_예약_대기_조회_API() {
+    @DisplayName("사용자는 예약 내역과 예약 대기 내역을 조회할 수 있다.")
+    void getReservationAndWaitList_Success() {
         JsonPath jsonPath = RestAssured.given().log().all()
                 .when().get("/reservations?userName=" + "토리")
                 .then().log().all()
@@ -152,8 +156,8 @@ class ReservationApiTest {
     }
 
     @Test
-    @DisplayName("사용자 이름이 null이면 상태코드 400을 반환한다.")
-    void 요청_이름_null_테스트() {
+    @DisplayName("예약 등록 시, 사용자 이름이 null 이면 400 에러를 반환한다.")
+    void registerReservation_WhenUserNameIsNull_Return400() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", FUTURE_DATE);
         params.put("timeId", timeId);
@@ -168,8 +172,8 @@ class ReservationApiTest {
     }
 
     @Test
-    @DisplayName("예약 날짜가 null이면 상태코드 400을 반환한다.")
-    void 요청_날짜_null_테스트() {
+    @DisplayName("예약 등록 시, 예약 날짜가 null 이면 400 에러를 반환한다.")
+    void registerReservation_WhenDateIsNull_Return400() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", userName);
         params.put("timeId", timeId);
@@ -184,8 +188,8 @@ class ReservationApiTest {
     }
 
     @Test
-    @DisplayName("예약 날짜의 형식이 올바르지 않으면 상태코드 400을 반환한다.")
-    void 요청_날짜_형식_불일치_테스트() {
+    @DisplayName("예약 등록 시, 예약 날짜의 형식이 올바르지 않으면 400 에러를 반환한다.")
+    void registerReservation_WhenDateFormatIsInvalid_Return400() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", userName);
         params.put("date", "26-01-01");
@@ -201,8 +205,8 @@ class ReservationApiTest {
     }
 
     @Test
-    @DisplayName("시간 식별자가 null이면 상태코드 400을 반환한다.")
-    void 요청_시간_식별자_null_테스트() {
+    @DisplayName("예약 등록 시, 시간 식별자가 null 이면 400 에러를 반환한다.")
+    void registerReservation_WhenTimeIdIsNull_Return400() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", userName);
         params.put("date", FUTURE_DATE);
@@ -217,8 +221,8 @@ class ReservationApiTest {
     }
 
     @Test
-    @DisplayName("테마 식별자가 null이면 상태코드 400을 반환한다.")
-    void 요청_테마_식별자_null_테스트() {
+    @DisplayName("예약 등록 시, 테마 식별자가 null 이면 400 에러를 반환한다.")
+    void registerReservation_WhenThemeIdIsNull_Return400() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", userName);
         params.put("date", FUTURE_DATE);

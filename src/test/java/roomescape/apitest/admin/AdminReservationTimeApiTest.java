@@ -14,7 +14,8 @@ import org.springframework.test.annotation.DirtiesContext;
 class AdminReservationTimeApiTest {
 
     @Test
-    void 시간_관리자_API() {
+    @DisplayName("관리자는 시간을 등록하고 삭제할 수 있다.")
+    void registerAndDeleteReservationTime_Success() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "19:00");
 
@@ -32,8 +33,8 @@ class AdminReservationTimeApiTest {
     }
 
     @Test
-    @DisplayName("시간이 null이면 상태코드 400을 반환한다.")
-    void 요청_이름_null_테스트() {
+    @DisplayName("시간 등록 시, 시작 시간이 null 이면 400 에러를 반환한다.")
+    void registerReservationTime_WhenStartAtIsNull_Return400() {
         Map<String, String> params = new HashMap<>();
 
         RestAssured.given().log().all()

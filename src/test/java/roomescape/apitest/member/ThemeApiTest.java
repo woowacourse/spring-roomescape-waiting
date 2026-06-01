@@ -15,7 +15,8 @@ import org.springframework.test.annotation.DirtiesContext;
 class ThemeApiTest {
 
     @Test
-    void 예약_가능한_시간_조회_API() {
+    @DisplayName("사용자는 예약 가능한 시간을 조회할 수 있다.")
+    void getThemeSchedules_Success() {
         LocalDate now = LocalDate.parse(TODAY);
 
         RestAssured.given().log().all()
@@ -26,8 +27,8 @@ class ThemeApiTest {
     }
 
     @Test
-    @DisplayName("최근 1주동안 예약이 많았던 테마를 조회하는 정상 테스트")
-    void 테마_조회_API() {
+    @DisplayName("사용자는 최근 1주동안 예약이 많았던 테마를 조회할 수 있다.")
+    void getPopularTheme_Success() {
         int expectedSize = 10;
 
         RestAssured.given().log().all()

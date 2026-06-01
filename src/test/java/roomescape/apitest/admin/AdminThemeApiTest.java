@@ -10,13 +10,14 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminThemeApiTest {
+    private final String name = "브라운";
+    private final String description = "추리";
+    private final byte[] fileContent = "fake-image-content".getBytes();
+
 
     @Test
-    void 테마_관리_API() {
-        String name = "추리물";
-        String description = "추리";
-        byte[] fileContent = "fake-image-content".getBytes();
-
+    @DisplayName("관리자는 테마를 등록하고 삭제할 수 있다.")
+    void registerAndDeleteTheme_Success() {
         RestAssured.given().log().all()
                 .contentType(ContentType.MULTIPART)
                 .multiPart("name", name)
@@ -33,11 +34,8 @@ class AdminThemeApiTest {
     }
 
     @Test
-    @DisplayName("테마 이름이 null이면 상태코드 400을 반환한다.")
-    void 요청_이름_null_테스트() {
-        String description = "추리";
-        byte[] fileContent = "fake-image-content".getBytes();
-
+    @DisplayName("테마 등록 시, 테마 이름이 null 이면 400 에러를 반환한다.")
+    void createTheme_WhenNameIsNull_Return400() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .contentType(ContentType.MULTIPART)
@@ -49,11 +47,8 @@ class AdminThemeApiTest {
     }
 
     @Test
-    @DisplayName("테마 설명이 null이면 상태코드 400을 반환한다.")
-    void 요청_설명_null_테스트() {
-        String name = "추리물";
-        byte[] fileContent = "fake-image-content".getBytes();
-
+    @DisplayName("테마 등록 시, 설명이 null 이면 400 에러를 반환한다.")
+    void registerTheme_WhenDescriptionIsNull_Return400() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .contentType(ContentType.MULTIPART)
@@ -65,11 +60,8 @@ class AdminThemeApiTest {
     }
 
     @Test
-    @DisplayName("테마 썸네일이 null이면 상태코드 400을 반환한다.")
-    void 요청_썸네일_null_테스트() {
-        String name = "추리물";
-        String description = "추리";
-
+    @DisplayName("테마 등록 시, 썸네일 파일이 null 이면 400 에러를 반환한다.")
+    void registerTheme_WhenFileIsNull_Return400() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .contentType(ContentType.MULTIPART)

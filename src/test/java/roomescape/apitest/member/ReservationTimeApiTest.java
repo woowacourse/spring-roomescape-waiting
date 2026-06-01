@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +28,8 @@ public class ReservationTimeApiTest {
     }
 
     @Test
-    void 시간_관리_API() {
+    @DisplayName("사용자는 예약 시간을 조회할 수 있다.")
+    void getReservationTime_Success() {
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
