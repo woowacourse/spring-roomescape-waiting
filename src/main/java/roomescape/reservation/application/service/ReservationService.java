@@ -77,9 +77,33 @@ public class ReservationService {
         validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
         validateDuplicateReservation(request, reservation);
 
+        if (isSameSchedule(request, reservation)) {
+            return updateReservation(request, reservation);
+        }
+
+        return waitingService.findOldestByReservation(reservation)
+                .map(waiting -> updateWithWaiting(request, reservation, waiting))
+                .orElseGet(() -> updateReservation(request, reservation));
+    }
+
+    private ReservationQueryResult updateWithWaiting(ReservationUpdateCommand request, Reservation reservation, Waiting waiting) {
+        reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
+        waitingService.delete(waiting.getId());
+
+        Reservation movedReservation = reservation.update(request.date(), request.timeId());
+        Reservation savedReservation = reservationRepository.save(movedReservation);
+        return toQueryResult(savedReservation);
+    }
+
+    private ReservationQueryResult updateReservation(ReservationUpdateCommand request, Reservation reservation) {
         Reservation updatedReservation = reservation.update(request.date(), request.timeId());
         Reservation savedReservation = reservationRepository.update(updatedReservation);
         return toQueryResult(savedReservation);
+    }
+
+    private boolean isSameSchedule(ReservationUpdateCommand request, Reservation reservation) {
+        return reservation.getDate().equals(request.date())
+                && reservation.getTimeId().equals(request.timeId());
     }
 
     public int delete(Long id, String name, LocalDateTime currentDateTime) {
