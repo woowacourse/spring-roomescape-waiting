@@ -1,0 +1,13 @@
+package roomescape.exception;
+
+public enum ErrorCode {
+    INVALID_INPUT,
+    INVALID_PARAMETER,
+    PAST_RESERVATION,
+    DOMAIN_VALIDATION_FAILED,
+    NOT_FOUND,
+    RESOURCE_NOT_FOUND,
+    CONFLICT,
+    FORBIDDEN,
+    INTERNAL_SERVER_ERROR,
+}
