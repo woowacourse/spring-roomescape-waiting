@@ -36,6 +36,17 @@ public class Reservation {
         return new Reservation(this.id, this.name, time, this.theme, this.status, this.createdAt);
     }
 
+    public Reservation promote() {
+        if (this.status != Status.WAITING) {
+            throw new IllegalStateException("WAITING 상태만 예약으로 가능합니다.");
+        }
+        return new Reservation(id, name, time, theme, Status.RESERVED, createdAt);
+    }
+
+    public Reservation withCreatedAt(LocalDateTime createdAt) {
+        return new Reservation(this.id, this.name, this.time, this.theme, this.status, createdAt);
+    }
+
     public Long getId() {
         return id;
     }
