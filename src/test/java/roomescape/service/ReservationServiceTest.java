@@ -114,7 +114,7 @@ class ReservationServiceTest {
     @DisplayName("지나간 시간에 대한 예약 생성은 불가능하다.")
     void 지난_시간_예약_생성_예외_발생() {
         LocalDate today = LocalDate.now();
-        LocalTime pastTime = LocalTime.now().minusHours(1);
+        LocalTime pastTime = LocalTime.of(0, 0);
         TimeSlot pastTimeSlot = timeSlotRepository.save(new TimeSlot(pastTime));
 
         assertThatThrownBy(
