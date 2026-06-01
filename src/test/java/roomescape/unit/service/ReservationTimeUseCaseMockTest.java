@@ -26,6 +26,10 @@ import roomescape.repository.ReservationTimeRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeUseCaseMockTest {
 
+    private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
+    private static final ReservationTime TEN_AM = new ReservationTime(1L, LocalTime.of(10, 0));
+    private static final ReservationTime ELEVEN_AM = new ReservationTime(2L, LocalTime.of(11, 0));
+
     @Mock
     private ReservationTimeRepository timeRepository;
 
@@ -58,18 +62,14 @@ class ReservationTimeUseCaseMockTest {
 
     @Test
     void getById는_존재하면_시간을_반환한다() {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        given(timeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(timeRepository.findById(1L)).willReturn(Optional.of(TEN_AM));
 
-        assertThat(reservationTimeQueryService.getById(1L)).isEqualTo(time);
+        assertThat(reservationTimeQueryService.getById(1L)).isEqualTo(TEN_AM);
     }
 
     @Test
     void findAll은_저장소의_전체_시간을_반환한다() {
-        List<ReservationTime> times = List.of(
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new ReservationTime(2L, LocalTime.of(11, 0))
-        );
+        List<ReservationTime> times = List.of(TEN_AM, ELEVEN_AM);
         given(timeRepository.findAll()).willReturn(times);
 
         assertThat(reservationTimeQueryService.findAll()).isEqualTo(times);
@@ -77,16 +77,12 @@ class ReservationTimeUseCaseMockTest {
 
     @Test
     void findWithAvailability는_저장소의_시간별_예약_상태를_반환한다() {
-        LocalDate date = LocalDate.of(2026, 8, 5);
-        List<ReservationTime> times = List.of(
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new ReservationTime(2L, LocalTime.of(11, 0))
-        );
+        List<ReservationTime> times = List.of(TEN_AM, ELEVEN_AM);
         given(timeRepository.findAll()).willReturn(times);
-        given(reservationQueryService.findReservedTimeIds(date, 1L)).willReturn(Set.of(1L));
+        given(reservationQueryService.findReservedTimeIds(RESERVATION_DATE, 1L)).willReturn(Set.of(1L));
 
         List<ReservationTimeAvailability> availabilities = reservationTimeApplicationService.findWithAvailability(
-                date,
+                RESERVATION_DATE,
                 1L
         );
 

@@ -34,7 +34,12 @@ public class ReservationWaitingApplicationService {
 
     @Transactional
     public ReservationWaitingWithOrder save(ReservationWaitingRequest request) {
-        Reservation reservation = getWaitingTargetReservation(request);
+        Reservation reservation = reservationQueryService.findBySlot(
+                request.date(),
+                request.timeId(),
+                request.themeId()
+        ).orElseThrow(() -> new ConflictException(WAITING_REQUIRES_RESERVED_SLOT));
+
         ReservationWaiting reservationWaiting = reservationWaitingCommandService.save(request.name(), reservation);
 
         return reservationWaitingQueryService.getWithOrderById(reservationWaiting.getId());
@@ -49,13 +54,5 @@ public class ReservationWaitingApplicationService {
         ReservationWaiting reservationWaiting = reservationWaitingQueryService.getById(id);
 
         reservationWaitingCommandService.deleteMine(reservationWaiting, name);
-    }
-
-    private Reservation getWaitingTargetReservation(ReservationWaitingRequest request) {
-        return reservationQueryService.findBySlot(
-                request.date(),
-                request.timeId(),
-                request.themeId()
-        ).orElseThrow(() -> new ConflictException(WAITING_REQUIRES_RESERVED_SLOT));
     }
 }

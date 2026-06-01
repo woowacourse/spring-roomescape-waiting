@@ -43,6 +43,10 @@ class ReservationWaitingUseCaseMockTest {
             Instant.parse("2026-08-05T01:00:00Z"),
             ZoneId.of("Asia/Seoul")
     );
+    private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
+    private static final ReservationTime RESERVATION_TIME = new ReservationTime(1L, LocalTime.of(10, 0));
+    private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
+    private static final LocalDateTime WAITING_CREATED_AT = LocalDateTime.of(2026, 8, 1, 10, 0);
 
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
@@ -76,17 +80,14 @@ class ReservationWaitingUseCaseMockTest {
 
     @Test
     void save는_저장소에_위임하고_저장된_대기를_반환한다() {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate date = LocalDate.of(2026, 8, 5);
-        Reservation reservation = new Reservation(1L, "티뉴", date, time, theme);
+        Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
         ReservationWaitingRequest request = new ReservationWaitingRequest(
                 "민욱",
-                date,
-                time.getId(),
-                theme.getId()
+                RESERVATION_DATE,
+                RESERVATION_TIME.getId(),
+                THEME.getId()
         );
-        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
+        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", WAITING_CREATED_AT, reservation);
         ReservationWaitingWithOrder savedWithOrder = new ReservationWaitingWithOrder(
                 saved.getId(),
                 saved.getName(),
@@ -95,7 +96,7 @@ class ReservationWaitingUseCaseMockTest {
                 saved.getReservation().getTheme(),
                 1
         );
-        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId()))
+        given(reservationQueryService.findBySlot(RESERVATION_DATE, RESERVATION_TIME.getId(), THEME.getId()))
                 .willReturn(Optional.of(reservation));
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
         given(reservationWaitingQueryRepository.findById(saved.getId())).willReturn(Optional.of(savedWithOrder));
@@ -105,9 +106,8 @@ class ReservationWaitingUseCaseMockTest {
 
     @Test
     void save는_예약되지_않은_슬롯이면_ConflictException을_던진다() {
-        LocalDate date = LocalDate.of(2026, 8, 5);
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", date, 1L, 1L);
-        given(reservationQueryService.findBySlot(date, 1L, 1L))
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_DATE, 1L, 1L);
+        given(reservationQueryService.findBySlot(RESERVATION_DATE, 1L, 1L))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingApplicationService.save(request))
@@ -152,9 +152,7 @@ class ReservationWaitingUseCaseMockTest {
     }
 
     private ReservationWaiting waitingOwnedBy(Long id, String name) {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        Reservation reservation = new Reservation(1L, "티뉴", LocalDate.of(2026, 8, 5), time, theme);
-        return new ReservationWaiting(id, name, LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
+        Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
+        return new ReservationWaiting(id, name, WAITING_CREATED_AT, reservation);
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,15 @@ import roomescape.repository.ReservationJdbcRepository;
 @Import(ReservationJdbcRepository.class)
 class ReservationJdbcRepositoryTest {
 
+    private static final String THEME_NAME = "공포";
+    private static final String THEME_DESCRIPTION = "무서운 테마";
+    private static final String THEME_THUMBNAIL_IMAGE_URL = "https://example.com/horror.jpg";
+    private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
+    private static final LocalDate OTHER_RESERVATION_DATE = LocalDate.of(2026, 8, 6);
+    private static final LocalTime RESERVATION_START_AT = LocalTime.of(10, 0);
+    private static final LocalTime OTHER_RESERVATION_START_AT = LocalTime.of(11, 0);
+    private static final LocalDateTime WAITING_CREATED_AT = LocalDateTime.of(2026, 8, 1, 10, 0);
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -40,16 +50,16 @@ class ReservationJdbcRepositoryTest {
 
         jdbcTemplate.update(
                 "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
-                "공포", "무서운 테마", "https://example.com/horror.jpg"
+                THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL
         );
         themeId = jdbcTemplate.queryForObject("SELECT id FROM theme LIMIT 1", Long.class);
     }
 
     @Test
     void save는_생성된_id를_부여한_예약을_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        Reservation reservation = new Reservation("브라운", RESERVATION_DATE, time, theme);
 
         Reservation saved = repository.save(reservation);
 
@@ -59,9 +69,9 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void 같은_날짜_시간_테마로_저장하면_ConflictException을_던진다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate date = LocalDate.of(2026, 8, 5);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        LocalDate date = RESERVATION_DATE;
         repository.save(new Reservation("브라운", date, time, theme));
 
         assertThatThrownBy(() -> repository.save(new Reservation("티뉴", date, time, theme)))
@@ -77,10 +87,10 @@ class ReservationJdbcRepositoryTest {
                 Long.class
         );
 
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        ReservationTime otherTime = new ReservationTime(otherTimeId, LocalTime.of(11, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate date = LocalDate.of(2026, 8, 5);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        ReservationTime otherTime = new ReservationTime(otherTimeId, OTHER_RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        LocalDate date = RESERVATION_DATE;
         repository.save(new Reservation("브라운", date, time, theme));
         Reservation saved = repository.save(new Reservation("티뉴", date, otherTime, theme));
 
@@ -93,11 +103,11 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void findReservedTimeIdsByDateAndThemeId는_같은_날짜와_테마의_예약_시간_id만_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate targetDate = LocalDate.of(2026, 8, 5);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        LocalDate targetDate = RESERVATION_DATE;
         repository.save(new Reservation("브라운", targetDate, time, theme));
-        repository.save(new Reservation("티뉴", LocalDate.of(2026, 8, 6), time, theme));
+        repository.save(new Reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
         List<Long> result = repository.findReservedTimeIdsByDateAndThemeId(targetDate, themeId);
 
@@ -106,9 +116,9 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void findBySlot은_해당_슬롯의_예약을_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate date = LocalDate.of(2026, 8, 5);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        LocalDate date = RESERVATION_DATE;
         Reservation saved = repository.save(new Reservation("브라운", date, time, theme));
 
         Optional<Reservation> result = repository.findBySlot(date, timeId, themeId);
@@ -118,9 +128,9 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void existsByDateAndTimeIdAndThemeId는_해당_슬롯에_예약이_있으면_true를_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        LocalDate date = LocalDate.of(2026, 8, 5);
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        LocalDate date = RESERVATION_DATE;
         repository.save(new Reservation("브라운", date, time, theme));
 
         assertThat(repository.existsBySlot(date, timeId, themeId)).isTrue();
@@ -133,18 +143,18 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void existsByTimeId는_예약이_있으면_true를_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        repository.save(new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme));
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        repository.save(new Reservation("브라운", RESERVATION_DATE, time, theme));
 
         assertThat(repository.existsByTimeId(timeId)).isTrue();
     }
 
     @Test
     void deleteById_이후_findById는_빈_Optional을_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        Reservation saved = repository.save(new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme));
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        Reservation saved = repository.save(new Reservation("브라운", RESERVATION_DATE, time, theme));
 
         repository.deleteById(saved.getId());
 
@@ -154,12 +164,12 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void deleteById는_예약에_달린_대기도_함께_삭제한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        Reservation saved = repository.save(new Reservation("브라운", LocalDate.of(2026, 8, 5), time, theme));
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        Reservation saved = repository.save(new Reservation("브라운", RESERVATION_DATE, time, theme));
         jdbcTemplate.update(
                 "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)",
-                "민욱", Timestamp.valueOf(LocalDate.of(2026, 8, 1).atTime(10, 0)), saved.getId()
+                "민욱", Timestamp.valueOf(WAITING_CREATED_AT), saved.getId()
         );
 
         repository.deleteById(saved.getId());
@@ -170,10 +180,10 @@ class ReservationJdbcRepositoryTest {
 
     @Test
     void findByName은_이름이_일치하는_예약만_반환한다() {
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
-        Theme theme = new Theme(themeId, "공포", "무서운 테마", "https://example.com/horror.jpg");
-        repository.save(new Reservation("민욱", LocalDate.of(2026, 8, 5), time, theme));
-        repository.save(new Reservation("티뉴", LocalDate.of(2026, 8, 6), time, theme));
+        ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
+        Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
+        repository.save(new Reservation("민욱", RESERVATION_DATE, time, theme));
+        repository.save(new Reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
         assertThat(repository.findByName("민욱"))
                 .hasSize(1)

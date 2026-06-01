@@ -26,7 +26,11 @@ public class ThemeApplicationService {
 
     @Transactional
     public Theme save(ThemeRequest request) {
-        Theme theme = new Theme(request.name(), request.description(), request.thumbnailImageUrl());
+        Theme theme = new Theme(
+                request.name(),
+                request.description(),
+                request.thumbnailImageUrl()
+        );
 
         return themeCommandService.save(theme);
     }
