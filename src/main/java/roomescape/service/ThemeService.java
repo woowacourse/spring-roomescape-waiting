@@ -23,15 +23,15 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeDao.findAllThemes();
-        return themes.stream()
+        return themeDao.findAllThemes()
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> findTopTheme(Long count) {
-        List<Theme> topTheme = themeDao.findTopThemes(count);
-        return topTheme.stream()
+        return themeDao.findTopThemes(count)
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

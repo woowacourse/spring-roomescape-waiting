@@ -34,8 +34,8 @@ public class ReservationService {
     }
 
     public List<ReservationRankResponse> find(String name) {
-        List<ReservationRank> response = reservationDao.findByName(name);
-        return response.stream()
+        return reservationDao.findByName(name)
+                .stream()
                 .map(ReservationRankResponse::from)
                 .toList();
     }
@@ -100,21 +100,18 @@ public class ReservationService {
     }
 
     private Reservation getReservation(long id) {
-        Reservation reservation = reservationDao.findById(id)
+        return reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("요청하신 예약을 찾을 수 없습니다."));
-        return reservation;
     }
 
     private ReservationTime getReservationTime(Long timeId) {
-        ReservationTime time = reservationTimeDao.findTimeById(timeId)
+        return reservationTimeDao.findTimeById(timeId)
                 .orElseThrow(() -> new NotFoundException("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요."));
-        return time;
     }
 
     private Theme getTheme(Long themeId) {
-        Theme theme = themeDao.findThemeById(themeId)
+        return themeDao.findThemeById(themeId)
                 .orElseThrow(() -> new NotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요."));
-        return theme;
     }
 
     private void validateReservationDateTime(LocalDate date, ReservationTime time) {

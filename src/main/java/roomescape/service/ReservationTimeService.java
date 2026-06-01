@@ -28,9 +28,8 @@ public class ReservationTimeService {
     }
 
     public List<TimeSlotResponse> findAvailableTime(Long id, String date) {
-        List<TimeSlot> availableTimes = reservationTimeDao.findAvailableTime(id, date);
-
-        return availableTimes.stream()
+        return reservationTimeDao.findAvailableTime(id, date)
+                .stream()
                 .map(TimeSlotResponse::from)
                 .toList();
     }
