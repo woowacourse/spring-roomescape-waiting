@@ -36,12 +36,6 @@ public class ReservationValidator {
         }
     }
 
-    public void validateReservable(final Reservation reservation) {
-        if (reservation.isPastAt(LocalDateTime.now())) {
-            throw new InvalidInputException(ErrorCode.RESERVATION_DATE_TIME_IN_PAST, "과거 날짜와 시간으로는 예약을 할 수 없습니다.");
-        }
-    }
-
     public void validateCancelable(final Reservation reservation) {
         if (reservation.isPastAt(LocalDateTime.now())) {
             throw new ConflictException(

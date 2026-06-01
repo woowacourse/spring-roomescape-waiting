@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -39,6 +40,44 @@ class ReservationWaitingTest {
         ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("지난 예약에는 대기를 생성할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("예약 대기는 ID가 같으면 같은 객체이다")
+    void equalsById() {
+        Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        ReservationWaiting waiting = new ReservationWaiting(
+                1L,
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        );
+        ReservationWaiting sameIdWaiting = new ReservationWaiting(
+                1L,
+                reservation,
+                "다른이름",
+                LocalDateTime.parse("2026-08-05T12:01:00")
+        );
+
+        assertThat(waiting).isEqualTo(sameIdWaiting);
+    }
+
+    @Test
+    @DisplayName("ID가 없는 예약 대기는 같은 객체로 판단하지 않는다")
+    void notEqualsWithoutId() {
+        Reservation reservation = createReservation(LocalDate.parse("2026-08-06"), LocalTime.parse("10:00"));
+        ReservationWaiting waiting = ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        );
+        ReservationWaiting sameValuesWaiting = ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-05T12:00:00")
+        );
+
+        assertThat(waiting).isNotEqualTo(sameValuesWaiting);
     }
 
     private Reservation createReservation(final LocalDate date, final LocalTime time) {

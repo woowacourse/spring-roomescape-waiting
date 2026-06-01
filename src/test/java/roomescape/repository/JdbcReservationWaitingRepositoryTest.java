@@ -99,7 +99,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting found = jdbcReservationWaitingRepository.findById(saved.getId())
                 .orElseThrow();
 
-        assertThat(found.getId()).isEqualTo(saved.getId());
+        assertThat(found).isEqualTo(saved);
         assertThat(found.getName()).isEqualTo("아루");
         assertThat(found.getReservation()).isEqualTo(reservation);
         assertThat(found.getRequestAt()).isEqualTo(LocalDateTime.parse("2026-08-05T12:00:00"));

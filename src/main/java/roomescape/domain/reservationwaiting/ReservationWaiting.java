@@ -1,6 +1,7 @@
 package roomescape.domain.reservationwaiting;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.reservation.Reservation;
 
 public class ReservationWaiting {
@@ -52,6 +53,21 @@ public class ReservationWaiting {
 
     public LocalDateTime getRequestAt() {
         return requestAt;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof ReservationWaiting)) {
+            return false;
+        }
+
+        ReservationWaiting reservationWaiting = (ReservationWaiting) o;
+        return id != null && Objects.equals(id, reservationWaiting.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     private static void validateWaitable(final Reservation reservation, final LocalDateTime requestAt) {

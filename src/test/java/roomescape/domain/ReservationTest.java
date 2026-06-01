@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -68,6 +69,22 @@ class ReservationTest {
         // when & then
         assertThatThrownBy(() -> Reservation.createNew(name, date, theme, null))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("과거 날짜와 시간으로는 예약을 생성할 수 없다")
+    @Test
+    void validatePastDateTime_ThrowsException() {
+        // given
+        String name = "쿠다";
+        LocalDate date = LocalDate.parse("2026-03-08");
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
+        LocalDateTime standardDateTime = LocalDateTime.parse("2026-03-08T10:01:00");
+
+        // when & then
+        assertThatThrownBy(() -> Reservation.createNew(name, date, theme, time, standardDateTime))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(Reservation.PAST_RESERVATION_MESSAGE);
     }
 
 }
