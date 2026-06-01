@@ -17,7 +17,7 @@ import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
-class WaitingService {
+public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final Clock clock;
