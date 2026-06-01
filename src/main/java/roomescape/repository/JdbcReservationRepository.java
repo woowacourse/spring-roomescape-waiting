@@ -44,16 +44,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Long> findByThemeIdAndDate(long themeId, LocalDate date) {
-        String sql = """
-                SELECT time_id
-                FROM reservation 
-                WHERE theme_id = ? and date = ?
-                """;
-        return jdbcTemplate.queryForList(sql, Long.class, themeId, date);
-    }
-
-    @Override
     public Optional<Reservation> findById(long reservationId) {
         String sql = """
                 SELECT
@@ -152,6 +142,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getTheme().getId(),
                 reservation.getId()
         );
+    }
+
+    @Override
+    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        return count != null && count > 0;
     }
 
     private SimpleJdbcInsert createInsert() {

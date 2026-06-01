@@ -24,7 +24,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<ReservationResponses> reservations() {
-        return ResponseEntity.ok(ReservationResponses.from(reservationService.allReservations()));
+        return ResponseEntity.ok(ReservationResponses.from(reservationService.findAllReservations()));
     }
 
     @GetMapping("/{id}")
@@ -59,36 +59,20 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<ReservationResponse> updateReservation(
-            @PathVariable
-            long id,
-            @RequestBody @Valid
-            ReservationPutRequest request,
-            @RequestParam @NotBlank
-            String userName
-    ) {
-        reservationService.putReservation(id, userName, request.name(), request.date(), request.timeId(),
-                request.themeId());
-        return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
-    }
-
     @PatchMapping(value = "/{id}")
     public ResponseEntity<ReservationResponse> patchReservation(
             @PathVariable
             long id,
-            @RequestBody
-            ReservationPatchRequest request,
+            @RequestBody @Valid
+            UpdateReservationRequest request,
             @RequestParam @NotBlank
             String userName
     ) {
-        reservationService.patchReservation(
+        reservationService.updateReservation(
                 id,
                 userName,
-                request.name(),
                 request.date(),
-                request.timeId(),
-                request.themeId()
+                request.timeId()
         );
         return ResponseEntity.ok(ReservationResponse.from(reservationService.findReservationById(id)));
     }

@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -10,8 +11,6 @@ import roomescape.domain.Reservation;
 public interface ReservationRepository {
 
     List<Reservation> findAll();
-
-    List<Long> findByThemeIdAndDate(long themeId, LocalDate date);
 
     Optional<Reservation> findById(long id);
 
@@ -24,4 +23,6 @@ public interface ReservationRepository {
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     int update(Reservation reservation);
+
+    boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
 }

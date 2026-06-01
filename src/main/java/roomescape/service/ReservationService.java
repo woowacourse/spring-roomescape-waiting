@@ -1,21 +1,22 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.*;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.ReservationNotFoundException;
+import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationAndWaiting;
 
@@ -34,19 +35,20 @@ public class ReservationService {
             ThemeRepository themeRepository,
             WaitingRepository waitingRepository
     ) {
+
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
     }
 
-    public List<Reservation> allReservations() {
+    public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
     }
 
     public Reservation findReservationById(long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new ReservationNotFoundException(id));
+                .orElseThrow(ReservationNotFoundException::new);
     }
 
     public List<ReservationAndWaiting> findReservationByName(String name) {
@@ -61,10 +63,10 @@ public class ReservationService {
 
         for (Waiting waiting : waitings) {
             TimeSlot timeSlot = timeSlotRepository.findById(waiting.getTimeSlotId())
-                    .orElseThrow(() -> new TimeSlotNotFoundException(waiting.getTimeSlotId()));
+                    .orElseThrow(TimeSlotNotFoundException::new);
 
             Theme theme = themeRepository.findById(waiting.getThemeId())
-                    .orElseThrow(() -> new ThemeNotFoundException(waiting.getThemeId()));
+                    .orElseThrow(ThemeNotFoundException::new);
 
             reservationAndWaitings.add(ReservationAndWaiting.fromWaiting(waiting, timeSlot, theme));
         }
@@ -74,104 +76,49 @@ public class ReservationService {
 
     @Transactional
     public Reservation saveReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        Reservation transientReservation = createTransientWithValidField(name, date, timeId, themeId);
-        validDuplicatedReservation(transientReservation);
+        validateDuplicatedReservation(date, timeId, themeId);
+        Reservation transientReservation = createReservation(name, date, timeId, themeId);
         return reservationRepository.save(transientReservation);
     }
 
     @Transactional
-    public void removeReservation(long reservationId, String userName) {
-        existsAndModifiableReservation(reservationId, userName);
-        reservationRepository.deleteById(reservationId);
-    }
-
-    @Transactional
-    public void putReservation(long id, String userName, String name, LocalDate date, Long timeId, Long themeId) {
-        existsAndModifiableReservation(id, userName);
-        Reservation transientReservation = createTransientWithValidField(name, date, timeId, themeId);
-        Reservation reservation = new Reservation(
-                id,
-                transientReservation.getName(),
-                transientReservation.getDate(),
-                transientReservation.getTimeSlot(),
-                transientReservation.getTheme()
-        );
-        validDuplicatedReservation(reservation);
-        reservationRepository.update(reservation);
-    }
-
-    @Transactional
-    public void patchReservation(long id, String userName, String name, LocalDate date, Long timeId, Long themeId) {
+    public void removeReservation(long id, String name) {
         Reservation reservation = findReservationById(id);
-        reservation.validateModifiable(userName);
-        validNotPast(reservation.getDate(), reservation.getTimeSlot().getStartAt());
-        reservation.reschedule(
-                name,
-                date,
-                findOptionalTime(timeId),
-                findOptionalTheme(themeId)
-        );
-        validDuplicatedReservation(reservation);
-        reservationRepository.update(reservation);
+        reservation.validateCancelable(LocalDateTime.now(), name);
+        reservationRepository.deleteById(id);
     }
 
-    private void existsAndModifiableReservation(long id, String userName) {
-        Reservation existingReservation = findReservationById(id);
-        existingReservation.validateModifiable(userName);
-        validNotPast(existingReservation.getDate(), existingReservation.getTimeSlot().getStartAt());
-    }
+    @Transactional
+    public void updateReservation(long id, String name, LocalDate date, Long timeId) {
+        Reservation nowReservation = findReservationById(id);
+        TimeSlot timeSlot = findTimeSlot(timeId);
+        Reservation updatedReservation = nowReservation.updateDateAndTime(name, date, timeSlot, LocalDateTime.now());
 
-    private void validNotPast(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
-            throw new PastReservationControlException();
+        if (!nowReservation.hasSameDateAndTime(updatedReservation)) {
+            validateDuplicatedReservation(date, timeId, nowReservation.getTheme().getId());
+            reservationRepository.update(updatedReservation);
         }
     }
 
-    private Reservation createTransientWithValidField(String name, LocalDate date, Long timeId, Long themeId) {
+    private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId) {
         TimeSlot timeSlot = findTimeSlot(timeId);
         Theme theme = findTheme(themeId);
-        validDateTime(date, timeSlot.getStartAt());
-        return Reservation.transientOf(name, date, timeSlot, theme);
+        return new Reservation(name, date, timeSlot, theme, LocalDateTime.now());
     }
 
-    private void validDateTime(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new PastTimeException("지난 날짜로 예약하실 수 없습니다.");
+    private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, timeId, themeId)) {
+            throw new DuplicateReservationException();
         }
-        if (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now())) {
-            throw new PastTimeException("지난 시간으로 예약하실 수 없습니다.");
-        }
-    }
-
-    private void validDuplicatedReservation(Reservation reservation) {
-        reservationRepository.findByDateAndTimeIdAndThemeId(
-                        reservation.getDate(),
-                        reservation.getTimeSlot().getId(),
-                        reservation.getTheme().getId()
-                )
-                .filter(existing -> reservation.getId() == null || !reservation.getId().equals(existing.getId()))
-                .ifPresent(existing -> {
-                    throw new DuplicateReservationException(
-                            existing.getDate().toString(),
-                            existing.getTimeSlot().getId(),
-                            existing.getTheme().getId()
-                    );
-                });
-    }
-
-    private TimeSlot findOptionalTime(Long id) {
-        return Optional.ofNullable(id).map(this::findTimeSlot).orElse(null);
-    }
-
-    private Theme findOptionalTheme(Long id) {
-        return Optional.ofNullable(id).map(this::findTheme).orElse(null);
     }
 
     private TimeSlot findTimeSlot(Long id) {
-        return timeSlotRepository.findById(id).orElseThrow(() -> new TimeSlotNotFoundException(id));
+        return timeSlotRepository.findById(id)
+                .orElseThrow(TimeSlotNotFoundException::new);
     }
 
     private Theme findTheme(Long id) {
-        return themeRepository.findById(id).orElseThrow(() -> new ThemeNotFoundException(id));
+        return themeRepository.findById(id)
+                .orElseThrow(ThemeNotFoundException::new);
     }
 }
