@@ -10,10 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Time;
 import roomescape.infra.JdbcTimeRepository;
 
 @JdbcTest
+@Sql("/schema.sql")
 class JdbcTimeRepositoryTest {
 
     @Autowired
@@ -24,14 +26,6 @@ class JdbcTimeRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbcTimeRepository = new JdbcTimeRepository(jdbcTemplate);
-        executeSchema();
-    }
-
-    private void executeSchema() {
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS time (id BIGINT AUTO_INCREMENT PRIMARY KEY, start_at TIME)");
-        jdbcTemplate.execute("TRUNCATE TABLE time");
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
     }
 
     @Test
