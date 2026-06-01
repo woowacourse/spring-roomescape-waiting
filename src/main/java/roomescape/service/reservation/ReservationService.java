@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationAvailabilityPolicy;
+import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -21,20 +22,17 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final ReservationValidator reservationValidator;
     private final ReservationAvailabilityPolicy reservationAvailabilityPolicy;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final ReservationValidator reservationValidator,
             final ReservationAvailabilityPolicy reservationAvailabilityPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.reservationValidator = reservationValidator;
         this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
@@ -43,7 +41,7 @@ public class ReservationService {
     }
 
     public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
-        reservationValidator.validateCreateReferenceIds(themeId, timeId);
+        validateCreateReferenceIds(themeId, timeId);
 
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
@@ -65,15 +63,15 @@ public class ReservationService {
     }
 
     public void deleteByIdAndName(final long id, final String name) {
-        reservationValidator.validateLookupName(name);
+        String lookupName = validateName(name);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, name)
+        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
                 ));
 
-        reservationValidator.validateCancelable(reservation);
+        validateCancelable(reservation);
 
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
@@ -88,16 +86,16 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId
     ) {
-        reservationValidator.validateLookupName(name);
-        reservationValidator.validateUpdateReferenceIds(timeId);
+        String lookupName = validateName(name);
+        validateUpdateReferenceIds(timeId);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, name)
+        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
                 ));
 
-        reservationValidator.validateUpdatable(reservation);
+        validateUpdatable(reservation);
 
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         Reservation updatedReservation = updateReservationDateAndTime(reservation, date, reservationTime);
@@ -112,6 +110,48 @@ public class ReservationService {
         }
 
         return reservationRepository.update(updatedReservation);
+    }
+
+    private String validateName(final String name) {
+        try {
+            return ReservationName.from(name).value();
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
+        }
+    }
+
+    private void validateCreateReferenceIds(final Long themeId, final Long timeId) {
+        if (themeId == null) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "themeId는 필수입니다.");
+        }
+
+        if (timeId == null) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
+        }
+    }
+
+    private void validateUpdateReferenceIds(final Long timeId) {
+        if (timeId == null) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
+        }
+    }
+
+    private void validateCancelable(final Reservation reservation) {
+        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
+            throw new ConflictException(
+                    ErrorCode.PAST_RESERVATION_CANNOT_BE_CANCELLED,
+                    "이미 지난 예약은 취소할 수 없습니다."
+            );
+        }
+    }
+
+    private void validateUpdatable(final Reservation reservation) {
+        if (reservationAvailabilityPolicy.isPast(reservation, LocalDateTime.now())) {
+            throw new ConflictException(
+                    ErrorCode.PAST_RESERVATION_CANNOT_BE_UPDATED,
+                    "이미 지난 예약은 변경할 수 없습니다."
+            );
+        }
     }
 
     private Reservation createNewReservation(

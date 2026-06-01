@@ -21,7 +21,6 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.service.reservation.ReservationService;
-import roomescape.service.reservation.ReservationValidator;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
@@ -216,13 +215,11 @@ class ReservationServiceTest {
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationAvailabilityPolicy reservationAvailabilityPolicy = new ReservationAvailabilityPolicy();
-        private final ReservationValidator reservationValidator = new ReservationValidator(reservationAvailabilityPolicy);
         private final ReservationService reservationService =
                 new ReservationService(
                         reservationRepository,
                         reservationTimeService,
                         themeService,
-                        reservationValidator,
                         reservationAvailabilityPolicy
                 );
     }
