@@ -1,0 +1,540 @@
+:root {
+    color-scheme: light;
+    --bg: #f5f7fb;
+    --surface: #ffffff;
+    --surface-muted: #eef2f7;
+    --text: #172033;
+    --muted: #68758a;
+    --line: #dce3ec;
+    --primary: #2558d4;
+    --primary-dark: #173f9f;
+    --available: #087f5b;
+    --available-bg: #e7f7f1;
+    --booked: #b45f06;
+    --booked-bg: #fff3db;
+    --waiting: #6f42c1;
+    --waiting-bg: #f0e8ff;
+    --danger: #c92a2a;
+    --danger-bg: #fff0f0;
+    --shadow: 0 16px 34px rgba(28, 39, 60, 0.09);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+        linear-gradient(180deg, rgba(245, 247, 251, 0.94), rgba(245, 247, 251, 0.98)),
+        url("https://commons.wikimedia.org/wiki/Special:FilePath/Escape%20room%20puzzle%20table.jpg?width=1600");
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    min-height: 42px;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 14px;
+    color: #ffffff;
+    background: var(--primary);
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+input {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 12px;
+    color: var(--text);
+    background: #ffffff;
+}
+
+input:focus,
+button:focus-visible,
+.theme-card:focus-visible {
+    outline: 3px solid rgba(37, 88, 212, 0.22);
+    outline-offset: 2px;
+}
+
+label {
+    display: grid;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.app-shell {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 40px;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-height: 92px;
+}
+
+.top-bar h1,
+.section-head h2,
+.schedule-head h3 {
+    margin: 0;
+    letter-spacing: 0;
+}
+
+.top-bar h1 {
+    font-size: clamp(28px, 4vw, 44px);
+}
+
+.eyebrow {
+    margin: 0 0 6px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.status-pill {
+    flex: 0 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 9px 13px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status-pill.is-online {
+    color: var(--available);
+    border-color: rgba(8, 127, 91, 0.24);
+    background: var(--available-bg);
+}
+
+.status-pill.is-error {
+    color: var(--danger);
+    border-color: rgba(201, 42, 42, 0.24);
+    background: var(--danger-bg);
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.9fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.booking-panel,
+.my-panel {
+    border: 1px solid rgba(220, 227, 236, 0.86);
+    border-radius: 8px;
+    padding: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shadow);
+}
+
+.section-head,
+.schedule-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.section-head h2 {
+    font-size: 24px;
+}
+
+.schedule-head {
+    margin-top: 22px;
+    margin-bottom: 12px;
+}
+
+.schedule-head h3 {
+    font-size: 18px;
+}
+
+.ghost-button {
+    color: var(--primary);
+    border: 1px solid var(--line);
+    background: #ffffff;
+}
+
+.ghost-button:hover:not(:disabled) {
+    color: #ffffff;
+}
+
+.search-controls {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.theme-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(164px, 1fr));
+    gap: 12px;
+}
+
+.theme-card {
+    display: grid;
+    grid-template-rows: 96px auto;
+    overflow: hidden;
+    min-height: 178px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0;
+    color: var(--text);
+    background: #ffffff;
+    text-align: left;
+}
+
+.theme-card:hover {
+    border-color: rgba(37, 88, 212, 0.35);
+    transform: translateY(-1px);
+}
+
+.theme-card.is-selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 88, 212, 0.14);
+}
+
+.theme-card img {
+    width: 100%;
+    height: 96px;
+    object-fit: cover;
+    background: var(--surface-muted);
+}
+
+.theme-card .theme-body {
+    display: grid;
+    gap: 5px;
+    padding: 12px;
+}
+
+.theme-card strong {
+    display: block;
+    overflow: hidden;
+    color: var(--text);
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.theme-card span {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.time-slot {
+    display: grid;
+    gap: 12px;
+    min-height: 132px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: #ffffff;
+}
+
+.time-slot.is-past {
+    background: var(--surface-muted);
+}
+
+.time-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.time-main strong {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    border-radius: 999px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.badge.available {
+    color: var(--available);
+    background: var(--available-bg);
+}
+
+.badge.booked {
+    color: var(--booked);
+    background: var(--booked-bg);
+}
+
+.badge.waiting {
+    color: var(--waiting);
+    background: var(--waiting-bg);
+}
+
+.badge.closed,
+.badge.danger {
+    color: var(--danger);
+    background: var(--danger-bg);
+}
+
+.slot-meta {
+    min-height: 20px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.time-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.time-actions button {
+    width: 100%;
+}
+
+.time-actions .wait-button {
+    color: #ffffff;
+    background: var(--waiting);
+}
+
+.time-actions .wait-button:hover:not(:disabled) {
+    background: #5b2ca3;
+}
+
+.my-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 86px;
+    gap: 10px;
+}
+
+.summary-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.summary-row div {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--surface-muted);
+}
+
+.summary-row strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 26px;
+}
+
+.summary-row span {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.reservation-list {
+    display: grid;
+    gap: 10px;
+}
+
+.reservation-item {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.reservation-item img {
+    width: 76px;
+    height: 76px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: var(--surface-muted);
+}
+
+.item-body {
+    display: grid;
+    gap: 9px;
+    min-width: 0;
+}
+
+.item-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.item-title strong {
+    overflow: hidden;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-meta {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.item-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cancel-button {
+    min-height: 34px;
+    color: var(--danger);
+    border: 1px solid rgba(201, 42, 42, 0.22);
+    background: var(--danger-bg);
+}
+
+.cancel-button:hover:not(:disabled) {
+    color: #ffffff;
+    background: var(--danger);
+}
+
+.empty-state,
+.loading-state,
+.error-state {
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 18px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.76);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.error-state {
+    color: var(--danger);
+    border-color: rgba(201, 42, 42, 0.28);
+    background: var(--danger-bg);
+}
+
+.toast {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 10;
+    max-width: min(360px, calc(100vw - 36px));
+    border-radius: 8px;
+    padding: 13px 15px;
+    color: #ffffff;
+    background: rgba(23, 32, 51, 0.94);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .app-shell {
+        width: min(100% - 20px, 1180px);
+        padding-top: 14px;
+    }
+
+    .top-bar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .booking-panel,
+    .my-panel {
+        padding: 16px;
+    }
+
+    .search-controls,
+    .my-search {
+        grid-template-columns: 1fr;
+    }
+
+    .theme-strip {
+        grid-template-columns: repeat(auto-fill, minmax(142px, 1fr));
+    }
+
+    .time-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-item {
+        grid-template-columns: 64px minmax(0, 1fr);
+    }
+
+    .reservation-item img {
+        width: 64px;
+        height: 64px;
+    }
+}
