@@ -47,6 +47,19 @@ public class Waiting {
         return slot.getStore().equals(store);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Waiting waiting)) {
+            return false;
+        }
+        return id != null && Objects.equals(id, waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
     public Long getId() {
         return id;
     }

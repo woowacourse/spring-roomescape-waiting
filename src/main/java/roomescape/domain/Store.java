@@ -25,7 +25,7 @@ public class Store {
             return false;
         }
 
-        return Objects.equals(id, store.id) && Objects.equals(name, store.name);
+        return id != null && Objects.equals(id, store.id);
     }
 
     @Override
