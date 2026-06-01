@@ -109,7 +109,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate targetDate,
                                                            Long targetThemeId) {
-        return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId);
+        return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId)
+                .stream()
+                .map(ReservedTimeResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
     @Transactional

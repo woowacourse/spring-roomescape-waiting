@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.ReservedTimeResponseDTO;
+import roomescape.domain.ReservedTime;
 
 public interface ReservationTimeRepository {
 
@@ -15,7 +15,7 @@ public interface ReservationTimeRepository {
 
     List<ReservationTime> findAll();
 
-    List<ReservedTimeResponseDTO> findReservedTimes(LocalDate date, Long themeId);
+    List<ReservedTime> findReservedTimes(LocalDate date, Long themeId);
 
     void delete(Long id);
 

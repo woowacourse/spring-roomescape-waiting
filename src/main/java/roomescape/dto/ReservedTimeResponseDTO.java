@@ -1,17 +1,18 @@
 package roomescape.dto;
 
 import java.time.LocalTime;
+import roomescape.domain.ReservedTime;
 
 public record ReservedTimeResponseDTO(
         Long timeId,
         LocalTime startAt,
         boolean reserved
 ) {
-    public static ReservedTimeResponseDTO create(Long timeId, LocalTime startAt, Long reservationId) {
+    public static ReservedTimeResponseDTO from(ReservedTime reservedTime) {
         return new ReservedTimeResponseDTO(
-                timeId,
-                startAt,
-                reservationId != null
+                reservedTime.time().getId(),
+                reservedTime.time().getStartAt(),
+                reservedTime.reserved()
         );
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.ReservedTimeResponseDTO;
+import roomescape.domain.ReservedTime;
 
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
@@ -81,11 +81,10 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate date, Long themeId) {
+    public List<ReservedTime> findReservedTimes(LocalDate date, Long themeId) {
         String sql = """
                     SELECT rt.id AS reservation_time_id,
                            rt.start_at AS start_at,
-                           r.date AS date,
                            r.id AS reservation_id
                     FROM reservation_time AS rt
                     LEFT JOIN reservation AS r
@@ -101,10 +100,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         return jdbcTemplate.query(
                 sql,
                 params,
-                (resultSet, rowNum) -> ReservedTimeResponseDTO.create(
-                        resultSet.getLong("reservation_time_id"),
-                        LocalTime.parse(resultSet.getString("start_at")),
-                        resultSet.getObject("reservation_id", Long.class)
+                (resultSet, rowNum) -> new ReservedTime(
+                        ReservationTime.of(
+                                resultSet.getLong("reservation_time_id"),
+                                LocalTime.parse(resultSet.getString("start_at"))
+                        ),
+                        resultSet.getObject("reservation_id", Long.class) != null
                 )
         );
     }
