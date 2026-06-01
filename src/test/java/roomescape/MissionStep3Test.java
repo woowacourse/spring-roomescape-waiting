@@ -20,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 public class MissionStep3Test {
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    
     @LocalServerPort
     int port;
 

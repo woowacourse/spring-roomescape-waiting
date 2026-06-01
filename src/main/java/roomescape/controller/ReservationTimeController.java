@@ -31,7 +31,7 @@ public class ReservationTimeController {
     public ReservationTimeResponse create(@Valid @RequestBody ReservationTimeCreateRequest request) {
         ReservationTime found = reservationTimeService.create(request);
 
-        return ReservationTimeResponse.toDto(found);
+        return ReservationTimeResponse.from(found);
     }
 
     @GetMapping("/times")
@@ -40,7 +40,7 @@ public class ReservationTimeController {
         List<ReservationTime> reservationTimes = reservationTimeService.findAll();
 
         return reservationTimes.stream()
-                .map(ReservationTimeResponse::toDto)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 
@@ -50,7 +50,7 @@ public class ReservationTimeController {
         List<ReservationTime> reservationTimes = reservationTimeService.findAvailable(request, LocalDate.now());
 
         return reservationTimes.stream()
-                .map(ReservationTimeResponse::toDto)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 

@@ -30,14 +30,14 @@ public class ThemeController {
     @ResponseStatus(HttpStatus.CREATED)
     public ThemeResponse create(@Valid @RequestBody ThemeCreateRequest request) {
         Theme theme = themeService.create(request);
-        return ThemeResponse.toDto(theme);
+        return ThemeResponse.from(theme);
     }
 
     @GetMapping("/themes/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ThemeResponse find(@PathVariable Long id) {
         Theme theme = themeService.find(id);
-        return ThemeResponse.toDto(theme);
+        return ThemeResponse.from(theme);
     }
 
     @GetMapping("/themes/famous")
@@ -45,7 +45,7 @@ public class ThemeController {
     public List<ThemeResponse> findFamous(@Valid @ModelAttribute ThemeFamousFindRequest request) {
         List<Theme> themes = themeService.findFamous(request, LocalDate.now());
         return themes.stream()
-                .map(ThemeResponse::toDto)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -54,7 +54,7 @@ public class ThemeController {
     public List<ThemeResponse> findAll() {
         List<Theme> themes = themeService.findAll();
         return themes.stream()
-                .map(ThemeResponse::toDto)
+                .map(ThemeResponse::from)
                 .toList();
     }
 

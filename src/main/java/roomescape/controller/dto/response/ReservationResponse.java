@@ -25,14 +25,14 @@ public class ReservationResponse {
         this.theme = theme;
     }
 
-    public static ReservationResponse toDto(ReservationResult reservationResult) {
+    public static ReservationResponse from(ReservationResult reservationResult) {
         Reservation reservation = reservationResult.getReservation();
         return new ReservationResponse(reservation.getId(), reservation.getName().getValue(),
                 reservation.getDate().getDate(),
-                reservationResult.status().getKoreanName(),
+                reservationResult.getReservation().getStatus().getKoreanName(),
                 reservationResult.getRank().getValue(),
-                ReservationTimeResponse.toDto(reservation.getTime()),
-                ThemeResponse.toDto(reservation.getTheme()));
+                ReservationTimeResponse.from(reservation.getTime()),
+                ThemeResponse.from(reservation.getTheme()));
     }
 
     public long getId() {

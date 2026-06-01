@@ -12,7 +12,7 @@ public class ReservationTimeResponse {
         this.startAt = startAt;
     }
 
-    public static ReservationTimeResponse toDto(ReservationTime reservationTime) {
+    public static ReservationTimeResponse from(ReservationTime reservationTime) {
         return new ReservationTimeResponse(reservationTime.getId(), reservationTime.getStartAt());
     }
 

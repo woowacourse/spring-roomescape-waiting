@@ -32,7 +32,7 @@ public class ReservationController {
     public ReservationResponse create(@Valid @RequestBody ReservationCreateRequest request) {
         ReservationResult reservation = reservationService.reserve(request, LocalDateTime.now());
 
-        return ReservationResponse.toDto(reservation);
+        return ReservationResponse.from(reservation);
     }
 
     @GetMapping("/reservations")
@@ -41,7 +41,7 @@ public class ReservationController {
         List<ReservationResult> reservations = reservationService.findList(name);
 
         return reservations.stream()
-                .map(ReservationResponse::toDto)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -49,7 +49,7 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse find(@PathVariable long id) {
         ReservationResult reservation = reservationService.find(id);
-        return ReservationResponse.toDto(reservation);
+        return ReservationResponse.from(reservation);
     }
 
     @DeleteMapping("/reservations/{id}")
@@ -62,6 +62,6 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
         ReservationResult updated = reservationService.update(request, id, LocalDateTime.now());
-        return ReservationResponse.toDto(updated);
+        return ReservationResponse.from(updated);
     }
 }

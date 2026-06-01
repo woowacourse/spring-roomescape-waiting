@@ -15,7 +15,7 @@ public class ThemeResponse {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public static ThemeResponse toDto(Theme theme) {
+    public static ThemeResponse from(Theme theme) {
         return new ThemeResponse(theme.getId(), theme.getName().getValue(), theme.getDescription(),
                 theme.getThumbnailUrl().getValue());
     }

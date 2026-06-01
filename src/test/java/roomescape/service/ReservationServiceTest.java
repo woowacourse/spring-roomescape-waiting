@@ -212,7 +212,7 @@ class ReservationServiceTest {
 
         ReservationResult result = reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59));
 
-        Assertions.assertThat(result.status()).isEqualTo(Status.WAITING);
+        Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
     }
 
     @Test
@@ -332,7 +332,7 @@ class ReservationServiceTest {
 
         ReservationResult result = reservationService.find(EXISTS_ID);
 
-        Assertions.assertThat(result.status()).isEqualTo(Status.APPROVED);
+        Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.APPROVED);
     }
 
     @Test
@@ -352,7 +352,7 @@ class ReservationServiceTest {
 
         ReservationResult result = reservationService.find(2L);
 
-        Assertions.assertThat(result.status()).isEqualTo(Status.WAITING);
+        Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
         Assertions.assertThat(result.getRank().getValue()).isEqualTo(2);
     }
 }
