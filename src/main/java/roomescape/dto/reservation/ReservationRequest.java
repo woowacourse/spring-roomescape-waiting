@@ -35,7 +35,7 @@ public record ReservationRequest(String name, LocalDate date, Long timeId, Long 
         }
     }
 
-    public Reservation to(ReservationTime reservationTime, Theme theme) {
+    public Reservation toReservation(ReservationTime reservationTime, Theme theme) {
         return new Reservation(name, date, reservationTime, theme);
     }
 }
