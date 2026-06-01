@@ -54,4 +54,21 @@ public class ApiFixtureGenerator {
                 .jsonPath()
                 .getLong("id");
     }
+
+    public long createWaiting(String name, LocalDate date, long timeId, long themeId) {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "name", name,
+                        "date", date.toString(),
+                        "timeId", timeId,
+                        "themeId", themeId
+                ))
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .jsonPath()
+                .getLong("id");
+    }
 }

@@ -91,9 +91,9 @@ WaitingServiceTest extends ServiceTest {
         fixtureGenerator.saveReservation("예약자", reservationDate, reservationTime, theme);
 
         String testUser = "첫번째대기신청자";
-        saveWaiting(reservationDate, reservationTime, theme, testUser, currentDateTime);
-        saveWaiting(reservationDate, reservationTime, theme, "두번째대기신청자", currentDateTime.plusMinutes(1));
-        saveWaiting(reservationDate, reservationTime, theme, "세번째대기신청자", currentDateTime.plusMinutes(2));
+        fixtureGenerator.saveWaiting(testUser, reservationDate, reservationTime, theme, currentDateTime);
+        fixtureGenerator.saveWaiting("두번째대기신청자", reservationDate, reservationTime, theme, currentDateTime.plusMinutes(1));
+        fixtureGenerator.saveWaiting("세번째대기신청자", reservationDate, reservationTime, theme, currentDateTime.plusMinutes(2));
 
         // when
         List<WaitingWithRankResponse> response = waitingService.getWaitingsByName(testUser);
@@ -105,15 +105,6 @@ WaitingServiceTest extends ServiceTest {
                     assertThat(waiting.rank()).isEqualTo(1);
                     assertThat(waiting.name()).isEqualTo(testUser);
                 });
-    }
-
-    private void saveWaiting(LocalDate date,
-                             ReservationTime reservationTime,
-                             Theme theme,
-                             String name,
-                             LocalDateTime createdAt) {
-        WaitingRequest request = new WaitingRequest(date, reservationTime.getId(), theme.getId(), name);
-        waitingService.create(request, createdAt);
     }
 
     @Test

@@ -19,7 +19,7 @@ import roomescape.domain.Theme;
 import roomescape.fixture.FixtureGenerator;
 
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, SlotDao.class})
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, SlotDao.class, WaitingDao.class})
 class ReservationDaoTest {
 
     @Autowired
@@ -30,12 +30,14 @@ class ReservationDaoTest {
     private ThemeDao themeDao;
     @Autowired
     private SlotDao slotDao;
+    @Autowired
+    private WaitingDao waitingDao;
 
     private FixtureGenerator fixture;
 
     @BeforeEach
     void setUp() {
-        fixture = new FixtureGenerator(themeDao, timeDao, slotDao, reservationDao);
+        fixture = new FixtureGenerator(themeDao, timeDao, slotDao, reservationDao, waitingDao);
     }
 
     @Test

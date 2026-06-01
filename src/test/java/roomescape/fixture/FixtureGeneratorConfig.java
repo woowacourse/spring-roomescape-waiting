@@ -6,6 +6,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
 
 @TestConfiguration
 public class FixtureGeneratorConfig {
@@ -20,13 +21,15 @@ public class FixtureGeneratorConfig {
             ThemeDao themeDao,
             ReservationTimeDao reservationTimeDao,
             SlotDao slotDao,
-            ReservationDao reservationDao
+            ReservationDao reservationDao,
+            WaitingDao waitingDao
     ) {
         return new FixtureGenerator(
                 themeDao,
                 reservationTimeDao,
                 slotDao,
-                reservationDao
+                reservationDao,
+                waitingDao
         );
     }
 }
