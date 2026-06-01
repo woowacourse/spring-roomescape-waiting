@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -99,14 +100,35 @@ public class WaitingRepository {
         }
     }
 
-    public Long countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(Long id, Theme theme, LocalDate date, ReservationTime time) {
+    public List<Waiting> findByName(String name) {
         String sql = """
-            SELECT COUNT(*) FROM waiting
-            WHERE theme_id = ?
-              AND date = ?
-              AND time_id = ?
-              AND id <= ?
-            """;
+                SELECT w.id          AS waiting_id,
+                       w.name        AS waiting_name,
+                       w.date        AS waiting_date,
+                       t.id          AS time_id,
+                       t.start_at    AS time_start_at,
+                       th.id         AS theme_id,
+                       th.name       AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail  AS theme_thumbnail
+                FROM waiting w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.name = ?
+                ORDER BY w.id
+                """;
+        return jdbcTemplate.query(sql, reservationRowsMapper(), name);
+    }
+
+    public Long countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(Long id, Theme theme, LocalDate date,
+                                                                 ReservationTime time) {
+        String sql = """
+                SELECT COUNT(*) FROM waiting
+                WHERE theme_id = ?
+                  AND date = ?
+                  AND time_id = ?
+                  AND id <= ?
+                """;
         return jdbcTemplate.queryForObject(
                 sql,
                 Long.class,

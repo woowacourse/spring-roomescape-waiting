@@ -1,17 +1,22 @@
 package roomescape.service;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
@@ -20,6 +25,7 @@ import roomescape.service.exception.ResourceNotFoundException;
 import java.time.*;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -32,6 +38,9 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
+    private WaitingRepository waitingRepository;
+
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
@@ -39,11 +48,12 @@ class ReservationServiceTest {
 
     private ReservationService reservationService;
 
+
     @BeforeEach
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, reservationTimeRepository, themeRepository, fixedClock
+                reservationRepository, waitingRepository, reservationTimeRepository, themeRepository, fixedClock
         );
     }
 
@@ -211,5 +221,34 @@ class ReservationServiceTest {
                 .isInstanceOf(DomainConflictException.class);
 
         verify(reservationRepository, never()).delete(any(Reservation.class));
+    }
+
+    @Test
+    void 예약과_예약_대기_목록을_함께_조회한다() {
+        //given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(18, 0));
+        Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
+        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme);
+        Waiting waiting = new Waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme);
+
+        when(reservationRepository.findByName("브라운")).thenReturn(List.of(reservation));
+        when(waitingRepository.findByName("브라운")).thenReturn(List.of(waiting));
+        when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(
+                waiting.getId(), theme, waiting.getDate(), time)).thenReturn(2L);
+
+        //when
+        List<UserReservation> result = reservationService.findUserReservations("브라운", 0, 10);
+
+        //then
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(UserReservation::status)
+                .containsExactlyInAnyOrder(ReservationStatus.RESERVED, ReservationStatus.WAITING);
+        UserReservation waitingResult = result.stream()
+                .filter(it -> it.status() == ReservationStatus.WAITING)
+                .findFirst()
+                .orElseThrow();
+        assertThat(waitingResult.name()).isEqualTo("브라운");
+        assertThat(waitingResult.rank()).isEqualTo(2L);
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.service.dto.UserReservation;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -93,43 +92,24 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowsMapper(), name, size, offset);
     }
 
-    public List<UserReservation> findUserReservations(String name, int page, int size) {
+    public List<Reservation> findByName(String name) {
         String sql = """
-                SELECT entry.id        AS entry_id,
-                       entry.name      AS entry_name,
-                       entry.date      AS entry_date,
-                       entry.status    AS entry_status,
-                       entry.rank      AS entry_rank,
-                       t.id            AS time_id,
-                       t.start_at      AS time_start_at,
-                       th.id           AS theme_id,
-                       th.name         AS theme_name,
-                       th.description  AS theme_description,
+                SELECT r.id          AS reservation_id,
+                       r.name        AS reservation_name,
+                       r.date        AS reservation_date,
+                       t.id          AS time_id,
+                       t.start_at    AS time_start_at,
+                       th.id    AS theme_id,
+                       th.name    AS theme_name,
+                       th.description    AS theme_description,
                        th.thumbnail    AS theme_thumbnail
-                FROM (
-                    SELECT r.id, r.name, r.date, r.time_id, r.theme_id,
-                           'RESERVED' AS status,
-                           0          AS rank
-                    FROM reservation r
-                    WHERE r.name = ?
-                    UNION ALL
-                    SELECT w.id, w.name, w.date, w.time_id, w.theme_id,
-                           'WAITING'  AS status,
-                           (SELECT COUNT(*) FROM waiting w2
-                             WHERE w2.theme_id = w.theme_id
-                               AND w2.date     = w.date
-                               AND w2.time_id  = w.time_id
-                               AND w2.id       < w.id) + 1 AS rank
-                    FROM waiting w
-                    WHERE w.name = ?
-                ) entry
-                JOIN reservation_time t ON entry.time_id = t.id
-                JOIN theme th           ON entry.theme_id = th.id
-                ORDER BY entry.date, t.start_at, entry.status, entry.id
-                LIMIT ? OFFSET ?
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.name = ?
+                ORDER BY r.id
                 """;
-        int offset = Math.max(page, 0) * size;
-        return jdbcTemplate.query(sql, userReservationRowMapper(), name, name, size, offset);
+        return jdbcTemplate.query(sql, reservationRowsMapper(), name);
     }
 
     public Optional<Reservation> findBySchedule(LocalDate date, long timeId, long themeId) {
@@ -184,7 +164,7 @@ public class ReservationRepository {
 
     public boolean existsByTimeId(long id) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE time_id = ?";
-        Integer count =  jdbcTemplate.queryForObject(sql, Integer.class, id);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
     }
 
@@ -199,31 +179,6 @@ public class ReservationRepository {
     public void delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(sql, reservation.getId());
-    }
-
-    private RowMapper<UserReservation> userReservationRowMapper() {
-        return (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getObject("time_start_at", LocalTime.class)
-            );
-
-            Theme theme = new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
-            );
-
-            Long id = rs.getLong("entry_id");
-            String name = rs.getString("entry_name");
-            LocalDate date = LocalDate.parse(rs.getString("entry_date"));
-
-            if ("WAITING".equals(rs.getString("entry_status"))) {
-                return UserReservation.waiting(id, name, date, time, theme, rs.getLong("entry_rank"));
-            }
-            return UserReservation.reserved(id, name, date, time, theme);
-        };
     }
 
     private RowMapper<Reservation> reservationRowsMapper() {

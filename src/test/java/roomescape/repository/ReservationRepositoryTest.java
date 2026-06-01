@@ -7,9 +7,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -125,7 +125,8 @@ class ReservationRepositoryTest {
 
     @Test
     void 예약을_저장한다() {
-        Reservation saved = reservationRepository.save(new Reservation(null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+        Reservation saved = reservationRepository.save(
+                new Reservation(null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM reservation WHERE id = ?", Integer.class, saved.getId());
@@ -197,28 +198,19 @@ class ReservationRepositoryTest {
         assertThat(result).isEmpty();
     }
 
-
     @Test
-    void 예약과_예약_대기_목록을_함께_조회한다() {
+    void 이름으로_예약_목록을_조회한다() {
         reservationRepository.save(new Reservation(
                 null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
-        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "어셔", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
-        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "브라운", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
+        reservationRepository.save(new Reservation(
+                null, "브라운", LocalDate.of(2026, 5, 11), time, theme));
+        reservationRepository.save(new Reservation(
+                null, "밍구", LocalDate.of(2026, 5, 12), time, theme));
 
-        List<UserReservation> result = reservationRepository.findUserReservations("브라운", 0, 10);
+        List<Reservation> result = reservationRepository.findByName("브라운");
 
         assertThat(result).hasSize(2);
-        assertThat(result)
-                .extracting(UserReservation::status)
-                .containsExactlyInAnyOrder("RESERVED", "WAITING");
-        UserReservation waiting = result.stream()
-                .filter(it -> "WAITING".equals(it.status()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(waiting.name()).isEqualTo("브라운");
-        assertThat(waiting.rank()).isEqualTo(2L);
+        assertThat(result).extracting(Reservation::getName).containsOnly("브라운");
     }
 
     @Test
