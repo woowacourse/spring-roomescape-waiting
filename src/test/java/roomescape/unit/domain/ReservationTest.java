@@ -2,6 +2,9 @@ package roomescape.unit.domain;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.fixture.ReservationFixture.member;
+import static roomescape.fixture.ReservationFixture.reservation;
+import static roomescape.fixture.ReservationFixture.slot;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,7 +22,7 @@ class ReservationTest {
 
     private static final Theme ANY_THEME = new Theme(1L, "공포", "설명", "https://example.com/horror.jpg");
     private static final String RESERVATION_OWNER = "브라운";
-    private static final Member RESERVER = new Member(RESERVATION_OWNER);
+    private static final Member RESERVER = member(RESERVATION_OWNER);
     private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 5, 14);
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 14, 14, 30);
     private static final LocalDateTime BEFORE_RESERVATION = LocalDateTime.of(2026, 5, 14, 13, 0);
@@ -28,32 +31,32 @@ class ReservationTest {
 
     @Test
     void 지난_시각으로는_예약을_생성할_수_없다() {
-        Slot slot = new Slot(RESERVATION_DATE, TWO_PM, ANY_THEME);
+        Slot targetSlot = slot(RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThatThrownBy(() -> Reservation.createWith(RESERVER, slot, NOW))
+        assertThatThrownBy(() -> Reservation.createWith(RESERVER, targetSlot, NOW))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("지난 시각에는 예약할 수 없습니다");
     }
 
     @Test
     void 미래_시각으로는_예약을_생성할_수_있다() {
-        Slot slot = new Slot(RESERVATION_DATE, THREE_PM, ANY_THEME);
+        Slot targetSlot = slot(RESERVATION_DATE, THREE_PM, ANY_THEME);
 
-        assertThatCode(() -> Reservation.createWith(RESERVER, slot, NOW))
+        assertThatCode(() -> Reservation.createWith(RESERVER, targetSlot, NOW))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void 본인_예약이_아니면_취소할_수_없다() {
-        Reservation reservation = reservation(TWO_PM);
+        Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThatThrownBy(() -> reservation.cancelBy(new Member("티뉴"), BEFORE_RESERVATION))
+        assertThatThrownBy(() -> reservation.cancelBy(member("티뉴"), BEFORE_RESERVATION))
                 .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
     void 지난_예약은_취소할_수_없다() {
-        Reservation reservation = reservation(TWO_PM);
+        Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
         assertThatThrownBy(() -> reservation.cancelBy(RESERVER, NOW))
                 .isInstanceOf(BusinessRuleViolationException.class)
@@ -62,13 +65,9 @@ class ReservationTest {
 
     @Test
     void 본인의_미래_예약은_취소할_수_있다() {
-        Reservation reservation = reservation(TWO_PM);
+        Reservation reservation = reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
         assertThatCode(() -> reservation.cancelBy(RESERVER, BEFORE_RESERVATION))
                 .doesNotThrowAnyException();
-    }
-
-    private Reservation reservation(ReservationTime time) {
-        return new Reservation(RESERVER, new Slot(RESERVATION_DATE, time, ANY_THEME));
     }
 }

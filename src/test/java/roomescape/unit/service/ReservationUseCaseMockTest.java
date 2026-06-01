@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static roomescape.fixture.ReservationFixture.reservation;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -24,10 +25,8 @@ import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
-import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
@@ -162,15 +161,5 @@ class ReservationUseCaseMockTest {
         reservationQueryService.findPage(2, 5);
 
         verify(reservationRepository).findAll(10, 5);
-    }
-
-    private Reservation reservation(
-            Long id,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        return new Reservation(id, new Member(name), new Slot(date, time, theme));
     }
 }
