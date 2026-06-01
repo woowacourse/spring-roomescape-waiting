@@ -110,6 +110,45 @@ class ReservationApiIntegrationTest {
                 .body("time.id", equalTo(secondTimeId.intValue()));
     }
 
+    @DisplayName("예약 변경 시 기존 예약 시간의 가장 오래된 대기가 예약으로 변경됩니다.")
+    @Test
+    void update_my_reservation_with_waiting() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long firstTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long secondTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation("스타크", LocalDate.of(2028, 5, 6), themeId, firstTimeId);
+        Long waitingId = testHelper.insertWaiting("카야", LocalDate.of(2028, 5, 6), themeId, firstTimeId);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "스타크");
+        params.put("date", "2028-05-07");
+        params.put("timeId", String.valueOf(secondTimeId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/{id}", reservationId)
+                .then().log().all()
+                .statusCode(200)
+                .body("name", equalTo("스타크"))
+                .body("date", equalTo("2028-05-07"))
+                .body("time.id", equalTo(secondTimeId.intValue()));
+
+        String oldReservationOwner = jdbcTemplate.queryForObject(
+                "SELECT name FROM reservation WHERE id = ?",
+                String.class,
+                reservationId
+        );
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE id = ?",
+                Integer.class,
+                waitingId
+        );
+
+        assertThat(oldReservationOwner).isEqualTo("카야");
+        assertThat(waitingCount).isZero();
+    }
+
     @DisplayName("본인 예약 취소 API를 테스트합니다.")
     @Test
     void cancel_my_reservation() {

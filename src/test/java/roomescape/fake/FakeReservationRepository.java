@@ -111,7 +111,14 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public void updateWaitingOwner(Long id, String name) {
-
+        Reservation reservation = reservations.get(id);
+        reservations.put(id, Reservation.builder()
+                .id(reservation.getId())
+                .name(name)
+                .date(reservation.getDate())
+                .themeId(reservation.getThemeId())
+                .timeId(reservation.getTimeId())
+                .build());
     }
 
     public List<Reservation> findAllReservations() {
