@@ -196,7 +196,7 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(update)
-                .when().patch("/reservations/" + reservationId)
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200);
     }
@@ -237,7 +237,7 @@ public class UserReservationTest {
         Map<String, Object> update = createReservationBody("브라운", "2026-08-05", 2, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/" + reservationId)
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(409)
                 .body("errorCode", is("DUPLICATE_RESERVATION"))
@@ -252,7 +252,7 @@ public class UserReservationTest {
         Map<String, Object> update = createReservationBody("브라운", "2026-08-05", 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/999")
+                .when().put("/reservations/999")
                 .then().log().all()
                 .statusCode(404)
                 .body("errorCode", is("RESERVATION_NOT_FOUND"))
@@ -315,7 +315,7 @@ public class UserReservationTest {
         Map<String, Object> update = createReservationBody("브라운", "2020-01-01", 1, 1);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
-                .when().patch("/reservations/" + reservationId)
+                .when().put("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(400)
                 .body("errorCode", is("INVALID_DATE_OR_TIME"))
