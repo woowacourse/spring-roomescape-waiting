@@ -1,8 +1,8 @@
 package roomescape.domain.theme;
 
-import roomescape.common.exception.RoomEscapeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.RoomEscapeException;
 
 public class ThemeNameTest {
     private static final String UNDER_SIZE_NAME = "";

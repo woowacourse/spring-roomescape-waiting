@@ -6,9 +6,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import roomescape.common.exception.ReservationErrorCode;
-import roomescape.common.exception.ReservationTimeErrorCode;
-import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -22,6 +19,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.RoomEscapeFixture;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.UnauthorizedException;
+import roomescape.common.exception.UnprocessableException;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
@@ -134,8 +136,8 @@ class ReservationServiceTest {
         ReservationUpdateRequest request = new ReservationUpdateRequest("zeze", LocalDate.parse("2099-04-06"), 1L, 1L);
         given(reservationRepository.findById(999L)).willReturn(Optional.empty());
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 999L, LocalDateTime.MIN))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다. 입력을 확인해 주세요.");
     }
 
     @Test
@@ -145,8 +147,8 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(ReservationTime.of(1L, LocalTime.parse("11:00"))));
         given(themeRepository.findById(1L)).willReturn(Optional.of(Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL))));
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MAX))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED.getMessage());
+                .isInstanceOf(UnprocessableException.class)
+                .hasMessage("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
     }
 
     @Test
@@ -155,8 +157,8 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.empty());
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND.getMessage());
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 시간입니다. 입력을 확인해 주세요.");
     }
 
     @Test
@@ -169,13 +171,13 @@ class ReservationServiceTest {
         given(reservationRepository.existsByTimeAndThemeAndDateAndName(request.getTimeId(), request.getThemeId(),
                 request.getDate(), request.getName())).willReturn(true);
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
     }
 
     @Test
     void 예약_삭제_시_ID가_존재하지_않으면_예외가_발생한다() {
-        given(reservationRepository.findById(NOT_EXISTS_ID)).willThrow(RoomEscapeException.class);
+        given(reservationRepository.findById(NOT_EXISTS_ID)).willThrow(NotFoundException.class);
         Assertions.assertThatThrownBy(() -> reservationRepository.findById(NOT_EXISTS_ID))
                 .isInstanceOf(RoomEscapeException.class);
     }
@@ -210,8 +212,8 @@ class ReservationServiceTest {
     void 단건_조회시_존재하지_않는_ID면_예외가_발생한다() {
         given(reservationRepository.findById(NOT_EXISTS_ID)).willReturn(Optional.empty());
         Assertions.assertThatThrownBy(() -> reservationService.find(NOT_EXISTS_ID))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약입니다. 입력을 확인해 주세요.");
     }
 
     @Test

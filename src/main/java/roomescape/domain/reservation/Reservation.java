@@ -1,10 +1,9 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.ReservationErrorCode;
-import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import roomescape.common.exception.UnprocessableException;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
@@ -53,7 +52,7 @@ public class Reservation {
         LocalDateTime requestDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
 
         if (requestDateTime.isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED);
+            throw new UnprocessableException("과거 예약에 대한 조작은 불가능합니다. 오늘 이후 날짜와 시간으로 다시 시도해 주세요");
         }
     }
 

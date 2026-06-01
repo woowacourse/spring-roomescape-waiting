@@ -1,8 +1,6 @@
 package roomescape.domain.theme;
 
-import roomescape.common.exception.ErrorCode;
-import roomescape.common.exception.RoomEscapeException;
-import roomescape.common.exception.ThemeErrorCode;
+import roomescape.common.exception.BadRequestException;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -19,7 +17,7 @@ public class ThumbnailUrl {
     private void validate(String value) {
         Objects.requireNonNull(value);
         if (!URL_PATTERN.matcher(value).matches()) {
-            throw new RoomEscapeException(ThemeErrorCode.INVALID_THUMBNAIL_URL);
+            throw new BadRequestException("유효하지 않은 이미지 주소입니다. URL은 https로 시작해야 합니다.");
         }
     }
 

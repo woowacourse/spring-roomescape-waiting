@@ -1,18 +1,18 @@
 package roomescape.controller;
 
-import roomescape.common.exception.ErrorResponse;
-import roomescape.common.exception.RoomEscapeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.common.exception.ExceptionType;
+import roomescape.common.exception.RoomEscapeException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,44 +21,44 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RoomEscapeException.class)
-    public ResponseEntity<ErrorResponse> roomEscapeExceptionHandle(RoomEscapeException e) {
+    public ProblemDetail roomEscapeExceptionHandle(RoomEscapeException e) {
         log.info("도메인 관련 오류가 발생했습니다.", e);
-        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                .body(ErrorResponse.create(e.getMessage()));
+        return ProblemDetail.forStatusAndDetail(ExceptionType.resolveStatus(e), e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse methodArgumentNotValidExceptionHandle(MethodArgumentNotValidException e) {
+    public ProblemDetail methodArgumentNotValidExceptionHandle(MethodArgumentNotValidException e) {
         log.info("입력 값 검증 중 예외가 발생했습니다.", e);
-        return ErrorResponse.create(e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingParams(MissingServletRequestParameterException e) {
+    public ProblemDetail handleMissingParams(MissingServletRequestParameterException e) {
         log.info("입력 값 검증 중 예외가 발생했습니다.", e);
-        return ErrorResponse.create("필수 파라미터가 없습니다.");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "필수 파라미터가 없습니다.");
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse httpRequestMethodNotSupportedExceptionHandle(HttpRequestMethodNotSupportedException e) {
+    public ProblemDetail httpRequestMethodNotSupportedExceptionHandle(HttpRequestMethodNotSupportedException e) {
         log.info("지원하지 않는 HTTP 메서드입니다.", e);
-        return ErrorResponse.create(e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail dataIntegrityViolationExceptionHandle(DataIntegrityViolationException e) {
+        log.info("데이터 무결성 위반 오류가 발생했습니다.", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, "이미 존재하는 예약입니다.");
     }
 
     @ExceptionHandler(DataAccessException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse dataAccessExceptionHandle(DataAccessException e) {
+    public ProblemDetail dataAccessExceptionHandle(DataAccessException e) {
         log.error("데이터베이스 관련 오류가 발생했습니다", e);
-        return ErrorResponse.create(DATABASE_ERROR);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, DATABASE_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse exceptionHandle(Exception e) {
+    public ProblemDetail exceptionHandle(Exception e) {
         log.error("서버 내부 오류입니다.", e);
-        return ErrorResponse.create(UNEXPECTED_ERROR);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, UNEXPECTED_ERROR);
     }
 }

@@ -2,9 +2,9 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import roomescape.common.exception.RoomEscapeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.RoomEscapeException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 

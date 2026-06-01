@@ -1,8 +1,7 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.ErrorCode;
-import roomescape.common.exception.ReservationErrorCode;
-import roomescape.common.exception.RoomEscapeException;
+import roomescape.common.exception.BadRequestException;
+
 import java.util.Objects;
 
 public class ReservationName {
@@ -20,7 +19,7 @@ public class ReservationName {
 
     public void validateLength(String value) {
         if (value.length() < MIN_NAME_LENGTH || value.length() > MAX_NAME_LENGTH) {
-            throw new RoomEscapeException(ReservationErrorCode.INVALID_NAME_LENGTH);
+            throw new BadRequestException("이름 길이는 1자 ~ 20자 사이여야 합니다.");
         }
     }
 

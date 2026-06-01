@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.mockito.BDDMockito.given;
 
-import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.common.exception.RoomEscapeException;
 import roomescape.controller.dto.request.AvailableTimeFindRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;

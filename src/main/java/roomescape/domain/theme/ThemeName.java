@@ -1,8 +1,6 @@
 package roomescape.domain.theme;
 
-import roomescape.common.exception.ErrorCode;
-import roomescape.common.exception.RoomEscapeException;
-import roomescape.common.exception.ThemeErrorCode;
+import roomescape.common.exception.BadRequestException;
 
 import java.util.Objects;
 
@@ -20,7 +18,7 @@ public class ThemeName {
 
     private void validate(String value) {
         if (MIN_NAME_LENGTH > value.length() || MAX_NAME_LENGTH < value.length()) {
-            throw new RoomEscapeException(ThemeErrorCode.INVALID_THEME_NAME_LENGTH);
+            throw new BadRequestException("테마 이름 길이는 1자 ~ 50자 사이여야 합니다.");
         }
     }
 

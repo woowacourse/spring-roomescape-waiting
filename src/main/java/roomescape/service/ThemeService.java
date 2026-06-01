@@ -1,12 +1,11 @@
 package roomescape.service;
 
-import roomescape.common.exception.ErrorCode;
-import roomescape.common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.ThemeErrorCode;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.NotFoundException;
 import roomescape.controller.dto.request.ThemeCreateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.theme.Theme;
@@ -37,7 +36,7 @@ public class ThemeService {
     }
 
     public Theme find(long themeId) {
-        return themeRepository.findById(themeId).orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
+        return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요."));
     }
 
     public List<Theme> findAll() {
@@ -64,11 +63,11 @@ public class ThemeService {
     @Transactional
     public void delete(long themeId) {
         if (!themeRepository.existsById(themeId)) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND);
+            throw new NotFoundException("존재하지 않는 테마입니다. 입력을 확인해 주세요.");
         }
 
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_IN_USE);
+            throw new ConflictException("테마를 사용하는 예약이 존재합니다. 관련 예약을 지우고 요청해 주세요");
         }
 
         themeRepository.deleteById(themeId);
