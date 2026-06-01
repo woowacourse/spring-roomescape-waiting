@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,14 +72,10 @@ class JdbcReservationRepositoryTest {
 
         reservationRepository.update(saved.update(LocalDate.of(2026, 5, 5), newTimeId));
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(jdbcTemplate.queryForObject(
-                    "SELECT date FROM reservation WHERE id = ?", LocalDate.class, saved.getId()))
-                    .isEqualTo(LocalDate.of(2026, 5, 5));
-            softly.assertThat(jdbcTemplate.queryForObject(
-                    "SELECT time_id FROM reservation WHERE id = ?", Long.class, saved.getId()))
-                    .isEqualTo(newTimeId);
-        });
+        Optional<Reservation> updated = reservationRepository.findById(saved.getId());
+        assertThat(updated).isPresent();
+        assertThat(updated.get().getDate()).isEqualTo(LocalDate.of(2026, 5, 5));
+        assertThat(updated.get().getTimeId()).isEqualTo(newTimeId);
     }
 
     @DisplayName("존재하지 않는 예약 id로 변경 시 예외가 발생할 수 있다.")
