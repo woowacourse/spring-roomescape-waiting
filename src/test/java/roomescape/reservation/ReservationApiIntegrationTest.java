@@ -66,6 +66,38 @@ class ReservationApiIntegrationTest {
                 .body("theme.name", equalTo("theme name"));
     }
 
+    @DisplayName("동일한 사용자가 이미 예약한 슬롯에는 대기할 수 없습니다.")
+    @Test
+    void save_waiting_fails_when_same_user_already_reserved_same_schedule() {
+        Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation("스타크", LocalDate.of(2028, 5, 6), themeId, timeId);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "스타크");
+        params.put("date", "2028-05-06");
+        params.put("themeId", String.valueOf(themeId));
+        params.put("timeId", String.valueOf(timeId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(409);
+
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE name = ? AND date = ? AND theme_id = ? AND time_id = ?",
+                Integer.class,
+                "스타크",
+                LocalDate.of(2028, 5, 6),
+                themeId,
+                timeId
+        );
+
+        assertThat(waitingCount).isZero();
+    }
+
     @DisplayName("이름으로 본인 예약 목록 조회 API를 테스트합니다.")
     @Test
     void find_my_reservations() {
