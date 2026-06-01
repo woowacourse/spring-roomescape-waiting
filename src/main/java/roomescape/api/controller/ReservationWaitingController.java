@@ -15,34 +15,26 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.api.dto.ReservationWaitingRequest;
 import roomescape.api.dto.ReservationWaitingResponse;
 import roomescape.api.dto.ReservationWaitingResponses;
-import roomescape.domain.ReservationWaiting;
+import roomescape.application.ReservationWaitingApplicationService;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
-import roomescape.service.ReservationWaitingCommandService;
-import roomescape.service.ReservationWaitingQueryService;
 
 @RestController
 @RequestMapping("/waitings")
 public class ReservationWaitingController {
 
-    private final ReservationWaitingCommandService reservationWaitingCommandService;
-    private final ReservationWaitingQueryService reservationWaitingQueryService;
+    private final ReservationWaitingApplicationService reservationWaitingApplicationService;
 
     public ReservationWaitingController(
-            ReservationWaitingCommandService reservationWaitingCommandService,
-            ReservationWaitingQueryService reservationWaitingQueryService
+            ReservationWaitingApplicationService reservationWaitingApplicationService
     ) {
-        this.reservationWaitingCommandService = reservationWaitingCommandService;
-        this.reservationWaitingQueryService = reservationWaitingQueryService;
+        this.reservationWaitingApplicationService = reservationWaitingApplicationService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> add(
             @RequestBody @Valid ReservationWaitingRequest request
     ) {
-        ReservationWaiting reservationWaiting = reservationWaitingCommandService.save(request);
-        ReservationWaitingWithOrder waitingWithOrder = reservationWaitingQueryService.getWithOrderById(
-                reservationWaiting.getId()
-        );
+        ReservationWaitingWithOrder waitingWithOrder = reservationWaitingApplicationService.save(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationWaitingResponse.from(waitingWithOrder));
@@ -52,7 +44,7 @@ public class ReservationWaitingController {
     public ResponseEntity<ReservationWaitingResponses> searchMine(
             @RequestParam String name
     ) {
-        List<ReservationWaitingWithOrder> waitings = reservationWaitingQueryService.findMine(name);
+        List<ReservationWaitingWithOrder> waitings = reservationWaitingApplicationService.findMine(name);
 
         return ResponseEntity.ok()
                 .body(ReservationWaitingResponses.from(waitings));
@@ -63,7 +55,7 @@ public class ReservationWaitingController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationWaitingCommandService.deleteMine(id, name);
+        reservationWaitingApplicationService.deleteMine(id, name);
 
         return ResponseEntity.noContent().build();
     }

@@ -16,31 +16,26 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.api.dto.ThemeRequest;
 import roomescape.api.dto.ThemeResponse;
 import roomescape.api.dto.ThemeResponses;
+import roomescape.application.ThemeApplicationService;
 import roomescape.domain.Theme;
-import roomescape.service.ThemeCommandService;
-import roomescape.service.ThemeQueryService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeCommandService themeCommandService;
-    private final ThemeQueryService themeQueryService;
+    private final ThemeApplicationService themeApplicationService;
 
     public ThemeController(
-            ThemeCommandService themeCommandService,
-            ThemeQueryService themeQueryService
+            ThemeApplicationService themeApplicationService
     ) {
-        this.themeCommandService = themeCommandService;
-        this.themeQueryService = themeQueryService;
+        this.themeApplicationService = themeApplicationService;
     }
 
     @PostMapping
     public ResponseEntity<ThemeResponse> add(
             @RequestBody @Valid ThemeRequest request
     ) {
-        Theme theme = new Theme(request.name(), request.description(), request.thumbnailImageUrl());
-        Theme savedTheme = themeCommandService.save(theme);
+        Theme savedTheme = themeApplicationService.save(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ThemeResponse.from(savedTheme));
@@ -48,7 +43,7 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<ThemeResponses> search() {
-        List<Theme> themes = themeQueryService.findAll();
+        List<Theme> themes = themeApplicationService.findAll();
 
         return ResponseEntity.ok()
                 .body(ThemeResponses.from(themes));
@@ -61,7 +56,7 @@ public class ThemeController {
             @RequestParam(defaultValue = "10") Integer limit
     ) {
         LocalDate baseDate = (now != null) ? now : LocalDate.now();
-        List<Theme> popularThemes = themeQueryService.findPopular(baseDate, days, limit);
+        List<Theme> popularThemes = themeApplicationService.findPopular(baseDate, days, limit);
 
         return ResponseEntity.ok()
                 .body(ThemeResponses.from(popularThemes));
@@ -69,7 +64,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        themeCommandService.delete(id);
+        themeApplicationService.delete(id);
 
         return ResponseEntity.noContent().build();
     }

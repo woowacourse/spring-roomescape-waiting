@@ -1,82 +1,72 @@
-package roomescape.service;
+package roomescape.application;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationRequest;
+import roomescape.api.dto.ReservationResponses;
 import roomescape.api.dto.ReservationUpdateRequest;
+import roomescape.application.service.ReservationCommandService;
+import roomescape.application.service.ReservationQueryService;
+import roomescape.application.service.ReservationTimeQueryService;
+import roomescape.application.service.ThemeQueryService;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.repository.ReservationRepository;
 
 @Service
-public class ReservationCommandService {
+@Transactional(readOnly = true)
+public class ReservationApplicationService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
-    private final Clock clock;
 
-    public ReservationCommandService(
-            ReservationRepository reservationRepository,
+    public ReservationApplicationService(
+            ReservationCommandService reservationCommandService,
             ReservationQueryService reservationQueryService,
             ReservationTimeQueryService reservationTimeQueryService,
-            ThemeQueryService themeQueryService,
-            Clock clock
+            ThemeQueryService themeQueryService
     ) {
-        this.reservationRepository = reservationRepository;
+        this.reservationCommandService = reservationCommandService;
         this.reservationQueryService = reservationQueryService;
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.themeQueryService = themeQueryService;
-        this.clock = clock;
     }
 
     @Transactional
     public Reservation save(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeQueryService.getById(request.timeId());
         Theme theme = themeQueryService.getById(request.themeId());
-        Reservation reservation = Reservation.createWith(
-                request.name(),
-                request.date(),
-                reservationTime,
-                theme,
-                now()
-        );
 
-        return reservationRepository.save(reservation);
+        return reservationCommandService.save(request.name(), request.date(), reservationTime, theme);
     }
 
     @Transactional
     public Reservation updateMine(Long id, String name, ReservationUpdateRequest request) {
         Reservation existing = reservationQueryService.getById(id);
         ReservationTime newTime = reservationTimeQueryService.getById(request.timeId());
-        Reservation updated = existing.updateWith(
-                name,
-                request.date(),
-                newTime,
-                now()
-        );
 
-        return reservationRepository.update(updated);
+        return reservationCommandService.updateMine(existing, name, request.date(), newTime);
+    }
+
+    public ReservationResponses findPage(int page, int size) {
+        return reservationQueryService.findPage(page, size);
+    }
+
+    public ReservationResponses findMine(String name) {
+        return reservationQueryService.findMine(name);
     }
 
     @Transactional
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
+        reservationCommandService.delete(id);
     }
 
     @Transactional
     public void deleteMine(Long id, String name) {
         Reservation reservation = reservationQueryService.getById(id);
-        reservation.cancelBy(name, now());
 
-        reservationRepository.deleteById(id);
-    }
-
-    private LocalDateTime now() {
-        return LocalDateTime.now(clock);
+        reservationCommandService.deleteMine(reservation, name);
     }
 }

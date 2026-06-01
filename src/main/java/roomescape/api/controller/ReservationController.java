@@ -16,30 +16,26 @@ import roomescape.api.dto.ReservationRequest;
 import roomescape.api.dto.ReservationResponse;
 import roomescape.api.dto.ReservationResponses;
 import roomescape.api.dto.ReservationUpdateRequest;
+import roomescape.application.ReservationApplicationService;
 import roomescape.domain.Reservation;
-import roomescape.service.ReservationCommandService;
-import roomescape.service.ReservationQueryService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationCommandService reservationCommandService;
-    private final ReservationQueryService reservationQueryService;
+    private final ReservationApplicationService reservationApplicationService;
 
     public ReservationController(
-            ReservationCommandService reservationCommandService,
-            ReservationQueryService reservationQueryService
+            ReservationApplicationService reservationApplicationService
     ) {
-        this.reservationCommandService = reservationCommandService;
-        this.reservationQueryService = reservationQueryService;
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> add(
             @RequestBody @Valid ReservationRequest request
     ) {
-        Reservation reservation = reservationCommandService.save(request);
+        Reservation reservation = reservationApplicationService.save(request);
         ReservationResponse response = ReservationResponse.from(reservation);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -52,7 +48,7 @@ public class ReservationController {
             @RequestParam String name,
             @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        Reservation updated = reservationCommandService.updateMine(id, name, request);
+        Reservation updated = reservationApplicationService.updateMine(id, name, request);
 
         return ResponseEntity.ok()
                 .body(ReservationResponse.from(updated));
@@ -64,7 +60,7 @@ public class ReservationController {
             @RequestParam(defaultValue = "20") int size
     ) {
         return ResponseEntity.ok()
-                .body(reservationQueryService.findPage(page, size));
+                .body(reservationApplicationService.findPage(page, size));
     }
 
     @GetMapping("/me")
@@ -72,14 +68,14 @@ public class ReservationController {
             @RequestParam String name
     ) {
         return ResponseEntity.ok()
-                .body(reservationQueryService.findMine(name));
+                .body(reservationApplicationService.findMine(name));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        reservationCommandService.delete(id);
+        reservationApplicationService.delete(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -89,7 +85,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCommandService.deleteMine(id, name);
+        reservationApplicationService.deleteMine(id, name);
 
         return ResponseEntity.noContent().build();
     }

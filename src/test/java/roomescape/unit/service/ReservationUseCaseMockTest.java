@@ -19,6 +19,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.api.dto.ReservationRequest;
+import roomescape.application.ReservationApplicationService;
+import roomescape.application.service.ReservationCommandService;
+import roomescape.application.service.ReservationQueryService;
+import roomescape.application.service.ReservationTimeQueryService;
+import roomescape.application.service.ThemeQueryService;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -26,10 +31,6 @@ import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.ReservationCommandService;
-import roomescape.service.ReservationQueryService;
-import roomescape.service.ReservationTimeQueryService;
-import roomescape.service.ThemeQueryService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationUseCaseMockTest {
@@ -56,16 +57,20 @@ class ReservationUseCaseMockTest {
 
     private ReservationQueryService reservationQueryService;
     private ReservationCommandService reservationCommandService;
+    private ReservationApplicationService reservationApplicationService;
 
     @BeforeEach
     void setUp() {
         reservationQueryService = new ReservationQueryService(reservationRepository);
         reservationCommandService = new ReservationCommandService(
                 reservationRepository,
+                FIXED_CLOCK
+        );
+        reservationApplicationService = new ReservationApplicationService(
+                reservationCommandService,
                 reservationQueryService,
                 reservationTimeQueryService,
-                themeQueryService,
-                FIXED_CLOCK
+                themeQueryService
         );
     }
 
@@ -75,7 +80,7 @@ class ReservationUseCaseMockTest {
         given(reservationTimeQueryService.getById(pastTime.getId())).willReturn(pastTime);
         given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
 
-        assertThatThrownBy(() -> reservationCommandService.save(
+        assertThatThrownBy(() -> reservationApplicationService.save(
                 new ReservationRequest(
                         "민욱",
                         TODAY,
@@ -99,7 +104,7 @@ class ReservationUseCaseMockTest {
         given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
         given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
 
-        assertThat(reservationCommandService.save(request)).isEqualTo(saved);
+        assertThat(reservationApplicationService.save(request)).isEqualTo(saved);
         verify(reservationRepository).save(any(Reservation.class));
     }
 
@@ -124,7 +129,7 @@ class ReservationUseCaseMockTest {
         Reservation reservation = new Reservation(1L, "티뉴", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> reservationCommandService.deleteMine(1L, "민욱"))
+        assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
                 .isInstanceOf(ForbiddenException.class);
     }
 
@@ -133,7 +138,7 @@ class ReservationUseCaseMockTest {
         Reservation reservation = new Reservation(1L, "민욱", PAST, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> reservationCommandService.deleteMine(1L, "민욱"))
+        assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
@@ -142,7 +147,7 @@ class ReservationUseCaseMockTest {
         Reservation reservation = new Reservation(1L, "민욱", FUTURE, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
-        reservationCommandService.deleteMine(1L, "민욱");
+        reservationApplicationService.deleteMine(1L, "민욱");
 
         verify(reservationRepository).deleteById(1L);
     }

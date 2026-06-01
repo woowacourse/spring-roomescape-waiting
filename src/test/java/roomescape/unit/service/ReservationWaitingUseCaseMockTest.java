@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -22,6 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.api.dto.ReservationWaitingRequest;
+import roomescape.application.ReservationWaitingApplicationService;
+import roomescape.application.service.ReservationQueryService;
+import roomescape.application.service.ReservationWaitingCommandService;
+import roomescape.application.service.ReservationWaitingQueryService;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -29,11 +32,9 @@ import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
+import roomescape.domain.projection.ReservationWaitingWithOrder;
 import roomescape.repository.ReservationWaitingQueryRepository;
 import roomescape.repository.ReservationWaitingRepository;
-import roomescape.service.ReservationQueryService;
-import roomescape.service.ReservationWaitingCommandService;
-import roomescape.service.ReservationWaitingQueryService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingUseCaseMockTest {
@@ -54,6 +55,7 @@ class ReservationWaitingUseCaseMockTest {
 
     private ReservationWaitingQueryService reservationWaitingQueryService;
     private ReservationWaitingCommandService reservationWaitingCommandService;
+    private ReservationWaitingApplicationService reservationWaitingApplicationService;
 
     @BeforeEach
     void setUp() {
@@ -63,9 +65,12 @@ class ReservationWaitingUseCaseMockTest {
         );
         reservationWaitingCommandService = new ReservationWaitingCommandService(
                 reservationWaitingRepository,
-                reservationQueryService,
-                reservationWaitingQueryService,
                 FIXED_CLOCK
+        );
+        reservationWaitingApplicationService = new ReservationWaitingApplicationService(
+                reservationWaitingCommandService,
+                reservationWaitingQueryService,
+                reservationQueryService
         );
     }
 
@@ -82,21 +87,30 @@ class ReservationWaitingUseCaseMockTest {
                 theme.getId()
         );
         ReservationWaiting saved = new ReservationWaiting(1L, "민욱", LocalDateTime.of(2026, 8, 1, 10, 0), reservation);
-        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId())).willReturn(reservation);
+        ReservationWaitingWithOrder savedWithOrder = new ReservationWaitingWithOrder(
+                saved.getId(),
+                saved.getName(),
+                saved.getReservation().getDate(),
+                saved.getReservation().getTime(),
+                saved.getReservation().getTheme(),
+                1
+        );
+        given(reservationQueryService.findBySlot(date, time.getId(), theme.getId()))
+                .willReturn(Optional.of(reservation));
         given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
+        given(reservationWaitingQueryRepository.findById(saved.getId())).willReturn(Optional.of(savedWithOrder));
 
-        assertThat(reservationWaitingCommandService.save(request)).isEqualTo(saved);
+        assertThat(reservationWaitingApplicationService.save(request)).isEqualTo(savedWithOrder);
     }
 
     @Test
     void save는_예약되지_않은_슬롯이면_ConflictException을_던진다() {
         LocalDate date = LocalDate.of(2026, 8, 5);
         ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", date, 1L, 1L);
-        willThrow(new ConflictException("예약된 슬롯에만 대기를 신청할 수 있습니다."))
-                .given(reservationQueryService)
-                .findBySlot(date, 1L, 1L);
+        given(reservationQueryService.findBySlot(date, 1L, 1L))
+                .willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationWaitingCommandService.save(request))
+        assertThatThrownBy(() -> reservationWaitingApplicationService.save(request))
                 .isInstanceOf(ConflictException.class);
         verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
@@ -122,7 +136,7 @@ class ReservationWaitingUseCaseMockTest {
         ReservationWaiting waiting = waitingOwnedBy(1L, "민욱");
         given(reservationWaitingRepository.findById(1L)).willReturn(Optional.of(waiting));
 
-        reservationWaitingCommandService.deleteMine(1L, "민욱");
+        reservationWaitingApplicationService.deleteMine(1L, "민욱");
 
         verify(reservationWaitingRepository).deleteById(1L);
     }
@@ -132,7 +146,7 @@ class ReservationWaitingUseCaseMockTest {
         ReservationWaiting waiting = waitingOwnedBy(1L, "민욱");
         given(reservationWaitingRepository.findById(1L)).willReturn(Optional.of(waiting));
 
-        assertThatThrownBy(() -> reservationWaitingCommandService.deleteMine(1L, "브라운"))
+        assertThatThrownBy(() -> reservationWaitingApplicationService.deleteMine(1L, "브라운"))
                 .isInstanceOf(ForbiddenException.class);
         verify(reservationWaitingRepository, never()).deleteById(anyLong());
     }

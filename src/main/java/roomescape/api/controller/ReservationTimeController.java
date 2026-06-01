@@ -18,32 +18,27 @@ import roomescape.api.dto.ReservationTimeResponse;
 import roomescape.api.dto.ReservationTimeResponses;
 import roomescape.api.dto.SlotAvailabilityResponse;
 import roomescape.api.dto.SlotAvailabilityResponses;
+import roomescape.application.ReservationTimeApplicationService;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.projection.ReservationTimeAvailability;
-import roomescape.service.ReservationTimeCommandService;
-import roomescape.service.ReservationTimeQueryService;
 
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
 
-    private final ReservationTimeCommandService reservationTimeCommandService;
-    private final ReservationTimeQueryService reservationTimeQueryService;
+    private final ReservationTimeApplicationService reservationTimeApplicationService;
 
     public ReservationTimeController(
-            ReservationTimeCommandService reservationTimeCommandService,
-            ReservationTimeQueryService reservationTimeQueryService
+            ReservationTimeApplicationService reservationTimeApplicationService
     ) {
-        this.reservationTimeCommandService = reservationTimeCommandService;
-        this.reservationTimeQueryService = reservationTimeQueryService;
+        this.reservationTimeApplicationService = reservationTimeApplicationService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> add(
             @RequestBody @Valid ReservationTimeRequest request
     ) {
-        ReservationTime time = new ReservationTime(request.startAt());
-        ReservationTime reservationTime = reservationTimeCommandService.save(time);
+        ReservationTime reservationTime = reservationTimeApplicationService.save(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ReservationTimeResponse.from(reservationTime));
@@ -51,7 +46,7 @@ public class ReservationTimeController {
 
     @GetMapping
     public ResponseEntity<ReservationTimeResponses> search() {
-        List<ReservationTime> reservationTimes = reservationTimeQueryService.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeApplicationService.findAll();
 
         return ResponseEntity.ok()
                 .body(ReservationTimeResponses.from(reservationTimes));
@@ -63,7 +58,7 @@ public class ReservationTimeController {
             @RequestParam Long themeId
     ) {
         List<ReservationTimeAvailability> availabilities
-                = reservationTimeQueryService.findWithAvailability(date, themeId);
+                = reservationTimeApplicationService.findWithAvailability(date, themeId);
         List<SlotAvailabilityResponse> responses = availabilities.stream()
                 .map(SlotAvailabilityResponse::from)
                 .toList();
@@ -74,7 +69,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationTimeCommandService.delete(id);
+        reservationTimeApplicationService.delete(id);
 
         return ResponseEntity.noContent().build();
     }
