@@ -124,4 +124,16 @@ public class Reservation {
             throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
     }
+
+    public Reservation update(Integer waitingNumber, ReservationStatus status, Clock clock) {
+        return new Reservation(
+                this.id,
+                this.reservationSlot,
+                this.user,
+                waitingNumber,
+                status,
+                this.createdAt,
+                LocalDateTime.now(clock)
+        );
+    }
 }

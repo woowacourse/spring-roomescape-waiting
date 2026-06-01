@@ -4,7 +4,6 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -40,165 +39,153 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String COLUMN_UPDATED_AT = "updated_at";
 
     private static final String INSERT_SQL =
-        """
-            insert into reservation(reservation_slot_id, user_id, waiting_number, status, created_at, updated_at)
-            values (?, ?, ?, ?, ?, ?)
-            """;
+            """
+                    insert into reservation(reservation_slot_id, user_id, waiting_number, status, created_at, updated_at)
+                    values (?, ?, ?, ?, ?, ?)
+                    """;
     private static final String FIND_ALL_SQL =
-        """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rd.id as date_id,
-                   rd.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.created_at,
-                   r.updated_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            order by rd.date desc, rt.start_at desc, r.id;
-            """;
+            """
+                    select r.id as user_reservation_id,
+                           r.waiting_number,
+                           r.status,
+                           u.id as user_id,
+                           u.name as user_name,
+                           rs.id as reservation_slot_id,
+                           rd.id as date_id,
+                           rd.date,
+                           rt.id as time_id,
+                           rt.start_at,
+                           th.id as theme_id,
+                           th.name as theme_name,
+                           th.content as theme_content,
+                           th.url as theme_url,
+                           r.created_at,
+                           r.updated_at
+                    from reservation r
+                    join users u on r.user_id = u.id
+                    join reservation_slot rs on r.reservation_slot_id = rs.id
+                    join reservation_date rd on rs.date_id = rd.id
+                    join reservation_time rt on rs.time_id = rt.id
+                    join theme th on rs.theme_id = th.id
+                    order by rd.date desc, rt.start_at desc, r.id;
+                    """;
     private static final String FIND_BY_ID_SQL =
-        """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rd.id as date_id,
-                   rd.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.created_at,
-                   r.updated_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where r.id = ?
-            """;
+            """
+                    select r.id as user_reservation_id,
+                           r.waiting_number,
+                           r.status,
+                           u.id as user_id,
+                           u.name as user_name,
+                           rs.id as reservation_slot_id,
+                           rd.id as date_id,
+                           rd.date,
+                           rt.id as time_id,
+                           rt.start_at,
+                           th.id as theme_id,
+                           th.name as theme_name,
+                           th.content as theme_content,
+                           th.url as theme_url,
+                           r.created_at,
+                           r.updated_at
+                    from reservation r
+                    join users u on r.user_id = u.id
+                    join reservation_slot rs on r.reservation_slot_id = rs.id
+                    join reservation_date rd on rs.date_id = rd.id
+                    join reservation_time rt on rs.time_id = rt.id
+                    join theme th on rs.theme_id = th.id
+                    where r.id = ?
+                    """;
     private static final String FIND_ALL_BY_USERNAME_SQL =
-        """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rd.id as date_id,
-                   rd.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.created_at,
-                   r.updated_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where u.name = ?
-            order by rd.date desc, rt.start_at desc, r.id;
-            """;
+            """
+                    select r.id as user_reservation_id,
+                           r.waiting_number,
+                           r.status,
+                           u.id as user_id,
+                           u.name as user_name,
+                           rs.id as reservation_slot_id,
+                           rd.id as date_id,
+                           rd.date,
+                           rt.id as time_id,
+                           rt.start_at,
+                           th.id as theme_id,
+                           th.name as theme_name,
+                           th.content as theme_content,
+                           th.url as theme_url,
+                           r.created_at,
+                           r.updated_at
+                    from reservation r
+                    join users u on r.user_id = u.id
+                    join reservation_slot rs on r.reservation_slot_id = rs.id
+                    join reservation_date rd on rs.date_id = rd.id
+                    join reservation_time rt on rs.time_id = rt.id
+                    join theme th on rs.theme_id = th.id
+                    where u.name = ?
+                    order by rd.date desc, rt.start_at desc, r.id;
+                    """;
     private static final String FIND_ALL_BY_RESERVATION_ID_ORDER_SQL =
-        """
-            select r.id as user_reservation_id,
-                   r.waiting_number,
-                   r.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   rs.id as reservation_slot_id,
-                   rd.id as date_id,
-                   rd.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   r.created_at,
-                   r.updated_at
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where r.reservation_slot_id = ?
-            order by r.updated_at, r.id
-            """;
+            """
+                    select r.id as user_reservation_id,
+                           r.waiting_number,
+                           r.status,
+                           u.id as user_id,
+                           u.name as user_name,
+                           rs.id as reservation_slot_id,
+                           rd.id as date_id,
+                           rd.date,
+                           rt.id as time_id,
+                           rt.start_at,
+                           th.id as theme_id,
+                           th.name as theme_name,
+                           th.content as theme_content,
+                           th.url as theme_url,
+                           r.created_at,
+                           r.updated_at
+                    from reservation r
+                    join users u on r.user_id = u.id
+                    join reservation_slot rs on r.reservation_slot_id = rs.id
+                    join reservation_date rd on rs.date_id = rd.id
+                    join reservation_time rt on rs.time_id = rt.id
+                    join theme th on rs.theme_id = th.id
+                    where r.reservation_slot_id = ?
+                    order by r.updated_at, r.id
+                    """;
     private static final String COUNT_BY_RESERVATION_SLOT_ID_SQL =
-        """
-            select count(*)
-            from reservation
-            where reservation_slot_id = ?
-            """;
+            """
+                    select count(*)
+                    from reservation
+                    where reservation_slot_id = ?
+                    """;
     private static final String EXISTS_ACTIVE_BY_USER_ID_AND_RESERVATION_ID_SQL =
-        """
-            select exists(
-                select 1
-                from reservation
-                where user_id = ?
-                  and reservation_slot_id = ?
-            )
-            """;
+            """
+                    select exists(
+                        select 1
+                        from reservation
+                        where user_id = ?
+                          and reservation_slot_id = ?
+                    )
+                    """;
     private static final String UPDATE_SQL =
-        """
-            update reservation
-            set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, created_at = ?, updated_at = ?
-            where id = ?
-            """;
-    private static final String UPDATE_WAITING_NUMBER_SQL =
-        """
-            update reservation
-            set waiting_number = ?
-            where id = ?
-            """;
-    private static final String UPDATE_STATUS_SQL =
-        """
-            update reservation
-            set status = ?
-            where id = ?
-            """;
+            """
+                    update reservation
+                    set reservation_slot_id = ?, user_id = ?, waiting_number = ?, status = ?, created_at = ?, updated_at = ?
+                    where id = ?
+                    """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
     private static final String COUNT_RESERVATION_BY_THEME_AND_DATE =
-        """
-            select rt.id as time_id,
-            rt.start_at,
-            count(r.id) as reservation_count
-            from reservation_time rt
-            left join reservation_slot rs
-            on rs.time_id = rt.id
-            and rs.date_id = ?
-            and rs.theme_id = ?
-            left join reservation r
-            on r.reservation_slot_id = rs.id
-            group by rt.id, rt.start_at
-            order by rt.start_at;
-            """;
+            """
+                    select rt.id as time_id,
+                    rt.start_at,
+                    count(r.id) as reservation_count
+                    from reservation_time rt
+                    left join reservation_slot rs
+                    on rs.time_id = rt.id
+                    and rs.date_id = ?
+                    and rs.theme_id = ?
+                    left join reservation r
+                    on r.reservation_slot_id = rs.id
+                    group by rt.id, rt.start_at
+                    order by rt.start_at;
+                    """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -249,21 +236,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId) {
         return jdbcTemplate.query(FIND_ALL_BY_RESERVATION_ID_ORDER_SQL, userReservationRowMapper(), reservationId);
     }
 
     @Override
     public Optional<Reservation> update(Long id, Reservation updatedReservation) {
         int updatedCount = jdbcTemplate.update(
-            UPDATE_SQL,
-            updatedReservation.getReservationSlot().getId(),
-            updatedReservation.getUser().getId(),
-            updatedReservation.getWaitingNumber(),
-            updatedReservation.getStatus().name(),
-            Timestamp.valueOf(updatedReservation.getCreatedAt()),
-            Timestamp.valueOf(updatedReservation.getUpdatedAt()),
-            id
+                UPDATE_SQL,
+                updatedReservation.getReservationSlot().getId(),
+                updatedReservation.getUser().getId(),
+                updatedReservation.getWaitingNumber(),
+                updatedReservation.getStatus().name(),
+                Timestamp.valueOf(updatedReservation.getCreatedAt()),
+                Timestamp.valueOf(updatedReservation.getUpdatedAt()),
+                id
         );
         if (updatedCount == 0) {
             return Optional.empty();
@@ -272,46 +259,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Long id, ReservationStatus status) {
-        jdbcTemplate.update(UPDATE_STATUS_SQL, status.name(), id);
-    }
-
-    @Override
     public boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId) {
         Boolean exists = jdbcTemplate.queryForObject(
-            EXISTS_ACTIVE_BY_USER_ID_AND_RESERVATION_ID_SQL,
-            Boolean.class,
-            userId,
-            reservationId
+                EXISTS_ACTIVE_BY_USER_ID_AND_RESERVATION_ID_SQL,
+                Boolean.class,
+                userId,
+                reservationId
         );
         return exists != null && exists;
-    }
-
-    @Override
-    public void updateWaitingNumbers(List<Reservation> userReservations) {
-        AtomicLong waitingNumber = new AtomicLong(0L);
-        jdbcTemplate.batchUpdate(
-            UPDATE_WAITING_NUMBER_SQL,
-            userReservations,
-            userReservations.size(),
-            (ps, userReservation) -> {
-                ps.setLong(1, waitingNumber.getAndIncrement());
-                ps.setLong(2, userReservation.getId());
-            }
-        );
-    }
-
-    @Override
-    public void updateAllStatus(List<Reservation> userReservations) {
-        jdbcTemplate.batchUpdate(
-            UPDATE_STATUS_SQL,
-            userReservations,
-            userReservations.size(),
-            (ps, userReservation) -> {
-                ps.setString(1, ReservationStatus.WAITING.name());
-                ps.setLong(2, userReservation.getId());
-            }
-        );
     }
 
     @Override
@@ -322,49 +277,71 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
         return jdbcTemplate.query(
-            COUNT_RESERVATION_BY_THEME_AND_DATE,
-            reservationCountResultRowMapper(),
-            dateId,
-            themeId
+                COUNT_RESERVATION_BY_THEME_AND_DATE,
+                reservationCountResultRowMapper(),
+                dateId,
+                themeId
+        );
+    }
+
+    @Override
+    public void batchUpdate(List<Reservation> reservations) {
+        if (reservations.isEmpty()) {
+            return;
+        }
+
+        jdbcTemplate.batchUpdate(
+                UPDATE_SQL,
+                reservations,
+                reservations.size(),
+                (ps, reservation) -> {
+                    ps.setLong(1, reservation.getReservationSlot().getId());
+                    ps.setLong(2, reservation.getUser().getId());
+                    ps.setInt(3, reservation.getWaitingNumber());
+                    ps.setString(4, reservation.getStatus().name());
+                    ps.setTimestamp(5, Timestamp.valueOf(reservation.getCreatedAt()));
+                    ps.setTimestamp(6, Timestamp.valueOf(reservation.getUpdatedAt()));
+                    ps.setLong(7, reservation.getId());
+                }
         );
     }
 
     private RowMapper<ReservationCountResult> reservationCountResultRowMapper() {
         return (rs, rowNum) -> ReservationCountResult.of(
-            rs.getLong(COLUMN_TIME_ID),
-            rs.getTime(COLUMN_START_AT).toLocalTime(),
-            rs.getLong("reservation_count")
+                rs.getLong(COLUMN_TIME_ID),
+                rs.getTime(COLUMN_START_AT).toLocalTime(),
+                rs.getLong("reservation_count")
         );
     }
 
     private RowMapper<Reservation> userReservationRowMapper() {
         return (rs, rowNum) -> Reservation.of(
-            rs.getLong(COLUMN_ID),
-            ReservationSlot.of(
-                rs.getLong(COLUMN_RESERVATION_SLOT_ID),
-                ReservationDate.of(
-                    rs.getLong(COLUMN_DATE_ID),
-                    rs.getDate(COLUMN_DATE).toLocalDate()
+                rs.getLong(COLUMN_ID),
+                ReservationSlot.of(
+                        rs.getLong(COLUMN_RESERVATION_SLOT_ID),
+                        ReservationDate.of(
+                                rs.getLong(COLUMN_DATE_ID),
+                                rs.getDate(COLUMN_DATE).toLocalDate()
+                        ),
+                        ReservationTime.of(
+                                rs.getLong(COLUMN_TIME_ID),
+                                rs.getTime(COLUMN_START_AT).toLocalTime()
+                        ),
+                        Theme.of(
+                                rs.getLong(COLUMN_THEME_ID),
+                                rs.getString(COLUMN_THEME_NAME),
+                                rs.getString(COLUMN_THEME_CONTENT),
+                                rs.getString(COLUMN_THEME_URL)
+                        )
                 ),
-                ReservationTime.of(
-                    rs.getLong(COLUMN_TIME_ID),
-                    rs.getTime(COLUMN_START_AT).toLocalTime()
+                User.of(
+                        rs.getLong(COLUMN_USER_ID),
+                        rs.getString(COLUMN_USER_NAME)
                 ),
-                Theme.of(
-                    rs.getLong(COLUMN_THEME_ID),
-                    rs.getString(COLUMN_THEME_NAME),
-                    rs.getString(COLUMN_THEME_CONTENT),
-                    rs.getString(COLUMN_THEME_URL)
-                )
-            ),
-            User.of(
-                rs.getLong(COLUMN_USER_ID),
-                rs.getString(COLUMN_USER_NAME)
-            ),
-            rs.getInt(COLUMN_WAITING_NUMBER),
-            ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
-            rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
-            rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()
+                rs.getObject(COLUMN_WAITING_NUMBER, Integer.class),
+                ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
+                rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
+                rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()
         );
     }
 

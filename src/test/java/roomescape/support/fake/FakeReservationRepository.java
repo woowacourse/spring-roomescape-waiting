@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -55,7 +54,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findAllBySlotIdOrderByWaitingNumber(Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
@@ -74,24 +73,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Long id, ReservationStatus status) {
-        Reservation userReservation = storage.get(id);
-        if (userReservation == null) {
-            return;
-        }
-        Reservation updatedUserReservation = Reservation.of(
-            userReservation.getId(),
-            userReservation.getReservationSlot(),
-            userReservation.getUser(),
-            userReservation.getWaitingNumber(),
-            status,
-            userReservation.getCreatedAt(),
-            userReservation.getUpdatedAt()
-        );
-        storage.put(id, updatedUserReservation);
-    }
-
-    @Override
     public boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
@@ -101,43 +82,12 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateWaitingNumbers(List<Reservation> userReservations) {
-        for (int index = 0; index < userReservations.size(); index++) {
-            Reservation userReservation = userReservations.get(index);
-            ReservationStatus status = userReservation.getStatus();
-            if (index == 0) {
-                status = ReservationStatus.CONFIRMED;
-            }
-            Reservation rerankedUserReservation = Reservation.of(
-                userReservation.getId(),
-                userReservation.getReservationSlot(),
-                userReservation.getUser(),
-                index,
-                status,
-                userReservation.getCreatedAt(),
-                userReservation.getUpdatedAt()
-            );
-            storage.put(userReservation.getId(), rerankedUserReservation);
-        }
-    }
-
-    @Override
-    public void updateAllStatus(List<Reservation> userReservations) {
-        for (Reservation userReservation : userReservations) {
-            Reservation currentReservation = storage.get(userReservation.getId());
-            if (currentReservation == null) {
+    public void batchUpdate(List<Reservation> reservations) {
+        for (Reservation reservation : reservations) {
+            if (reservation.getId() == null) {
                 continue;
             }
-            Reservation waitingReservation = Reservation.of(
-                currentReservation.getId(),
-                currentReservation.getReservationSlot(),
-                currentReservation.getUser(),
-                currentReservation.getWaitingNumber(),
-                ReservationStatus.WAITING,
-                currentReservation.getCreatedAt(),
-                currentReservation.getUpdatedAt()
-            );
-            storage.put(userReservation.getId(), waitingReservation);
+            storage.put(reservation.getId(), Reservation.createWithId(reservation.getId(), reservation));
         }
     }
 
