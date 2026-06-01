@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
+import roomescape.dto.ReservationResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -102,18 +103,21 @@ public class ReservationDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void memberId로_예약을_조회한다() {
-        List<Reservation> reservations = reservationDao.findAllReservationsByMemberId(1L);
+        List<ReservationResult> reservations = reservationDao.findAllReservationsByMemberId(1L);
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations)
                 .extracting(
-                        Reservation::getMemberId,
-                        Reservation::getDate,
-                        reservation -> reservation.getTime().getId(),
-                        reservation -> reservation.getTime().getStartAt()
+                        result -> result.reservation().getMemberId(),
+                        result -> result.reservation().getDate(),
+                        result -> result.reservation().getTime().getId(),
+                        result -> result.reservation().getTime().getStartAt(),
+                        result -> result.theme().getName(),
+                        result -> result.store().getName()
                 )
                 .containsExactlyInAnyOrder(
-                        tuple(1L, LocalDate.of(2026, 5, 1), 1L, LocalTime.of(10, 0))
+                        tuple(1L, LocalDate.of(2026, 5, 1), 1L, LocalTime.of(10, 0),
+                                "이든의 공포 하우스", "강남점")
                 );
     }
 
@@ -261,11 +265,11 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void findByStoreId는_해당_매장의_예약만_조회한다() {
-        List<Reservation> gangnamReservations = reservationDao.findByStoreId(1L);
+        List<ReservationResult> gangnamReservations = reservationDao.findByStoreId(1L);
 
         assertThat(gangnamReservations).hasSize(2);
         assertThat(gangnamReservations)
-                .extracting(Reservation::getId, Reservation::getStoreId)
+                .extracting(result -> result.reservation().getId(), result -> result.store().getId())
                 .containsExactlyInAnyOrder(
                         tuple(1L, 1L),
                         tuple(2L, 1L)
@@ -281,11 +285,11 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void 다른_매장의_예약은_findByStoreId_결과에_포함되지_않는다() {
-        List<Reservation> hongdaeReservations = reservationDao.findByStoreId(2L);
+        List<ReservationResult> hongdaeReservations = reservationDao.findByStoreId(2L);
 
         assertThat(hongdaeReservations).hasSize(1);
         assertThat(hongdaeReservations)
-                .extracting(Reservation::getId, Reservation::getStoreId)
+                .extracting(result -> result.reservation().getId(), result -> result.store().getId())
                 .containsExactly(tuple(3L, 2L));
     }
 
@@ -297,7 +301,7 @@ public class ReservationDaoTest {
             INSERT_TWO_STORES_SQL
     })
     void 예약이_없는_매장은_findByStoreId가_빈_리스트를_반환한다() {
-        List<Reservation> reservations = reservationDao.findByStoreId(1L);
+        List<ReservationResult> reservations = reservationDao.findByStoreId(1L);
 
         assertThat(reservations).isEmpty();
     }

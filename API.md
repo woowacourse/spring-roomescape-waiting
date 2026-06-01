@@ -263,8 +263,16 @@
         "id": 1,
         "startAt": "10:00"
       },
-      "themeId": 1,
-      "storeId": 1
+      "theme": {
+        "id": 1,
+        "name": "이든의 공포 하우스",
+        "description": "이든이 귀신으로 나오는 공포 테마",
+        "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+      },
+      "store": {
+        "id": 1,
+        "name": "강남점"
+      }
     }
   ],
   "waitings": [
@@ -323,6 +331,9 @@
 | 필드 | 타입 | 설명 |
 | --- | --- | --- |
 | `reservations[]` | `Array<ReservationResponse>` | 확정된 예약 목록 |
+| `reservations[].time` | `Object` | 예약 시간 (`id`, `startAt`) |
+| `reservations[].theme` | `Object` | 테마 정보 (`id`, `name`, `description`, `imgUrl`) |
+| `reservations[].store` | `Object` | 매장 정보 (`id`, `name`) |
 | `waitings[]` | `Array<WaitingResponse>` | 대기 중인 예약 목록 |
 | `waitings[].order` | `Long` | 같은 슬롯 안에서의 대기 순번 (1부터 시작) |
 | `waitings[].reservation` | `Object` | 대기 중인 원본 예약 정보 |
@@ -386,8 +397,16 @@
     "id": 1,
     "startAt": "10:00"
   },
-  "themeId": 1,
-  "storeId": 1
+  "theme": {
+    "id": 1,
+    "name": "이든의 공포 하우스",
+    "description": "이든이 귀신으로 나오는 공포 테마",
+    "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+  },
+  "store": {
+    "id": 1,
+    "name": "강남점"
+  }
 }
 ```
 
@@ -485,8 +504,16 @@
     "id": 2,
     "startAt": "11:00"
   },
-  "themeId": 1,
-  "storeId": 1
+  "theme": {
+    "id": 1,
+    "name": "이든의 공포 하우스",
+    "description": "이든이 귀신으로 나오는 공포 테마",
+    "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+  },
+  "store": {
+    "id": 1,
+    "name": "강남점"
+  }
 }
 ```
 
@@ -989,8 +1016,13 @@
     "memberId": 3,
     "date": "2026-12-01",
     "time": { "id": 1, "startAt": "10:00" },
-    "themeId": 1,
-    "storeId": 1
+    "theme": {
+      "id": 1,
+      "name": "이든의 공포 하우스",
+      "description": "이든이 귀신으로 나오는 공포 테마",
+      "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+    },
+    "store": { "id": 1, "name": "강남점" }
   }
 ]
 ```
@@ -1054,8 +1086,13 @@
   "memberId": 3,
   "date": "2026-12-15",
   "time": { "id": 2, "startAt": "11:00" },
-  "themeId": 1,
-  "storeId": 1
+  "theme": {
+    "id": 1,
+    "name": "이든의 공포 하우스",
+    "description": "이든이 귀신으로 나오는 공포 테마",
+    "imgUrl": "https://images.example.com/themes/horror-house.jpg"
+  },
+  "store": { "id": 1, "name": "강남점" }
 }
 ```
 

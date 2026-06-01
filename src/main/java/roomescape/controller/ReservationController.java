@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
-import roomescape.domain.Reservation;
+import roomescape.dto.ReservationResult;
 import roomescape.dto.WaitingResponseResult;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
@@ -29,7 +29,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<MyReservationsAndWaitsResponse> getReservations(@LoginMember Long memberId) {
-        List<Reservation> reservations = reservationService.getReservations(memberId);
+        List<ReservationResult> reservations = reservationService.getReservations(memberId);
         List<WaitingResponseResult> waitingResponseResults = reservationService.getWaitings(memberId);
         MyReservationsAndWaitsResponse myReservationsAndWaitsResponse = new MyReservationsAndWaitsResponse(
                 ReservationResponse.fromAll(reservations), WaitingResponse.fromAll(waitingResponseResults));
@@ -40,7 +40,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest,
             @LoginMember Long memberId) {
-        Reservation savedReservation = reservationService.createReservation(
+        ReservationResult savedReservation = reservationService.createReservation(
                 memberId,
                 reservationCreateRequest.date(),
                 reservationCreateRequest.timeId(),
@@ -63,7 +63,7 @@ public class ReservationController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateRequest reservationUpdateRequest,
             @LoginMember Long memberId) {
-        Reservation updatedReservation = reservationService.updateReservation(
+        ReservationResult updatedReservation = reservationService.updateReservation(
                 id,
                 reservationUpdateRequest.date(),
                 memberId,

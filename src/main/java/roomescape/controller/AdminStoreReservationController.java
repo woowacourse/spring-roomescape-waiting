@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.dto.ReservationResult;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
@@ -26,7 +26,7 @@ public class AdminStoreReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getStoreReservations(
             @LoginMember(role = Role.MANAGER) Member manager) {
-        List<Reservation> reservations = reservationService.findByStoreId(manager.getStoreId());
+        List<ReservationResult> reservations = reservationService.findByStoreId(manager.getStoreId());
         return ResponseEntity.ok().body(ReservationResponse.fromAll(reservations));
     }
 
@@ -35,7 +35,7 @@ public class AdminStoreReservationController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateRequest reservationUpdateRequest,
             @LoginMember(role = Role.MANAGER) Member manager) {
-        Reservation reservation = reservationService.updateByManager(
+        ReservationResult reservation = reservationService.updateByManager(
                 id, reservationUpdateRequest.date(), reservationUpdateRequest.timeId(), manager
         );
         return ResponseEntity.ok().body(ReservationResponse.from(reservation));

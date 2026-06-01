@@ -446,7 +446,7 @@ async function loadMyReservations() {
                             <span class="info-main">${r.time.startAt.slice(0, 5)}</span>
                         </div>
                         <div class="info-line">
-                            <span class="info-sub">테마 #${r.themeId} · 예약 ID ${r.id}</span>
+                            <span class="info-sub">${r.theme.name} · ${r.store.name} · 예약 ID ${r.id}</span>
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-danger" data-cancel-id="${r.id}">예약 취소</button>
@@ -560,7 +560,7 @@ async function loadManagerReservations() {
                 <td>#${r.id}</td>
                 <td>${r.date}</td>
                 <td>${r.time.startAt.slice(0, 5)}</td>
-                <td>테마 #${r.themeId}</td>
+                <td>${r.theme.name}</td>
                 <td class="actions">
                     <button type="button" class="btn btn-sm btn-secondary" data-edit-id="${r.id}" data-edit-date="${r.date}" data-edit-time-id="${r.time.id}">변경</button>
                     <button type="button" class="btn btn-sm btn-danger" data-delete-id="${r.id}">삭제</button>

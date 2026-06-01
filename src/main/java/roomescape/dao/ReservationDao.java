@@ -7,6 +7,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Store;
+import roomescape.domain.Theme;
+import roomescape.dto.ReservationResult;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -15,6 +18,25 @@ import java.util.List;
 
 @Repository
 public class ReservationDao {
+
+    private static final String RESERVATION_DETAIL_SELECT = """
+            SELECT
+                r.id as reservation_id,
+                r.member_id,
+                r.date,
+                t.id as time_id,
+                t.start_at,
+                th.id as theme_id,
+                th.name as theme_name,
+                th.description as theme_description,
+                th.img_url as theme_img_url,
+                s.id as store_id,
+                s.name as store_name
+            FROM reservation as r
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            INNER JOIN store as s ON r.store_id = s.id
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -42,50 +64,31 @@ public class ReservationDao {
         return reservations;
     }
 
-    public List<Reservation> findAllReservationsByMemberId(Long memberId) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.member_id,
-                    r.date,
-                    t.id as time_id,
-                    t.start_at,
-                    r.theme_id,
-                    r.store_id
-                FROM reservation as r
-                INNER JOIN reservation_time as t
-                  ON r.time_id = t.id
-                WHERE r.member_id = ?
-                """;
-        List<Reservation> reservations = jdbcTemplate.query(
+    public List<ReservationResult> findAllReservationsByMemberId(Long memberId) {
+        String sql = RESERVATION_DETAIL_SELECT + "WHERE r.member_id = ?";
+        return jdbcTemplate.query(
                 sql,
-                reservationRowMapper(),
+                reservationResultRowMapper(),
                 memberId
         );
-        return reservations;
     }
 
-    public List<Reservation> findByStoreId(Long storeId) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.member_id,
-                    r.date,
-                    t.id as time_id,
-                    t.start_at,
-                    r.theme_id,
-                    r.store_id
-                FROM reservation as r
-                INNER JOIN reservation_time as t
-                  ON r.time_id = t.id
-                WHERE r.store_id = ?
-                """;
-        List<Reservation> reservations = jdbcTemplate.query(
+    public List<ReservationResult> findByStoreId(Long storeId) {
+        String sql = RESERVATION_DETAIL_SELECT + "WHERE r.store_id = ?";
+        return jdbcTemplate.query(
                 sql,
-                reservationRowMapper(),
+                reservationResultRowMapper(),
                 storeId
         );
-        return reservations;
+    }
+
+    public ReservationResult findReservationResultById(Long id) {
+        String sql = RESERVATION_DETAIL_SELECT + "WHERE r.id = ?";
+        return jdbcTemplate.queryForObject(
+                sql,
+                reservationResultRowMapper(),
+                id
+        );
     }
 
     public Reservation findReservationById(Long id) {
@@ -136,6 +139,33 @@ public class ReservationDao {
 
     public int delete(Long id) {
         return jdbcTemplate.update("delete from reservation where id = ?", id);
+    }
+
+    private RowMapper<ReservationResult> reservationResultRowMapper() {
+        return (resultSet, rowNum) -> {
+            Reservation reservation = new Reservation(
+                    resultSet.getLong("reservation_id"),
+                    resultSet.getLong("member_id"),
+                    LocalDate.parse(resultSet.getString("date")),
+                    new ReservationTime(
+                            resultSet.getLong("time_id"),
+                            LocalTime.parse(resultSet.getString("start_at"))
+                    ),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getLong("store_id")
+            );
+            Theme theme = new Theme(
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_img_url")
+            );
+            Store store = new Store(
+                    resultSet.getLong("store_id"),
+                    resultSet.getString("store_name")
+            );
+            return new ReservationResult(reservation, theme, store);
+        };
     }
 
     private RowMapper<Reservation> reservationRowMapper() {

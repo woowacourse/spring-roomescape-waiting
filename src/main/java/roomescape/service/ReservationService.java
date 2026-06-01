@@ -12,6 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
 import roomescape.dto.CreatedWaitResult;
+import roomescape.dto.ReservationResult;
 import roomescape.dto.WaitingResponseResult;
 import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
@@ -36,7 +37,7 @@ public class ReservationService {
         this.reservationWaitDao = reservationWaitDao;
     }
 
-    public List<Reservation> getReservations(Long memberId) {
+    public List<ReservationResult> getReservations(Long memberId) {
         return reservationDao.findAllReservationsByMemberId(memberId);
     }
 
@@ -46,19 +47,19 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<Reservation> findByStoreId(Long storeId) {
+    public List<ReservationResult> findByStoreId(Long storeId) {
         return reservationDao.findByStoreId(storeId);
     }
 
     @Transactional
-    public Reservation createReservation(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
+    public ReservationResult createReservation(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
         ReservationTime reservationTime = reservationTimeDao.findReservationTimeById(timeId);
         if (reservationTime.isPast(date)) {
             throw new PastReservationNotAllowedException();
         }
         try {
             Long id = reservationDao.insertWithKeyHolder(memberId, date, timeId, themeId, storeId);
-            return reservationDao.findReservationById(id);
+            return reservationDao.findReservationResultById(id);
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
@@ -84,7 +85,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation updateReservation(Long id, LocalDate date, Long memberId, Long timeId) {
+    public ReservationResult updateReservation(Long id, LocalDate date, Long memberId, Long timeId) {
         ReservationTime reservationTime = findReservationTime(timeId);
         validateReservationOwner(memberId, findReservation(id));
         if (reservationTime.isPast(date)) {
@@ -95,11 +96,11 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
-        return reservationDao.findReservationById(id);
+        return reservationDao.findReservationResultById(id);
     }
 
     @Transactional
-    public Reservation updateByManager(Long reservationId, LocalDate date, Long timeId, Member manager) {
+    public ReservationResult updateByManager(Long reservationId, LocalDate date, Long timeId, Member manager) {
         ReservationTime reservationTime = findReservationTime(timeId);
         Reservation reservation = findReservation(reservationId);
         reservation.validateStoreOwnership(manager);
@@ -111,7 +112,7 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistsException();
         }
-        return reservationDao.findReservationById(reservationId);
+        return reservationDao.findReservationResultById(reservationId);
     }
 
     @Transactional
