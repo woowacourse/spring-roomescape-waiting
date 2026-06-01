@@ -40,7 +40,7 @@ class JdbcTimeSlotRepositoryTest {
     @Test
     @DisplayName("예약 시간을 저장하고 영속화된 객체를 반환한다.")
     void 예약_시간_저장() {
-        TimeSlot timeSlot = TimeSlot.transientOf(LocalTime.of(10, 0));
+        TimeSlot timeSlot = new TimeSlot(LocalTime.of(10, 0));
         TimeSlot savedTimeSlot = timeRepository.save(timeSlot);
         assertThat(savedTimeSlot.getId()).isPositive();
     }
@@ -48,7 +48,7 @@ class JdbcTimeSlotRepositoryTest {
     @Test
     @DisplayName("식별자로 예약 시간 객체를 조회한다.")
     void 식별자로_예약_시간_조회() {
-        TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
+        TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         Optional<TimeSlot> foundTimeSlot = timeRepository.findById(savedTimeSlot.getId());
         assertThat(foundTimeSlot).isPresent();
         assertThat(foundTimeSlot.get().getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -58,7 +58,7 @@ class JdbcTimeSlotRepositoryTest {
     @DisplayName("존재하는 예약 시간을 삭제한다.")
     void 존재하는_예약_시간_삭제() {
         int defaultSize = timeRepository.findAll().size();
-        TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
+        TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         timeRepository.deleteById(savedTimeSlot.getId());
         assertThat(timeRepository.findAll().size() == defaultSize).isTrue();
     }
@@ -73,8 +73,8 @@ class JdbcTimeSlotRepositoryTest {
     @Test
     @DisplayName("예약이 존재하는 시간을 삭제할 수 없다.")
     void 예약이_존재하는_시간_삭제_예외_발생() {
-        TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
-        Theme savedTheme = themeRepository.save(Theme.transientOf("공포", "설명", "url"));
+        TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
+        Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url"));
         reservationRepository.save(
                 new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
 

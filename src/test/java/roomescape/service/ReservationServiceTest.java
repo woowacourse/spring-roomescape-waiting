@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
@@ -18,7 +20,7 @@ import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
-import roomescape.repository.FakeWaitingRepository;
+import roomescape.repository.WaitingRepository;
 
 class ReservationServiceTest {
 
@@ -26,7 +28,9 @@ class ReservationServiceTest {
     private FakeReservationRepository reservationRepository;
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
-    private FakeWaitingRepository fakeWaitingRepository;
+
+    @Mock
+    private WaitingRepository waitingRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -36,13 +40,13 @@ class ReservationServiceTest {
         timeSlotRepository = new FakeTimeSlotRepository();
         reservationRepository = new FakeReservationRepository();
         themeRepository = new FakeThemeRepository();
-        fakeWaitingRepository = new FakeWaitingRepository();
+        waitingRepository = Mockito.mock(WaitingRepository.class);
 
         reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
-                fakeWaitingRepository);
+                waitingRepository);
 
-        savedTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
-        savedTheme = themeRepository.save(Theme.transientOf("이름", "설명", "test.com"));
+        savedTimeSlot = timeSlotRepository.save(new TimeSlot(LocalTime.of(10, 0)));
+        savedTheme = themeRepository.save(new Theme("이름", "설명", "test.com"));
     }
 
     @Test
@@ -111,7 +115,7 @@ class ReservationServiceTest {
     void 지난_시간_예약_생성_예외_발생() {
         LocalDate today = LocalDate.now();
         LocalTime pastTime = LocalTime.now().minusHours(1);
-        TimeSlot pastTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(pastTime));
+        TimeSlot pastTimeSlot = timeSlotRepository.save(new TimeSlot(pastTime));
 
         assertThatThrownBy(
                 () -> reservationService.saveReservation("브라운", today, pastTimeSlot.getId(), savedTheme.getId()))
@@ -165,7 +169,7 @@ class ReservationServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation target = reservationService.saveReservation("브라운", futureDate, savedTimeSlot.getId(),
                 savedTheme.getId());
-        TimeSlot otherTime = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(13, 0)));
+        TimeSlot otherTime = timeSlotRepository.save(new TimeSlot(LocalTime.of(13, 0)));
         reservationService.saveReservation("네오", futureDate, otherTime.getId(), savedTheme.getId());
 
         assertThatThrownBy(() -> reservationService.updateReservation(

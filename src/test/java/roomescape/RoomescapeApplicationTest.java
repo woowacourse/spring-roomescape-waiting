@@ -49,7 +49,7 @@ public class RoomescapeApplicationTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(14));
+                .body("timeResponses.size()", is(14));
     }
 
     @Test

@@ -11,6 +11,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
+import roomescape.repository.WaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceExperiment {
@@ -33,31 +33,27 @@ class ReservationServiceExperiment {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    private WaitingRepository waitingRepository;
+
     @InjectMocks
     private ReservationService reservationService;
 
     @Test
     void 예약_저장_결과_검증() {
         LocalDate date = LocalDate.now().plusDays(1);
-        TimeSlot timeSlot = mock(TimeSlot.class);
-        Theme theme = mock(Theme.class);
-        Reservation expected = mock(Reservation.class);
-        stubDomainBehaviors(timeSlot, theme);
+        TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "테마", "설명", "thumbnail.png");
+        Reservation expected = new Reservation(1L, "브라운", date, timeSlot, theme);
         stubRepositoryBehaviors(date, timeSlot, theme, expected);
         Reservation actual = reservationService.saveReservation("브라운", date, 1L, 1L);
         assertThat(actual).isEqualTo(expected);
     }
 
-    private void stubDomainBehaviors(TimeSlot timeSlot, Theme theme) {
-        given(timeSlot.getId()).willReturn(1L);
-        given(timeSlot.getStartAt()).willReturn(LocalTime.of(10, 0));
-        given(theme.getId()).willReturn(1L);
-    }
-
     private void stubRepositoryBehaviors(LocalDate date, TimeSlot time, Theme theme, Reservation expected) {
+        given(reservationRepository.existsByDateAndTimeAndTheme(date, 1L, 1L)).willReturn(false);
         given(timeSlotRepository.findById(1L)).willReturn(Optional.of(time));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(Optional.empty());
         given(reservationRepository.save(any(Reservation.class))).willReturn(expected);
     }
 }

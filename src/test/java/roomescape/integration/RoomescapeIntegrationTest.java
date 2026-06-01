@@ -49,7 +49,7 @@ public class RoomescapeIntegrationTest {
                 .statusCode(400)
                 .body("title", notNullValue())
                 .body("status", equalTo(400))
-                .body("detail", equalTo("지난 날짜로 예약하실 수 없습니다."))
+                .body("detail", equalTo("지난 날짜/시간으로 예약하실 수 없습니다."))
                 .body("code", notNullValue());
     }
 
@@ -63,8 +63,8 @@ public class RoomescapeIntegrationTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", equalTo(1))
-                .body("[0].name", equalTo("브라운"));
+                .body("reservationAndWaitingResponses.size()", equalTo(1))
+                .body("reservationAndWaitingResponses[0].name", equalTo("브라운"));
     }
 
     @Test
@@ -79,8 +79,8 @@ public class RoomescapeIntegrationTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("find { it.id == 1 }.isAvailable", equalTo(false))
-                .body("find { it.id == 2 }.isAvailable", equalTo(true));
+                .body("timeResponses.find { it.id == 1 }.isAvailable", equalTo(false))
+                .body("timeResponses.find { it.id == 2 }.isAvailable", equalTo(true));
     }
 
     @Test
@@ -116,12 +116,18 @@ public class RoomescapeIntegrationTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", greaterThanOrEqualTo(1))
-                .body("[0].id", equalTo(2));
+                .body("themeResponses.size()", greaterThanOrEqualTo(1))
+                .body("themeResponses[0].id", equalTo(2));
     }
 
     private void insertTestData() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "테마1", "설명1", "thumbnail1.png");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "테마2", "설명2", "thumbnail2.png");
+        jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
+        jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "11:00:00");
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', ?, 1, 1)",
                 tomorrow);
     }
