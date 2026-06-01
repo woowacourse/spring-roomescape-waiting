@@ -60,19 +60,14 @@ public class ReservationCommandService {
         return reservationDao.save(Reservation.create(command.name(), slot, LocalDateTime.now(clock)));
     }
 
-    public void deleteByAdmin(Long reservationId) {
-        Reservation reservation = reservationDao.findById(reservationId);
-        reservationDao.delete(reservation);
-    }
-
-    public void cancelByUser(Long reservationId, UserName name) {
+    public void cancel(Long reservationId, UserName name) {
         Reservation reservation = reservationDao.findById(reservationId);
         reservation.validateOwnedBy(name);
         reservation.validateCancelable(LocalDateTime.now(clock));
         reservationDao.delete(reservation);
     }
 
-    public Reservation updateByUser(Long reservationId, UserName name, ReservationUpdateCommand command) {
+    public Reservation update(Long reservationId, UserName name, ReservationUpdateCommand command) {
         Reservation current = reservationDao.findById(reservationId);
         current.validateOwnedBy(name);
 

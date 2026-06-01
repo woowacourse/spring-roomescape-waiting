@@ -61,7 +61,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCommandService.cancelByUser(id, UserName.from(name));
+        reservationCommandService.cancel(id, UserName.from(name));
         return ResponseEntity.noContent().build();
     }
 
@@ -72,7 +72,7 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
         ReservationResponse response = ReservationResponse.from(
-                reservationCommandService.updateByUser(id, UserName.from(name), ReservationUpdateRequest.toCommand(request)));
+                reservationCommandService.update(id, UserName.from(name), ReservationUpdateRequest.toCommand(request)));
         return ResponseEntity.ok(response);
     }
 }

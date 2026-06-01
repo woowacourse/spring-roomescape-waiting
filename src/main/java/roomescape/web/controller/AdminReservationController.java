@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.reservation.Reservation;
+import roomescape.service.ReservationAdminCommandService;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
 import roomescape.web.dto.request.ReservationRequest;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminReservationController {
 
+    private final ReservationAdminCommandService reservationAdminCommandService;
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
 
@@ -52,7 +54,7 @@ public class AdminReservationController {
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id
     ) {
-        reservationCommandService.deleteByAdmin(id);
+        reservationAdminCommandService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
