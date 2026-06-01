@@ -2,6 +2,12 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ForbiddenException;
 
 import java.time.LocalDateTime;
@@ -16,7 +22,7 @@ class ReservationTest {
     @DisplayName("새로운 예약을 성공적으로 생성한다.")
     void createReservationTest() {
         // given
-        String username = "파도";
+        UserName username = UserName.from("파도");
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
         Slot slot = createValidSlot(now.plusDays(1));
 
@@ -25,7 +31,7 @@ class ReservationTest {
 
         // then
         assertThat(reservation.getId()).isNull();
-        assertThat(reservation.getUsername()).isEqualTo("파도");
+        assertThat(reservation.getUserName()).isEqualTo(username);
         assertThat(reservation.getReservationDate()).isEqualTo(now.plusDays(1).toLocalDate());
     }
 
@@ -33,21 +39,21 @@ class ReservationTest {
     @DisplayName("예약의 소유자가 일치하는지 확인한다.")
     void isOwnedByTest() {
         // given
-        Reservation reservation = Reservation.from(1L, "파도", createAnySlot());
+        Reservation reservation = Reservation.from(1L, UserName.from("파도"), createAnySlot());
 
         // when & then
-        assertThat(reservation.isOwnedBy("파도")).isTrue();
-        assertThat(reservation.isOwnedBy("다른사람")).isFalse();
+        assertThat(reservation.isOwnedBy(UserName.from("파도"))).isTrue();
+        assertThat(reservation.isOwnedBy(UserName.from("다른사람"))).isFalse();
     }
 
     @Test
     @DisplayName("타인의 예약에 접근할 경우 예외를 발생시킨다.")
     void validateOwnedByTest() {
         // given
-        Reservation reservation = Reservation.from(1L, "파도", createAnySlot());
+        Reservation reservation = Reservation.from(1L, UserName.from("파도"), createAnySlot());
 
         // when & then
-        assertThatThrownBy(() -> reservation.validateOwnedBy("다른사람"))
+        assertThatThrownBy(() -> reservation.validateOwnedBy(UserName.from("다른사람")))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("타인의 예약에 접근할 수 없습니다.");
     }
@@ -57,7 +63,7 @@ class ReservationTest {
     void withSlotTest() {
         // given
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
-        Reservation reservation = Reservation.from(1L, "파도", createValidSlot(now.plusDays(1)));
+        Reservation reservation = Reservation.from(1L, UserName.from("파도"), createValidSlot(now.plusDays(1)));
         Slot newSlot = createValidSlot(now.plusDays(2));
 
         // when
@@ -73,8 +79,8 @@ class ReservationTest {
     void equalsAndHashCodeTest() {
         // given
         Slot slot = createAnySlot();
-        Reservation reservation1 = Reservation.from(1L, "파도", slot);
-        Reservation reservation2 = Reservation.from(1L, "다른이름", slot);
+        Reservation reservation1 = Reservation.from(1L, UserName.from("파도"), slot);
+        Reservation reservation2 = Reservation.from(1L, UserName.from("다른이름"), slot);
 
         // when & then
         assertThat(reservation1).isEqualTo(reservation2);

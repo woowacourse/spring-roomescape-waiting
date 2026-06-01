@@ -2,6 +2,10 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.PastDateTimeException;
 
 import java.time.LocalDate;

@@ -14,7 +14,7 @@ import java.util.Map;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/reservation-waiting-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import(FixedClockConfig.class)
-public class WaitingTest {
+public class ReservationWaitingTest {
     @Test
     @DisplayName("기존 예약이 존재할 때 예약 대기가 성공적으로 되는지 확인한다.")
     void createWaitingTest() {

@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.theme.Theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +21,7 @@ class ThemeTest {
 
         // then
         assertThat(theme.getId()).isNull();
-        assertThat(theme.getName()).isEqualTo("홍대 방탈출");
+        assertThat(theme.getThemeName()).isEqualTo("홍대 방탈출");
         assertThat(theme.getThumbnailUrl()).isEqualTo("https://picsum.photos/400/300");
         assertThat(theme.getDescription()).isEqualTo("재밌는 방탈출 테마");
     }

@@ -2,6 +2,12 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.common.UserName;
+import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.ReservationWaiting;
+import roomescape.domain.reservation.Schedule;
+import roomescape.domain.reservation.Slot;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ForbiddenException;
 
 import java.time.LocalDateTime;
@@ -10,22 +16,22 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class WaitingTest {
+class ReservationWaitingTest {
 
     @Test
     @DisplayName("새로운 예약 대기를 성공적으로 생성한다.")
     void createWaitingTest() {
         // given
-        String name = "파도";
+        UserName name = UserName.from("파도");
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
         Slot slot = createValidSlot(now.plusDays(1));
 
         // when
-        Waiting waiting = Waiting.create(name, slot, now);
+        ReservationWaiting waiting = ReservationWaiting.create(name, slot, now);
 
         // then
         assertThat(waiting.getId()).isNull();
-        assertThat(waiting.getName()).isEqualTo("파도");
+        assertThat(waiting.getUserName()).isEqualTo(name);
         assertThat(waiting.getWaitingDate()).isEqualTo(now.plusDays(1).toLocalDate());
         assertThat(waiting.createAt()).isEqualTo(now);
     }
@@ -36,7 +42,7 @@ class WaitingTest {
         // given
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
         Slot slot = createValidSlot(now.plusDays(1));
-        Waiting waiting = Waiting.from(1L, "파도", slot, now);
+        ReservationWaiting waiting = ReservationWaiting.from(1L, UserName.from("파도"), slot, now);
 
         // when & then
         waiting.validateCancelable(now);
@@ -47,10 +53,10 @@ class WaitingTest {
     void validateOwnedByTest() {
         // given
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
-        Waiting waiting = Waiting.from(1L, "파도", createAnySlot(), now);
+        ReservationWaiting waiting = ReservationWaiting.from(1L, UserName.from("파도"), createAnySlot(), now);
 
         // when & then
-        assertThatThrownBy(() -> waiting.validateOwnedBy("다른사람"))
+        assertThatThrownBy(() -> waiting.validateOwnedBy(UserName.from("다른사람")))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("타인의 예약대기는 취소할 수 없습니다.");
     }
@@ -62,8 +68,8 @@ class WaitingTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
         Slot slot = createAnySlot();
 
-        Waiting waiting1 = Waiting.from(1L, "파도", slot, now);
-        Waiting waiting2 = Waiting.from(1L, "다른사람", slot, now.plusMinutes(1));
+        ReservationWaiting waiting1 = ReservationWaiting.from(1L, UserName.from("파도"), slot, now);
+        ReservationWaiting waiting2 = ReservationWaiting.from(1L, UserName.from("다른사람"), slot, now.plusMinutes(1));
 
         // when & then
         assertThat(waiting1).isEqualTo(waiting2);
