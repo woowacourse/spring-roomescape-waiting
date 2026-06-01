@@ -55,6 +55,8 @@ public class ReservationService {
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
         if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
+            validateDuplicateReservationWaiting(request);
+
             Waiting savedWaitingResult = waitingService.save(Waiting.of(
                     null,
                     reservation.getName(),
@@ -65,6 +67,17 @@ public class ReservationService {
             return ReservationQueryResult.from(savedWaitingResult, themeQueryResult, timeQueryResult);
         }
         return ReservationQueryResult.from(reservationRepository.save(reservation), themeQueryResult, timeQueryResult);
+    }
+
+    private void validateDuplicateReservationWaiting(ReservationCreateCommand request) {
+        boolean alreadyReservedBySameName = reservationRepository.findByName(request.name()).stream()
+                .anyMatch(reservation -> reservation.getDate().equals(request.date())
+                        && reservation.getThemeId().equals(request.themeId())
+                        && reservation.getTimeId().equals(request.timeId()));
+
+        if (alreadyReservedBySameName) {
+            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
+        }
     }
 
     public ReservationQueryResult update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
