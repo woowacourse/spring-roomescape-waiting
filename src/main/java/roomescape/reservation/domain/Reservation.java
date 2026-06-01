@@ -34,8 +34,12 @@ public class Reservation {
         return new Reservation(id, name, date, time, theme, status);
     }
 
-    public void changeStatus(ReservationStatus status) {
+    public void promote(ReservationStatus status) {
         this.status = this.status.transitionTo(status);
+    }
+
+    public boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
     }
 
     public Long getId() {

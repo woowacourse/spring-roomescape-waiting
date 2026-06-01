@@ -67,7 +67,7 @@ public class ThemeDao {
                 + " FROM theme t"
                 + " LEFT OUTER JOIN reservation r ON t.id = r.theme_id"
                 + " AND (? IS NULL OR r.date >= ?) AND r.date <= ?"
-                + " AND (r.status = 'reservation' OR r.status = 'waiting')"
+                + " AND (r.status = 'RESERVED' OR r.status = 'WAITING')"
                 + " GROUP BY t.id"
                 + " ORDER BY reservation_count DESC"
                 + " LIMIT ?";

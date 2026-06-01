@@ -3,6 +3,7 @@ package roomescape.theme.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -10,9 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.AppException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
+import roomescape.theme.dto.response.ReservedThemeResponse;
 
 @JdbcTest
 class ThemeDaoTest {
@@ -119,6 +122,54 @@ class ThemeDaoTest {
 
             // then
             assertThat(deleted).isFalse();
+        }
+    }
+
+    @Nested
+    class 인기_테마를_조회한다 {
+
+        @Test
+        @Sql(statements = {
+                "INSERT INTO theme (id, name, description, image_url) VALUES (1, '테마1', '설명1', 'url1')",
+                "INSERT INTO theme (id, name, description, image_url) VALUES (2, '테마2', '설명2', 'url2')",
+                "INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')",
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (1, '유저1', '2024-05-01', 1, 1, 'RESERVED')",
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (2, '유저2', '2024-05-01', 1, 1, 'WAITING')",
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (3, '유저3', '2024-05-01', 1, 2, 'CANCELED')"
+        })
+        void 대문자_RESERVED와_WAITING_상태의_예약이_카운트에_포함된다() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 5, 1);
+            LocalDate endDate = LocalDate.of(2024, 5, 31);
+
+            // when
+            List<ReservedThemeResponse> result = themeDao.findMostReserved(10, startDate, endDate);
+
+            // then
+            ReservedThemeResponse theme1 = result.stream()
+                    .filter(r -> r.id() == 1L)
+                    .findFirst()
+                    .orElseThrow();
+            assertThat(theme1.reservationCount()).isEqualTo(2);
+        }
+
+        @Test
+        @Sql(statements = {
+                "INSERT INTO theme (id, name, description, image_url) VALUES (1, '테마1', '설명1', 'url1')",
+                "INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')",
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (1, '유저1', '2024-05-01', 1, 1, 'CANCELED')"
+        })
+        void 대문자_CANCELED_상태의_예약은_카운트에_포함되지_않는다() {
+            // given
+            LocalDate startDate = LocalDate.of(2024, 5, 1);
+            LocalDate endDate = LocalDate.of(2024, 5, 31);
+
+            // when
+            List<ReservedThemeResponse> result = themeDao.findMostReserved(10, startDate, endDate);
+
+            // then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).reservationCount()).isEqualTo(0);
         }
     }
 }

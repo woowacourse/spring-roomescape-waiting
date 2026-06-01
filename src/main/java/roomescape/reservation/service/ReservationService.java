@@ -70,12 +70,12 @@ public class ReservationService {
 
     public void delete(Long id) {
         Reservation reservation = reservationDao.findById(id);
-        if (reservation.getStatus() == ReservationStatus.RESERVED) {
+        if (reservation.isReserved()) {
             reservationDao.findFirstWaitingByDateTimeTheme(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
             ).ifPresent(waiting -> {
-                waiting.changeStatus(ReservationStatus.RESERVED);
-                reservationDao.updateStatus(waiting.getId(), waiting.getStatus());
+                waiting.promote(ReservationStatus.RESERVED);
+                reservationDao.updateStatus(waiting.getId(), ReservationStatus.RESERVED);
             });
         }
         reservationDao.delete(id);

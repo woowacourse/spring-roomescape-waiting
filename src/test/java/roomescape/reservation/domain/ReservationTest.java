@@ -31,7 +31,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(1L, "누누", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
 
         // when
-        reservation.changeStatus(ReservationStatus.CANCELED);
+        reservation.promote(ReservationStatus.CANCELED);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
@@ -43,7 +43,7 @@ class ReservationTest {
         Reservation reservation = Reservation.of(1L, "누누", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
 
         // when // then
-        assertThatThrownBy(() -> reservation.changeStatus(ReservationStatus.WAITING))
+        assertThatThrownBy(() -> reservation.promote(ReservationStatus.WAITING))
             .isInstanceOf(IllegalStateException.class);
     }
 }
