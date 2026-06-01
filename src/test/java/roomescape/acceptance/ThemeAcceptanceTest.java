@@ -1,5 +1,6 @@
 package roomescape.acceptance;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.step.ReservationSteps;
 import roomescape.acceptance.step.ReservationTimeSteps;
@@ -8,7 +9,8 @@ import roomescape.acceptance.step.ThemeSteps;
 public class ThemeAcceptanceTest extends AcceptanceTest {
 
     @Test
-    void reservationTimeApiSuccessTest() {
+    @DisplayName("테마를 추가하고 삭제할 수 있으며, 예약 수를 기반으로 랭킹을 조회할 수 있다")
+    void themeApiSuccessTest() {
         // 1. 테마 추가
         ThemeSteps.createTheme("방탈출1", "방탈출1 설명", "theme/url.png");
 

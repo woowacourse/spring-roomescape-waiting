@@ -1,5 +1,6 @@
 package roomescape.acceptance;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.step.ReservationSteps;
 import roomescape.acceptance.step.ReservationTimeSteps;
@@ -8,6 +9,7 @@ import roomescape.acceptance.step.ThemeSteps;
 public class ReservationTimeAcceptanceTest extends AcceptanceTest {
 
     @Test
+    @DisplayName("예약 추가/삭제에 따라 해당 시간의 예약 가능 상태가 변경된다")
     void reservationTimeApiSuccessTest() {
         // 1. 시간 추가
         ReservationTimeSteps.createReservationTime(FUTURE_TIME);
@@ -30,10 +32,13 @@ public class ReservationTimeAcceptanceTest extends AcceptanceTest {
         // 7. 예약 삭제
         ReservationSteps.deleteReservation(1L);
 
-        // 8. 시간 삭제
+        // 8. 예약 삭제 후 해당 날짜, 테마의 시간 예약 가능 상태 변경 조회
+        ReservationTimeSteps.checkAvailableReservation(NOW_DATE, 1L, true);
+
+        // 9. 시간 삭제
         ReservationTimeSteps.deleteReservationTime(1L);
 
-        // 9. 전체 시간 조회 사이즈로 시간 삭제 확인
+        // 10. 전체 시간 조회 사이즈로 시간 삭제 확인
         ReservationTimeSteps.checkAllReservationTimeSize(0);
     }
 }

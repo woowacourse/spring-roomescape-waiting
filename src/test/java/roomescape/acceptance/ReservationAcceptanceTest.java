@@ -1,5 +1,6 @@
 package roomescape.acceptance;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance.step.ReservationSteps;
 import roomescape.acceptance.step.ReservationTimeSteps;
@@ -9,6 +10,7 @@ import roomescape.domain.ReservationStatus;
 public class ReservationAcceptanceTest extends AcceptanceTest {
 
     @Test
+    @DisplayName("예약 취소 시 첫 번째 대기자가 자동으로 예약 확정된다")
     void reservationApiSuccessTest() {
         // 1. 시간 추가
         ReservationTimeSteps.createReservationTime(FUTURE_TIME);
