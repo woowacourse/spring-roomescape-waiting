@@ -8,6 +8,6 @@ public record ReservationTimeResult(
         LocalTime startAt
 ) {
     public static ReservationTimeResult from(ReservationTime time) {
-        return new ReservationTimeResult(time.id(), time.startAt());
+        return new ReservationTimeResult(time.getId(), time.getStartAt());
     }
 }

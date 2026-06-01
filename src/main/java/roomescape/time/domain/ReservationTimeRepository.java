@@ -1,10 +1,9 @@
-package roomescape.time.repository;
+package roomescape.time.domain;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 public interface ReservationTimeRepository {
@@ -19,5 +18,5 @@ public interface ReservationTimeRepository {
 
     List<AvailableTimeQueryResult> findAvailableTimes(Long themeId, LocalDate date);
 
-    int deleteById(Long id);
+    void delete(ReservationTime time);
 }

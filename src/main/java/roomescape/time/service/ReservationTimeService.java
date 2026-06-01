@@ -1,19 +1,14 @@
 package roomescape.time.service;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.AvailableTimesResult;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.exception.TimeErrorCode;
-import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
 
@@ -22,12 +17,9 @@ import roomescape.time.service.dto.ReservationTimeResult;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ThemeRepository themeRepository) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
     }
 
     @Transactional
@@ -49,32 +41,17 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationTimeResult> findAll() {
-        return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeResult::from)
-                .toList();
-    }
-
-    public ReservationTime findById(Long id) {
+    public ReservationTime getById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
     }
 
-    public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
-        if (themeRepository.findById(themeId).isEmpty()) {
-            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
-        }
-
-        return new AvailableTimesResult(reservationTimeRepository.findAvailableTimes(themeId, date));
-    }
-
     @Transactional
     public void deleteById(Long id) {
+        ReservationTime deleteTarget = getById(id);
+
         try {
-            int affectedRow = reservationTimeRepository.deleteById(id);
-            if (affectedRow == 0) {
-                throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage());
-            }
+            reservationTimeRepository.delete(deleteTarget);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(TimeErrorCode.TIME_IN_USE.getMessage());
         }

@@ -2,17 +2,21 @@ package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @JdbcTest
@@ -28,62 +32,37 @@ class JdbcReservationTimeRepositoryTest {
         this.reservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
     }
 
-    @Test
-    @DisplayName("새로운 시간 정보를 저장하고 반환된 객체의 ID를 확인한다.")
-    void save_validTime_returnsWithId() {
-        // given
-        LocalTime startTime = LocalTime.of(10, 0);
-        ReservationTime time = ReservationTime.of(startTime);
+    @Nested
+    class save {
+        @Test
+        @DisplayName("새로운 시간 정보를 저장하고 반환된 객체의 ID를 확인한다.")
+        void save_validTime_returnsWithId() {
+            // given
+            LocalTime startTime = LocalTime.of(10, 0);
+            ReservationTime time = ReservationTime.of(startTime);
 
-        // when
-        ReservationTime savedTime = reservationTimeRepository.save(time);
+            // when
+            ReservationTime savedTime = reservationTimeRepository.save(time);
 
-        //then
-        assertThat(savedTime.id()).isNotNull();
-        assertThat(savedTime.startAt()).isEqualTo(startTime);
-    }
+            //then
+            assertThat(savedTime.getId()).isNotNull();
+            assertThat(savedTime.getStartAt()).isEqualTo(startTime);
+        }
 
-    @Test
-    @DisplayName("기존에 이미 해당 시간이 있으면 예외가 발생한다.")
-    void save_duplicateTime_throwsDataIntegrityViolation() {
-        // given
-        LocalTime startTime = LocalTime.of(10, 0);
-        ReservationTime time = ReservationTime.of(startTime);
+        @Test
+        @DisplayName("기존에 이미 해당 시간이 있으면 예외가 발생한다.")
+        void save_duplicateTime_throwsDataIntegrityViolation() {
+            // given
+            LocalTime startTime = LocalTime.of(10, 0);
+            ReservationTime time = ReservationTime.of(startTime);
 
-        reservationTimeRepository.save(time);
+            reservationTimeRepository.save(time);
 
-        // when & then
-        assertThatThrownBy(() ->  reservationTimeRepository.save(time))
-                .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    @DisplayName("ID를 통해 시간 정보를 삭제한다.")
-    void deleteById_existingId_removesTime() {
-        // given
-        ReservationTime saved = createTime(LocalTime.of(10, 0));
-
-        // when
-        reservationTimeRepository.deleteById(saved.id());
-
-        // then
-        List<ReservationTime> all = reservationTimeRepository.findAll();
-        assertThat(all).isEmpty();
-    }
-
-    @Test
-    @DisplayName("ID가 사용되고 있으면 예외가 발생한다.")
-    void deleteById_timeInUse_throwsDataIntegrityViolation() {
-        //given
-        ReservationTime time = createTime(LocalTime.of(10, 0));
-
-        Long themeId = createTheme();
-        createReservation(time, LocalDate.of(2026, 5, 6), themeId);
-
-        //when & then
-        assertThatThrownBy(
-                () -> reservationTimeRepository.deleteById(time.id())
-        ).isInstanceOf(DataIntegrityViolationException.class);
+            // when & then
+            assertThatThrownBy(
+                    () -> reservationTimeRepository.save(time)
+            ).isInstanceOf(DataIntegrityViolationException.class);
+        }
     }
 
     @Test
@@ -93,11 +72,11 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime savedTime = createTime(LocalTime.of(11, 0));
 
         // when
-        ReservationTime foundTime = reservationTimeRepository.findById(savedTime.id())
-                .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + savedTime.id()));
+        Optional<ReservationTime> result = reservationTimeRepository.findById(savedTime.getId());
 
         // then
-        assertThat(foundTime).isEqualTo(savedTime);
+        assertTrue(result.isPresent());
+        assertThat(result.get()).isEqualTo(savedTime);
     }
 
     @Test
@@ -146,14 +125,43 @@ class JdbcReservationTimeRepositoryTest {
 
         // then
         assertThat(result).hasSize(3);
-        
-        AvailableTimeQueryResult result1 = result.stream().filter(t -> t.id().equals(time1.id())).findFirst().get();
-        AvailableTimeQueryResult result2 = result.stream().filter(t -> t.id().equals(time2.id())).findFirst().get();
-        AvailableTimeQueryResult result3 = result.stream().filter(t -> t.id().equals(time3.id())).findFirst().get();
+
+        AvailableTimeQueryResult result1 = result.stream().filter(t -> t.id().equals(time1.getId())).findFirst().get();
+        AvailableTimeQueryResult result2 = result.stream().filter(t -> t.id().equals(time2.getId())).findFirst().get();
+        AvailableTimeQueryResult result3 = result.stream().filter(t -> t.id().equals(time3.getId())).findFirst().get();
 
         assertThat(result1.alreadyBooked()).isTrue();
         assertThat(result2.alreadyBooked()).isFalse();
         assertThat(result3.alreadyBooked()).isFalse();
+    }
+
+    @Test
+    @DisplayName("시간 정보를 삭제한다.")
+    void delete_existingId_removesTime() {
+        // given
+        ReservationTime saved = createTime(LocalTime.of(10, 0));
+
+        // when
+        reservationTimeRepository.delete(saved);
+
+        // then
+        List<ReservationTime> all = reservationTimeRepository.findAll();
+        assertThat(all).isEmpty();
+    }
+
+    @Test
+    @DisplayName("다른 객체가 참조하고 있으면 예외가 발생한다.")
+    void deleteById_timeInUse_throwsDataIntegrityViolation() {
+        //given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+
+        Long themeId = createTheme();
+        createReservation(time, LocalDate.of(2026, 5, 6), themeId);
+
+        //when & then
+        assertThatThrownBy(
+                () -> reservationTimeRepository.delete(time)
+        ).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     private ReservationTime createTime(LocalTime time) {
@@ -175,10 +183,17 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private void createReservation(ReservationTime time, LocalDate date, Long themeId) {
-        jdbcTemplate.update("""
-            insert into reservation(name, reservation_date, time_id, theme_id)
-            values (?, ?, ?, ?)
-        """, "브라운", date, time.id(), themeId
-        );
+        String insertSlotSql = "insert into reservation_slot(reservation_date, time_id, theme_id) values (?, ?, ?)";
+        org.springframework.jdbc.support.KeyHolder keyHolder = new org.springframework.jdbc.support.GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            java.sql.PreparedStatement ps = connection.prepareStatement(insertSlotSql, new String[]{"id"});
+            ps.setDate(1, java.sql.Date.valueOf(date));
+            ps.setLong(2, time.getId());
+            ps.setLong(3, themeId);
+            return ps;
+        }, keyHolder);
+        Long slotId = keyHolder.getKey().longValue();
+
+        jdbcTemplate.update("insert into reservation(name, slot_id) values (?, ?)", "브라운", slotId);
     }
 }
