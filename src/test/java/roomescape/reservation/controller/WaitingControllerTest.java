@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,9 +30,10 @@ class WaitingControllerTest {
     @MockitoBean
     private WaitingService waitingService;
 
+    @DisplayName("이름으로 본인 대기 목록을 조회할 수 있다.")
     @Test
-    void findAll() throws Exception {
-        given(waitingService.findAllByName(any()))
+    void find_waitings_by_name() throws Exception {
+        given(waitingService.findAllByName("카야"))
                 .willReturn(List.of(
                         new WaitingQueryResult(
                                 1L,
@@ -69,7 +71,7 @@ class WaitingControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get("/waitings")
                         .param("name", "카야"))
-                .andExpect(status().is2xxSuccessful())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("카야"))
                 .andExpect(jsonPath("$[0].date").value("2026-05-27"))
@@ -78,8 +80,9 @@ class WaitingControllerTest {
                 .andExpect(jsonPath("$[1].date").value("2026-05-28"));
     }
 
+    @DisplayName("본인 대기를 취소할 수 있다.")
     @Test
-    void delete() throws Exception {
+    void cancel_waiting() throws Exception {
         given(waitingService.delete(any(), any()))
                 .willReturn(1);
 
