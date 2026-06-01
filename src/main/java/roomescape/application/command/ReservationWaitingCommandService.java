@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 import roomescape.repository.ReservationWaitingRepository;
@@ -23,19 +24,23 @@ public class ReservationWaitingCommandService {
     }
 
     @Transactional
-    public ReservationWaiting save(String name, Reservation reservation) {
+    public ReservationWaiting save(Member waiter, Reservation reservation) {
         ReservationWaiting reservationWaiting = ReservationWaiting.createWith(
-                name,
-                LocalDateTime.now(clock),
-                reservation
+                waiter,
+                reservation.getReserver(),
+                reservation.getSlot(),
+                LocalDateTime.now(clock)
         );
 
-        return reservationWaitingRepository.save(reservationWaiting);
+        return reservationWaitingRepository.save(
+                reservationWaiting,
+                reservation.getId()
+        );
     }
 
     @Transactional
-    public void deleteMine(ReservationWaiting reservationWaiting, String name) {
-        reservationWaiting.cancelBy(name);
+    public void deleteMine(ReservationWaiting reservationWaiting, Member requester) {
+        reservationWaiting.cancelBy(requester);
 
         reservationWaitingRepository.deleteById(reservationWaiting.getId());
     }

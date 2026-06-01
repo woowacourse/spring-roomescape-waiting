@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.api.dto.ReservationTimeAvailabilityResponse;
+import roomescape.api.dto.ReservationTimeAvailabilityResponses;
 import roomescape.api.dto.ReservationTimeRequest;
 import roomescape.api.dto.ReservationTimeResponse;
 import roomescape.api.dto.ReservationTimeResponses;
-import roomescape.api.dto.SlotAvailabilityResponse;
-import roomescape.api.dto.SlotAvailabilityResponses;
 import roomescape.application.ReservationTimeApplicationService;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.projection.ReservationTimeAvailability;
@@ -53,18 +53,18 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<SlotAvailabilityResponses> searchAvailableReservationTime(
+    public ResponseEntity<ReservationTimeAvailabilityResponses> searchAvailableReservationTime(
             @RequestParam LocalDate date,
             @RequestParam Long themeId
     ) {
         List<ReservationTimeAvailability> availabilities
                 = reservationTimeApplicationService.findWithAvailability(date, themeId);
-        List<SlotAvailabilityResponse> responses = availabilities.stream()
-                .map(SlotAvailabilityResponse::from)
+        List<ReservationTimeAvailabilityResponse> responses = availabilities.stream()
+                .map(ReservationTimeAvailabilityResponse::from)
                 .toList();
 
         return ResponseEntity.ok()
-                .body(SlotAvailabilityResponses.of(responses));
+                .body(ReservationTimeAvailabilityResponses.of(responses));
     }
 
     @DeleteMapping("/{id}")

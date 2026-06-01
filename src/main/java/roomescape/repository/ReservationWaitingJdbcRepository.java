@@ -1,8 +1,6 @@
 package roomescape.repository;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -13,9 +11,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.NotFoundException;
@@ -29,7 +28,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     private static final String SELECT_BASE = """
             SELECT 
                 rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
-                r.id as reservation_id, r.name as reservation_name, r.date,
+                r.date,
                 t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name,
                 th.description as theme_description,
@@ -46,15 +45,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) ->
-            new ReservationWaiting(
-                    rs.getLong("waiting_id"),
-                    rs.getString("waiting_name"),
-                    rs.getTimestamp("created_at").toLocalDateTime(),
-                    mapReservation(rs)
-            );
-
-    private Reservation mapReservation(ResultSet rs) throws SQLException {
+    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
                 rs.getTime("time_value").toLocalTime()
@@ -65,33 +56,41 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 rs.getString("theme_description"),
                 rs.getString("theme_thumbnail")
         );
-        return new Reservation(
-                rs.getLong("reservation_id"),
-                rs.getString("reservation_name"),
+        Slot slot = new Slot(
                 rs.getDate("date").toLocalDate(),
                 time,
                 theme
         );
-    }
+        Member member = new Member(
+                rs.getString("waiting_name")
+        );
+
+        return new ReservationWaiting(
+                rs.getLong("waiting_id"),
+                member,
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                slot
+        );
+    };
 
     @Override
-    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+    public ReservationWaiting save(ReservationWaiting reservationWaiting, Long reservationId) {
         String sql = "INSERT INTO reservation_waiting (name, created_at, reservation_id) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-                ps.setString(1, reservationWaiting.getName());
+                ps.setString(1, reservationWaiting.getWaiter().name());
                 ps.setTimestamp(2, Timestamp.valueOf(reservationWaiting.getCreatedAt()));
-                ps.setLong(3, reservationWaiting.getReservation().getId());
+                ps.setLong(3, reservationId);
                 return ps;
             }, keyHolder);
         } catch (DuplicateKeyException e) {
             throw new ConflictException(ALREADY_WAITING, e);
         } catch (DataIntegrityViolationException e) {
             throw new NotFoundException(
-                    String.format(RESERVATION_NOT_FOUND_FORMAT, reservationWaiting.getReservation().getId()),
+                    String.format(RESERVATION_NOT_FOUND_FORMAT, reservationId),
                     e
             );
         }
@@ -99,16 +98,16 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         long id = keyHolder.getKey().longValue();
         return new ReservationWaiting(
                 id,
-                reservationWaiting.getName(),
+                reservationWaiting.getWaiter(),
                 reservationWaiting.getCreatedAt(),
-                reservationWaiting.getReservation()
+                reservationWaiting.getSlot()
         );
     }
 
     @Override
-    public boolean existBy(String name, Long reservationId) {
+    public boolean existBy(Member member, Long reservationId) {
         String sql = "SELECT COUNT(*) FROM reservation_waiting WHERE name = ? AND reservation_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, reservationId);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, member.name(), reservationId);
         return count != null && count > 0;
     }
 

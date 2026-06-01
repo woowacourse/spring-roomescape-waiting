@@ -11,8 +11,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 
@@ -49,13 +51,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 rs.getString("theme_description"),
                 rs.getString("theme_thumbnail")
         );
-        return new Reservation(
-                rs.getLong("reservation_id"),
-                rs.getString("name"),
-                rs.getDate("date").toLocalDate(),
-                time,
-                theme
-        );
+        Member reserver = new Member(rs.getString("name"));
+        Slot slot = new Slot(rs.getDate("date").toLocalDate(), time, theme);
+        return new Reservation(rs.getLong("reservation_id"), reserver, slot);
     };
 
     public List<Reservation> findAll(int offset, int limit) {
@@ -74,9 +72,15 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return count != null && count > 0;
     }
 
-    public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlot(Slot slot) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        );
         return count != null && count > 0;
     }
 
@@ -87,10 +91,10 @@ public class ReservationJdbcRepository implements ReservationRepository {
         try {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-                ps.setString(1, reservation.getName());
-                ps.setDate(2, Date.valueOf(reservation.getDate()));
-                ps.setLong(3, reservation.getTime().getId());
-                ps.setLong(4, reservation.getTheme().getId());
+                ps.setString(1, reservation.getReserver().name());
+                ps.setDate(2, Date.valueOf(reservation.getSlot().date()));
+                ps.setLong(3, reservation.getSlot().time().getId());
+                ps.setLong(4, reservation.getSlot().theme().getId());
                 return ps;
             }, keyHolder);
         } catch (DuplicateKeyException e) {
@@ -100,10 +104,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
         long id = keyHolder.getKey().longValue();
         return new Reservation(
                 id,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                reservation.getReserver(),
+                reservation.getSlot()
         );
     }
 
@@ -112,9 +114,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
         try {
             jdbcTemplate.update(
                     sql,
-                    Date.valueOf(reservation.getDate()),
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId(),
+                    Date.valueOf(reservation.getSlot().date()),
+                    reservation.getSlot().time().getId(),
+                    reservation.getSlot().theme().getId(),
                     reservation.getId()
             );
         } catch (DuplicateKeyException e) {
@@ -133,19 +135,25 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return results.stream().findFirst();
     }
 
-    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findBySlot(Slot slot) {
         String sql = SELECT_BASE + " WHERE r.date = ? AND r.time_id = ? AND r.theme_id = ?";
-        List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, date, timeId, themeId);
+        List<Reservation> results = jdbcTemplate.query(
+                sql,
+                reservationRowMapper,
+                slot.date(),
+                slot.time().getId(),
+                slot.theme().getId()
+        );
         return results.stream().findFirst();
     }
 
-    public List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId) {
+    public List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Theme theme) {
         String sql = "SELECT time_id FROM reservation WHERE date = ? AND theme_id = ?";
-        return jdbcTemplate.queryForList(sql, Long.class, date, themeId);
+        return jdbcTemplate.queryForList(sql, Long.class, date, theme.getId());
     }
 
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findByMember(Member member) {
         String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC";
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, member.name());
     }
 }

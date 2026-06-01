@@ -9,8 +9,10 @@ import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @Service
@@ -38,16 +40,33 @@ public class ReservationApplicationService {
     public Reservation save(ReservationRequest request) {
         ReservationTime reservationTime = reservationTimeQueryService.getById(request.timeId());
         Theme theme = themeQueryService.getById(request.themeId());
+        Slot slot = new Slot(
+                request.date(),
+                reservationTime,
+                theme
+        );
 
-        return reservationCommandService.save(request.name(), request.date(), reservationTime, theme);
+        return reservationCommandService.save(
+                new Member(request.name()),
+                slot
+        );
     }
 
     @Transactional
     public Reservation updateMine(Long id, String name, ReservationUpdateRequest request) {
         Reservation existing = reservationQueryService.getById(id);
         ReservationTime newTime = reservationTimeQueryService.getById(request.timeId());
+        Slot targetSlot = new Slot(
+                request.date(),
+                newTime,
+                existing.getTheme()
+        );
 
-        return reservationCommandService.updateMine(existing, name, request.date(), newTime);
+        return reservationCommandService.updateMine(
+                existing,
+                new Member(name),
+                targetSlot
+        );
     }
 
     public ReservationResponses findPage(int page, int size) {
@@ -55,7 +74,7 @@ public class ReservationApplicationService {
     }
 
     public ReservationResponses findMine(String name) {
-        return reservationQueryService.findMine(name);
+        return reservationQueryService.findMine(new Member(name));
     }
 
     @Transactional
@@ -67,6 +86,9 @@ public class ReservationApplicationService {
     public void deleteMine(Long id, String name) {
         Reservation reservation = reservationQueryService.getById(id);
 
-        reservationCommandService.deleteMine(reservation, name);
+        reservationCommandService.deleteMine(
+                reservation,
+                new Member(name)
+        );
     }
 }

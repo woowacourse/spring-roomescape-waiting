@@ -8,8 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
 import roomescape.domain.exception.ForbiddenException;
@@ -18,6 +20,7 @@ class ReservationTest {
 
     private static final Theme ANY_THEME = new Theme(1L, "공포", "설명", "https://example.com/horror.jpg");
     private static final String RESERVATION_OWNER = "브라운";
+    private static final Member RESERVER = new Member(RESERVATION_OWNER);
     private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 5, 14);
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 5, 14, 14, 30);
     private static final LocalDateTime BEFORE_RESERVATION = LocalDateTime.of(2026, 5, 14, 13, 0);
@@ -27,14 +30,18 @@ class ReservationTest {
 
     @Test
     void 지난_시각으로는_예약을_생성할_수_없다() {
-        assertThatThrownBy(() -> Reservation.createWith(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME, NOW))
+        Slot slot = new Slot(RESERVATION_DATE, TWO_PM, ANY_THEME);
+
+        assertThatThrownBy(() -> Reservation.createWith(RESERVER, slot, NOW))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("지난 시각에는 예약할 수 없습니다");
     }
 
     @Test
     void 미래_시각으로는_예약을_생성할_수_있다() {
-        assertThatCode(() -> Reservation.createWith(RESERVATION_OWNER, RESERVATION_DATE, THREE_PM, ANY_THEME, NOW))
+        Slot slot = new Slot(RESERVATION_DATE, THREE_PM, ANY_THEME);
+
+        assertThatCode(() -> Reservation.createWith(RESERVER, slot, NOW))
                 .doesNotThrowAnyException();
     }
 
@@ -63,14 +70,14 @@ class ReservationTest {
     void 예약자_이름과_같으면_isOwnedBy가_true를_반환한다() {
         Reservation reservation = new Reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThat(reservation.isOwnedBy(RESERVATION_OWNER)).isTrue();
+        assertThat(reservation.isOwnedBy(new Member(RESERVATION_OWNER))).isTrue();
     }
 
     @Test
     void 예약자_이름과_다르면_isOwnedBy가_false를_반환한다() {
         Reservation reservation = new Reservation(RESERVATION_OWNER, RESERVATION_DATE, TWO_PM, ANY_THEME);
 
-        assertThat(reservation.isOwnedBy("티뉴")).isFalse();
+        assertThat(reservation.isOwnedBy(new Member("티뉴"))).isFalse();
     }
 
     @Test

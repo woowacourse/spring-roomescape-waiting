@@ -15,11 +15,20 @@ public class Reservation {
     private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
 
     private final Long id;
-    private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Member reserver;
+    private final Slot slot;
 
+    public Reservation(
+            Long id,
+            Member reserver,
+            Slot slot
+    ) {
+        this.id = id;
+        this.reserver = Objects.requireNonNull(reserver);
+        this.slot = Objects.requireNonNull(slot);
+    }
+
+    // TODO: 테스트에서 사용하는 메서드
     public Reservation(
             Long id,
             String name,
@@ -27,11 +36,7 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        this.id = id;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this(id, new Member(name), new Slot(date, time, theme));
     }
 
     public Reservation(
@@ -40,60 +45,57 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        this(null, name, date, time, theme);
+        this(null, new Member(name), new Slot(date, time, theme));
     }
 
     public static Reservation createWith(
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme,
+            Member reserver,
+            Slot slot,
             LocalDateTime now
     ) {
-        validateCreatable(date, time, now);
-        return new Reservation(name, date, time, theme);
+        validateCreatable(slot, now);
+        return new Reservation(null, reserver, slot);
     }
 
-    private static void validateCreatable(LocalDate date, ReservationTime time, LocalDateTime now) {
-        if (isPast(date, time, now)) {
+    private static void validateCreatable(Slot slot, LocalDateTime now) {
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_CREATE_REJECTED);
         }
     }
 
-    private static boolean isPast(LocalDate date, ReservationTime time, LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
-    }
-
     public Reservation updateWith(
-            String name,
-            LocalDate date,
-            ReservationTime time,
+            Member requester,
+            Slot targetSlot,
             LocalDateTime now
     ) {
-        validateOwner(name);
+        validateOwner(requester);
         validatePast(now, EXPIRED_RESERVATION_UPDATE_REJECTED);
-        validateTargetNotPast(date, time, now);
+        validateTargetNotPast(targetSlot, now);
 
         return new Reservation(
                 this.id,
-                name,
-                date,
-                time,
-                this.theme
+                this.reserver,
+                targetSlot
         );
     }
 
+    // TODO: 테스트에서 사용하는 메서드
     public void cancelBy(String name, LocalDateTime now) {
-        validateOwner(name);
+        cancelBy(new Member(name), now);
+    }
+
+    public void cancelBy(Member member, LocalDateTime now) {
+        validateOwner(member);
         validatePast(now, PAST_RESERVATION_CANCEL_REJECTED);
     }
 
-    public boolean isOwnedBy(String name) {
-        return name.equals(this.name);
+    // TODO: 테스트에서 사용하는 메서드
+    public boolean isOwnedBy(Member other) {
+        return reserver.equals(other);
     }
 
     public boolean isPast(LocalDateTime now) {
-        return isPast(this.date, this.time, now);
+        return slot.isPast(now);
     }
 
     public Long getId() {
@@ -101,19 +103,27 @@ public class Reservation {
     }
 
     public String getName() {
-        return name;
+        return reserver.name();
+    }
+
+    public Member getReserver() {
+        return reserver;
+    }
+
+    public Slot getSlot() {
+        return slot;
     }
 
     public LocalDate getDate() {
-        return date;
+        return slot.date();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.time();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.theme();
     }
 
     @Override
@@ -133,8 +143,8 @@ public class Reservation {
         return Objects.hash(id);
     }
 
-    private void validateOwner(String name) {
-        if (!name.equals(this.name)) {
+    private void validateOwner(Member member) {
+        if (!reserver.equals(member)) {
             throw new ForbiddenException(NOT_OWNER);
         }
     }
@@ -145,8 +155,8 @@ public class Reservation {
         }
     }
 
-    private void validateTargetNotPast(LocalDate date, ReservationTime time, LocalDateTime now) {
-        if (isPast(date, time, now)) {
+    private void validateTargetNotPast(Slot slot, LocalDateTime now) {
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_UPDATE_REJECTED);
         }
     }

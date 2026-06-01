@@ -3,7 +3,10 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
 
 public interface ReservationRepository {
 
@@ -13,15 +16,15 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsBySlot(LocalDate date, Long timeId, Long themeId);
+    boolean existsBySlot(Slot slot);
 
     Optional<Reservation> findById(Long id);
 
-    Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findBySlot(Slot slot);
 
-    List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
+    List<Long> findReservedTimeIdsByDateAndTheme(LocalDate date, Theme theme);
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByMember(Member member);
 
     List<Reservation> findAll(int offset, int limit);
 

@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.repository.ReservationJdbcRepository;
@@ -102,14 +104,14 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findReservedTimeIdsByDateAndThemeId는_같은_날짜와_테마의_예약_시간_id만_반환한다() {
+    void findReservedTimeIdsByDateAndTheme는_같은_날짜와_테마의_예약_시간_id만_반환한다() {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         LocalDate targetDate = RESERVATION_DATE;
         repository.save(new Reservation("브라운", targetDate, time, theme));
         repository.save(new Reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
-        List<Long> result = repository.findReservedTimeIdsByDateAndThemeId(targetDate, themeId);
+        List<Long> result = repository.findReservedTimeIdsByDateAndTheme(targetDate, theme);
 
         assertThat(result).containsExactly(timeId);
     }
@@ -119,9 +121,10 @@ class ReservationJdbcRepositoryTest {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         LocalDate date = RESERVATION_DATE;
+        Slot slot = new Slot(date, time, theme);
         Reservation saved = repository.save(new Reservation("브라운", date, time, theme));
 
-        Optional<Reservation> result = repository.findBySlot(date, timeId, themeId);
+        Optional<Reservation> result = repository.findBySlot(slot);
 
         assertThat(result).contains(saved);
     }
@@ -131,9 +134,10 @@ class ReservationJdbcRepositoryTest {
         ReservationTime time = new ReservationTime(timeId, RESERVATION_START_AT);
         Theme theme = new Theme(themeId, THEME_NAME, THEME_DESCRIPTION, THEME_THUMBNAIL_IMAGE_URL);
         LocalDate date = RESERVATION_DATE;
+        Slot slot = new Slot(date, time, theme);
         repository.save(new Reservation("브라운", date, time, theme));
 
-        assertThat(repository.existsBySlot(date, timeId, themeId)).isTrue();
+        assertThat(repository.existsBySlot(slot)).isTrue();
     }
 
     @Test
@@ -185,7 +189,7 @@ class ReservationJdbcRepositoryTest {
         repository.save(new Reservation("민욱", RESERVATION_DATE, time, theme));
         repository.save(new Reservation("티뉴", OTHER_RESERVATION_DATE, time, theme));
 
-        assertThat(repository.findByName("민욱"))
+        assertThat(repository.findByMember(new Member("민욱")))
                 .hasSize(1)
                 .first()
                 .extracting(Reservation::getName)

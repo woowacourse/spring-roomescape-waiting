@@ -12,50 +12,78 @@ public class ReservationWaiting {
     private static final String NOT_OWNER = "본인의 예약 대기가 아닙니다.";
 
     private final Long id;
-    private final String name;
+    private final Member waiter;
     private final LocalDateTime createdAt;
-    private final Reservation reservation;
+    private final Slot slot;
 
+    public ReservationWaiting(
+            Long id,
+            Member waiter,
+            LocalDateTime createdAt,
+            Slot slot
+    ) {
+        this.id = id;
+        this.waiter = Objects.requireNonNull(waiter);
+        this.createdAt = Objects.requireNonNull(createdAt);
+        this.slot = Objects.requireNonNull(slot);
+    }
+
+    // TODO: 테스트에서 사용하는 메서드
     public ReservationWaiting(
             Long id,
             String name,
             LocalDateTime createdAt,
-            Reservation reservation
+            Slot slot
     ) {
-        this.id = id;
-        this.name = name;
-        this.createdAt = createdAt;
-        this.reservation = reservation;
+        this(id, new Member(name), createdAt, slot);
     }
 
+    // TODO: 테스트에서 사용하는 메서드
     public ReservationWaiting(
             String name,
             LocalDateTime createdAt,
-            Reservation reservation
+            Slot slot
     ) {
-        this(null, name, createdAt, reservation);
+        this(null, new Member(name), createdAt, slot);
     }
 
+    // TODO: 테스트에서 사용하는 메서드
     public static ReservationWaiting createWith(
             String name,
-            LocalDateTime now,
-            Reservation reservation
+            Member reserver,
+            Slot slot,
+            LocalDateTime now
     ) {
-        validateWaitable(name, now, reservation);
-        return new ReservationWaiting(name, now, reservation);
+        return createWith(new Member(name), reserver, slot, now);
     }
 
-    private static void validateWaitable(String name, LocalDateTime now, Reservation reservation) {
-        if (reservation.isOwnedBy(name)) {
+    // TODO: 이미 있는 예약과 겹치는지는 외부에서 판단하는 것이 좋아보임
+    public static ReservationWaiting createWith(
+            Member waiter,
+            Member reserver,
+            Slot slot,
+            LocalDateTime now
+    ) {
+        validateWaitable(waiter, reserver, slot, now);
+        return new ReservationWaiting(null, waiter, now, slot);
+    }
+
+    private static void validateWaitable(Member waiter, Member reserver, Slot slot, LocalDateTime now) {
+        if (waiter.equals(reserver)) {
             throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
         }
-        if (reservation.isPast(now)) {
+        if (slot.isPast(now)) {
             throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
         }
     }
 
+    // TODO: 테스트에서 사용하는 메서드
     public void cancelBy(String name) {
-        validateOwner(name);
+        cancelBy(new Member(name));
+    }
+
+    public void cancelBy(Member member) {
+        validateOwner(member);
     }
 
     public Long getId() {
@@ -63,15 +91,19 @@ public class ReservationWaiting {
     }
 
     public String getName() {
-        return name;
+        return waiter.name();
+    }
+
+    public Member getWaiter() {
+        return waiter;
+    }
+
+    public Slot getSlot() {
+        return slot;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    public Reservation getReservation() {
-        return reservation;
     }
 
     @Override
@@ -91,8 +123,8 @@ public class ReservationWaiting {
         return Objects.hash(id);
     }
 
-    private void validateOwner(String name) {
-        if (!this.name.equals(name)) {
+    private void validateOwner(Member member) {
+        if (!waiter.equals(member)) {
             throw new ForbiddenException(NOT_OWNER);
         }
     }

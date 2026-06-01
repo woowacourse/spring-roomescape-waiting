@@ -24,10 +24,13 @@ import roomescape.api.dto.ReservationWaitingRequest;
 import roomescape.application.ReservationWaitingApplicationService;
 import roomescape.application.command.ReservationWaitingCommandService;
 import roomescape.application.query.ReservationQueryService;
+import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ReservationWaitingQueryService;
+import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.ConflictException;
 import roomescape.domain.exception.ForbiddenException;
@@ -57,6 +60,12 @@ class ReservationWaitingUseCaseMockTest {
     @Mock
     private ReservationQueryService reservationQueryService;
 
+    @Mock
+    private ReservationTimeQueryService reservationTimeQueryService;
+
+    @Mock
+    private ThemeQueryService themeQueryService;
+
     private ReservationWaitingQueryService reservationWaitingQueryService;
     private ReservationWaitingCommandService reservationWaitingCommandService;
     private ReservationWaitingApplicationService reservationWaitingApplicationService;
@@ -74,31 +83,36 @@ class ReservationWaitingUseCaseMockTest {
         reservationWaitingApplicationService = new ReservationWaitingApplicationService(
                 reservationWaitingCommandService,
                 reservationWaitingQueryService,
-                reservationQueryService
+                reservationQueryService,
+                reservationTimeQueryService,
+                themeQueryService
         );
     }
 
     @Test
     void save는_저장소에_위임하고_저장된_대기를_반환한다() {
         Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
+        Slot slot = new Slot(RESERVATION_DATE, RESERVATION_TIME, THEME);
         ReservationWaitingRequest request = new ReservationWaitingRequest(
                 "민욱",
                 RESERVATION_DATE,
                 RESERVATION_TIME.getId(),
                 THEME.getId()
         );
-        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", WAITING_CREATED_AT, reservation);
+        ReservationWaiting saved = new ReservationWaiting(1L, "민욱", WAITING_CREATED_AT, reservation.getSlot());
         ReservationWaitingWithOrder savedWithOrder = new ReservationWaitingWithOrder(
                 saved.getId(),
                 saved.getName(),
-                saved.getReservation().getDate(),
-                saved.getReservation().getTime(),
-                saved.getReservation().getTheme(),
+                saved.getSlot().date(),
+                saved.getSlot().time(),
+                saved.getSlot().theme(),
                 1
         );
-        given(reservationQueryService.findBySlot(RESERVATION_DATE, RESERVATION_TIME.getId(), THEME.getId()))
+        given(reservationTimeQueryService.getById(RESERVATION_TIME.getId())).willReturn(RESERVATION_TIME);
+        given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
+        given(reservationQueryService.findBySlot(slot))
                 .willReturn(Optional.of(reservation));
-        given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
+        given(reservationWaitingRepository.save(any(ReservationWaiting.class), anyLong())).willReturn(saved);
         given(reservationWaitingQueryRepository.findById(saved.getId())).willReturn(Optional.of(savedWithOrder));
 
         assertThat(reservationWaitingApplicationService.save(request)).isEqualTo(savedWithOrder);
@@ -106,13 +120,21 @@ class ReservationWaitingUseCaseMockTest {
 
     @Test
     void save는_예약되지_않은_슬롯이면_ConflictException을_던진다() {
-        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", RESERVATION_DATE, 1L, 1L);
-        given(reservationQueryService.findBySlot(RESERVATION_DATE, 1L, 1L))
+        Slot slot = new Slot(RESERVATION_DATE, RESERVATION_TIME, THEME);
+        ReservationWaitingRequest request = new ReservationWaitingRequest(
+                "민욱",
+                RESERVATION_DATE,
+                RESERVATION_TIME.getId(),
+                THEME.getId()
+        );
+        given(reservationTimeQueryService.getById(RESERVATION_TIME.getId())).willReturn(RESERVATION_TIME);
+        given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
+        given(reservationQueryService.findBySlot(slot))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationWaitingApplicationService.save(request))
                 .isInstanceOf(ConflictException.class);
-        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class), anyLong());
     }
 
     @Test
@@ -153,6 +175,6 @@ class ReservationWaitingUseCaseMockTest {
 
     private ReservationWaiting waitingOwnedBy(Long id, String name) {
         Reservation reservation = new Reservation(1L, "티뉴", RESERVATION_DATE, RESERVATION_TIME, THEME);
-        return new ReservationWaiting(id, name, WAITING_CREATED_AT, reservation);
+        return new ReservationWaiting(id, name, WAITING_CREATED_AT, reservation.getSlot());
     }
 }

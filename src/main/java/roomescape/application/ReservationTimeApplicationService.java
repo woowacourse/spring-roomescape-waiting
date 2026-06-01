@@ -9,7 +9,9 @@ import roomescape.api.dto.ReservationTimeRequest;
 import roomescape.application.command.ReservationTimeCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
+import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.projection.ReservationTimeAvailability;
 
 @Service
@@ -19,15 +21,18 @@ public class ReservationTimeApplicationService {
     private final ReservationTimeCommandService reservationTimeCommandService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ReservationQueryService reservationQueryService;
+    private final ThemeQueryService themeQueryService;
 
     public ReservationTimeApplicationService(
             ReservationTimeCommandService reservationTimeCommandService,
             ReservationTimeQueryService reservationTimeQueryService,
-            ReservationQueryService reservationQueryService
+            ReservationQueryService reservationQueryService,
+            ThemeQueryService themeQueryService
     ) {
         this.reservationTimeCommandService = reservationTimeCommandService;
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.reservationQueryService = reservationQueryService;
+        this.themeQueryService = themeQueryService;
     }
 
     @Transactional
@@ -43,7 +48,8 @@ public class ReservationTimeApplicationService {
 
     public List<ReservationTimeAvailability> findWithAvailability(LocalDate date, Long themeId) {
         List<ReservationTime> times = reservationTimeQueryService.findAll();
-        Set<Long> reservedTimeIds = reservationQueryService.findReservedTimeIds(date, themeId);
+        Theme theme = themeQueryService.getById(themeId);
+        Set<Long> reservedTimeIds = reservationQueryService.findReservedTimeIds(date, theme);
 
         return times.stream()
                 .map(time -> new ReservationTimeAvailability(time, !reservedTimeIds.contains(time.getId())))

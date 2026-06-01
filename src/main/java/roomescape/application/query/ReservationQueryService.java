@@ -8,7 +8,10 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.api.dto.ReservationResponses;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
@@ -35,16 +38,16 @@ public class ReservationQueryService {
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약입니다. Id: " + id));
     }
 
-    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.findBySlot(date, timeId, themeId);
+    public Optional<Reservation> findBySlot(Slot slot) {
+        return reservationRepository.findBySlot(slot);
     }
 
-    public ReservationResponses findMine(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
+    public ReservationResponses findMine(Member member) {
+        List<Reservation> reservations = reservationRepository.findByMember(member);
         return ReservationResponses.from(reservations, reservations.size(), 0, reservations.size());
     }
 
-    public Set<Long> findReservedTimeIds(LocalDate date, Long themeId) {
-        return new HashSet<>(reservationRepository.findReservedTimeIdsByDateAndThemeId(date, themeId));
+    public Set<Long> findReservedTimeIds(LocalDate date, Theme theme) {
+        return new HashSet<>(reservationRepository.findReservedTimeIdsByDateAndTheme(date, theme));
     }
 }

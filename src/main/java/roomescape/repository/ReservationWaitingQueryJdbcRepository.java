@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
@@ -66,8 +67,8 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
     }
 
     @Override
-    public List<ReservationWaitingWithOrder> findByName(String name) {
+    public List<ReservationWaitingWithOrder> findByMember(Member member) {
         String sql = SELECT_BASE + " WHERE ow.waiting_name = ? ORDER BY ow.waiting_order ASC";
-        return jdbcTemplate.query(sql, waitingWithOrderRowMapper, name);
+        return jdbcTemplate.query(sql, waitingWithOrderRowMapper, member.name());
     }
 }

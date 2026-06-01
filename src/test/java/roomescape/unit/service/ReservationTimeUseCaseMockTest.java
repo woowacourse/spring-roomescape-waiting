@@ -18,7 +18,9 @@ import roomescape.application.ReservationTimeApplicationService;
 import roomescape.application.command.ReservationTimeCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
+import roomescape.application.query.ThemeQueryService;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationTimeAvailability;
 import roomescape.repository.ReservationTimeRepository;
@@ -29,6 +31,7 @@ class ReservationTimeUseCaseMockTest {
     private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
     private static final ReservationTime TEN_AM = new ReservationTime(1L, LocalTime.of(10, 0));
     private static final ReservationTime ELEVEN_AM = new ReservationTime(2L, LocalTime.of(11, 0));
+    private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
 
     @Mock
     private ReservationTimeRepository timeRepository;
@@ -39,6 +42,9 @@ class ReservationTimeUseCaseMockTest {
     @Mock
     private ReservationTimeCommandService reservationTimeCommandService;
 
+    @Mock
+    private ThemeQueryService themeQueryService;
+
     private ReservationTimeQueryService reservationTimeQueryService;
     private ReservationTimeApplicationService reservationTimeApplicationService;
 
@@ -48,7 +54,8 @@ class ReservationTimeUseCaseMockTest {
         reservationTimeApplicationService = new ReservationTimeApplicationService(
                 reservationTimeCommandService,
                 reservationTimeQueryService,
-                reservationQueryService
+                reservationQueryService,
+                themeQueryService
         );
     }
 
@@ -79,7 +86,8 @@ class ReservationTimeUseCaseMockTest {
     void findWithAvailability는_저장소의_시간별_예약_상태를_반환한다() {
         List<ReservationTime> times = List.of(TEN_AM, ELEVEN_AM);
         given(timeRepository.findAll()).willReturn(times);
-        given(reservationQueryService.findReservedTimeIds(RESERVATION_DATE, 1L)).willReturn(Set.of(1L));
+        given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
+        given(reservationQueryService.findReservedTimeIds(RESERVATION_DATE, THEME)).willReturn(Set.of(1L));
 
         List<ReservationTimeAvailability> availabilities = reservationTimeApplicationService.findWithAvailability(
                 RESERVATION_DATE,

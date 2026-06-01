@@ -3,6 +3,7 @@ package roomescape.application.query;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
@@ -34,7 +35,7 @@ public class ReservationWaitingQueryService {
                 .orElseThrow(() -> new NotFoundException("존재하지않는 예약대기입니다. Id: " + id));
     }
 
-    public List<ReservationWaitingWithOrder> findMine(String name) {
-        return reservationWaitingQueryRepository.findByName(name);
+    public List<ReservationWaitingWithOrder> findMine(Member member) {
+        return reservationWaitingQueryRepository.findByMember(member);
     }
 }

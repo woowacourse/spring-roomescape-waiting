@@ -40,7 +40,11 @@ public class ThemeApplicationService {
     }
 
     public List<Theme> findPopular(LocalDate now, Integer days, Integer limit) {
-        return themeQueryService.findPopular(now, days, limit);
+        return themeQueryService.findPopular(
+                now,
+                days,
+                limit
+        );
     }
 
     @Transactional

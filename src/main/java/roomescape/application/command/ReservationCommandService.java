@@ -1,13 +1,12 @@
 package roomescape.application.command;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.Slot;
 import roomescape.repository.ReservationRepository;
 
 @Service
@@ -25,12 +24,10 @@ public class ReservationCommandService {
     }
 
     @Transactional
-    public Reservation save(String name, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    public Reservation save(Member reserver, Slot slot) {
         Reservation reservation = Reservation.createWith(
-                name,
-                date,
-                reservationTime,
-                theme,
+                reserver,
+                slot,
                 now()
         );
 
@@ -38,11 +35,10 @@ public class ReservationCommandService {
     }
 
     @Transactional
-    public Reservation updateMine(Reservation existing, String name, LocalDate date, ReservationTime newTime) {
+    public Reservation updateMine(Reservation existing, Member requester, Slot targetSlot) {
         Reservation updated = existing.updateWith(
-                name,
-                date,
-                newTime,
+                requester,
+                targetSlot,
                 now()
         );
 
@@ -55,8 +51,11 @@ public class ReservationCommandService {
     }
 
     @Transactional
-    public void deleteMine(Reservation reservation, String name) {
-        reservation.cancelBy(name, now());
+    public void deleteMine(Reservation reservation, Member requester) {
+        reservation.cancelBy(
+                requester,
+                now()
+        );
 
         reservationRepository.deleteById(reservation.getId());
     }
