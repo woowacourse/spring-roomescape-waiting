@@ -716,7 +716,7 @@
                     </div>
                     <div class="reservation-actions">
                         <button class="btn-secondary" onclick="toggleEditForm(${item.id})">변경</button>
-                        <button class="btn-danger" onclick="cancelReservation(${item.id})">취소</button>
+                        <button class="btn-danger" onclick="cancelReservation(${item.id}, '${encodeURIComponent(name)}')">취소</button>
                     </div>
                 </div>
                 <div class="edit-form hidden" id="edit-${item.id}">
@@ -725,7 +725,7 @@
                     <label>새 시간</label>
                     <div class="time-list" id="edit-times-${item.id}"></div>
                     <div id="edit-alert-${item.id}"></div>
-                    <button class="btn-success" onclick="submitEdit(${item.id})">저장</button>
+                    <button class="btn-success" onclick="submitEdit(${item.id}, '${encodeURIComponent(name)}')">저장</button>
                 </div>
             </div>
         `;
@@ -773,7 +773,7 @@
         selectedEditTimeId[reservationId] = timeId;
     }
 
-    async function submitEdit(reservationId) {
+    async function submitEdit(reservationId, encodedName) {
         const date = document.getElementById(`edit-date-${reservationId}`).value;
         const timeId = selectedEditTimeId[reservationId];
         const alertEl = document.getElementById(`edit-alert-${reservationId}`);
@@ -783,7 +783,7 @@
             return;
         }
 
-        const res = await fetch(`/reservations/${reservationId}`, {
+        const res = await fetch(`/reservations/${reservationId}?name=${encodedName}`, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({date, timeId})
@@ -798,10 +798,10 @@
         }
     }
 
-    async function cancelReservation(reservationId) {
+    async function cancelReservation(reservationId, encodedName) {
         if (!confirm('예약을 취소하시겠습니까?')) return;
 
-        const res = await fetch(`/reservations/${reservationId}`, {method: 'DELETE'});
+        const res = await fetch(`/reservations/${reservationId}?name=${encodedName}`, {method: 'DELETE'});
 
         if (res.ok) {
             showMyAlert('예약이 취소되었습니다.', 'success');

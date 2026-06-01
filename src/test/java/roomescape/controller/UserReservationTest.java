@@ -55,9 +55,11 @@ class UserReservationTest {
     @DisplayName("지난 예약 취소 시 400을 반환한다.")
     void cancelPastReservation() {
         RestAssured.given().log().all()
+                .queryParam("name", "user_a")
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(400)
+                .body("message", is("이미 시작된 예약은 변경할 수 없습니다."));
     }
 
     @Test
@@ -87,10 +89,12 @@ class UserReservationTest {
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .queryParam("name", "user_b")
                 .body(params)
                 .when().patch("/reservations/2")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(400)
+                .body("message", is("지나간 시간에는 예약할 수 없습니다."));
     }
 
     @Test
