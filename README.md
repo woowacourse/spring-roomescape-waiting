@@ -92,7 +92,7 @@ PATCH /reservations/{reservationId}/cancel
 
 취소하고자 하는 예약이 COMPLETE, CANCELLED라면
 
-- [ ]  취소할 수 없다는 예외처리
+- [x]  취소할 수 없다는 예외처리
 
 ### 상태 변환 흐름
 
