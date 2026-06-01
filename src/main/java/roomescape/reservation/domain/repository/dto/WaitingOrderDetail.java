@@ -5,12 +5,10 @@ import java.time.LocalTime;
 
 public record WaitingOrderDetail(Long waitingId,
                                  String username,
-                                 LocalDate date,
-                                 Long themeId,
-                                 String themeName,
-                                 String themeDescription,
-                                 String thumbnailImgUrl,
-                                 Long timeId,
-                                 LocalTime startAt,
-                                 Long order) {
+	                                 LocalDate date,
+	                                 Long themeId,
+	                                 String themeName,
+	                                 Long timeId,
+	                                 LocalTime startAt,
+	                                 Long order) {
 }

@@ -109,7 +109,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return jdbcTemplate.query(
                 """
                         SELECT ranked.id, ranked.name, ranked.date,
-                               ranked.theme_id, t.name AS theme_name, t.description, t.thumbnail_img_url,
+                               ranked.theme_id, t.name AS theme_name,
                                ranked.time_id, rt.start_at,
                                ranked.rank
                         FROM (
@@ -128,12 +128,10 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 (rs, rowNum) -> new WaitingOrderDetail(
                         rs.getLong("id"),
                         rs.getString("name"),
-                        rs.getDate("date").toLocalDate(),
-                        rs.getLong("theme_id"),
-                        rs.getString("theme_name"),
-                        rs.getString("description"),
-                        rs.getString("thumbnail_img_url"),
-                        rs.getLong("time_id"),
+	                        rs.getDate("date").toLocalDate(),
+	                        rs.getLong("theme_id"),
+	                        rs.getString("theme_name"),
+	                        rs.getLong("time_id"),
                         rs.getTime("start_at").toLocalTime(),
                         rs.getLong("rank")),
                 name

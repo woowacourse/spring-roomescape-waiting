@@ -64,12 +64,10 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .map(w -> new WaitingOrderDetail(
                         w.getId(),
                         w.getName(),
-                        w.getDate(),
-                        w.getThemeId(),
-                        "dummy theme",
-                        "dummy description",
-                        "https://dummy.com/image.jpg",
-                        w.getTimeId(),
+	                        w.getDate(),
+	                        w.getThemeId(),
+	                        "dummy theme",
+	                        w.getTimeId(),
                         LocalTime.of(9, 0),
                         1L
                 ))
