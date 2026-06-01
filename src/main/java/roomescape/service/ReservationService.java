@@ -19,8 +19,10 @@ import roomescape.repository.ReservationWaitingQueryDao;
 import roomescape.repository.ThemeQueryDao;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -61,9 +63,11 @@ public class ReservationService {
                 .stream()
                 .map(MyReservationResponse::fromWaiting)
                 .toList();
-        List<MyReservationResponse> result = new ArrayList<>(reservations);
-        result.addAll(waitings);
-        return result;
+
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .sorted(Comparator.comparing(MyReservationResponse::getDate)
+                        .thenComparing(r -> r.getTime().getStartAt()))
+                .toList();
     }
 
     public ReservationResponse create(ReservationRequest reservationReq) {
