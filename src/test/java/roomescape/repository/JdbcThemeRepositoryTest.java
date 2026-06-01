@@ -80,21 +80,6 @@ class JdbcThemeRepositoryTest {
                 .doesNotThrowAnyException();
     }
 
-    @Test
-    @DisplayName("존재하는 테마의 정보를 수정한다.")
-    void 존재하는_테마_수정() {
-        Theme savedTheme = jdbcThemeRepository.save(Theme.transientOf("공포", "귀신의 집", "https://url"));
-        Theme updateTheme = new Theme(savedTheme.getId(), "코믹", "웃긴 집", "https://url2");
-        assertThat(jdbcThemeRepository.update(updateTheme)).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 테마를 수정하면 0을 반환한다.")
-    void 존재하지_않는_테마_수정_검증() {
-        Theme updateTheme = new Theme(999L, "코믹", "웃긴 집", "https://url2");
-        assertThat(jdbcThemeRepository.update(updateTheme)).isZero();
-    }
-
     private void insertReservation(long themeId) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, "test", LocalDate.now(), 1L, themeId);

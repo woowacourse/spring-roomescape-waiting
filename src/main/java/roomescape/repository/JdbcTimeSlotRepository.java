@@ -70,12 +70,6 @@ public class JdbcTimeSlotRepository implements TimeSlotRepository {
         jdbcTemplate.update(sql, timeId);
     }
 
-    @Override
-    public int update(TimeSlot timeSlot) {
-        String sql = "UPDATE time_slot SET start_at = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, timeSlot.getStartAt(), timeSlot.getId());
-    }
-
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("time_slot")

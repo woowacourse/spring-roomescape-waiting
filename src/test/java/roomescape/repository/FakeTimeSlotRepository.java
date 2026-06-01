@@ -39,11 +39,6 @@ public class FakeTimeSlotRepository implements TimeSlotRepository {
     }
 
     @Override
-    public int update(TimeSlot timeSlot) {
-        return 1;
-    }
-
-    @Override
     public void deleteById(long id) {
         storage.remove(id);
     }

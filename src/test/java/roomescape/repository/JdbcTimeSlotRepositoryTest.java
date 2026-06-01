@@ -71,21 +71,6 @@ class JdbcTimeSlotRepositoryTest {
     }
 
     @Test
-    @DisplayName("존재하는 예약 시간 정보를 수정한다.")
-    void 존재하는_예약_시간_수정() {
-        TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
-        TimeSlot updateTime = new TimeSlot(savedTimeSlot.getId(), LocalTime.of(12, 0));
-        assertThat(timeRepository.update(updateTime)).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 예약 시간을 수정하면 0을 반환한다.")
-    void 존재하지_않는_예약_시간_수정_검증() {
-        TimeSlot updateTime = new TimeSlot(999L, LocalTime.of(12, 0));
-        assertThat(timeRepository.update(updateTime)).isZero();
-    }
-
-    @Test
     @DisplayName("예약이 존재하는 시간을 삭제할 수 없다.")
     void 예약이_존재하는_시간_삭제_예외_발생() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
