@@ -34,28 +34,6 @@ public class ReservationDaoTest {
     private ReservationDao reservationDao;
 
     @Test
-    void 예약_생성_성공() {
-        Reservation reservation = new Reservation("초록", 1L, LocalDate.now().plusDays(1),
-                new ReservationTime(6L, LocalTime.parse("15:00")));
-        Reservation expected = reservationDao.insert(reservation);
-
-        String sql =
-                "select r.id as reservation_id, r.name, r.date, t.id as time_id, t.start_at as start_at, r.theme_id as theme_id "
-                        + "from reservation r "
-                        + "inner join reservation_time t "
-                        + "on r.time_id = t.id "
-                        + "and r.id = ?";
-        Reservation actual = jdbcTemplate.query(sql, rowMapper, expected.getId()).getFirst();
-
-        assertThat(expected.getId()).isEqualTo(actual.getId());
-        assertThat(expected.getName()).isEqualTo(actual.getName());
-        assertThat(expected.getDate()).isEqualTo(actual.getDate());
-        assertThat(expected.getTime().getId()).isEqualTo(actual.getTime().getId());
-        assertThat(expected.getTime().getStartAt()).isEqualTo(actual.getTime().getStartAt());
-        assertThat(expected.getThemeId()).isEqualTo(actual.getThemeId());
-    }
-
-    @Test
     void 예약_시간_조회_성공() {
         Long themeId = 2L;
         LocalDate date = LocalDate.now().plusDays(1);

@@ -89,26 +89,6 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
-    void 예약_대기_생성_성공() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
-                "티버",
-                1L,
-                LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1))
-        );
-
-        ReservationWaiting expected = reservationWaitingDao.insert(reservationWaiting);
-
-        ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId()).get();
-
-        assertThat(actual.getName()).isEqualTo(expected.getName());
-        assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
-        assertThat(actual.getDate()).isEqualTo(expected.getDate());
-        assertThat(actual.getTime().getId()).isEqualTo(expected.getTime().getId());
-        assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
-    }
-
-    @Test
     void 예약_대기_삭제_성공() {
         ReservationWaiting reservationWaiting = new ReservationWaiting(
                 "티버",

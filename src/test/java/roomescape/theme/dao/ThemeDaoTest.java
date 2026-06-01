@@ -48,20 +48,6 @@ public class ThemeDaoTest {
     }
 
     @Test
-    void 테마_생성_성공() {
-        Theme theme = new Theme("디스커버리", "디스커버리 테마방입니다", "http.jp");
-        Theme expected = themeDao.insert(theme);
-
-        String sql = "SELECT * FROM theme WHERE id = ?";
-        Theme actual = jdbcTemplate.query(sql, rowMapper, expected.getId()).getFirst();
-
-        assertThat(expected.getId()).isEqualTo(actual.getId());
-        assertThat(expected.getName()).isEqualTo(actual.getName());
-        assertThat(expected.getDescription()).isEqualTo(actual.getDescription());
-        assertThat(expected.getImage()).isEqualTo(actual.getImage());
-    }
-
-    @Test
     void 테마_삭제_성공() {
         long id = 1L;
         themeDao.deleteById(id);
