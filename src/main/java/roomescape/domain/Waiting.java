@@ -18,7 +18,7 @@ public class Waiting {
     private final Long waitingNumber;
 
     private Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
-            Long waitingNumber) {
+                    Long waitingNumber) {
         validateName(name);
         validateDate(date);
         validateTime(time);
@@ -33,12 +33,12 @@ public class Waiting {
     }
 
     public static Waiting create(String name, LocalDate date, ReservationTime time,
-            Theme theme, Long waitingNumber) {
+                                 Theme theme, Long waitingNumber) {
         return new Waiting(null, name, date, time, theme, waitingNumber);
     }
 
     public static Waiting of(Long id, String name, LocalDate date, ReservationTime time,
-            Theme theme, Long waitingNumber) {
+                             Theme theme, Long waitingNumber) {
         validateId(id);
         return new Waiting(id, name, date, time, theme, waitingNumber);
     }

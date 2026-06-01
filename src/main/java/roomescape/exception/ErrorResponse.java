@@ -13,5 +13,6 @@ public record ErrorResponse(
     public record FieldErrorDetail(
             String field,
             String reason
-    ) {}
+    ) {
+    }
 }

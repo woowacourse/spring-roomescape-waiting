@@ -27,13 +27,11 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation create(String name, LocalDate date, ReservationTime time,
-            Theme theme) {
+    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, name, date, time, theme);
     }
 
-    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time,
-            Theme theme) {
+    public static Reservation of(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
         validateId(id);
         return new Reservation(id, name, date, time, theme);
     }

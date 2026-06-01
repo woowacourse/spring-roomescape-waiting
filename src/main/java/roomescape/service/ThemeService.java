@@ -23,7 +23,7 @@ public class ThemeService {
 
 
     public ThemeService(Clock clock, ThemeRepository themeRepository,
-            ReservationRepository reservationRepository) {
+                        ReservationRepository reservationRepository) {
         this.clock = clock;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;

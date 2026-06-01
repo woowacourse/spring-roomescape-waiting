@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
@@ -36,8 +35,8 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
 
     public ReservationService(Clock clock, ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-            WaitingRepository waitingRepository) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.clock = clock;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -109,7 +108,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate targetDate,
-            Long targetThemeId) {
+                                                           Long targetThemeId) {
         return reservationTimeRepository.findReservedTimes(targetDate, targetThemeId);
     }
 
@@ -132,7 +131,7 @@ public class ReservationService {
     }
 
     private void validateUpdateAvailableTime(LocalDate date, ReservationTime time,
-            LocalDateTime now) {
+                                             LocalDateTime now) {
         if (LocalDateTime.of(date, time.getStartAt()).isBefore(now)) {
             throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
         }

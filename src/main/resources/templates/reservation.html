@@ -1,430 +1,430 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>예약하기</title>
-  <style>
-    :root {
-      --ink: #202124;
-      --muted: #666f7a;
-      --line: #d9dee7;
-      --surface: #ffffff;
-      --bg: #f6f7f9;
-      --accent: #1f6feb;
-      --accent-dark: #164fa8;
-      --danger: #c9362c;
-      --success: #237a4b;
-      --warning: #a45d00;
-      --disabled: #eef1f5;
-    }
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>예약하기</title>
+    <style>
+        :root {
+            --ink: #202124;
+            --muted: #666f7a;
+            --line: #d9dee7;
+            --surface: #ffffff;
+            --bg: #f6f7f9;
+            --accent: #1f6feb;
+            --accent-dark: #164fa8;
+            --danger: #c9362c;
+            --success: #237a4b;
+            --warning: #a45d00;
+            --disabled: #eef1f5;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-      min-height: 100vh;
-      margin: 0;
-      padding: 32px;
-      color: var(--ink);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-    }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 32px;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+        }
 
-    main {
-      display: grid;
-      grid-template-columns: minmax(280px, 420px) minmax(320px, 520px);
-      gap: 24px;
-      width: min(100%, 980px);
-      margin: 0 auto;
-      align-items: start;
-    }
+        main {
+            display: grid;
+            grid-template-columns: minmax(280px, 420px) minmax(320px, 520px);
+            gap: 24px;
+            width: min(100%, 980px);
+            margin: 0 auto;
+            align-items: start;
+        }
 
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 24px;
-      background: var(--surface);
-    }
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 24px;
+            background: var(--surface);
+        }
 
-    .theme-image {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      border-radius: 6px;
-      margin: 16px 0;
-      background: var(--disabled);
-    }
+        .theme-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            border-radius: 6px;
+            margin: 16px 0;
+            background: var(--disabled);
+        }
 
-    h1, h2 {
-      margin: 0;
-      line-height: 1.25;
-    }
+        h1, h2 {
+            margin: 0;
+            line-height: 1.25;
+        }
 
-    h1 {
-      font-size: 28px;
-    }
+        h1 {
+            font-size: 28px;
+        }
 
-    h2 {
-      font-size: 20px;
-      margin-bottom: 16px;
-    }
+        h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
 
-    p {
-      margin: 8px 0;
-      color: var(--muted);
-      line-height: 1.5;
-    }
+        p {
+            margin: 8px 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
 
-    label {
-      display: block;
-      margin: 18px 0 8px;
-      font-weight: 700;
-    }
+        label {
+            display: block;
+            margin: 18px 0 8px;
+            font-weight: 700;
+        }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      font-size: 16px;
-      background: var(--surface);
-    }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-size: 16px;
+            background: var(--surface);
+        }
 
-    .time-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-      gap: 10px;
-      min-height: 52px;
-    }
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+            gap: 10px;
+            min-height: 52px;
+        }
 
-    .time-btn {
-      min-height: 44px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      color: var(--ink);
-      font-size: 15px;
-      font-weight: 700;
-      background: var(--surface);
-      cursor: pointer;
-    }
+        .time-btn {
+            min-height: 44px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ink);
+            font-size: 15px;
+            font-weight: 700;
+            background: var(--surface);
+            cursor: pointer;
+        }
 
-    .time-btn.selected {
-      border-color: var(--accent);
-      color: #fff;
-      background: var(--accent);
-    }
+        .time-btn.selected {
+            border-color: var(--accent);
+            color: #fff;
+            background: var(--accent);
+        }
 
-    .time-btn:disabled {
-      color: #9aa3ad;
-      background: var(--disabled);
-      cursor: not-allowed;
-    }
+        .time-btn:disabled {
+            color: #9aa3ad;
+            background: var(--disabled);
+            cursor: not-allowed;
+        }
 
-    .time-btn.booked {
-      border-color: #a0a0a0;
-      background: #e8e8e8;
-      color: #4a4a4a;
-    }
+        .time-btn.booked {
+            border-color: #a0a0a0;
+            background: #e8e8e8;
+            color: #4a4a4a;
+        }
 
-    .time-btn.booked.selected {
-      border-color: var(--warning);
-      background: #fff3df;
-      color: var(--warning);
-    }
+        .time-btn.booked.selected {
+            border-color: var(--warning);
+            background: #fff3df;
+            color: var(--warning);
+        }
 
-    .submit-btn {
-      width: 100%;
-      margin-top: 22px;
-      padding: 14px;
-      border: 0;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 17px;
-      font-weight: 800;
-      background: var(--accent);
-      cursor: pointer;
-    }
+        .submit-btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 800;
+            background: var(--accent);
+            cursor: pointer;
+        }
 
-    .submit-btn:hover {
-      background: var(--accent-dark);
-    }
+        .submit-btn:hover {
+            background: var(--accent-dark);
+        }
 
-    .submit-btn.waiting-mode {
-      background: var(--warning);
-    }
+        .submit-btn.waiting-mode {
+            background: var(--warning);
+        }
 
-    .submit-btn.waiting-mode:hover {
-      background: #8a4a00;
-    }
+        .submit-btn.waiting-mode:hover {
+            background: #8a4a00;
+        }
 
-    .message {
-      min-height: 22px;
-      margin-top: 14px;
-      color: var(--danger);
-      font-weight: 700;
-    }
+        .message {
+            min-height: 22px;
+            margin-top: 14px;
+            color: var(--danger);
+            font-weight: 700;
+        }
 
-    .message.success {
-      color: var(--success);
-    }
+        .message.success {
+            color: var(--success);
+        }
 
-    .hint {
-      font-size: 14px;
-    }
+        .hint {
+            font-size: 14px;
+        }
 
-    @media (max-width: 820px) {
-      body {
-        padding: 18px;
-      }
+        @media (max-width: 820px) {
+            body {
+                padding: 18px;
+            }
 
-      main {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 <main>
-  <section class="panel" aria-labelledby="theme-name">
-    <h1 id="theme-name">테마 불러오는 중</h1>
-    <img id="theme-image" class="theme-image" src="" alt="" style="display: none;">
-    <p id="theme-desc"></p>
-    <p id="theme-time"></p>
-  </section>
+    <section aria-labelledby="theme-name" class="panel">
+        <h1 id="theme-name">테마 불러오는 중</h1>
+        <img alt="" class="theme-image" id="theme-image" src="" style="display: none;">
+        <p id="theme-desc"></p>
+        <p id="theme-time"></p>
+    </section>
 
-  <section class="panel" aria-labelledby="reservation-title">
-    <h2 id="reservation-title">예약 정보</h2>
+    <section aria-labelledby="reservation-title" class="panel">
+        <h2 id="reservation-title">예약 정보</h2>
 
-    <label for="user-name">예약자 이름</label>
-    <input type="text" id="user-name" maxlength="20" autocomplete="name" placeholder="이름을 입력하세요">
+        <label for="user-name">예약자 이름</label>
+        <input autocomplete="name" id="user-name" maxlength="20" placeholder="이름을 입력하세요" type="text">
 
-    <label for="date-picker">예약 날짜</label>
-    <input type="date" id="date-picker">
+        <label for="date-picker">예약 날짜</label>
+        <input id="date-picker" type="date">
 
-    <label>예약 시간</label>
-    <div id="time-list" class="time-grid"></div>
-    <p id="time-hint" class="hint">날짜를 선택하면 예약 가능한 시간이 표시됩니다.</p>
+        <label>예약 시간</label>
+        <div class="time-grid" id="time-list"></div>
+        <p class="hint" id="time-hint">날짜를 선택하면 예약 가능한 시간이 표시됩니다.</p>
 
-    <button id="reserve-btn" class="submit-btn">예약하기</button>
-    <p id="reservation-message" class="message" role="status" aria-live="polite"></p>
-  </section>
+        <button class="submit-btn" id="reserve-btn">예약하기</button>
+        <p aria-live="polite" class="message" id="reservation-message" role="status"></p>
+    </section>
 </main>
 
 <script>
-  let selectedTimeId = null;
-  let selectedTimeIsBooked = false;
-  let allTimes = [];
-  let currentBookedTimeIds = [];
+    let selectedTimeId = null;
+    let selectedTimeIsBooked = false;
+    let allTimes = [];
+    let currentBookedTimeIds = [];
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const themeId = params.get('themeId');
-    const datePicker = document.getElementById('date-picker');
-    const message = document.getElementById('reservation-message');
-    const submitBtn = document.getElementById('reserve-btn');
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const themeId = params.get('themeId');
+        const datePicker = document.getElementById('date-picker');
+        const message = document.getElementById('reservation-message');
+        const submitBtn = document.getElementById('reserve-btn');
 
-    datePicker.min = toDateValue(new Date());
+        datePicker.min = toDateValue(new Date());
 
-    if (!themeId) {
-      showMessage('예약할 테마를 먼저 선택해주세요.');
-      return;
-    }
-
-    Promise.all([
-      fetchJson(`/api/themes/${themeId}`),
-      fetchJson('/api/times')
-    ])
-    .then(([theme, times]) => {
-      renderTheme(theme);
-      allTimes = times;
-      renderTimeButtons([]);
-    })
-    .catch(error => showMessage(toErrorMessage(error, '예약 정보를 불러오지 못했습니다.')));
-
-    datePicker.addEventListener('change', loadBookedTimes);
-
-    submitBtn.addEventListener('click', () => {
-      const name = document.getElementById('user-name').value.trim();
-      const date = datePicker.value;
-      clearMessage();
-
-      if (!name || !date || !selectedTimeId) {
-        showMessage('이름, 날짜, 시간을 모두 선택해주세요.');
-        return;
-      }
-
-      if (isPastDateTime(date, selectedTimeId)) {
-        showMessage('현재 시간 이후의 예약 시간만 선택할 수 있습니다.');
-        loadBookedTimes();
-        return;
-      }
-
-      if (selectedTimeIsBooked) {
-        fetch('/api/waiting', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ themeId: Number(themeId), name, date, timeId: selectedTimeId })
-        })
-        .then(handleResponse)
-        .then(() => {
-          showMessage('대기 신청이 완료되었습니다.', true);
-          setTimeout(() => window.location.href = '/', 1500);
-        })
-        .catch(error => showMessage(toErrorMessage(error, '대기 신청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
-      } else {
-        fetch('/api/reservations', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ themeId: Number(themeId), name, date, timeId: selectedTimeId })
-        })
-        .then(handleResponse)
-        .then(() => {
-          showMessage('예약이 완료되었습니다.', true);
-          setTimeout(() => window.location.href = '/', 1500);
-        })
-        .catch(error => showMessage(toErrorMessage(error, '예약에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
-      }
-    });
-
-    function loadBookedTimes() {
-      const selectedDate = datePicker.value;
-      selectedTimeId = null;
-      selectedTimeIsBooked = false;
-      clearMessage();
-      updateSubmitButton();
-
-      if (!selectedDate) {
-        renderTimeButtons([]);
-        return;
-      }
-
-      fetchJson(`/api/reservations/booked-times?themeId=${encodeURIComponent(themeId)}&selectedDate=${encodeURIComponent(selectedDate)}`)
-      .then(times => {
-        currentBookedTimeIds = times
-        .filter(time => time.reserved === true)
-        .map(time => time.timeId);
-
-        renderTimeButtons(currentBookedTimeIds);
-      })
-      .catch(error => showMessage(toErrorMessage(error, '예약된 시간을 불러오지 못했습니다.')));
-    }
-
-    function renderTheme(theme) {
-      document.getElementById('theme-name').textContent = theme.name;
-      document.getElementById('theme-desc').textContent = theme.description;
-      document.getElementById('theme-time').textContent = `소요 시간 ${theme.runningTime}분`;
-
-      const img = document.getElementById('theme-image');
-      img.src = theme.imageUrl;
-      img.alt = theme.name;
-      img.style.display = 'block';
-    }
-
-    function renderTimeButtons(bookedTimeIds) {
-      const timeList = document.getElementById('time-list');
-      const timeHint = document.getElementById('time-hint');
-      const selectedDate = datePicker.value;
-      timeList.innerHTML = '';
-
-      allTimes.forEach(time => {
-        const btn = document.createElement('button');
-        const isBooked = bookedTimeIds.includes(time.id);
-        const isPast = selectedDate && isPastDateTime(selectedDate, time.id);
-
-        btn.type = 'button';
-        btn.className = 'time-btn';
-        if (isBooked) {
-          btn.classList.add('booked');
+        if (!themeId) {
+            showMessage('예약할 테마를 먼저 선택해주세요.');
+            return;
         }
-        btn.textContent = isBooked ? `${time.startAt} (예약됨)` : time.startAt;
-        btn.disabled = isPast || !selectedDate;
-        btn.title = isPast ? '현재 시간 이전입니다.' : '';
 
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.time-btn').forEach(button => button.classList.remove('selected'));
-          btn.classList.add('selected');
-          selectedTimeId = time.id;
-          selectedTimeIsBooked = isBooked;
-          clearMessage();
-          updateSubmitButton();
+        Promise.all([
+            fetchJson(`/api/themes/${themeId}`),
+            fetchJson('/api/times')
+        ])
+            .then(([theme, times]) => {
+                renderTheme(theme);
+                allTimes = times;
+                renderTimeButtons([]);
+            })
+            .catch(error => showMessage(toErrorMessage(error, '예약 정보를 불러오지 못했습니다.')));
+
+        datePicker.addEventListener('change', loadBookedTimes);
+
+        submitBtn.addEventListener('click', () => {
+            const name = document.getElementById('user-name').value.trim();
+            const date = datePicker.value;
+            clearMessage();
+
+            if (!name || !date || !selectedTimeId) {
+                showMessage('이름, 날짜, 시간을 모두 선택해주세요.');
+                return;
+            }
+
+            if (isPastDateTime(date, selectedTimeId)) {
+                showMessage('현재 시간 이후의 예약 시간만 선택할 수 있습니다.');
+                loadBookedTimes();
+                return;
+            }
+
+            if (selectedTimeIsBooked) {
+                fetch('/api/waiting', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({themeId: Number(themeId), name, date, timeId: selectedTimeId})
+                })
+                    .then(handleResponse)
+                    .then(() => {
+                        showMessage('대기 신청이 완료되었습니다.', true);
+                        setTimeout(() => window.location.href = '/', 1500);
+                    })
+                    .catch(error => showMessage(toErrorMessage(error, '대기 신청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
+            } else {
+                fetch('/api/reservations', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({themeId: Number(themeId), name, date, timeId: selectedTimeId})
+                })
+                    .then(handleResponse)
+                    .then(() => {
+                        showMessage('예약이 완료되었습니다.', true);
+                        setTimeout(() => window.location.href = '/', 1500);
+                    })
+                    .catch(error => showMessage(toErrorMessage(error, '예약에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
+            }
         });
-        timeList.appendChild(btn);
-      });
 
-      const availableCount = [...timeList.children].filter(button => !button.disabled && !button.classList.contains('booked')).length;
-      const bookedCount = [...timeList.children].filter(button => !button.disabled && button.classList.contains('booked')).length;
+        function loadBookedTimes() {
+            const selectedDate = datePicker.value;
+            selectedTimeId = null;
+            selectedTimeIsBooked = false;
+            clearMessage();
+            updateSubmitButton();
 
-      if (selectedDate) {
-        if (availableCount > 0) {
-          timeHint.textContent = `선택 가능한 시간: ${availableCount}개${bookedCount > 0 ? ` / 대기 신청 가능: ${bookedCount}개` : ''}`;
-        } else if (bookedCount > 0) {
-          timeHint.textContent = `모든 시간이 예약되었습니다. 대기 신청이 가능합니다.`;
-        } else {
-          timeHint.textContent = '선택 가능한 시간이 없습니다. 다른 날짜를 골라주세요.';
+            if (!selectedDate) {
+                renderTimeButtons([]);
+                return;
+            }
+
+            fetchJson(`/api/reservations/booked-times?themeId=${encodeURIComponent(themeId)}&selectedDate=${encodeURIComponent(selectedDate)}`)
+                .then(times => {
+                    currentBookedTimeIds = times
+                        .filter(time => time.reserved === true)
+                        .map(time => time.timeId);
+
+                    renderTimeButtons(currentBookedTimeIds);
+                })
+                .catch(error => showMessage(toErrorMessage(error, '예약된 시간을 불러오지 못했습니다.')));
         }
-      } else {
-        timeHint.textContent = '날짜를 선택하면 예약 가능한 시간이 표시됩니다.';
-      }
-    }
 
-    function updateSubmitButton() {
-      if (selectedTimeIsBooked) {
-        submitBtn.textContent = '대기 신청';
-        submitBtn.classList.add('waiting-mode');
-      } else {
-        submitBtn.textContent = '예약하기';
-        submitBtn.classList.remove('waiting-mode');
-      }
-    }
+        function renderTheme(theme) {
+            document.getElementById('theme-name').textContent = theme.name;
+            document.getElementById('theme-desc').textContent = theme.description;
+            document.getElementById('theme-time').textContent = `소요 시간 ${theme.runningTime}분`;
 
-    function isPastDateTime(dateValue, timeId) {
-      const time = allTimes.find(item => item.id === Number(timeId));
-      if (!dateValue || !time) return false;
+            const img = document.getElementById('theme-image');
+            img.src = theme.imageUrl;
+            img.alt = theme.name;
+            img.style.display = 'block';
+        }
 
-      return new Date(`${dateValue}T${time.startAt}`) <= new Date();
-    }
+        function renderTimeButtons(bookedTimeIds) {
+            const timeList = document.getElementById('time-list');
+            const timeHint = document.getElementById('time-hint');
+            const selectedDate = datePicker.value;
+            timeList.innerHTML = '';
 
-    function clearMessage() {
-      message.textContent = '';
-      message.classList.remove('success');
-    }
+            allTimes.forEach(time => {
+                const btn = document.createElement('button');
+                const isBooked = bookedTimeIds.includes(time.id);
+                const isPast = selectedDate && isPastDateTime(selectedDate, time.id);
 
-    function showMessage(text, success = false) {
-      message.textContent = text;
-      message.classList.toggle('success', success);
-    }
-  });
+                btn.type = 'button';
+                btn.className = 'time-btn';
+                if (isBooked) {
+                    btn.classList.add('booked');
+                }
+                btn.textContent = isBooked ? `${time.startAt} (예약됨)` : time.startAt;
+                btn.disabled = isPast || !selectedDate;
+                btn.title = isPast ? '현재 시간 이전입니다.' : '';
 
-  function toDateValue(date) {
-    const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    return offsetDate.toISOString().slice(0, 10);
-  }
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.time-btn').forEach(button => button.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedTimeId = time.id;
+                    selectedTimeIsBooked = isBooked;
+                    clearMessage();
+                    updateSubmitButton();
+                });
+                timeList.appendChild(btn);
+            });
 
-  function fetchJson(url) {
-    return fetch(url).then(handleResponse);
-  }
+            const availableCount = [...timeList.children].filter(button => !button.disabled && !button.classList.contains('booked')).length;
+            const bookedCount = [...timeList.children].filter(button => !button.disabled && button.classList.contains('booked')).length;
 
-  function handleResponse(res) {
-    return res.text().then(text => {
-      const data = text ? JSON.parse(text) : null;
+            if (selectedDate) {
+                if (availableCount > 0) {
+                    timeHint.textContent = `선택 가능한 시간: ${availableCount}개${bookedCount > 0 ? ` / 대기 신청 가능: ${bookedCount}개` : ''}`;
+                } else if (bookedCount > 0) {
+                    timeHint.textContent = `모든 시간이 예약되었습니다. 대기 신청이 가능합니다.`;
+                } else {
+                    timeHint.textContent = '선택 가능한 시간이 없습니다. 다른 날짜를 골라주세요.';
+                }
+            } else {
+                timeHint.textContent = '날짜를 선택하면 예약 가능한 시간이 표시됩니다.';
+            }
+        }
 
-      if (res.ok) {
-        return data;
-      }
+        function updateSubmitButton() {
+            if (selectedTimeIsBooked) {
+                submitBtn.textContent = '대기 신청';
+                submitBtn.classList.add('waiting-mode');
+            } else {
+                submitBtn.textContent = '예약하기';
+                submitBtn.classList.remove('waiting-mode');
+            }
+        }
 
-      throw data || { message: '요청을 처리할 수 없습니다.' };
+        function isPastDateTime(dateValue, timeId) {
+            const time = allTimes.find(item => item.id === Number(timeId));
+            if (!dateValue || !time) return false;
+
+            return new Date(`${dateValue}T${time.startAt}`) <= new Date();
+        }
+
+        function clearMessage() {
+            message.textContent = '';
+            message.classList.remove('success');
+        }
+
+        function showMessage(text, success = false) {
+            message.textContent = text;
+            message.classList.toggle('success', success);
+        }
     });
-  }
 
-  function toErrorMessage(error, fallback) {
-    if (error.errors && error.errors.length > 0) {
-      return error.errors.map(detail => detail.reason).join(' ');
+    function toDateValue(date) {
+        const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        return offsetDate.toISOString().slice(0, 10);
     }
-    return error.message || fallback;
-  }
+
+    function fetchJson(url) {
+        return fetch(url).then(handleResponse);
+    }
+
+    function handleResponse(res) {
+        return res.text().then(text => {
+            const data = text ? JSON.parse(text) : null;
+
+            if (res.ok) {
+                return data;
+            }
+
+            throw data || {message: '요청을 처리할 수 없습니다.'};
+        });
+    }
+
+    function toErrorMessage(error, fallback) {
+        if (error.errors && error.errors.length > 0) {
+            return error.errors.map(detail => detail.reason).join(' ');
+        }
+        return error.message || fallback;
+    }
 </script>
 </body>
 </html>
