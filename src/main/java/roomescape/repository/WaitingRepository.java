@@ -1,147 +1,21 @@
 package roomescape.repository;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Optional;
 
-@Repository
-public class WaitingRepository {
+public interface WaitingRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    Waiting save(Waiting waiting);
 
-    public WaitingRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    Optional<Waiting> findByScheduleAndName(Waiting waiting);
 
-    public Waiting save(Waiting waiting) {
-        String sql = "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
+    Optional<Waiting> findById(long id);
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, waiting.getName());
-            ps.setObject(2, waiting.getDate());
-            ps.setObject(3, waiting.getTime().getId());
-            ps.setObject(4, waiting.getTheme().getId());
-            return ps;
-        }, keyHolder);
-        long id = keyHolder.getKey().longValue();
-        return new Waiting(
-                id,
-                waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getTheme());
-    }
+    Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time);
 
-    public Optional<Waiting> findByScheduleAndName(Waiting waiting) {
-        String sql = """
-                SELECT w.id          AS waiting_id,
-                       w.name        AS waiting_name,
-                       w.date        AS waiting_date,
-                       t.id          AS time_id,
-                       t.start_at    AS time_start_at,
-                       th.id         AS theme_id,
-                       th.name       AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail  AS theme_thumbnail
-                FROM waiting w
-                JOIN reservation_time t ON w.time_id = t.id
-                JOIN theme th ON w.theme_id = th.id
-                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ? AND w.name = ?
-                ORDER BY w.id
-                LIMIT 1
-                """;
-        try {
-            Waiting found = jdbcTemplate.queryForObject(sql, reservationRowsMapper(),
-                    waiting.getDate(),
-                    waiting.getTime().getId(),
-                    waiting.getTheme().getId(),
-                    waiting.getName());
-            return Optional.ofNullable(found);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    public Optional<Waiting> findById(long id) {
-        String sql = """
-                SELECT w.id          AS waiting_id,
-                       w.name        AS waiting_name,
-                       w.date        AS waiting_date,
-                       t.id          AS time_id,
-                       t.start_at    AS time_start_at,
-                       th.id         AS theme_id,
-                       th.name       AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail  AS theme_thumbnail
-                FROM waiting w
-                JOIN reservation_time t ON w.time_id = t.id
-                JOIN theme th ON w.theme_id = th.id
-                WHERE w.id = ?
-                """;
-        try {
-            Waiting waiting = jdbcTemplate.queryForObject(sql, reservationRowsMapper(), id);
-            return Optional.ofNullable(waiting);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
-
-    public Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time) {
-        String sql = """
-            SELECT COUNT(*) FROM waiting
-            WHERE theme_id = ?
-              AND date = ?
-              AND time_id = ?
-              AND id < ?
-            """;
-        return jdbcTemplate.queryForObject(
-                sql,
-                Long.class,
-                theme.getId(),
-                date,
-                time.getId(),
-                id);
-    }
-
-    public void delete(Waiting waiting) {
-        String sql = "DELETE FROM waiting WHERE id = ?";
-        jdbcTemplate.update(sql, waiting.getId());
-    }
-
-    private RowMapper<Waiting> reservationRowsMapper() {
-        return (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getObject("time_start_at", LocalTime.class)
-            );
-
-            Theme theme = new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("thumbnail")
-            );
-
-            return new Waiting(
-                    rs.getLong("waiting_id"),
-                    rs.getString("waiting_name"),
-                    LocalDate.parse(rs.getString("waiting_date")),
-                    time,
-                    theme
-            );
-        };
-    }
+    void delete(Waiting waiting);
 }

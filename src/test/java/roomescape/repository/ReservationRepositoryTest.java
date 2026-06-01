@@ -20,7 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import(ReservationRepository.class)
+@Import(JdbcReservationRepository.class)
 class ReservationRepositoryTest {
 
     @Autowired

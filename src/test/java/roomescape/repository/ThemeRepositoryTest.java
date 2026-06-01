@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import(ThemeRepository.class)
+@Import(JdbcThemeRepository.class)
 class ThemeRepositoryTest {
 
     @Autowired

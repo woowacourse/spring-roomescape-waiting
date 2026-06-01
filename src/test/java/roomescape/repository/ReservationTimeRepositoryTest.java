@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
-@Import(ReservationTimeRepository.class)
+@Import(JdbcReservationTimeRepository.class)
 class ReservationTimeRepositoryTest {
 
     @Autowired

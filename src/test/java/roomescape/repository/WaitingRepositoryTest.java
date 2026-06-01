@@ -17,7 +17,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import(WaitingRepository.class)
+@Import(JdbcWaitingRepository.class)
 class WaitingRepositoryTest {
 
     @Autowired
