@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
@@ -103,5 +104,18 @@ class TimeServiceTest {
 
         assertThatThrownBy(() -> reservationTimeService.findThemeSlotBy(nonExistentThemeId, date))
                 .isInstanceOf(CustomException.class);
+    }
+
+    @Test
+    @DisplayName("예약이 존재하는 시간을 삭제하면 예외가 발생한다.")
+    void throwsExceptionWhenDeletingTimeWithReservation() {
+        Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com"));
+        Time time = reservationTimeService.saveTime(LocalTime.of(10, 0));
+        ThemeSlot themeSlot = fakeThemeSlotRepository.save(new ThemeSlot(theme, LocalDate.now().plusDays(1), time, false));
+        fakeReservationRepository.save(new Reservation("브라운", themeSlot));
+
+        assertThatThrownBy(() -> reservationTimeService.removeTime(time.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("예약에 해당하는 시간이 존재합니다.");
     }
 }

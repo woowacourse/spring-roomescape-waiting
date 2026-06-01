@@ -32,6 +32,7 @@ class ReservationServiceTest {
     private Theme savedTheme;
     private ThemeSlot savedThemeSlot1;
     private ThemeSlot savedThemeSlot2;
+    private ThemeSlot savedPastThemeSlot;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +48,7 @@ class ReservationServiceTest {
         savedTheme = fakeThemeRepository.save(new Theme("이름", "설명", "test.com"));
         savedThemeSlot1 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(1), savedTime, false));
         savedThemeSlot2 = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().plusDays(2), savedTime, false));
+        savedPastThemeSlot = fakeThemeSlotRepository.save(new ThemeSlot(savedTheme, LocalDate.now().minusDays(1), savedTime, false));
     }
 
     @Test
@@ -183,6 +185,48 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> {
             reservationService.cancelReservation(completedReservation.getId());
         }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
+    }
+
+    @Test
+    @DisplayName("과거 날짜 슬롯으로 예약 등록시 예외가 발생한다.")
+    void throwsExceptionWhenSavingReservationWithPastDate() {
+        assertThatThrownBy(() -> reservationService.saveReservation("브라운", savedPastThemeSlot.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("과거 날짜 시간은 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("과거 날짜 슬롯으로 예약 변경시 예외가 발생한다.")
+    void throwsExceptionWhenModifyingReservationToPastDate() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), savedPastThemeSlot.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("과거 날짜 시간은 예약할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약을 취소하면 예외가 발생한다.")
+    void throwsExceptionWhenCancellingNonExistentReservation() {
+        assertThatThrownBy(() -> reservationService.cancelReservation(999L))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("예약이 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약을 변경하면 예외가 발생한다.")
+    void throwsExceptionWhenModifyingNonExistentReservation() {
+        assertThatThrownBy(() -> reservationService.modifyReservation(999L, savedThemeSlot1.getId()))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("예약이 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 슬롯으로 예약 변경시 예외가 발생한다.")
+    void throwsExceptionWhenModifyingReservationToNonExistentThemeSlot() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
+        assertThatThrownBy(() -> reservationService.modifyReservation(reservation.getId(), 999L))
+                .isInstanceOf(CustomException.class)
+                .hasMessage("예약 가능한 시간이 존재하지 않습니다.");
     }
 
     @Test
