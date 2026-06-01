@@ -147,7 +147,7 @@ class ReservationWaitingControllerTest {
                 .body("name", is(name))
                 .body("themeId", is(1))
                 .body("date", is(date))
-                .body("time.id", is(1))
+                .body("startAt", is("10:00"))
                 .body("waitingNumber", is(1))
                 .extract()
                 .header("Location");
@@ -159,7 +159,7 @@ class ReservationWaitingControllerTest {
                 .body("name", is(name))
                 .body("themeId", is(1))
                 .body("date", is(date))
-                .body("time.id", is(1))
+                .body("startAt", is("10:00"))
                 .body("waitingNumber", is(1));
     }
 

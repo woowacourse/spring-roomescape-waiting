@@ -1,5 +1,7 @@
 package roomescape.waiting.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -10,8 +12,6 @@ import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
 import roomescape.waiting.ReservationWaiting;
 import roomescape.waiting.dao.ReservationWaitingDao;
-
-import java.time.LocalDate;
 
 @Service
 public class ReservationWaitingService {
@@ -45,9 +45,7 @@ public class ReservationWaitingService {
         validateDuplicatedReservation(name, themeId, date, timeId);
         validateDuplicatedWaiting(name, themeId, date, timeId);
 
-
-        Long nextWaitingNumber = reservationWaitingDao.findNextWaitingNumber(themeId, date, timeId);
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, nextWaitingNumber);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, LocalDateTime.now());
 
         return reservationWaitingDao.insert(reservationWaiting);
     }

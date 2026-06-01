@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +59,8 @@ public class ReservationServiceTest {
         ReservationTime time = new ReservationTime(22L, LocalTime.now().plusMinutes(3));
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(1L, name, reservationThemeId, date, time);
-        ReservationWaiting waiting = new ReservationWaiting(1L, name, waitingThemeId, date, time, 1L);
+        ReservationWaiting waiting = new ReservationWaiting(1L, name, waitingThemeId, date, time,
+                LocalDateTime.now(), 1L);
 
         when(reservationDao.selectByName(name)).thenReturn(List.of(reservation));
         when(waitingDao.selectByName(name)).thenReturn(List.of(waiting));
@@ -101,7 +103,8 @@ public class ReservationServiceTest {
         String name = "초록";
         Long themeId = 1L;
         ReservationTime time = new ReservationTime(22L, LocalTime.now().plusMinutes(3));
-        ReservationWaiting waiting = new ReservationWaiting(1L, name, themeId, LocalDate.now().plusDays(1), time, 1L);
+        ReservationWaiting waiting = new ReservationWaiting(1L, name, themeId, LocalDate.now().plusDays(1), time,
+                LocalDateTime.now(), 1L);
 
         when(reservationDao.selectByName(name)).thenReturn(List.of());
         when(waitingDao.selectByName(name)).thenReturn(List.of(waiting));

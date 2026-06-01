@@ -63,13 +63,13 @@ public class ReservationControllerTest {
                 .body("[0].name", is(name))
                 .body("[0].themeName", is("은하수"))
                 .body("[0].date", is(date))
-                .body("[0].startAt", is("10:00:00"))
+                .body("[0].startAt", is("10:00"))
                 .body("[0].waitingNumber", nullValue())
                 .body("[1].id", is(waitingId))
                 .body("[1].name", is(name))
                 .body("[1].themeName", is("지구"))
                 .body("[1].date", is(date))
-                .body("[1].startAt", is("11:00:00"))
+                .body("[1].startAt", is("11:00"))
                 .body("[1].waitingNumber", is(1));
     }
 

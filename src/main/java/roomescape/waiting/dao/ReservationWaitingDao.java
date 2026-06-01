@@ -21,6 +21,7 @@ public class ReservationWaitingDao {
                     rs.getDate("date").toLocalDate(),
                     new ReservationTime(rs.getLong("time_id"),
                             rs.getTime("start_at").toLocalTime()),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
                     rs.getLong("waiting_number")
             );
 
@@ -36,7 +37,14 @@ public class ReservationWaitingDao {
 
     public Optional<ReservationWaiting> selectById(Long id) {
         String sql = """
-                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
+                       t.id as time_id, t.start_at as start_at, w.created_at,
+                       (select count(*) + 1
+                        from reservation_waiting ahead
+                        where ahead.theme_id = w.theme_id
+                          and ahead.date = w.date
+                          and ahead.time_id = w.time_id
+                          and ahead.created_at < w.created_at) as waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
@@ -49,11 +57,19 @@ public class ReservationWaitingDao {
 
     public List<ReservationWaiting> selectByName(String name) {
         String sql = """
-                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date,
+                       t.id as time_id, t.start_at as start_at, w.created_at,
+                       (select count(*) + 1
+                        from reservation_waiting ahead
+                        where ahead.theme_id = w.theme_id
+                          and ahead.date = w.date
+                          and ahead.time_id = w.time_id
+                          and ahead.created_at < w.created_at) as waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
                 where w.name = ?
+                order by w.created_at
                 """;
 
         return jdbcTemplate.query(sql, rowMapper, name);
@@ -77,22 +93,10 @@ public class ReservationWaitingDao {
                 .addValue("theme_id", reservationsWaiting.getThemeId())
                 .addValue("date", reservationsWaiting.getDate())
                 .addValue("time_id", reservationsWaiting.getTime().getId())
-                .addValue("waiting_number", reservationsWaiting.getWaitingNumber());
+                .addValue("created_at", reservationsWaiting.getCreatedAt());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
-        return new ReservationWaiting(id, reservationsWaiting.getName(), reservationsWaiting.getThemeId(),
-                reservationsWaiting.getDate(),
-                reservationsWaiting.getTime(), reservationsWaiting.getWaitingNumber());
-    }
-
-    public Long findNextWaitingNumber(Long themeId, LocalDate date, Long timeId) {
-        String sql = """
-                SELECT COALESCE(MAX(waiting_number), 0) + 1
-                FROM reservation_waiting
-                WHERE theme_id = ? AND date = ? AND time_id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Long.class, themeId, date, timeId);
+        return selectById(id).orElseThrow();
     }
 
     public void deleteById(Long id) {

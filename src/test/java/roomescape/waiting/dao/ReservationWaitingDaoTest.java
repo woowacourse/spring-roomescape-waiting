@@ -3,6 +3,7 @@ package roomescape.waiting.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +41,9 @@ class ReservationWaitingDaoTest {
         LocalDate date = LocalDate.now();
         Long timeId = 1L;
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        Long waitingNumber = 1L;
+        LocalDateTime createdAt = LocalDateTime.now();
 
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, waitingNumber);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, createdAt);
         reservationWaitingDao.insert(reservationWaiting);
         Boolean actual = reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId);
 
@@ -56,26 +57,27 @@ class ReservationWaitingDaoTest {
                 1L,
                 LocalDate.now(),
                 new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                2L
+                LocalDateTime.now()
         );
 
-        ReservationWaiting expected =  reservationWaitingDao.insert(reservationWaiting);
+        ReservationWaiting expected = reservationWaitingDao.insert(reservationWaiting);
         ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId()).get();
 
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
         assertThat(actual.getTime().getId()).isEqualTo(expected.getTime().getId());
-        assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
+        assertThat(actual.getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
     void 이름으로_예약_대기_목록_조회_성공() {
         LocalDate date = LocalDate.now();
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime, 1L);
-        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime, 2L);
-        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime, 3L);
+        LocalDateTime createdAt = LocalDateTime.now();
+        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime, createdAt);
+        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime, createdAt.plusSeconds(1));
+        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime, createdAt.plusSeconds(2));
         reservationWaitingDao.insert(first);
         reservationWaitingDao.insert(second);
         reservationWaitingDao.insert(other);
@@ -97,7 +99,7 @@ class ReservationWaitingDaoTest {
                 1L,
                 LocalDate.now(),
                 new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                2L
+                LocalDateTime.now()
         );
 
         ReservationWaiting expected = reservationWaitingDao.insert(reservationWaiting);
@@ -108,40 +110,7 @@ class ReservationWaitingDaoTest {
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
         assertThat(actual.getTime().getId()).isEqualTo(expected.getTime().getId());
-        assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
-    }
-
-    @Test
-    void 예약_대기가_없을_때_순번_1_반환_성공() {
-        Long expected = 1L;
-        Long actual = reservationWaitingDao.findNextWaitingNumber(
-                1L,
-                LocalDate.now(),
-                3L
-        );
-
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void 다음_순번_번호_찾기_성공() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
-                "티버",
-                1L,
-                LocalDate.now(),
-                new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                1L
-        );
-        reservationWaitingDao.insert(reservationWaiting);
-
-        Long expected = 2L;
-        Long actual = reservationWaitingDao.findNextWaitingNumber(
-                1L,
-                LocalDate.now(),
-                1L
-        );
-
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual.getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
@@ -151,7 +120,7 @@ class ReservationWaitingDaoTest {
                 1L,
                 LocalDate.now(),
                 new ReservationTime(1L, LocalTime.now().plusHours(1)),
-                1L
+                LocalDateTime.now()
         );
 
         ReservationWaiting inserted = reservationWaitingDao.insert(reservationWaiting);
