@@ -2,7 +2,6 @@ package roomescape.service.reservationwaiting;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
@@ -28,8 +27,7 @@ public class ReservationWaitingService {
 
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
         String waitingName = validateName(name);
-        Long reservationId = findReservationId(date, themeId, timeId);
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
@@ -66,17 +64,6 @@ public class ReservationWaitingService {
             throw new ConflictException(
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 같은 예약에 대기 중입니다."
-            );
-        }
-    }
-
-    private Long findReservationId(final LocalDate date, final Long themeId, final Long timeId) {
-        try {
-            return reservationRepository.findReservationIdByDateAndThemeIdAndTimeId(date, themeId, timeId);
-        } catch (EmptyResultDataAccessException exception) {
-            throw new ResourceNotFoundException(
-                    ErrorCode.RESERVATION_NOT_FOUND,
-                    "예약 정보가 없으면 대기 생성이 불가능합니다."
             );
         }
     }

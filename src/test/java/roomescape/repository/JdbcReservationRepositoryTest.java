@@ -171,6 +171,31 @@ class JdbcReservationRepositoryTest {
                 .containsExactlyInAnyOrder(firstThemeFirstTime.getId(), firstThemeSecondTime.getId());
     }
 
+    @Test
+    @DisplayName("날짜와 테마와 시간으로 예약을 조회한다")
+    void findByDateAndThemeIdAndTimeId() {
+        // given
+        LocalDate date = LocalDate.parse("2026-08-06");
+        Theme theme = createTheme("미술관의 밤");
+        ReservationTime reservationTime = jdbcReservationTimeRepository.save(
+                ReservationTime.createNew(LocalTime.parse("10:00"))
+        );
+        Reservation saved = jdbcReservationRepository.save(
+                Reservation.createNew("쿠다", date, theme, reservationTime)
+        );
+
+        // when
+        Reservation found = jdbcReservationRepository.findByDateAndThemeIdAndTimeId(
+                        date,
+                        theme.getId(),
+                        reservationTime.getId()
+                )
+                .orElseThrow();
+
+        // then
+        assertThat(found).isEqualTo(saved);
+    }
+
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
