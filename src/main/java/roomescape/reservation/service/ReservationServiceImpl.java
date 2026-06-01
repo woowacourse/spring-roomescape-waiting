@@ -47,29 +47,24 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
+        LocalDateTime now = LocalDateTime.now();
         ReservationTime time = timeService.findById(request.timeId());
-        Long themeId = request.themeId();
-        time.validateExpired(LocalDateTime.now());
-        if (!themeRepository.existsById(themeId)) {
-            throw new ThemeNotFoundException(themeId);
-        }
+        time.validateExpired(now);
+
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
+
         if (holidayService.isHoliday(time.getDate())) {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
-        Theme theme = themeRepository.findById(themeId);
-        Status status = Status.RESERVED;
-        if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
+
+        if (reservationRepository.isDuplicatedWithName(request.name(), request.themeId(), time)) {
             throw new DuplicateReservationException();
         }
-        if (reservationRepository.isDuplicated(themeId, time)) {
-            status = Status.WAITING;
+        if (reservationRepository.isDuplicated(request.themeId(), time)) {
+            return reservationRepository.save(new Reservation(request.name(), time, theme, Status.WAITING, now));
         }
-        Reservation newReservation = new Reservation(request.name(),
-                time,
-                theme,
-                status,
-                LocalDateTime.now());
-        return reservationRepository.save(newReservation);
+        return reservationRepository.save(new Reservation(request.name(), time, theme, Status.RESERVED, now));
     }
 
     @Override
@@ -113,7 +108,7 @@ public class ReservationServiceImpl implements ReservationService {
         newTime.validateExpired(LocalDateTime.now());
 
         if (holidayService.isHoliday(newTime.getDate())) {
-            throw new IllegalArgumentException("휴일은 예약이 불가능합니다.");
+            throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
 
         if (reservationRepository.isDuplicated(reservation.getTheme().getId(), newTime)) {

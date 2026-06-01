@@ -1,13 +1,15 @@
 package roomescape.theme.repository;
 
+import roomescape.theme.domain.Theme;
+
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.theme.domain.Theme;
+import java.util.Optional;
 
 public interface ThemeRepository {
     List<Theme> findAll();
 
-    Theme findById(Long id);
+    Optional<Theme> findById(Long id);
 
     Theme save(Theme theme);
 
