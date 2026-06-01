@@ -21,7 +21,6 @@ public class Member {
         validatePassword(password);
         validateName(name);
         validateRole(role);
-        validateStoreId(storeId);
         validateRoleStoreId(role, storeId);
 
         this.id = id;
@@ -86,12 +85,6 @@ public class Member {
     private void validateRole(Role role) {
         if (role == null) {
             throw new IllegalArgumentException("권한은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private void validateStoreId(Long storeId) {
-        if (storeId != null && storeId <= 0) {
-            throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
         }
     }
 

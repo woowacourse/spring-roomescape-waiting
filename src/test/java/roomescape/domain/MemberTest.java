@@ -167,19 +167,6 @@ public class MemberTest {
     }
 
     @Test
-    void storeId가_0이하면_회원을_생성할_수_없다() {
-        assertThatThrownBy(() -> new Member(
-                1L,
-                "manager@email.com",
-                "password",
-                "매니저",
-                Role.MANAGER,
-                0L
-        )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("매장 ID는 양수여야 합니다.");
-    }
-
-    @Test
     void USER는_storeId가_null이어도_정상_생성된다() {
         assertThatCode(() -> new Member(
                 1L,

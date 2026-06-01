@@ -28,19 +28,6 @@ public class ReservationTest {
     }
 
     @Test
-    void memberId가_음수이면_예약을_생성할_수_없다() {
-        assertThatThrownBy(() -> new Reservation(
-                1L,
-                -1L,
-                SAMPLE_DATE,
-                SAMPLE_TIME,
-                1L,
-                1L
-        )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("회원 ID는 양수여야 합니다.");
-    }
-
-    @Test
     void 날짜가_null이면_예약을_생성할_수_없다() {
         assertThatThrownBy(() -> new Reservation(
                 1L,
@@ -80,19 +67,6 @@ public class ReservationTest {
     }
 
     @Test
-    void themeId가_음수이면_예약을_생성할_수_없다() {
-        assertThatThrownBy(() -> new Reservation(
-                1L,
-                1L,
-                SAMPLE_DATE,
-                SAMPLE_TIME,
-                -1L,
-                1L
-        )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("테마 ID는 양수여야 합니다.");
-    }
-
-    @Test
     void storeId가_null이면_예약을_생성할_수_없다() {
         assertThatThrownBy(() -> new Reservation(
                 1L,
@@ -103,19 +77,6 @@ public class ReservationTest {
                 null
         )).isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("매장 ID는 비어 있을 수 없습니다.");
-    }
-
-    @Test
-    void storeId가_0이하면_예약을_생성할_수_없다() {
-        assertThatThrownBy(() -> new Reservation(
-                1L,
-                1L,
-                SAMPLE_DATE,
-                SAMPLE_TIME,
-                1L,
-                0L
-        )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("매장 ID는 양수여야 합니다.");
     }
 
     @Test

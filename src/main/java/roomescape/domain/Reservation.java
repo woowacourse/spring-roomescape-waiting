@@ -61,10 +61,6 @@ public class Reservation {
         if (memberId == null) {
             throw new IllegalArgumentException("회원 ID는 비어 있을 수 없습니다.");
         }
-
-        if (memberId <= 0) {
-            throw new IllegalArgumentException("회원 ID는 양수여야 합니다.");
-        }
     }
 
     private void validateDate(LocalDate date) {
@@ -83,18 +79,11 @@ public class Reservation {
         if (themeId == null) {
             throw new IllegalArgumentException("테마 ID는 비어 있을 수 없습니다.");
         }
-
-        if (themeId <= 0) {
-            throw new IllegalArgumentException("테마 ID는 양수여야 합니다.");
-        }
     }
 
     private void validateStoreId(Long storeId) {
         if (storeId == null) {
             throw new IllegalArgumentException("매장 ID는 비어 있을 수 없습니다.");
-        }
-        if (storeId <= 0) {
-            throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
         }
     }
 }

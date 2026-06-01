@@ -10,7 +10,6 @@ public class ReservationWait {
     private final LocalDateTime createdAt;
 
     public ReservationWait(Long id, Long reservationId, Long memberId, LocalDateTime createdAt) {
-        validateId(id);
         validateReservationId(reservationId);
         validateMemberId(memberId);
         validateCreatedAt(createdAt);
@@ -37,27 +36,15 @@ public class ReservationWait {
         return createdAt;
     }
 
-    private void validateId(Long id) {
-        if (id != null && id <= 0) {
-            throw new IllegalArgumentException("Id는 0보다 작거나 같을 수 없습니다.");
-        }
-    }
-
     private void validateReservationId(Long reservationId) {
         if (reservationId == null) {
             throw new IllegalArgumentException("예약 ID는 null일 수 없습니다.");
-        }
-        if (reservationId <= 0) {
-            throw new IllegalArgumentException("예약 ID는 0보다 작거나 같을 수 없습니다.");
         }
     }
 
     private void validateMemberId(Long memberId) {
         if (memberId == null) {
             throw new IllegalArgumentException("회원 ID는 null일 수 없습니다.");
-        }
-        if (memberId <= 0) {
-            throw new IllegalArgumentException("회원 ID는 0보다 작거나 같을 수 없습니다.");
         }
     }
 
