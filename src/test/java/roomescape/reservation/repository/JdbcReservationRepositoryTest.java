@@ -109,11 +109,10 @@ class JdbcReservationRepositoryTest {
         Reservation waiting = insertReservation("어셔1", time, theme, Status.WAITING, LocalDateTime.now().plusHours(1));
 
         // when
-        boolean affected = reservationRepository.promoteToReserved(waiting.getId());
+        reservationRepository.promoteToReserved(waiting.getId());
         Optional<Reservation> reservation = reservationRepository.findById(waiting.getId());
 
         // then
-        assertThat(affected).isTrue();
         assertThat(reservation).isPresent();
         assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
     }

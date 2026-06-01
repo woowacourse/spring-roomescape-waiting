@@ -348,7 +348,6 @@ class ReservationServiceImplTest {
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
-        when(reservationRepository.promoteToReserved(2L)).thenReturn(true);
         when(reservationRepository.deleteById(1L)).thenReturn(true);
 
         // when
@@ -357,24 +356,6 @@ class ReservationServiceImplTest {
         // then
         verify(reservationRepository).promoteToReserved(2L);
         verify(reservationRepository).deleteById(1L);
-    }
-
-    @DisplayName("승격할 예약 대기를 찼았지만 promoteToReserved가 실패하면 ReservationNotFoundException을 발생한다")
-    @Test
-    void cancelForUser_승격_실패시_예외발생_및_예약삭제_불가능() {
-        // given
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation reserved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reserved));
-        when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
-        when(reservationRepository.promoteToReserved(2L)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.cancelForUser(1L, "라이"))
-                .isInstanceOf(ReservationNotFoundException.class);
-
-        verify(reservationRepository, never()).deleteById(any());
     }
 
     @DisplayName("예약 시간을 변경한다")
