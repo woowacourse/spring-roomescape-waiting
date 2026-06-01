@@ -2,7 +2,6 @@ package roomescape.reservationwaiting.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.Builder;
 import org.springframework.http.HttpStatus;
 import roomescape.exception.business.BusinessException;
 import roomescape.member.domain.Member;
@@ -17,8 +16,19 @@ public class ReservationWaiting {
     private final ReservationTime time;
     private final Theme theme;
 
-    @Builder(access = lombok.AccessLevel.PRIVATE)
     private ReservationWaiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        if (member == null) {
+            throw new IllegalArgumentException("예약자는 필수입니다.");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("날짜는 필수입니다.");
+        }
+        if (time == null) {
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
+        }
+        if (theme == null) {
+            throw new IllegalArgumentException("테마는 필수입니다.");
+        }
         this.id = id;
         this.member = member;
         this.date = date;
@@ -27,33 +37,15 @@ public class ReservationWaiting {
     }
 
     public static ReservationWaiting of(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        if (member == null) {
-            throw new IllegalArgumentException("예약자는 필수입니다.");
-        }
-        if (date == null || time == null || theme == null) {
-            throw new IllegalArgumentException("날짜, 시간, 테마는 필수입니다.");
-        }
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+        ReservationWaiting waiting = new ReservationWaiting(null, member, date, time, theme);
+        if (waiting.isPast()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다.");
         }
-        return ReservationWaiting.builder()
-                .id(null)
-                .member(member)
-                .date(date)
-                .time(time)
-                .theme(theme)
-                .build();
+        return waiting;
     }
 
-    public static ReservationWaiting restore(Long id, Member member, LocalDate date, ReservationTime time,
-                                             Theme theme) {
-        return ReservationWaiting.builder()
-                .id(id)
-                .member(member)
-                .date(date)
-                .time(time)
-                .theme(theme)
-                .build();
+    public static ReservationWaiting restore(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new ReservationWaiting(id, member, date, time, theme);
     }
 
     public boolean isPast() {

@@ -8,6 +8,15 @@ public class Member {
     private final String password;
 
     private Member(Long id, String name, String email, String password) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("이름은 필수입니다.");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("이메일은 필수입니다.");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 필수입니다.");
+        }
         this.id = id;
         this.name = name;
         this.email = email;
