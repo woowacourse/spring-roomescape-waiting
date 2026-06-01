@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -38,23 +39,14 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponseDto("존재하지 않는 API입니다."));
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(
-        HttpMessageNotReadableException e
-    ) {
-        return ResponseEntity.badRequest().body(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponseDto> handleMethodArgumentTypeMismatchException(
-        MethodArgumentTypeMismatchException e
-    ) {
-        return ResponseEntity.badRequest().body(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
-    }
-
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorResponseDto> handleMissingServletRequestParameterException(
-        MissingServletRequestParameterException e
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            HandlerMethodValidationException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ErrorResponseDto> handleIllegalRequestForm(
+        Exception e
     ) {
         return ResponseEntity.badRequest().body(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
     }
@@ -115,6 +107,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleException(Exception e) {
+        e.printStackTrace();
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponseDto("예상치 못한 오류가 발생했습니다."));
     }

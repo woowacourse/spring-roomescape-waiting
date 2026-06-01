@@ -14,10 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.global.error.dto.ErrorResponseDto;
@@ -78,31 +81,50 @@ class GlobalExceptionHandlerTest {
     }
 
     @Nested
-    class MissingServletRequestParameterException_처리 {
+    class 부적절한_요청_형식_처리 {
 
         @Test
-        void BAD_REQUEST를_반환하고_message만_내려준다() {
-            MissingServletRequestParameterException exception =
-                new MissingServletRequestParameterException("value", "String");
+        void HttpMessageNotReadableException은_BAD_REQUEST와_message만_내려준다() {
+            HttpMessageNotReadableException exception = new HttpMessageNotReadableException(
+                "본문을 읽을 수 없습니다.", new MockHttpInputMessage(new byte[0]));
 
             ResponseEntity<ErrorResponseDto> response =
-                handler.handleMissingServletRequestParameterException(exception);
+                handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
         }
-    }
-
-    @Nested
-    class MethodArgumentTypeMismatchException_처리 {
 
         @Test
-        void BAD_REQUEST를_반환하고_message만_내려준다() throws Exception {
+        void HandlerMethodValidationException은_BAD_REQUEST와_message만_내려준다() {
+            HandlerMethodValidationException exception = mock(HandlerMethodValidationException.class);
+
+            ResponseEntity<ErrorResponseDto> response =
+                handler.handleIllegalRequestForm(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+        }
+
+        @Test
+        void MethodArgumentTypeMismatchException은_BAD_REQUEST와_message만_내려준다() throws Exception {
             MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException(
                 "abc", Long.class, "id", createMethodParameter(), new IllegalArgumentException());
 
             ResponseEntity<ErrorResponseDto> response =
-                handler.handleMethodArgumentTypeMismatchException(exception);
+                handler.handleIllegalRequestForm(exception);
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
+        }
+
+        @Test
+        void MissingServletRequestParameterException은_BAD_REQUEST와_message만_내려준다() {
+            MissingServletRequestParameterException exception =
+                new MissingServletRequestParameterException("value", "String");
+
+            ResponseEntity<ErrorResponseDto> response =
+                handler.handleIllegalRequestForm(exception);
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getBody()).isEqualTo(new ErrorResponseDto("요청 형식이 올바르지 않습니다."));
