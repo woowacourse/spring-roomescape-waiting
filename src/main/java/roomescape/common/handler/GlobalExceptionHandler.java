@@ -1,8 +1,8 @@
 package roomescape.common.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -96,6 +96,16 @@ public class GlobalExceptionHandler {
     ) {
         ErrorInformation errorInformation = GlobalExceptionInformation.REQUEST_VALIDATION_FAILED;
         log.info(EXCEPTION_LOG_FORMAT, errorInformation.getErrorCode(), e.getMessage());
+        return ResponseEntity.status(errorInformation.getHttpStatus())
+                .body(ErrorDetail.of(errorInformation));
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ErrorDetail> handleDuplicateKeyException(
+            DataIntegrityViolationException e
+    ) {
+        ErrorInformation errorInformation = GlobalExceptionInformation.DATA_NOT_DUPLICATED_KEY;
+        log.error(DATA_INTEGRITY_EXCEPTION_LOG_FORMAT, errorInformation.getErrorCode(), e);
         return ResponseEntity.status(errorInformation.getHttpStatus())
                 .body(ErrorDetail.of(errorInformation));
     }
