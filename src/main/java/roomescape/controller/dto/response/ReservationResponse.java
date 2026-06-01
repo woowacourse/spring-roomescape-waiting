@@ -28,7 +28,7 @@ public class ReservationResponse {
     public static ReservationResponse from(ReservationResult reservationResult) {
         Reservation reservation = reservationResult.getReservation();
         return new ReservationResponse(reservation.getId(), reservation.getName().getValue(),
-                reservation.getDate().getDate(),
+                reservation.getDate().getValue(),
                 reservationResult.getReservation().getStatus().getKoreanName(),
                 reservationResult.getRank().getValue(),
                 ReservationTimeResponse.from(reservation.getTime()),

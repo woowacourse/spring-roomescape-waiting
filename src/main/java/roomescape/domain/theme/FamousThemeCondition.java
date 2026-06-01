@@ -8,31 +8,31 @@ public class FamousThemeCondition {
     private static final long DEFAULT_LIMIT = 10;
     private static final int DEFAULT_GAP_DATE = 1;
 
-    private final Long days;
-    private final LocalDate date;
+    private final Long recentDays;
+    private final LocalDate baseDate;
     private final Long limit;
 
-    public FamousThemeCondition(Long days, LocalDate date, Long limit, LocalDate now) {
+    public FamousThemeCondition(Long recentDays, LocalDate baseDate, Long limit, LocalDate now) {
         Objects.requireNonNull(now);
-        this.days = Objects.requireNonNullElse(days, DEFAULT_DAYS);
-        this.date = Objects.requireNonNullElse(date, now);
+        this.recentDays = Objects.requireNonNullElse(recentDays, DEFAULT_DAYS);
+        this.baseDate = Objects.requireNonNullElse(baseDate, now);
         this.limit = Objects.requireNonNullElse(limit, DEFAULT_LIMIT);
     }
 
     public LocalDate startDate() {
-        return date.minusDays(days);
+        return baseDate.minusDays(recentDays);
     }
 
     public LocalDate endDate() {
-        return date.minusDays(DEFAULT_GAP_DATE);
+        return baseDate.minusDays(DEFAULT_GAP_DATE);
     }
 
-    public Long getDays() {
-        return days;
+    public Long getRecentDays() {
+        return recentDays;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getBaseDate() {
+        return baseDate;
     }
 
     public Long getLimit() {

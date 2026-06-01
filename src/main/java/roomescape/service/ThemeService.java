@@ -42,7 +42,7 @@ public class ThemeService {
     }
 
     public List<Theme> findFamous(ThemeFamousFindRequest request, LocalDate now) {
-        FamousThemeCondition condition = new FamousThemeCondition(request.getDays(), request.getDate(),
+        FamousThemeCondition condition = new FamousThemeCondition(request.getRecentDays(), request.getBaseDate(),
                 request.getLimit(), now);
 
         return themeRepository.findFamous(condition);

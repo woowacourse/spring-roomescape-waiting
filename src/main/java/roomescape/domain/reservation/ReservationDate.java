@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class ReservationDate {
-    private final LocalDate date;
+    private final LocalDate value;
 
-    public ReservationDate(LocalDate date) {
-        this.date = Objects.requireNonNull(date);
+    public ReservationDate(LocalDate value) {
+        this.value = Objects.requireNonNull(value);
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDate getValue() {
+        return value;
     }
 
     @Override
@@ -23,11 +23,11 @@ public class ReservationDate {
             return false;
         }
         ReservationDate that = (ReservationDate) o;
-        return Objects.equals(date, that.date);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date);
+        return Objects.hash(value);
     }
 }

@@ -20,7 +20,7 @@ class FamousThemeConditionTest {
             FamousThemeCondition condition =
                     new FamousThemeCondition(null, ANY_DATE, 10L, ANY_NOW);
 
-            assertThat(condition.getDays()).isEqualTo(7L);
+            assertThat(condition.getRecentDays()).isEqualTo(7L);
         }
 
         @Test
@@ -28,7 +28,7 @@ class FamousThemeConditionTest {
             FamousThemeCondition condition =
                     new FamousThemeCondition(30L, ANY_DATE, 10L, ANY_NOW);
 
-            assertThat(condition.getDays()).isEqualTo(30L);
+            assertThat(condition.getRecentDays()).isEqualTo(30L);
         }
     }
 
@@ -41,7 +41,7 @@ class FamousThemeConditionTest {
             FamousThemeCondition condition =
                     new FamousThemeCondition(7L, null, 10L, ANY_NOW);
 
-            assertThat(condition.getDate()).isEqualTo(ANY_NOW);
+            assertThat(condition.getBaseDate()).isEqualTo(ANY_NOW);
         }
 
         @Test
@@ -51,7 +51,7 @@ class FamousThemeConditionTest {
             FamousThemeCondition condition =
                     new FamousThemeCondition(7L, given, 10L, ANY_NOW);
 
-            assertThat(condition.getDate()).isEqualTo(given);
+            assertThat(condition.getBaseDate()).isEqualTo(given);
         }
     }
 

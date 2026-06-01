@@ -17,7 +17,7 @@ public class Reservations {
     }
 
     private boolean isEarlierThan(Reservation source, Reservation target) {
-        int byTime = source.getDateTime().compareTo(target.getDateTime());
+        int byTime = source.getCreatedAt().compareTo(target.getCreatedAt());
         if (byTime != 0) {
             return byTime < 0;
         }

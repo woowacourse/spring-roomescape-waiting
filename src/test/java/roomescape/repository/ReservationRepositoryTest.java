@@ -82,7 +82,7 @@ class ReservationRepositoryTest {
             assertSoftly(soft -> {
                 soft.assertThat(saved.getId()).isPositive();
                 soft.assertThat(saved.getName().getValue()).isEqualTo("달수");
-                soft.assertThat(saved.getDate().getDate()).isEqualTo(FUTURE);
+                soft.assertThat(saved.getDate().getValue()).isEqualTo(FUTURE);
             });
         }
 
@@ -170,7 +170,7 @@ class ReservationRepositoryTest {
 
             assertSoftly(soft -> {
                 soft.assertThat(found.getName().getValue()).isEqualTo("달수");
-                soft.assertThat(found.getDate().getDate()).isEqualTo(FUTURE);
+                soft.assertThat(found.getDate().getValue()).isEqualTo(FUTURE);
                 soft.assertThat(found.getTime().getId()).isEqualTo(time.getId());
                 soft.assertThat(found.getTheme().getId()).isEqualTo(theme.getId());
             });
@@ -195,7 +195,7 @@ class ReservationRepositoryTest {
             assertSoftly(soft -> {
                 soft.assertThat(updated.getId()).isEqualTo(saved.getId());
                 soft.assertThat(updated.getName().getValue()).isEqualTo("민구");
-                soft.assertThat(updated.getDate().getDate()).isEqualTo(FUTURE.plusDays(1));
+                soft.assertThat(updated.getDate().getValue()).isEqualTo(FUTURE.plusDays(1));
                 soft.assertThat(updated.getTime().getId()).isEqualTo(time2.getId());
             });
         }

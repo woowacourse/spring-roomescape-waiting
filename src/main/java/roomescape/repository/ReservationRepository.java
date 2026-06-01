@@ -117,11 +117,11 @@ public class ReservationRepository {
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = Map.of(
                 "name", reservation.getName().getValue(),
-                "date", reservation.getDate().getDate(),
+                "date", reservation.getDate().getValue(),
                 "time_id", reservation.getTime().getId(),
                 "theme_id", reservation.getTheme().getId(),
                 "status", reservation.getStatus().name(),
-                "created_at", reservation.getDateTime()
+                "created_at", reservation.getCreatedAt()
         );
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
@@ -129,15 +129,15 @@ public class ReservationRepository {
         return Reservation.load(generatedKey,
                 reservation.getName(),
                 reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus(), reservation.getDateTime());
+                reservation.getTheme(), reservation.getStatus(), reservation.getCreatedAt());
     }
 
     public Reservation update(long id, Reservation target) {
-        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
-                target.getTheme().getId(), target.getDateTime(), id);
+        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getValue(), target.getTime().getId(),
+                target.getTheme().getId(), target.getCreatedAt(), id);
 
         return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(),
-                target.getStatus(), target.getDateTime());
+                target.getStatus(), target.getCreatedAt());
     }
 
     public void deleteById(Long id) {
@@ -178,6 +178,6 @@ public class ReservationRepository {
 
     public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
         String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ?";
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getValue(), theme.getId(), time.getId());
     }
 }

@@ -126,7 +126,7 @@ public class ReservationService {
             reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
                     reservation.getTime().getId(),
                     reservation.getTheme().getId(),
-                    reservation.getDate().getDate()
+                    reservation.getDate().getValue()
             ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
         }
     }

@@ -8,22 +8,22 @@ import roomescape.domain.theme.Theme;
 
 public class Reservation {
     private final Long id;
-    private final ReservationName reservationName;
+    private final ReservationName name;
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
     private final Status status;
-    private final LocalDateTime dateTime;
+    private final LocalDateTime createdAt;
 
-    private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                        Theme theme, Status status, LocalDateTime dateTime) {
+    private Reservation(Long id, ReservationName name, ReservationDate date, ReservationTime time,
+                        Theme theme, Status status, LocalDateTime createdAt) {
         this.id = id;
-        this.reservationName = Objects.requireNonNull(reservationName);
+        this.name = Objects.requireNonNull(name);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
         this.theme = Objects.requireNonNull(theme);
         this.status = Objects.requireNonNull(status);
-        this.dateTime = Objects.requireNonNull(dateTime);
+        this.createdAt = Objects.requireNonNull(createdAt);
     }
 
     public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
@@ -46,7 +46,7 @@ public class Reservation {
     }
 
     public void ensureNotPast(LocalDateTime now) {
-        LocalDateTime requestDateTime = LocalDateTime.of(date.getDate(), time.getStartAt());
+        LocalDateTime requestDateTime = LocalDateTime.of(date.getValue(), time.getStartAt());
 
         if (requestDateTime.isBefore(now)) {
             throw new RoomEscapeException(ErrorCode.PAST_RESERVATION_NOT_ALLOWED);
@@ -58,7 +58,7 @@ public class Reservation {
     }
 
     public ReservationName getName() {
-        return reservationName;
+        return name;
     }
 
     public ReservationDate getDate() {
@@ -77,8 +77,8 @@ public class Reservation {
         return status;
     }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

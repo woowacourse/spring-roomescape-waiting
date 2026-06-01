@@ -66,15 +66,15 @@ public class RoomEscapeFixture {
     }
 
     public static ThemeFamousFindRequest themeFamousFindRequest() {
-        return new ThemeFamousFindRequest(7L, FUTURE_DATE.getDate(), 10L);
+        return new ThemeFamousFindRequest(7L, FUTURE_DATE.getValue(), 10L);
     }
 
     public static ReservationCreateRequest reservationCreateRequest() {
-        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getDate(), 1L, 1L);
+        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
     }
 
     public static ReservationCreateRequest reservationCreateRequestWithNullName() {
-        return new ReservationCreateRequest(null, FUTURE_DATE.getDate(), 1L, 1L);
+        return new ReservationCreateRequest(null, FUTURE_DATE.getValue(), 1L, 1L);
     }
 
     public static ReservationCreateRequest reservationCreateRequestWithNullDate() {
@@ -82,18 +82,18 @@ public class RoomEscapeFixture {
     }
 
     public static ReservationCreateRequest reservationCreateRequestWithNullTimeId() {
-        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getDate(), null, 1L);
+        return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getValue(), null, 1L);
     }
 
     public static ReservationCreateRequest reservationCreateRequestWithPastDate() {
-        return new ReservationCreateRequest(NAME.getValue(), PAST_DATE.getDate(), 1L, 1L);
+        return new ReservationCreateRequest(NAME.getValue(), PAST_DATE.getValue(), 1L, 1L);
     }
 
     public static ReservationUpdateRequest reservationUpdateRequest() {
-        return new ReservationUpdateRequest(NAME.getValue(), FUTURE_DATE.getDate(), 1L, 1L);
+        return new ReservationUpdateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
     }
 
     public static ReservationUpdateRequest reservationUpdateRequestWithPastDate() {
-        return new ReservationUpdateRequest(NAME.getValue(), PAST_DATE.getDate(), 1L, 1L);
+        return new ReservationUpdateRequest(NAME.getValue(), PAST_DATE.getValue(), 1L, 1L);
     }
 }
