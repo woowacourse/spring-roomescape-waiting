@@ -38,34 +38,11 @@ public class ReservationService {
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
+        long scheduleId = resolveScheduleId(body.date(), body.timeId(), body.themeId());
         validateReservationAlreadyExistsNot(scheduleId);
         Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
 
         return ReservationSaveResponse.from(reservation);
-    }
-
-    public List<MyReservationsAndWaitingsDetailResponse> findReservationDetails() {
-        List<ReservationReadModel> reservationReadModels = ReservationReadModel.from(reservationRepository.findAll());
-
-        return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
-    }
-
-    @Transactional
-    public void deleteByIdForManager(long reservationId) {
-        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
-                .orElse(null);
-        if (reservationDetail == null) {
-            return;
-        }
-
-        validateNotPast(reservationDetail);
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                reservationDetail.date(),
-                reservationDetail.timeId(),
-                reservationDetail.themeId()
-        );
-        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
     }
 
     @Transactional
@@ -78,12 +55,36 @@ public class ReservationService {
 
         validateReservationOwner(reservationId, reservationDetail, memberId);
         validateNotPast(reservationDetail);
-        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                reservationDetail.date(),
-                reservationDetail.timeId(),
-                reservationDetail.themeId()
-        );
+        long scheduleId = resolveScheduleId(reservationDetail.date(), reservationDetail.timeId(), reservationDetail.themeId());
         deleteReservationAndPromoteWaiting(reservationId, scheduleId);
+    }
+
+    @Transactional
+    public void deleteByIdForManager(long reservationId) {
+        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+                .orElse(null);
+        if (reservationDetail == null) {
+            return;
+        }
+
+        validateNotPast(reservationDetail);
+        long scheduleId = resolveScheduleId(reservationDetail.date(), reservationDetail.timeId(), reservationDetail.themeId());
+        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
+    }
+
+    @Transactional
+    public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
+        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
+        validateReservationOwner(reservationId, oldReservation, memberId);
+
+        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
+    }
+
+    @Transactional
+    public ReservationSaveResponse updateForManager(ReservationUpdateRequest body, long reservationId) {
+        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
+
+        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
     }
 
     public List<MyReservationsAndWaitingsDetailResponse> findMyReservationsAndWaitingsByPeriod(long memberId, ReservationPeriod period) {
@@ -107,40 +108,19 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
-    public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
-        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
-        validateReservationOwner(reservationId, oldReservation, memberId);
+    public List<MyReservationsAndWaitingsDetailResponse> findReservationDetails() {
+        List<ReservationReadModel> reservationReadModels = ReservationReadModel.from(reservationRepository.findAll());
 
-        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
+        return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
     }
 
-    @Transactional
-    public ReservationSaveResponse updateForManager(ReservationUpdateRequest body, long reservationId) {
-        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
-
-        return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
-    }
-
-    private static void validateReservationOwner(
+    private void validateReservationOwner(
             long reservationId,
             ReservationDetailProjection reservationDetail,
             long memberId
     ) {
         if (!Objects.equals(reservationDetail.memberId(), memberId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
-        }
-    }
-
-    private static void validateReservationUpdated(int affectedRow) {
-        if (affectedRow != 1) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
-        }
-    }
-
-    private static void validateNotEmptyUpdateRequest(ReservationUpdateRequest body) {
-        if (body.date() == null && body.timeId() == null) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
         }
     }
 
@@ -163,21 +143,20 @@ public class ReservationService {
             long reservationId,
             ReservationDetailProjection oldReservation
     ) {
-        long oldScheduleId = resolveScheduleId(oldReservation.date(), oldReservation.timeId(), oldReservation.themeId());
         validateUpdatable(oldReservation, body);
+        long oldScheduleId = resolveScheduleId(oldReservation.date(), oldReservation.timeId(), oldReservation.themeId());
+        long newScheduleId = resolveNewScheduleId(body, oldReservation, reservationId);
+        validateNotSameSchedule(oldScheduleId, newScheduleId);
 
         Waiting firstWaiting = popFirstWaiting(oldScheduleId);
-        long newScheduleId = resolveNewScheduleId(body, oldReservation, reservationId);
-
         updateReservationSchedule(reservationId, newScheduleId);
         promoteWaitingIfPresent(firstWaiting, oldScheduleId);
 
         return ReservationSaveResponse.from(getReservationOrThrow(reservationId));
     }
 
-    private void validateUpdatable(ReservationDetailProjection oldReservation, ReservationUpdateRequest body) {
-        validateNotPast(oldReservation);
-        validateNotEmptyUpdateRequest(body);
+    private long resolveScheduleId(LocalDate date, long timeId, long themeId) {
+        return scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     private long resolveNewScheduleId(
@@ -213,10 +192,6 @@ public class ReservationService {
         }
     }
 
-    private long resolveScheduleId(LocalDate date, long timeId, long themeId) {
-        return scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(date, timeId, themeId);
-    }
-
     private void deleteReservationAndPromoteWaiting(long reservationId, long scheduleId) {
         Waiting firstWaiting = waitingRepository.findFirstByScheduleId(scheduleId)
                 .orElse(null);
@@ -238,6 +213,29 @@ public class ReservationService {
     private ReservationDetailProjection getOldReservationDetailOrThrow(long reservationId) {
         return reservationRepository.findDetailById(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
+    }
+
+    private void validateReservationUpdated(int affectedRow) {
+        if (affectedRow != 1) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
+        }
+    }
+
+    private void validateNotEmptyUpdateRequest(ReservationUpdateRequest body) {
+        if (body.date() == null && body.timeId() == null) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
+        }
+    }
+
+    private void validateNotSameSchedule(long oldScheduleId, long newScheduleId) {
+        if (oldScheduleId == newScheduleId) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_SAME_SCHEDULE);
+        }
+    }
+
+    private void validateUpdatable(ReservationDetailProjection oldReservation, ReservationUpdateRequest body) {
+        validateNotPast(oldReservation);
+        validateNotEmptyUpdateRequest(body);
     }
 
     private void validateDuplicatedReservationNot(long reservationId, long scheduleId) {

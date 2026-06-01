@@ -80,7 +80,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
-    void deleteById_user_success() {
+    void deleteByIdForUser_테스트_1() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
@@ -99,8 +99,51 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
+    void deleteByIdForUser_테스트_2() {
+        long reservationId = 1L;
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 2L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+        );
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+
+        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, 1L))
+                .isInstanceOf(EscapeRoomException.class);
+        verify(reservationRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("유저 예약 삭제 시 해당 슬롯의 선두 대기자는 자동 승격된다.")
+    void deleteByIdForUser_테스트_3() {
+        long reservationId = 1L;
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+        );
+        long scheduleId = 10L;
+        Waiting waiting = new Waiting(100L, 3L, scheduleId);
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(scheduleId);
+        when(waitingRepository.findFirstByScheduleId(scheduleId)).thenReturn(Optional.of(waiting));
+
+        reservationService.deleteByIdForUser(reservationId, 1L);
+
+        verify(reservationRepository).deleteById(reservationId);
+        verify(reservationRepository).save(argThat(promoted ->
+                promoted.getMemberId().equals(waiting.getMemberId())
+                        && promoted.getScheduleId().equals(waiting.getScheduleId())
+        ));
+        verify(waitingRepository).deleteById(waiting.getId());
+    }
+
+
+    @Test
     @DisplayName("매니저는 예약 삭제에 성공한다.")
-    void deleteById_manager_success() {
+    void deleteByIdForManager_테스트_1() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
@@ -119,22 +162,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
-    void deleteById_user_other_member_forbidden() {
-        long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 2L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
-        );
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-
-        assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, 1L))
-                .isInstanceOf(EscapeRoomException.class);
-        verify(reservationRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
     @DisplayName("유저는 본인 예약 수정에 성공한다.")
-    void update_user_success() {
+    void updateForUser_테스트_1() {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
@@ -163,7 +192,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("매니저는 예약 수정에 성공한다.")
-    void update_manager_success() {
+    void updateForManager_테스트_1() {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
@@ -192,7 +221,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("유저는 타인 예약 수정을 할 수 없다.")
-    void update_user_other_member_forbidden() {
+    void updateForUser_테스트_2() {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
@@ -208,7 +237,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약 시간이 과거면 수정에 실패한다.")
-    void update_past_time_fail() {
+    void updateForUser_테스트_3() {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
@@ -225,8 +254,70 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("유저 예약 수정으로 기존 슬롯이 비면 선두 대기자가 자동 승격된다.")
+    void updateForUser_테스트_4() {
+        long reservationId = 4L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+        long oldScheduleId = 30L;
+        long newScheduleId = 99L;
+        Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
+        Reservation updated = new Reservation(reservationId, 1L, newScheduleId);
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(oldScheduleId);
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(newScheduleId);
+        when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
+        when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
+        when(waitingRepository.findFirstByScheduleId(oldScheduleId)).thenReturn(Optional.of(waiting));
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+
+        reservationService.updateForUser(request, reservationId, 1L);
+
+        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
+        verify(reservationRepository).save(argThat(promoted ->
+                promoted.getMemberId().equals(waiting.getMemberId())
+                        && promoted.getScheduleId().equals(waiting.getScheduleId())
+        ));
+        verify(waitingRepository).deleteById(waiting.getId());
+    }
+
+    @Test
+    @DisplayName("예약 수정 시 기존 스케줄과 새 스케줄이 같으면 예외가 발생한다")
+    void updateForUser_테스트_5() {
+        long reservationId = 1L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+        long oldScheduleId = 30L;
+        long newScheduleId = 30L;
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
+                oldReservation.date(),
+                oldReservation.getTimeId(),
+                oldReservation.getThemeId()
+        )).thenReturn(oldScheduleId);
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(newScheduleId);
+
+        assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
+                .isInstanceOf(EscapeRoomException.class);
+
+        verify(reservationRepository, never()).updateScheduleById(reservationId, newScheduleId);
+    }
+
+    @Test
     @DisplayName("UPCOMING 기간으로 내 예약/대기 조회 시 UPCOMING 조회 메서드를 호출한다.")
-    void findMyReservationsAndWaitingsByPeriod_upcoming() {
+    void findMyReservationsAndWaitingsByPeriod_테스트_1() {
         LocalDateTime now = LocalDateTime.of(2026, 5, 5, 10, 0);
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
@@ -256,7 +347,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("HISTORY 기간으로 내 예약/대기 조회 시 HISTORY 조회 메서드를 호출한다.")
-    void findMyReservationsAndWaitingsByPeriod_history() {
+    void findMyReservationsAndWaitingsByPeriod_테스트_2() {
         LocalDateTime now = LocalDateTime.of(2026, 5, 5, 10, 0);
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
@@ -289,7 +380,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("동일한 날짜와 시간에서는 예약(RESERVED)이 대기(WAITING)보다 먼저 조회된다.")
-    void findMyReservationsAndWaitingsByPeriod_sameDateTime_reservedFirst() {
+    void findMyReservationsAndWaitingsByPeriod_테스트_3() {
         LocalDateTime now = LocalDateTime.of(2026, 5, 5, 9, 0);
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
@@ -316,7 +407,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("UPCOMING 조회는 날짜/시간 오름차순이며, 동률이면 예약을 우선한다.")
-    void findMyReservationsAndWaitingsByPeriod_upcoming_sortedByDateAndTime() {
+    void findMyReservationsAndWaitingsByPeriod_테스트_4() {
         LocalDateTime now = LocalDateTime.of(2026, 5, 5, 9, 0);
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
@@ -350,7 +441,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("HISTORY 조회는 날짜/시간 내림차순이며, 동률이면 예약을 우선한다.")
-    void findMyReservationsAndWaitingsByPeriod_history_sortedByDateAndTime() {
+    void findMyReservationsAndWaitingsByPeriod_테스트_5() {
         LocalDateTime now = LocalDateTime.of(2026, 5, 7, 10, 0);
         when(clock.instant()).thenReturn(now.atZone(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
@@ -384,69 +475,5 @@ class ReservationServiceTest {
 
         assertThat(result).extracting(MyReservationsAndWaitingsDetailResponse::id)
                 .containsExactly(401L, 301L, 302L, 402L);
-    }
-
-    @Test
-    @DisplayName("유저 예약 삭제 시 해당 슬롯의 선두 대기자는 자동 승격된다.")
-    void deleteByIdForUser_promoteFirstWaiting() {
-        long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 1L, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
-        );
-        long scheduleId = 10L;
-        Waiting waiting = new Waiting(100L, 3L, scheduleId);
-
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(scheduleId);
-        when(waitingRepository.findFirstByScheduleId(scheduleId)).thenReturn(Optional.of(waiting));
-
-        reservationService.deleteByIdForUser(reservationId, 1L);
-
-        verify(reservationRepository).deleteById(reservationId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
-    }
-
-    @Test
-    @DisplayName("유저 예약 수정으로 기존 슬롯이 비면 선두 대기자가 자동 승격된다.")
-    void updateForUser_promoteFirstWaitingFromOldSchedule() {
-        long reservationId = 4L;
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
-        );
-        long oldScheduleId = 30L;
-        long newScheduleId = 99L;
-        Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
-        Reservation updated = new Reservation(reservationId, 1L, newScheduleId);
-
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(oldScheduleId);
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
-                .thenReturn(newScheduleId);
-        when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(oldScheduleId)).thenReturn(Optional.of(waiting));
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
-
-        reservationService.updateForUser(request, reservationId, 1L);
-
-        verify(reservationRepository).updateScheduleById(reservationId, newScheduleId);
-        verify(reservationRepository).save(argThat(promoted ->
-                promoted.getMemberId().equals(waiting.getMemberId())
-                        && promoted.getScheduleId().equals(waiting.getScheduleId())
-        ));
-        verify(waitingRepository).deleteById(waiting.getId());
     }
 }

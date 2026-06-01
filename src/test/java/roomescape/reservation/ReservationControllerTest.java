@@ -160,9 +160,22 @@ public class ReservationControllerTest {
     void 매니저_예약_수정() {
         String accessToken = loginManager();
 
+        Map<String, Object> createScheduleRequest = new HashMap<>();
+        createScheduleRequest.put("date", "2026-05-05");
+        createScheduleRequest.put("themeId", 1L);
+        createScheduleRequest.put("timeId", 2L);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(createScheduleRequest)
+                .when().post("/api/manager/schedules")
+                .then().log().all()
+                .statusCode(201);
+
         Map<String, Object> updateRequest = new HashMap<>();
         updateRequest.put("date", "2026-05-05");
-        updateRequest.put("timeId", 1);
+        updateRequest.put("timeId", 2);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
