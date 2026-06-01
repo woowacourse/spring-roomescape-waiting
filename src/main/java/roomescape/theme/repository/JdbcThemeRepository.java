@@ -9,20 +9,17 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.entity.ThemeEntity;
+import roomescape.theme.domain.ThemeRepository;
 
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
 
-    private static final RowMapper<Theme> THEME_ROW_MAPPER = (resultSet, rowNum) -> {
-        ThemeEntity entity = new ThemeEntity(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail_url")
-        );
-        return ThemeMapper.toDomain(entity);
-    };
+    private static final RowMapper<Theme> THEME_ROW_MAPPER = (resultSet, rowNum) -> new Theme(
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getString("description"),
+            resultSet.getString("thumbnail_url")
+    );
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -32,42 +29,33 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        ThemeEntity entity = ThemeMapper.toEntity(theme);
-
         String sql = """
-               INSERT INTO theme (name, description, thumbnail_url)
-               VALUES (?, ?, ?)
-               """;
+                INSERT INTO theme (name, description, thumbnail_url)
+                VALUES (?, ?, ?)
+                """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, entity.getName());
-            ps.setString(2, entity.getDescription());
-            ps.setString(3, entity.getThumbnailUrl());
+            ps.setString(1, theme.getName());
+            ps.setString(2, theme.getDescription());
+            ps.setString(3, theme.getThumbnailUrl());
             return ps;
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
 
-        ThemeEntity savedEntity = new ThemeEntity(
-                id,
-                entity.getName(),
-                entity.getDescription(),
-                entity.getThumbnailUrl()
-        );
-
-        return ThemeMapper.toDomain(savedEntity);
+        return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
     }
 
     @Override
     public Optional<Theme> findById(Long id) {
         String sql = """
-               SELECT *
-               FROM theme
-               WHERE id = ?
-               """;
+                SELECT *
+                FROM theme
+                WHERE id = ?
+                """;
 
         return jdbcTemplate.query(sql, THEME_ROW_MAPPER, id)
                 .stream().findFirst();
@@ -76,12 +64,12 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public boolean existsByName(String name) {
         String sql = """
-               SELECT EXISTS(
-                   SELECT 1
-                   FROM theme
-                   WHERE name = ?   
-               )
-               """;
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM theme
+                    WHERE name = ?   
+                )
+                """;
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, name);
         return Boolean.TRUE.equals(exists);
@@ -98,12 +86,12 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public int deleteById(Long id) {
+    public void delete(Theme theme) {
         String sql = """
-               DELETE FROM theme
-               WHERE id = ?
-               """;
+                DELETE FROM theme
+                WHERE id = ?
+                """;
 
-        return jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(sql, theme.getId());
     }
 }

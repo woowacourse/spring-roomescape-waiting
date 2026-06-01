@@ -8,8 +8,8 @@ import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
 
@@ -25,19 +25,11 @@ public class ThemeService {
 
     @Transactional
     public ThemeResult save(ThemeCommand command) {
-        validateThemeNameUniqueness(command.name());
         Theme newTheme = Theme.of(command.name(), command.description(), command.thumbnailUrl());
-
         try {
             Theme saved = themeRepository.save(newTheme);
             return ThemeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
-        }
-    }
-
-    private void validateThemeNameUniqueness(String name) {
-        if (themeRepository.existsByName(name)) {
             throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
     }
@@ -56,12 +48,11 @@ public class ThemeService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public void delete(Long id) {
+        Theme deleteTarget = findById(id);
+
         try {
-            int affectedRow = themeRepository.deleteById(id);
-            if (affectedRow == 0) {
-                throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
-            }
+            themeRepository.delete(deleteTarget);
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException(ThemeErrorCode.THEME_IN_USE.getMessage());
         }

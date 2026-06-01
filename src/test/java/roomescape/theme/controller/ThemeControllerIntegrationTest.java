@@ -27,15 +27,30 @@ public class ThemeControllerIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     private void insertReservationDirectly(String name, LocalDate date, Long timeId, Long themeId) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, java.sql.Date.valueOf(date), timeId, themeId
-        );
+        helper.insertReservationDirectly(name, date, timeId, themeId);
     }
 
     @BeforeEach
     void setup() {
         helper.clear();
+    }
+
+    @Test
+    @DisplayName("모든 테마 목록을 성공적으로 조회한다.")
+    void readAll_returnsAllThemes() {
+        // given
+        createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/woowa.png");
+        createTheme("페어 테마", "페어 전용 테마입니다.", "https://example.com/pair.png");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].name", is("우아한 테마"))
+                .body("[1].name", is("페어 테마"));
     }
 
     @Test
@@ -71,5 +86,27 @@ public class ThemeControllerIntegrationTest {
                 .body("[0].name", is("우아한 테마"))
                 .body("[1].name", is("페어 테마"))
                 .body("name", not(hasItem("당근 테마")));
+    }
+
+    @Test
+    @DisplayName("인기 테마 조회 시 잘못된 파라미터를 제공하면 400 Bad Request를 반환한다.")
+    void readPopular_invalidParams_returnsBadRequest() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/themes?popular=true&period=0&limit=5")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("요청 기간 및 개수는 1 이상이어야 합니다."));
+    }
+
+    @Test
+    @DisplayName("인기 테마 조회 시 필수 파라미터가 없으면 400 Bad Request를 반환한다.")
+    void readPopular_missingParams_returnsBadRequest() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .when().get("/themes?popular=true&period=7")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("필수 요청 파라미터가 누락되었습니다. 입력 값을 다시 확인해 주세요."));
     }
 }

@@ -33,10 +33,10 @@ public class ThemeAdminController {
                 .created(URI.create("/themes/" + theme.id()))
                 .body(response);
     }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
-        themeService.deleteById(id);
+        themeService.delete(id);
     }
 }
