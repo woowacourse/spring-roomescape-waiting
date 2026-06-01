@@ -1,7 +1,9 @@
 package roomescape.adapter.web;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import roomescape.adapter.web.dto.response.WaitingResponse;
 import roomescape.application.WaitingService;
 import roomescape.application.dto.result.WaitingResult;
 
+@Validated
 @RestController
 @RequestMapping("/user/waitings")
 public class UserWaitingController {
@@ -34,7 +37,7 @@ public class UserWaitingController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancel(@PathVariable Long id, @RequestParam String name) {
+    public void cancel(@PathVariable Long id, @RequestParam @NotBlank(message = "이름은 비어 있을 수 없습니다.") String name) {
         waitingService.cancelByOwner(id, name);
     }
 }

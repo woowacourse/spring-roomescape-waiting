@@ -164,5 +164,14 @@ class UserWaitingControllerTest {
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.message").value("존재하지 않는 대기입니다."));
         }
+
+        @Test
+        @DisplayName("[입력 게이트] 이름이 비어 있으면 400 + 메시지")
+        void 빈_이름_취소_400() throws Exception {
+            mockMvc.perform(delete("/user/waitings/1").param("name", ""))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("이름은 비어 있을 수 없습니다."));
+        }
+
     }
 }
