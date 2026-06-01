@@ -24,11 +24,7 @@ public class Theme {
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(id);
-        result = 31 * result + Objects.hashCode(name);
-        result = 31 * result + Objects.hashCode(thumbnailUrl);
-        result = 31 * result + Objects.hashCode(description);
-        return result;
+        return Objects.hashCode(id);
     }
 
     @Override
@@ -37,9 +33,7 @@ public class Theme {
             return false;
         }
 
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
-                && Objects.equals(thumbnailUrl, theme.thumbnailUrl) && Objects.equals(description,
-                theme.description);
+        return id != null && Objects.equals(id, theme.id);
     }
 
     public Long getId() {

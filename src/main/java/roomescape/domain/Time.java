@@ -36,9 +36,7 @@ public class Time {
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(id);
-        result = 31 * result + Objects.hashCode(startAt);
-        return result;
+        return Objects.hashCode(id);
     }
 
     @Override
@@ -47,7 +45,7 @@ public class Time {
             return false;
         }
 
-        return Objects.equals(id, time.id) && Objects.equals(startAt, time.startAt);
+        return id != null && Objects.equals(id, time.id);
     }
 
     public Long getId() {
