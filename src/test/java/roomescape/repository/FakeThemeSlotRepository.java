@@ -4,19 +4,25 @@ import roomescape.domain.ThemeSlot;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class FakeThemeSlotRepository implements ThemeSlotRepository {
 
-    private final Map<Long, ThemeSlot> storage = new HashMap<>();
-    private long sequence = 1L;
+    private final Map<Long, ThemeSlot> storage = new ConcurrentHashMap<>();
+    private final AtomicLong sequence = new AtomicLong(1L);
+
+    public void clear() {
+        storage.clear();
+        sequence.set(1L);
+    }
 
     @Override
     public ThemeSlot save(ThemeSlot themeSlot) {
-        long id = sequence++;
+        long id = sequence.getAndIncrement();
         ThemeSlot saved = ThemeSlot.of(id, themeSlot);
         storage.put(id, saved);
         return saved;

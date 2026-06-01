@@ -1,17 +1,23 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.domain.Theme;
 
 public class FakeThemeRepository implements ThemeRepository {
 
-    private final Map<Long, Theme> storage = new HashMap<>();
-    private long sequence = 1L;
+    private final Map<Long, Theme> storage = new ConcurrentHashMap<>();
+    private final AtomicLong sequence = new AtomicLong(1L);
+
+    public void clear() {
+        storage.clear();
+        sequence.set(1L);
+    }
 
     @Override
     public List<Theme> findAll() {
@@ -25,7 +31,7 @@ public class FakeThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        long id = sequence++;
+        long id = sequence.getAndIncrement();
         Theme savedTheme = new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
         storage.put(id, savedTheme);
         return savedTheme;

@@ -1,6 +1,12 @@
 package roomescape.repository;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.reservationStatus.PendingStatus;
@@ -9,8 +15,13 @@ import roomescape.global.exception.ErrorCode;
 
 public class FakeReservationRepository implements ReservationRepository {
 
-    private final Map<Long, Reservation> storage = new HashMap<>();
-    private long sequence = 1L;
+    private final Map<Long, Reservation> storage = new ConcurrentHashMap<>();
+    private final AtomicLong sequence = new AtomicLong(1L);
+
+    public void clear() {
+        storage.clear();
+        sequence.set(1L);
+    }
 
     @Override
     public List<Reservation> findAll() {
@@ -24,7 +35,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        long id = sequence++;
+        long id = sequence.getAndIncrement();
         Reservation savedReservation = new Reservation(
                 id,
                 reservation.getName(),
