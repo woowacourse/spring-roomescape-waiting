@@ -40,7 +40,7 @@ public class Time {
     }
 
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (!(o instanceof Time time)) {
             return false;
         }
