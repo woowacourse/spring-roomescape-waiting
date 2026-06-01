@@ -4,10 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Status;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservation.domain.ActiveReservation;
+import roomescape.reservation.domain.PendingReservation;
+import roomescape.reservation.domain.TimeSlot;
 
 @Builder
 public record ReservationCreateCommand(
@@ -16,13 +15,18 @@ public record ReservationCreateCommand(
         Long timeId,
         Long themeId
 ) {
-    public Reservation toEntity(final ReservationTime time, final Theme theme, final Clock clock) {
-        return Reservation.builder()
+    public ActiveReservation toActiveEntity(final TimeSlot slot, final Clock clock) {
+        return ActiveReservation.builder()
                 .name(name)
-                .date(date)
-                .time(time)
-                .theme(theme)
-                .status(Status.ACTIVE)
+                .slot(slot)
+                .createdAt(LocalDateTime.now(clock))
+                .build();
+    }
+
+    public PendingReservation toPendingEntity(final TimeSlot slot, final Clock clock) {
+        return PendingReservation.builder()
+                .name(name)
+                .slot(slot)
                 .createdAt(LocalDateTime.now(clock))
                 .build();
     }
