@@ -39,6 +39,7 @@ CREATE TABLE reservation_waiting
     date     DATE         NOT NULL,
     time_id  BIGINT,
     theme_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)

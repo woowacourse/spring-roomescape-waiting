@@ -20,7 +20,7 @@ import roomescape.theme.domain.Theme;
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private static final String BASE_QUERY = """
-            SELECT rw.id as reservation_waiting_id, rw.name, rw.date as reservation_date,
+            SELECT rw.id as reservation_waiting_id, rw.name, rw.date as reservation_date, rw.created_at as created_at,
                    rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                    t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
             FROM reservation_waiting rw
@@ -61,7 +61,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("name", "date", "time_id", "theme_id");
     }
 
     @Override
@@ -86,24 +87,24 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public Map<Long, Long> calculateTurn(String name) {
         String query = """
                 SELECT * FROM (
-                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY rw.date, rw.time_id, rw.theme_id ORDER BY rw.id) as turn
+                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY rw.date, rw.time_id, rw.theme_id ORDER BY rw.created_at) as turn
                 FROM reservation_waiting rw) sub
                 WHERE sub.name = ?
-                ORDER BY sub.id;
+                ORDER BY sub.turn;
                 """;
         return jdbcTemplate.query(query, turnExtractor, name);
     }
 
     @Override
     public List<ReservationWaiting> findByName(String name) {
-        String query = "SELECT * FROM (" + BASE_QUERY + ") sub WHERE sub.name = ? ORDER BY reservation_waiting_id";
+        String query = "SELECT * FROM (" + BASE_QUERY + ") sub WHERE sub.name = ? ORDER BY sub.created_at";
         return jdbcTemplate.query(query, rowMapper, name);
     }
 
     @Override
     public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
         String query = "SELECT * FROM (" + BASE_QUERY
-                + ") sub WHERE sub.reservation_waiting_id = ? ORDER BY reservation_waiting_id";
+                + ") sub WHERE sub.reservation_waiting_id = ? ORDER BY sub.created_at";
         return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 
