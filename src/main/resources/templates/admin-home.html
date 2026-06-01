@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="admin-page admin-home-page">
+<header>
+    <div class="brand">
+        <div class="header-title">관리자 페이지</div>
+        <div class="header-sub">Admin</div>
+    </div>
+    <a href="/" class="header-link">사용자 홈</a>
+</header>
+
+<main class="admin-home-main">
+    <div class="admin-home-heading">
+        <div class="section-title">관리자 메뉴</div>
+        <h1>운영 관리를 선택하세요</h1>
+    </div>
+    <div class="admin-home-actions">
+        <a href="/admin/reservation">
+            <span>예약 관리</span>
+            <small>예약 조회, 등록, 삭제</small>
+        </a>
+        <a href="/admin/time">
+            <span>시간 관리</span>
+            <small>예약 시간 조회, 추가, 삭제</small>
+        </a>
+        <a href="/admin/theme">
+            <span>테마 관리</span>
+            <small>테마 조회, 추가, 삭제</small>
+        </a>
+    </div>
+</main>
+</body>
+</html>

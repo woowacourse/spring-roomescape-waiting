@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테마 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="admin-page">
+<header>
+    <a href="/admin" class="brand">
+        <div class="header-title">테마 관리</div>
+        <div class="header-sub">Admin</div>
+    </a>
+    <nav class="admin-nav">
+        <a href="/admin/reservation">예약</a>
+        <a href="/admin/time">시간</a>
+        <a href="/admin/theme" class="active">테마</a>
+    </nav>
+</header>
+
+<main>
+    <div class="section-header">
+        <div class="section-title">테마 추가</div>
+    </div>
+    <div class="form-grid theme-form">
+        <input type="text" id="name-input" placeholder="테마 이름">
+        <input type="text" id="description-input" placeholder="테마 설명">
+        <input type="text" id="thumbnail-input" placeholder="썸네일 경로">
+        <button onclick="createTheme()">테마 추가</button>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">테마 목록</div>
+    </div>
+    <div class="toolbar">
+        <input type="search" id="search-input" placeholder="이름, 설명, 썸네일 검색">
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th data-sort="id">ID<span class="sort-indicator"></span></th>
+                <th data-sort="name">이름<span class="sort-indicator"></span></th>
+                <th data-sort="description">설명<span class="sort-indicator"></span></th>
+                <th data-sort="thumbnail">썸네일<span class="sort-indicator"></span></th>
+                <th class="right">관리</th>
+            </tr>
+            </thead>
+            <tbody id="theme-body"></tbody>
+        </table>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let themes = [];
+    let sortCriteria = [];
+
+    window.onload = () => {
+        document.getElementById('search-input').addEventListener('input', renderThemes);
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                toggleSort(th.dataset.sort);
+                renderThemes();
+            });
+        });
+        loadThemes();
+    };
+
+    function loadThemes() {
+        return fetch('/admin/themes')
+            .then(handleResponse)
+            .then(data => {
+                themes = data;
+                renderThemes();
+            })
+            .catch(showError);
+    }
+
+    function renderThemes() {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        const body = document.getElementById('theme-body');
+        updateSortIndicators();
+        const rows = themes
+            .filter(theme => [theme.name, theme.description, theme.thumbnail].join(' ').toLowerCase().includes(query))
+            .sort(compareTheme);
+
+        if (rows.length === 0) {
+            body.innerHTML = `<tr><td colspan="5" class="empty">테마가 없습니다</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = rows.map(theme => `
+            <tr>
+                <td class="muted">${theme.id}</td>
+                <td>${escapeHtml(theme.name)}</td>
+                <td>${escapeHtml(theme.description || '')}</td>
+                <td class="muted">${createThumbnailLink(theme.thumbnail)}</td>
+                <td class="right"><button class="btn-danger" onclick="deleteTheme(${theme.id})">삭제</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function createTheme() {
+        const body = {
+            name: document.getElementById('name-input').value.trim(),
+            description: document.getElementById('description-input').value.trim(),
+            thumbnail: document.getElementById('thumbnail-input').value.trim()
+        };
+
+        fetch('/admin/themes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+            .then(handleResponse)
+            .then(() => {
+                document.getElementById('name-input').value = '';
+                document.getElementById('description-input').value = '';
+                document.getElementById('thumbnail-input').value = '';
+                showToast('테마가 추가되었습니다', 'success');
+                loadThemes();
+            })
+            .catch(showError);
+    }
+
+    function deleteTheme(id) {
+        fetch(`/admin/themes/${id}`, { method: 'DELETE' })
+            .then(handleResponse)
+            .then(() => {
+                showToast('테마가 삭제되었습니다', 'success');
+                loadThemes();
+            })
+            .catch(showError);
+    }
+
+    function createThumbnailLink(thumbnail) {
+        if (!thumbnail) {
+            return '';
+        }
+        const escapedThumbnail = escapeHtml(thumbnail);
+        return `<a href="${escapedThumbnail}" target="_blank" rel="noopener noreferrer">${escapedThumbnail}</a>`;
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function compareTheme(a, b) {
+        for (const criterion of sortCriteria) {
+            const result = String(a[criterion.key] || '').localeCompare(
+                String(b[criterion.key] || ''),
+                'ko',
+                { numeric: true }
+            );
+            if (result !== 0) {
+                return criterion.direction === 'asc' ? result : -result;
+            }
+        }
+        return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
+    }
+
+    function toggleSort(key) {
+        const index = sortCriteria.findIndex(criterion => criterion.key === key);
+        if (index === -1) {
+            sortCriteria.push({ key, direction: 'asc' });
+            return;
+        }
+        if (sortCriteria[index].direction === 'asc') {
+            sortCriteria[index].direction = 'desc';
+            return;
+        }
+        sortCriteria.splice(index, 1);
+    }
+
+    function updateSortIndicators() {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const indicator = th.querySelector('.sort-indicator');
+            const index = sortCriteria.findIndex(criterion => criterion.key === th.dataset.sort);
+            if (index === -1) {
+                indicator.textContent = '';
+                return;
+            }
+            const arrow = sortCriteria[index].direction === 'asc' ? '↑' : '↓';
+            indicator.textContent = `${arrow}${index + 1}`;
+        });
+    }
+
+    function handleResponse(response) {
+        if (response.ok) {
+            if (response.status === 204) return null;
+            return response.json();
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function showError(error) {
+        showToast(error.message, 'error');
+    }
+
+    function showToast(message, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2600);
+    }
+</script>
+</body>
+</html>

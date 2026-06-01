@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 예약·대기 조회</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="my-page">
+<header>
+    <a href="/" class="escape-logo">ESC<span>A</span>PE</a>
+    <a href="/reservation" class="header-link">예약하기</a>
+</header>
+
+<main>
+    <div class="section-header">
+        <div class="section-title">예약자 이름</div>
+    </div>
+    <div class="form-grid lookup-form">
+        <input type="text" id="name-input" placeholder="예약자 이름">
+        <button type="button" onclick="loadMyReservations()">조회</button>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">예약·대기 목록</div>
+    </div>
+    <div class="result-meta" id="result-meta">이름을 입력하면 예약·대기 목록이 표시됩니다.</div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th data-sort="id">ID<span class="sort-indicator"></span></th>
+                <th data-sort="date">날짜<span class="sort-indicator"></span></th>
+                <th data-sort="time">시간<span class="sort-indicator"></span></th>
+                <th data-sort="theme">테마<span class="sort-indicator"></span></th>
+                <th data-sort="status">상태<span class="sort-indicator"></span></th>
+                <th data-sort="turn">대기 순번<span class="sort-indicator"></span></th>
+                <th class="right">관리</th>
+            </tr>
+            </thead>
+            <tbody id="reservation-body">
+            <tr>
+                <td colspan="7" class="empty">조회된 예약이 없습니다</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const nameInput = document.getElementById('name-input');
+    const reservationBody = document.getElementById('reservation-body');
+    const resultMeta = document.getElementById('result-meta');
+    let reservations = [];
+    let sortCriteria = [];
+    let editingReservationId = null;
+    let editingTimeId = null;
+    let editingTimes = null;
+
+    window.onload = () => {
+        nameInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                loadMyReservations();
+            }
+        });
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                toggleSort(th.dataset.sort);
+                renderReservations(nameInput.value.trim(), reservations);
+            });
+        });
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name');
+        if (name) {
+            nameInput.value = name;
+            loadMyReservations();
+        }
+    };
+
+    function loadMyReservations() {
+        const name = nameInput.value.trim();
+        if (!name) {
+            showToast('예약자 이름을 입력해주세요', 'error');
+            nameInput.focus();
+            return;
+        }
+
+        resultMeta.textContent = '예약·대기 목록을 불러오는 중입니다.';
+        reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회 중입니다</td></tr>`;
+
+        fetch(`/reservation-statuses?name=${encodeURIComponent(name)}`)
+            .then(handleResponse)
+            .then(rows => {
+                reservations = rows;
+                editingReservationId = null;
+                editingTimeId = null;
+                editingTimes = null;
+                renderReservations(name, reservations);
+            })
+            .catch(showError);
+    }
+
+    function renderReservations(name, rows) {
+        updateSortIndicators();
+        const sortedRows = [...rows].sort(compareReservation);
+        resultMeta.textContent = `${name}님의 예약·대기 ${rows.length}건`;
+        if (sortedRows.length === 0) {
+            reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회된 예약이 없습니다</td></tr>`;
+            return;
+        }
+
+        reservationBody.innerHTML = sortedRows.map(reservation => {
+            const waiting = reservation.status === 'WAITING';
+            const editing = editingReservationId === reservation.id && reservation.status === 'RESERVED';
+            let row = `
+            <tr class="${editing ? 'editing' : ''}">
+                <td class="muted">${reservation.id}</td>
+                <td>${reservation.date}</td>
+                <td class="accent">${formatTime(reservation.time?.startAt)}</td>
+                <td class="theme-name">${escapeHtml(reservation.theme?.name || '')}</td>
+                <td>${renderStatusBadge(reservation.status)}</td>
+                <td>${waiting ? `${reservation.turn}번째` : '-'}</td>
+                <td class="right">
+                    <div class="action-buttons">
+                        ${waiting ? '' : `<button type="button" class="btn-text" onclick="openEditForm(${reservation.id}, '${reservation.status}')">변경</button>`}
+                        <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, '${reservation.status}')">취소</button>
+                    </div>
+                </td>
+            </tr>`;
+            if (editing) {
+                row += renderEditRow(reservation);
+            }
+            return row;
+        }).join('');
+    }
+
+    function renderEditRow(reservation) {
+        return `
+            <tr class="edit-row">
+                <td colspan="7">
+                    <div class="edit-panel">
+                        <div class="edit-current">
+                            현재 예약: ${reservation.date} ${formatTime(reservation.time?.startAt)} · ${escapeHtml(reservation.theme?.name || '')}
+                        </div>
+                        <div class="edit-grid">
+                            <label class="edit-field">
+                                <span>변경 날짜</span>
+                                <input type="date" id="edit-date-${reservation.id}" value="${reservation.date}" min="${getTodayString()}" onchange="loadEditTimes(${reservation.id})">
+                            </label>
+                            <div class="edit-field">
+                                <span>변경 시간</span>
+                                <div class="time-grid edit-time-grid" id="edit-times-${reservation.id}">
+                                    ${renderEditTimes(reservation.id)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="edit-actions">
+                            <button type="button" onclick="updateReservation(${reservation.id})">변경하기</button>
+                            <button type="button" class="btn-secondary" onclick="closeEditForm()">닫기</button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function renderEditTimes(reservationId) {
+        if (editingTimes === null) {
+            return '<div class="placeholder-msg compact">날짜를 기준으로 시간을 불러오는 중입니다</div>';
+        }
+        if (editingTimes.length === 0) {
+            return '<div class="placeholder-msg compact">선택 가능한 시간이 없습니다</div>';
+        }
+        return editingTimes.map(item => {
+            const time = item.time || item;
+            const startAt = formatTime(time.startAt);
+            const available = item.available !== undefined ? item.available : true;
+            const selected = editingTimeId === time.id;
+            const classes = ['time-slot'];
+            if (!available) {
+                classes.push('unavailable');
+            }
+            if (selected) {
+                classes.push('selected');
+            }
+            let click = '';
+            if (available) {
+                click = ` onclick="selectEditTime(${reservationId}, ${time.id})"`;
+            }
+            return `<button type="button" class="${classes.join(' ')}"${click}>${startAt}</button>`;
+        }).join('');
+    }
+
+    function openEditForm(id, status) {
+        const reservation = findReservation(id, status);
+        if (!reservation || reservation.status === 'WAITING') {
+            showToast('대기는 변경할 수 없습니다', 'error');
+            return;
+        }
+        editingReservationId = id;
+        editingTimeId = null;
+        editingTimes = null;
+        renderReservations(nameInput.value.trim(), reservations);
+        loadEditTimes(id);
+    }
+
+    function closeEditForm() {
+        editingReservationId = null;
+        editingTimeId = null;
+        editingTimes = null;
+        renderReservations(nameInput.value.trim(), reservations);
+    }
+
+    function loadEditTimes(id) {
+        const reservation = findReservation(id, 'RESERVED');
+        if (!reservation) {
+            showToast('예약 정보를 찾을 수 없습니다', 'error');
+            return;
+        }
+        const dateInput = document.getElementById(`edit-date-${id}`);
+        if (!dateInput.value) {
+            showToast('변경할 날짜를 선택해주세요', 'error');
+            return;
+        }
+        editingTimeId = null;
+        const timesContainer = document.getElementById(`edit-times-${id}`);
+        timesContainer.innerHTML = '<div class="placeholder-msg compact">시간을 불러오는 중입니다</div>';
+
+        fetch(`/themes/${reservation.theme.id}/times?date=${dateInput.value}`)
+            .then(handleResponse)
+            .then(times => {
+                editingTimes = times;
+                timesContainer.innerHTML = renderEditTimes(id);
+            })
+            .catch(error => {
+                editingTimes = null;
+                timesContainer.innerHTML = '<div class="placeholder-msg compact">시간을 불러오지 못했습니다</div>';
+                showToast(error.message, 'error');
+            });
+    }
+
+    function selectEditTime(reservationId, timeId) {
+        editingTimeId = timeId;
+        const timesContainer = document.getElementById(`edit-times-${reservationId}`);
+        timesContainer.innerHTML = renderEditTimes(reservationId);
+    }
+
+    function updateReservation(id) {
+        const name = nameInput.value.trim();
+        const dateInput = document.getElementById(`edit-date-${id}`);
+        if (!dateInput.value) {
+            showToast('변경할 날짜를 선택해주세요', 'error');
+            return;
+        }
+        if (!editingTimeId) {
+            showToast('변경할 시간을 선택해주세요', 'error');
+            return;
+        }
+
+        fetch(`/reservations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                date: dateInput.value,
+                timeId: editingTimeId
+            })
+        })
+            .then(handleResponse)
+            .then(() => {
+                showToast('예약이 변경되었습니다', 'success');
+                loadMyReservations();
+            })
+            .catch(error => showToast(error.message, 'error'));
+    }
+
+    function cancelReservation(id, status) {
+        const name = nameInput.value.trim();
+        const reservation = findReservation(id, status);
+        if (!reservation) {
+            showToast('예약 정보를 찾을 수 없습니다', 'error');
+            return;
+        }
+        const waiting = reservation.status === 'WAITING';
+        if (!confirm(waiting ? '예약 대기를 취소하시겠습니까?' : '예약을 취소하시겠습니까?')) {
+            return;
+        }
+
+        const path = waiting ? `/waitings/${id}` : `/reservations/${id}`;
+
+        fetch(`${path}?name=${encodeURIComponent(name)}`, {
+            method: 'DELETE'
+        })
+            .then(handleEmptyResponse)
+            .then(() => {
+                showToast(waiting ? '예약 대기가 취소되었습니다' : '예약이 취소되었습니다', 'success');
+                loadMyReservations();
+            })
+            .catch(error => showToast(error.message, 'error'));
+    }
+
+    function findReservation(id, status) {
+        return reservations.find(reservation => reservation.id === id && reservation.status === status);
+    }
+
+    function compareReservation(a, b) {
+        for (const criterion of sortCriteria) {
+            const result = String(getSortValue(a, criterion.key)).localeCompare(
+                String(getSortValue(b, criterion.key)),
+                'ko',
+                { numeric: true }
+            );
+            if (result !== 0) {
+                return criterion.direction === 'asc' ? result : -result;
+            }
+        }
+        return compareDefaultReservation(a, b);
+    }
+
+    function compareDefaultReservation(a, b) {
+        const dateResult = String(b.date).localeCompare(String(a.date), 'ko', { numeric: true });
+        if (dateResult !== 0) {
+            return dateResult;
+        }
+        const timeResult = String(b.time?.startAt || '').localeCompare(String(a.time?.startAt || ''), 'ko', { numeric: true });
+        if (timeResult !== 0) {
+            return timeResult;
+        }
+        return String(b.id).localeCompare(String(a.id), 'ko', { numeric: true });
+    }
+
+    function getSortValue(reservation, key) {
+        return {
+            id: reservation.id,
+            date: reservation.date,
+            time: reservation.time?.startAt,
+            theme: reservation.theme?.name,
+            status: reservation.status,
+            turn: reservation.turn ?? 0
+        }[key] || '';
+    }
+
+    function toggleSort(key) {
+        const index = sortCriteria.findIndex(criterion => criterion.key === key);
+        if (index === -1) {
+            sortCriteria.push({ key, direction: 'asc' });
+            return;
+        }
+        if (sortCriteria[index].direction === 'asc') {
+            sortCriteria[index].direction = 'desc';
+            return;
+        }
+        sortCriteria.splice(index, 1);
+    }
+
+    function updateSortIndicators() {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const indicator = th.querySelector('.sort-indicator');
+            const index = sortCriteria.findIndex(criterion => criterion.key === th.dataset.sort);
+            if (index === -1) {
+                indicator.textContent = '';
+                return;
+            }
+            const arrow = sortCriteria[index].direction === 'asc' ? '↑' : '↓';
+            indicator.textContent = `${arrow}${index + 1}`;
+        });
+    }
+
+    function formatTime(value) {
+        return value ? value.slice(0, 5) : '';
+    }
+
+    function renderStatusBadge(status) {
+        if (status === 'WAITING') {
+            return '<span class="status-badge waiting">대기</span>';
+        }
+        return '<span class="status-badge reserved">예약</span>';
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function handleResponse(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function handleEmptyResponse(response) {
+        if (response.ok) {
+            return;
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function showError(error) {
+        resultMeta.textContent = '예약·대기 목록을 불러오지 못했습니다.';
+        reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회된 예약이 없습니다</td></tr>`;
+        showToast(error.message, 'error');
+    }
+
+    function showToast(message, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2600);
+    }
+
+    function getTodayString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const date = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
+    }
+</script>
+</body>
+</html>
