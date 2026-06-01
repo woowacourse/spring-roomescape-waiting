@@ -135,41 +135,6 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("본인의 예약 대기를 취소할 수 있다.")
-    void deleteByIdForUser_테스트_1() {
-        Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
-
-        assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
-                .doesNotThrowAnyException();
-
-        verify(waitingRepository).deleteById(1L);
-    }
-
-    @Test
-    @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
-    void deleteByIdForUser_테스트_2() {
-        Waiting waiting = new Waiting(1L, 1L, 1L);
-        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
-
-        assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))
-                .isInstanceOf(EscapeRoomException.class);
-
-        verify(waitingRepository, never()).deleteById(1L);
-    }
-
-    @Test
-    @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
-    void deleteByIdForUser_테스트_3() {
-        when(waitingRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))
-                .doesNotThrowAnyException();
-
-        verify(waitingRepository, never()).deleteById(999L);
-    }
-
-    @Test
     @DisplayName("reservationId가 있으면 예약 존재/권한을 검증하고 삭제한 뒤 대기를 저장한다. 즉, 현재 예약을 대기 가능한 다른 스케줄로 변경하려 할 때")
     void save_테스트_5() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, 10L);
@@ -259,5 +224,40 @@ class WaitingServiceTest {
         verify(reservationRepository, never()).findById(anyLong());
         verify(reservationRepository, never()).deleteById(anyLong());
         verify(waitingRepository).save(any(Waiting.class));
+    }
+
+    @Test
+    @DisplayName("본인의 예약 대기를 취소할 수 있다.")
+    void deleteByIdForUser_테스트_1() {
+        Waiting waiting = new Waiting(1L, 1L, 1L);
+        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
+
+        assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
+                .doesNotThrowAnyException();
+
+        verify(waitingRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
+    void deleteByIdForUser_테스트_2() {
+        Waiting waiting = new Waiting(1L, 1L, 1L);
+        when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
+
+        assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))
+                .isInstanceOf(EscapeRoomException.class);
+
+        verify(waitingRepository, never()).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("없는 예약 대기를 취소할 경우 성공처리 한다.")
+    void deleteByIdForUser_테스트_3() {
+        when(waitingRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatCode(() -> waitingService.deleteByIdForUser(999L, 1L))
+                .doesNotThrowAnyException();
+
+        verify(waitingRepository, never()).deleteById(999L);
     }
 }

@@ -33,7 +33,6 @@ public class WaitingControllerTest {
         RestAssured.port = port;
     }
 
-
     private String loginUser() {
         return login("b", "test2");
     }
