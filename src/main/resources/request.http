@@ -1,0 +1,105 @@
+### 예약 추가
+POST http://localhost:8080/reservations
+Authorization: ADMIN
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "date": "2026-05-04",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 예약 전체 조회
+GET http://localhost:8080/reservations
+Authorization: ADMIN
+
+### 예약 필터 조회 (날짜 및 테마, 응답 형식은 예약 전체 조회와 동일)
+GET http://localhost:8080/reservations?date=2026-05-04&themeId=1
+Authorization: ADMIN
+
+### 내 예약 조회
+GET http://localhost:8080/reservations/me?name=홍길동
+
+### 내 예약 날짜/시간 변경
+PATCH http://localhost:8080/reservations/me/1?name=홍길동&date=2026-05-05&timeId=2
+
+### 내 예약 취소
+DELETE http://localhost:8080/reservations/me/1?name=홍길동
+
+### 예약 추가 실패 - 빈 이름
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "name": " ",
+  "date": "2026-05-04",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 예약 추가 실패 - 잘못된 날짜 형식
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "date": "bad-date",
+  "timeId": 1,
+  "themeId": 1
+}
+
+### 예약 추가 실패 - 빈 테마 ID
+POST http://localhost:8080/reservations
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "date": "2026-05-04",
+  "timeId": 1,
+  "themeId": null
+}
+
+### 예약 삭제
+DELETE http://localhost:8080/reservations/1
+Authorization: ADMIN
+
+### 시간 추가
+POST http://localhost:8080/times
+Authorization: ADMIN
+Content-Type: application/json
+
+{
+  "startAt": "16:00"
+}
+
+### 시간 조회
+GET http://localhost:8080/times
+
+### 예약 가능 시간 조회
+GET http://localhost:8080/times?date=2026-05-04&themeId=1
+
+### 시간 삭제
+DELETE http://localhost:8080/times/1
+Authorization: ADMIN
+
+### 테마 추가
+POST http://localhost:8080/themes
+Authorization: ADMIN
+Content-Type: application/json
+
+{
+  "name": "테스트 테마",
+  "description": "테스트 설명",
+  "thumbnail": "https://good.com/thumb"
+}
+
+### 테마 전체 조회
+GET http://localhost:8080/themes
+
+### 인기 테마 조회
+GET http://localhost:8080/themes?sortBy=popular&from=2026-05-01&to=2026-05-31&limit=10
+
+### 테마 삭제
+DELETE http://localhost:8080/themes/1
+Authorization: ADMIN

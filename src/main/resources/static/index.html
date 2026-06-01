@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>방탈출 예약</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app-shell">
+    <header class="top-bar">
+        <div>
+            <p class="eyebrow">Room Escape</p>
+            <h1>방탈출 예약</h1>
+        </div>
+        <div class="status-pill" id="connectionStatus">API 연결 대기</div>
+    </header>
+
+    <main class="main-layout">
+        <section class="booking-panel" aria-labelledby="bookingTitle">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">Booking</p>
+                    <h2 id="bookingTitle">예약 신청</h2>
+                </div>
+                <button class="ghost-button" type="button" id="reloadButton">새로고침</button>
+            </div>
+
+            <form class="search-controls" id="bookingForm">
+                <label>
+                    예약자
+                    <input id="bookingName" name="name" autocomplete="name" placeholder="이름" required>
+                </label>
+                <label>
+                    날짜
+                    <input id="bookingDate" name="date" type="date" required>
+                </label>
+            </form>
+
+            <div class="theme-strip" id="themeList" aria-label="테마 목록"></div>
+
+            <div class="schedule-head">
+                <div>
+                    <p class="eyebrow">Schedule</p>
+                    <h3 id="selectedThemeName">테마 선택</h3>
+                </div>
+                <span class="muted" id="selectedDateLabel"></span>
+            </div>
+
+            <div class="time-grid" id="timeList"></div>
+        </section>
+
+        <section class="my-panel" aria-labelledby="myReservationTitle">
+            <div class="section-head">
+                <div>
+                    <p class="eyebrow">My List</p>
+                    <h2 id="myReservationTitle">내 예약</h2>
+                </div>
+            </div>
+
+            <form class="my-search" id="mySearchForm">
+                <label>
+                    예약자
+                    <input id="myName" name="name" autocomplete="name" placeholder="이름" required>
+                </label>
+                <button type="submit">조회</button>
+            </form>
+
+            <div class="summary-row" aria-label="내 예약 요약">
+                <div>
+                    <strong id="reservationCount">0</strong>
+                    <span>예약</span>
+                </div>
+                <div>
+                    <strong id="waitingCount">0</strong>
+                    <span>대기</span>
+                </div>
+            </div>
+
+            <div class="reservation-list" id="myReservationList"></div>
+        </section>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
