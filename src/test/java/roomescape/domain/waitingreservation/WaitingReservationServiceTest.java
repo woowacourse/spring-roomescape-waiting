@@ -124,7 +124,7 @@ class WaitingReservationServiceTest {
     }
 
     @Test
-    void 과거_시간에는_예약_대기를_신청할_수_없다() {
+    void 예약_불가능_날짜에는_예약_대기를_신청할_수_없다() {
         ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 5));
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(13, 59));
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
@@ -136,7 +136,7 @@ class WaitingReservationServiceTest {
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessageContaining("과거 시간에는 예약 대기를 신청할 수 없습니다.");
+            .hasMessageContaining("예약일이 오늘 이전이거나 당일인 예약에는 대기를 신청할 수 없습니다.");
     }
 
     @Test

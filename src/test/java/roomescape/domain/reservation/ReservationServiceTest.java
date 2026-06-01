@@ -30,7 +30,6 @@ import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
 class ReservationServiceTest {
@@ -86,7 +85,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("과거 시간으로 예약 생성 시 예외가 발생한다.")
+    @DisplayName("예약 불가능 날짜로 예약 생성 시 예외가 발생한다.")
     void createReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().minusDays(1)));
@@ -98,7 +97,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -199,7 +198,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("당일 예약 삭제 시 예외가 발생한다.")
+    @DisplayName("예약 불가능 날짜의 예약 삭제 시 예외가 발생한다.")
     void cancelTodayReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
@@ -211,7 +210,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationDateErrorCode.TODAY_NOT_MODIFIED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -238,7 +237,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("과거 시간으로 예약 수정 시 예외가 발생한다.")
+    @DisplayName("예약 불가능 날짜로 예약 수정 시 예외가 발생한다.")
     void updateReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
@@ -255,7 +254,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.updateReservation(creationResponse.id(), updateRequest))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -282,7 +281,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("당일 예약 수정 시 예외가 발생한다.")
+    @DisplayName("예약 불가능 날짜의 예약 수정 시 예외가 발생한다.")
     void updateTodayReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
@@ -297,7 +296,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), updateRequest))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationDateErrorCode.TODAY_NOT_MODIFIED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     private static class FakeReservationRepository implements ReservationRepository {

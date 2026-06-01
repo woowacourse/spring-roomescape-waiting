@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSchedule;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
@@ -36,7 +35,7 @@ public class WaitingReservationService {
         ReservationTime time = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
         ReservationSlot slot = new ReservationSlot(date, time, theme);
-        validateNotPast(slot.schedule());
+        validateReservableDate(slot);
         validateSlotIsReserved(slot);
         validateDuplicationOfWaitingReservation(request.name(), slot);
 
@@ -67,9 +66,9 @@ public class WaitingReservationService {
         }
     }
 
-    private void validateNotPast(ReservationSchedule schedule) {
-        if (schedule.isPast(clock)) {
-            throw new RoomescapeException(WaitingReservationErrorCode.PAST_TIME_NOT_ALLOWED);
+    private void validateReservableDate(ReservationSlot slot) {
+        if (slot.isOnOrBeforeToday(clock)) {
+            throw new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_DATE_NOT_ALLOWED);
         }
     }
 

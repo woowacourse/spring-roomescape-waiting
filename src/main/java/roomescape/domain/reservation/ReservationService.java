@@ -21,7 +21,6 @@ import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.RoomescapeErrorCode;
 
@@ -39,9 +38,9 @@ public class ReservationService {
     public ReservationCreationResponse createReservation(ReservationCreationRequest request) {
         ReservationDate reservationDate = reservationDateService.findById(request.dateId());
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
-        validateNotPast(new ReservationSchedule(reservationDate, reservationTime));
         Theme theme = themeService.findById(request.themeId());
         ReservationSlot slot = new ReservationSlot(reservationDate, reservationTime, theme);
+        validateReservableDate(slot);
         validateNotDuplicated(slot);
         Reservation savedReservation = reservationRepository.save(
                 request.toEntity(reservationDate, reservationTime, theme));
@@ -70,7 +69,7 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
-        validateModifiable(reservation);
+        validateReservableDate(reservation);
 
         deleteReservationOrThrow(id);
         promoteOldestWaiting(ReservationSlot.from(reservation));
@@ -79,16 +78,16 @@ public class ReservationService {
     @Transactional
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
         Reservation reservation = findById(id);
-        validateModifiable(reservation);
+        validateReservableDate(reservation);
 
         ReservationDate newReservationDate = reservationDateService.findById(request.dateId());
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
         ReservationSlot currentSlot = ReservationSlot.from(reservation);
         ReservationSlot newSlot = new ReservationSlot(newReservationDate, newReservationTime, reservation.getTheme());
-        validateNotPast(newSlot.schedule());
 
         boolean slotChanged = !currentSlot.isSameSlot(newSlot);
         if (slotChanged) {
+            validateReservableDate(newSlot);
             validateNotDuplicated(newSlot);
         }
 
@@ -151,21 +150,13 @@ public class ReservationService {
         }
     }
 
-    private void validateModifiable(Reservation reservation) {
-        ReservationSchedule schedule = ReservationSlot.from(reservation).schedule();
-        validateNotPast(schedule);
-        validateNotToday(schedule);
+    private void validateReservableDate(Reservation reservation) {
+        validateReservableDate(ReservationSlot.from(reservation));
     }
 
-    private void validateNotPast(ReservationSchedule schedule) {
-        if (schedule.isPast(clock)) {
-            throw new RoomescapeException(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED);
-        }
-    }
-
-    private void validateNotToday(ReservationSchedule schedule) {
-        if (schedule.isToday(clock)) {
-            throw new RoomescapeException(ReservationDateErrorCode.TODAY_NOT_MODIFIED);
+    private void validateReservableDate(ReservationSlot slot) {
+        if (slot.isOnOrBeforeToday(clock)) {
+            throw new RoomescapeException(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED);
         }
     }
 }

@@ -1,5 +1,7 @@
 package roomescape.domain.reservation;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -32,7 +34,7 @@ public record ReservationSlot(
                 && themeId().equals(other.themeId());
     }
 
-    public ReservationSchedule schedule() {
-        return new ReservationSchedule(date, time);
+    public boolean isOnOrBeforeToday(Clock clock) {
+        return !date.getPlayDay().isAfter(LocalDate.now(clock));
     }
 }
