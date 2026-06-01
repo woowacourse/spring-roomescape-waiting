@@ -22,4 +22,7 @@ public interface WaitingRepository {
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme);
 
     void delete(Long id);
+
+    Long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+
 }
