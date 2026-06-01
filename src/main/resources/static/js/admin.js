@@ -184,7 +184,8 @@
             list.forEach((r) => {
                 const tr = document.createElement("tr");
                 const timeVal = r.timeResponse?.startAt;
-                const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—"];
+                const statusText = r.status === "WAITING" ? "대기" : "확정";
+                const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—", statusText];
                 cells.forEach(text => {
                     const td = document.createElement("td");
                     td.textContent = text;

@@ -286,7 +286,7 @@
             reserveSubmitBtn.classList.remove("btn--waiting");
             return;
         }
-        if (slot.status === "CONFIRMED") {
+        if (slot.status === "RESERVED") {
             slotStatusHint.textContent =
                 "이미 다른 사용자가 예약한 시간대입니다. 신청하시면 대기 명단에 등록됩니다.";
             slotStatusHint.className = "slot-status-hint is-waiting";
@@ -331,7 +331,7 @@
             state.currentSlots.forEach((s) => {
                 const opt = document.createElement("option");
                 opt.value = String(s.id);
-                const tag = s.status === "CONFIRMED" ? " (대기 신청)" : "";
+                const tag = s.status === "RESERVED" ? " (대기 신청)" : "";
                 opt.textContent = formatTimeLabel(s.startAt) + tag;
                 timeSelect.appendChild(opt);
             });
@@ -366,7 +366,7 @@
         const name = nameInput.value.trim();
         if (!timeId || !name) return;
         const currentSlot = state.currentSlots.find((s) => s.id === timeId);
-        const willBeWaiting = currentSlot && currentSlot.status === "CONFIRMED";
+        const willBeWaiting = currentSlot && currentSlot.status === "RESERVED";
 
         try {
             const saved = await fetchJson("/reservations", {
@@ -619,7 +619,6 @@
                 body: JSON.stringify({
                     date: myEditDate.value,
                     timeId: Number(myEditTime.value),
-                    themeId: editingReservation.themeResponse?.id,
                 }),
             });
             myEditPanel.classList.add("is-hidden");
