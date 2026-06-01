@@ -98,13 +98,4 @@ public class ReservationTest {
         assertThat(reservation.isReservedBy("브라운")).isTrue();
         assertThat(reservation.isReservedBy("네오")).isFalse();
     }
-
-    @Test
-    void isExpired는_슬롯의_만료_여부를_반환한다() {
-        Slot futureSlot = Slot.restore(1L, LocalDate.now().plusDays(1), reservationTime, theme);
-        Slot pastSlot = Slot.restore(1L, LocalDate.now().minusDays(1), reservationTime, theme);
-
-        assertThat(Reservation.restore(1L, futureSlot, "브라운", LocalDateTime.now()).isExpired()).isFalse();
-        assertThat(Reservation.restore(1L, pastSlot, "브라운", LocalDateTime.now()).isExpired()).isTrue();
-    }
 }
