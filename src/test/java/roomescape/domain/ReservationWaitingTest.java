@@ -9,6 +9,7 @@ import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ForbiddenException;
+import roomescape.exception.PastDateTimeException;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,7 +50,35 @@ class ReservationWaitingTest {
     }
 
     @Test
-    @DisplayName("본인의 예약 대기가 맞는지 검증하고, 타인의 대기라면 예외를 발생시킨다.")
+    @DisplayName("슬롯의 시간이 현재 시간보다 과거인 예약 대기는 취소할 수 없다.")
+    void validateCancelableFailWhenPastTest() {
+        // given
+        LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
+
+        LocalDateTime pastDateTime = now.minusHours(1);
+        Slot slot = createValidSlot(pastDateTime);
+
+        ReservationWaiting waiting = ReservationWaiting.from(1L, UserName.from("파도"), slot, now.minusDays(1));
+
+        // when & then
+        assertThatThrownBy(() -> waiting.validateCancelable(now))
+                .isInstanceOf(PastDateTimeException.class)
+                .hasMessageContaining("과거의 날짜/시간입니다.");
+    }
+
+    @Test
+    @DisplayName("본인의 예약 대기가 맞다면 검증을 통과한다.")
+    void validateOwnedBySuccessTest() {
+        // given
+        UserName ownerName = UserName.from("파도");
+        LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
+        ReservationWaiting waiting = ReservationWaiting.from(1L, ownerName, createAnySlot(), now);
+
+        waiting.validateOwnedBy(ownerName);
+    }
+
+    @Test
+    @DisplayName("본인의 예약 대기가 아니라 타인의 대기라면 검증에 통과하지 못한다.")
     void validateOwnedByTest() {
         // given
         LocalDateTime now = LocalDateTime.of(2026, 5, 29, 10, 0);
