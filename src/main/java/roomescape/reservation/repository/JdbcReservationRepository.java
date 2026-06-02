@@ -145,6 +145,10 @@ public class JdbcReservationRepository implements ReservationRepository {
             AND date_id = :dateId
             AND time_id = :timeId
             AND theme_id = :themeId
+            AND (
+                d.date > CURRENT_DATE 
+                OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
+            )
             ORDER BY r.requested_at ASC, reservation_id ASC
             LIMIT 1
             """;
@@ -153,7 +157,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             .addValue("timeId", timeId)
             .addValue("themeId", themeId);
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(sql, params, reservationRowMapper);
+            Reservation reservation = jdbcTemplate.queryForObject(sql, params,
+                reservationRowMapper);
             return Optional.ofNullable(reservation);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -161,7 +166,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+    public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
         String sql = """
             SELECT
                 r.id AS reservation_id,
@@ -266,14 +272,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                         SELECT COUNT(*) + 1 
                         FROM reservation wait
                         WHERE wait.date_id = r.date_id
-                          AND wait.time_id = r.time_id
-                          AND wait.theme_id = r.theme_id
-                          AND wait.status = 'WAITING'
-                          AND (wait.requested_at < r.requested_at 
-                               OR (wait.requested_at = r.requested_at AND wait.id < r.id))
+                            AND wait.time_id = r.time_id
+                            AND wait.theme_id = r.theme_id
+                            AND wait.status = 'WAITING'
+                            AND (wait.requested_at < r.requested_at 
+                                OR (wait.requested_at = r.requested_at AND wait.id < r.id)
+                            )
+                            AND (
+                                d.date > CURRENT_DATE 
+                                OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
+                            )
                     )
-                    ELSE NULL 
-                END AS waiting_turn
+                           END AS waiting_turn
             FROM reservation r
             INNER JOIN reservation_date d ON r.date_id = d.id
             INNER JOIN reservation_time t ON r.time_id = t.id
