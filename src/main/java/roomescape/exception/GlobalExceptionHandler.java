@@ -1,7 +1,5 @@
 package roomescape.exception;
 
-import java.time.format.DateTimeParseException;
-import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -9,6 +7,10 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,6 +48,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException() {
         final ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
+        final ErrorResponse response = ErrorResponse.from(errorCode);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoHandlerFoundException() {
+        final ErrorCode errorCode = ErrorCode.API_NOT_FOUND;
         final ErrorResponse response = ErrorResponse.from(errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }

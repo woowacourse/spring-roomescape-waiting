@@ -8,6 +8,7 @@ public enum ErrorCode {
     // 시스템 에러
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED,"지원하지 않는 HTTP 메서드입니다."),
+    API_NOT_FOUND(HttpStatus.NOT_FOUND, "요청하신 API 주소를 찾을 수 없습니다."),
 
     // 비즈니스 에러
     WAITING_LIST_NOT_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "해당 시간에 예약이 존재하지 않기 때문에 예약 대기 불가합니다."),
