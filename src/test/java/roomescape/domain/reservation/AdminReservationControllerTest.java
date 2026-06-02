@@ -1,126 +1,87 @@
 package roomescape.domain.reservation;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
-import java.util.Objects;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.admin.AdminRequestValidator;
+import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.support.exception.ReservationErrorCode;
+import roomescape.support.exception.RoomescapeException;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql("/truncate.sql")
+@WebMvcTest(AdminReservationController.class)
 class AdminReservationControllerTest {
 
-    @org.springframework.beans.factory.annotation.Value("${token}")
-    private String adminToken;
     private static final String ADMIN_HEADER = "X-ADMIN-TOKEN";
-    @LocalServerPort
-    private int port;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    private Long futureDateId;
-    private Long timeId;
-    private Long themeId;
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
+    @MockitoBean
+    private ReservationService reservationService;
 
-        KeyHolder dateKeyHolder = new GeneratedKeyHolder();
-        String futureDate = LocalDate.now().plusDays(10).toString();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("insert into reservation_date(play_day) values (?)",
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, futureDate);
-            return ps;
-        }, dateKeyHolder);
-        futureDateId = Objects.requireNonNull(dateKeyHolder.getKey()).longValue();
+    @MockitoBean
+    private AdminRequestValidator adminRequestValidator;
 
-        KeyHolder timeKeyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("insert into reservation_time(start_at) values (?)",
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, "22:00");
-            return ps;
-        }, timeKeyHolder);
-        timeId = Objects.requireNonNull(timeKeyHolder.getKey()).longValue();
+    @Test
+    void 관리자_예약_목록_조회_요청을_처리하고_200을_반환한다() throws Exception {
+        when(reservationService.getAllReservations())
+            .thenReturn(List.of(new ReservationResponse(
+                1L,
+                "고래",
+                LocalDate.of(2026, 5, 10),
+                new ReservationResponse.ReservationTimePayload(2L, LocalTime.of(10, 0)),
+                new ReservationResponse.ThemePayload(3L, "공포", "테마 내용", "/themes/scary")
+            )));
 
-        KeyHolder themeKeyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("insert into theme(name, content, url) values (?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, "테스트테마");
-            ps.setString(2, "설명");
-            ps.setString(3, "url");
-            return ps;
-        }, themeKeyHolder);
-        themeId = Objects.requireNonNull(themeKeyHolder.getKey()).longValue();
+        mockMvc.perform(get("/admin/reservations")
+                .header(ADMIN_HEADER, "token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1))
+            .andExpect(jsonPath("$[0].name").value("고래"));
+
+        verify(reservationService).getAllReservations();
     }
 
     @Test
-    @DisplayName("관리자 권한으로 모든 예약을 조회한다.")
-    void getAllReservations() {
-        jdbcTemplate.update("insert into reservation(name, date_id, time_id, theme_id) values (?, ?, ?, ?)",
-            "관리자조회용", futureDateId, timeId, themeId);
+    void 관리자_예약_삭제_요청을_처리하고_204를_반환한다() throws Exception {
+        mockMvc.perform(delete("/admin/reservations/1")
+                .header(ADMIN_HEADER, "token"))
+            .andExpect(status().isNoContent());
 
-        RestAssured.given().log().all()
-            .header(ADMIN_HEADER, adminToken)
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(200)
-            .body("any { it.name == '관리자조회용' }", is(true));
+        verify(reservationService).deleteReservation(1L);
     }
 
     @Test
-    @DisplayName("관리자 권한으로 예약을 삭제한다.")
-    void deleteReservation() {
-        KeyHolder reservationKeyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                "insert into reservation(name, date_id, time_id, theme_id) values (?, ?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, "삭제될예약");
-            ps.setLong(2, futureDateId);
-            ps.setLong(3, timeId);
-            ps.setLong(4, themeId);
-            return ps;
-        }, reservationKeyHolder);
-        Long reservationId = Objects.requireNonNull(reservationKeyHolder.getKey()).longValue();
+    void 존재하지_않는_예약을_삭제하면_404를_반환한다() throws Exception {
+        doThrow(new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND))
+            .when(reservationService)
+            .deleteReservation(999L);
 
-        RestAssured.given().log().all()
-            .header(ADMIN_HEADER, adminToken)
-            .when().delete("/admin/reservations/" + reservationId)
-            .then().log().all()
-            .statusCode(204);
+        mockMvc.perform(delete("/admin/reservations/999")
+                .header(ADMIN_HEADER, "token"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("존재하지 않는 예약을 삭제하면 404 에러가 발생한다.")
-    void deleteNotFoundReservation() {
-        RestAssured.given().log().all()
-            .header(ADMIN_HEADER, adminToken)
-            .when().delete("/admin/reservations/" + 999)
-            .then().log().all()
-            .statusCode(404);
-    }
+    void 관리자_토큰이_없으면_401을_반환한다() throws Exception {
+        when(adminRequestValidator.isUnauthorized(any(HttpServletRequest.class))).thenReturn(true);
 
-    @Test
-    @DisplayName("관리자 토큰 없이 접근할 경우 401 에러가 발생한다.")
-    void unauthorizedAccess() {
-        RestAssured.given().log().all()
-            .when().get("/admin/reservations")
-            .then().log().all()
-            .statusCode(401);
+        mockMvc.perform(get("/admin/reservations"))
+            .andExpect(status().isUnauthorized());
     }
 }
