@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,11 @@ public class ReservationTimeDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
+    private final RowMapper<ReservationTime> reservationTimeRowMapper =
+            (resultSet, rowNum) -> new ReservationTime(
+                    resultSet.getLong("id"),
+                    resultSet.getObject("start_at", LocalTime.class)
+            );
 
     public ReservationTimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -30,10 +36,7 @@ public class ReservationTimeDao {
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time",
-                (rs, rowNum) -> new ReservationTime(
-                        rs.getLong("id"),
-                        rs.getTime("start_at").toLocalTime()
-                )
+                reservationTimeRowMapper
         );
     }
 
@@ -84,10 +87,7 @@ public class ReservationTimeDao {
     public Optional<ReservationTime> findTimeById(Long timeId) {
         List<ReservationTime> reservationTimes = jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time WHERE id = ?",
-                (rs, rowNum) -> new ReservationTime(
-                        rs.getLong("id"),
-                        rs.getTime("start_at").toLocalTime()
-                ),
+                reservationTimeRowMapper,
                 timeId
         );
 
@@ -107,12 +107,8 @@ public class ReservationTimeDao {
                                ORDER BY t.start_at
                         """,
                 (rs, rowNum) -> {
-                    ReservationTime time = new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime());
-
+                    ReservationTime time = reservationTimeRowMapper.mapRow(rs, rowNum);
                     return new TimeSlot(time, ReservationTimeStatus.valueOf(rs.getString("status")));
-
                 }, id, date
         );
     }

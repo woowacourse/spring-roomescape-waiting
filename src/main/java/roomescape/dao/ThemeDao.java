@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,14 @@ import roomescape.domain.Theme;
 public class ThemeDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
+    private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) ->
+            new Theme(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("description"),
+                    resultSet.getString("url")
+            );
+
 
     public ThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -26,12 +35,7 @@ public class ThemeDao {
     public Optional<Theme> findThemeById(Long id) {
         List<Theme> themes = jdbcTemplate.query(
                 "SELECT id, name, description, url FROM theme WHERE id = ?",
-                (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                ),
+                themeRowMapper,
                 id
         );
 
@@ -41,12 +45,7 @@ public class ThemeDao {
     public List<Theme> findAllThemes() {
         return jdbcTemplate.query(
                 "SELECT id, name, description, url FROM theme",
-                (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                )
+                themeRowMapper
         );
     }
 
@@ -65,12 +64,8 @@ public class ThemeDao {
                            GROUP BY t.id, t.name, t.description, t.url
                            ORDER BY reservation_count DESC
                            LIMIT ?
-                        """, (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                ),
+                        """,
+                themeRowMapper,
                 count
         );
     }
