@@ -2,6 +2,7 @@ package roomescape.feature.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,15 +15,11 @@ import roomescape.feature.theme.repository.ThemeRepository;
 import roomescape.global.error.exception.GeneralException;
 
 @Service
+@RequiredArgsConstructor
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ThemeMapper themeMapper;
-
-    public ThemeService(ThemeRepository themeRepository, ThemeMapper themeMapper) {
-        this.themeRepository = themeRepository;
-        this.themeMapper = themeMapper;
-    }
 
     public List<ThemeResponseDto> getThemes() {
         return convertThemesToDto(themeRepository.findAllByNotDeleted());

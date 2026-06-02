@@ -1,8 +1,10 @@
 package roomescape.feature.time.domain;
 
 import java.time.LocalTime;
+import lombok.Getter;
 import roomescape.global.domain.EntityStatus;
 
+@Getter
 public class Time {
 
     private final Long id;
@@ -21,17 +23,5 @@ public class Time {
 
     public static Time reconstruct(Long id, LocalTime startAt, EntityStatus status) {
         return new Time(id, startAt, status);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    public EntityStatus getStatus() {
-        return status;
     }
 }

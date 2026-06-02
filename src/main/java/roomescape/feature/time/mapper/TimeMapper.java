@@ -12,10 +12,6 @@ import roomescape.global.domain.EntityStatus;
 @Component
 public final class TimeMapper {
 
-    public TimeMapper() {
-
-    }
-
     public TimeCreateCommand toCreateCommand(TimeCreateRequestDto requestDto) {
         return new TimeCreateCommand(requestDto.startAt());
     }

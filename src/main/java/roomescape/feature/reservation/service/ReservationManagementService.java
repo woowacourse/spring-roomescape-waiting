@@ -2,6 +2,7 @@ package roomescape.feature.reservation.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,20 +26,13 @@ import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationManagementService implements ReservationService, WaitingService {
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationMapper reservationMapper;
-
-    public ReservationManagementService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, ReservationMapper reservationMapper) {
-        this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
-        this.reservationMapper = reservationMapper;
-    }
 
     @Override
     public List<ReservationResponseDto> getReservations() {

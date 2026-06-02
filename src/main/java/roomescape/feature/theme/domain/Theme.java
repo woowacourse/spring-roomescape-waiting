@@ -1,7 +1,9 @@
 package roomescape.feature.theme.domain;
 
+import lombok.Getter;
 import roomescape.global.domain.EntityStatus;
 
+@Getter
 public class Theme {
 
     private final Long id;
@@ -28,10 +30,6 @@ public class Theme {
             status);
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public String getName() {
         return name.value();
     }
@@ -42,9 +40,5 @@ public class Theme {
 
     public String getImageUrl() {
         return imageUrl.value();
-    }
-
-    public EntityStatus getStatus() {
-        return status;
     }
 }

@@ -2,6 +2,7 @@ package roomescape.feature.reservation.controller;
 
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,13 +16,10 @@ import roomescape.feature.reservation.service.ReservationService;
 @RestController
 @RequestMapping("/api/admin/reservations")
 @Validated
+@RequiredArgsConstructor
 public class AdminReservationController {
 
     private final ReservationService reservationService;
-
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservations() {

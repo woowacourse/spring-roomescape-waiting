@@ -3,6 +3,7 @@ package roomescape.feature.time.controller;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +16,10 @@ import roomescape.feature.time.service.TimeService;
 @RestController
 @RequestMapping("/api/times")
 @Validated
+@RequiredArgsConstructor
 public class TimeController {
 
     private final TimeService timeService;
-
-    public TimeController(TimeService timeService) {
-        this.timeService = timeService;
-    }
 
     @GetMapping
     public ResponseEntity<List<TimeAvailabilityResponseDto>> getAvailableTimes(@RequestParam LocalDate date,

@@ -3,6 +3,7 @@ package roomescape.feature.theme.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,15 +22,11 @@ import roomescape.feature.theme.service.ThemeService;
 @RestController
 @RequestMapping("/api/admin/themes")
 @Validated
+@RequiredArgsConstructor
 public class AdminThemeController {
 
     private final ThemeService themeService;
     private final ThemeMapper themeMapper;
-
-    public AdminThemeController(ThemeService themeService, ThemeMapper themeMapper) {
-        this.themeService = themeService;
-        this.themeMapper = themeMapper;
-    }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponseDto>> getThemes() {

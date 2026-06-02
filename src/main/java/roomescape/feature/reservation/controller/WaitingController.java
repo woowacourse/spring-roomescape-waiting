@@ -2,6 +2,7 @@ package roomescape.feature.reservation.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,15 +23,11 @@ import roomescape.feature.reservation.service.WaitingService;
 @RestController
 @RequestMapping("/api/reservations/waitings")
 @Validated
+@RequiredArgsConstructor
 public class WaitingController {
 
     private final WaitingService waitingService;
     private final ReservationMapper reservationMapper;
-
-    public WaitingController(WaitingService waitingService, ReservationMapper reservationMapper) {
-        this.waitingService = waitingService;
-        this.reservationMapper = reservationMapper;
-    }
 
     @PostMapping
     public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
