@@ -1,14 +1,14 @@
 package roomescape.auth.session;
 
-import jakarta.servlet.annotation.WebListener;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionAttributeListener;
 import jakarta.servlet.http.HttpSessionBindingEvent;
 import jakarta.servlet.http.HttpSessionEvent;
 import jakarta.servlet.http.HttpSessionListener;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Component;
 
-@WebListener
+@Component
 public class SessionRegistry implements HttpSessionListener, HttpSessionAttributeListener {
     private final ConcurrentHashMap<Long, HttpSession> sessions = new ConcurrentHashMap<>();
 
