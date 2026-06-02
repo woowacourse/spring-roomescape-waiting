@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Asia/Seoul
+
+  frontend:
+    image: alstj2384/roomescape-front
+    ports:
+      - "4173:4173"
+    environment:
+      - TZ=Asia/Seoul
+    depends_on:
+      - backend
