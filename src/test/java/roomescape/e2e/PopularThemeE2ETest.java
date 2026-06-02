@@ -10,30 +10,18 @@ import io.restassured.http.ContentType;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 
-@SpringWebTest
-public class PopularThemeE2ETest {
+public class PopularThemeE2ETest extends E2ETest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Autowired
     Clock clock;
-
-    @Autowired
-    DatabaseHelper helper;
-
-    @BeforeEach
-    void setup() {
-        helper.clear();
-    }
 
     @DisplayName("5월 1일 기준, 직전 period 일 동안의 예약 수를 기준으로 상위 limit 개의 테마들을 조회한다.")
     @Test

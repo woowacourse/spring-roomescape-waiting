@@ -14,12 +14,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 import roomescape.global.exception.BusinessException;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -39,11 +36,7 @@ import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
-@SpringWebTest
-class ConcurrencyE2ETest {
-
-    @Autowired
-    DatabaseHelper databaseHelper;
+class ConcurrencyE2ETest extends E2ETest {
 
     @Autowired
     ReservationService reservationService;
@@ -57,10 +50,6 @@ class ConcurrencyE2ETest {
     @Autowired
     private ThemeService themeService;
 
-    @BeforeEach
-    void setup() {
-        databaseHelper.clear();
-    }
 
     @DisplayName("동일한 예약 요청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test

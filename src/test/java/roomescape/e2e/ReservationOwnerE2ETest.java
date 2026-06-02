@@ -10,27 +10,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 
-@SpringWebTest
-public class ReservationOwnerE2ETest {
+public class ReservationOwnerE2ETest extends E2ETest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    DatabaseHelper databaseHelper;
-
-    @BeforeEach
-    void setup() {
-        databaseHelper.clear();
-    }
 
     @DisplayName("Authorization 헤더의 이름으로 자신의 예약을 삭제한다.")
     @Test

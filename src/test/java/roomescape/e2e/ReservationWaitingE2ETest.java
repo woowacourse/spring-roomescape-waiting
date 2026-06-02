@@ -5,23 +5,10 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 
-@SpringWebTest
-class ReservationWaitingE2ETest {
-
-    @Autowired
-    DatabaseHelper databaseHelper;
-
-    @BeforeEach
-    void setup() {
-        databaseHelper.clear();
-    }
+class ReservationWaitingE2ETest extends E2ETest {
 
     @DisplayName("예약 대기 신청에 성공하면 201을 반환한다.")
     @Test

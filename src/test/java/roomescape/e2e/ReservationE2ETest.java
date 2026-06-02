@@ -6,23 +6,10 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 
-@SpringWebTest
-public class ReservationE2ETest {
-
-    @Autowired
-    DatabaseHelper databaseHelper;
-
-    @BeforeEach
-    void setup() {
-        databaseHelper.clear();
-    }
+public class ReservationE2ETest extends E2ETest {
 
     @DisplayName("예약 시간과 테마를 생성한 뒤 예약을 생성하고 목록에서 조회한다.")
     @Test

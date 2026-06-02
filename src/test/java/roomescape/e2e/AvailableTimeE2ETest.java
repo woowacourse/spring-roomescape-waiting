@@ -11,23 +11,10 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.e2e.support.DatabaseHelper;
-import roomescape.e2e.support.SpringWebTest;
 import roomescape.time.domain.ReservationTime;
 
-@SpringWebTest
-public class AvailableTimeE2ETest {
-
-    @Autowired
-    DatabaseHelper databaseHelper;
-
-    @BeforeEach
-    void setup() {
-        databaseHelper.clear();
-    }
+public class AvailableTimeE2ETest extends E2ETest {
 
     @Test
     void 예약_가능한_시간_목록_조회() {
