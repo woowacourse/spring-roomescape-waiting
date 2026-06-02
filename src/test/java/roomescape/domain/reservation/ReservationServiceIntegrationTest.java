@@ -24,7 +24,7 @@ import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 @SpringBootTest
 @Sql("/truncate.sql")
-class ReservationCancellationIntegrationTest {
+class ReservationServiceIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
