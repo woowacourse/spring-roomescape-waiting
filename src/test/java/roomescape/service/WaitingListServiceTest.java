@@ -72,7 +72,7 @@ class WaitingListServiceTest {
 
         WaitingList waitingList = WaitingList.create(name, date, reservationTime, theme);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
-        given(waitingListRepository.findWaitingOrderByIdAndDateAndTimeAndTheme(any(WaitingList.class))).willReturn(1);
+        given(waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(any(WaitingList.class))).willReturn(1);
 
         // when
         WaitingListResult result = waitingListService.create(createCommand);

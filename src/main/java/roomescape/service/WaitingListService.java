@@ -32,7 +32,7 @@ public class WaitingListService {
         final List<WaitingList> waitingLists = waitingListRepository.findByName(name);
         return waitingLists.stream()
                 .map(waitingList -> WaitingListResult.from(
-                        waitingList, waitingListRepository.findWaitingOrderByIdAndDateAndTimeAndTheme(waitingList)
+                        waitingList, waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(waitingList)
                         )
                 ).toList();
     }
@@ -62,7 +62,7 @@ public class WaitingListService {
 
         try {
             final WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            final int waitingOrder = waitingListRepository.findWaitingOrderByIdAndDateAndTimeAndTheme(savedWaitingList);
+            final int waitingOrder = waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
         } catch (final DataAccessException e) {
             throw new DatabaseException(ErrorCode.UNIQUE_CONSTRAINT_VIOLATION);
@@ -72,13 +72,13 @@ public class WaitingListService {
     public void delete(final WaitingListDeleteCommand deleteCommand) {
         final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
-        
+
         if (!findWaitingList.getName().equals(deleteCommand.name())) {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 
         validateFuture(findWaitingList);
-        
+
         final boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);

@@ -77,7 +77,7 @@ public class WaitingListRepository {
         return jdbcTemplate.query(sql, this::mapToDomain, name).stream().toList();
     }
 
-    public int findWaitingOrderByIdAndDateAndTimeAndTheme(final WaitingList waitingList) {
+    public int findWaitingOrderByDateAndTimeAndTheme(final WaitingList waitingList) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
