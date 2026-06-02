@@ -59,8 +59,9 @@ class JdbcThemeRepositoryTest {
     void 인기_테마_조회() {
         Theme savedTheme = jdbcThemeRepository.save(new Theme("공포", "귀신의 집", "https://url"));
         insertReservation(savedTheme.getId());
-        List<Theme> themes = jdbcThemeRepository.findPopularThemes(10L, LocalDate.now().minusDays(1),
-                LocalDate.now().plusDays(1));
+        LocalDate startDate = LocalDate.now().minusDays(1);
+        LocalDate endDate = startDate.plusDays(2);
+        List<Theme> themes = jdbcThemeRepository.findPopularThemes(10L, startDate, endDate);
         assertThat(themes).hasSize(1);
     }
 
