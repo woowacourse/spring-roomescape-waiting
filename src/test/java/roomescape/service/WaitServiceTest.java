@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.WaitRepository;
 
@@ -40,12 +41,11 @@ public class WaitServiceTest {
 
     @Test
     void saveTest() {
-        List<Wait> waits = List.of();
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime,
                 theme);
         Wait wait = Wait.of(1L, waitWithoutId);
 
-        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
+        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(new Waits(List.of()));
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
 
         assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
@@ -60,9 +60,7 @@ public class WaitServiceTest {
         Wait otherWait = new Wait(2L, LocalDateTime.of(2026, 5, 2, 11, 0), "luke", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(wait, otherWait);
-
-        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
+        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(new Waits(List.of(wait, otherWait)));
 
         assertThatThrownBy(() -> waitService.save(waitWithoutId))
                 .isInstanceOf(RoomEscapeException.class);
@@ -80,9 +78,7 @@ public class WaitServiceTest {
         Wait otherWait3 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 13, 0), "lucky", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(otherWait1, otherWait2, otherWait3);
-
-        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
+        when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(new Waits(List.of(otherWait1, otherWait2, otherWait3)));
 
         assertThatThrownBy(() -> waitService.save(waitWithoutId))
                 .isInstanceOf(RoomEscapeException.class);
@@ -132,10 +128,8 @@ public class WaitServiceTest {
         Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(wait1, wait2);
+        Waits waits = new Waits(List.of(wait1, wait2));
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
-        when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
-        when(waitRepository.findOrderByWait(wait2)).thenReturn(2L);
 
         assertThat(waitService.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).isEqualTo(waits);
     }

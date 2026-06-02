@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 
 @JdbcTest
 class JdbcWaitRepositoryTest {
@@ -85,9 +86,9 @@ class JdbcWaitRepositoryTest {
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        List<Wait> slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        Waits slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        assertThat(slots.size()).isEqualTo(1);
+        assertThat(slots.findFirst()).isPresent();
     }
 
     @Test

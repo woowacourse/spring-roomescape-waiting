@@ -89,12 +89,9 @@ public class ReceptionFacade {
         }
         reservationService.delete(id);
 
-        List<Wait> waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
-        if (waits.isEmpty()) {
-            return;
-        }
-        confirmFirstWait(waits.getFirst());
+        waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+                .findFirst()
+                .ifPresent(this::confirmFirstWait);
     }
 
     @Transactional

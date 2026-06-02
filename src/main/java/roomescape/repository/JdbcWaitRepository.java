@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 
 @Repository
 public class JdbcWaitRepository implements WaitRepository {
@@ -68,7 +69,7 @@ public class JdbcWaitRepository implements WaitRepository {
     }
 
     @Override
-    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+    public Waits findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
         String sql = """
                 SELECT w.id, w.created_at, w.name, w.reservation_date,
                        rt.id AS time_id, rt.start_at AS time_value,
@@ -81,10 +82,10 @@ public class JdbcWaitRepository implements WaitRepository {
                 ORDER BY w.created_at
                 """;
 
-        return jdbcTemplate.query(sql, waitRowMapper(),
+        return new Waits(jdbcTemplate.query(sql, waitRowMapper(),
                 reservationDate,
                 timeId,
-                themeId);
+                themeId));
     }
 
     @Override

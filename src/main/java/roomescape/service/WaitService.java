@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.repository.WaitRepository;
@@ -11,7 +12,6 @@ import roomescape.repository.WaitRepository;
 @Service
 public class WaitService {
 
-    private static final int MAX_WAIT_SIZE = 3;
     private final WaitRepository waitRepository;
 
     public WaitService(WaitRepository waitRepository) {
@@ -19,20 +19,12 @@ public class WaitService {
     }
 
     public Wait save(Wait waitWithoutId) {
-        List<Wait> waits = waitRepository.findBySlot(
+        Waits waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),
                 waitWithoutId.getTime().getId(),
                 waitWithoutId.getTheme().getId());
 
-        for (Wait wait : waits) {
-            if (wait.isWaitedBy(waitWithoutId)) {
-                throw new RoomEscapeException(DomainErrorCode.DUPLICATED_WAIT);
-            }
-        }
-
-        if (waits.size() >= MAX_WAIT_SIZE) {
-            throw new RoomEscapeException(DomainErrorCode.WAIT_IS_FULL);
-        }
+        waits.validateAddable(waitWithoutId);
 
         return waitRepository.save(waitWithoutId);
     }
@@ -49,7 +41,7 @@ public class WaitService {
         waitRepository.delete(id);
     }
 
-    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+    public Waits findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
         return waitRepository.findBySlot(reservationDate, timeId, themeId);
     }
 

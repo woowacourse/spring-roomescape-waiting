@@ -23,6 +23,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.service.ReservationService;
@@ -177,7 +178,7 @@ public class ReceptionFacadeTest {
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())).thenReturn(List.of());
+                reservation.getTheme().getId())).thenReturn(new Waits(List.of()));
 
         receptionFacade.deleteReservation(reservation.getId());
 
@@ -194,7 +195,7 @@ public class ReceptionFacadeTest {
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())).thenReturn(List.of(firstWait));
+                reservation.getTheme().getId())).thenReturn(new Waits(List.of(firstWait)));
 
         receptionFacade.deleteReservation(reservation.getId());
         verify(reservationService, times(1)).save(waitRequest, firstWait.getTime(), firstWait.getTheme());

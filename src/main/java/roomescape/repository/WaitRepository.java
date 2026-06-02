@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Wait;
+import roomescape.domain.Waits;
 
 public interface WaitRepository {
 
@@ -11,7 +12,7 @@ public interface WaitRepository {
 
     Optional<Wait> findById(Long id);
 
-    List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId);
+    Waits findBySlot(LocalDate reservationDate, Long timeId, Long themeId);
 
     List<Wait> findByName(String name);
 
