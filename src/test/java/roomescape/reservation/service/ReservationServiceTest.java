@@ -25,7 +25,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
-import roomescape.reservation.service.validator.ReservationValidator;
+import roomescape.reservation.service.policy.ReservationPolicy;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -42,7 +42,7 @@ import roomescape.theme.repository.ThemeRepository;
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
-        ReservationValidator.class
+        ReservationPolicy.class
 })
 class ReservationServiceTest {
 

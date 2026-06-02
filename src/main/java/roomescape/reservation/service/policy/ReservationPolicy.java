@@ -1,4 +1,4 @@
-package roomescape.reservation.service.validator;
+package roomescape.reservation.service.policy;
 
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_ALREADY_STARTED_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_OTHER_GUEST_RESERVATION;
@@ -15,7 +15,7 @@ import roomescape.reservation.repository.ReservationRepository;
 
 @Component
 @RequiredArgsConstructor
-public class ReservationValidator {
+public class ReservationPolicy {
 
     private final ReservationRepository reservationRepository;
     private final TimeManager timeManager;

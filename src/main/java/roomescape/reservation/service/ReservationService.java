@@ -14,7 +14,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
-import roomescape.reservation.service.validator.ReservationValidator;
+import roomescape.reservation.service.policy.ReservationPolicy;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -28,7 +28,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    private final ReservationValidator reservationValidator;
+    private final ReservationPolicy reservationPolicy;
 
     @Transactional
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
@@ -39,7 +39,7 @@ public class ReservationService {
 
         Reservation reservation = Reservation.create(guestName, date, time, theme, status);
 
-        reservationValidator.validateCreate(reservation);
+        reservationPolicy.validateCreate(reservation);
 
         Reservation saved = reservationRepository.save(reservation);
 
@@ -67,7 +67,7 @@ public class ReservationService {
         Status status = determineState(date, timeId, reservation.themeId());
         Reservation changedReservation = reservation.changeDateAndTime(date, changedTime, status);
 
-        reservationValidator.validateEdit(reservation, changedReservation, guestName);
+        reservationPolicy.validateEdit(reservation, changedReservation, guestName);
 
         updateReservation(changedReservation);
         promoteWaitingIfNeeded(reservation, changedReservation);
@@ -84,7 +84,7 @@ public class ReservationService {
     @Transactional
     public void deleteMine(Long id, String guestName) {
         Reservation reservation = getReservation(id);
-        reservationValidator.validateDelete(reservation, guestName);
+        reservationPolicy.validateDelete(reservation, guestName);
         cancelReservation(id);
     }
 
