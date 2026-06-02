@@ -157,7 +157,7 @@ class ReservationRepositoryTest {
 
             reservationRepository.deleteById(saved.getId());
 
-            assertThat(reservationRepository.existsById(saved.getId())).isFalse();
+            assertThat(reservationRepository.findById(saved.getId())).isEmpty();
         }
     }
 
@@ -179,29 +179,6 @@ class ReservationRepositoryTest {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
             boolean result = reservationRepository.existsByThemeId(anotherTheme.getId());
-
-            assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("id로 예약 존재 여부 조회")
-    class ExistsById {
-
-        @Test
-        void 존재하는_id면_true를_반환한다() {
-            Reservation saved = reservationRepository.save(
-                    Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
-            );
-
-            boolean result = reservationRepository.existsById(saved.getId());
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void 존재하지_않는_id면_false를_반환한다() {
-            boolean result = reservationRepository.existsById(999L);
 
             assertThat(result).isFalse();
         }

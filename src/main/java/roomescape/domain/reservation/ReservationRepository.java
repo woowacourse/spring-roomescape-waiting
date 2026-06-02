@@ -101,16 +101,6 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
-    public boolean existsById(Long id) {
-        String query = """
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE id = ?
-                """;
-        Integer count = jdbcTemplate.queryForObject(query, Integer.class, id);
-        return count != null && count > 0;
-    }
-
     public List<Long> findThemeIdTop10(LocalDate startDate, LocalDate endDate) {
         String query = """
                 SELECT r.theme_id AS theme_id
