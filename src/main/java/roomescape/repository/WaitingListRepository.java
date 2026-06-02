@@ -88,8 +88,8 @@ public class WaitingListRepository {
                 waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
-                Timestamp.valueOf(waitingList.getCreatedAt()
-                ));
+                waitingList.getCreatedAt()
+        );
 
         if (waitingOrder != null) {
             return waitingOrder;
