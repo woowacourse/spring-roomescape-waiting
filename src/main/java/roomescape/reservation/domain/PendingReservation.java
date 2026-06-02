@@ -45,7 +45,7 @@ public class PendingReservation {
         slot.checkChangeableTime(clock);
         return PendingReservation.builder()
                 .id(id)
-                .name(username)
+                .name(name)
                 .slot(slot)
                 .is_deleted(is_deleted)
                 .createdAt(LocalDateTime.now(clock))

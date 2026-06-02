@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
@@ -22,6 +24,7 @@ public class ActiveReservationService {
     private final Clock clock;
     private final ActiveReservationRepository reservationRepository;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ReservationInfo add(final TimeSlot slot, final ReservationCreateCommand command) {
         if (reservationRepository.existsByActiveSlotId(slot.getId())) {
             throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
@@ -49,15 +52,24 @@ public class ActiveReservationService {
         }
     }
 
+    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo change(final Long id, final TimeSlot slot, final ReservationChangeCommand command) {
-        ActiveReservation reservation = reservationRepository.getById(id);
-        ActiveReservation changedReservation = reservation.changeTime(command.name(), slot, clock);
-        reservationRepository.update(changedReservation);
-        return ReservationInfo.from(changedReservation);
+        try {
+            ActiveReservation reservation = reservationRepository.getById(id);
+            ActiveReservation changedReservation = reservation.changeTime(command.name(), slot, clock);
+            reservationRepository.update(changedReservation);
+            return ReservationInfo.from(changedReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("변경 하려는 시간에 이미 예약이 존재합니다.");
+        }
     }
 
-    public boolean existsBySlotId(Long id) {
-        return reservationRepository.existsByActiveSlotId(id);
+    public boolean existsBySlotId(Long slotId, Long id) {
+        return reservationRepository.existsByActiveSlotIdNotId(slotId, id);
+    }
+
+    public boolean existsBySlotId(Long slotId) {
+        return reservationRepository.existsByActiveSlotId(slotId);
     }
 
     public Long getSlotId(final Long id) {

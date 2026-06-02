@@ -13,7 +13,8 @@ public interface ActiveReservationRepository {
     List<ActiveReservation> findAllByName(String name);
     boolean existsByReservationTime(Long timeId);
     boolean existsByTheme(Long id);
-    boolean existsByActiveSlotId(Long id);
+    boolean existsByActiveSlotId(Long slotId);
+    boolean existsByActiveSlotIdNotId(Long slotId, Long id);
     void update(ActiveReservation changedReservation);
     void cancel(ActiveReservation reservation);
 

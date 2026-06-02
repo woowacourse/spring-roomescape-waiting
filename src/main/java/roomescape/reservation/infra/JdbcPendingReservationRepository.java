@@ -54,7 +54,6 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
                 .createdAt(resultSet.getTimestamp("p_created_at").toLocalDateTime())
                 .build();
     };
-
     private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum) -> {
         Theme theme = Theme.builder()
                 .id(resultSet.getLong("t_id"))
@@ -181,7 +180,8 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
                 + "WHERE p.slot_id = :slotId "
                 + "AND p.is_deleted = 0 "
                 + "ORDER BY p.created_at ASC "
-                + "LIMIT 1";
+                + "LIMIT 1 "
+                + "FOR UPDATE";
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("slotId", slotId);

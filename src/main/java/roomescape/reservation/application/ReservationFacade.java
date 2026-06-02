@@ -29,6 +29,22 @@ public class ReservationFacade {
     private final ThemeService themeService;
     private final TimeSlotService timeSlotService;
 
+    @Transactional(readOnly = true)
+    public List<ReservationInfo> getReservations() {
+        List<ReservationInfo> activeReservations = activeReservationService.getReservations();
+        List<ReservationInfo> pendingReservations = pendingReservationService.getReservations();
+        return Stream.concat(activeReservations.stream(), pendingReservations.stream())
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationPendingInfo> getReservationsByName(final String username) {
+        List<ReservationPendingInfo> activeReservations = activeReservationService.getReservationsByName(username);
+        List<ReservationPendingInfo> pendingReservations = pendingReservationService.getReservationsByName(username);
+        return Stream.concat(activeReservations.stream(), pendingReservations.stream())
+                .toList();
+    }
+
     public ReservationInfo addReservation(final ReservationCreateCommand command) {
         ReservationTime time = timeService.getTime(command.timeId(), command.date());
         Theme theme = themeService.getThemeById(command.themeId());
@@ -55,15 +71,17 @@ public class ReservationFacade {
         Theme theme = themeService.getThemeById(command.themeId());
         TimeSlot slot = timeSlotService.getTimeSlot(command.date(), time, theme);
 
-        boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId());
-
+        boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId(), id);
+        
         if (command.status().equals(Status.PENDING)) {
+            isSlotFull = activeReservationService.existsBySlotId(slot.getId());
             return changePendingReservation(id, command, slot, isSlotFull);
         }
         return changeActiveReservation(id, command, slot, isSlotFull);
     }
 
-    private ReservationInfo changePendingReservation(final Long id, final ReservationChangeCommand command, final TimeSlot slot, final boolean isSlotFull) {
+    private ReservationInfo changePendingReservation(final Long id, final ReservationChangeCommand command,
+                                                     final TimeSlot slot, final boolean isSlotFull) {
         if (isSlotFull) {
             return pendingReservationService.change(id, slot, command);
         }
@@ -71,33 +89,28 @@ public class ReservationFacade {
         return activeReservationService.add(slot, command.toCreateCommand());
     }
 
-    private ReservationInfo changeActiveReservation(final Long id, final ReservationChangeCommand command, final TimeSlot slot, final boolean isSlotFull) {
+    private ReservationInfo changeActiveReservation(final Long id, final ReservationChangeCommand command,
+                                                    final TimeSlot slot, final boolean isSlotFull) {
         if (isSlotFull) {
-            Long oldSlotId = activeReservationService.cancel(id, command.toCancelCommand());
-            pendingReservationService.popNextPendingAndPromote(oldSlotId)
-                    .ifPresent(activeReservationService::savePromoted);
-            return pendingReservationService.add(slot, command.toCreateCommand());
+            return fallbackToPending(id, command, slot);
         }
-        Long oldSlotId = activeReservationService.getSlotId(id);
-        ReservationInfo changedInfo = activeReservationService.change(id, slot, command);
+        try {
+            Long oldSlotId = activeReservationService.getSlotId(id);
+            ReservationInfo changedInfo = activeReservationService.change(id, slot, command);
+            if (!oldSlotId.equals(slot.getId())) {
+                pendingReservationService.popNextPendingAndPromote(oldSlotId)
+                        .ifPresent(activeReservationService::savePromoted);
+            }
+            return changedInfo;
+        } catch (ReservationInUseException e) {
+            return fallbackToPending(id, command, slot);
+        }
+    }
+
+    private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
+        Long oldSlotId = activeReservationService.cancel(id, command.toCancelCommand());
         pendingReservationService.popNextPendingAndPromote(oldSlotId)
                 .ifPresent(activeReservationService::savePromoted);
-        return changedInfo;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationInfo> getReservations() {
-        List<ReservationInfo> activeReservations = activeReservationService.getReservations();
-        List<ReservationInfo> pendingReservations = pendingReservationService.getReservations();
-        return Stream.concat(activeReservations.stream(), pendingReservations.stream())
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationPendingInfo> getReservationsByName(final String username) {
-        List<ReservationPendingInfo> activeReservations = activeReservationService.getReservationsByName(username);
-        List<ReservationPendingInfo> pendingReservations = pendingReservationService.getReservationsByName(username);
-        return Stream.concat(activeReservations.stream(), pendingReservations.stream())
-                .toList();
+        return pendingReservationService.add(slot, command.toCreateCommand());
     }
 }
