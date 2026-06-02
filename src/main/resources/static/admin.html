@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 관리자</title>
+  <meta name="description" content="Roomescape 방탈출 카페 관리자 페이지. 예약, 시간대, 테마를 관리합니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab" href="/page/reservations">예약</a>
+        <a class="nav-tab" href="/page/my-reservations">내 예약</a>
+        <a class="nav-tab active" href="/page/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">관리자</h1>
+        <p class="admin-subtitle">예약, 시간대, 테마를 관리합니다.</p>
+      </div>
+    </div>
+
+    <div class="admin-tabs" role="tablist" aria-label="관리자 메뉴">
+      <button class="admin-tab active" role="tab" data-panel="reservations" id="tab-admin-res" aria-selected="true">예약 목록</button>
+      <button class="admin-tab" role="tab" data-panel="times" id="tab-admin-times" aria-selected="false">시간대</button>
+      <button class="admin-tab" role="tab" data-panel="themes" id="tab-admin-themes" aria-selected="false">테마</button>
+    </div>
+
+    <!-- Panel: Reservations -->
+    <div class="admin-panel active" id="admin-panel-reservations" role="tabpanel">
+      <div class="data-table-wrap">
+        <table class="data-table" aria-label="예약 목록">
+          <thead><tr><th>#</th><th>예약자</th><th>날짜</th><th>시간</th><th>테마</th><th></th></tr></thead>
+          <tbody id="admin-reservations-tbody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel: Times -->
+    <div class="admin-panel" id="admin-panel-times" role="tabpanel">
+      <div class="admin-form-card">
+        <div class="admin-form-title">시간대 추가</div>
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label class="form-label" for="new-time-start">시작 시간</label>
+            <input class="form-input" type="time" id="new-time-start" />
+          </div>
+          <div class="admin-form-group">
+            <label class="form-label" for="new-time-end">종료 시간</label>
+            <input class="form-input" type="time" id="new-time-end" />
+          </div>
+          <button class="btn-add" id="btn-add-time">추가</button>
+        </div>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" aria-label="시간대 목록">
+          <thead><tr><th>#</th><th>시작 시간</th><th>종료 시간</th><th></th></tr></thead>
+          <tbody id="admin-times-tbody">
+          <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Panel: Themes -->
+    <div class="admin-panel" id="admin-panel-themes" role="tabpanel">
+      <div class="admin-form-card">
+        <div class="admin-form-title">테마 추가</div>
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label class="form-label" for="new-theme-name">테마명</label>
+            <input class="form-input" type="text" id="new-theme-name" placeholder="미스터리 저택" />
+          </div>
+          <div class="admin-form-group" style="flex:2">
+            <label class="form-label" for="new-theme-desc">설명</label>
+            <input class="form-input" type="text" id="new-theme-desc" placeholder="어두운 저택에 갇혔다..." />
+          </div>
+          <div class="admin-form-group">
+            <label class="form-label" for="new-theme-thumb">썸네일 URL</label>
+            <input class="form-input" type="text" id="new-theme-thumb" placeholder="/images/theme.png" />
+          </div>
+          <button class="btn-add" id="btn-add-theme">추가</button>
+        </div>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" aria-label="테마 목록">
+          <thead><tr><th>#</th><th>이름</th><th>설명</th><th></th></tr></thead>
+          <tbody id="admin-themes-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-muted)">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+<script src="/admin.js"></script>
+</body>
+</html>
