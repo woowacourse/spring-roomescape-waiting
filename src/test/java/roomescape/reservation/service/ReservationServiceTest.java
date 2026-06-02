@@ -9,6 +9,7 @@ import static roomescape.reservation.exception.ReservationErrorInformation.RESER
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
+import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
@@ -249,11 +250,53 @@ class ReservationServiceTest {
                 reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
 
             // when
-            Reservation actual = reservationService.cancel(reservationInWaiting.getId(), nameInWaiting);
+            Reservation actual = reservationService.cancel(reservationInWaiting.getId(),
+                nameInWaiting);
 
             // then
             Assertions.assertThat(actual.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+
+        @Test
+        @DisplayName("WAITING 예약을 취소하면 승격이 일어나지 않는다")
+        void 성공3() {
+            // given
+            String name2 = "사용자2";
+            String name3 = "사용자3";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+            save(waitReservation(name3, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationInWaiting.getId(), name2);
+
+            // then
+            assertThat(reservationRepository.findAll())
+                .filteredOn(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .hasSize(1);
+        }
+
+
+        @Test
+        @DisplayName("RESERVED 예약을 취소하면 첫 번째 WAITING 예약만 RESERVED로 승격된다")
+        void 성공4() {
+            // given
+            String name2 = "사용자2";
+            Reservation reservationToCancel = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationToCancel.getId(), name);
+
+            // then
+            assertThat(reservationInWaiting)
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
         }
 
 
@@ -340,6 +383,47 @@ class ReservationServiceTest {
             // then
             Assertions.assertThat(actual.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
+        }
+
+
+        @Test
+        @DisplayName("WAITING 상태인 예약이 취소되어도 같은 슬롯에서 승격이 이루어지지 않는다")
+        void 성공3() {
+            // given
+            String name2 = "사용자2";
+            String name3 = "사용자3";
+            save(reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+            save(waitReservation(name3, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationInWaiting.getId(), name2);
+
+            // then
+            assertThat(reservationRepository.findAll())
+                .filteredOn(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                .hasSize(1);
+        }
+
+
+        @Test
+        @DisplayName("RESERVED 예약을 취소하면 첫 번째 WAITING 예약만 RESERVED로 승격된다")
+        void 성공4() {
+            // given
+            String name2 = "사용자2";
+            Reservation reservationToCancel = save(
+                reservation(name, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting = save(
+                waitReservation(name2, reservationDate1, reservationTime1, theme1));
+
+            // when
+            reservationService.cancel(reservationToCancel.getId(), name);
+
+            // then
+            assertThat(reservationInWaiting)
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
         }
 
 

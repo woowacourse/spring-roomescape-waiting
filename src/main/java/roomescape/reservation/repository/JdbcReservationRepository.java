@@ -118,6 +118,49 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findFirstWaitingByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
+        String sql = """
+            SELECT
+                r.id AS reservation_id,
+                r.name,
+                r.status,
+                r.requested_at,
+                d.id as date_id,
+                d.date,
+                d.is_active as date_is_active,
+                t.id as time_id,
+                t.start_at,
+                t.is_active as time_is_active,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description,
+                th.thumbnail_url,
+                th.is_active
+            FROM reservation r
+            INNER JOIN reservation_date d ON r.date_id = d.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            WHERE r.status = 'WAITING'
+            AND date_id = :dateId
+            AND time_id = :timeId
+            AND theme_id = :themeId
+            ORDER BY r.requested_at ASC, reservation_id ASC
+            LIMIT 1
+            """;
+        SqlParameterSource params = new MapSqlParameterSource()
+            .addValue("dateId", dateId)
+            .addValue("timeId", timeId)
+            .addValue("themeId", themeId);
+        try {
+            Reservation reservation = jdbcTemplate.queryForObject(sql, params, reservationRowMapper);
+            return Optional.ofNullable(reservation);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public List<Reservation> findAllActiveByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
         String sql = """
             SELECT

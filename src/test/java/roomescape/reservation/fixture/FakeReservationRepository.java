@@ -1,6 +1,7 @@
 package roomescape.reservation.fixture;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,21 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public Optional<Reservation> findFirstWaitingByDateTimeAndThemeId(Long dateId, Long timeId,
+        Long themeId) {
+        return store.values().stream()
+            .filter(reservation ->
+                reservation.getDate().getId().equals(dateId) &&
+                    reservation.getTime().getId().equals(timeId) &&
+                    reservation.getTheme().getId().equals(themeId) &&
+                    (reservation.getStatus() == ReservationStatus.RESERVED ||
+                        reservation.getStatus() == ReservationStatus.WAITING))
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .min(Comparator.comparing(Reservation::getRequestedAt)
+                .thenComparing(Reservation::getId));
     }
 
     @Override
