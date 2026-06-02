@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
-import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
@@ -78,10 +76,8 @@ public class ReservationService {
         }
         reservationRepository.deleteById(id);
 
-        Optional<ReservationWaiting> promoteWaiting = reservationWaitingService.promoteWaiting(reservation.getDate(),
+        reservationWaitingService.promoteWaiting(reservation.getDate(),
                 reservation.getTime().getId(), reservation.getTheme().getId());
-        promoteWaiting.ifPresent(w -> reservationRepository.save(
-                reservationFactory.create(w.getName(), w.getDate(), w.getTime(), w.getTheme())));
     }
 
     @Transactional

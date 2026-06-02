@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
@@ -26,15 +27,18 @@ public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingFactory reservationWaitingFactory;
+    private final ReservationFactory reservationFactory;
     private final Clock clock;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
                                      ReservationRepository reservationRepository,
                                      ReservationWaitingFactory reservationWaitingFactory,
+                                     ReservationFactory reservationFactory,
                                      Clock clock) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
+        this.reservationFactory = reservationFactory;
         this.clock = clock;
     }
 
@@ -75,12 +79,14 @@ public class ReservationWaitingService {
                 .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW) // 별도 트랜잭션 생성
-    public Optional<ReservationWaiting> promoteWaiting(LocalDate date, Long timeId, Long themeId) {
-        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findReservationWaitingBySlot(date, timeId,
-                themeId);
-        waiting.ifPresent(w -> reservationWaitingRepository.deleteById(w.getId()));
-        return waiting;
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void promoteWaiting(LocalDate date, Long timeId, Long themeId) {
+        reservationWaitingRepository.findReservationWaitingBySlot(date, timeId, themeId)
+                .ifPresent(waiting -> {
+                    reservationRepository.save(
+                            reservationFactory.create(waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+                    reservationWaitingRepository.deleteById(waiting.getId());
+                });
     }
 
     @NonNull
