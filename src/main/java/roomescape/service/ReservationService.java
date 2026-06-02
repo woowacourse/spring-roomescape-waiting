@@ -1,17 +1,14 @@
 package roomescape.service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
+import roomescape.repository.UserReservationRepository;
 import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
@@ -27,20 +24,20 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
+    private final UserReservationRepository userReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            WaitingRepository waitingRepository,
+            UserReservationRepository userReservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             Clock clock
     ) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
+        this.userReservationRepository = userReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
@@ -51,41 +48,7 @@ public class ReservationService {
     }
 
     public List<UserReservation> findUserReservations(String name, int page, int size) {
-        List<UserReservation> userReservations = new ArrayList<>();
-
-        for (Reservation reservation : reservationRepository.findByName(name)) {
-            userReservations.add(
-                    UserReservation.reserved(reservation.getId(), reservation.getName(), reservation.getDate(),
-                            reservation.getTime(), reservation.getTheme()));
-        }
-
-        for (Waiting waiting : waitingRepository.findByName(name)) {
-            userReservations.add(UserReservation.waiting(
-                    waiting.getId(),
-                    waiting.getName(),
-                    waiting.getDate(),
-                    waiting.getTime(),
-                    waiting.getTheme(),
-                    waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(
-                            waiting.getId(),
-                            waiting.getTheme(),
-                            waiting.getDate(),
-                            waiting.getTime()
-                    )
-            ));
-        }
-
-        userReservations.sort(Comparator
-                .comparing(UserReservation::date)
-                .thenComparing(ur -> ur.time().getStartAt())
-                .thenComparing(ur -> ur.theme().getId()));
-
-        int offset = page * size;
-
-        return userReservations.stream()
-                .skip(offset)
-                .limit(size)
-                .toList();
+        return userReservationRepository.findByName(name, page, size);
     }
 
     @Transactional
