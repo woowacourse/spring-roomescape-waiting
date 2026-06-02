@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/}">방탈출 예약</a>
+    <nav class="nav">
+        <a class="active" th:href="@{/}">홈</a>
+        <a th:href="@{/reservation}">예약</a>
+        <a th:href="@{/my}">내 예약</a>
+        <a th:href="@{/popular}">인기 테마</a>
+        <a th:href="@{/admin}">어드민</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <h1>방탈출에 오신 것을 환영합니다</h1>
+        <p>원하는 날짜와 시간에 즐길 수 있는 테마를 예약해보세요.</p>
+        <div class="hero-grid">
+            <a class="hero-card" th:href="@{/reservation}">
+                <h3>예약하기</h3>
+                <p>이름·날짜·시간을 입력하고 바로 예약을 등록합니다.</p>
+            </a>
+            <a class="hero-card" th:href="@{/my}">
+                <h3>내 예약</h3>
+                <p>본인 이름으로 등록한 예약 목록을 확인합니다.</p>
+            </a>
+            <a class="hero-card" th:href="@{/popular}">
+                <h3>인기 테마</h3>
+                <p>최근 1주일 동안 가장 많이 예약된 테마 TOP 10을 살펴보세요.</p>
+            </a>
+            <a class="hero-card" th:href="@{/admin}">
+                <h3>어드민 페이지</h3>
+                <p>테마와 시간을 관리할 수 있는 관리자 메뉴입니다.</p>
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

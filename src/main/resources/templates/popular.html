@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인기 테마 · 방탈출</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/}">방탈출 예약</a>
+    <nav class="nav">
+        <a th:href="@{/}">홈</a>
+        <a th:href="@{/reservation}">예약</a>
+        <a th:href="@{/my}">내 예약</a>
+        <a class="active" th:href="@{/popular}">인기 테마</a>
+        <a th:href="@{/admin}">어드민</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="popular-hero">
+        <span class="popular-eyebrow">WEEKLY RANKING</span>
+        <h1>이번 주 가장 사랑받은 테마</h1>
+        <p class="subtitle">최근 1주일 동안 예약이 가장 많았던 테마 TOP 10을 모았습니다.</p>
+    </section>
+
+    <section id="popular-podium" class="podium"></section>
+
+    <section class="card popular-list-card">
+        <ol id="popular-list" class="ranked-list"></ol>
+    </section>
+
+    <p id="popular-empty" class="empty-state" hidden>
+        최근 1주일 동안 예약된 테마가 없습니다.
+    </p>
+</main>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/popular.js}"></script>
+</body>
+</html>
