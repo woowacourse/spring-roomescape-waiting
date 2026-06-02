@@ -71,11 +71,12 @@ CREATE TABLE waitings
     theme_id   BIGINT    NOT NULL,
     store_id   BIGINT    NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NOT NULL DEFAULT '9999-12-31 00:00:00',
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES members (id),
     FOREIGN KEY (time_id) REFERENCES times (id),
     FOREIGN KEY (theme_id) REFERENCES themes (id),
     FOREIGN KEY (store_id) REFERENCES stores (id),
-    UNIQUE (member_id, date, time_id, theme_id, store_id)
+    UNIQUE (member_id, date, time_id, theme_id, store_id, deleted_at)
 );
 

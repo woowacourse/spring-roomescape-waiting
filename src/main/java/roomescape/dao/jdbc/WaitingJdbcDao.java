@@ -1,6 +1,7 @@
 package roomescape.dao.jdbc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import roomescape.domain.vo.Name;
 
 @Repository
 public class WaitingJdbcDao implements WaitingDao {
+    private static final LocalDateTime SENTINEL = LocalDateTime.of(9999, 12, 31, 0, 0, 0);
     private static final RowMapper<Member> MEMBER_ROW_MAPPER = (rs, rowNum) -> new Member(
             rs.getLong("member_id"),
             rs.getString("member_name"),
@@ -71,11 +73,13 @@ public class WaitingJdbcDao implements WaitingDao {
                         AND w2.time_id = w.time_id
                         AND w2.theme_id = w.theme_id
                         AND w2.store_id = w.store_id
+                        AND w2.deleted_at = :sentinel
                         AND w2.id < w.id) AS rank
                 FROM waitings w
                 INNER JOIN members m ON w.member_id = m.id
                 INNER JOIN times t ON w.time_id = t.id
                 INNER JOIN themes th ON w.theme_id = th.id
+                WHERE w.deleted_at = :sentinel
             """;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -91,13 +95,15 @@ public class WaitingJdbcDao implements WaitingDao {
 
     @Override
     public List<Waiting> findAll() {
-        return jdbcTemplate.query(BASE_SELECT, ROW_MAPPER);
+        SqlParameterSource params = new MapSqlParameterSource("sentinel", SENTINEL);
+        return jdbcTemplate.query(BASE_SELECT, params, ROW_MAPPER);
     }
 
     @Override
     public Optional<Waiting> findById(Long id) {
-        String sql = BASE_SELECT + "WHERE w.id = :id";
-        MapSqlParameterSource parameterSource = new MapSqlParameterSource("id", id);
+        String sql = BASE_SELECT + "AND w.id = :id";
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource("id", id)
+                .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, parameterSource, ROW_MAPPER)
                 .stream().findFirst();
@@ -139,19 +145,22 @@ public class WaitingJdbcDao implements WaitingDao {
     @Override
     public boolean delete(Long id) {
         String sql = """
-                DELETE FROM waitings
-                WHERE id = :id
+                UPDATE waitings
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = :id AND deleted_at = :sentinel
                 """;
-        SqlParameterSource params = new MapSqlParameterSource("id", id);
+        SqlParameterSource params = new MapSqlParameterSource("id", id)
+                .addValue("sentinel", SENTINEL);
         return jdbcTemplate.update(sql, params) > 0;
     }
 
     @Override
     public boolean existsById(Long id) {
         String sql = """
-                SELECT EXISTS(SELECT 1 FROM waitings WHERE id = :id);
+                SELECT EXISTS(SELECT 1 FROM waitings WHERE id = :id AND deleted_at = :sentinel);
                 """;
-        SqlParameterSource params = new MapSqlParameterSource("id", id);
+        SqlParameterSource params = new MapSqlParameterSource("id", id)
+                .addValue("sentinel", SENTINEL);
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 
@@ -166,6 +175,7 @@ public class WaitingJdbcDao implements WaitingDao {
                     AND time_id = :timeId
                     AND theme_id = :themeId
                     AND store_id = :storeId
+                    AND deleted_at = :sentinel
                 );
                 """;
         SqlParameterSource params = new MapSqlParameterSource()
@@ -173,20 +183,22 @@ public class WaitingJdbcDao implements WaitingDao {
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId)
-                .addValue("storeId", storeId);
+                .addValue("storeId", storeId)
+                .addValue("sentinel", SENTINEL);
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 
     @Override
     public Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId) {
         String sql = BASE_SELECT + """
-                WHERE w.date = :date AND w.time_id = :timeId AND w.theme_id = :themeId AND w.store_id = :storeId
+                AND w.date = :date AND w.time_id = :timeId AND w.theme_id = :themeId AND w.store_id = :storeId
                 ORDER BY w.id LIMIT 1
                 """;
         SqlParameterSource params = new MapSqlParameterSource("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId)
-                .addValue("storeId", storeId);
+                .addValue("storeId", storeId)
+                .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, params, ROW_MAPPER)
                 .stream().findFirst();
@@ -195,11 +207,12 @@ public class WaitingJdbcDao implements WaitingDao {
     @Override
     public List<Waiting> findAllByMemberId(Long memberId) {
         String sql = BASE_SELECT + """
-                WHERE w.member_id = :memberId
+                AND w.member_id = :memberId
                 ORDER BY w.date, w.time_id
                 """;
 
-        SqlParameterSource params = new MapSqlParameterSource("memberId", memberId);
+        SqlParameterSource params = new MapSqlParameterSource("memberId", memberId)
+                .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }
@@ -207,11 +220,12 @@ public class WaitingJdbcDao implements WaitingDao {
     @Override
     public List<Waiting> findAllByStoreId(Long storeId) {
         String sql = BASE_SELECT + """
-                WHERE w.store_id = :storeId
+                AND w.store_id = :storeId
                 ORDER BY w.date, w.time_id, w.id
                 """;
 
-        SqlParameterSource params = new MapSqlParameterSource("storeId", storeId);
+        SqlParameterSource params = new MapSqlParameterSource("storeId", storeId)
+                .addValue("sentinel", SENTINEL);
 
         return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }

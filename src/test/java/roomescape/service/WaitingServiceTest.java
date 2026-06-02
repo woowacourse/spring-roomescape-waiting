@@ -178,6 +178,29 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.delete(-1L))
                     .isInstanceOf(EntityNotFoundException.class);
         }
+
+        @Test
+        @DisplayName("삭제한 대기는 전체 목록에서 제외된다")
+        void deletedWaitingExcludedFromFindAll() {
+            Waiting saved = waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
+
+            waitingService.delete(saved.getId());
+
+            assertThat(waitingService.findAll()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("삭제한 슬롯에 다시 대기를 신청할 수 있다")
+        void canReapplyAfterDelete() {
+            WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
+            Waiting first = waitingService.create(dto, member);
+            waitingService.delete(first.getId());
+
+            Waiting second = waitingService.create(dto, member);
+
+            assertThat(second.getId()).isNotEqualTo(first.getId());
+        }
     }
 
     @Nested
@@ -252,6 +275,22 @@ class WaitingServiceTest {
                     .singleElement()
                     .extracting(Waiting::getRank)
                     .isEqualTo(1L);
+            assertThat(waitingService.findAllByMemberId(otherMemberId))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("삭제한 앞 순번 대기는 순번 계산에서 제외된다")
+        void deletedWaitingExcludedFromRank() {
+            Waiting first = waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
+            waitingService.create(
+                    new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
+
+            waitingService.delete(first.getId());
+
             assertThat(waitingService.findAllByMemberId(otherMemberId))
                     .singleElement()
                     .extracting(Waiting::getRank)
