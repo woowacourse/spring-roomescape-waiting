@@ -35,7 +35,7 @@ public record ReservationWaitingRequest (String name, LocalDate date, Long timeI
         }
     }
 
-    public ReservationWaiting to(ReservationTime reservationTime, Theme theme) {
+    public ReservationWaiting toReservationWaiting(ReservationTime reservationTime, Theme theme) {
         return new ReservationWaiting(name, new ReservationSlot(date, reservationTime, theme));
     }
 }

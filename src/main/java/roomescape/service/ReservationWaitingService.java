@@ -52,7 +52,7 @@ public class ReservationWaitingService {
             throw new InvalidInputException("이미 해당 예약에 대기열이 존재합니다.");
         }
 
-        ReservationWaiting reservationWaiting = reservationWaitingReq.to(reservationTimeById, themeById);
+        ReservationWaiting reservationWaiting = reservationWaitingReq.toReservationWaiting(reservationTimeById, themeById);
         Long id = reservationWaitingUpdateDao.create(reservationWaiting);
 
         return ReservationWaitingResponse.from(reservationWaitingQueryDao.findReservationWaitingById(id)
