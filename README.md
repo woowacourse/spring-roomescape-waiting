@@ -80,9 +80,9 @@ Password: 비워두기
 
 ### **1단계 - 예약 대기 신청/취소**
 
-- [x] 이미 다른 사용자에 의해 예약된 슬롯(날짜+시간+테마)에**대기를 신청**할 수 있다.
-- [x] 같은 슬롯에 대한 대기는**신청 순서대로 순번**이 부여된다.
-- [x] 같은 사용자가 같은 슬롯에**중복 대기할 수 없다**.
+- [x] 이미 다른 사용자에 의해 예약된 슬롯(날짜+시간+테마)에 **대기를 신청**할 수 있다.
+- [x] 같은 슬롯에 대한 대기는 **신청 순서대로 순번**이 부여된다.
+- [x] 같은 사용자가 같은 슬롯에 **중복 대기할 수 없다**.
 - [x] 이미 지난 예약은 대기를 신청할 수 없다.
 - [x] 사용자는 본인의**대기를 취소**할 수 있다.
 - [x] 예약대기가 있는 예약 삭제를 한 경우 최근 예약대기자 정보로 예약된다. 
@@ -90,11 +90,39 @@ Password: 비워두기
 
 ### **2단계 - 내 예약 목록 조회 (상태 구분)**
 
-- [x] 이전 미션의 내 예약 목록 조회를**확장**한다.
-- [x] 사용자의**예약과 대기가 상태로 구분**되어 함께 표시된다.
-- [x] 대기에는 본인의**대기 순번**도 함께 보여준다.
+- [x] 이전 미션의 내 예약 목록 조회를 **확장**한다.
+- [x] 사용자의 **예약과 대기가 상태로 구분**되어 함께 표시된다.
+- [x] 대기에는 본인의 **대기 순번**도 함께 보여준다.
+
+## 사이클2 기능명세서
+
+### **1단계 - 예약 대기 승인 (자동 전환 방식 채택)**
+
+> 전환 방식으로 **자동 전환**을 채택한다. 예약이 취소되면 해당 슬롯의 대기 1번이 자동으로 예약으로 전환되며, 별도의 관리자 수동 승인 단계는 두지 않는다.
+
+- [x] 예약이 취소되면 해당 슬롯의 **대기 1번(`created_at` 최선두)이 자동으로 예약으로 전환**되고, 전환된 대기 row는 삭제된다.
+- [x] 전환된 예약의 **소유자(`memberId`)는 대기 1번 신청자**로 바뀐다.
+- [x] 전환 후 같은 슬롯에 남은 대기들의 **순번이 1씩 당겨진다** (`created_at` 정렬 기반이므로 row 수정 없이 조회 시 자동 반영).
+- [x] 취소된 슬롯에 **대기가 하나도 없으면** 전환 없이 예약만 삭제된다.
+- [x] 본인이 신청한 **대기를 취소**하면 그 슬롯의 남은 대기 순번도 동일하게 재정렬된다.
+- [x] **매니저가 예약을 삭제**하면 자동 전환 없이 슬롯이 비워지며, 딸린 대기는 FK `ON DELETE CASCADE`로 함께 삭제된다.
+  - 사용자 취소(대기 1번 승격)와 의도적으로 다른 경로다. 매니저 삭제는 슬롯 자체를 닫는 행정 처리이므로 대기를 승격시키지 않고 정리한다.
+
+### 함께 진행할 작업
+
+- [x] 백엔드 API 추가/변경과 사용자가 보는 **클라이언트 화면**을 함께 작성한다.
+- [x] 대기 전환과 순번 재정렬이 화면에서 사용자에게 자연스럽게 보이는 것까지 확인한다.
+
+### 통합 적용 규칙
+
+- [ ] 이번 토론에서 정한 **트랜잭션 경계 규칙**을 코드에 적용한다.
+  - [ ] 트랜잭션 경계 결정마다 "왜 함께 묶었는가 / 분리했는가"를 **PR 본문에 한두 줄로** 남긴다.
 
 ## 미션 중 기록
+
+<details>
+<summary>사이클 1</summary>
+<div>
 
 ### 막힌 부분
 
@@ -107,37 +135,33 @@ Password: 비워두기
 
 CREATE TABLE member
 (
-    id   INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL, .
-    .
-    .
-    store_id
-    INT
-    NOT
-    NULL
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  name     VARCHAR(255) NOT NULL,
+  -- ...
+  store_id INT          NOT NULL
 )
 ```
 
 ```sql
 CREATE TABLE member
 (
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(255) NOT NULL, 
-    store_id INT          NOT NULL
+  id       INT AUTO_INCREMENT PRIMARY KEY,
+  name     VARCHAR(255) NOT NULL,
+  store_id INT          NOT NULL
 );
 
 CREATE TABLE store_manager
 (
-    id        INT AUTO_INCREMENT PRIMARY KEY,
-    member_id INT NOT NULL,
-    store_id  INT NOT NULL,
-    PRIMARY KEY (member_id)
+  id        INT AUTO_INCREMENT PRIMARY KEY,
+  member_id INT NOT NULL,
+  store_id  INT NOT NULL,
+  PRIMARY KEY (member_id)
 );
 
 CREATE TABLE store
 (
-    id   INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255)
+  id   INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255)
 );
 ```
 
@@ -205,3 +229,7 @@ WHERE reservation_id = ?
 - 도메인 객체의 자기 책임으로 표현하는 게 의미상 더 명확할 때
 
 기준 한 줄로: **"SQL이 잘하는 일은 SQL에 맡기고, 도메인 규칙은 자바에 둔다."**
+</div>
+</details>
+
+
