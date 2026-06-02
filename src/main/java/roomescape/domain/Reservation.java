@@ -42,10 +42,6 @@ public class Reservation {
         return this.status == ReservationStatus.WAITING;
     }
 
-    public boolean isDeleted() {
-        return this.status == ReservationStatus.DELETED;
-    }
-
     public void promote() {
         this.status = ReservationStatus.RESERVED;
     }
