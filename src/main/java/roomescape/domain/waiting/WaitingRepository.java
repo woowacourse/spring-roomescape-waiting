@@ -2,12 +2,15 @@ package roomescape.domain.waiting;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.domain.waiting.dto.MyWaitingResult;
 
 @Repository
@@ -67,6 +70,42 @@ public class WaitingRepository {
         String query = "delete from waiting where id = ?";
         jdbcTemplate.update(query, id);
     }
+
+    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
+        String query = """
+                SELECT w.id AS waiting_id, w.name, w.date,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url
+                FROM waiting w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.id
+                LIMIT 1
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(query, waitingRowMapper, date, timeId, themeId)
+                .stream()
+                .findFirst();
+    }
+
+    private final RowMapper<Waiting> waitingRowMapper = (rs, rowNum) -> Waiting.of(
+            rs.getLong("waiting_id"),
+            rs.getString("name"),
+            rs.getDate("date").toLocalDate(),
+            ReservationTime.of(
+                    rs.getLong("time_id"),
+                    rs.getTime("time_start_at").toLocalTime(),
+                    rs.getTime("time_finish_at").toLocalTime()
+            ),
+            Theme.of(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_image_url")
+            )
+    );
 
     public List<MyWaitingResult> findByName(String name) {
         String query = """

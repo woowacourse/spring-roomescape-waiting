@@ -288,25 +288,25 @@ class ReservationRepositoryTest {
     }
 
     @Nested
-    @DisplayName("id로 예약 존재 여부 조회 (FOR UPDATE)")
-    class ExistsByIdForUpdate {
+    @DisplayName("id로 예약 조회 (FOR UPDATE)")
+    class FindByIdForUpdate {
 
         @Test
-        void 존재하는_id면_true를_반환한다() {
+        void 존재하는_id면_예약을_반환한다() {
             Reservation saved = reservationRepository.save(
                     Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
             );
 
-            boolean result = reservationRepository.existsByIdForUpdate(saved.getId());
+            Optional<Reservation> result = reservationRepository.findByIdForUpdate(saved.getId());
 
-            assertThat(result).isTrue();
+            assertThat(result).isPresent();
         }
 
         @Test
-        void 존재하지_않는_id면_false를_반환한다() {
-            boolean result = reservationRepository.existsByIdForUpdate(999L);
+        void 존재하지_않는_id면_빈값을_반환한다() {
+            Optional<Reservation> result = reservationRepository.findByIdForUpdate(999L);
 
-            assertThat(result).isFalse();
+            assertThat(result).isEmpty();
         }
     }
 

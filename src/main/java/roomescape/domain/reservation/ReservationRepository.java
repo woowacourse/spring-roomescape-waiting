@@ -154,9 +154,20 @@ public class ReservationRepository {
                 .findFirst();
     }
 
-    public boolean existsByIdForUpdate(Long id) {
-        String query = "SELECT id FROM reservation WHERE id = ? FOR UPDATE";
-        return !jdbcTemplate.query(query, (rs, rowNum) -> rs.getLong("id"), id).isEmpty();
+    public Optional<Reservation> findByIdForUpdate(Long id) {
+        String query = """
+                SELECT r.id AS reservation_id, r.name, r.date,
+                       t.id AS time_id, t.start_at AS time_start_at, t.finish_at AS time_finish_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description,
+                       th.image_url AS theme_image_url
+                FROM reservation r
+                JOIN reservation_time t ON r.time_id = t.id
+                JOIN theme th ON r.theme_id = th.id
+                WHERE r.id = ?
+                FOR UPDATE
+                """;
+        return jdbcTemplate.query(query, rowMapper, id).stream()
+                .findFirst();
     }
 
     public Optional<String> findNameByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {

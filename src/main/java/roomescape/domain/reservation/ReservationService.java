@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +14,8 @@ import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -24,15 +25,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -73,8 +77,21 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        validateReservationId(id);
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+
         reservationRepository.deleteById(id);
+
+        waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        ).ifPresent(this::promoteToReservation);
+    }
+
+    private void promoteToReservation(Waiting waiting) {
+        waitingRepository.deleteById(waiting.getId());
+        reservationRepository.save(Reservation.of(
+                waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme()
+        ));
     }
 
     @Transactional(readOnly = true)
@@ -89,10 +106,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         newTime.validateIfTimePast(fixRequest.date());
 
-        if (!reservationRepository.existsByIdForUpdate(id)) {
-            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
-        }
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
 
@@ -102,12 +116,6 @@ public class ReservationService {
             reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
         } catch (DuplicateKeyException exception) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
-        }
-    }
-
-    private void validateReservationId(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
     }
 
