@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
+@Slf4j
 @Service
 public class ReservationService {
 
@@ -75,9 +77,13 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_CANCEL);
         }
         reservationRepository.deleteById(id);
-
-        reservationWaitingService.promoteWaiting(reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId());
+        try {
+            reservationWaitingService.promoteWaiting(reservation.getDate(),
+                    reservation.getTime().getId(), reservation.getTheme().getId());
+        } catch (Exception e) {
+            log.warn("승격 실패: date={}, timeId={}, themeId={}",
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(), e);
+        }
     }
 
     @Transactional
