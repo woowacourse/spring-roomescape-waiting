@@ -76,6 +76,14 @@ class ThemeControllerE2ETest extends BaseE2ETest {
         }
 
         @Test
+        @DisplayName("파라미터 없이 호출하면 기본값이 적용되어 200을 반환한다")
+        void findPopularsWithDefaults() {
+            RestAssured.given()
+                    .when().get("/themes/populars")
+                    .then().statusCode(HttpStatus.OK.value());
+        }
+
+        @Test
         @DisplayName("limit가 음수면 400을 반환한다")
         void invalidLimit() {
             RestAssured.given()
