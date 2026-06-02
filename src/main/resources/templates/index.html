@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESCAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--sur:#0f0f0f;--sur2:#181818;
+  --border:#525252;--text:#d4d4d4;--muted:#aaa;
+  --white:#ebebeb;--acc:#c22235;--acc-h:#e5485a;
+  --glow:rgba(194,34,53,.3);
+}
+html{scroll-behavior:smooth}
+body{
+  background-color:#080808;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,rgba(140,20,45,.32) 0%,transparent 52%),
+    radial-gradient(ellipse at 100% 100%,rgba(110,15,35,.22) 0%,transparent 52%);
+  background-attachment:fixed;
+  color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 4rem;
+  background:rgba(7,7,7,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:.42em;color:var(--white);text-decoration:none}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{font-size:1rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--white)}
+.nav-acc{color:var(--acc)!important}
+.nav-acc:hover{color:var(--acc-h)!important}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-logout:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:2rem;position:relative;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(194,34,53,.18) 0%,transparent 70%);
+  pointer-events:none;
+}
+.eyebrow{font-size:.95rem;letter-spacing:.45em;text-transform:uppercase;color:var(--acc);margin-bottom:2.5rem;font-weight:500}
+.hero-title{
+  font-family:'Cinzel',serif;font-weight:400;
+  font-size:clamp(4.5rem,14vw,11rem);letter-spacing:.14em;
+  color:var(--white);line-height:1;margin-bottom:2rem;
+}
+.vline{width:2px;height:64px;background:linear-gradient(to bottom,transparent,var(--acc),transparent);margin:0 auto 2rem}
+.hero-sub{font-size:1rem;color:var(--muted);letter-spacing:.15em;margin-bottom:3.5rem}
+.btn{
+  display:inline-block;padding:.9rem 2.9rem;
+  border:2px solid var(--acc);color:var(--acc-h);
+  text-decoration:none;font-size:.8rem;letter-spacing:.32em;text-transform:uppercase;
+  transition:all .35s;cursor:pointer;background:transparent;font-family:'Inter',sans-serif;
+  box-shadow:0 0 16px var(--glow);
+}
+.btn:hover{background:var(--acc);color:var(--white);box-shadow:0 0 40px var(--glow)}
+
+/* ── SECTIONS ── */
+.section{padding:7rem 4rem;max-width:1440px;margin:0 auto}
+.sh{display:flex;align-items:center;gap:2rem;margin-bottom:3.5rem}
+.st{font-family:'Cinzel',serif;font-size:1.3rem;letter-spacing:.25em;text-transform:uppercase;color:var(--white);white-space:nowrap}
+.sr{flex:1;height:1px;background:var(--border)}
+
+/* ── GRIDS ── */
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:2px}
+@media(max-width:1200px){.g5{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.g5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){
+  .g5,.g3{grid-template-columns:repeat(2,1fr)}
+  .section{padding:5rem 1.5rem}
+  nav{padding:1rem 1.5rem}
+}
+
+/* ── CARDS ── */
+.card{background:var(--sur);cursor:pointer;border:1px solid var(--border);transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:var(--acc);box-shadow:0 0 28px var(--glow)}
+.card:hover .ci img{transform:scale(1.06)}
+.ci{position:relative;padding-top:68%;overflow:hidden;background:var(--sur2)}
+.ci img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s;filter:brightness(.55) saturate(.55)}
+.cb{padding:1.2rem 1.4rem 1.6rem}
+.cn{font-family:'Cinzel',serif;font-size:1rem;color:var(--white);margin-bottom:.45rem;letter-spacing:.04em}
+.cd{font-size:.88rem;color:var(--muted);line-height:1.5}
+
+/* ── SKELETON ── */
+.skel{
+  background:linear-gradient(90deg,var(--sur) 25%,var(--sur2) 50%,var(--sur) 75%);
+  background-size:200%;animation:sk 1.6s infinite;height:270px;
+}
+@keyframes sk{0%{background-position:200%}100%{background-position:-200%}}
+
+/* ── STATES ── */
+.msg{padding:4rem;text-align:center;color:var(--muted);font-size:.75rem;letter-spacing:.2em;grid-column:1/-1}
+
+/* ── FOOTER ── */
+footer{
+  padding:2.5rem 4rem;border-top:1px solid var(--border);
+  text-align:center;font-size:.8rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;
+}
+footer a{color:var(--muted);text-decoration:none;transition:color .3s}
+footer a:hover{color:var(--acc)}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">ESCAPE</a>
+  <ul class="nav-links">
+    <li><a href="#themes">테마 목록</a></li>
+    <li><a href="/my-reservations">내 예약</a></li>
+    <li id="nav-admin" style="display:none"><a href="/admin" class="nav-acc">관리자</a></li>
+    <li id="nav-auth"></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <p class="eyebrow">방탈출 예약 서비스</p>
+  <h1 class="hero-title">ESCAPE</h1>
+  <div class="vline"></div>
+  <p class="hero-sub">비밀이 잠든 방, 당신이 열쇠입니다</p>
+  <a href="#populars" class="btn">테마 탐색하기</a>
+</section>
+
+<div id="populars" class="section">
+  <div class="sh">
+    <h2 class="st">이번 주 인기 테마</h2>
+    <div class="sr"></div>
+  </div>
+  <div class="g5" id="pgrid">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    <div class="skel"></div><div class="skel"></div>
+  </div>
+</div>
+
+<div id="themes" class="section">
+  <div class="sh">
+    <h2 class="st">모든 테마</h2>
+    <div class="sr"></div>
+  </div>
+  <div class="g3" id="tgrid">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </div>
+</div>
+
+<footer>
+  © 2026 ESCAPE &nbsp;·&nbsp; <a href="/admin">관리자 시스템</a>
+</footer>
+
+<script>
+function mkCard(t) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.onclick = () => location.href = `/reservation?themeId=${t.id}`;
+  el.innerHTML = `
+    <div class="ci">
+      <img src="${t.thumbnailUrl || ''}" alt="${t.name}"
+           onerror="this.parentElement.style.background='#141414';this.remove()">
+    </div>
+    <div class="cb">
+      <p class="cn">${t.name}</p>
+      <p class="cd">${t.description || ''}</p>
+    </div>
+  `;
+  return el;
+}
+
+async function load(url, gridId, emptyMsg) {
+  const grid = document.getElementById(gridId);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    grid.innerHTML = '';
+    if (!data.length) {
+      grid.innerHTML = `<p class="msg">${emptyMsg}</p>`;
+      return;
+    }
+    data.forEach(t => grid.appendChild(mkCard(t)));
+  } catch {
+    grid.innerHTML = '<p class="msg">데이터를 불러올 수 없습니다</p>';
+  }
+}
+
+load('/themes/populars?limit=10&days=7', 'pgrid', '이번 주 인기 테마가 없습니다');
+load('/themes', 'tgrid', '등록된 테마가 없습니다');
+
+async function logout() {
+  await fetch('/sessions', { method: 'DELETE' });
+  location.reload();
+}
+
+(async () => {
+  const r = await fetch('/reservations', { method: 'GET' });
+  const navAuth = document.getElementById('nav-auth');
+  if (r.status === 401) {
+    navAuth.innerHTML = '<a href="/login" style="font-size:1rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s" onmouseover="this.style.color=\'var(--white)\'" onmouseout="this.style.color=\'var(--muted)\'">로그인</a>';
+  } else if (r.ok) {
+    navAuth.innerHTML = '<button class="btn-logout" onclick="logout()">로그아웃</button>';
+    const data = await r.json().catch(() => []);
+    if (data.length > 0 && data[0]?.role === 'ADMIN') {
+      document.getElementById('nav-admin').style.display = '';
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+package roomescape.service;
+
+import roomescape.auth.service.ReservationAuthorizationService;
+import roomescape.common.exception.BusinessRuleViolationException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.DuplicateEntityException;
+import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.UnauthorizedException;
+import roomescape.dao.MemberDao;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ThemeDao;
+import roomescape.dao.TimeDao;
+import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.dao.jdbc.ReservationJdbcDao;
+import roomescape.dao.jdbc.ThemeJdbcDao;
+import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.Theme;
+import roomescape.domain.Time;
+import roomescape.domain.vo.Name;
+import roomescape.dto.request.ReservationPatchDto;
+import roomescape.dto.request.ReservationRequestDto;
+
+@JdbcTest
+@Import({ReservationService.class, ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
+        ThemeJdbcDao.class, MemberJdbcDao.class})
+@ActiveProfiles("test")
+class ReservationServiceTest {
+
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationDao reservationDao;
+    @Autowired
+    private MemberDao memberDao;
+    @Autowired
+    private TimeDao timeDao;
+    @Autowired
+    private ThemeDao themeDao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private Member member;
+    private Time savedTime1;
+    private Time savedTime2;
+    private Theme savedTheme1;
+    private Theme savedTheme2;
+    private ReservationRequestDto requestDto1;
+    private ReservationRequestDto requestDto2;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("INSERT INTO stores(name) VALUES (?)", "강남점");
+        Long storeId = jdbcTemplate.queryForObject(
+                "SELECT id FROM stores WHERE name = ?", Long.class, "강남점");
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                "유저", "user@test.com", "password", "USER"
+        );
+        member = memberDao.findByEmail("user@test.com").orElseThrow();
+        savedTime1 = timeDao.insert(new Time(LocalTime.of(13, 0)));
+        savedTime2 = timeDao.insert(new Time(LocalTime.of(14, 0)));
+        savedTheme1 = themeDao.insert(new Theme(new Name("방탈출 이름1"), "http://thumbnail_url", "방탈출을 할 수 있다."));
+        savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
+        requestDto1 = new ReservationRequestDto(LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+        requestDto2 = new ReservationRequestDto(LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), storeId);
+    }
+
+    @Nested
+    class Create {
+
+        @Test
+        @DisplayName("유효한 요청으로 예약을 생성한다")
+        void createsReservation() {
+            Reservation saved = reservationService.create(member, requestDto1);
+
+            assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getMember()).isEqualTo(member);
+            assertThat(saved.getDate()).isEqualTo(requestDto1.date());
+        }
+
+        @Test
+        @DisplayName("시간이 존재하지 않으면 예외를 반환한다")
+        void throwsWhenTimeNotFound() {
+            ReservationRequestDto dto = new ReservationRequestDto(LocalDate.now().plusDays(1), -1L, savedTheme1.getId(), null);
+
+            assertThatThrownBy(() -> reservationService.create(member, dto))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("테마가 존재하지 않으면 예외를 반환한다")
+        void throwsWhenThemeNotFound() {
+            ReservationRequestDto dto = new ReservationRequestDto(LocalDate.now().plusDays(1), savedTime1.getId(), -1L, null);
+
+            assertThatThrownBy(() -> reservationService.create(member, dto))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("동일한 테마, 날짜, 시간으로 예약을 생성하면 예외를 반환한다")
+        void throwsWhenDuplicateReservation() {
+            reservationService.create(member, requestDto1);
+
+            assertThatThrownBy(() -> reservationService.create(member, requestDto1))
+                    .isInstanceOf(DuplicateEntityException.class);
+        }
+
+        @Test
+        @DisplayName("과거 날짜로 예약을 생성하면 예외를 반환한다")
+        void throwsWhenPastDate() {
+            ReservationRequestDto pastDto = new ReservationRequestDto(
+                    LocalDate.now().minusDays(1), savedTime1.getId(), savedTheme1.getId(), null);
+
+            assertThatThrownBy(() -> reservationService.create(member, pastDto))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+    }
+
+    @Nested
+    class FindActiveById {
+
+        @Test
+        @DisplayName("BOOKED 예약을 조회한다")
+        void returnsActiveReservation() {
+            Reservation saved = reservationService.create(member, requestDto1);
+
+            assertThat(reservationService.findActiveById(saved.getId())).isEqualTo(saved);
+        }
+
+        @Test
+        @DisplayName("CANCELED 예약을 조회하면 예외를 반환한다")
+        void throwsWhenCanceled() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
+            reservationService.cancel(saved.getId(), member.getId());
+
+            assertThatThrownBy(() -> reservationService.findActiveById(saved.getId()))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    class FindAllByMemberId {
+
+        @Test
+        @DisplayName("멤버 ID로 활성 예약 목록을 조회한다")
+        void returnsActiveReservationsByMemberId() {
+            Reservation saved = reservationService.create(member, requestDto1);
+
+            List<Reservation> result = reservationService.findAllByMemberId(member.getId());
+
+            assertThat(result).isEqualTo(List.of(saved));
+        }
+
+        @Test
+        @DisplayName("취소된 예약도 반환한다")
+        void includesCanceledReservations() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
+            reservationService.cancel(saved.getId(), member.getId());
+
+            assertThat(reservationService.findAllByMemberId(member.getId())).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 멤버 ID이면 빈 목록을 반환한다")
+        void returnsEmptyWhenMemberNotFound() {
+            assertThat(reservationService.findAllByMemberId(-1L)).isEmpty();
+        }
+    }
+
+    @Nested
+    class UpdateByUser {
+
+        @Test
+        @DisplayName("본인 예약을 수정한다")
+        void updatesReservation() {
+            Reservation saved = reservationService.create(member, requestDto1);
+            LocalDate newDate = LocalDate.now().plusDays(3);
+            ReservationPatchDto updateDto = new ReservationPatchDto(newDate, savedTime2.getId());
+
+            Reservation updated = reservationService.updateByUser(saved.getId(), member.getId(), updateDto);
+
+            assertThat(updated.getDate()).isEqualTo(newDate);
+            assertThat(updated.getTime()).isEqualTo(savedTime2);
+        }
+
+        @Test
+        @DisplayName("다른 사람의 예약을 수정하면 예외를 반환한다")
+        void throwsWhenMemberMismatch() {
+            Reservation saved = reservationService.create(member, requestDto1);
+            ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime2.getId());
+
+            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
+                    .isInstanceOf(UnauthorizedException.class);
+        }
+
+        @Test
+        @DisplayName("다른 사람의 예약을 존재하지 않는 시간으로 수정해도 권한 예외를 반환한다")
+        void throwsUnauthorizedWhenMemberMismatchWithUnknownTime() {
+            Reservation saved = reservationService.create(member, requestDto1);
+            ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), -1L);
+
+            assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
+                    .isInstanceOf(UnauthorizedException.class);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 id를 수정하면 예외를 반환한다")
+        void throwsWhenIdNotFound() {
+            ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime1.getId());
+
+            assertThatThrownBy(() -> reservationService.updateByUser(-1L, member.getId(), updateDto))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
+    @Nested
+    class Cancel {
+
+        @Test
+        @DisplayName("미래 예약을 취소하면 상태가 CANCELED로 변경된다")
+        void cancelsReservation() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
+
+            reservationService.cancel(saved.getId(), member.getId());
+
+            Reservation canceled = reservationDao.findById(saved.getId()).orElseThrow();
+            assertThat(canceled.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 id를 취소하면 예외를 반환한다")
+        void throwsWhenIdNotFound() {
+            assertThatThrownBy(() -> reservationService.cancel(-1L, member.getId()))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("이미 지난 예약을 취소하면 예외를 반환한다")
+        void throwsWhenPastReservation() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().minusDays(1), savedTime1, savedTheme1));
+
+            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), member.getId()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+
+        @Test
+        @DisplayName("다른 사람의 예약을 취소하면 예외를 반환한다")
+        void throwsWhenNotOwner() {
+            Reservation saved = reservationDao.insert(
+                    Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
+
+            assertThatThrownBy(() -> reservationService.cancel(saved.getId(), -1L))
+                    .isInstanceOf(UnauthorizedException.class);
+        }
+    }
+}

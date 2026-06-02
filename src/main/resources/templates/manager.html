@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANAGER — ESCAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--sur:#101010;--sur2:#181818;--sur3:#202020;
+  --border:#525252;--border2:#646464;--text:#d4d4d4;--muted:#aaa;
+  --white:#ebebeb;--acc:#c22235;--acc-h:#e5485a;
+  --glow:rgba(194,34,53,.3);--ok:#2d6a4f;--ok-t:#74c69d;
+}
+body{
+  background-color:#080808;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,rgba(140,20,45,.3) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 100%,rgba(110,15,35,.2) 0%,transparent 50%);
+  background-attachment:fixed;
+  color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.6;min-height:100vh;
+}
+
+/* ── NAV ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 4rem;
+  background:var(--sur);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:50;
+}
+.logo{font-family:'Cinzel',serif;font-size:.9rem;letter-spacing:.42em;color:var(--white);text-decoration:none}
+.logo-badge{font-size:.55rem;letter-spacing:.4em;text-transform:uppercase;color:var(--acc);margin-left:.75rem}
+.nav-r{display:flex;align-items:center;gap:2rem}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-logout:hover{border-color:var(--acc);color:var(--acc)}
+.store-name{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;background:var(--sur);
+  border-bottom:1px solid var(--border);padding:0 4rem;
+}
+.tab{
+  padding:1.1rem 0;margin-right:3rem;
+  font-size:.82rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  border-bottom:2px solid transparent;transition:all .3s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--white);border-bottom-color:var(--acc)}
+
+/* ── PANEL ── */
+.panel{padding:3rem 4rem;max-width:1280px;margin:0 auto}
+.panel-title{
+  font-family:'Cinzel',serif;font-size:1.1rem;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--white);margin-bottom:.5rem;
+}
+.panel-sub{font-size:.78rem;color:var(--muted);margin-bottom:2rem}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{
+  font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--muted);padding:.75rem 1rem;text-align:left;
+  border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap;
+}
+td{
+  padding:.9rem 1rem;border-bottom:1px solid var(--border);
+  font-size:.92rem;color:var(--text);
+}
+tr:hover td{background:var(--sur2)}
+.td-id{color:var(--muted);font-size:.7rem;font-variant-numeric:tabular-nums}
+.btn-act{
+  width:60px;padding:.5rem .6rem;border:1px solid var(--border);color:var(--muted);
+  background:transparent;font-size:.68rem;letter-spacing:.1em;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all .3s;text-transform:uppercase;
+}
+.btn-act:hover{border-color:var(--acc);color:var(--acc)}
+.btn-act.cancel:hover{border-color:#c22235;color:#e5485a}
+.empty-row td{text-align:center;color:var(--muted);font-size:.72rem;letter-spacing:.2em;padding:2.5rem}
+.status-booked{color:var(--ok-t);font-size:.78rem;letter-spacing:.1em}
+.status-canceled{color:var(--muted);font-size:.78rem;letter-spacing:.1em;text-decoration:line-through}
+
+/* ── EDIT INLINE ── */
+.edit-row td{background:var(--sur2)}
+.edit-row .fi{
+  background:transparent;border:1px solid var(--border2);color:var(--white);
+  padding:.45rem .75rem;font-size:.88rem;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .3s;width:100%;
+}
+.edit-row .fi:focus{border-color:var(--acc)}
+select.fi{color:var(--text);background:var(--sur2)}
+.btn-save{
+  padding:.45rem 1rem;border:1px solid var(--acc);color:var(--acc);
+  background:transparent;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-save:hover{background:var(--acc);color:var(--white)}
+.btn-cancel-edit{
+  padding:.45rem 1rem;border:1px solid var(--border);color:var(--muted);
+  background:transparent;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-cancel-edit:hover{border-color:var(--white);color:var(--white)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:2rem;right:2rem;
+  padding:.82rem 1.75rem;font-size:.72rem;letter-spacing:.1em;
+  border:1px solid;z-index:300;opacity:0;transition:opacity .3s;
+}
+.toast.show{opacity:1}
+.toast.ok{background:rgba(5,18,12,.95);border-color:var(--ok);color:var(--ok-t)}
+.toast.err{background:rgba(18,5,7,.95);border-color:var(--acc);color:var(--acc-h)}
+
+/* ── CONFIRM DIALOG ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;
+  display:none;align-items:center;justify-content:center;
+}
+.overlay.open{display:flex}
+.dialog{background:var(--sur);border:1px solid var(--border);padding:2.5rem;max-width:380px;width:100%;margin:2rem}
+.d-title{font-family:'Cinzel',serif;font-size:.95rem;color:var(--white);margin-bottom:.75rem}
+.d-msg{font-size:.78rem;color:var(--muted);margin-bottom:2rem;line-height:1.7}
+.d-actions{display:flex;gap:.75rem;justify-content:flex-end}
+.btn-ghost{
+  padding:.65rem 1.5rem;border:1px solid var(--border);color:var(--muted);
+  background:transparent;font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-ghost:hover{border-color:var(--white);color:var(--white)}
+.btn-danger{
+  padding:.65rem 1.5rem;border:1px solid var(--acc);color:var(--acc);
+  background:transparent;font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-danger:hover{background:var(--acc);color:var(--white)}
+
+@media(max-width:700px){
+  nav,.panel{padding-left:1.5rem;padding-right:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:baseline;gap:.5rem">
+    <a href="/" class="logo">ESCAPE</a>
+    <span class="logo-badge">Manager</span>
+  </div>
+  <div class="nav-r">
+    <span class="store-name" id="nav-store">내 매장</span>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</nav>
+
+<div class="tabs">
+  <button class="tab active" data-tab="reservations">예약 관리</button>
+  <button class="tab" data-tab="waitings">대기 관리</button>
+</div>
+
+<div class="panel" id="panel-reservations">
+  <p class="panel-title">내 매장 예약 관리</p>
+  <p class="panel-sub" id="panel-sub">내 매장의 예약만 조회·수정·취소할 수 있습니다</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>예약자</th>
+          <th>날짜</th>
+          <th>테마</th>
+          <th>시간</th>
+          <th>상태</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel" id="panel-waitings" hidden>
+  <p class="panel-title">내 매장 대기 관리</p>
+  <p class="panel-sub">내 매장의 대기 신청만 조회·삭제할 수 있습니다</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>대기자</th>
+          <th>날짜</th>
+          <th>테마</th>
+          <th>시간</th>
+          <th>순번</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody id="w-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <h2 class="d-title" id="d-title">확인</h2>
+    <p class="d-msg" id="d-msg"></p>
+    <div class="d-actions">
+      <button class="btn-ghost" onclick="closeDialog()">취소</button>
+      <button class="btn-danger" id="d-confirm">확인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let times = [];
+let editingId = null;
+
+async function logout() {
+  await fetch('/sessions', { method: 'DELETE' });
+  location.href = '/login';
+}
+
+function fmt(t) {
+  if (!t) return '';
+  if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
+  return String(t).substring(0, 5);
+}
+
+function toast(type, msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+function confirm(title, msg, onOk) {
+  document.getElementById('d-title').textContent = title;
+  document.getElementById('d-msg').textContent = msg;
+  document.getElementById('d-confirm').onclick = async () => { closeDialog(); await onOk(); };
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeDialog() {
+  document.getElementById('overlay').classList.remove('open');
+}
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeDialog();
+});
+
+/* ── load times ── */
+async function loadTimes() {
+  try {
+    const r = await fetch('/manager/times');
+    if (r.ok) times = await r.json();
+  } catch {}
+}
+
+/* ── render rows ── */
+function renderRows(reservations) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  if (!reservations.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">내 매장 예약이 없습니다</td></tr>';
+    return;
+  }
+
+  reservations.forEach(rv => {
+    const isCanceled = rv.status === 'CANCELED';
+    const tr = document.createElement('tr');
+    tr.dataset.id = rv.id;
+    tr.innerHTML = `
+      <td class="td-id">${rv.id}</td>
+      <td>${rv.name || ''}</td>
+      <td>${rv.date || ''}</td>
+      <td>${rv.theme?.name || ''}</td>
+      <td>${fmt(rv.time?.startAt)}</td>
+      <td>
+        <span class="${isCanceled ? 'status-canceled' : 'status-booked'}">
+          ${isCanceled ? '취소됨' : '예약됨'}
+        </span>
+      </td>
+      <td style="display:flex;gap:.4rem">
+        ${isCanceled ? '<span style="color:var(--muted);font-size:.72rem">—</span>' : `
+          <button class="btn-act" onclick="startEdit(${rv.id}, '${rv.date}', ${rv.time?.id})">수정</button>
+          <button class="btn-act cancel" onclick="cancelReservation(${rv.id})">취소</button>
+        `}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── load reservations ── */
+async function loadReservations() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted);font-size:.75rem">불러오는 중...</td></tr>';
+  try {
+    const r = await fetch('/manager/reservations');
+    if (r.status === 401) { location.href = '/login?redirect=/manager'; return; }
+    if (r.status === 403) { location.href = '/'; return; }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    renderRows(data);
+  } catch (e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">오류: ${e.message}</td></tr>`;
+  }
+}
+
+/* ── inline edit ── */
+function startEdit(id, date, timeId) {
+  if (editingId !== null) cancelEdit();
+  editingId = id;
+
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  const timeOptions = times.map(t =>
+    `<option value="${t.id}" ${t.id === timeId ? 'selected' : ''}>${fmt(t.startAt)}</option>`
+  ).join('');
+
+  tr.classList.add('edit-row');
+  tr.cells[2].innerHTML = `<input class="fi" type="date" id="edit-date" value="${date}" min="${new Date().toISOString().split('T')[0]}">`;
+  tr.cells[4].innerHTML = `<select class="fi" id="edit-time">${timeOptions}</select>`;
+  tr.cells[6].innerHTML = `
+    <div style="display:flex;gap:.4rem">
+      <button class="btn-save" onclick="saveEdit(${id})">저장</button>
+      <button class="btn-cancel-edit" onclick="cancelEdit()">취소</button>
+    </div>
+  `;
+}
+
+function cancelEdit() {
+  editingId = null;
+  loadReservations();
+}
+
+async function saveEdit(id) {
+  const date = document.getElementById('edit-date').value;
+  const timeId = document.getElementById('edit-time').value;
+  if (!date || !timeId) { toast('err', '날짜와 시간을 선택하세요'); return; }
+  try {
+    const r = await fetch(`/manager/reservations/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, timeId: Number(timeId) })
+    });
+    if (!r.ok) {
+      let msg = '수정에 실패했습니다';
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+      toast('err', msg);
+      return;
+    }
+    editingId = null;
+    toast('ok', '예약이 수정되었습니다');
+    loadReservations();
+  } catch {
+    toast('err', '네트워크 오류가 발생했습니다');
+  }
+}
+
+/* ── cancel reservation ── */
+function cancelReservation(id) {
+  confirm('예약 취소', '해당 예약을 취소하시겠습니까?', async () => {
+    try {
+      const r = await fetch(`/manager/reservations/${id}/cancel`, { method: 'DELETE' });
+      if (!r.ok) {
+        let msg = '취소에 실패했습니다';
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+        toast('err', msg);
+        return;
+      }
+      toast('ok', '예약이 취소되었습니다');
+      loadReservations();
+    } catch {
+      toast('err', '네트워크 오류가 발생했습니다');
+    }
+  });
+}
+
+/* ── waitings ── */
+async function loadWaitings() {
+  const tbody = document.getElementById('w-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted);font-size:.75rem">불러오는 중...</td></tr>';
+  try {
+    const r = await fetch('/manager/waitings');
+    if (r.status === 401) { location.href = '/login?redirect=/manager'; return; }
+    if (r.status === 403) { location.href = '/'; return; }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">내 매장 대기가 없습니다</td></tr>';
+      return;
+    }
+    data.forEach(w => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-id">${w.id}</td>
+        <td>${w.name || ''}</td>
+        <td>${w.date || ''}</td>
+        <td>${w.theme?.name || ''}</td>
+        <td>${fmt(w.time?.startAt)}</td>
+        <td>${w.rank != null ? w.rank + '번' : '—'}</td>
+        <td><button class="btn-act cancel" onclick="delWaiting(${w.id},'${(w.name||'').replace(/'/g,"\\'")}')">삭제</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">오류: ${e.message}</td></tr>`;
+  }
+}
+
+function delWaiting(id, name) {
+  confirm('대기 삭제', `"${name}"님의 대기를 삭제하시겠습니까?`, async () => {
+    try {
+      const r = await fetch(`/manager/waitings/${id}`, { method: 'DELETE' });
+      if (!r.ok) {
+        let msg = '삭제에 실패했습니다';
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+        toast('err', msg);
+        return;
+      }
+      toast('ok', '대기가 삭제되었습니다');
+      loadWaitings();
+    } catch {
+      toast('err', '네트워크 오류가 발생했습니다');
+    }
+  });
+}
+
+/* ── tabs ── */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.hidden = true);
+    btn.classList.add('active');
+    document.getElementById(`panel-${btn.dataset.tab}`).hidden = false;
+    if (btn.dataset.tab === 'reservations') loadReservations();
+    else if (btn.dataset.tab === 'waitings') loadWaitings();
+  });
+});
+
+/* ── init ── */
+(async () => {
+  await loadTimes();
+  loadReservations();
+})();
+</script>
+</body>
+</html>

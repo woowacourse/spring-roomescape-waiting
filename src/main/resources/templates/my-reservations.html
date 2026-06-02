@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 예약 — ESCAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080808;--sur:#0f0f0f;--sur2:#181818;--border:#525252;--text:#d4d4d4;--muted:#aaa;--white:#ebebeb;--acc:#c22235;--acc-h:#e5485a;--glow:rgba(194,34,53,.3)}
+body{background-color:#080808;background-image:radial-gradient(ellipse at 0% 0%,rgba(140,20,45,.32) 0%,transparent 52%),radial-gradient(ellipse at 100% 100%,rgba(110,15,35,.22) 0%,transparent 52%);background-attachment:fixed;color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.7}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 4rem;background:rgba(7,7,7,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.42em;color:var(--white);text-decoration:none}
+.nav-r{display:flex;align-items:center;gap:1.5rem}
+.nav-link{font-size:.82rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.nav-link:hover{color:var(--white)}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-logout:hover{border-color:var(--acc);color:var(--acc)}
+.content{max-width:760px;margin:0 auto;padding:7rem 2rem 7rem}
+.page-title{font-family:'Cinzel',serif;font-size:1.8rem;color:var(--white);letter-spacing:.08em;margin-bottom:.5rem}
+.page-sub{font-size:.85rem;color:var(--muted);margin-bottom:3rem}
+.btn-s{padding:.72rem 1.6rem;border:1px solid var(--acc);color:var(--acc);background:transparent;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-s:hover{background:var(--acc);color:var(--white);box-shadow:0 0 20px var(--glow)}
+.btn-s:disabled{opacity:.4;cursor:not-allowed}
+.btn-s:disabled:hover{background:transparent;color:var(--acc);box-shadow:none}
+.btn-g{padding:.72rem 1.6rem;border:1px solid var(--border);color:var(--muted);background:transparent;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-g:hover{border-color:var(--white);color:var(--white)}
+.btn-cancel{padding:.5rem 1rem;border:1px solid var(--border);color:var(--muted);background:transparent;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-cancel:hover{border-color:var(--acc);color:var(--acc)}
+.reservation-list{display:flex;flex-direction:column;gap:1px}
+.res-item{background:var(--sur);border:1px solid var(--border);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.res-theme{font-family:'Cinzel',serif;font-size:1rem;color:var(--white);margin-bottom:.3rem}
+.res-detail{font-size:.85rem;color:var(--muted);letter-spacing:.05em}
+.res-status{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .8rem;border:1px solid;white-space:nowrap}
+.res-status.booked{color:#74c69d;border-color:#2d6a4f}
+.res-status.canceled{color:var(--muted);border-color:var(--border)}
+.res-status.waiting{color:#e5b34a;border-color:#7a5c1a}
+.res-actions{display:flex;gap:.75rem;align-items:center}
+.msg{padding:3rem 0;text-align:center;color:var(--muted);font-size:.85rem;letter-spacing:.15em}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:2rem}
+.overlay.open{display:flex}
+.modal{background:var(--sur);border:1px solid var(--border);padding:3rem;width:100%;max-width:440px}
+.m-eye{font-size:.75rem;letter-spacing:.45em;text-transform:uppercase;color:var(--acc);margin-bottom:1rem}
+.m-title{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--white);margin-bottom:1.75rem}
+.m-label{font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.75rem}
+.m-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);padding:.7rem 0;font-size:.9rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .3s;margin-bottom:1.5rem;color-scheme:dark}
+.m-input:focus{border-color:var(--acc)}
+.time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-bottom:1.5rem}
+.slot{padding:.7rem 1rem;text-align:center;border:1px solid;font-size:.85rem;transition:all .3s;cursor:pointer;background:transparent;font-family:'Inter',sans-serif}
+.slot.avail{border-color:var(--acc);color:var(--acc)}
+.slot.avail:hover,.slot.selected{background:var(--acc);color:var(--white);box-shadow:0 0 20px var(--glow)}
+.slot.booked,.slot.past{border-color:var(--border);color:var(--muted);cursor:not-allowed;opacity:.5}
+.m-actions{display:flex;gap:1rem;justify-content:flex-end}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:.85rem 2rem;font-size:.72rem;letter-spacing:.1em;border:1px solid;z-index:300;opacity:0;transition:opacity .3s;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.ok{background:rgba(5,20,12,.9);border-color:#2d6a4f;color:#74c69d}
+.toast.err{background:rgba(20,5,8,.9);border-color:var(--acc);color:var(--acc-h)}
+@media(max-width:600px){nav{padding:1rem 1.5rem}.content{padding:5rem 1.25rem 5rem}.res-item{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">ESCAPE</a>
+  <div class="nav-r">
+    <a href="/" class="nav-link">← 홈으로</a>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</nav>
+
+<div class="content">
+  <h1 class="page-title">내 예약</h1>
+  <p class="page-sub" id="member-name"></p>
+  <div id="list-area"><p class="msg">불러오는 중...</p></div>
+</div>
+
+<!-- 수정 모달 -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="m-eye">예약 수정</p>
+    <h2 class="m-title" id="m-theme">—</h2>
+    <label class="m-label">날짜</label>
+    <input class="m-input" id="m-date" type="date" oninput="loadTimes(this.value)">
+    <label class="m-label">시간</label>
+    <div class="time-grid" id="m-times"></div>
+    <div class="m-actions">
+      <button class="btn-g" onclick="closeModal()">취소</button>
+      <button class="btn-s" id="confirm-btn" onclick="doUpdate()" disabled>수정 완료</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let editingId = null;
+let editingThemeId = null;
+let selTimeId = null;
+
+function fmt(t) {
+  if (!t) return '';
+  if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
+  return String(t).substring(0, 5);
+}
+
+async function logout() {
+  await fetch('/sessions', { method: 'DELETE' });
+  location.href = '/login';
+}
+
+async function loadReservations() {
+  const area = document.getElementById('list-area');
+  area.innerHTML = '<p class="msg">불러오는 중...</p>';
+  try {
+    const [resR, waitR] = await Promise.all([
+      fetch('/reservations'),
+      fetch('/waitings')
+    ]);
+    if (resR.status === 401 || waitR.status === 401) {
+      location.href = '/login?redirect=/my-reservations';
+      return;
+    }
+    if (!resR.ok || !waitR.ok) throw new Error();
+    const reservations = await resR.json();
+    const waitings = await waitR.json();
+
+    const items = [
+      ...reservations.map(r => ({ kind: 'reservation', ...r })),
+      ...waitings.map(w => ({ kind: 'waiting', ...w }))
+    ];
+    items.sort((a, b) => {
+      const da = `${a.date} ${a.time?.startAt || ''}`;
+      const db = `${b.date} ${b.time?.startAt || ''}`;
+      return da.localeCompare(db);
+    });
+
+    if (!items.length) { area.innerHTML = '<p class="msg">예약 내역이 없습니다</p>'; return; }
+    area.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'reservation-list';
+    items.forEach(it => list.appendChild(mkItem(it)));
+    area.appendChild(list);
+
+    const sub = document.getElementById('member-name');
+    if (sub && !sub.textContent && items[0]?.name) sub.textContent = items[0].name;
+  } catch {
+    area.innerHTML = '<p class="msg">예약 정보를 불러올 수 없습니다</p>';
+  }
+}
+
+function mkItem(it) {
+  const el = document.createElement('div');
+  el.className = 'res-item';
+  let statusClass, statusText, actionsHtml = '';
+  if (it.kind === 'waiting') {
+    statusClass = 'waiting';
+    statusText = it.rank != null ? `대기 ${it.rank}번` : '대기';
+    actionsHtml = `
+      <div class="res-actions">
+        <button class="btn-cancel" onclick="doCancelWaiting(${it.id})">대기 취소</button>
+      </div>`;
+  } else if (it.status === 'BOOKED') {
+    statusClass = 'booked';
+    statusText = '예약됨';
+    actionsHtml = `
+      <div class="res-actions">
+        <button class="btn-cancel" onclick="doCancel(${it.id})">취소</button>
+        <button class="btn-s" onclick="openModal(${it.id},'${(it.theme?.name||'').replace(/'/g,"\\'")}',${it.theme?.id})">수정</button>
+      </div>`;
+  } else {
+    statusClass = 'canceled';
+    statusText = '취소됨';
+  }
+  el.innerHTML = `
+    <div>
+      <p class="res-theme">${it.theme?.name || '—'}</p>
+      <p class="res-detail">${it.date} · ${fmt(it.time?.startAt)}</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span class="res-status ${statusClass}">${statusText}</span>
+      ${actionsHtml}
+    </div>
+  `;
+  return el;
+}
+
+async function doCancelWaiting(id) {
+  if (!confirm('대기 신청을 취소하시겠습니까?')) return;
+  try {
+    const r = await fetch(`/waitings/${id}`, { method: 'DELETE' });
+    if (!r.ok) {
+      let msg = '대기 취소에 실패했습니다';
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+      toast('err', msg);
+      return;
+    }
+    toast('ok', '대기가 취소되었습니다');
+    await loadReservations();
+  } catch {
+    toast('err', '네트워크 오류가 발생했습니다');
+  }
+}
+
+async function doCancel(id) {
+  if (!confirm('예약을 취소하시겠습니까?')) return;
+  try {
+    const r = await fetch(`/reservations/${id}`, { method: 'DELETE' });
+    if (!r.ok) {
+      let msg = '취소에 실패했습니다';
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+      toast('err', msg);
+      return;
+    }
+    toast('ok', '예약이 취소되었습니다');
+    await loadReservations();
+  } catch {
+    toast('err', '네트워크 오류가 발생했습니다');
+  }
+}
+
+function openModal(id, themeName, themeId) {
+  editingId = id;
+  editingThemeId = themeId;
+  selTimeId = null;
+  document.getElementById('m-theme').textContent = themeName;
+  document.getElementById('m-times').innerHTML = '';
+  document.getElementById('confirm-btn').disabled = true;
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('m-date');
+  dateInput.min = today;
+  dateInput.value = today;
+  document.getElementById('overlay').classList.add('open');
+  loadTimes(today);
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editingId = null;
+  selTimeId = null;
+}
+
+async function loadTimes(date) {
+  if (!date || !editingThemeId) return;
+  selTimeId = null;
+  document.getElementById('confirm-btn').disabled = true;
+  const grid = document.getElementById('m-times');
+  grid.innerHTML = '<p style="color:var(--muted);font-size:.82rem;padding:.5rem 0">불러오는 중...</p>';
+  try {
+    const r = await fetch(`/themes/${editingThemeId}/times?localDate=${date}`);
+    if (!r.ok) throw new Error();
+    const times = await r.json();
+    grid.innerHTML = '';
+    const now = new Date();
+    const isToday = date === now.toISOString().slice(0, 10);
+    times.forEach(t => {
+      const [h, m] = (t.time?.startAt || '').split(':').map(Number);
+      const slotTime = new Date(date);
+      slotTime.setHours(h, m, 0, 0);
+      const isPast = isToday && slotTime <= now;
+      const cls = t.alreadyBooked ? 'booked' : isPast ? 'past' : 'avail';
+      const btn = document.createElement('button');
+      btn.className = `slot ${cls}`;
+      btn.disabled = t.alreadyBooked || isPast;
+      btn.textContent = fmt(t.time?.startAt);
+      if (!t.alreadyBooked && !isPast) {
+        btn.onclick = () => {
+          document.querySelectorAll('#m-times .slot').forEach(s => s.classList.remove('selected'));
+          btn.classList.add('selected');
+          selTimeId = t.time?.id;
+          document.getElementById('confirm-btn').disabled = false;
+        };
+      }
+      grid.appendChild(btn);
+    });
+  } catch {
+    grid.innerHTML = '<p style="color:var(--muted);font-size:.82rem">시간 정보를 불러올 수 없습니다</p>';
+  }
+}
+
+async function doUpdate() {
+  if (!editingId || !selTimeId) return;
+  const date = document.getElementById('m-date').value;
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch(`/reservations/${editingId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, timeId: selTimeId })
+    });
+    if (!r.ok) {
+      let msg = '수정에 실패했습니다';
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+      closeModal();
+      toast('err', msg);
+      return;
+    }
+    closeModal();
+    toast('ok', '예약이 수정되었습니다');
+    await loadReservations();
+  } catch {
+    closeModal();
+    toast('err', '네트워크 오류가 발생했습니다');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toast(type, msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+loadReservations();
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
