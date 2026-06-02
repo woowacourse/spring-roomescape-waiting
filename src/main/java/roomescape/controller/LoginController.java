@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ public class LoginController {
         this.memberService = memberService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/sessions")
     public ResponseEntity<Void> login(@Valid @RequestBody LoginRequestDto request, HttpServletRequest httpRequest) {
         Member member = memberService.login(request);
         HttpSession session = httpRequest.getSession();
@@ -43,7 +44,7 @@ public class LoginController {
         return ResponseEntity.ok(MemberResponseDto.from(member));
     }
 
-    @PostMapping("/logout")
+    @DeleteMapping("/sessions")
     public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
         HttpSession session = httpRequest.getSession(false);
         if (session != null) {

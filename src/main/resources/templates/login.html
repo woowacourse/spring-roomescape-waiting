@@ -78,7 +78,7 @@ async function doLogin() {
   btn.disabled = true;
 
   try {
-    const r = await fetch('/login', {
+    const r = await fetch('/sessions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })

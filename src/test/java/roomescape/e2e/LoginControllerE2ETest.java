@@ -25,7 +25,7 @@ class LoginControllerE2ETest extends BaseE2ETest {
             String sessionId = RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(Map.of("email", "user@test.com", "password", PASSWORD_PLAIN))
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then().statusCode(HttpStatus.OK.value())
                     .extract().sessionId();
 
@@ -38,7 +38,7 @@ class LoginControllerE2ETest extends BaseE2ETest {
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(Map.of("email", "user@test.com", "password", "wrong"))
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then().statusCode(HttpStatus.BAD_REQUEST.value());
         }
 
@@ -48,7 +48,7 @@ class LoginControllerE2ETest extends BaseE2ETest {
             RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(Map.of("email", "ghost@test.com", "password", PASSWORD_PLAIN))
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then().statusCode(HttpStatus.BAD_REQUEST.value());
         }
     }
@@ -97,7 +97,7 @@ class LoginControllerE2ETest extends BaseE2ETest {
 
             RestAssured.given()
                     .sessionId(sessionId)
-                    .when().post("/logout")
+                    .when().delete("/sessions")
                     .then().statusCode(HttpStatus.OK.value());
         }
     }

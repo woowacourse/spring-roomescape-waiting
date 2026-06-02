@@ -106,7 +106,7 @@ function fmt(t) {
 }
 
 async function logout() {
-  await fetch('/logout', { method: 'POST' });
+  await fetch('/sessions', { method: 'DELETE' });
   location.href = '/login';
 }
 

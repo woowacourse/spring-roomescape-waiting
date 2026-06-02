@@ -95,7 +95,7 @@ public abstract class BaseE2ETest {
         return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", email, "password", PASSWORD_PLAIN))
-                .when().post("/login")
+                .when().post("/sessions")
                 .then().statusCode(200)
                 .extract().sessionId();
     }

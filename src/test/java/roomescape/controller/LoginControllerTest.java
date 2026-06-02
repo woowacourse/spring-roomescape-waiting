@@ -54,7 +54,7 @@ class LoginControllerTest {
             RestAssuredMockMvc.given()
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .body(request)
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then()
                     .status(HttpStatus.OK);
         }
@@ -69,7 +69,7 @@ class LoginControllerTest {
             RestAssuredMockMvc.given()
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .body(request)
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then()
                     .status(HttpStatus.BAD_REQUEST);
         }
@@ -82,7 +82,7 @@ class LoginControllerTest {
             RestAssuredMockMvc.given()
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .body(request)
-                    .when().post("/login")
+                    .when().post("/sessions")
                     .then()
                     .status(HttpStatus.BAD_REQUEST);
         }
@@ -95,7 +95,7 @@ class LoginControllerTest {
         @DisplayName("로그아웃하면 200을 반환한다")
         void returnsOkOnLogout() {
             RestAssuredMockMvc.given()
-                    .when().post("/logout")
+                    .when().delete("/sessions")
                     .then()
                     .status(HttpStatus.OK);
         }
