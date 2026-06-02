@@ -40,13 +40,12 @@ class ReservationRepositoryTest {
         Reservation reservation = new Reservation(null, "브라운", date, time, theme);
 
         // when
-        Long id = reservationRepository.insert(reservation);
+        Reservation savedReservation = reservationRepository.insert(reservation);
 
         // then
         List<Reservation> reservations = reservationRepository.findAll();
-        Reservation savedReservation = reservationRepository.findById(id).get();
         assertAll(
-                () -> assertThat(id).isNotNull(),
+                () -> assertThat(savedReservation.getId()).isNotNull(),
                 () -> assertThat(reservations).hasSize(1),
                 () -> assertThat(savedReservation.getName()).isEqualTo(reservation.getName()),
                 () -> assertThat(savedReservation.getDate()).isEqualTo(reservation.getDate()),
@@ -62,8 +61,8 @@ class ReservationRepositoryTest {
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
         Reservation reservation1 = new Reservation(null, "브라운", date, time1, theme1);
         Reservation reservation2 = new Reservation(null, "구구", date, time2, theme2);
-        Long id1 = reservationRepository.insert(reservation1);
-        Long id2 = reservationRepository.insert(reservation2);
+        Long id1 = reservationRepository.insert(reservation1).getId();
+        reservationRepository.insert(reservation2);
 
         // when
         int deletedCount = reservationRepository.delete(id1);
@@ -105,7 +104,7 @@ class ReservationRepositoryTest {
         ReservationTime time = findTimeByStartAt("15:00");
         ReservationTime updateTime = findTimeByStartAt("12:00");
         Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
-        Long id = reservationRepository.insert(new Reservation(null, "브라운", date, time, theme));
+        Long id = reservationRepository.insert(new Reservation(null, "브라운", date, time, theme)).getId();
         LocalDate updateDate = date.plusDays(1);
 
         Reservation updatedReservation = new Reservation(id, "브라운", updateDate, updateTime, theme);
@@ -131,9 +130,11 @@ class ReservationRepositoryTest {
         reservationRepository.insert(new Reservation(null, "브라운", date, time, theme));
 
         // when
-        boolean exists = reservationRepository.existsWith(date, time.getId(), theme.getId());
-        boolean notExistsWithOtherDate = reservationRepository.existsWith(date.plusDays(1), time.getId(), theme.getId());
-        boolean notExistsWithOtherTime = reservationRepository.existsWith(date, otherTime.getId(), theme.getId());
+        boolean exists = reservationRepository.existsBySlot(new Reservation(null, "브라운", date, time, theme));
+        boolean notExistsWithOtherDate = reservationRepository.existsBySlot(
+                new Reservation(null, "브라운", date.plusDays(1), time, theme));
+        boolean notExistsWithOtherTime = reservationRepository.existsBySlot(
+                new Reservation(null, "브라운", date, otherTime, theme));
 
         // then
         assertAll(

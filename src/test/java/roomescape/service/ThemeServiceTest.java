@@ -55,7 +55,7 @@ class ThemeServiceTest {
 
         when(themeRepository.insert(any(Theme.class)))
                 .thenReturn(id);
-        when(themeRepository.findBy(id))
+        when(themeRepository.findById(id))
                 .thenReturn(Optional.of(theme));
 
         // when
@@ -79,7 +79,7 @@ class ThemeServiceTest {
                 () -> assertThat(captured.getDescription()).isEqualTo(description),
                 () -> assertThat(captured.getThumbnail()).isEqualTo(thumbnail));
 
-        verify(themeRepository, times(1)).findBy(id);
+        verify(themeRepository, times(1)).findById(id);
         verifyNoMoreInteractions(themeRepository, reservationRepository);
     }
 

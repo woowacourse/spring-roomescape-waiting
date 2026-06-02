@@ -91,21 +91,22 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
 
-    public Long insert(Reservation reservation) {
+    public Reservation insert(Reservation reservation) {
         String sql = "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement pstmt = connection.prepareStatement(
                     sql,
-                    new String[]{"id"});
+                    new String[]{"id"}
+            );
             pstmt.setString(1, reservation.getName());
             pstmt.setObject(2, reservation.getDate());
             pstmt.setLong(3, reservation.getTime().getId());
             pstmt.setLong(4, reservation.getTheme().getId());
             return pstmt;
         }, keyHolder);
-
-        return keyHolder.getKey().longValue();
+        Long id = keyHolder.getKey().longValue();
+        return reservation.withId(id);
     }
 
     public int delete(Long id) {
@@ -147,9 +148,14 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowMapper, themeId, date);
     }
 
-    public boolean existsWith(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlot(Reservation reservation) {
         String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId());
         return count != null && count > 0;
     }
 

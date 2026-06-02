@@ -42,7 +42,7 @@ class ReservationAvailabilityServiceTest {
         Theme theme = new Theme(themeId, "테스트 테마", "테마 설명", "썸네일 주소");
         Reservation reservation = new Reservation(1L, "브라운", date, reservedTime, theme);
 
-        when(themeRepository.findBy(themeId))
+        when(themeRepository.findById(themeId))
                 .thenReturn(Optional.of(theme));
         when(reservationTimeRepository.findAll())
                 .thenReturn(List.of(reservedTime, availableTime));
@@ -55,7 +55,7 @@ class ReservationAvailabilityServiceTest {
         // then
         assertThat(result).extracting(TimeAvailabilityResult::available)
                 .containsExactly(false, true);
-        verify(themeRepository, times(1)).findBy(themeId);
+        verify(themeRepository, times(1)).findById(themeId);
         verify(reservationTimeRepository, times(1)).findAll();
         verify(reservationRepository, times(1)).findReservationsByThemeAndDate(themeId, date);
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
@@ -65,7 +65,7 @@ class ReservationAvailabilityServiceTest {
     void 존재하지_않는_테마의_예약_가능_시간_조회시_예외_발생() {
         // given
         Long themeId = 1L;
-        when(themeRepository.findBy(themeId))
+        when(themeRepository.findById(themeId))
                 .thenReturn(Optional.empty());
 
         // when & then
@@ -74,7 +74,7 @@ class ReservationAvailabilityServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 테마입니다.");
 
-        verify(themeRepository, times(1)).findBy(themeId);
+        verify(themeRepository, times(1)).findById(themeId);
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
 }

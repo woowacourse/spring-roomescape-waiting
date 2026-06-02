@@ -76,9 +76,9 @@ class ReservationWaitingServiceTest {
         String name = "브라운";
         ReservationWaiting savedWaiting = new ReservationWaiting(id, name, date, time, theme);
 
-        when(reservationTimeRepository.findBy(time.getId()))
+        when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
+        when(themeRepository.findById(theme.getId()))
                 .thenReturn(Optional.of(theme));
         when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
                 .thenReturn(id);
@@ -112,9 +112,9 @@ class ReservationWaitingServiceTest {
     void 예약_대기_검증_실패시_저장하지_않는다() {
         // given
         String name = "브라운";
-        when(reservationTimeRepository.findBy(time.getId()))
+        when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
+        when(themeRepository.findById(theme.getId()))
                 .thenReturn(Optional.of(theme));
         doThrow(new RoomescapeException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다."))
                 .when(reservationWaitingValidator).validateWaiting(any(ReservationWaiting.class));
@@ -132,9 +132,9 @@ class ReservationWaitingServiceTest {
     void 동시에_중복_대기_신청시_예외_발생() {
         // given
         String name = "브라운";
-        when(reservationTimeRepository.findBy(time.getId()))
+        when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
+        when(themeRepository.findById(theme.getId()))
                 .thenReturn(Optional.of(theme));
         when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
                 .thenThrow(new DuplicateKeyException("duplicate waiting"));
@@ -150,7 +150,7 @@ class ReservationWaitingServiceTest {
     void 존재하지_않는_시간으로_예약_대기_신청시_예외_발생() {
         // given
         Long timeId = 999L;
-        when(reservationTimeRepository.findBy(timeId))
+        when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.empty());
 
         // when & then
@@ -166,9 +166,9 @@ class ReservationWaitingServiceTest {
     void 존재하지_않는_테마로_예약_대기_신청시_예외_발생() {
         // given
         Long themeId = 999L;
-        when(reservationTimeRepository.findBy(time.getId()))
+        when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(themeId))
+        when(themeRepository.findById(themeId))
                 .thenReturn(Optional.empty());
 
         // when & then

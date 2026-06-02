@@ -48,7 +48,7 @@ public class ReservationAvailabilityService {
     }
 
     private void validateThemeExists(Long themeId) {
-        if (themeRepository.findBy(themeId).isEmpty()) {
+        if (themeRepository.findById(themeId).isEmpty()) {
             throw new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다.");
         }
     }

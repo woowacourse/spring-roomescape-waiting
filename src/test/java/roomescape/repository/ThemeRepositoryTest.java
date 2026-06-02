@@ -39,7 +39,7 @@ class ThemeRepositoryTest {
 
         // then
         List<Theme> themes = themeRepository.findAll();
-        Theme savedTheme = themeRepository.findBy(id).get();
+        Theme savedTheme = themeRepository.findById(id).get();
         assertAll(
                 () -> assertThat(id).isNotNull(),
                 () -> assertThat(themes).hasSize(1),
@@ -62,7 +62,7 @@ class ThemeRepositoryTest {
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
                 () -> assertThat(themes).hasSize(1),
-                () -> assertThat(themeRepository.findBy(id1)).isEmpty());
+                () -> assertThat(themeRepository.findById(id1)).isEmpty());
     }
 
     @Test

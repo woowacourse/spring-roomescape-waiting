@@ -30,7 +30,7 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTime create(LocalTime startAt) {
         Long id = reservationTimeRepository.insert(new ReservationTime(null, startAt));
-        return reservationTimeRepository.findBy(id)
+        return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("생성된 예약 시간을 찾을 수 없습니다."));
     }
 

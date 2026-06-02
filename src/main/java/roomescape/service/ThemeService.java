@@ -32,7 +32,7 @@ public class ThemeService {
     public Theme create(String name, String description, String thumbnail) {
         Theme theme = new Theme(null, name, description, thumbnail);
         Long id = themeRepository.insert(theme);
-        return themeRepository.findBy(id)
+        return themeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("생성된 테마를 찾을 수 없습니다."));
     }
 

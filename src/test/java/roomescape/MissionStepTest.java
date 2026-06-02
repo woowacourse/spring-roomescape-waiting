@@ -92,6 +92,39 @@ public class MissionStepTest {
     }
 
     @Test
+    void 사용자_본인_예약_변경() {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "브라운");
+        params.put("date", LocalDate.now().plusDays(1).toString());
+        params.put("timeId", "1");
+        params.put("themeId", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1));
+
+        Map<String, String> updateParams = new HashMap<>();
+        updateParams.put("name", "브라운");
+        updateParams.put("date", LocalDate.now().plusDays(2).toString());
+        updateParams.put("timeId", "2");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(updateParams)
+                .when().put("/reservations/1")
+                .then().log().all()
+                .statusCode(200)
+                .body("id", is(1))
+                .body("name", is("브라운"))
+                .body("date", is(LocalDate.now().plusDays(2).toString()))
+                .body("time.id", is(2));
+    }
+
+    @Test
     void 관리자_중복_예약_생성_시_에러_응답() {
         Map<String, String> params = new HashMap<>();
         params.put("name", "브라운");

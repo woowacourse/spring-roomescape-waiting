@@ -53,7 +53,7 @@ class ReservationTimeServiceTest {
 
         when(reservationTimeRepository.insert(any(ReservationTime.class)))
                 .thenReturn(id);
-        when(reservationTimeRepository.findBy(id))
+        when(reservationTimeRepository.findById(id))
                 .thenReturn(Optional.of(time));
 
         // when
@@ -73,7 +73,7 @@ class ReservationTimeServiceTest {
                 () -> assertThat(captured.getId()).isNull(),
                 () -> assertThat(captured.getStartAt()).isEqualTo(startAt));
 
-        verify(reservationTimeRepository, times(1)).findBy(id);
+        verify(reservationTimeRepository, times(1)).findById(id);
         verifyNoMoreInteractions(reservationTimeRepository, reservationRepository);
     }
 

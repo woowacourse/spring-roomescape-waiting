@@ -38,7 +38,7 @@ class ReservationTimeRepositoryTest {
 
         // then
         List<ReservationTime> times = dao.findAll();
-        ReservationTime savedTime = dao.findBy(id).get();
+        ReservationTime savedTime = dao.findById(id).get();
         assertAll(
                 () -> assertThat(id).isNotNull(),
                 () -> assertThat(times).hasSize(1),
@@ -61,6 +61,6 @@ class ReservationTimeRepositoryTest {
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
                 () -> assertThat(times).hasSize(1),
-                () -> assertThat(dao.findBy(id1)).isEmpty());
+                () -> assertThat(dao.findById(id1)).isEmpty());
     }
 }

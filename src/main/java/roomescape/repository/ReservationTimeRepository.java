@@ -26,7 +26,7 @@ public class ReservationTimeRepository {
         return jdbcTemplate.query(sql, timeRowMapper);
     }
 
-    public Optional<ReservationTime> findBy(Long id) {
+    public Optional<ReservationTime> findById(Long id) {
         String sql = "SELECT id, start_at FROM reservation_time WHERE id = ?;";
         List<ReservationTime> result = jdbcTemplate.query(sql, timeRowMapper, id);
         return result.stream().findAny();

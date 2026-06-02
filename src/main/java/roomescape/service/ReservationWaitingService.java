@@ -78,12 +78,12 @@ public class ReservationWaitingService {
     }
 
     private Theme findTheme(Long themeId) {
-        return themeRepository.findBy(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findBy(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 시간입니다."));
     }
 

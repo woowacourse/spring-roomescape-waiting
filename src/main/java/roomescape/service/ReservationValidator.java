@@ -2,12 +2,10 @@ package roomescape.service;
 
 import org.springframework.stereotype.Component;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Component
@@ -19,36 +17,35 @@ public class ReservationValidator {
         this.reservationRepository = reservationRepository;
     }
 
-    public void validateNotPast(LocalDate date, ReservationTime time) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+    public void validateCreatableByUser(Reservation reservation, LocalDateTime now) {
+        validateNotPast(reservation, now);
+        validateAvailableSlot(reservation);
+    }
+
+    public void validateCreatableByAdmin(Reservation reservation) {
+        validateAvailableSlot(reservation);
+    }
+
+    public void validateModifiableByUser(Reservation reservation, String name, LocalDateTime now) {
+        validateOwner(reservation, name);
+        validateNotPastForModification(reservation, now);
+    }
+
+    public void validateUpdatedReservation(Reservation reservation, Reservation updatedReservation, LocalDateTime now) {
+        validateScheduleChanged(reservation, updatedReservation);
+        validateNotPast(updatedReservation, now);
+        validateAvailableSlot(updatedReservation);
+    }
+
+    private void validateNotPast(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPast(now)) {
             throw new RoomescapeException(ErrorCode.PAST_SCHEDULE, "이미 지난 시간으로는 예약할 수 없습니다.");
         }
     }
 
-    public void validateAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsWith(date, timeId, themeId)) {
+    private void validateAvailableSlot(Reservation reservation) {
+        if (reservationRepository.existsBySlot(reservation)) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
-        }
-    }
-
-    public void validateUpdatableReservation(Reservation reservation, String name) {
-        validateOwner(reservation, name);
-        validateReservationNotLocked(reservation);
-    }
-
-    public void validateUpdatePolicy(Reservation reservation, Reservation updatedReservation) {
-        validateScheduleChanged(reservation, updatedReservation);
-        validateNotPast(updatedReservation.getDate(), updatedReservation.getTime());
-        validateAlreadyReserved(
-                updatedReservation.getDate(),
-                updatedReservation.getTime().getId(),
-                updatedReservation.getTheme().getId());
-    }
-
-    public void validateUpdateValueExists(LocalDate date, Long timeId) {
-        if (date == null && timeId == null) {
-            throw new RoomescapeException(ErrorCode.INVALID_INPUT, "변경할 날짜 또는 시간이 필요합니다.");
         }
     }
 
@@ -58,8 +55,8 @@ public class ReservationValidator {
         }
     }
 
-    private void validateReservationNotLocked(Reservation reservation) {
-        if (reservation.isPast()) {
+    private void validateNotPastForModification(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPast(now)) {
             throw new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약은 변경하거나 취소할 수 없습니다.");
         }
     }

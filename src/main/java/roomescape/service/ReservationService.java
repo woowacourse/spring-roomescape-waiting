@@ -13,6 +13,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -44,22 +45,31 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation create(String name, LocalDate date, Long timeId, Long themeId) {
+    public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         ReservationTime time = findReservationTime(timeId);
-        reservationValidator.validateNotPast(date, time);
-        return createReservation(name, date, timeId, themeId, time);
+        Theme theme = findTheme(themeId);
+
+        Reservation reservation = new Reservation(null, name, date, time, theme);
+        reservationValidator.validateCreatableByUser(reservation, now);
+
+        return insertReservation(reservation);
     }
 
     @Transactional
     public Reservation createByAdmin(String name, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = findReservationTime(timeId);
-        return createReservation(name, date, timeId, themeId, time);
+        Theme theme = findTheme(themeId);
+
+        Reservation reservation = new Reservation(null, name, date, time, theme);
+        reservationValidator.validateCreatableByAdmin(reservation);
+
+        return insertReservation(reservation);
     }
 
     @Transactional
-    public void delete(Long id, String name) {
+    public void deleteByUser(Long id, String name, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateUpdatableReservation(reservation, name);
+        reservationValidator.validateModifiableByUser(reservation, name, now);
         reservationRepository.delete(id);
     }
 
@@ -69,31 +79,33 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation update(Long id, String name, LocalDate date, Long timeId) {
+    public Reservation updateByUser(Long id, String name, LocalDate date, Long timeId, LocalDateTime now) {
         Reservation reservation = findReservation(id);
-        reservationValidator.validateUpdatableReservation(reservation, name);
+        reservationValidator.validateModifiableByUser(reservation, name, now);
 
         Reservation updatedReservation = createUpdatedReservation(reservation, date, timeId);
-        reservationValidator.validateUpdatePolicy(reservation, updatedReservation);
+        reservationValidator.validateUpdatedReservation(reservation, updatedReservation, now);
 
-        try {
-            reservationRepository.update(updatedReservation);
-        } catch (DuplicateKeyException e) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
-        }
-
-        return findUpdatedReservation(id);
+        updateReservation(updatedReservation);
+        return updatedReservation;
     }
 
-    private Reservation save(Reservation reservation) {
+    private ReservationTime findReservationTime(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
+    }
+
+    private Reservation insertReservation(Reservation reservation) {
         try {
-            Long id = reservationRepository.insert(reservation);
-            return reservationRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
+            return reservationRepository.insert(reservation);
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
         }
-
     }
 
     private Reservation findReservation(Long id) {
@@ -101,32 +113,10 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
-    private Reservation findUpdatedReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("수정된 예약을 찾을 수 없습니다."));
-    }
-
-    private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findBy(timeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 시간입니다."));
-    }
-
-    private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId, ReservationTime time) {
-        reservationValidator.validateAlreadyReserved(date, timeId, themeId);
-        Theme theme = findTheme(themeId);
-
-        Reservation reservation = new Reservation(null, name, date, time, theme);
-        return save(reservation);
-    }
-
-    private Theme findTheme(Long themeId) {
-        return themeRepository.findBy(themeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
-    }
-
     private Reservation createUpdatedReservation(Reservation reservation, LocalDate date, Long timeId) {
-        reservationValidator.validateUpdateValueExists(date, timeId);
-
+        if (date == null && timeId == null) {
+            throw new RoomescapeException(ErrorCode.INVALID_INPUT, "변경할 날짜 또는 시간이 필요합니다.");
+        }
         return new Reservation(
                 reservation.getId(),
                 reservation.getName(),
@@ -147,5 +137,13 @@ public class ReservationService {
             return findReservationTime(timeId);
         }
         return reservation.getTime();
+    }
+
+    private void updateReservation(Reservation updatedReservation) {
+        try {
+            reservationRepository.update(updatedReservation);
+        } catch (DuplicateKeyException e) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
+        }
     }
 }

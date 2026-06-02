@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,7 +113,7 @@ class ReservationTest {
                 new ReservationTime(1L, startAt));
 
         // when & then
-        assertThat(reservation.isPast()).isTrue();
+        assertThat(reservation.isPast(LocalDateTime.now())).isTrue();
     }
 
     @Test

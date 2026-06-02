@@ -13,6 +13,7 @@ import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -28,11 +29,12 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
-        Reservation reservation = service.create(
+        Reservation reservation = service.createByUser(
                 request.name(),
                 request.date(),
                 request.timeId(),
-                request.themeId());
+                request.themeId(),
+                LocalDateTime.now());
         return ResponseEntity.created(URI.create("/reservations/" + reservation.getId()))
                 .body(ReservationResponse.from(reservation));
     }
@@ -50,7 +52,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
             @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
-        service.delete(id, name);
+        service.deleteByUser(id, name, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 
@@ -58,11 +60,12 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
             @Valid @RequestBody ReservationUpdateRequest request) {
-        Reservation reservation = service.update(
+        Reservation reservation = service.updateByUser(
                 id,
                 request.name(),
                 request.date(),
-                request.timeId());
+                request.timeId(),
+                LocalDateTime.now());
         return ResponseEntity.ok(ReservationResponse.from(reservation));
     }
 }

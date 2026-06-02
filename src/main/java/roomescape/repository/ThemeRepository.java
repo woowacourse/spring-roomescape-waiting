@@ -27,7 +27,7 @@ public class ThemeRepository {
         return jdbcTemplate.query(sql, themeRowMapper);
     }
 
-    public Optional<Theme> findBy(Long id) {
+    public Optional<Theme> findById(Long id) {
         String sql = "SELECT id, name, description, thumbnail FROM theme WHERE id = ?;";
         List<Theme> result = jdbcTemplate.query(sql, themeRowMapper, id);
         return result.stream().findAny();
