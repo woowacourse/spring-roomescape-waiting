@@ -8,10 +8,13 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.repository.result.ReservationWaitingOrderResult;
 
 import java.sql.PreparedStatement;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +48,30 @@ public class ReservationWaitingRepository {
                 ORDER BY r.id;
                 """;
         return jdbcTemplate.query(sql, waitingRowMapper, name);
+    }
+
+    public List<ReservationWaitingOrderResult> findOrderResultsBy(List<ReservationWaiting> waitings) {
+        if (waitings.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> conditions = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+        for (ReservationWaiting waiting : waitings) {
+            conditions.add("(date = ? AND time_id = ? AND theme_id = ?)");
+            params.add(waiting.getDate());
+            params.add(waiting.getTime().getId());
+            params.add(waiting.getTheme().getId());
+        }
+
+        String sql = """
+                SELECT id, date, time_id, theme_id, created_at
+                FROM reservation_waiting
+                WHERE %s
+                ORDER BY date, time_id, theme_id, created_at, id;
+                """.formatted(String.join(" OR ", conditions));
+
+        return jdbcTemplate.query(sql, waitingOrderResultRowMapper, params.toArray());
     }
 
     public Long countEarlierWaitings(Long id) {
@@ -155,4 +182,12 @@ public class ReservationWaitingRepository {
                 theme);
         return waiting;
     };
+
+    private final RowMapper<ReservationWaitingOrderResult> waitingOrderResultRowMapper = (resultSet, rowNum) ->
+            new ReservationWaitingOrderResult(
+                    resultSet.getLong("id"),
+                    resultSet.getObject("date", LocalDate.class),
+                    resultSet.getLong("time_id"),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getObject("created_at", LocalDateTime.class));
 }
