@@ -19,6 +19,7 @@ import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
+import roomescape.exception.NonPastReservationDeletionException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
@@ -138,10 +139,20 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long reservationId, User manager) {
+    public void cancelReservation(Long reservationId, User manager) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("예약", reservationId));
         validateManagesStore(manager.getId(), reservation.getStore().getId());
+        validateExistingNotInPast(reservation);
+        reservationRepository.deleteById(reservationId);
+    }
+
+    @Transactional
+    public void deletePastReservation(Long reservationId, User manager) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("예약", reservationId));
+        validateManagesStore(manager.getId(), reservation.getStore().getId());
+        validateExistingInPast(reservation);
         reservationRepository.deleteById(reservationId);
     }
 
@@ -219,6 +230,12 @@ public class ReservationService {
     private void validateExistingNotInPast(Reservation existing) {
         if (existing.isInPast(timeProvider.currentDateTime())) {
             throw new PastReservationModificationException();
+        }
+    }
+
+    private void validateExistingInPast(Reservation existing) {
+        if (!existing.isInPast(timeProvider.currentDateTime())) {
+            throw new NonPastReservationDeletionException();
         }
     }
 

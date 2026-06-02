@@ -19,6 +19,7 @@ import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
+import roomescape.exception.NonPastReservationDeletionException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
@@ -257,36 +258,88 @@ class ReservationServiceTest {
     }
 
     @Test
-    void deleteReservation_없는_id이면_ResourceNotFoundException() {
-        assertThatThrownBy(() -> service.deleteReservation(9999L, manager))
+    void cancelReservation_없는_id이면_ResourceNotFoundException() {
+        assertThatThrownBy(() -> service.cancelReservation(9999L, manager))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("예약")
                 .hasMessageContaining("9999");
     }
 
     @Test
-    void deleteReservation_삭제후_조회되지_않는다() {
+    void cancelReservation_취소후_조회되지_않는다() {
         User user = buildUser("브라운");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         Long reservationId = reservationRepository.save(
-                buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6)));
+                buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 8)));
 
-        service.deleteReservation(reservationId, manager);
+        service.cancelReservation(reservationId, manager);
 
         ReservationResponses responses = service.getReservations(0, 10, null, manager);
         assertThat(responses.reservations()).extracting("id").doesNotContain(reservationId);
     }
 
     @Test
-    void deleteReservation_담당하지_않는_매장_예약이면_StoreManagementForbiddenException() {
+    void cancelReservation_담당하지_않는_매장_예약이면_StoreManagementForbiddenException() {
+        User user = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 8), 999L));
+
+        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+                .isInstanceOf(StoreManagementForbiddenException.class);
+        assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    void cancelReservation_과거_예약이면_PastReservationModificationException() {
+        User user = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6)));
+
+        assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
+                .isInstanceOf(PastReservationModificationException.class);
+        assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    void deletePastReservation_과거_예약을_삭제하면_조회되지_않는다() {
+        User user = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6)));
+
+        service.deletePastReservation(reservationId, manager);
+
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
+    }
+
+    @Test
+    void deletePastReservation_아직_지나지_않은_예약이면_NonPastReservationDeletionException() {
+        User user = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 8)));
+
+        assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
+                .isInstanceOf(NonPastReservationDeletionException.class);
+        assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    void deletePastReservation_담당하지_않는_매장_예약이면_StoreManagementForbiddenException() {
         User user = buildUser("브라운");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         Long reservationId = reservationRepository.save(
                 buildReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 6), 999L));
 
-        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
+        assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
                 .isInstanceOf(StoreManagementForbiddenException.class);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }

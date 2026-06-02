@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,9 +40,15 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservationService.getReservations(page, size, name, manager));
     }
 
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelReservation(@LoginUser User manager, @PathVariable Long id) {
+        reservationService.cancelReservation(id, manager);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@LoginUser User manager, @PathVariable Long id) {
-        reservationService.deleteReservation(id, manager);
+    public ResponseEntity<Void> deletePastReservation(@LoginUser User manager, @PathVariable Long id) {
+        reservationService.deletePastReservation(id, manager);
         return ResponseEntity.ok().build();
     }
 }

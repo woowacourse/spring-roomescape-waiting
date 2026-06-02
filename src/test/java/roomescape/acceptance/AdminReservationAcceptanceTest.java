@@ -95,14 +95,53 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_예약을_삭제한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
+    void POST_admin_reservations_id_cancel_예약을_취소한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
+                .date("2026-05-08").onStore(managedStoreId).save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, managerBearer())
+                .when().post("/admin/reservations/" + reserved.reservationId() + "/cancel")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    void POST_admin_reservations_id_cancel_과거_예약이면_422와_메시지를_반환한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
+                .date("2026-05-06").onStore(managedStoreId).save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, managerBearer())
+                .when().post("/admin/reservations/" + reserved.reservationId() + "/cancel")
+                .then().log().all()
+                .statusCode(422)
+                .body("message", equalTo("이미 지난 예약은 수정할 수 없습니다."));
+    }
+
+    @Test
+    void DELETE_admin_reservations_id_과거_예약을_삭제한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
+                .date("2026-05-06").onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(200);
+    }
+
+    @Test
+    void DELETE_admin_reservations_id_아직_지나지_않은_예약이면_422와_메시지를_반환한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
+                .date("2026-05-08").onStore(managedStoreId).save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, managerBearer())
+                .when().delete("/admin/reservations/" + reserved.reservationId())
+                .then().log().all()
+                .statusCode(422)
+                .body("message", equalTo("아직 지나지 않은 예약은 삭제할 수 없습니다."));
     }
 
     @Test
@@ -120,12 +159,12 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_reservations_담당하지_않는_매장_예약이면_403과_메시지를_반환한다() {
+    void POST_admin_reservations_id_cancel_담당하지_않는_매장_예약이면_403과_메시지를_반환한다() {
         long reservationId = insertReservationInOtherStore("2026-05-09");
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
-                .when().delete("/admin/reservations/" + reservationId)
+                .when().post("/admin/reservations/" + reservationId + "/cancel")
                 .then().log().all()
                 .statusCode(403)
                 .body("message", equalTo("본인이 관리하는 매장의 예약만 관리할 수 있습니다."));

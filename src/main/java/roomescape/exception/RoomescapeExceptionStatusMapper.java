@@ -16,6 +16,7 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(ReservationTimeInUseException.class, HttpStatus.CONFLICT),
             Map.entry(PastDateTimeReservationException.class, HttpStatus.UNPROCESSABLE_ENTITY),
             Map.entry(PastReservationModificationException.class, HttpStatus.UNPROCESSABLE_ENTITY),
+            Map.entry(NonPastReservationDeletionException.class, HttpStatus.UNPROCESSABLE_ENTITY),
             Map.entry(DuplicateUsernameException.class, HttpStatus.CONFLICT),
             Map.entry(InvalidLoginException.class, HttpStatus.UNAUTHORIZED),
             Map.entry(UnauthenticatedException.class, HttpStatus.UNAUTHORIZED),

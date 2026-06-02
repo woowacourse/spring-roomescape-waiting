@@ -137,16 +137,22 @@
         }
     }
 
+    function isPastReservation(reservation) {
+        const dateTime = new Date(`${reservation.date}T${reservation.time || '00:00:00'}`);
+        return dateTime.getTime() < Date.now();
+    }
+
     function renderReservationRow(reservation) {
+        const actionButton = isPastReservation(reservation)
+            ? R.button('btn btn-danger btn-sm', '🗑 기록삭제', () => deletePastReservation(reservation.id))
+            : R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id));
         return R.h('tr', {}, [
             R.h('td', {}, [R.badge(`#${reservation.id}`)]),
             R.h('td', {}, [R.h('strong', {text: reservation.name})]),
             R.h('td', {text: reservation.themeName || '–'}),
             R.h('td', {text: reservation.date}),
             R.h('td', {text: reservation.time || '–'}),
-            R.h('td', {}, [
-                R.button('btn btn-danger btn-sm', '🗑 삭제', () => deleteReservation(reservation.id)),
-            ]),
+            R.h('td', {}, [actionButton]),
         ]);
     }
 
@@ -166,11 +172,22 @@
         await loadReservations(false);
     }
 
-    async function deleteReservation(id) {
-        if (!confirm(`예약 #${id}을 삭제할까요?`)) return;
+    async function cancelReservation(id) {
+        if (!confirm(`예약 #${id}을 취소할까요?`)) return;
+        try {
+            await R.api('POST', `/admin/reservations/${id}/cancel`, {token: token()});
+            R.toast('예약이 취소되었습니다.', 'success');
+            await loadReservations(true);
+        } catch (e) {
+            R.toast(`취소 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function deletePastReservation(id) {
+        if (!confirm(`지난 예약 #${id} 기록을 삭제할까요?`)) return;
         try {
             await R.api('DELETE', `/admin/reservations/${id}`, {token: token()});
-            R.toast('예약이 삭제되었습니다.', 'success');
+            R.toast('예약 기록이 삭제되었습니다.', 'success');
             await loadReservations(true);
         } catch (e) {
             R.toast(`삭제 실패: ${e.message}`, 'error');

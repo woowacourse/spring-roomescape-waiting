@@ -580,7 +580,7 @@
     async function cancelReservation(id) {
         if (!confirm(`#${id} 항목을 취소할까요?`)) return;
         try {
-            await R.api('DELETE', `/reservations/${id}`, {token: R.auth.getMemberToken()});
+            await R.api('POST', `/reservations/${id}/cancel`, {token: R.auth.getMemberToken()});
             R.toast('취소되었습니다.', 'success');
             await loadMyReservations();
             if (state.selectedTheme && state.selectedDate) await loadAvailableTimes();

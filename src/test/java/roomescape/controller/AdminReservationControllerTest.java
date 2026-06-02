@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -131,17 +132,35 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_200을_반환하고_서비스에_위임한다() throws Exception {
-        mockMvc.perform(delete("/admin/reservations/3"))
+    void POST_admin_reservations_id_cancel_200을_반환하고_서비스에_위임한다() throws Exception {
+        mockMvc.perform(post("/admin/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
-        verify(reservationService).deleteReservation(3L, MANAGER);
+        verify(reservationService).cancelReservation(3L, MANAGER);
     }
 
     @Test
-    void DELETE_admin_reservations_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    void POST_admin_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         willThrow(new ResourceNotFoundException("예약", 9999L))
-                .given(reservationService).deleteReservation(9999L, MANAGER);
+                .given(reservationService).cancelReservation(9999L, MANAGER);
+
+        mockMvc.perform(post("/admin/reservations/9999/cancel"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
+    }
+
+    @Test
+    void DELETE_admin_reservations_id_과거_예약을_삭제하고_서비스에_위임한다() throws Exception {
+        mockMvc.perform(delete("/admin/reservations/3"))
+                .andExpect(status().isOk());
+
+        verify(reservationService).deletePastReservation(3L, MANAGER);
+    }
+
+    @Test
+    void DELETE_admin_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+        willThrow(new ResourceNotFoundException("예약", 9999L))
+                .given(reservationService).deletePastReservation(9999L, MANAGER);
 
         mockMvc.perform(delete("/admin/reservations/9999"))
                 .andExpect(status().isNotFound())

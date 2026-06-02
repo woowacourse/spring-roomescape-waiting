@@ -110,7 +110,7 @@ class ReservationAcceptanceTest {
         //재키 삭제
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, waitingReservation2.bearer())
-                .when().delete("/reservations/" + waitingReservation2.reservationId())
+                .when().post("/reservations/" + waitingReservation2.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(200);
 
@@ -425,44 +425,44 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_reservations_id_본인의_예약을_취소한다() {
+    void POST_reservations_id_cancel_본인의_예약을_취소한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, reserved.bearer())
-                .when().delete("/reservations/" + reserved.reservationId())
+                .when().post("/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(200);
     }
 
     @Test
-    void DELETE_reservations_id_소유자_불일치면_403과_메시지를_반환한다() {
+    void POST_reservations_id_cancel_소유자_불일치면_403과_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "다른사람"))
-                .when().delete("/reservations/" + reserved.reservationId())
+                .when().post("/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(403)
                 .body("message", equalTo("본인의 예약만 취소 혹은 변경 가능합니다."));
     }
 
     @Test
-    void DELETE_reservations_id_없는_id면_404과_메시지를_반환한다() {
+    void POST_reservations_id_cancel_없는_id면_404과_메시지를_반환한다() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
-                .when().delete("/reservations/9999")
+                .when().post("/reservations/9999/cancel")
                 .then().log().all()
                 .statusCode(404)
                 .body("message", equalTo("예약을(를) 찾을 수 없습니다. id=9999"));
     }
 
     @Test
-    void DELETE_reservations_id_토큰이_없으면_401과_메시지를_반환한다() {
+    void POST_reservations_id_cancel_토큰이_없으면_401과_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/" + reserved.reservationId())
+                .when().post("/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(401)
                 .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));

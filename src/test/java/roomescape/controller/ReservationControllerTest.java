@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -177,29 +176,29 @@ class ReservationControllerTest {
     }
 
     @Test
-    void DELETE_reservations_id_200을_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
-        mockMvc.perform(delete("/reservations/3"))
+    void POST_reservations_id_cancel_200을_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
+        mockMvc.perform(post("/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
         verify(reservationService).cancelOwnReservation(Fixtures.cancelCommand(3L, 1L));
     }
 
     @Test
-    void DELETE_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    void POST_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         willThrow(new roomescape.exception.ResourceNotFoundException("예약", 9999L))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(9999L, 1L));
 
-        mockMvc.perform(delete("/reservations/9999"))
+        mockMvc.perform(post("/reservations/9999/cancel"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
     }
 
     @Test
-    void DELETE_reservations_id_소유자_불일치면_403과_메시지를_반환한다() throws Exception {
+    void POST_reservations_id_cancel_소유자_불일치면_403과_메시지를_반환한다() throws Exception {
         willThrow(new ReservationOwnerMismatchException())
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
 
-        mockMvc.perform(delete("/reservations/1"))
+        mockMvc.perform(post("/reservations/1/cancel"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("본인의 예약만 취소 혹은 변경 가능합니다."));
     }
