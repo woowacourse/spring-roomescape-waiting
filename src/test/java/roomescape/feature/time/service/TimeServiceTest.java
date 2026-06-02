@@ -23,6 +23,7 @@ import roomescape.feature.time.domain.Time;
 import roomescape.feature.time.mapper.TimeMapper;
 import roomescape.feature.time.repository.TimeRepository;
 import roomescape.fixture.TimeFixture;
+import roomescape.global.domain.EntityStatus;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
 import roomescape.global.error.exception.GeneralParametersException;
@@ -49,17 +50,17 @@ class TimeServiceTest {
 
         @Test
         void 예약_시간이_없으면_빈_목록을_반환한다() {
-            when(timeRepository.findAllByNotDeleted()).thenReturn(List.of());
+            when(timeRepository.findAll()).thenReturn(List.of());
 
             assertThat(timeService.getTimes()).isEmpty();
         }
 
         @Test
-        void 활성_예약_시간_목록을_조회한다() {
+        void 삭제된_시간을_포함한_전체_예약_시간_목록을_조회한다() {
             // given
-            Time time1 = Time.reconstruct(1L, LocalTime.of(10, 0), null);
-            Time time2 = Time.reconstruct(2L, LocalTime.of(15, 30), null);
-            when(timeRepository.findAllByNotDeleted()).thenReturn(List.of(time1, time2));
+            Time activeTime = Time.reconstruct(1L, LocalTime.of(10, 0), EntityStatus.ACTIVE);
+            Time deletedTime = Time.reconstruct(2L, LocalTime.of(15, 30), EntityStatus.DELETED);
+            when(timeRepository.findAll()).thenReturn(List.of(activeTime, deletedTime));
 
             // when
             List<TimeResponseDto> result = timeService.getTimes();
@@ -68,6 +69,8 @@ class TimeServiceTest {
             assertThat(result).hasSize(2);
             assertThat(result).extracting(TimeResponseDto::startAt)
                 .containsExactly(LocalTime.of(10, 0), LocalTime.of(15, 30));
+            assertThat(result).extracting(TimeResponseDto::deleted)
+                .containsExactly(false, true);
         }
     }
 

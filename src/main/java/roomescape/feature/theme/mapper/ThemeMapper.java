@@ -23,7 +23,8 @@ public final class ThemeMapper {
     }
 
     public ThemeResponseDto toResponseDto(Theme theme) {
-        return new ThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(), theme.getImageUrl());
+        return new ThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(), theme.getImageUrl(),
+            theme.getStatus() == EntityStatus.DELETED);
     }
 
     public ReservationThemeResponseDto toReservationResponseDto(Theme theme) {

@@ -11,7 +11,7 @@ import roomescape.feature.time.domain.Time;
 
 public interface ReservationRepository {
 
-    List<Reservation> findReservationsByNotDeleted();
+    List<Reservation> findAllReservations();
 
     List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 

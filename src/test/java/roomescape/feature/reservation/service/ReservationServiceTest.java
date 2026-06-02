@@ -69,7 +69,7 @@ class ReservationServiceTest {
 
         @Test
         void 예약이_없으면_빈_목록을_반환한다() {
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of());
+            when(reservationRepository.findAllReservations()).thenReturn(List.of());
 
             assertThat(reservationService.getReservations()).isEmpty();
         }
@@ -82,7 +82,7 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation reservation = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of(reservation));
+            when(reservationRepository.findAllReservations()).thenReturn(List.of(reservation));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservations();
@@ -100,13 +100,30 @@ class ReservationServiceTest {
             Theme theme = themeWithId(1L);
             Reservation canceled = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findReservationsByNotDeleted()).thenReturn(List.of(canceled));
+            when(reservationRepository.findAllReservations()).thenReturn(List.of(canceled));
 
             // when
             List<ReservationResponseDto> result = reservationService.getReservations();
 
             // then
             assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.CANCELED);
+        }
+
+        @Test
+        void 삭제된_예약은_DELETED_상태로_반환한다() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation deleted = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.DELETED);
+            when(reservationRepository.findAllReservations()).thenReturn(List.of(deleted));
+
+            // when
+            List<ReservationResponseDto> result = reservationService.getReservations();
+
+            // then
+            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.DELETED);
         }
     }
 

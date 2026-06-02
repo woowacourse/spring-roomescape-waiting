@@ -28,6 +28,10 @@ public class ThemeService {
         return convertThemesToDto(themeRepository.findAllByNotDeleted());
     }
 
+    public List<ThemeResponseDto> getAllThemes() {
+        return convertThemesToDto(themeRepository.findAll());
+    }
+
     private List<ThemeResponseDto> convertThemesToDto(List<Theme> themes) {
         return themes.stream()
             .map(themeMapper::toResponseDto)

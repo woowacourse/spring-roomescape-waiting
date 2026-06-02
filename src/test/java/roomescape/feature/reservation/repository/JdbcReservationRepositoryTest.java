@@ -114,9 +114,13 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date, time, theme, ReservationStatus.ACTIVE));
 
             // then
-            assertThat(reservationRepository.findReservationsByNotDeleted())
-                .extracting(Reservation::getId, r -> r.getName().value())
-                .containsExactly(tuple(actual.getId(), "예약자2"));
+            assertThat(reservationRepository.findAllReservations())
+                .extracting(r -> r.getName().value(), Reservation::getStatus)
+                .containsExactlyInAnyOrder(
+                    tuple("예약자1", ReservationStatus.DELETED),
+                    tuple("예약자2", ReservationStatus.ACTIVE)
+                );
+            assertThat(actual.getName().value()).isEqualTo("예약자2");
         }
 
         @Test
@@ -163,7 +167,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date2, time2, theme2, ReservationStatus.ACTIVE));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
+            List<Reservation> actual = reservationRepository.findAllReservations();
 
             // then
             assertThat(actual)
@@ -193,7 +197,7 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
+            List<Reservation> actual = reservationRepository.findAllReservations();
 
             // then
             assertThat(actual)
@@ -204,6 +208,32 @@ class JdbcReservationRepositoryTest {
                     r -> r.getTheme().getName()
                 )
                 .containsExactly(tuple(reservation.getId(), "예약자1", LocalTime.of(10, 0), "테마1"));
+        }
+
+        @Test
+        @Order(3)
+        void 삭제된_예약도_함께_조회한다() {
+            // given
+            Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), date, time1, theme, ReservationStatus.ACTIVE));
+            Reservation deleted = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자2"), date, time2, theme, ReservationStatus.ACTIVE));
+            reservationRepository.deleteReservationById(deleted.getId());
+
+            // when
+            List<Reservation> actual = reservationRepository.findAllReservations();
+
+            // then
+            assertThat(actual)
+                .extracting(Reservation::getId, Reservation::getStatus)
+                .containsExactlyInAnyOrder(
+                    tuple(active.getId(), ReservationStatus.ACTIVE),
+                    tuple(deleted.getId(), ReservationStatus.DELETED)
+                );
         }
     }
 
@@ -544,9 +574,12 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(reservation1.getId());
 
             // then
-            assertThat(reservationRepository.findReservationsByNotDeleted())
-                .extracting(Reservation::getId)
-                .containsExactly(reservation2.getId());
+            assertThat(reservationRepository.findAllReservations())
+                .extracting(Reservation::getId, Reservation::getStatus)
+                .containsExactlyInAnyOrder(
+                    tuple(reservation1.getId(), ReservationStatus.DELETED),
+                    tuple(reservation2.getId(), ReservationStatus.ACTIVE)
+                );
             assertThat(countDeletedReservationById(reservation1.getId())).isEqualTo(1);
             assertThat(reservationRepository.existsReservationByIdAndNotDeleted(reservation1.getId())).isFalse();
         }

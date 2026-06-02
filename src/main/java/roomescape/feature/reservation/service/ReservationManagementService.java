@@ -42,7 +42,7 @@ public class ReservationManagementService implements ReservationService, Waiting
 
     @Override
     public List<ReservationResponseDto> getReservations() {
-        List<Reservation> reservations = reservationRepository.findReservationsByNotDeleted();
+        List<Reservation> reservations = reservationRepository.findAllReservations();
         return convertReservationsToDto(reservations);
     }
 

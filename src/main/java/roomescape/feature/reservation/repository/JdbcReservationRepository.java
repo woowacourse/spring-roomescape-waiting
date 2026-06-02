@@ -36,7 +36,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByNotDeleted() {
+    public List<Reservation> findAllReservations() {
         return jdbcTemplate.query(
             """
                 SELECT r.id, r.name, r.date, r.status,
@@ -46,7 +46,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation r
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                WHERE r.status <> 'DELETED'
                 ORDER BY r.id
                 """,
             (rs, rowNum) -> mapReservation(rs)

@@ -40,6 +40,19 @@ public class JdbcTimeRepository implements TimeRepository {
     }
 
     @Override
+    public List<Time> findAll() {
+        String sql = "SELECT id, start_at, status FROM reservation_time ORDER BY id";
+        return jdbcTemplate.query(
+            sql,
+            (rs, rowNum) -> Time.reconstruct(
+                rs.getLong("id"),
+                rs.getTime("start_at").toLocalTime(),
+                EntityStatus.valueOf(rs.getString("status"))
+            )
+        );
+    }
+
+    @Override
     public List<Time> findAllByNotDeleted() {
         String sql = "SELECT id, start_at, status FROM reservation_time WHERE status = 'ACTIVE'";
         return jdbcTemplate.query(

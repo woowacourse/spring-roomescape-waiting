@@ -9,6 +9,8 @@ public interface TimeRepository {
 
     Time save(Time time);
 
+    List<Time> findAll();
+
     List<Time> findAllByNotDeleted();
 
     Optional<Time> findTimeByIdAndNotDeleted(Long id);

@@ -77,9 +77,9 @@ class ThemeServiceTest {
             Theme theme2 = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", EntityStatus.ACTIVE);
 
             ThemeResponseDto expectedResult1 = new ThemeResponseDto(theme1.getId(), theme1.getName(),
-                    theme1.getDescription(), theme1.getImageUrl());
+                    theme1.getDescription(), theme1.getImageUrl(), false);
             ThemeResponseDto expectedResult2 = new ThemeResponseDto(theme2.getId(), theme2.getName(),
-                    theme2.getDescription(), theme2.getImageUrl());
+                    theme2.getDescription(), theme2.getImageUrl(), false);
 
             when(themeRepository.findAllByNotDeleted()).thenReturn(List.of(theme1, theme2));
             when(themeMapper.toResponseDto(theme1)).thenReturn(expectedResult1);
@@ -98,6 +98,35 @@ class ThemeServiceTest {
             verifyNoMoreInteractions(themeRepository);
             verifyNoMoreInteractions(themeMapper);
         }
+
+        @Test
+        void 삭제된_테마를_포함한_전체_테마_목록을_조회한다() {
+            // given
+            Theme active = Theme.reconstruct(1L, "테마1", "설명1", "https://example.com/1.png", EntityStatus.ACTIVE);
+            Theme deleted = Theme.reconstruct(2L, "테마2", "설명2", "https://example.com/2.png", EntityStatus.DELETED);
+
+            ThemeResponseDto activeDto = new ThemeResponseDto(active.getId(), active.getName(),
+                    active.getDescription(), active.getImageUrl(), false);
+            ThemeResponseDto deletedDto = new ThemeResponseDto(deleted.getId(), deleted.getName(),
+                    deleted.getDescription(), deleted.getImageUrl(), true);
+
+            when(themeRepository.findAll()).thenReturn(List.of(active, deleted));
+            when(themeMapper.toResponseDto(active)).thenReturn(activeDto);
+            when(themeMapper.toResponseDto(deleted)).thenReturn(deletedDto);
+
+            // when
+            List<ThemeResponseDto> actualResults = themeService.getAllThemes();
+
+            // then
+            assertThat(actualResults).containsExactly(activeDto, deletedDto);
+
+            verify(themeRepository, times(1)).findAll();
+            verify(themeMapper, times(1)).toResponseDto(active);
+            verify(themeMapper, times(1)).toResponseDto(deleted);
+
+            verifyNoMoreInteractions(themeRepository);
+            verifyNoMoreInteractions(themeMapper);
+        }
     }
 
     @Nested
@@ -111,7 +140,7 @@ class ThemeServiceTest {
                     EntityStatus.ACTIVE
             );
             ThemeResponseDto expectedResult = new ThemeResponseDto(
-                    ID, NAME, DESCRIPTION, IMAGE_URL
+                    ID, NAME, DESCRIPTION, IMAGE_URL, false
             );
 
             LocalDate today = LocalDate.now();
@@ -179,7 +208,7 @@ class ThemeServiceTest {
                     EntityStatus.ACTIVE
             );
             ThemeResponseDto expectedResult = new ThemeResponseDto(
-                    ID, NAME, DESCRIPTION, IMAGE_URL
+                    ID, NAME, DESCRIPTION, IMAGE_URL, false
             );
 
             when(themeRepository.existsThemeByNameAndNotDeleted(NAME))

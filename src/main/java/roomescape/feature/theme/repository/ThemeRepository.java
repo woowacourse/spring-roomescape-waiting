@@ -7,6 +7,8 @@ import roomescape.feature.theme.domain.Theme;
 
 public interface ThemeRepository {
 
+    List<Theme> findAll();
+
     List<Theme> findAllByNotDeleted();
 
     Theme save(Theme theme);

@@ -198,10 +198,11 @@
 
 ```text
 1. 등록된 전체 예약 목록을 조회합니다.
-2. 삭제되지 않은 예약만 조회합니다.
-3. 예약이 삭제되지 않았다면 연결된 예약 시간 또는 테마가 삭제되어 있어도 예약 이력으로 조회합니다.
+2. 관리자는 소프트 삭제된 예약도 모두 조회합니다.
+3. 연결된 예약 시간 또는 테마가 삭제되어 있어도 예약 이력으로 조회합니다.
 4. 각 예약에 상태(status), 상태 메시지(message), 대기 순번(waitingNumber)을 함께 반환합니다.
-5. 조회 가능한 예약이 없으면 빈 목록을 반환합니다.
+5. 소프트 삭제된 예약은 status가 DELETED로 반환됩니다.
+6. 조회 가능한 예약이 없으면 빈 목록을 반환합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -239,6 +240,26 @@
     },
     "status": "EDITABLE",
     "message": "",
+    "waitingNumber": null
+  },
+  {
+    "id": 2,
+    "name": "제이슨",
+    "date": "2026-05-04",
+    "time": {
+      "id": 2,
+      "startAt": "12:00",
+      "deleted": false
+    },
+    "theme": {
+      "id": 1,
+      "name": "피온피온",
+      "description": "설명",
+      "imageUrl": "https://roomescape.com/images/themes/ring-banner.png",
+      "deleted": false
+    },
+    "status": "DELETED",
+    "message": "삭제된 예약입니다.",
     "waitingNumber": null
   }
 ]
@@ -1299,8 +1320,9 @@
 
 ```text
 1. 등록된 전체 예약 시간을 조회합니다.
-2. 삭제되지 않은 예약 시간만 조회합니다.
-3. 조회 가능한 예약 시간이 없으면 빈 목록을 반환합니다.
+2. 관리자는 소프트 삭제된 예약 시간도 모두 조회합니다.
+3. 소프트 삭제된 예약 시간은 deleted가 true로 반환됩니다.
+4. 조회 가능한 예약 시간이 없으면 빈 목록을 반환합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -1322,11 +1344,13 @@
 [
   {
     "id": 1,
-    "startAt": "10:00"
+    "startAt": "10:00",
+    "deleted": false
   },
   {
     "id": 2,
-    "startAt": "11:00"
+    "startAt": "11:00",
+    "deleted": true
   }
 ]
 ```
@@ -1393,7 +1417,8 @@
 ```json
 {
   "id": 1,
-  "startAt": "20:30"
+  "startAt": "20:30",
+  "deleted": false
 }
 ```
 
@@ -1564,13 +1589,15 @@
     "id": 1,
     "name": "링",
     "description": "이것은 링 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/ring.png"
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
   },
   {
     "id": 2,
     "name": "감옥",
     "description": "이것은 감옥 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": false
   }
 ]
 ```
@@ -1628,13 +1655,15 @@
     "id": 1,
     "name": "링",
     "description": "이것은 링 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/ring.png"
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
   },
   {
     "id": 2,
     "name": "감옥",
     "description": "이것은 감옥 방탈출 설명입니다.",
-    "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": false
   }
 ]
 ```
@@ -1642,6 +1671,66 @@
 ### 실패 예시
 
 #### HR2 서버 오류
+
+```json
+{
+  "message": "예상치 못한 오류가 발생했습니다."
+}
+```
+
+</details>
+
+### `GET /api/admin/themes` 관리자 테마 목록 조회 API
+
+<details>
+<summary>세부 내용</summary>
+
+### 기능 요구사항
+
+```text
+1. 등록된 전체 테마를 조회합니다.
+2. 관리자는 소프트 삭제된 테마도 모두 조회합니다.
+3. 소프트 삭제된 테마는 deleted가 true로 반환됩니다.
+4. 조회 가능한 테마가 없으면 빈 목록을 반환합니다.
+```
+
+### 상황별 HTTP Code 및 상위 메시지
+
+| ID  | 상황        | HTTP Code                 | 상위 에러 메시지          |
+|-----|-----------|---------------------------|--------------------|
+| HM1 | 요청 처리 성공  | 200 OK                    | 없음                 |
+| HM2 | 서버 오류인 경우 | 500 Internal Server Error | 예상치 못한 오류가 발생했습니다. |
+
+### Request Body
+
+없음
+
+### Response Body
+
+#### HM1 성공 예시
+
+```json
+[
+  {
+    "id": 1,
+    "name": "링",
+    "description": "이것은 링 방탈출 설명입니다.",
+    "imageUrl": "https://roomescape.com/images/themes/ring.png",
+    "deleted": false
+  },
+  {
+    "id": 2,
+    "name": "감옥",
+    "description": "이것은 감옥 방탈출 설명입니다.",
+    "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+    "deleted": true
+  }
+]
+```
+
+### 실패 예시
+
+#### HM2 서버 오류
 
 ```json
 {
@@ -1714,7 +1803,8 @@
   "id": 1,
   "name": "브라운",
   "description": "테마 설명",
-  "imageUrl": "https://roomescape.com/images/themes/prison-room.png"
+  "imageUrl": "https://roomescape.com/images/themes/prison-room.png",
+  "deleted": false
 }
 ```
 
@@ -1924,6 +2014,7 @@
 #### 예약 관리 기능
 
 전체 예약 내역을 관리합니다. (필터링, 정렬 기준 제공)
+소프트 삭제된 예약도 `삭제됨` 상태로 함께 표시되며, 삭제된 예약에는 삭제 버튼을 노출하지 않습니다.
 
 <img alt="관리자 예약 관리" src="https://github.com/user-attachments/assets/741f5147-0abe-4a9a-bf4c-81cd507d98bd" />
 
@@ -1936,11 +2027,13 @@
 #### 테마 관리 기능
 
 등록된 전체 테마를 관리합니다. (ID 순으로 정렬)
+소프트 삭제된 테마도 `삭제됨` 상태로 함께 표시되며, 삭제된 테마에는 삭제 버튼을 노출하지 않습니다. (예약 추가 폼에는 삭제되지 않은 테마만 선택지로 제공합니다.)
 
 <img alt="관리자 테마 관리" src="https://github.com/user-attachments/assets/15da0dc8-03aa-452d-994f-3a50f7c26de4" />
 
 #### 시간 추가 및 관리 기능
 
 시간을 등록하고, 등록된 전체 시간을 관리합니다. (ID 순으로 정렬)
+소프트 삭제된 시간도 `삭제됨` 상태로 함께 표시되며, 삭제된 시간에는 삭제 버튼을 노출하지 않습니다.
 
 <img alt="관리자 시간 등록 및 관리" src="https://github.com/user-attachments/assets/68bf0fc6-ddf7-4661-a849-95b9f368ccaa" />

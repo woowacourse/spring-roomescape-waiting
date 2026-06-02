@@ -47,6 +47,10 @@ public final class ReservationMapper {
     }
 
     private ReservationEditableStatus getStatus(Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.DELETED) {
+            return ReservationEditableStatus.DELETED;
+        }
+
         if (reservation.getStatus() == ReservationStatus.CANCELED) {
             return ReservationEditableStatus.CANCELED;
         }

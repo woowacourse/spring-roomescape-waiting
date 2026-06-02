@@ -35,7 +35,7 @@ public class TimeService {
     }
 
     public List<TimeResponseDto> getTimes() {
-        return timeRepository.findAllByNotDeleted()
+        return timeRepository.findAll()
             .stream()
             .map(timeMapper::toResponseDto)
             .toList();

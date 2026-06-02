@@ -153,6 +153,26 @@ class JdbcThemeRepositoryTest {
                 .extracting(Theme::getId, Theme::getName, Theme::getDescription, Theme::getImageUrl)
                 .containsExactly(tuple(activeTheme.getId(), "테마2", "설명2", "https://example.com/image2.png"));
         }
+
+        @Test
+        @Order(3)
+        void 삭제된_테마를_포함한_전체_테마를_조회한다() {
+            // given
+            Theme deletedTheme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Theme activeTheme = themeRepository.save(Theme.create("테마2", "설명2", "https://example.com/image2.png"));
+            themeRepository.deleteThemeById(deletedTheme.getId());
+
+            // when
+            List<Theme> actual = themeRepository.findAll();
+
+            // then
+            assertThat(actual)
+                .extracting(Theme::getId, Theme::getName, Theme::getStatus)
+                .containsExactly(
+                    tuple(deletedTheme.getId(), "테마1", EntityStatus.DELETED),
+                    tuple(activeTheme.getId(), "테마2", EntityStatus.ACTIVE)
+                );
+        }
     }
 
     @Nested

@@ -31,6 +31,20 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
+    public List<Theme> findAll() {
+        String sql = "SELECT id, name, description, image_url, status FROM theme ORDER BY id";
+        return jdbcTemplate.query(
+            sql,
+            (resultSet, rowNum) -> Theme.reconstruct(
+                resultSet.getLong("id"),
+                resultSet.getString("name"),
+                resultSet.getString("description"),
+                resultSet.getString("image_url"),
+                EntityStatus.valueOf(resultSet.getString("status"))
+            ));
+    }
+
+    @Override
     public List<Theme> findAllByNotDeleted() {
         String sql = "SELECT id, name, description, image_url, status FROM theme WHERE status = 'ACTIVE'";
         return jdbcTemplate.query(
