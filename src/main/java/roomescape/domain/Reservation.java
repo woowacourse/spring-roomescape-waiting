@@ -105,10 +105,6 @@ public class Reservation {
         return status == ReservationStatus.BOOKED;
     }
 
-    public boolean isSameMember(Member member) {
-        return Objects.equals(this.member.getId(), member.getId());
-    }
-
     public boolean isOwnedBy(Long memberId) {
         return Objects.equals(this.member.getId(), memberId);
     }

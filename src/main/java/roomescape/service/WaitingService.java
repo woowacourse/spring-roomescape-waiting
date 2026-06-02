@@ -38,7 +38,7 @@ public class WaitingService {
                         waitingRequestDto.timeId(), waitingRequestDto.date(), waitingRequestDto.storeId())
                 .orElseThrow(() -> new EntityNotFoundException("예약이 존재하지 않아 대기가 불가능합니다."));
 
-        if (reservation.isSameMember(member)) {
+        if (reservation.isOwnedBy(member.getId())) {
             throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
         }
 

@@ -116,7 +116,7 @@ class ReservationTest {
     }
 
     @Nested
-    class IsSameMember {
+    class IsOwnedBy {
 
         @Test
         @DisplayName("같은 멤버면 true를 반환한다")
@@ -124,7 +124,7 @@ class ReservationTest {
             Time time = new Time(1L, LocalTime.of(10, 0));
             Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
 
-            assertThat(reservation.isSameMember(member)).isTrue();
+            assertThat(reservation.isOwnedBy(member.getId())).isTrue();
         }
 
         @Test
@@ -134,7 +134,7 @@ class ReservationTest {
             Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
             Member other = new Member(2L, "다른유저", "other@test.com", "password", MemberRole.USER);
 
-            assertThat(reservation.isSameMember(other)).isFalse();
+            assertThat(reservation.isOwnedBy(other.getId())).isFalse();
         }
     }
 
