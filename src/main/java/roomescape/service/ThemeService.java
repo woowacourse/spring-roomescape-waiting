@@ -15,7 +15,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ThemeService {
 
-    private static final int ONE_DAY = 1;
     private final ThemeRepository themeRepository;
 
     public ThemeService(ThemeRepository themeRepository) {
@@ -47,9 +46,9 @@ public class ThemeService {
         }
     }
 
-    public List<Theme> findPopularThemes(Long topCount, Long during) {
-        LocalDate toDate = LocalDate.now().minusDays(ONE_DAY);
-        LocalDate fromDate = LocalDate.now().minusDays(during);
-        return themeRepository.findPopularThemes(topCount, fromDate, toDate);
+    public List<Theme> findPopularThemes(Long limit, Long days) {
+        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate startDate = LocalDate.now().minusDays(days);
+        return themeRepository.findPopularThemes(limit, startDate, endDate);
     }
 }

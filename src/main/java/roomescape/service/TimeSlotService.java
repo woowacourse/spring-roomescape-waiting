@@ -7,7 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.TimeSlot;
-import roomescape.exception.DuplicateTimeException;
+import roomescape.exception.DuplicateTimeSlotException;
 import roomescape.exception.ResourceInUseException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.exception.TimeSlotNotFoundException;
@@ -61,7 +61,7 @@ public class TimeSlotService {
 
     private void checkDuplicatedStartAt(LocalTime startAt) {
         if (timeSlotRepository.findByStartAt(startAt).isPresent()) {
-            throw new DuplicateTimeException(startAt.toString());
+            throw new DuplicateTimeSlotException(startAt.toString());
         }
     }
 }
