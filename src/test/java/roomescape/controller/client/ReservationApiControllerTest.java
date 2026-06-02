@@ -26,7 +26,6 @@ import org.springframework.web.context.WebApplicationContext;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
 import roomescape.controller.BaseControllerUnitTest;
-import roomescape.controller.client.dto.condition.ReservationSearchCondition;
 import roomescape.controller.client.dto.request.ReservationChangeRequest;
 import roomescape.controller.client.dto.request.ReservationRequest;
 import roomescape.controller.client.dto.response.ReservationResponse;
@@ -36,6 +35,7 @@ import roomescape.exception.EntityNotFoundException;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;
@@ -89,7 +89,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         ReservationSearchResult searchResult =
                 new ReservationSearchResult(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
         Page<ReservationSearchResult> serviceResult = Page.of(10, 10, List.of(searchResult));
-        when(reservationService.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(
+        when(reservationService.search(any(ReservationSearchCommand.class), any(Pageable.class))).thenReturn(
                 serviceResult);
 
         // when

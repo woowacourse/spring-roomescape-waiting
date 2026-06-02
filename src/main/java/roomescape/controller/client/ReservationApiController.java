@@ -78,7 +78,7 @@ public class ReservationApiController {
             @ModelAttribute @Valid ReservationSearchCondition condition,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(reservationService.search(condition, pageable)
+        return ResponseEntity.ok(reservationService.search(condition.toCommand(), pageable)
                 .map(ReservationSearchResponse::from));
     }
 }

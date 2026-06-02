@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.dto.condition.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationTime;
@@ -22,6 +21,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.ReservationCondition;
 import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
+import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;
 
@@ -125,8 +125,8 @@ public class ReservationService {
         return reservationQueryRepository.getAllReservations();
     }
 
-    public Page<ReservationSearchResult> search(ReservationSearchCondition condition, Pageable pageable) {
-        return reservationQueryRepository.search(condition, pageable);
+    public Page<ReservationSearchResult> search(ReservationSearchCommand command, Pageable pageable) {
+        return reservationQueryRepository.search(command, pageable);
     }
 
     private Reservation findReservationByEntryIdWithThrow(long entryId) {

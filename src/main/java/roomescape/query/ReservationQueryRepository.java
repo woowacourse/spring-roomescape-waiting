@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.dto.condition.ReservationSearchCondition;
+import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.result.ReservationEntryResult;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationSearchResult;
@@ -83,13 +83,13 @@ public class ReservationQueryRepository {
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER);
     }
 
-    public Page<ReservationSearchResult> search(ReservationSearchCondition condition, Pageable pageable) {
+    public Page<ReservationSearchResult> search(ReservationSearchCommand command, Pageable pageable) {
         StringBuilder whereClause = new StringBuilder(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
-        if (condition.name() != null && !condition.name().isBlank()) {
+        if (command.name() != null && !command.name().isBlank()) {
             whereClause.append(" AND re.name = ?");
-            params.add(condition.name());
+            params.add(command.name());
         }
 
         String joinClause = """

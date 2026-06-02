@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.controller.client.dto.condition.ReservationSearchCondition;
+import roomescape.service.command.ReservationSearchCommand;
 import roomescape.service.result.ReservationSearchResult;
 import roomescape.support.BaseIntegrationTest;
 
@@ -21,7 +21,7 @@ class ReservationQueryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 검색_필터가_없을_때_전체_카운트를_계산하고_페이징과_정렬이_적용된_데이터를_반환한다() {
         // given: 필터 없음, 한 페이지에 5개씩 보기로 설정하고 2페이지 요청
-        ReservationSearchCondition noCondition = new ReservationSearchCondition(null);
+        ReservationSearchCommand noCondition = new ReservationSearchCommand(null);
         Pageable pageable = new Pageable(5, 5);
 
         // when
@@ -41,7 +41,7 @@ class ReservationQueryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 검색_필터가_있을_때_조건에_맞는_카운트를_계산하고_필터링된_데이터만_반환한다() {
         // given: '이프'라는 특정 조건으로 필터링 요청
-        ReservationSearchCondition condition = new ReservationSearchCondition("이프");
+        ReservationSearchCommand condition = new ReservationSearchCommand("이프");
         Pageable pageable = new Pageable(1, 10);
 
         // when
