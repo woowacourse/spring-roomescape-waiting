@@ -2,11 +2,13 @@ package roomescape.reservation.domain;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_PAST_DATETIME_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_TIME_IS_NULL;
@@ -77,6 +79,8 @@ public class Reservation {
         ReservationTime newTime) {
         validateOwner(requesterName);
         validateNotCanceled();
+        validateNotWaiting();
+        validateReserved();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -86,6 +90,8 @@ public class Reservation {
 
     public void changeScheduleByManager(ReservationDate newDate, ReservationTime newTime) {
         validateNotCanceled();
+        validateNotWaiting();
+        validateReserved();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -155,9 +161,21 @@ public class Reservation {
         return this.name.equals(requesterName);
     }
 
+    private void validateReserved() {
+        if (status != ReservationStatus.RESERVED) {
+            throw new ReservationException(RESERVATION_NOT_RESERVED);
+        }
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
+        }
+    }
+
+    private void validateNotWaiting() {
+        if (status == ReservationStatus.WAITING) {
+            throw new ReservationException(RESERVATION_ALREADY_WAITING);
         }
     }
 

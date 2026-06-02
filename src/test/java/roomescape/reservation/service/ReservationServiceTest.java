@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
@@ -517,26 +518,6 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("대기 상태인 예약이 빈 슬롯으로 변경되면 예약 상태로 변경된다")
-        void 성공3() {
-            // given
-            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
-                name, reservationDate2.getId(), reservationTime2.getId());
-
-            // when
-            reservationService.changeSchedule(changeCommand);
-            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
-
-            // then
-            assertThat(actual).isPresent()
-                .get()
-                .extracting("status")
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-
-
-        @Test
         @DisplayName("예약자가 아니면 예외가 발생한다")
         void 실패1() {
             // given
@@ -622,6 +603,21 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
         }
+
+
+        @Test
+        @DisplayName("대기 상태인 예약이면 예외가 발생한다")
+        void 실패6() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
+        }
     }
 
     @Nested
@@ -675,26 +671,6 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("대기 상태인 예약이 빈 슬롯으로 변경되면 예약 상태로 변경된다")
-        void 성공3() {
-            // given
-            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
-            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
-                name, reservationDate2.getId(), reservationTime2.getId());
-
-            // when
-            reservationService.changeScheduleByManager(changeCommand);
-            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
-
-            // then
-            assertThat(actual).isPresent()
-                .get()
-                .extracting("status")
-                .isEqualTo(ReservationStatus.RESERVED);
-        }
-
-
-        @Test
         @DisplayName("이미 취소된 예약이면 예외가 발생한다")
         void 실패1() {
             // given
@@ -744,6 +720,21 @@ class ReservationServiceTest {
                 reservationService.changeScheduleByManager(changeCommand))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_BOOKED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("대기 상태인 예약이면 예외가 발생한다")
+        void 실패4() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
     }
 }

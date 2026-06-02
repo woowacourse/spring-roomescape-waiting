@@ -6,6 +6,7 @@ import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
@@ -284,6 +285,22 @@ class ReservationTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
         }
+
+
+        @Test
+        @DisplayName("대기 상태이면 예외가 발생한다")
+        void 실패5() {
+            // given
+            Reservation waiting = ReservationFixture.waitReservation(name, reservationDate,
+                reservationTime, theme);
+            ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
+            ReservationTime changedTime = ReservationTimeFixture.activeTime15();
+
+            // when & then
+            assertThatThrownBy(() -> waiting.changeSchedule(name, changedDate, changedTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
+        }
     }
 
     @Nested
@@ -344,6 +361,22 @@ class ReservationTest {
                     () -> reserved.changeScheduleByManager(changedDate, reservationTime))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("대기 상태이면 예외가 발생한다")
+        void 실패3() {
+            // given
+            Reservation waiting = ReservationFixture.waitReservation(name, reservationDate,
+                reservationTime, theme);
+            ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
+            ReservationTime changedTime = ReservationTimeFixture.activeTime15();
+
+            // when & then
+            assertThatThrownBy(() -> waiting.changeScheduleByManager(changedDate, changedTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_WAITING.getMessage());
         }
     }
 }
