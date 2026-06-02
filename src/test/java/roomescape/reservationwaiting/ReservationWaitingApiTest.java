@@ -65,8 +65,7 @@ class ReservationWaitingApiTest {
                 "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1 AND name = '아루'",
                 Integer.class
         );
-        assert waitingCount != null;
-        assertThat(waitingCount).isEqualTo(1);
+        assertThat(waitingCount).isNotNull().isEqualTo(1);
     }
 
     @Test
@@ -156,8 +155,7 @@ class ReservationWaitingApiTest {
                 "SELECT count(1) FROM reservation_waiting WHERE id = 1",
                 Integer.class
         );
-        assert waitingCount != null;
-        assertThat(waitingCount).isZero();
+        assertThat(waitingCount).isNotNull().isZero();
     }
 
     @Test
@@ -175,8 +173,7 @@ class ReservationWaitingApiTest {
                 "SELECT count(1) FROM reservation_waiting WHERE id = 1",
                 Integer.class
         );
-        assert waitingCount != null;
-        assertThat(waitingCount).isOne();
+        assertThat(waitingCount).isNotNull().isOne();
     }
 
     @Test
