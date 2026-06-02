@@ -36,7 +36,7 @@ public class WaitingList {
         return name.getName();
     }
 
-    public WaitingList withId(final long waitingListId) {
+    public WaitingList withId(final Long waitingListId) {
         return new WaitingList(waitingListId, name, reservationDate, reservationTime, theme, createdAt);
     }
 }

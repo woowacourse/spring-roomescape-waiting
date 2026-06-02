@@ -71,7 +71,7 @@ class WaitingListServiceTest {
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
 
         WaitingList waitingList = WaitingList.create(name, date, reservationTime, theme);
-        given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
+        given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1L));
         given(waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(any(WaitingList.class))).willReturn(1);
 
         // when
