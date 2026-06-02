@@ -20,7 +20,7 @@ import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.service.WaitingService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/reservations/waitings")
 @Validated
 public class WaitingController {
 
@@ -32,14 +32,14 @@ public class WaitingController {
         this.reservationMapper = reservationMapper;
     }
 
-    @PostMapping("/reservations/waitings")
+    @PostMapping
     public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
         @Valid @RequestBody ReservationCreateRequestDto requestDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(waitingService.saveWaitingReservation(reservationMapper.toCreateCommand(requestDto)));
     }
 
-    @PatchMapping("/reservations/{id}/waitings/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<ReservationCancelResponseDto> cancelWaitingReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
         @RequestParam String name

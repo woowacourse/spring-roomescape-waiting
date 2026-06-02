@@ -846,7 +846,7 @@
 
 </details>
 
-### `PATCH /api/reservations/{id}/waitings/cancel?name={name}` 사용자 대기 예약 취소 API
+### `PATCH /api/reservations/waitings/{id}/cancel?name={name}` 사용자 대기 예약 취소 API
 
 <details>
 <summary>세부 내용</summary>

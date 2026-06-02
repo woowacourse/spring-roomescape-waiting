@@ -755,7 +755,7 @@
     const submitButton = document.getElementById('cancelReservationSubmitButton');
     const waiting = submitButton.dataset.mode === 'waiting';
     const endpoint = waiting
-        ? `/api/reservations/${id}/waitings/cancel?name=${encodeURIComponent(lastReservationLookupName)}`
+        ? `/api/reservations/waitings/${id}/cancel?name=${encodeURIComponent(lastReservationLookupName)}`
         : `/api/reservations/${id}/cancel?name=${encodeURIComponent(lastReservationLookupName)}`;
     errorBox.style.display = 'none';
 
