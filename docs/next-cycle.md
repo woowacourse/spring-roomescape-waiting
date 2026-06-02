@@ -142,6 +142,7 @@
   → 맥락: ReservationDao/Service에 같은 냄새가 나는 지점이 있는지 스캔. 오늘 패턴을 다른 곳에서 발견할 수 있는가
   → 출처: log_25
 
-- [ ] **동시성 race (리뷰 finding #6) 검토 + DB unique index 도입 여부**
+- [x] ~~**동시성 race (리뷰 finding #6) 검토 + DB unique index 도입 여부**~~
   → 맥락: MAX_WAITING_COUNT=5와 '중복 멤버' 불변식이 상위 reservation 락에만 의존. backstop으로 unique index를 둘지 판단
-  → 출처: log_25 (추가 검토)
+  → 해결(log_26 §7): unique index는 이미 도입됨(`waitings` UNIQUE(member_id,date,time_id,theme_id,store_id)). race는 29줄 예약 행 FOR UPDATE로 직렬화되어 안 터지고, 같은 유니크값=같은 예약 행이라 중복 INSERT 데드락도 구조적으로 안 남. 전제: 모든 쓰기 경로가 예약 행 락을 거쳐야 함.
+  → 출처: log_25 (추가 검토), log_26 §7

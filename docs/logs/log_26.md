@@ -91,4 +91,45 @@ T1 롤백 → X 풀림
            "B-Tree에서 갭락 물리 구현"(log_17)
 ```
 
-연결 메모: 오늘 배운 "유니크 충돌 S락 → 중복 INSERT 데드락"은 next-cycle의 **"동시성 race(finding #6) + DB unique index 도입 여부"**(log_25) 판단의 직접 재료다. unique index를 backstop으로 두면 이 데드락 패턴이 어떻게 바뀌는지가 그 키워드의 실전 버전.
+연결 메모: 오늘 배운 "유니크 충돌 S락 → 중복 INSERT 데드락"은 next-cycle의 **"동시성 race(finding #6) + DB unique index 도입 여부"**(log_25) 판단의 직접 재료다. unique index를 backstop으로 두면 이 데드락 패턴이 어떻게 바뀌는지가 그 키워드의 실전 버전. → 아래 7번에서 실전 적용으로 해결.
+
+## 7. 실전 적용 — WaitingService.create 동시성 점검 (같은 날)
+
+### 시작 의문 (user)
+
+"WaitingService에서 insert할 때 동시성 문제 아닌가? Waiting 삽입 3개가 동시에 일어나면 전부 rank 1을 받는 거잖아."
+
+- rank를 `waitings.size() + 1`로 계산(`Waitings.enqueue`) → **read-then-write race**. 직렬화 장치가 없다면 100% 터지는 게 맞다. (직감 정확)
+
+### 코드 실제 분석
+
+`WaitingService.create`에는 `ForUpdate`가 **두 개**:
+
+```java
+// 29줄: 예약(reservation) 행에 FOR UPDATE
+reservationDao.findBySlotKeyForUpdate(...)
+// 33줄: 큐(대기들)에 FOR UPDATE
+waitingDao.findQueueBySlotForUpdate(slot)
+```
+
+- **함정**: 큐가 비어 있으면 33번 `SELECT ... FOR UPDATE`는 잠글 행이 0개 → **큐 락만으론 직렬화 불가**.
+- **진짜 게이트는 29번**: 대기는 항상 존재하는 예약에 붙으므로, **예약 행 = 항상 존재하는 안정적 앵커**. 큐가 비었든 말든 같은 슬롯의 INSERT들을 그 한 행의 X락 앞에 한 줄로 세운다.
+
+### 일반화 패턴
+
+> **개수/순번(rank, count, max)을 읽고 쓰는 로직은, "항상 존재하는 부모 행"을 잠가서 직렬화한다.** (큐처럼 비어 있을 수 있는 대상은 앵커로 못 쓴다.)
+
+### 오늘 배운 데드락은 이 코드에서 안 터진다
+
+- `waitings`에 `UNIQUE (member_id, date, time_id, theme_id, store_id)` 이미 존재 → 중복 멤버 DB 백스톱 완비 (finding #6의 "unique index 도입 여부"는 이미 도입됨).
+- 동시 중복 INSERT 데드락은 "같은 유니크값 두 개가 S락 단계에 **나란히** 도달"해야 터진다. 그런데 **같은 유니크값 = 같은 슬롯 = 같은 예약 행** → 29번에서 직렬화 → S락 단계에 나란히 못 선다 → **데드락 전제 붕괴.**
+- 결론: **락의 순서/계층이 데드락 가능성을 결정한다.** 상위에서 직렬화하면 하위(유니크 체크)의 동시성 자체가 사라진다.
+
+### 2단 방어 구조
+
+1. **예약 행 X락** (1차): 정합성(rank/count/중복) + 직렬화
+2. **유니크 인덱스** (2차): 코드 경로가 빠져도 중복을 막는 백스톱. 1차가 늘 먼저 직렬화하므로 평소엔 **발동조차 안 하는 잠든 백스톱**.
+
+### 유일한 전제 (fragility)
+
+모든 쓰기 경로가 **29번 줄(`findBySlotKeyForUpdate`)을 거쳐야** 이 보장이 성립한다. 배치/관리자/타 서비스가 이를 우회해 직접 INSERT하면 → 1차 직렬화가 사라지고, 그땐 동시 중복 INSERT가 유니크 인덱스 S락에서 오늘 배운 데드락을 낼 수 있다.
