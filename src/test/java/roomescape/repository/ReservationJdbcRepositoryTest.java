@@ -115,7 +115,7 @@ class ReservationJdbcRepositoryTest {
         long waitingBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-01", time,
                 ReservationStatus.WAITING.name());
 
-        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown);
+        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown, 100, 0);
 
         assertThat(results).hasSize(2);
         assertThat(results.keySet()).extracting(reservation -> reservation.getUser().getName())
@@ -165,7 +165,7 @@ class ReservationJdbcRepositoryTest {
         jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 11:00:00",
                 slotBBrownWaitingId);
 
-        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown);
+        Map<Reservation, Integer> results = repository.findAllByUserIdWithWaitingOrder(brown, 100, 0);
 
         assertThat(results).hasSize(2);
         assertThat(results.keySet()).extracting(Reservation::getId)

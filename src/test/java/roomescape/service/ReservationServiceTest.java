@@ -178,10 +178,28 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3)));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown);
+        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
+    }
+
+    @Test
+    void getMyReservations_size를_초과하면_hasNext가_true이고_size만큼만_반환한다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 2)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3)));
+
+        ReservationWithStatusResponses firstPage = service.getMyReservations(brown, 0, 2);
+        ReservationWithStatusResponses secondPage = service.getMyReservations(brown, 1, 2);
+
+        assertThat(firstPage.reservations()).hasSize(2);
+        assertThat(firstPage.hasNext()).isTrue();
+        assertThat(secondPage.reservations()).hasSize(1);
+        assertThat(secondPage.hasNext()).isFalse();
     }
 
     @Test
@@ -198,7 +216,7 @@ class ReservationServiceTest {
         reservationRepository.save(
                 buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
 
-        ReservationWithStatusResponses results = service.getMyReservations(brown);
+        ReservationWithStatusResponses results = service.getMyReservations(brown, 0, 20);
 
         assertThat(results.waitingReservations()).hasSize(1);
         assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
@@ -210,7 +228,7 @@ class ReservationServiceTest {
     void getMyReservations_예약과_대기가_없으면_빈_목록을_반환한다() {
         User brown = buildUser("브라운");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown);
+        ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
 
         assertThat(responses.reservations()).isEmpty();
         assertThat(responses.waitingReservations()).isEmpty();

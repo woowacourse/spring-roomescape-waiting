@@ -79,12 +79,19 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationWithStatusResponses getMyReservations(User user) {
-        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(user.getId());
+    public ReservationWithStatusResponses getMyReservations(User user, int page, int size) {
+        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(
+                user.getId(), size + 1, page * size);
+
+        boolean hasNext = myReservations.size() > size;
 
         List<Reservation> reservations = new ArrayList<>();
         Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
+        int count = 0;
         for (Map.Entry<Reservation, Integer> entry : myReservations.entrySet()) {
+            if (count++ >= size) {
+                break;
+            }
             Reservation reservation = entry.getKey();
             if (reservation.isReserved()) {
                 reservations.add(reservation);
@@ -95,7 +102,7 @@ public class ReservationService {
             }
         }
 
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
+        return ReservationWithStatusResponses.of(reservations, waitingReservations, hasNext);
     }
 
     @Transactional

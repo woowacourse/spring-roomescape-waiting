@@ -13,7 +13,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByStoreIdsAndName(List<Long> storeIds, String name, int limit, int offset);
 
-    Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId);
+    Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset);
 
     Optional<Reservation> findById(Long id);
 

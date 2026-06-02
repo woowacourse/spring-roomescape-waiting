@@ -123,7 +123,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId) {
+    public Map<Reservation, Integer> findAllByUserIdWithWaitingOrder(Long userId, int limit, int offset) {
         String sql = """
                 select *
                 from (
@@ -150,13 +150,14 @@ public class ReservationJdbcRepository implements ReservationRepository {
                              else 2
                          end,
                          date, start_at, waiting_order, id
+                limit ? offset ?
                 """;
 
         Map<Reservation, Integer> reservations = new LinkedHashMap<>();
         jdbcTemplate.query(sql, resultSet -> {
             Reservation reservation = rowMapper.mapRow(resultSet, resultSet.getRow());
             reservations.put(reservation, resultSet.getInt("waiting_order"));
-        }, userId);
+        }, userId, limit, offset);
         return reservations;
     }
 
