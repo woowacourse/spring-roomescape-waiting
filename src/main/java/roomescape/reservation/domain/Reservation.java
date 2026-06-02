@@ -6,11 +6,8 @@ import static roomescape.common.domain.DomainPreconditions.requireNonNull;
 import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_DATE;
 import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_GUEST_NAME;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_HAS_ID;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVALID_RESERVATION_TIME;
-import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.Getter;
 import roomescape.common.exception.DomainException;
@@ -21,24 +18,24 @@ import roomescape.theme.domain.Theme;
 public class Reservation {
     private final Long id;
     private final String guestName;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
     private final Status status;
 
-    private Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
-        validateReservation(guestName, date, time, theme);
+    private Reservation(Long id, String guestName, ReservationSlot slot, Status status) {
+        validateReservation(guestName, slot);
         this.id = id;
         this.guestName = guestName;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
         this.status = status;
     }
 
     public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme,
                                      Status status) {
-        return new Reservation(null, guestName, date, time, theme, status);
+        return create(guestName, ReservationSlot.of(date, time, theme), status);
+    }
+
+    public static Reservation create(String guestName, ReservationSlot slot, Status status) {
+        return new Reservation(null, guestName, slot, status);
     }
 
     public static Reservation of(
@@ -49,19 +46,33 @@ public class Reservation {
             Theme theme,
             Status status
     ) {
-        return new Reservation(id, guestName, date, time, theme, status);
+        return of(id, guestName, ReservationSlot.of(date, time, theme), status);
+    }
+
+    public static Reservation of(long id, String guestName, ReservationSlot slot, Status status) {
+        return new Reservation(id, guestName, slot, status);
     }
 
     public Reservation withId(long id) {
         require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
-        return of(id, guestName, date, time, theme, status);
+        return of(id, guestName, slot, status);
     }
 
-    private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+    private void validateReservation(String guestName, ReservationSlot slot) {
         requireNonBlank(guestName, new DomainException(INVALID_RESERVATION_GUEST_NAME));
-        requireNonNull(date, new DomainException(INVALID_RESERVATION_DATE));
-        requireNonNull(time, new DomainException(INVALID_RESERVATION_TIME));
-        requireNonNull(theme, new DomainException(INVALID_THEME));
+        requireNonNull(slot, new DomainException(INVALID_RESERVATION_DATE));
+    }
+
+    public LocalDate getDate() {
+        return slot.date();
+    }
+
+    public ReservationTime getTime() {
+        return slot.time();
+    }
+
+    public Theme getTheme() {
+        return slot.theme();
     }
 
     @Override
@@ -80,11 +91,6 @@ public class Reservation {
         return Objects.hashCode(getId());
     }
 
-    public boolean isPassed(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt())
-                .isBefore(now);
-    }
-
     public boolean isSameGuest(String guestName) {
         return Objects.equals(this.guestName, guestName);
     }
@@ -98,25 +104,11 @@ public class Reservation {
         return status == Status.CANCELED;
     }
 
-    public Long timeId() {
-        return time.getId();
-    }
-
-    public Long themeId() {
-        return theme.getId();
-    }
-
-    private boolean isSameSlot(LocalDate date, Long timeId, Long themeId) {
-        return this.date.equals(date)
-                && this.timeId().equals(timeId)
-                && this.themeId().equals(themeId);
-    }
-
     public boolean hasSameSlotAs(Reservation other) {
-        return isSameSlot(other.date, other.timeId(), other.themeId());
+        return slot.equals(other.slot);
     }
 
-    public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime, Status status) {
-        return of(id, guestName, changedDate, changedTime, theme, status);
+    public Reservation changeSlot(ReservationSlot changedSlot, Status status) {
+        return of(id, guestName, changedSlot, status);
     }
 }

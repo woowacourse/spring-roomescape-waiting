@@ -9,7 +9,6 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVAL
 import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,28 +73,6 @@ class ReservationTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "2025-05-11T09:59:59,false",
-            "2025-05-11T10:00:00,false",
-            "2025-05-11T10:00:01,true",
-    })
-    @DisplayName("예약의 날짜 및 시간이 이미 지났는지 여부를 반환한다.")
-    public void isPassed(LocalDateTime now, boolean expected) {
-        // given
-        // 2025-05-11T10:00:00
-        LocalDate date = LocalDate.of(2025, 5, 11);
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Reservation reservation = Reservation.of(1L, "브라운", date, time, theme, Status.CONFIRMED);
-
-        // when
-        boolean result = reservation.isPassed(now);
-
-        // then
-        assertThat(result).isEqualTo(expected);
-    }
-
-
-    @ParameterizedTest
-    @CsvSource(value = {
             "브라운,true",
             "포비,false"
     })
@@ -110,6 +87,29 @@ class ReservationTest {
 
         // then
         assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("날짜, 시간, 테마가 같은 예약은 같은 슬롯으로 판단한다.")
+    void hasSameSlotAs_true_when_reservation_slot_is_same() {
+        ReservationTime sameTime = ReservationTime.of(time.getId(), LocalTime.of(11, 0));
+        Theme sameTheme = Theme.of(theme.getId(), "다른 이름", "다른 설명", "https://example.com/other.png");
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        Reservation reservation = Reservation.of(1L, "브라운", date, time, theme, Status.CONFIRMED);
+        Reservation other = Reservation.of(2L, "포비", date, sameTime, sameTheme, Status.WAITING);
+
+        assertThat(reservation.hasSameSlotAs(other)).isTrue();
+    }
+
+    @Test
+    @DisplayName("날짜, 시간, 테마 중 하나라도 다르면 다른 슬롯으로 판단한다.")
+    void hasSameSlotAs_false_when_reservation_slot_is_different() {
+        ReservationTime otherTime = ReservationTime.of(2L, LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        Reservation reservation = Reservation.of(1L, "브라운", date, time, theme, Status.CONFIRMED);
+        Reservation other = Reservation.of(2L, "포비", date, otherTime, theme, Status.WAITING);
+
+        assertThat(reservation.hasSameSlotAs(other)).isFalse();
     }
 
     private void assertDomainException(Runnable runnable, ErrorPolicy errorCode) {

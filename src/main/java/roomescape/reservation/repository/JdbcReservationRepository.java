@@ -2,7 +2,6 @@ package roomescape.reservation.repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -226,9 +226,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                     new String[]{"id"}
             );
             preparedStatement.setString(1, reservation.getGuestName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTime().getId());
-            preparedStatement.setLong(4, reservation.getTheme().getId());
+            preparedStatement.setDate(2, Date.valueOf(reservation.getSlot().date()));
+            preparedStatement.setLong(3, reservation.getSlot().timeId());
+            preparedStatement.setLong(4, reservation.getSlot().themeId());
             preparedStatement.setString(5, reservation.getStatus().toString());
             preparedStatement.setObject(6, toConfirmedToken(reservation.getStatus()));
             return preparedStatement;
@@ -238,7 +238,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status) {
+    public boolean updateSlot(Long id, ReservationSlot slot, Status status) {
         String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?, status = ?, confirmed_token = ?
@@ -246,8 +246,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         int count = jdbcTemplate.update(sql,
-                date,
-                timeId,
+                slot.date(),
+                slot.timeId(),
                 status.toString(),
                 toConfirmedToken(status),
                 id);
@@ -277,38 +277,38 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Long> findFirstWaitingIdBySlot(ReservationSlot slot) {
         return jdbcTemplate.query("""
                         SELECT id
                         FROM reservation
                         WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         ORDER BY created_at, id
                         LIMIT 1
-                        """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream()
-                .findFirst();
+                        """,
+                (rs, rowNum) -> rs.getLong("id"),
+                slot.date(),
+                slot.timeId(),
+                slot.themeId(),
+                Status.WAITING.toString()
+        ).stream().findFirst();
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-            LocalDate date, Long timeId, Long themeId, String guestName) {
+    public boolean existsBySlotAndGuestNameExceptCanceled(ReservationSlot slot, String guestName) {
         return existsReservation("""
                         date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != ?
                         """,
-                date, timeId, themeId, guestName,
+                slot.date(), slot.timeId(), slot.themeId(), guestName,
                 Status.CANCELED.toString()
         );
     }
 
     @Override
-    public boolean existsReservationBySlot(
-            LocalDate date,
-            Long timeId,
-            Long themeId
-    ) {
+    public boolean existsReservationBySlot(ReservationSlot slot) {
         return existsReservation("""
                         date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         """,
-                date, timeId, themeId,
+                slot.date(), slot.timeId(), slot.themeId(),
                 Status.CONFIRMED.toString()
         );
     }

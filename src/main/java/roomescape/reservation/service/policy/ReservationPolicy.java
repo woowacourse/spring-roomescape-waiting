@@ -40,10 +40,8 @@ public class ReservationPolicy {
     }
 
     private void validateNotDuplicatedExcept(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+        if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                reservation.getSlot(),
                 reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
@@ -51,13 +49,13 @@ public class ReservationPolicy {
     }
 
     private void validateNotPast(Reservation reservation) {
-        if (reservation.isPassed(timeManager.now())) {
+        if (reservation.getSlot().isPassed(timeManager.now())) {
             throw new DomainException(PAST_RESERVATION_NOT_ALLOWED);
         }
     }
 
     private void validateAlreadyStarted(Reservation reservation) {
-        if (reservation.isPassed(timeManager.now())) {
+        if (reservation.getSlot().isPassed(timeManager.now())) {
             throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
         }
     }

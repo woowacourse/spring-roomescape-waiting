@@ -21,6 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -138,7 +139,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약의 날짜 및 시간을 수정한다.")
-    public void updateDateAndTime() {
+    public void updateSlot() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -148,8 +149,11 @@ class JdbcReservationRepositoryTest {
         ReservationTime updatedTime = insertReservationTime(LocalTime.of(12, 0));
 
         // when
-        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId(),
-                Status.WAITING);
+        boolean result = reservationRepository.updateSlot(
+                reservation.getId(),
+                ReservationSlot.of(updatedDate, updatedTime, theme),
+                Status.WAITING
+        );
 
         // then
         assertThat(result).isTrue();
@@ -173,10 +177,14 @@ class JdbcReservationRepositoryTest {
         insertReservation("브라운", targetDate, time, theme, Status.WAITING);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate,
-                time.getId(), theme.getId(), "브라운");
-        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate,
-                time2.getId(), theme2.getId(), "브라운");
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                ReservationSlot.of(targetDate, time, theme),
+                "브라운"
+        );
+        boolean notExists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                ReservationSlot.of(targetDate, time2, theme2),
+                "브라운"
+        );
 
         // then
         assertThat(exists).isTrue();
@@ -193,8 +201,8 @@ class JdbcReservationRepositoryTest {
         insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                targetDate, time.getId(), theme.getId(), "브라운");
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                ReservationSlot.of(targetDate, time, theme), "브라운");
 
         // then
         assertThat(exists).isFalse();
@@ -228,10 +236,8 @@ class JdbcReservationRepositoryTest {
 
         // when
         boolean exists = reservationRepository
-                .existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                        targetDate,
-                        otherTime.getId(),
-                        theme.getId(),
+                .existsBySlotAndGuestNameExceptCanceled(
+                        ReservationSlot.of(targetDate, otherTime, theme),
                         target1
                 );
 
@@ -249,8 +255,8 @@ class JdbcReservationRepositoryTest {
         insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                targetDate, time.getId(), theme.getId(), "브라운");
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                ReservationSlot.of(targetDate, time, theme), "브라운");
 
         // then
         assertThat(exists).isFalse();
@@ -384,8 +390,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        boolean result = reservationRepository.existsReservationBySlot(reservation.getDate(), time.getId(),
-                theme.getId());
+        boolean result = reservationRepository.existsReservationBySlot(reservation.getSlot());
 
         // then
         assertThat(result).isTrue();

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
@@ -35,9 +36,10 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
 
-        Status status = determineState(date, timeId, themeId);
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+        Status status = determineState(slot);
 
-        Reservation reservation = Reservation.create(guestName, date, time, theme, status);
+        Reservation reservation = Reservation.create(guestName, slot, status);
 
         reservationPolicy.validateCreate(reservation);
 
@@ -64,8 +66,9 @@ public class ReservationService {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
 
-        Status status = determineState(date, timeId, reservation.themeId());
-        Reservation changedReservation = reservation.changeDateAndTime(date, changedTime, status);
+        ReservationSlot changedSlot = ReservationSlot.of(date, changedTime, reservation.getTheme());
+        Status status = determineState(changedSlot);
+        Reservation changedReservation = reservation.changeSlot(changedSlot, status);
 
         reservationPolicy.validateEdit(reservation, changedReservation, guestName);
 
@@ -96,7 +99,7 @@ public class ReservationService {
         }
 
         if (reservation.isConfirmed()) {
-            promoteFirstWaiting(reservation.getDate(), reservation.timeId(), reservation.themeId());
+            promoteFirstWaiting(reservation.getSlot());
         }
     }
 
@@ -116,10 +119,9 @@ public class ReservationService {
     }
 
     private void updateReservation(Reservation reservation) {
-        if (!reservationRepository.updateDateAndTime(
+        if (!reservationRepository.updateSlot(
                 reservation.getId(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                reservation.getSlot(),
                 reservation.getStatus()
         )) {
             throw new DomainException(RESERVATION_NOT_FOUND);
@@ -135,11 +137,11 @@ public class ReservationService {
             return;
         }
 
-        promoteFirstWaiting(before.getDate(), before.timeId(), before.themeId());
+        promoteFirstWaiting(before.getSlot());
     }
 
-    private void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
-        reservationRepository.findFirstWaitingIdBySlot(date, timeId, themeId)
+    private void promoteFirstWaiting(ReservationSlot slot) {
+        reservationRepository.findFirstWaitingIdBySlot(slot)
                 .ifPresent(waitingId -> updateState(waitingId, Status.CONFIRMED));
     }
 
@@ -149,8 +151,8 @@ public class ReservationService {
         }
     }
 
-    private Status determineState(LocalDate date, Long timeId, Long themeId) {
-        if (!reservationRepository.existsReservationBySlot(date, timeId, themeId)) {
+    private Status determineState(ReservationSlot slot) {
+        if (!reservationRepository.existsReservationBySlot(slot)) {
             return Status.CONFIRMED;
         }
         return Status.WAITING;

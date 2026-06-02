@@ -1,9 +1,9 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 
@@ -21,18 +21,17 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status);
+    boolean updateSlot(Long id, ReservationSlot slot, Status status);
 
     boolean cancelById(Long id);
 
     boolean updateStatus(Long id, Status status);
 
-    Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId);
+    Optional<Long> findFirstWaitingIdBySlot(ReservationSlot slot);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId,
-                                                                      String guestName);
+    boolean existsBySlotAndGuestNameExceptCanceled(ReservationSlot slot, String guestName);
 
-    boolean existsReservationBySlot(LocalDate date, Long timeId, Long themeId);
+    boolean existsReservationBySlot(ReservationSlot slot);
 
     boolean existByTimeId(Long timeId);
 
