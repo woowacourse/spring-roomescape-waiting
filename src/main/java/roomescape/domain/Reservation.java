@@ -35,6 +35,11 @@ public class Reservation {
         validateNotPast(date, time, createdAt);
     }
 
+    public Reservation(String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, name, date, createdAt, time, theme, status);
+        validateNotPast(date, time, createdAt);
+    }
+
     public Reservation withUpdated(LocalDate date, ReservationTime newTime, LocalDateTime now) {
         validateNotPast(date, newTime, now);
         return new Reservation(id, name, date, this.createdAt, newTime, theme, this.status);

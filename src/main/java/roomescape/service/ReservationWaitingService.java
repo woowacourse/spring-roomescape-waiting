@@ -7,21 +7,24 @@ import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.dao.ReservationWaitingDao;
+import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
 
 @Service
 public class ReservationWaitingService {
-    private final ReservationWaitingDao reservationWaitingDao;
+    private final ReservationDao reservationDao;
     private final ReservationService reservationService;
     private final Clock clock;
 
-    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao,
+    public ReservationWaitingService(ReservationDao reservationDao,
                                      ReservationService reservationService,
                                      Clock clock) {
-        this.reservationWaitingDao = reservationWaitingDao;
+        this.reservationDao = reservationDao;
         this.reservationService = reservationService;
         this.clock = clock;
     }
@@ -34,13 +37,14 @@ public class ReservationWaitingService {
         if (reservationService.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
         }
-        if (reservationWaitingDao.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
+        if (reservationDao.existsWaitingByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
-        Reservation saved = reservationService.saveEntry(name, date, timeId, themeId);
+        ReservationTime time = reservationService.getTime(timeId);
+        Theme theme = reservationService.getTheme(themeId);
+        Reservation waiting = new Reservation(name, date, LocalDateTime.now(clock), time, theme, ReservationStatus.WAITING);
         try {
-            ReservationWaiting waiting = reservationWaitingDao.saveWaiting(saved);
-            return waiting.reservation();
+            return reservationDao.save(waiting);
         } catch (DuplicateKeyException e) {
             throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
         }
@@ -48,14 +52,14 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteWaiting(long id) {
-        reservationWaitingDao.findByWaitingId(id).ifPresent(waiting -> {
+        reservationDao.findWaitingById(id).ifPresent(waiting -> {
             waiting.reservation().validateCancellable(LocalDateTime.now(clock));
-            reservationWaitingDao.deleteWaiting(id);
+            reservationDao.delete(id);
         });
     }
 
     @Transactional(readOnly = true)
     public List<ReservationWaiting> findAllWaitingByName(String username) {
-        return reservationWaitingDao.findAllWaitingByName(username);
+        return reservationDao.findAllWaitingByName(username);
     }
 }

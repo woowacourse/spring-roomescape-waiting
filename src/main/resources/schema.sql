@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS reservation_time;
@@ -34,11 +33,3 @@ CREATE TABLE IF NOT EXISTS reservation
     UNIQUE (name, date, time_id, theme_id)
 );
 
-CREATE TABLE IF NOT EXISTS reservation_waiting
-(
-    id             BIGINT NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
-    UNIQUE (reservation_id)
-);
