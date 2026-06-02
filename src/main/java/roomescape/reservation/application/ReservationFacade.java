@@ -60,10 +60,10 @@ public class ReservationFacade {
 
     public void cancelReservation(final Long id, final ReservationCancelCommand command) {
         if (command.status().equals(Status.PENDING)) {
-            pendingReservationService.cancel(id, command);
+            pendingReservationService.cancel(id, command.name());
             return;
         }
-        Long slotId = activeReservationService.cancel(id, command);
+        Long slotId = activeReservationService.cancel(id, command.name());
         pendingReservationService.popNextPendingAndPromote(slotId)
                 .ifPresent(activeReservationService::savePromoted);
     }
@@ -88,7 +88,7 @@ public class ReservationFacade {
         if (isSlotFull) {
             return pendingReservationService.change(id, slot, command);
         }
-        pendingReservationService.cancel(id, command.toCancelCommand());
+        pendingReservationService.cancel(id, command.name());
         return activeReservationService.add(slot, command.toCreateCommand());
     }
 
@@ -99,7 +99,7 @@ public class ReservationFacade {
         }
         try {
             Long oldSlotId = activeReservationService.getSlotId(id);
-            ReservationInfo changedInfo = activeReservationService.change(id, slot, command);
+            ReservationInfo changedInfo = activeReservationService.change(id, slot, command.name());
             if (!oldSlotId.equals(slot.getId())) {
                 pendingReservationService.popNextPendingAndPromote(oldSlotId)
                         .ifPresent(activeReservationService::savePromoted);
@@ -111,7 +111,7 @@ public class ReservationFacade {
     }
 
     private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
-        Long oldSlotId = activeReservationService.cancel(id, command.toCancelCommand());
+        Long oldSlotId = activeReservationService.cancel(id, command.name());
         pendingReservationService.popNextPendingAndPromote(oldSlotId)
                 .ifPresent(activeReservationService::savePromoted);
         return pendingReservationService.add(slot, command.toCreateCommand());

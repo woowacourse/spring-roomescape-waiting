@@ -43,9 +43,9 @@ public class PendingReservationService {
         }
     }
 
-    public void cancel(final Long id, final ReservationCancelCommand command) {
+    public void cancel(final Long id, final String name) {
         PendingReservation reservation = reservationRepository.getById(id);
-        PendingReservation cancelled = reservation.cancel(command.name(), clock);
+        PendingReservation cancelled = reservation.cancel(name, clock);
         reservationRepository.cancel(cancelled);
     }
 

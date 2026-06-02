@@ -20,11 +20,4 @@ public record ReservationChangeCommand(
                 .themeId(themeId)
                 .build();
     }
-
-    public ReservationCancelCommand toCancelCommand() {
-        return ReservationCancelCommand.builder()
-                .name(name)
-                .status(status)
-                .build();
-    }
 }

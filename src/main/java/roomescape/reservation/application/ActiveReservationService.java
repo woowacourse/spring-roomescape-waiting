@@ -34,9 +34,9 @@ public class ActiveReservationService {
         }
     }
 
-    public Long cancel(final Long id, final ReservationCancelCommand command) {
+    public Long cancel(final Long id, final String name) {
         ActiveReservation reservation = reservationRepository.getById(id);
-        ActiveReservation cancelled = reservation.cancel(command.name(), clock);
+        ActiveReservation cancelled = reservation.cancel(name, clock);
         reservationRepository.cancel(cancelled);
         return reservation.getSlot().getId();
     }
@@ -49,10 +49,10 @@ public class ActiveReservationService {
         }
     }
 
-    public ReservationInfo change(final Long id, final TimeSlot slot, final ReservationChangeCommand command) {
+    public ReservationInfo change(final Long id, final TimeSlot slot, final String name) {
         try {
             ActiveReservation reservation = reservationRepository.getById(id);
-            ActiveReservation changedReservation = reservation.changeTime(command.name(), slot, clock);
+            ActiveReservation changedReservation = reservation.changeTime(name, slot, clock);
             reservationRepository.update(changedReservation);
             return ReservationInfo.from(changedReservation);
         } catch (DataIntegrityViolationException e) {
