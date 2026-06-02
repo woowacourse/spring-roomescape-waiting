@@ -3,12 +3,12 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.repository.dto.WaitingWithNumber;
+import roomescape.service.dto.WaitingWithNumber;
 import roomescape.domain.Waiting;
 
 public interface WaitingRepository {
 
-    void save(Waiting waiting);
+    Waiting save(Waiting waiting);
 
     void deleteById(Long id);
 
@@ -17,4 +17,6 @@ public interface WaitingRepository {
     List<WaitingWithNumber> findByName(String name);
 
     Optional<Waiting> findById(long id);
+
+    Optional<WaitingWithNumber> findWaitingWithNumberById(long id);
 }

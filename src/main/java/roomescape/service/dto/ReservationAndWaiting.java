@@ -1,7 +1,6 @@
 package roomescape.service.dto;
 
 import java.time.LocalDate;
-import roomescape.repository.dto.WaitingWithNumber;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;

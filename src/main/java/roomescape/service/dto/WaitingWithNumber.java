@@ -1,4 +1,4 @@
-package roomescape.repository.dto;
+package roomescape.service.dto;
 
 import roomescape.domain.Waiting;
 

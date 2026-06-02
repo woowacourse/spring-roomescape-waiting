@@ -16,6 +16,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.WaitingWithNumber;
 
 @Service
 @Transactional(readOnly = true)
@@ -35,11 +36,12 @@ public class WaitingService {
     }
 
     @Transactional
-    public void saveWaiting(String name, LocalDate date, Long timeId, Long themeId) {
+    public WaitingWithNumber saveWaiting(String name, LocalDate date, Long timeId, Long themeId) {
         validateDuplicatedWaiting(name, date, timeId, themeId);
         Waiting waiting = createWaiting(name, date, timeId, themeId);
-        validateExistReservation(name, date, timeId, themeId);
-        waitingRepository.save(waiting);
+        validateAlreadyReserved(name, date, timeId, themeId);
+        Waiting saveWaiting = waitingRepository.save(waiting);
+        return findWaitingWithNumber(saveWaiting.getId());
     }
 
     @Transactional
@@ -61,7 +63,7 @@ public class WaitingService {
         }
     }
 
-    private void validateExistReservation(String name, LocalDate date, Long timeId, Long themeId) {
+    private void validateAlreadyReserved(String name, LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByNameAndDateAndTimeAndTheme(name, date, timeId, themeId)) {
             throw new DuplicateReservationException();
         }
@@ -69,6 +71,11 @@ public class WaitingService {
 
     private Waiting findWaiting(Long id) {
         return waitingRepository.findById(id)
+                .orElseThrow(WaitingNotFoundException::new);
+    }
+
+    private WaitingWithNumber findWaitingWithNumber(Long id) {
+        return waitingRepository.findWaitingWithNumberById(id)
                 .orElseThrow(WaitingNotFoundException::new);
     }
 

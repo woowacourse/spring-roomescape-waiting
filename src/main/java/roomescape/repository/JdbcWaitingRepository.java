@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.repository.dto.WaitingWithNumber;
+import roomescape.service.dto.WaitingWithNumber;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -26,10 +26,18 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void save(Waiting waiting) {
+    public Waiting save(Waiting waiting) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);
-        insert.execute(params);
+        long waitingId = insert.executeAndReturnKey(params).longValue();
+
+        return new Waiting(
+                waitingId,
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTimeSlot(),
+                waiting.getTheme(),
+                waiting.getCreatedAt());
     }
 
     @Override
@@ -91,6 +99,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findById(long waitingId) {
         String sql = """
+                SELECT w.id,
+                       w.name,
+                       w.date,
+                       w.created_at,
+                       ts.id AS time_id,
+                       ts.start_at,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail_url
+                FROM waiting w
+                INNER JOIN time_slot ts ON w.time_id = ts.id
+                INNER JOIN theme th ON w.theme_id = th.id
+                WHERE w.id = ?
+                """;
+
+        List<Waiting> waitings = jdbcTemplate.query(sql, waitingRowMapper(), waitingId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
+    }
+
+    @Override
+    public Optional<WaitingWithNumber> findWaitingWithNumberById(long id) {
+        String sql = """
                 SELECT *
                 FROM (
                     SELECT w.id,
@@ -114,14 +145,15 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 WHERE ranked.id = ?
                 """;
 
-        List<Waiting> waitings = jdbcTemplate.query(sql, waitingRowMapper(), waitingId);
+        List<WaitingWithNumber> waitings = jdbcTemplate.query(sql, waitingWithNumberRowMapper(), id);
         return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
     }
 
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
-                .usingColumns("name", "date", "time_id", "theme_id", "created_at");
+                .usingColumns("name", "date", "time_id", "theme_id", "created_at")
+                .usingGeneratedKeyColumns("id");
     }
 
     private Map<String, Object> createParams(Waiting waiting) {
