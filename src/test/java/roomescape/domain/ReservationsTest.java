@@ -88,7 +88,7 @@ class ReservationsTest {
     }
 
     @Test
-    void 상태와_관계없이_같은_이름이_존재하면_true를_반환한다() {
+    void 활성_상태인_같은_이름이_존재하면_true를_반환한다() {
         // given
         Reservations reservations = new Reservations(List.of(
                 reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
@@ -97,7 +97,7 @@ class ReservationsTest {
 
         // when & then
         assertThat(reservations.hasReservationByName("이프")).isTrue();
-        assertThat(reservations.hasReservationByName("라텔")).isTrue();
+        assertThat(reservations.hasReservationByName("라텔")).isFalse();
     }
 
     @Test

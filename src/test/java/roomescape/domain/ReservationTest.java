@@ -58,6 +58,26 @@ class ReservationTest {
     }
 
     @Test
+    void 예약_또는_대기_상태이면_활성_상태이다() {
+        // given
+        Reservation reserved = reservation(1L, ReservationStatus.RESERVED);
+        Reservation waiting = reservation(2L, ReservationStatus.WAITING);
+
+        // when & then
+        assertThat(reserved.isActive()).isTrue();
+        assertThat(waiting.isActive()).isTrue();
+    }
+
+    @Test
+    void 취소_상태이면_활성_상태가_아니다() {
+        // given
+        Reservation reservation = reservation(1L, ReservationStatus.DELETED);
+
+        // when & then
+        assertThat(reservation.isActive()).isFalse();
+    }
+
+    @Test
     void 같은_식별자이면_true를_반환한다() {
         // given
         Reservation reservation = reservation(1L, ReservationStatus.RESERVED);

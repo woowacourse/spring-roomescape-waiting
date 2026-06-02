@@ -38,6 +38,7 @@ public class Reservations {
 
     public boolean hasReservationByName(String name) {
         return reservations.stream()
+                .filter(Reservation::isActive)
                 .anyMatch(reservation -> reservation.hasSameName(name));
     }
 

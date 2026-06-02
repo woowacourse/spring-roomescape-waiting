@@ -46,6 +46,10 @@ public class Reservation {
         return this.status == ReservationStatus.WAITING;
     }
 
+    public boolean isActive() {
+        return this.status != ReservationStatus.DELETED;
+    }
+
     public boolean hasSameName(String name) {
         return this.name.equals(name);
     }
