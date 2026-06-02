@@ -1,6 +1,6 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,7 +44,8 @@ class JdbcWaitingRepositoryTest {
     @DisplayName("예약 대기를 저장한다.")
     void 대기_저장() {
         Waiting waiting = createWaiting();
-        jdbcWaitingRepository.save(waiting);
+        Waiting savedWaiting = jdbcWaitingRepository.save(waiting);
+        assertThat(savedWaiting.getId()).isNotNull();
     }
 
     @Test

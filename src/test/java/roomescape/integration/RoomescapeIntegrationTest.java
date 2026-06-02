@@ -111,8 +111,8 @@ public class RoomescapeIntegrationTest {
                 today.plusDays(2), 1L, 1L);
 
         RestAssured.given().log().all()
-                .queryParam("topCount", 10)
-                .queryParam("during", 7)
+                .queryParam("limit", 10)
+                .queryParam("days", 7)
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
