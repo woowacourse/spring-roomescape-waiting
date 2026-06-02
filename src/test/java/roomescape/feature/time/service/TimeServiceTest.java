@@ -3,6 +3,9 @@ package roomescape.feature.time.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -71,6 +74,8 @@ class TimeServiceTest {
                 .containsExactly(LocalTime.of(10, 0), LocalTime.of(15, 30));
             assertThat(result).extracting(TimeResponseDto::deleted)
                 .containsExactly(false, true);
+
+            verifyNoInteractions(reservationRepository, themeRepository);
         }
     }
 
@@ -111,6 +116,8 @@ class TimeServiceTest {
                         .extracting(ParameterErrorResponseDto::parameter)
                         .containsExactly("themeId");
                 });
+
+            verifyNoInteractions(reservationRepository, timeRepository);
         }
     }
 
@@ -132,6 +139,8 @@ class TimeServiceTest {
             // then
             assertThat(result.id()).isEqualTo(1L);
             assertThat(result.startAt()).isEqualTo(TimeFixture.VALID_10_00.getStartAt());
+
+            verify(timeRepository).save(any(Time.class));
         }
 
         @Test
@@ -145,6 +154,8 @@ class TimeServiceTest {
             assertThatThrownBy(() -> timeService.saveTime(command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 등록된 예약 시간입니다.");
+
+            verify(timeRepository, never()).save(any(Time.class));
         }
     }
 
@@ -153,9 +164,14 @@ class TimeServiceTest {
 
         @Test
         void 예약_시간을_삭제한다() {
+            // given
             when(timeRepository.existsTimeByIdAndNotDeleted(1L)).thenReturn(true);
 
+            // when
             timeService.deleteTimeById(1L);
+
+            // then
+            verify(timeRepository).deleteTimeById(1L);
         }
 
         @Test
@@ -167,6 +183,8 @@ class TimeServiceTest {
             assertThatThrownBy(() -> timeService.deleteTimeById(999L))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
+
+            verify(timeRepository, never()).deleteTimeById(any());
         }
     }
 }

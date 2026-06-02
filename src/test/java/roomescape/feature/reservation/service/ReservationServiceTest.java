@@ -3,6 +3,8 @@ package roomescape.feature.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -159,6 +161,25 @@ class ReservationServiceTest {
         }
 
         @Test
+        void 대기_중인_예약이_아니라면_순번을_계산하지_않는다() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation active = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE);
+            when(reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("예약자")))
+                .thenReturn(List.of(active));
+
+            // when
+            reservationService.getReservationsByName(new ReserverName("예약자"));
+
+            // then
+            verify(reservationRepository, never())
+                .countByIdLessThanEqualAndDateAndTimeAndTheme(any(), any(), any(), any());
+        }
+
+        @Test
         void 지난_날짜의_예약은_LOCKED_상태로_반환한다() {
             // given
             LocalDate pastDate = LocalDate.now().minusDays(1);
@@ -223,6 +244,8 @@ class ReservationServiceTest {
             assertThat(result.date()).isEqualTo(date);
             assertThat(result.timeId()).isEqualTo(1L);
             assertThat(result.themeId()).isEqualTo(1L);
+
+            verify(reservationRepository).save(any(Reservation.class));
         }
 
         @Test
@@ -242,6 +265,8 @@ class ReservationServiceTest {
                         .extracting(ParameterErrorResponseDto::parameter)
                         .containsExactly("timeId");
                 });
+
+            verify(reservationRepository, never()).save(any(Reservation.class));
         }
 
         @Test
@@ -259,6 +284,8 @@ class ReservationServiceTest {
                         .extracting(ParameterErrorResponseDto::parameter)
                         .containsExactly("timeId", "themeId");
                 });
+
+            verify(reservationRepository, never()).save(any(Reservation.class));
         }
 
         @Test
@@ -278,6 +305,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.saveReservation(command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
+
+            verify(reservationRepository, never()).save(any(Reservation.class));
         }
     }
 
@@ -314,6 +343,8 @@ class ReservationServiceTest {
             assertThat(result.date()).isEqualTo(newDate);
             assertThat(result.timeId()).isEqualTo(2L);
             assertThat(result.themeId()).isEqualTo(2L);
+
+            verify(reservationRepository).update(any(Reservation.class));
         }
 
         @Test
@@ -328,6 +359,9 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(999L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
+
+            verify(timeRepository, never()).findTimeByIdAndNotDeleted(any());
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -349,6 +383,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 변경할 권한이 없습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -370,6 +406,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("활성된 예약이 아닙니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -392,6 +430,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 생성할 수 없습니다");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -414,6 +454,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 생성할 수 없습니다");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -434,6 +476,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("수정할 자원이 존재하지 않습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -455,6 +499,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("수정할 자원이 존재하지 않습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -478,6 +524,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.updateReservation(1L, command))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("이미 예약된 날짜, 시간, 테마입니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
     }
 
@@ -504,6 +552,8 @@ class ReservationServiceTest {
             // then
             assertThat(result.id()).isEqualTo(1L);
             assertThat(result.name()).isEqualTo("예약자");
+
+            verify(reservationRepository).update(any(Reservation.class));
         }
 
         @Test
@@ -516,6 +566,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.cancelReservation(999L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -533,6 +585,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("다른사람")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 취소할 권한이 없습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -550,6 +604,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("활성된 예약이 아닙니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
 
         @Test
@@ -567,6 +623,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.cancelReservation(1L, new ReserverName("예약자")))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
+
+            verify(reservationRepository, never()).update(any(Reservation.class));
         }
     }
 
@@ -575,9 +633,14 @@ class ReservationServiceTest {
 
         @Test
         void 예약을_삭제한다() {
+            // given
             when(reservationRepository.existsReservationByIdAndNotDeleted(1L)).thenReturn(true);
 
+            // when
             reservationService.deleteReservationById(1L);
+
+            // then
+            verify(reservationRepository).deleteReservationById(1L);
         }
 
         @Test
@@ -589,6 +652,8 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.deleteReservationById(999L))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
+
+            verify(reservationRepository, never()).deleteReservationById(any());
         }
     }
 }
