@@ -86,7 +86,7 @@ public class ReservationFacade {
     private ReservationInfo changePendingReservation(final Long id, final ReservationChangeCommand command,
                                                      final TimeSlot slot, final boolean isSlotFull) {
         if (isSlotFull) {
-            return pendingReservationService.change(id, slot, command);
+            return pendingReservationService.change(id, slot, command.name());
         }
         pendingReservationService.cancel(id, command.name());
         return activeReservationService.add(slot, command.toCreateCommand());

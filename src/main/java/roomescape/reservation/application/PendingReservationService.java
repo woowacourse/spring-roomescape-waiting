@@ -52,14 +52,15 @@ public class PendingReservationService {
     public Optional<ActiveReservation> popNextPendingAndPromote(final Long slotId) {
         return reservationRepository.findNextPendingReservation(slotId)
                 .map(pending -> {
-                    reservationRepository.cancel(pending);
+                    PendingReservation cancelled = pending.cancel(pending.getName(), clock);
+                    reservationRepository.cancel(cancelled);
                     return pending.active();
                 });
     }
 
-    public ReservationInfo change(Long id, TimeSlot slot, ReservationChangeCommand command) {
+    public ReservationInfo change(Long id, TimeSlot slot, String name) {
         PendingReservation reservation = reservationRepository.getById(id);
-        PendingReservation changedReservation = reservation.changeTime(command.name(), slot, clock);
+        PendingReservation changedReservation = reservation.changeTime(name, slot, clock);
         reservationRepository.update(changedReservation);
         return ReservationInfo.from(changedReservation);
     }
