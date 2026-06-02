@@ -67,71 +67,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
-            Theme theme) {
+    public void delete(Long id) {
         String sql = """
-                    SELECT MAX(waiting_number)
-                    FROM waiting
-                    WHERE date = :date
-                      AND time_id = :time_id
-                      AND theme_id = :theme_id
+                    DELETE FROM waiting
+                    WHERE id = :id
                 """;
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", reservationTime.getId())
-                .addValue("theme_id", theme.getId());
-
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, Long.class));
-    }
-
-    @Override
-    public List<Waiting> findByName(String name) {
-        String sql = """
-                    SELECT w.id AS id,
-                           w.name,
-                           w.date,
-                           w.waiting_number,
-                           t.id AS reservation_time_id,
-                           t.start_at AS time_value,
-                           th.id AS reservation_theme_id,
-                           th.name AS reservation_theme_name,
-                           th.description AS reservation_theme_description,
-                           th.image_url AS reservation_theme_image_url
-                    FROM waiting AS w
-                    INNER JOIN reservation_time AS t
-                      ON w.time_id = t.id
-                    INNER JOIN theme AS th
-                      ON w.theme_id = th.id
-                    WHERE w.name = :name
-                """;
-
-        Map<String, Object> params = Map.of("name", name);
-
-        return jdbcTemplate.query(sql, params, getWaitingRowMapper());
-    }
-
-    @Override
-    public List<Waiting> findAll() {
-        String sql = """
-                SELECT w.id AS id,
-                           w.name,
-                           w.date,
-                           w.waiting_number,
-                           t.id AS reservation_time_id,
-                           t.start_at AS time_value,
-                           th.id AS reservation_theme_id,
-                           th.name AS reservation_theme_name,
-                           th.description AS reservation_theme_description,
-                           th.image_url AS reservation_theme_image_url
-                    FROM waiting AS w
-                    INNER JOIN reservation_time AS t
-                      ON w.time_id = t.id
-                    INNER JOIN theme AS th
-                      ON w.theme_id = th.id
-                """;
-
-        return jdbcTemplate.query(sql, getWaitingRowMapper());
+        Map<String, Object> params = Map.of("id", id);
+        jdbcTemplate.update(sql, params);
     }
 
     @Override
@@ -162,6 +104,74 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findAll() {
+        String sql = """
+                SELECT w.id AS id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                    FROM waiting AS w
+                    INNER JOIN reservation_time AS t
+                      ON w.time_id = t.id
+                    INNER JOIN theme AS th
+                      ON w.theme_id = th.id
+                """;
+
+        return jdbcTemplate.query(sql, getWaitingRowMapper());
+    }
+
+    @Override
+    public List<Waiting> findByName(String name) {
+        String sql = """
+                    SELECT w.id AS id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                    FROM waiting AS w
+                    INNER JOIN reservation_time AS t
+                      ON w.time_id = t.id
+                    INNER JOIN theme AS th
+                      ON w.theme_id = th.id
+                    WHERE w.name = :name
+                """;
+
+        Map<String, Object> params = Map.of("name", name);
+
+        return jdbcTemplate.query(sql, params, getWaitingRowMapper());
+    }
+
+    @Override
+    public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
+            Theme theme) {
+        String sql = """
+                    SELECT MAX(waiting_number)
+                    FROM waiting
+                    WHERE date = :date
+                      AND time_id = :time_id
+                      AND theme_id = :theme_id
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("time_id", reservationTime.getId())
+                .addValue("theme_id", theme.getId());
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, Long.class));
+    }
+
+    @Override
     public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
             ReservationTime time, Theme theme) {
         String sql = """
@@ -184,15 +194,5 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, params, Boolean.class)
         );
-    }
-
-    @Override
-    public void delete(Long id) {
-        String sql = """
-                    DELETE FROM waiting
-                    WHERE id = :id
-                """;
-        Map<String, Object> params = Map.of("id", id);
-        jdbcTemplate.update(sql, params);
     }
 }

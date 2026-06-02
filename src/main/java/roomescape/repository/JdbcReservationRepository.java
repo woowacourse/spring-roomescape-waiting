@@ -55,6 +55,35 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Reservation update(Long id, LocalDate date, ReservationTime time) {
+        String sql = """
+                    UPDATE reservation
+                    SET date = :date,
+                        time_id = :time_id
+                    WHERE id = :id
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("time_id", time.getId())
+                .addValue("id", id);
+
+        jdbcTemplate.update(sql, params);
+        return findById(id).orElseThrow(
+                () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    @Override
+    public void delete(Long id) {
+        String sql = """
+                    DELETE FROM reservation
+                    WHERE id = :id
+                """;
+        Map<String, Object> params = Map.of("id", id);
+        jdbcTemplate.update(sql, params);
+    }
+
+    @Override
     public Optional<Reservation> findById(Long id) {
         String sql = """
                     SELECT r.id AS reservation_id,
@@ -158,35 +187,6 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         List<Reservation> results = jdbcTemplate.query(sql, params, getReservationRowMapper());
         return results.stream().findFirst();
-    }
-
-    @Override
-    public Reservation update(Long id, LocalDate date, ReservationTime time) {
-        String sql = """
-                    UPDATE reservation
-                    SET date = :date,
-                        time_id = :time_id
-                    WHERE id = :id
-                """;
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
-                .addValue("id", id);
-
-        jdbcTemplate.update(sql, params);
-        return findById(id).orElseThrow(
-                () -> new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
-    }
-
-    @Override
-    public void delete(Long id) {
-        String sql = """
-                    DELETE FROM reservation
-                    WHERE id = :id
-                """;
-        Map<String, Object> params = Map.of("id", id);
-        jdbcTemplate.update(sql, params);
     }
 
     @Override

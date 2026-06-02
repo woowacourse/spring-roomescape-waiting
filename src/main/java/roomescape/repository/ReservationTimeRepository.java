@@ -11,13 +11,13 @@ public interface ReservationTimeRepository {
 
     ReservationTime save(ReservationTime reservationTime);
 
+    void delete(Long id);
+
     Optional<ReservationTime> findById(Long id);
 
     List<ReservationTime> findAll();
 
     List<ReservedTimeResponseDTO> findReservedTimes(LocalDate date, Long themeId);
-
-    void delete(Long id);
 
     boolean existByStartAt(LocalTime startAt);
 }

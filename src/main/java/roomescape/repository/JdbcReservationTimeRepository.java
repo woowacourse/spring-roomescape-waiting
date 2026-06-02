@@ -41,6 +41,16 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
+    public void delete(Long id) {
+        String sql = """
+                    DELETE FROM reservation_time
+                    WHERE id = :id
+                """;
+        Map<String, Object> params = Map.of("id", id);
+        jdbcTemplate.update(sql, params);
+    }
+
+    @Override
     public Optional<ReservationTime> findById(Long id) {
         String sql = """
                     SELECT id,
@@ -107,16 +117,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                         resultSet.getObject("reservation_id", Long.class)
                 )
         );
-    }
-
-    @Override
-    public void delete(Long id) {
-        String sql = """
-                    DELETE FROM reservation_time
-                    WHERE id = :id
-                """;
-        Map<String, Object> params = Map.of("id", id);
-        jdbcTemplate.update(sql, params);
     }
 
     @Override

@@ -11,18 +11,18 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    Optional<Waiting> findById(Long id);
+    void delete(Long id);
 
-    List<Waiting> findByName(String name);
+    Optional<Waiting> findById(Long id);
 
     List<Waiting> findAll();
 
-    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time,
-            Theme theme);
+    List<Waiting> findByName(String name);
 
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
             Theme theme);
 
-    void delete(Long id);
+    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time,
+            Theme theme);
 
 }
