@@ -13,8 +13,9 @@ public class Reservation {
     private final LocalDateTime createdAt;
     private final ReservationTime time;
     private final Theme theme;
+    private final ReservationStatus status;
 
-    public Reservation(Long id, String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme, ReservationStatus status) {
         validateFields(name, date, time, theme);
         this.id = id;
         this.name = name;
@@ -22,16 +23,21 @@ public class Reservation {
         this.createdAt = createdAt;
         this.time = time;
         this.theme = theme;
+        this.status = status;
+    }
+
+    public Reservation(Long id, String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme) {
+        this(id, name, date, createdAt, time, theme, ReservationStatus.CONFIRMED);
     }
 
     public Reservation(String name, LocalDate date, LocalDateTime createdAt, ReservationTime time, Theme theme) {
-        this(null, name, date, createdAt, time, theme);
+        this(null, name, date, createdAt, time, theme, ReservationStatus.CONFIRMED);
         validateNotPast(date, time, createdAt);
     }
 
     public Reservation withUpdated(LocalDate date, ReservationTime newTime, LocalDateTime now) {
         validateNotPast(date, newTime, now);
-        return new Reservation(id, name, date, this.createdAt, newTime, theme);
+        return new Reservation(id, name, date, this.createdAt, newTime, theme, this.status);
     }
 
     public void validateCancellable(LocalDateTime now) {
@@ -62,6 +68,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     @Override

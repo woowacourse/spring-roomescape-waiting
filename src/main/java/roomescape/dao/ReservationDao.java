@@ -75,10 +75,11 @@ public class ReservationDao {
                 "date", reservation.getDate(),
                 "created_at", reservation.getCreatedAt(),
                 "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
+                "theme_id", reservation.getTheme().getId(),
+                "status", reservation.getStatus().name()
         )).longValue();
         return new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
+                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme(), reservation.getStatus());
     }
 
     public boolean existsByTimeId(long timeId) {
