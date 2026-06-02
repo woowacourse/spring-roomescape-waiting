@@ -34,13 +34,14 @@ class ReservationTimeRepositoryTest {
         ReservationTime time = new ReservationTime(null, LocalTime.of(8, 0));
 
         // when
-        Long id = dao.insert(time);
+        ReservationTime result = dao.insert(time);
 
         // then
         List<ReservationTime> times = dao.findAll();
-        ReservationTime savedTime = dao.findById(id).get();
+        ReservationTime savedTime = dao.findById(result.getId()).get();
         assertAll(
-                () -> assertThat(id).isNotNull(),
+                () -> assertThat(result.getId()).isNotNull(),
+                () -> assertThat(result.getStartAt()).isEqualTo(time.getStartAt()),
                 () -> assertThat(times).hasSize(1),
                 () -> assertThat(savedTime.getStartAt()).isEqualTo(time.getStartAt()));
     }
@@ -50,17 +51,18 @@ class ReservationTimeRepositoryTest {
         // given
         ReservationTime time1 = new ReservationTime(null, LocalTime.of(8, 0));
         ReservationTime time2 = new ReservationTime(null, LocalTime.of(21, 0));
-        Long id1 = dao.insert(time1);
-        Long id2 = dao.insert(time2);
+        ReservationTime savedTime1 = dao.insert(time1);
+        ReservationTime savedTime2 = dao.insert(time2);
 
         // when
-        int deletedCount = dao.delete(id1);
+        int deletedCount = dao.delete(savedTime1.getId());
 
         // then
         List<ReservationTime> times = dao.findAll();
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
                 () -> assertThat(times).hasSize(1),
-                () -> assertThat(dao.findById(id1)).isEmpty());
+                () -> assertThat(dao.findById(savedTime1.getId())).isEmpty(),
+                () -> assertThat(dao.findById(savedTime2.getId())).isPresent());
     }
 }

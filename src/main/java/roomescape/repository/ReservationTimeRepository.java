@@ -32,7 +32,7 @@ public class ReservationTimeRepository {
         return result.stream().findAny();
     }
 
-    public Long insert(ReservationTime reservationTime) {
+    public ReservationTime insert(ReservationTime reservationTime) {
         String sql = "INSERT INTO reservation_time(start_at) VALUES (?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -43,7 +43,8 @@ public class ReservationTimeRepository {
             return pstmt;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        Long id = keyHolder.getKey().longValue();
+        return reservationTime.withId(id);
     }
 
     public int delete(Long id) {

@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -29,20 +30,29 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
-        Long id = reservationTimeRepository.insert(new ReservationTime(null, startAt));
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 예약 시간을 찾을 수 없습니다."));
+        return reservationTimeRepository.insert(new ReservationTime(null, startAt));
     }
 
     @Transactional
     public void delete(Long id) {
         validateDeletable(id);
-        reservationTimeRepository.delete(id);
+        deleteReservationTime(id);
     }
 
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
+        }
+    }
+
+    private void deleteReservationTime(Long id) {
+        try {
+            reservationTimeRepository.delete(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new RoomescapeException(
+                    ErrorCode.RESOURCE_IN_USE,
+                    "예약이 존재하는 시간은 삭제할 수 없습니다."
+            );
         }
     }
 }
