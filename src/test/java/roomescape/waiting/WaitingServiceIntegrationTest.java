@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
-import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.ReservationRepository;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
 

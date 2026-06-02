@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;

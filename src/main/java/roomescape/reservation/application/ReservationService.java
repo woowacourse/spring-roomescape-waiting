@@ -13,12 +13,12 @@ import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.application.readmodel.WaitingReadModel;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.WaitingRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;

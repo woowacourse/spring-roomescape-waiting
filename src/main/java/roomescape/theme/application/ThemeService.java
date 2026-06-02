@@ -9,7 +9,7 @@ import roomescape.theme.Theme;
 import roomescape.theme.dto.request.ThemeSaveRequest;
 import roomescape.theme.dto.response.ThemeFindResponse;
 import roomescape.theme.dto.response.ThemeSaveResponse;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.theme.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;

@@ -6,14 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.infrastructure.WaitingRepository;
-
-import java.util.Objects;
+import roomescape.waiting.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor

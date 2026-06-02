@@ -4,14 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
-import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
 import roomescape.reservationtime.dto.response.AvailableTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.dto.response.TimeInformation;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
 
 import java.time.LocalDate;

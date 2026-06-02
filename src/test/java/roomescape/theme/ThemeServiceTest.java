@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.infrastructure.ThemeRepository;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;

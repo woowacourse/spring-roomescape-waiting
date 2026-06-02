@@ -1,6 +1,4 @@
-package roomescape.schedule.infrastructure;
-
-import roomescape.schedule.Schedule;
+package roomescape.schedule;
 
 import java.time.LocalDate;
 import java.util.List;

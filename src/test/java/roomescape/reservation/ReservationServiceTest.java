@@ -11,11 +11,10 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
-import roomescape.waiting.infrastructure.WaitingRepository;
+import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.Clock;

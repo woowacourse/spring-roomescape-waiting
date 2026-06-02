@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.time.LocalDateTime;

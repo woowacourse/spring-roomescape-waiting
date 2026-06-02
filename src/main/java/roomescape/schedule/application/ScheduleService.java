@@ -6,12 +6,12 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.schedule.Schedule;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.schedule.dto.request.ScheduleSaveRequest;
 import roomescape.schedule.dto.response.ScheduleFindResponse;
 import roomescape.schedule.dto.response.ScheduleSaveResponse;
-import roomescape.schedule.infrastructure.ScheduleRepository;
-import roomescape.theme.infrastructure.ThemeRepository;
+import roomescape.schedule.ScheduleRepository;
+import roomescape.theme.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
