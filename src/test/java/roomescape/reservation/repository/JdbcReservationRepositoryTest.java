@@ -19,6 +19,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
@@ -32,8 +34,8 @@ class JdbcReservationRepositoryTest {
     private final ReservationRepository reservationRepository;
 
     @Autowired
-    public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate1, JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate1;
+    public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.reservationRepository = new JdbcReservationRepository(jdbcTemplate);
     }
 
@@ -49,15 +51,13 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 1),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
                 )
         );
 
         // then
-        assertThat(saved.id()).isNotNull();
-        assertThat(saved.name()).isEqualTo("브라운");
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getName()).isEqualTo("브라운");
     }
 
     @Test
@@ -71,9 +71,7 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 1),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
                 )
         );
 
@@ -82,9 +80,7 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 1),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
                 )
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -99,10 +95,10 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
-        reservationRepository.deleteById(saved.id());
+        reservationRepository.delete(saved);
 
         // then
-        List<Reservation> reservations = reservationRepository.findAllByName("브라");
+        List<Reservation> reservations = reservationRepository.findAllByName("브라운");
         assertThat(reservations).isEmpty();
     }
 
@@ -115,23 +111,23 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
-        reservationRepository.deleteById(saved.id());
+        reservationRepository.delete(saved);
 
         // then
         Integer reservationCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation WHERE id = ?",
                 Integer.class,
-                saved.id()
+                saved.getId()
         );
         Integer timeCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM reservation_time WHERE id = ?",
                 Integer.class,
-                time.id()
+                time.getId()
         );
         Integer themeCount = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM theme WHERE id = ?",
                 Integer.class,
-                theme.id()
+                theme.getId()
         );
 
         assertThat(reservationCount).isEqualTo(0);
@@ -150,20 +146,18 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 1),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
                 )
         );
 
-        Reservation updated = saved.update(LocalDate.of(2024, 5, 5), null);
+        Reservation updated = saved.update(LocalDate.now().plusDays(5), null, "브라운");
 
         // when
         reservationRepository.update(updated);
 
         // then
-        assertThat(updated.id()).isNotNull();
-        assertThat(updated.date()).isEqualTo(LocalDate.of(2024, 5, 5));
+        assertThat(updated.getId()).isNotNull();
+        assertThat(updated.getDate()).isEqualTo(LocalDate.now().plusDays(5));
     }
 
     @Test
@@ -179,9 +173,7 @@ class JdbcReservationRepositoryTest {
                         new Reservation(
                                 999L,
                                 "브라운",
-                                LocalDate.of(2024, 5, 1),
-                                time,
-                                theme
+                                new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
                         )
                 )
         ).isInstanceOf(NotFoundException.class)
@@ -199,9 +191,7 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 5),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.now().plusDays(5), time, theme)
                 )
         );
 
@@ -209,13 +199,11 @@ class JdbcReservationRepositoryTest {
                 new Reservation(
                         null,
                         "브라운",
-                        LocalDate.of(2024, 5, 1),
-                        time,
-                        theme
+                        new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
                 )
         );
 
-        Reservation updated = saved.update(LocalDate.of(2024, 5, 5), time);
+        Reservation updated = saved.update(LocalDate.now().plusDays(5), time, "브라운");
 
         // when & then
         assertThatThrownBy(
@@ -233,7 +221,7 @@ class JdbcReservationRepositoryTest {
         Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when & then
-        assertThat(reservationRepository.findById(saved.id())).isPresent();
+        assertThat(reservationRepository.findById(saved.getId())).isPresent();
         assertThat(reservationRepository.findById(999L)).isEmpty();
     }
 
@@ -324,7 +312,6 @@ class JdbcReservationRepositoryTest {
         assertThat(result.getFirst().waitingOrder()).isEqualTo(1L);
     }
 
-
     @Test
     @DisplayName("from과 to 사이 일정의 예약들에 대해, 상위 limit 개의 테마들을 조회한다.")
     void findPopularThemes_dateRangeAndLimit_returnsOrderedThemes() {
@@ -364,8 +351,6 @@ class JdbcReservationRepositoryTest {
                 .containsExactly("우테코", "페어");
     }
 
-
-
     private ReservationTime createTime(LocalTime time) {
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_at) VALUES (?)",
@@ -398,7 +383,7 @@ class JdbcReservationRepositoryTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(
-                Reservation.of(name, date, time, theme)
+                new Reservation(null, name, new ReservationSlot(date, time, theme))
         );
     }
 
@@ -413,9 +398,9 @@ class JdbcReservationRepositoryTest {
 
         //when
         Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeId(
-                saved.date(),
-                saved.time().id(),
-                saved.theme().id()
+                saved.getDate(),
+                saved.getTime().getId(),
+                saved.getTheme().getId()
         );
 
         //then
@@ -427,8 +412,8 @@ class JdbcReservationRepositoryTest {
                 "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 name,
                 java.sql.Date.valueOf(date),
-                time.id(),
-                theme.id()
+                time.getId(),
+                theme.getId()
         );
     }
 }

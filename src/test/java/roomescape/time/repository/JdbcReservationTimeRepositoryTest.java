@@ -183,17 +183,9 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     private void createReservation(ReservationTime time, LocalDate date, Long themeId) {
-        String insertSlotSql = "insert into reservation_slot(reservation_date, time_id, theme_id) values (?, ?, ?)";
-        org.springframework.jdbc.support.KeyHolder keyHolder = new org.springframework.jdbc.support.GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            java.sql.PreparedStatement ps = connection.prepareStatement(insertSlotSql, new String[]{"id"});
-            ps.setDate(1, java.sql.Date.valueOf(date));
-            ps.setLong(2, time.getId());
-            ps.setLong(3, themeId);
-            return ps;
-        }, keyHolder);
-        Long slotId = keyHolder.getKey().longValue();
-
-        jdbcTemplate.update("insert into reservation(name, slot_id) values (?, ?)", "브라운", slotId);
+        jdbcTemplate.update(
+                "insert into reservation(name, reservation_date, time_id, theme_id) values (?, ?, ?, ?)",
+                "브라운", java.sql.Date.valueOf(date), time.getId(), themeId
+        );
     }
 }

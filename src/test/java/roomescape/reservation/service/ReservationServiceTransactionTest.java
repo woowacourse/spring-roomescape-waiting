@@ -14,18 +14,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationResult;
-import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
-import roomescape.reservationWaiting.service.ReservationWaitingService;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
+import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.service.ReservationWaitingService;
+import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class ReservationServiceTransactionTest {

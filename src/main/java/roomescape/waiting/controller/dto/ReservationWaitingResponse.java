@@ -1,9 +1,9 @@
-package roomescape.reservationWaiting.controller.dto;
+package roomescape.waiting.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.time.controller.dto.ReservationTimeResponse;
+import roomescape.waiting.service.dto.ReservationWaitingResult;
 
 public record ReservationWaitingResponse(
         Long id,

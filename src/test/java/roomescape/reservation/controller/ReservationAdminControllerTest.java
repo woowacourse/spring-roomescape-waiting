@@ -18,11 +18,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.global.config.WebMvcConfig;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import roomescape.reservation.domain.ReservationSlot;
 
 @WebMvcTest(ReservationAdminController.class)
 @Import(WebMvcConfig.class)
@@ -43,7 +45,7 @@ class ReservationAdminControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme));
 
         given(reservationService.findAll()).willReturn(List.of(ReservationResult.from(reservation)));
 

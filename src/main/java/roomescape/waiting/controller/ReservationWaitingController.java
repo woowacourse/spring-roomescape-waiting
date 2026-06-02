@@ -1,4 +1,4 @@
-package roomescape.reservationWaiting.controller;
+package roomescape.waiting.controller;
 
 import java.net.URI;
 import org.springframework.http.HttpStatus;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Authorized;
 import roomescape.auth.OwnerOnly;
-import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
-import roomescape.reservationWaiting.controller.dto.ReservationWaitingResponse;
-import roomescape.reservationWaiting.service.ReservationWaitingService;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
+import roomescape.waiting.controller.dto.ReservationWaitingRequest;
+import roomescape.waiting.controller.dto.ReservationWaitingResponse;
+import roomescape.waiting.service.ReservationWaitingService;
+import roomescape.waiting.service.dto.ReservationWaitingResult;
 
 @RestController
 @RequestMapping("/reservations-waitings")

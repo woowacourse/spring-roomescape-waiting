@@ -1,9 +1,8 @@
-package roomescape.reservationWaiting.repository;
+package roomescape.waiting.domain;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
 
 public interface ReservationWaitingRepository {
 
@@ -17,5 +16,5 @@ public interface ReservationWaitingRepository {
 
     int deleteById(Long id);
 
-    List<ReservationWaiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    List<ReservationWaiting> findAllByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
 }

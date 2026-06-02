@@ -1,9 +1,9 @@
-package roomescape.reservationWaiting.service.dto;
+package roomescape.waiting.service.dto;
 
 import java.time.LocalDate;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.theme.service.dto.ThemeResult;
 import roomescape.time.service.dto.ReservationTimeResult;
+import roomescape.waiting.domain.ReservationWaiting;
 
 public record ReservationWaitingResult(
         Long id,
@@ -14,11 +14,11 @@ public record ReservationWaitingResult(
 ) {
     public static ReservationWaitingResult from(ReservationWaiting waiting) {
         return new ReservationWaitingResult(
-                waiting.id(),
-                waiting.name(),
-                waiting.date(),
-                ReservationTimeResult.from(waiting.time()),
-                ThemeResult.from(waiting.theme())
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getDate(),
+                ReservationTimeResult.from(waiting.getTime()),
+                ThemeResult.from(waiting.getTheme())
         );
     }
 }

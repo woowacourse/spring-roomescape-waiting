@@ -1,9 +1,9 @@
-package roomescape.reservationWaiting.controller.dto;
+package roomescape.waiting.controller.dto;
 
 import java.time.LocalDate;
 import roomescape.global.exception.BadRequestException;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
+import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
 public record ReservationWaitingRequest(
         String name,

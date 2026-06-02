@@ -1,4 +1,4 @@
-package roomescape.reservationWaiting.service;
+package roomescape.waiting.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -7,12 +7,12 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
-import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.exception.ReservationWaitingErrorCode;
+import roomescape.waiting.service.dto.ReservationWaitingCommand;
+import roomescape.waiting.service.dto.ReservationWaitingResult;
 
 @Service
 @Transactional(readOnly = true)
@@ -47,8 +47,8 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = ReservationWaiting.of(
                 command.name(),
                 command.date(),
-                targetReservation.time(),
-                targetReservation.theme()
+                targetReservation.getTime(),
+                targetReservation.getTheme()
         );
         reservationWaiting.validateExpiry();
         return reservationWaiting;
@@ -66,8 +66,10 @@ public class ReservationWaitingService {
         if (reservationRepository.existsByDateAndTimeIdAndName(command.date(), command.timeId(), command.name())) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
         }
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndName(command.date(), command.timeId(), command.name())) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage()); // Or another appropriate error message
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndName(command.date(), command.timeId(),
+                command.name())) {
+            throw new InvalidBusinessStateException(
+                    ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage()); // Or another appropriate error message
         }
     }
 

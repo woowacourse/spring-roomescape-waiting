@@ -11,11 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.reservation.controller.dto.ReservationRequest;
-import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
 import roomescape.theme.controller.dto.ThemeRequest;
 import roomescape.time.controller.dto.ReservationTimeRequest;
+import roomescape.waiting.controller.dto.ReservationWaitingRequest;
 
 @SpringWebTest
 public class RoomEscapeE2ETest {

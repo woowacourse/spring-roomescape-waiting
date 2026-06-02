@@ -1,11 +1,15 @@
 package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.global.exception.ForbiddenException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -19,111 +23,151 @@ class ReservationTest {
     @DisplayName("성공적으로 예약 도메인 객체를 생성한다.")
     void of_validInput_returnsReservation() {
         // given
-        String name = "브라운";
         LocalDate date = LocalDate.now().plusDays(1);
 
-        // when
-        Reservation reservation = Reservation.of(name, date, reservationTime, theme);
-
-        // then
-        assertThat(reservation.id()).isNull();
-        assertThat(reservation.name()).isEqualTo(name);
-        assertThat(reservation.date()).isEqualTo(date);
-        assertThat(reservation.time()).isEqualTo(reservationTime);
-        assertThat(reservation.theme()).isEqualTo(theme);
+        // when & then
+        assertThatCode(() -> Reservation.of("브라운", date, reservationTime, theme))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("생성된 예약 객체의 필드 값을 확인한다.")
-    void constructor_validInput_storesFields() {
+    @DisplayName("과거 날짜로 예약을 생성하려 하면 InvalidBusinessStateException을 던진다.")
+    void of_pastDate_throwsInvalidBusinessStateException() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate pastDate = LocalDate.now().minusDays(1);
 
-        Reservation reservation = new Reservation(1L, "제임스", date, reservationTime, theme);
-
-        // then
-        assertThat(reservation.id()).isEqualTo(1L);
-        assertThat(reservation.name()).isEqualTo("제임스");
-        assertThat(reservation.date()).isEqualTo(date);
-        assertThat(reservation.time()).isEqualTo(reservationTime);
-        assertThat(reservation.theme()).isEqualTo(theme);
+        // when & then
+        assertThatThrownBy(() -> Reservation.of("브라운", pastDate, reservationTime, theme))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
-    @DisplayName("예약 일자 및 시간을 성공적으로 수정한다.")
-    void update_validInput_returnsUpdatedReservation() {
+    @DisplayName("과거 시간으로 예약을 생성하려 하면 InvalidBusinessStateException을 던진다.")
+    void of_pastTime_throwsInvalidBusinessStateException() {
         // given
-        Reservation original = new Reservation(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme);
-        LocalDate newDate = LocalDate.now().plusDays(2);
-        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
+        LocalDate today = LocalDate.now();
+        LocalTime pastTimeVal = LocalTime.now().minusHours(1);
+        ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
 
-        // when
-        Reservation updated = original.update(newDate, newTime);
-
-        // then
-        assertThat(updated.id()).isEqualTo(original.id());
-        assertThat(updated.name()).isEqualTo(original.name());
-        assertThat(updated.date()).isEqualTo(newDate);
-        assertThat(updated.time()).isEqualTo(newTime);
-        assertThat(updated.theme()).isEqualTo(original.theme());
-    }
-
-    @Test
-    @DisplayName("예약 일자나 시간이 null로 들어오면 기존 값을 유지한다.")
-    void update_nullInput_keepsOriginalValues() {
-        // given
-        Reservation original = new Reservation(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme);
-
-        // when
-        Reservation updated = original.update(null, null);
-
-        // then
-        assertThat(updated.date()).isEqualTo(original.date());
-        assertThat(updated.time()).isEqualTo(original.time());
+        // when & then
+        assertThatThrownBy(() -> Reservation.of("브라운", today, pastTime, theme))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
     }
 
     @Test
     @DisplayName("예약 소유자 이름이 일치하면 예외가 발생하지 않는다.")
     void validateOwner_matchName_doesNotThrow() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
 
         // when & then
-        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> reservation.validateOwner("브라운"));
+        assertThatCode(() -> reservation.validateOwner("브라운"))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("예약 소유자 이름이 일치하지 않으면 예외가 발생한다.")
-    void validateOwner_mismatchName_throwsException() {
+    @DisplayName("예약 소유자 이름이 일치하지 않으면 ForbiddenException을 던진다.")
+    void validateOwner_mismatchName_throwsForbiddenException() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
 
         // when & then
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> reservation.validateOwner("코니"))
-                .isInstanceOf(roomescape.global.exception.ForbiddenException.class)
+        assertThatThrownBy(() -> reservation.validateOwner("코니"))
+                .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
 
     @Test
-    @DisplayName("예약 일자가 과거면 예외가 발생한다.")
-    void validateExpiry_pastDate_throwsException() {
+    @DisplayName("예약 일자가 과거인 상태에서 validateExpiry 실행 시 InvalidBusinessStateException을 던진다.")
+    void validateExpiry_pastDate_throwsInvalidBusinessStateException() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.now().minusDays(1), reservationTime, theme);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme));
 
         // when & then
-        org.assertj.core.api.Assertions.assertThatThrownBy(reservation::validateExpiry)
-                .isInstanceOf(roomescape.global.exception.InvalidBusinessStateException.class)
+        assertThatThrownBy(reservation::validateExpiry)
+                .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
-    @DisplayName("동일한 이름인지 확인한다.")
-    void hasSameName_returnsTrueOrFalse() {
+    @DisplayName("예약 시간(시각)이 과거인 상태에서 validateExpiry 실행 시 InvalidBusinessStateException을 던진다.")
+    void validateExpiry_pastTime_throwsInvalidBusinessStateException() {
         // given
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme);
+        LocalTime pastTimeVal = LocalTime.now().minusHours(1);
+        ReservationTime pastTime = new ReservationTime(2L, pastTimeVal);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now(), pastTime, theme));
 
         // when & then
-        assertThat(reservation.hasSameName("브라운")).isTrue();
-        assertThat(reservation.hasSameName("코니")).isFalse();
+        assertThatThrownBy(reservation::validateExpiry)
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_TIME.getMessage());
+    }
+
+    @Test
+    @DisplayName("소유자가 동일하고 날짜가 유효하면 성공적으로 예약을 수정한다.")
+    void update_validInput_returnsUpdatedReservation() {
+        // given
+        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
+        LocalDate newDate = LocalDate.now().plusDays(2);
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(14, 0));
+
+        // when
+        Reservation updated = original.update(newDate, newTime, "브라운");
+
+        // then
+        assertThat(updated.getDate()).isEqualTo(newDate);
+        assertThat(updated.getTime()).isEqualTo(newTime);
+    }
+
+    @Test
+    @DisplayName("예약 수정 시 날짜와 시간이 null이면 기존의 날짜와 시간을 유지한다.")
+    void update_nullInput_keepsOriginalValues() {
+        // given
+        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
+
+        // when
+        Reservation updated = original.update(null, null, "브라운");
+
+        // then
+        assertThat(updated.getDate()).isEqualTo(original.getDate());
+        assertThat(updated.getTime()).isEqualTo(original.getTime());
+    }
+
+    @Test
+    @DisplayName("소유자가 아닌 사람이 수정을 요청하면 ForbiddenException을 던진다.")
+    void update_mismatchOwner_throwsForbiddenException() {
+        // given
+        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
+
+        // when & then
+        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(2), null, "코니"))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("이미 만료된 예약건에 대해 수정을 요청하면 InvalidBusinessStateException을 던진다.")
+    void update_expiredOriginalReservation_throwsInvalidBusinessStateException() {
+        // given
+        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), reservationTime, theme));
+
+        // when & then
+        assertThatThrownBy(() -> original.update(LocalDate.now().plusDays(1), null, "브라운"))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
+    }
+
+    @Test
+    @DisplayName("수정하려는 타겟 시간대가 이미 지난 과거인 경우 InvalidBusinessStateException을 던진다.")
+    void update_expiredNewDate_throwsInvalidBusinessStateException() {
+        // given
+        Reservation original = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme));
+
+        // when & then
+        assertThatThrownBy(() -> original.update(LocalDate.now().minusDays(1), null, "브라운"))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationErrorCode.INVALID_DATE.getMessage());
     }
 }

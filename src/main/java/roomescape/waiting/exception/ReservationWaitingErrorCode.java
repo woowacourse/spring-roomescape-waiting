@@ -1,4 +1,4 @@
-package roomescape.reservationWaiting.exception;
+package roomescape.waiting.exception;
 
 public enum ReservationWaitingErrorCode {
     ALREADY_RESERVED("이미 본인이 예약 완료한 타임 슬롯입니다. 마이페이지에서 예약 내역을 확인해 주세요."),

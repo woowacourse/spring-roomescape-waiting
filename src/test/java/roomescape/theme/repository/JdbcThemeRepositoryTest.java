@@ -125,7 +125,7 @@ class JdbcThemeRepositoryTest {
         long timeId = insertTestReservationTime(testTime);
         Long themeId = insertTestTheme(testTheme);
 
-        insertTestReservationSlot(timeId, themeId);
+        insertTestReservation(timeId, themeId);
         Theme savedTheme = new Theme(themeId, testTheme.getName(), testTheme.getDescription(), testTheme.getThumbnailUrl());
 
         //when & then
@@ -134,11 +134,11 @@ class JdbcThemeRepositoryTest {
         ).isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    private void insertTestReservationSlot(long timeId, Long themeId) {
+    private void insertTestReservation(long timeId, Long themeId) {
         jdbcTemplate.update("""
-                    insert into reservation_slot(reservation_date, time_id, theme_id)
-                    values (?, ?, ?)
-                """, LocalDate.of(2026, 5, 6), timeId, themeId
+                    insert into reservation(name, reservation_date, time_id, theme_id)
+                    values (?, ?, ?, ?)
+                """, "브라운", LocalDate.of(2026, 5, 6), timeId, themeId
         );
     }
 

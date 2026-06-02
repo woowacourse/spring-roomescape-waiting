@@ -96,12 +96,10 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 SELECT t.id, t.start_at,
                        CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked
                 FROM reservation_time t 
-                LEFT JOIN reservation_slot s
-                ON t.id = s.time_id
-                AND s.theme_id = ?
-                AND s.reservation_date = ?
                 LEFT JOIN reservation r
-                ON s.id = r.slot_id
+                ON t.id = r.time_id
+                AND r.theme_id = ?
+                AND r.reservation_date = ?
                 """;
 
         RowMapper<AvailableTimeQueryResult> availableTimeRowMapper = (rs, rowNum) ->

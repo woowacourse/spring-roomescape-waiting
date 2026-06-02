@@ -1,4 +1,4 @@
-package roomescape.reservationWaiting.repository;
+package roomescape.waiting.repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -10,36 +10,39 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.reservationWaiting.repository.entity.ReservationWaitingEntity;
-import roomescape.theme.repository.entity.ThemeEntity;
-import roomescape.time.repository.entity.ReservationTimeEntity;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaitingRepository;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private static final RowMapper<ReservationWaiting> RESERVATION_WAITING_ROW_MAPPER = (resultSet, rowNum) -> {
-        ReservationTimeEntity timeEntity = new ReservationTimeEntity(
+        ReservationTime time = new ReservationTime(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("time_start_at").toLocalTime()
         );
 
-        ThemeEntity themeEntity = new ThemeEntity(
+        Theme theme = new Theme(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail_url")
         );
 
-        ReservationWaitingEntity waitingEntity = new ReservationWaitingEntity(
-                resultSet.getLong("reservation_waiting_id"),
-                resultSet.getString("reservation_waiting_name"),
+        ReservationSlot slot = new ReservationSlot(
                 resultSet.getDate("reservation_waiting_date").toLocalDate(),
-                timeEntity,
-                themeEntity
+                time,
+                theme
         );
 
-        return ReservationWaitingMapper.toDomain(waitingEntity);
+        return new ReservationWaiting(
+                resultSet.getLong("reservation_waiting_id"),
+                resultSet.getString("reservation_waiting_name"),
+                slot
+        );
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -50,8 +53,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
-        ReservationWaitingEntity entity = ReservationWaitingMapper.toEntity(reservationWaiting);
-
         String sql = """
                 INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id)
                 VALUES (?, ?, ?, ?)
@@ -61,24 +62,21 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, entity.getName());
-            ps.setDate(2, Date.valueOf(entity.getDate()));
-            ps.setLong(3, entity.getTime().getId());
-            ps.setLong(4, entity.getTheme().getId());
+            ps.setString(1, reservationWaiting.getName());
+            ps.setDate(2, Date.valueOf(reservationWaiting.getDate()));
+            ps.setLong(3, reservationWaiting.getTime().getId());
+            ps.setLong(4, reservationWaiting.getTheme().getId());
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
 
-        ReservationWaitingEntity savedEntity = new ReservationWaitingEntity(
+        return new ReservationWaiting(
                 id,
-                entity.getName(),
-                entity.getDate(),
-                entity.getTime(),
-                entity.getTheme()
+                reservationWaiting.getName(),
+                new ReservationSlot(reservationWaiting.getDate(), reservationWaiting.getTime(),
+                        reservationWaiting.getTheme())
         );
-
-        return ReservationWaitingMapper.toDomain(savedEntity);
     }
 
     @Override
@@ -109,26 +107,24 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public List<ReservationWaiting> findAllByName(String name) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
-                               r.name AS reservation_waiting_name,
-                               r.reservation_date AS reservation_waiting_date,
-                               r.time_id,
-                               t.start_at AS time_start_at,
-                               h.id AS theme_id,
-                               h.name AS theme_name,
-                               h.description AS theme_description,
-                               h.thumbnail_url AS theme_thumbnail_url
-                        FROM reservation_waiting r
-                        INNER JOIN reservation_time t
-                          ON r.time_id = t.id
-                        INNER JOIN theme h
-                          ON r.theme_id = h.id
+                       r.name AS reservation_waiting_name,
+                       r.reservation_date AS reservation_waiting_date,
+                       r.time_id,
+                       t.start_at AS time_start_at,
+                       h.id AS theme_id,
+                       h.name AS theme_name,
+                       h.description AS theme_description,
+                       h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_waiting r
+                INNER JOIN reservation_time t
+                  ON r.time_id = t.id
+                INNER JOIN theme h
+                  ON r.theme_id = h.id
                 WHERE r.name = ?
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, name);
     }
-
-
 
     @Override
     public boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name) {
@@ -144,8 +140,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         return Boolean.TRUE.equals(exists);
     }
 
-
-
     @Override
     public int deleteById(Long id) {
         String sql = """
@@ -157,7 +151,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public List<ReservationWaiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public List<ReservationWaiting> findAllByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId,
+                                                                              Long themeId) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
                        r.name AS reservation_waiting_name,
@@ -173,6 +168,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 INNER JOIN theme h ON r.theme_id = h.id
                 WHERE r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
                 ORDER BY r.id ASC
+                FOR UPDATE
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId);

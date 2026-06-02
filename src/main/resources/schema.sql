@@ -18,34 +18,27 @@ CREATE TABLE theme (
     PRIMARY KEY (id)
 );
 
-CREATE TABLE reservation_slot (
-    id                 BIGINT           NOT NULL AUTO_INCREMENT,
-    reservation_date   DATE             NOT NULL,
-    time_id            BIGINT           NOT NULL,
-    theme_id           BIGINT           NOT NULL,
+CREATE TABLE reservation (
+    id                 BIGINT          NOT NULL AUTO_INCREMENT,
+    name               VARCHAR(255)    NOT NULL,
+    reservation_date   DATE            NOT NULL,
+    time_id            BIGINT          NOT NULL,
+    theme_id           BIGINT          NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (reservation_date, time_id, theme_id)
 );
 
-CREATE TABLE reservation (
-    id                 BIGINT          NOT NULL AUTO_INCREMENT,
-    name               VARCHAR(255)    NOT NULL,
-    slot_id            BIGINT          NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    UNIQUE (slot_id)
-);
-
 CREATE TABLE reservation_waiting (
     id                 BIGINT       NOT NULL AUTO_INCREMENT,
     name               VARCHAR(255) NOT NULL,
-    slot_id            BIGINT       NOT NULL,
+    reservation_date   DATE         NOT NULL,
+    time_id            BIGINT       NOT NULL,
+    theme_id           BIGINT       NOT NULL,
     deleted_at         TIMESTAMP    NOT NULL DEFAULT '1970-01-01 00:00:00',
     PRIMARY KEY (id),
-    FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    UNIQUE (slot_id, name, deleted_at)
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    UNIQUE (reservation_date, time_id, theme_id, name, deleted_at)
 );
-
-

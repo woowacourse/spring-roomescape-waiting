@@ -24,12 +24,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.global.config.WebMvcConfig;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import roomescape.reservation.domain.ReservationSlot;
 
 @WebMvcTest(ReservationController.class)
 @Import(WebMvcConfig.class)
@@ -54,7 +56,7 @@ class ReservationControllerTest {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme);
+        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme));
 
         given(reservationService.save(any())).willReturn(ReservationResult.from(reservation));
 

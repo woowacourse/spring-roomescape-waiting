@@ -22,14 +22,14 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-import roomescape.reservationWaiting.service.ReservationWaitingService;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
+import roomescape.waiting.service.ReservationWaitingService;
+import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
 @SpringWebTest
 class ConcurrencyIntegrationTest {
@@ -182,7 +182,7 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> themeService.deleteById(1L),
+                () -> themeService.delete(1L),
                 100,
                 NotFoundException.class
         );
