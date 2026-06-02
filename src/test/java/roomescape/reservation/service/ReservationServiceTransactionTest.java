@@ -23,9 +23,11 @@ import roomescape.theme.service.dto.ThemeResult;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.service.ReservationWaitingService;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class ReservationServiceTransactionTest {
@@ -98,7 +100,8 @@ public class ReservationServiceTransactionTest {
 
         doThrow(new RuntimeException("대기 예약 삭제 중 에러 발생"))
                 .when(reservationWaitingRepository)
-                .deleteById(any(Long.class));
+                .delete(any(ReservationWaiting.class));
+
 
         // when
         assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName))

@@ -357,9 +357,10 @@ class ReservationServiceTest {
         // then
         then(reservationRepository).should().delete(targetReservation);
         then(reservationWaitingRepository).should().findAllByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L);
-        then(reservationWaitingRepository).should().deleteById(20L);
+        then(reservationWaitingRepository).should().delete(w2);
         then(reservationRepository).should().save(Reservation.of("정상대기자", date, time, theme));
     }
+
 
     @Test
     @DisplayName("존재하지 않는 ID로 예약을 조회하면 NotFoundException을 던진다.")

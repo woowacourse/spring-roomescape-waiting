@@ -141,13 +141,16 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public int deleteById(Long id) {
+    public void delete(ReservationWaiting reservationWaiting) {
         String sql = """
                 DELETE FROM reservation_waiting
                 WHERE id = ?
                 """;
 
-        return jdbcTemplate.update(sql, id);
+        int affected = jdbcTemplate.update(sql, reservationWaiting.getId());
+        if (affected == 0) {
+            throw new roomescape.global.exception.NotFoundException(roomescape.waiting.exception.ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
+        }
     }
 
     @Override

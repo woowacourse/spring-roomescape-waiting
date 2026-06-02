@@ -172,7 +172,8 @@ public class ReservationService {
     }
 
     private void createReservationFromWaiting(ReservationWaiting waiting) {
-        reservationWaitingRepository.deleteById(waiting.getId());
+        reservationWaitingRepository.delete(waiting);
+
 
         Reservation newReservation = Reservation.of(
                 waiting.getName(),

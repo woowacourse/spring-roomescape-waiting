@@ -318,10 +318,11 @@ class ConcurrencyIntegrationTest {
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.delete(1L, "포비"),
+                () -> reservationWaitingService.deleteById(1L, "포비"),
                 100,
                 NotFoundException.class
         );
+
 
         // then
         assertThat(result.get(0)).isEqualTo(1);
