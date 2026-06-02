@@ -20,6 +20,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationResult;
+import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
@@ -64,7 +65,7 @@ public class ReservationServiceTransactionTest {
     }
 
     @Test
-    void deleteById_rollback() {
+    void delete_rollback() {
         // given
         ReservationTimeResult reservationTimeResult = saveReservationTime();
         ThemeResult themeResult = saveTheme();
@@ -91,7 +92,7 @@ public class ReservationServiceTransactionTest {
     }
 
     @Test
-    void deleteById_rollback_when_waiting_delete_fails() {
+    void delete_rollbackWhenWaitingDeleteFails() {
         // given
         ReservationTimeResult reservationTimeResult = saveReservationTime();
         ThemeResult themeResult = saveTheme();
@@ -125,6 +126,64 @@ public class ReservationServiceTransactionTest {
                 reservationResult.theme().id()
         );
         reservationWaitingService.save(reservationWaitingCommand);
+    }
+
+    @Test
+    void save_rollback() {
+        // given
+        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ThemeResult themeResult = saveTheme();
+        ReservationCommand command = new ReservationCommand(
+                "홍길동",
+                LocalDate.now().plusDays(1),
+                reservationTimeResult.id(),
+                themeResult.id()
+        );
+
+        doThrow(new RuntimeException("저장 중 에러 발생"))
+                .when(reservationRepository)
+                .save(any(Reservation.class));
+
+        // when
+        assertThatThrownBy(() -> reservationService.save(command))
+                .isInstanceOf(RuntimeException.class);
+
+        // then
+        List<Reservation> reservations = reservationRepository.findAllByName("홍길동");
+        Assertions.assertTrue(reservations.isEmpty());
+    }
+
+    @Test
+    void update_rollback() {
+        // given
+        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ThemeResult themeResult = saveTheme();
+
+        // 시간 하나 더 생성 (수정용)
+        ReservationTimeCommand command2 = new ReservationTimeCommand(LocalTime.now().plusHours(2));
+        ReservationTimeResult time2 = reservationTimeService.save(command2);
+
+        ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
+        ReservationResult reservationResult = reservationService.save(reservationCommand);
+
+        Long testTargetId = reservationResult.id();
+        String testTargetOwnerName = reservationResult.name();
+
+        ReservationUpdateCommand updateCommand = new ReservationUpdateCommand(LocalDate.now().plusDays(5), time2.id());
+
+        doThrow(new RuntimeException("수정 중 에러 발생"))
+                .when(reservationRepository)
+                .update(any(Reservation.class));
+
+        // when
+        assertThatThrownBy(() -> reservationService.update(updateCommand, testTargetId, testTargetOwnerName))
+                .isInstanceOf(RuntimeException.class);
+
+        // then
+        Optional<Reservation> result = reservationRepository.findById(testTargetId);
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertEquals(reservationResult.date(), result.get().getDate());
+        Assertions.assertEquals(reservationResult.time().id(), result.get().getTimeId());
     }
 
     private static ReservationCommand saveReservation(
