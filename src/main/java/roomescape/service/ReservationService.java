@@ -91,8 +91,9 @@ public class ReservationService {
         ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationRequest.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationRequest.timeId()));
 
-        Reservation.validateNoPast(reservationRequest.date(), newTime);
-        validateDuplicatedReservation(new ReservationSlot(reservationRequest.date(), newTime, existedReservation.getTheme()));
+        ReservationSlot newSlot = new ReservationSlot(reservationRequest.date(), newTime, existedReservation.getTheme());
+        newSlot.validateNoPast();
+        validateDuplicatedReservation(newSlot);
 
         Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationRequest.date(), newTime);
 

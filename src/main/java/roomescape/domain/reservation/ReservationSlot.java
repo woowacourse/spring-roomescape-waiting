@@ -2,7 +2,10 @@ package roomescape.domain.reservation;
 
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.ExpiredDateTimeException;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReservationSlot {
 
@@ -34,6 +37,12 @@ public class ReservationSlot {
 
     public Long getThemeId() {
         return theme.getId();
+    }
+
+    public void validateNoPast() {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new ExpiredDateTimeException();
+        }
     }
 
     @Override

@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 
 public class ReservationWaiting {
@@ -65,9 +64,7 @@ public class ReservationWaiting {
     }
 
     public void validatePastDateTime() {
-        if(LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt()).isBefore(LocalDateTime.now())) {
-            throw new ExpiredDateTimeException();
-        }
+        slot.validateNoPast();
     }
 
     public void validateOwner(String name) {
