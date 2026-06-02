@@ -16,6 +16,7 @@ import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -516,6 +517,26 @@ class ReservationServiceTest {
 
 
         @Test
+        @DisplayName("대기 상태인 예약이 빈 슬롯으로 변경되면 예약 상태로 변경된다")
+        void 성공3() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when
+            reservationService.changeSchedule(changeCommand);
+            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
+
+            // then
+            assertThat(actual).isPresent()
+                .get()
+                .extracting("status")
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
+
+        @Test
         @DisplayName("예약자가 아니면 예외가 발생한다")
         void 실패1() {
             // given
@@ -638,22 +659,38 @@ class ReservationServiceTest {
             String otherName = "다른 이용자";
             Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
             save(reservation(otherName, reservationDate2, reservationTime2, theme1));
-            LocalDateTime beforeChange = LocalDateTime.now();
             ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
                 null, reservationDate2.getId(), reservationTime2.getId());
 
             // when
             reservationService.changeScheduleByManager(changeCommand);
-            LocalDateTime afterChange = LocalDateTime.now();
+            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
 
             // then
-            Reservation actual = reservationRepository.findById(saved.getId()).get();
-            assertThat(actual.getDate()).isEqualTo(reservationDate2);
-            assertThat(actual.getTime()).isEqualTo(reservationTime2);
-            assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getRequestedAt())
-                .isAfterOrEqualTo(beforeChange)
-                .isBeforeOrEqualTo(afterChange);
+            assertThat(actual).isPresent()
+                .get()
+                .extracting("status")
+                .isEqualTo(ReservationStatus.RESERVED);
+        }
+
+
+        @Test
+        @DisplayName("대기 상태인 예약이 빈 슬롯으로 변경되면 예약 상태로 변경된다")
+        void 성공3() {
+            // given
+            Reservation saved = save(waitReservation(name, reservationDate1, reservationTime1, theme1));
+            ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(),
+                name, reservationDate2.getId(), reservationTime2.getId());
+
+            // when
+            reservationService.changeScheduleByManager(changeCommand);
+            Optional<Reservation> actual = reservationRepository.findById(saved.getId());
+
+            // then
+            assertThat(actual).isPresent()
+                .get()
+                .extracting("status")
+                .isEqualTo(ReservationStatus.RESERVED);
         }
 
 

@@ -119,9 +119,9 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
+        reservation.changeSchedule(command.requesterName(), newDate, newTime);
         lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
         decideStatus(command, reservation);
-        reservation.changeSchedule(command.requesterName(), newDate, newTime);
         reservation.changeRequestedAt(LocalDateTime.now());
         reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
@@ -153,7 +153,9 @@ public class ReservationService {
             command.dateId(), command.timeId(), reservation.getTheme().getId());
         if (isReservedSlot) {
             reservation.updateStatus(WAITING);
+            return;
         }
+        reservation.updateStatus(RESERVED);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
