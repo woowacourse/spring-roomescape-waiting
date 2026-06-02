@@ -3,6 +3,7 @@ package roomescape.service.reservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
+import roomescape.domain.ReserverName;
 import roomescape.domain.reservation.Reservation;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
@@ -18,13 +19,7 @@ public class ReservationValidator {
     }
 
     public void validateLookupName(final String name) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 필수입니다.");
-        }
-
-        if (name.length() >= 10) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 10자 미만이어야 합니다.");
-        }
+        ReserverName.from(name);
     }
 
     public void validateCreateReferenceIds(final Long themeId, final Long timeId) {
