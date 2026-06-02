@@ -49,7 +49,7 @@ public class WaitingService {
             return;
         }
 
-        if (!Objects.equals(waiting.getMemberId(), memberId)) {
+        if (!waiting.isSameMemberId(memberId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, waitingId);
         }
 
@@ -79,7 +79,7 @@ public class WaitingService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
-        if (!Objects.equals(reservation.getMemberId(), memberId)) {
+        if (!reservation.isSameMemberId(memberId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
 

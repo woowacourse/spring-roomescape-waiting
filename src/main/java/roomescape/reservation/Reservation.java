@@ -13,4 +13,8 @@ public class Reservation {
     public static Reservation of(long id, long memberId, long scheduleId) {
         return new Reservation(id, memberId, scheduleId);
     }
+
+    public boolean isSameMemberId(long otherMemberId) {
+        return this.memberId.equals(otherMemberId);
+    }
 }

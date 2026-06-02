@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
+
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final ScheduleService scheduleService;
@@ -39,7 +40,7 @@ public class ReservationService {
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = resolveScheduleId(body.date(), body.timeId(), body.themeId());
-        validateReservationAlreadyExistsNot(scheduleId);
+        validateNotReservationAlreadyExists(scheduleId);
         Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
 
         return ReservationSaveResponse.from(reservation);
@@ -114,16 +115,6 @@ public class ReservationService {
         return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
     }
 
-    private void validateReservationOwner(
-            long reservationId,
-            ReservationDetailProjection reservationDetail,
-            long memberId
-    ) {
-        if (!Objects.equals(reservationDetail.memberId(), memberId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
-        }
-    }
-
     private Comparator<MyReservationsAndWaitingsDetailResponse> reservationOrderComparator(ReservationPeriod period) {
         Comparator<MyReservationsAndWaitingsDetailResponse> comparator =
                 Comparator.comparing(MyReservationsAndWaitingsDetailResponse::date)
@@ -166,10 +157,10 @@ public class ReservationService {
     ) {
         LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
         long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
-        long newScheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(newDate, newTimeId, oldReservation.getThemeId());
+        long newScheduleId = resolveScheduleId(newDate, newTimeId, oldReservation.getThemeId());
 
         scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId());
-        validateDuplicatedReservationNot(reservationId, newScheduleId);
+        validateNotDuplicatedReservation(reservationId, newScheduleId);
         return newScheduleId;
     }
 
@@ -215,6 +206,16 @@ public class ReservationService {
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 
+    private void validateReservationOwner(
+            long reservationId,
+            ReservationDetailProjection reservationDetail,
+            long memberId
+    ) {
+        if (!Objects.equals(reservationDetail.memberId(), memberId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
+        }
+    }
+
     private void validateReservationUpdated(int affectedRow) {
         if (affectedRow != 1) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
@@ -238,13 +239,13 @@ public class ReservationService {
         validateNotEmptyUpdateRequest(body);
     }
 
-    private void validateDuplicatedReservationNot(long reservationId, long scheduleId) {
+    private void validateNotDuplicatedReservation(long reservationId, long scheduleId) {
         if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
         }
     }
 
-    private void validateReservationAlreadyExistsNot(long scheduleId) {
+    private void validateNotReservationAlreadyExists(long scheduleId) {
         if (reservationRepository.existsByScheduleId(scheduleId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
         }
