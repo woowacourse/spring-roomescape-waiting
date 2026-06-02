@@ -108,12 +108,12 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                   ON r.time_id = t.id
                 INNER JOIN theme h
                   ON r.theme_id = h.id
-                WHERE r.reservation_date = ? AND time_id = ? AND theme_id = ?
+                WHERE r.reservation_date = ? AND theme_id = ? AND time_id = ?
                 ORDER BY r.id ASC
                 LIMIT 1
                 """;
 
-        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, themeId, timeId)
                 .stream().findFirst();
     }
 
@@ -147,11 +147,11 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT EXISTS (
                     SELECT 1
                     FROM reservation_waiting
-                    WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND name = ?
+                    WHERE reservation_date = ?  AND theme_id = ? AND time_id = ? AND name = ?
                 )
                 """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, name);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, themeId, timeId, name);
         return Boolean.TRUE.equals(exists);
     }
 
@@ -161,11 +161,11 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT EXISTS (
                     SELECT 1
                     FROM reservation_waiting
-                    WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
+                    WHERE reservation_date = ?  AND theme_id = ? AND time_id = ?
                 )
                 """;
 
-        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, themeId, timeId);
         return Boolean.TRUE.equals(exists);
     }
 
@@ -185,9 +185,9 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         String sql = """
                 SELECT COUNT(*)
                 FROM reservation_waiting 
-                WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id < ?;
+                WHERE reservation_date = ? AND theme_id = ? AND time_id = ? AND id < ?;
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Long.class, date, timeId, themeId, id);
+        return jdbcTemplate.queryForObject(sql, Long.class, date, themeId, timeId, id);
     }
 }

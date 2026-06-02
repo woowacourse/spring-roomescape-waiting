@@ -91,19 +91,23 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<AvailableTimeQueryResult> findAvailableTimes(Long themeId, LocalDate date) {
         String sql = """
-           SELECT t.id, t.start_at
-           FROM reservation_time t
-           LEFT JOIN reservation r
-             ON t.id = r.time_id
-            AND r.theme_id = ?
-            AND r.reservation_date = ?
-           LEFT JOIN reservation_waiting w
-             ON t.id = w.time_id
-            AND w.theme_id = ?
-            AND w.reservation_date = ?
-           WHERE r.id IS NULL
-             AND w.id IS NULL
-           ORDER BY start_at ASC
+        SELECT t.id, t.start_at
+        FROM reservation_time t
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM reservation r
+            WHERE r.reservation_date = ?
+              AND r.theme_id = ?
+              AND r.time_id = t.id
+        )
+        AND NOT EXISTS (
+            SELECT 1
+            FROM reservation_waiting w
+            WHERE w.reservation_date = ?
+              AND w.theme_id = ?
+              AND w.time_id = t.id
+        )
+        ORDER BY t.start_at ASC
            """;
 
         RowMapper<AvailableTimeQueryResult> availableTimeRowMapper = (rs, rowNum) ->
@@ -112,7 +116,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                         rs.getTime("start_at").toLocalTime()
                 );
 
-        return jdbcTemplate.query(sql, availableTimeRowMapper, themeId, date, themeId, date);
+        return jdbcTemplate.query(sql, availableTimeRowMapper, date, themeId, date, themeId);
     }
 
     @Override
