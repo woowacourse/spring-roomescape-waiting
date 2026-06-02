@@ -1,0 +1,120 @@
+package roomescape.theme;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import roomescape.support.ControllerTestSupport;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+
+public class ThemeApiIntegrationTest extends ControllerTestSupport {
+
+    @MockitoBean
+    private Clock clock;
+
+    @Test
+    void 각_날짜에_존재하는_모든_테마_조회_API_테스트() {
+        String accessToken = loginUserToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .queryParam("date", "2026-05-05")
+                .when().get("/api/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4))
+                .body("data[0].id", is(1))
+                .body("data[1].id", is(2))
+                .body("data[2].id", is(3))
+                .body("data[3].id", is(4));
+    }
+
+    @Test
+    void 최근_7일_예약_개수에_따른_인기_테마_조회_API_테스트() {
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 7)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+        );
+
+        RestAssured.given().log().all()
+                .when().get("/api/themes/popular")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(3))
+                .body("data[0].id", is(2))
+                .body("data[1].id", is(1))
+                .body("data[2].id", is(3));
+    }
+
+    @Test
+    void 매니저_테마_저장_API_테스트() {
+        String accessToken = loginManagerToken();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "무서운게 딱 좋아");
+        params.put("description", "무서운 분위기의 방탈출");
+        params.put("thumbnailUrl", "https://example.com/theme.jpg");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/api/manager/themes")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true));
+    }
+
+    @Test
+    void 매니저_테마_전체_조회_API_테스트() {
+        String accessToken = loginManagerToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/manager/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4))
+                .body("data[0].id", is(1))
+                .body("data[1].id", is(2))
+                .body("data[2].id", is(3))
+                .body("data[3].id", is(4));
+    }
+
+    @Test
+    void 매니저_테마_추가_및_삭제_API_테스트() {
+        String accessToken = loginManagerToken();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "무서운게 딱 좋아");
+        params.put("description", "무서운 분위기의 방탈출");
+        params.put("thumbnailUrl", "https://example.com/theme.jpg");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/api/manager/themes")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.id", is(5));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().delete("/api/manager/themes/5")
+                .then().log().all()
+                .statusCode(204);
+    }
+}

@@ -1,0 +1,109 @@
+package roomescape.reservation;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import roomescape.common.api.ApiResponse;
+import roomescape.member.AuthenticatedMember;
+import roomescape.member.Role;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.ReservationSaveResponse;
+import roomescape.reservation.presentation.ManagerReservationController;
+import roomescape.reservation.presentation.UserReservationController;
+import roomescape.reservationtime.dto.response.TimeInformation;
+import roomescape.theme.dto.response.ThemeFindResponse;
+
+@ExtendWith(MockitoExtension.class)
+class ReservationControllerTest {
+
+    @Mock
+    private ReservationService reservationService;
+
+    private UserReservationController userReservationController;
+    private ManagerReservationController managerReservationController;
+
+    @BeforeEach
+    void setUp() {
+        userReservationController = new UserReservationController(reservationService);
+        managerReservationController = new ManagerReservationController(reservationService);
+    }
+
+    @Test
+    void 유저_예약_생성_응답_테스트() {
+        ReservationSaveRequest request = new ReservationSaveRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+        AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
+        ReservationSaveResponse serviceResponse = new ReservationSaveResponse(5L, 1L, 4L);
+        when(reservationService.save(request, member.id())).thenReturn(serviceResponse);
+
+        ResponseEntity<ApiResponse<ReservationSaveResponse>> response = userReservationController.save(request, member);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
+    }
+
+    @Test
+    void 유저_예약_삭제_응답_테스트() {
+        AuthenticatedMember member = AuthenticatedMember.of(1L, Role.USER);
+
+        ResponseEntity<ApiResponse<Void>> response = userReservationController.deleteByUser(1L, member);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(reservationService).deleteByIdForUser(1L, member.id());
+    }
+
+    @Test
+    void 매니저_예약_목록_조회_응답_테스트() {
+        List<ReservationDetailFindResponse> serviceResponse = List.of(reservationDetailResponse());
+        when(reservationService.findReservationDetails()).thenReturn(serviceResponse);
+
+        ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> response =
+                managerReservationController.findReservationDetails();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().success()).isTrue();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
+    }
+
+    @Test
+    void 매니저_예약_수정_응답_테스트() {
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 5, 6), 2L);
+        ReservationSaveResponse serviceResponse = new ReservationSaveResponse(1L, 1L, 5L);
+        when(reservationService.update(request, 1L)).thenReturn(serviceResponse);
+
+        ResponseEntity<ApiResponse<ReservationSaveResponse>> response =
+                managerReservationController.updateByManager(request, 1L);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().data()).isEqualTo(serviceResponse);
+    }
+
+    private ReservationDetailFindResponse reservationDetailResponse() {
+        return new ReservationDetailFindResponse(
+                1L,
+                "a",
+                LocalDate.of(2026, 5, 5),
+                new ThemeFindResponse(1L, "theme", "description", "thumbnail"),
+                new TimeInformation(1L, java.time.LocalTime.of(10, 0)),
+                ReservationStatus.RESERVED,
+                null
+        );
+    }
+}

@@ -1,0 +1,591 @@
+/* 공통 스타일 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background-color: #f0f2f5;
+  color: #1c1e21;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+h1 { font-size: 1.5rem; color: #1a1a1a; }
+h2 { font-size: 1.25rem; margin: 25px 0 15px; display: flex; align-items: center; }
+h3 { font-size: 1.1rem; color: #4b5563; margin-bottom: 15px; }
+
+/* 상단 링크 버튼 */
+.link-row { display: flex; gap: 8px; }
+.link-button {
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f1f3f5;
+  color: #495057;
+  transition: 0.2s;
+}
+.link-button:hover { background: #e9ecef; }
+.admin-link { background: #343a40; color: #fff; }
+.admin-link:hover { background: #000; }
+
+/* 폼 디자인 */
+.row-form {
+  display: flex;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.row-form label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+input {
+  margin-top: 6px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4dabf7;
+  box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+}
+
+/* 버튼 디자인 */
+button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.search-button { background: #4dabf7; color: white; }
+.primary-button {
+  background: #228be6;
+  color: white;
+  width: 100%;
+  padding: 15px;
+  font-size: 1.1rem;
+}
+
+button:disabled {
+  background: #ced4da;
+  cursor: not-allowed;
+}
+
+/* 선택 요약 바 (Pills) */
+.selection-summary {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.summary-pill {
+  background: #e7f5ff;
+  color: #1971c2;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid #a5d8ff;
+}
+
+/* 시간 선택 칩 디자인 */
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* JS에서 생성될 칩 스타일 예시 */
+.chips-container > * {
+  padding: 10px 20px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#available-times .chip {
+  min-width: 110px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+#edit-available-times .chip {
+  min-width: 110px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+#available-times .chip:hover:not(:disabled) {
+  border-color: #74c0fc;
+  background: #e7f5ff;
+}
+
+#edit-available-times .chip:hover:not(:disabled) {
+  border-color: #74c0fc;
+  background: #e7f5ff;
+}
+
+#available-times .chip.selected {
+  background: #1c7ed6;
+  border-color: #1864ab;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(116, 192, 252, 0.45);
+  transform: translateY(-1px);
+}
+
+#edit-available-times .chip.selected {
+  background: #1c7ed6;
+  border-color: #1864ab;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(116, 192, 252, 0.45);
+  transform: translateY(-1px);
+}
+
+#available-times .chip.selected::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+#edit-available-times .chip.selected::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+#available-times .chip.disabled,
+#available-times .chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#available-times .chip.waitable {
+  border-color: #f59f00;
+  background: #fff9db;
+  color: #8a5a00;
+}
+
+#available-times .chip.waitable:hover {
+  border-color: #f08c00;
+  background: #ffec99;
+}
+
+#edit-available-times .chip.disabled,
+#edit-available-times .chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 리스트 디자인 */
+.list {
+  list-style: none;
+  margin: 15px 0;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.list li {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.list li:last-child { border-bottom: none; }
+.list li:hover { background: #f1f3f5; }
+
+.theme-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-list li.theme-item {
+  cursor: pointer;
+}
+
+.theme-list li.theme-item.selected {
+  background: #e7f5ff;
+  border-left: 4px solid #1c7ed6;
+}
+
+.theme-thumbnail {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.list li.empty-message {
+  color: #6b7280;
+  font-style: italic;
+  cursor: default;
+}
+
+/* 인기 순위 리스트 */
+.popular-ranking {
+  counter-reset: my-counter;
+  border: none;
+}
+
+.popular-ranking li {
+  counter-increment: my-counter;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin-bottom: 8px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+}
+
+.popular-ranking li::before {
+  content: counter(my-counter);
+  font-weight: 800;
+  width: 30px;
+  height: 30px;
+  background: #ffec99;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  margin-right: 15px;
+  font-size: 0.9rem;
+}
+
+/* 하단 상태 바 */
+.status-bar {
+  position: sticky;
+  bottom: 20px;
+  background: #343a40;
+  color: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  min-height: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-top: 40px;
+}
+
+.divider {
+  margin: 40px 0;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+.mt-40 { margin-top: 40px; }
+
+.admin-section-toggle {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #fff;
+  margin: 16px 0;
+  padding: 0 12px 12px;
+}
+
+.admin-section-toggle > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-section-toggle > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-section-toggle > summary h2 {
+  margin: 0;
+}
+
+.admin-section-toggle > summary::after {
+  content: "▾";
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.admin-section-toggle[open] > summary {
+  border-bottom: 1px solid #f1f3f5;
+  margin-bottom: 12px;
+}
+
+.admin-section-toggle[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.admin-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.admin-form {
+  margin-bottom: 0;
+}
+
+.inline-form {
+  margin-bottom: 0;
+}
+
+.admin-card .row-form {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.admin-card .row-form label {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-card .row-form button {
+  width: 100%;
+}
+
+.reservation-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 14px 0 8px;
+}
+
+.reservation-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.danger-button {
+  background: #e03131;
+  color: #fff;
+}
+
+.danger-button:hover {
+  background: #c92a2a;
+}
+
+.my-reservation-section {
+  margin-top: 20px;
+}
+
+.reservation-cards {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.reservation-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+
+.reservation-card.waiting-card {
+  border-color: #ffe8a3;
+  background: #fffdf5;
+}
+
+.reservation-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.reservation-card-head p {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.reservation-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-badge.reserved {
+  background: #e7f5ff;
+  color: #1864ab;
+}
+
+.status-badge.waiting {
+  background: #fff3bf;
+  color: #8a5a00;
+}
+
+.reservation-card-body p {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.reservation-card-body span {
+  color: #6b7280;
+}
+
+.menu-wrapper {
+  position: relative;
+}
+
+.menu-button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  padding: 0;
+}
+
+.menu-panel {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.menu-item {
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: #111827;
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.menu-item:hover {
+  background: #f3f4f6;
+}
+
+.menu-item.delete {
+  color: #dc2626;
+}
+
+.modal-card .row-form.modal-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.modal-card .row-form.modal-form label {
+  flex: none;
+  width: 100%;
+}
+
+.modal-card .row-form.modal-form input {
+  width: 100%;
+}
+
+.modal-card .row-form.modal-form button {
+  width: 100%;
+}
+
+@media (min-width: 860px) {
+  .admin-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.modal-card {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-card.success {
+  border-color: #86efac;
+}
+
+.modal-card.error {
+  border-color: #fca5a5;
+}
+
+.modal-message {
+  margin: 8px 0 14px;
+  color: #334155;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

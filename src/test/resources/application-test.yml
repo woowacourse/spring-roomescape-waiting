@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test_room_escape-${random.uuid}
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:test-data.sql
+
+auth:
+  jwt:
+    secret: test-roomescape-test-roomescape-test-roomescape
+    access-token-expiration-seconds: 3600
