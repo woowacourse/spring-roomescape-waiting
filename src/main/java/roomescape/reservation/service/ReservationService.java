@@ -160,7 +160,7 @@ public class ReservationService {
     }
 
     private void promoteFirstWaiting(ReservationSlot slot) {
-        reservationRepository.findFirstWaitingIdBySlot(slot)
+        reservationRepository.findFirstWaitingIdBySlotForUpdate(slot)
                 .ifPresent(waitingId -> updateState(waitingId, Status.CONFIRMED));
     }
 

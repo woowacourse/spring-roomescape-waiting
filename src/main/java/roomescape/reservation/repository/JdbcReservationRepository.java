@@ -283,13 +283,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Long> findFirstWaitingIdBySlot(ReservationSlot slot) {
+    public Optional<Long> findFirstWaitingIdBySlotForUpdate(ReservationSlot slot) {
         return jdbcTemplate.query("""
                         SELECT id
                         FROM reservation
                         WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         ORDER BY created_at, id
                         LIMIT 1
+                        FOR UPDATE
                         """,
                 (rs, rowNum) -> rs.getLong("id"),
                 slot.date(),

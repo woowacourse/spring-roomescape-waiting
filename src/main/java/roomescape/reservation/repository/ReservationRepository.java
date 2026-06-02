@@ -27,7 +27,7 @@ public interface ReservationRepository {
 
     boolean updateStatus(Long id, Status status);
 
-    Optional<Long> findFirstWaitingIdBySlot(ReservationSlot slot);
+    Optional<Long> findFirstWaitingIdBySlotForUpdate(ReservationSlot slot);
 
     boolean existsBySlotAndGuestNameExceptCanceled(ReservationSlot slot, String guestName);
 
