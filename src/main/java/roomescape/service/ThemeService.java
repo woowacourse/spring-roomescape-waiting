@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
@@ -30,16 +31,13 @@ public class ThemeService {
 
     @Transactional
     public Theme create(String name, String description, String thumbnail) {
-        Theme theme = new Theme(null, name, description, thumbnail);
-        Long id = themeRepository.insert(theme);
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 테마를 찾을 수 없습니다."));
+        return themeRepository.insert(new Theme(null, name, description, thumbnail));
     }
 
     @Transactional
     public void delete(Long id) {
         validateDeletable(id);
-        themeRepository.delete(id);
+        deleteTheme(id);
     }
 
     public List<PopularThemeResult> findWeeklyTopTen() {
@@ -49,9 +47,21 @@ public class ThemeService {
         return themeRepository.findPopular(startDate, endDate, 10);
     }
 
+    private void deleteTheme(Long id) {
+        try {
+            themeRepository.delete(id);
+        } catch (DataIntegrityViolationException e) {
+            throwResourceInUse();
+        }
+    }
+
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
-            throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다.");
+            throwResourceInUse();
         }
+    }
+
+    private void throwResourceInUse() {
+        throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 }

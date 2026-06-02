@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
@@ -12,7 +13,6 @@ import roomescape.repository.dto.PopularThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,9 +54,7 @@ class ThemeServiceTest {
         Theme theme = new Theme(id, name, description, thumbnail);
 
         when(themeRepository.insert(any(Theme.class)))
-                .thenReturn(id);
-        when(themeRepository.findById(id))
-                .thenReturn(Optional.of(theme));
+                .thenReturn(theme);
 
         // when
         Theme result = service.create(name, description, thumbnail);
@@ -79,7 +77,6 @@ class ThemeServiceTest {
                 () -> assertThat(captured.getDescription()).isEqualTo(description),
                 () -> assertThat(captured.getThumbnail()).isEqualTo(thumbnail));
 
-        verify(themeRepository, times(1)).findById(id);
         verifyNoMoreInteractions(themeRepository, reservationRepository);
     }
 
@@ -114,6 +111,27 @@ class ThemeServiceTest {
 
         verify(reservationRepository, times(1)).existsByThemeId(id);
         verify(themeRepository, never()).delete(anyLong());
+        verifyNoMoreInteractions(themeRepository, reservationRepository);
+    }
+
+    @Test
+    void 삭제_중_예약이_생긴_테마는_삭제시_예외_발생() {
+        // given
+        Long id = 1L;
+        when(reservationRepository.existsByThemeId(id))
+                .thenReturn(false);
+        doThrow(new DataIntegrityViolationException("referenced theme"))
+                .when(themeRepository)
+                .delete(id);
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(id))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESOURCE_IN_USE)
+                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
+
+        verify(reservationRepository, times(1)).existsByThemeId(id);
+        verify(themeRepository, times(1)).delete(id);
         verifyNoMoreInteractions(themeRepository, reservationRepository);
     }
 

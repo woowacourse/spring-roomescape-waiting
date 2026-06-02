@@ -41,7 +41,7 @@ public class ReservationTimeService {
 
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
+            throwResourceInUse();
         }
     }
 
@@ -49,10 +49,11 @@ public class ReservationTimeService {
         try {
             reservationTimeRepository.delete(id);
         } catch (DataIntegrityViolationException e) {
-            throw new RoomescapeException(
-                    ErrorCode.RESOURCE_IN_USE,
-                    "예약이 존재하는 시간은 삭제할 수 없습니다."
-            );
+            throwResourceInUse();
         }
+    }
+
+    private void throwResourceInUse() {
+        throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 }

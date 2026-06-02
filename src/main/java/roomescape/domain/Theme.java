@@ -54,4 +54,8 @@ public class Theme {
             throw new IllegalArgumentException("thumbnail은 255자를 넘을 수 없습니다.");
         }
     }
+
+    public Theme withId(Long id) {
+        return new Theme(id, name, description, thumbnail);
+    }
 }
