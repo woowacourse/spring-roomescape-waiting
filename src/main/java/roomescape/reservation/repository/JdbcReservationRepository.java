@@ -333,19 +333,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation
-                    WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ? AND id != ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId, id));
-    }
-
-    @Override
     public void deleteById(Long id) {
         delete(id);
     }
