@@ -1,6 +1,8 @@
 package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservation.dto.ReservationUpdateRequest;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -29,7 +32,7 @@ class ReservationCancellationIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
+    @MockitoSpyBean
     private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
@@ -178,6 +181,68 @@ class ReservationCancellationIntegrationTest {
             .singleElement()
             .extracting(WaitingReservationWithRank::rank)
             .isEqualTo(1L);
+    }
+
+    @Test
+    void 예약_취소_중_승격된_예약_대기_삭제가_실패하면_예약_취소와_승격을_롤백한다() {
+        Reservation cancelledReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        WaitingReservation firstWaiting = waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        doThrow(new IllegalStateException("예약 대기 삭제 실패"))
+            .when(waitingReservationRepository)
+            .deleteById(firstWaiting.getId());
+
+        assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
+            .isInstanceOf(IllegalStateException.class);
+
+        assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
+        assertThat(reservationRepository.findByName("이산")).isEmpty();
+        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
+    }
+
+    @Test
+    void 예약_수정_중_승격된_예약_대기_삭제가_실패하면_예약_수정과_승격을_롤백한다() {
+        Reservation updatedReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        Slot newSlot = insertSlot(
+            102L, LocalDate.now().plusDays(3),
+            202L, LocalTime.of(11, 0),
+            302L, "스릴러"
+        );
+        WaitingReservation firstWaiting = waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        doThrow(new IllegalStateException("예약 대기 삭제 실패"))
+            .when(waitingReservationRepository)
+            .deleteById(firstWaiting.getId());
+
+        assertThatThrownBy(() -> reservationService.updateReservation(
+            updatedReservation.getId(),
+            new ReservationUpdateRequest(
+                newSlot.date().getId(),
+                newSlot.time().getId()
+            )
+        )).isInstanceOf(IllegalStateException.class);
+
+        Reservation rollbackedReservation = reservationRepository.findById(updatedReservation.getId()).orElseThrow();
+        assertThat(rollbackedReservation.getDate().getId()).isEqualTo(cancelledSlot.date().getId());
+        assertThat(rollbackedReservation.getTime().getId()).isEqualTo(cancelledSlot.time().getId());
+        assertThat(reservationRepository.findByName("이산")).isEmpty();
+        assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
     }
 
     private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
