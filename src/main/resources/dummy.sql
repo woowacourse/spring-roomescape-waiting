@@ -32,7 +32,7 @@ INSERT INTO theme (name, description, thumbnail_url, is_active)
 SELECT v.name, v.description, v.thumbnail_url, v.is_active
 FROM (
          VALUES
-             ('잠겨버린 연구실', '제한 시간 안에 단서를 찾아 연구실을 탈출해야 합니다.', 'https://images.unsplash.com/photo-1518005020951-eccb494ad742', TRUE),
+         ('잠겨버린 연구실', '제한 시간 안에 단서를 찾아 연구실을 탈출해야 합니다.', 'https://images.unsplash.com/photo-1518005020951-eccb494ad742', TRUE),
              ('사라진 탐정', '실종된 탐정의 흔적을 따라 사건의 진실을 밝혀내세요.', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee', TRUE),
              ('고대 유적의 비밀', '고대 유적에 숨겨진 암호를 풀고 보물을 찾아야 합니다.', 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', TRUE)
      ) AS v(name, description, thumbnail_url, is_active)
@@ -55,12 +55,10 @@ WHERE NOT EXISTS (
 );
 
 -- Reservation Dummy Data
-INSERT INTO reservation (name, date_id, time_id, theme_id, reserved_at, status)
+INSERT INTO reservation (name, slot_id, reserved_at, status)
 SELECT
     v.name,
-    rd.id AS date_id,
-    rt.id AS time_id,
-    t.id  AS theme_id,
+    rs.id AS slot_id,
     v.reserved_at,
     v.status
 FROM (
@@ -81,13 +79,14 @@ FROM (
          JOIN reservation_date rd ON rd.date     = v.reservation_date
          JOIN reservation_time rt ON rt.start_at = v.start_at
          JOIN theme             t  ON t.name      = v.theme_name
+         JOIN reservation_slot rs ON rs.date_id   = rd.id
+                                 AND rs.time_id   = rt.id
+                                 AND rs.theme_id  = t.id
 WHERE NOT EXISTS (
     SELECT 1
     FROM reservation r
-    WHERE r.name     = v.name
-      AND r.date_id  = rd.id
-      AND r.time_id  = rt.id
-      AND r.theme_id = t.id
+    WHERE r.name    = v.name
+      AND r.slot_id = rs.id
 );
 
 -- Member

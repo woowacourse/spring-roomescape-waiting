@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.AcceptanceTest;
 import roomescape.reservation.controller.ReservationAdminController;
+import roomescape.slot.fixture.SlotApiFixture;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -98,6 +99,8 @@ class MissionStepTest extends AcceptanceTest {
                 .when().post("/admin/dates")
                 .then().log().all()
                 .statusCode(200);
+
+        SlotApiFixture.createSlot(managerToken, 1, 1, 1);
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("dateId", 1);

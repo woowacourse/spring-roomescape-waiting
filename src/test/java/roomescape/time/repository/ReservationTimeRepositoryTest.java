@@ -176,7 +176,8 @@ class ReservationTimeRepositoryTest {
     }
 
     private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        jdbcReservationRepository.save(reservation("송송", reservationDate, reservationTime, theme));
+        ReservationSlot slot = saveSlot(ReservationSlot.of(reservationDate, reservationTime, theme));
+        jdbcReservationRepository.save(reservation("송송", slot));
     }
 
     private boolean updateStatus(ReservationTime saved) {

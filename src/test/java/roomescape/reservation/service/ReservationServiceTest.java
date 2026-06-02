@@ -27,6 +27,7 @@ import roomescape.reservation.fixture.FakeReservationRepository;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
+import roomescape.slot.fixture.FakeReservationSlotRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
 import roomescape.theme.fixture.FakeThemeRepository;
@@ -43,6 +44,8 @@ class ReservationServiceTest {
     private ReservationTime reservationTime2;
     private ReservationDate reservationDate1;
     private ReservationDate reservationDate2;
+    private ReservationSlot slot1;
+    private ReservationSlot slot2;
     private Theme theme1;
     private Theme theme2;
 
@@ -50,6 +53,7 @@ class ReservationServiceTest {
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeReservationDateRepository reservationDateRepository;
     private FakeThemeRepository themeRepository;
+    private FakeReservationSlotRepository reservationSlotRepository;
 
     private ReservationService reservationService;
 
@@ -59,9 +63,10 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
         themeRepository = new FakeThemeRepository();
+        reservationSlotRepository = new FakeReservationSlotRepository();
 
         this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
-                reservationDateRepository, themeRepository);
+                reservationDateRepository, themeRepository, reservationSlotRepository);
 
         reservationTime1 = reservationTimeRepository.save(ReservationTimeFixture.time15());
         reservationTime2 = reservationTimeRepository.save(ReservationTimeFixture.time16());
@@ -71,6 +76,9 @@ class ReservationServiceTest {
 
         theme1 = themeRepository.save(ThemeFixture.theme("테마1"));
         theme2 = themeRepository.save(ThemeFixture.theme("테마2"));
+
+        slot1 = reservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime1, theme1));
+        slot2 = reservationSlotRepository.save(ReservationSlot.of(reservationDate2, reservationTime2, theme1));
     }
 
     @Test
@@ -141,7 +149,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(actual.getStatus())
-            .isEqualTo(ReservationStatus.WAITING);
+                .isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
@@ -269,13 +277,14 @@ class ReservationServiceTest {
     void changeSchedule_not_owner() {
         // given
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
+        reservationSlotRepository.save(ReservationSlot.of(reservationDate2, reservationTime2, theme1));
         String notOwerName = "다른사람";
         ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), notOwerName, reservationDate2.getId(), reservationTime2.getId());
 
         // when & then
         assertThatThrownBy(() -> {
-                    reservationService.changeSchedule(changeCommand);
-                }).isInstanceOf(ReservationException.class)
+            reservationService.changeSchedule(changeCommand);
+        }).isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_NOT_OWNER.getMessage());
     }
 
@@ -305,8 +314,8 @@ class ReservationServiceTest {
 
         // when
         assertThatThrownBy(() -> {
-                    reservationService.changeSchedule(changeCommand);
-                }).isInstanceOf(ReservationException.class)
+            reservationService.changeSchedule(changeCommand);
+        }).isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
@@ -315,13 +324,15 @@ class ReservationServiceTest {
     void changeSchedule_new_datetime_is_past() {
         // given
         ReservationDate pastDate = reservationDateRepository.save(ReservationDate.load(20L, LocalDate.now().minusDays(1), true));
+        ReservationTime pastTime = reservationTimeRepository.save(ReservationTimeFixture.time16());
+        reservationSlotRepository.save(ReservationSlot.of(pastDate, pastTime, theme1));
+
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
-        ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, pastDate.getId(), reservationTime2.getId());
+        ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), name, pastDate.getId(), pastTime.getId());
 
         // when
-        assertThatThrownBy(() -> {
-                    reservationService.changeSchedule(changeCommand);
-                }).isInstanceOf(ReservationException.class)
+        assertThatThrownBy(() -> reservationService.changeSchedule(changeCommand))
+                .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
@@ -377,11 +388,11 @@ class ReservationServiceTest {
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
         ReservationDate pastDate = reservationDateRepository.save(ReservationDate.load(1L, LocalDate.now().minusDays(1), true));
         ReservationTime pastTime = reservationTimeRepository.save(ReservationTimeFixture.time16());
+        reservationSlotRepository.save(ReservationSlot.of(pastDate, pastTime, theme1));
         ReservationChangeCommand changeCommand = new ReservationChangeCommand(saved.getId(), null, pastDate.getId(), pastTime.getId());
 
         // when & then
-        assertThatThrownBy(() ->
-                        reservationService.changeScheduleByManager(changeCommand))
+        assertThatThrownBy(() -> reservationService.changeScheduleByManager(changeCommand))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }

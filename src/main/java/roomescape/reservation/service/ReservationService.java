@@ -9,6 +9,8 @@ import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.slot.domain.ReservationSlot;
+import roomescape.slot.exception.ReservationSlotException;
+import roomescape.slot.repository.ReservationSlotRepository;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -28,6 +30,7 @@ import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
+import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
@@ -40,6 +43,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDateRepository reservationDateRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
     public List<Reservation> readAll() {
         return reservationRepository.findAll();
@@ -60,8 +64,7 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        ReservationSlot slot = ReservationSlot.of(date, time, theme);
-
+        ReservationSlot slot = findSlot(date, time, theme);
         Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
         Reservation reservation = reservationsOfTimeSlot.reserve(name, slot, LocalDateTime.now());
         return reservationRepository.save(reservation);
@@ -92,7 +95,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
+        ReservationSlot slot = findSlot(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
         reservation.changeSchedule(command.requesterName(), slot, LocalDateTime.now());
@@ -109,7 +112,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
+        ReservationSlot slot = findSlot(newDate, newTime, reservation.getTheme());
         validateAlreadyBookedByOthers(slot);
 
         reservation.changeScheduleByManager(slot, LocalDateTime.now());
@@ -135,6 +138,11 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+    }
+
+    private ReservationSlot findSlot(ReservationDate date, ReservationTime time, Theme theme) {
+        return reservationSlotRepository.findByDateIdTimeIdThemeId(date.getId(), time.getId(), theme.getId())
+                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 
     private void validateAlreadyBookedByOthers(ReservationSlot slot) {

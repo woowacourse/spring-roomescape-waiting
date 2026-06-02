@@ -15,6 +15,8 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.repository.ReservationTimeRepository;
 
+import java.util.List;
+
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
@@ -33,6 +35,10 @@ public class ReservationSlotService {
         ReservationTime time = getReservationTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         return reservationSlotRepository.save(ReservationSlot.of(date, time, theme));
+    }
+
+    public List<ReservationSlot> findAllSlot() {
+        return reservationSlotRepository.findAll();
     }
 
     private ReservationTime getReservationTime(Long timeId) {

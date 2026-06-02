@@ -7,6 +7,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
@@ -20,6 +21,9 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.JdbcReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @JdbcTest
 @Import({
@@ -62,19 +66,24 @@ public abstract class ServiceSupport {
         return themeRepository.save(theme);
     }
 
-    protected Reservation saveReservation(String name, ReservationDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(ReservationFixture.reservation(name, date, time, theme));
+    protected Reservation saveReservation(String name, ReservationSlot slot) {
+        return reservationRepository.save(ReservationFixture.reservation(name, slot));
     }
 
     protected Reservation saveReservation(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 
-    protected Reservation saveWaitReservation(String name, ReservationDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(ReservationFixture.waitReservation(name, date, time, theme));
+    protected Reservation savePastReservation(String name, ReservationSlot slot) {
+        return reservationRepository.save(Reservation.load(0L, name, slot, ReservationStatus.RESERVED, LocalDateTime.now()));
+    }
+
+    protected Reservation saveWaitReservation(String name, ReservationSlot slot) {
+        return reservationRepository.save(ReservationFixture.waitReservation(name, slot));
     }
 
     protected ReservationSlot saveSlot(ReservationSlot slot) {
         return reservationSlotRepository.save(slot);
     }
+
 }

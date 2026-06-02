@@ -22,6 +22,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.slot.domain.ReservationSlot;
+import roomescape.slot.repository.JdbcReservationSlotRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -43,10 +44,16 @@ class ReservationRepositoryTest {
     private ReservationTime reservationTime2;
     private Theme theme;
 
+    private ReservationSlot slot1;  // date1 + time1
+    private ReservationSlot slot2;  // date1 + time2
+    private ReservationSlot slot3;  // date2 + time1
+    private ReservationSlot slot4;  // date2 + time2
+
     private JdbcReservationRepository jdbcReservationRepository;
     private JdbcReservationTimeRepository jdbcReservationTimeRepository;
     private JdbcReservationDateRepository jdbcReservationDateRepository;
     private JdbcThemeRepository jdbcThemeRepository;
+    private JdbcReservationSlotRepository jdbcReservationSlotRepository;
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -57,6 +64,7 @@ class ReservationRepositoryTest {
         jdbcReservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
         jdbcReservationDateRepository = new JdbcReservationDateRepository(jdbcTemplate);
         jdbcThemeRepository = new JdbcThemeRepository(jdbcTemplate);
+        jdbcReservationSlotRepository = new JdbcReservationSlotRepository(jdbcTemplate);
 
         ReservationTime time1 = jdbcReservationTimeRepository.save(ReservationTimeFixture.time15());
         ReservationTime time2 = jdbcReservationTimeRepository.save(ReservationTimeFixture.time16());
@@ -66,13 +74,18 @@ class ReservationRepositoryTest {
         reservationDate1 = jdbcReservationDateRepository.save(ReservationDate.create(date1));
         reservationDate2 = jdbcReservationDateRepository.save(ReservationDate.create(date2));
         theme = jdbcThemeRepository.save(Theme.create("테마", "설명", "썸네일"));
+
+        slot1 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime1, theme));
+        slot2 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate1, reservationTime2, theme));
+        slot3 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate2, reservationTime1, theme));
+        slot4 = jdbcReservationSlotRepository.save(ReservationSlot.of(reservationDate2, reservationTime2, theme));
     }
 
     @Test
     @DisplayName("예약 정보를 단건 조회한다.")
     void findById() {
         // given
-        Reservation saved = save(ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme));
+        Reservation saved = save(reservation(name, slot1));
 
         // when
         Reservation actual = jdbcReservationRepository.findById(saved.getId()).get();
@@ -102,8 +115,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         List<Reservation> reservations = List.of(
-                Reservation.reserve(name, ReservationSlot.of(reservationDate1, reservationTime1, theme), LocalDateTime.now()),
-                Reservation.reserve(name, ReservationSlot.of(reservationDate1, reservationTime2, theme), LocalDateTime.now())
+                Reservation.reserve(name, slot1, LocalDateTime.now()),
+                Reservation.reserve(name, slot2, LocalDateTime.now())
         );
         saveAll(reservations);
 
@@ -125,10 +138,10 @@ class ReservationRepositoryTest {
         LocalDateTime fourthReservedAt = LocalDateTime.now().plusHours(4).truncatedTo(ChronoUnit.MICROS);
 
         saveAll(List.of(
-                ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme, firstReservedAt),
-                ReservationFixture.reservation(name, reservationDate1, reservationTime2, theme, secondReservedAt),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime1, theme, thirdReservedAt),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime2, theme, fourthReservedAt)
+                ReservationFixture.reservation(name, slot1, firstReservedAt),
+                ReservationFixture.reservation(name, slot2, secondReservedAt),
+                ReservationFixture.reservation(name, slot3, thirdReservedAt),
+                ReservationFixture.reservation(name, slot4, fourthReservedAt)
         ));
 
         // when
@@ -152,7 +165,7 @@ class ReservationRepositoryTest {
         List<Reservation> emptyReservations = List.of();
 
         // when
-        jdbcReservationRepository.save(reservation(name, reservationDate1, reservationTime1, theme));
+        jdbcReservationRepository.save(reservation(name, slot1));
 
         // then
         assertThat(jdbcReservationRepository.findAll())
@@ -163,15 +176,12 @@ class ReservationRepositoryTest {
     @DisplayName("예약 날짜와 시간 ID 정보로 존재하는지 확인한다.")
     void exitsByDateAndTimeId() {
         // given
-        save(reservation(name, reservationDate1, reservationTime1, theme));
-
-        ReservationSlot slot = ReservationSlot.of(reservationDate1, reservationTime1, theme);
-        ReservationSlot wrongSlot = ReservationSlot.of(reservationDate2, reservationTime1, theme);
+        save(reservation(name, slot1));
 
         // when & then
-        assertThat(jdbcReservationRepository.existsReservedBySlot(slot))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(slot1))
                 .isTrue();
-        assertThat(jdbcReservationRepository.existsReservedBySlot(wrongSlot))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(slot3))
                 .isFalse();
     }
 
@@ -179,7 +189,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약을 취소하면 상태가 CANCELED가 된다.")
     void updateState_canceled() {
         // given
-        Reservation canceledReservation = save(canceledReservation(name, reservationDate1, reservationTime1, theme));
+        Reservation canceledReservation = save(canceledReservation(name, slot1));
         updateStatus(canceledReservation);
 
         // when
@@ -194,9 +204,8 @@ class ReservationRepositoryTest {
     @DisplayName("이용가능한 날짜/시간으로 예약을 변경할 수 있다.")
     void updateSchedule() {
         // given
-        Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme));
-        ReservationSlot newSlot = ReservationSlot.of(reservationDate2, reservationTime1, saved.getTheme());
-        saved.changeSchedule(name, newSlot, LocalDateTime.now());
+        Reservation saved = save(reservation(name, slot1));
+        saved.changeSchedule(name, slot3, LocalDateTime.now());
 
         // when
         jdbcReservationRepository.updateSchedule(saved);

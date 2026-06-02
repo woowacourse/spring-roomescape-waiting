@@ -87,22 +87,19 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTime> findAvailableByDateIdAndThemeId(Long dateId, Long themeId) {
         String sql = """
-            SELECT rt.*
-            FROM reservation_time rt
-            JOIN reservation_slot s
-              ON s.time_id = rt.id
-             AND s.date_id = :date_id
-             AND s.theme_id = :theme_id
-            WHERE rt.is_active = true
-              AND rt.id NOT IN (
-                  SELECT r.time_id
-                  FROM reservation r
-                  WHERE r.date_id = :date_id
-                    AND r.theme_id = :theme_id
-                    AND r.status = 'RESERVED'
-              )
-            ORDER BY rt.start_at ASC
-            """;
+                SELECT rt.*
+                FROM reservation_time rt
+                JOIN reservation_slot s
+                  ON s.time_id  = rt.id
+                 AND s.date_id  = :date_id
+                 AND s.theme_id = :theme_id
+                LEFT JOIN reservation r
+                  ON r.slot_id = s.id
+                 AND r.status  = 'RESERVED'
+                WHERE rt.is_active = true
+                  AND r.id IS NULL
+                ORDER BY rt.start_at ASC
+                """;
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date_id", dateId)

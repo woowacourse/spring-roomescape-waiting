@@ -23,6 +23,14 @@ public class ReservationFixture {
         return Reservation.reserve(name, ReservationSlot.of(date, time, theme), LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
+    public static Reservation reservation(String name, ReservationSlot slot) {
+        return Reservation.reserve(name, slot, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+    }
+
+    public static Reservation reservation(String name, ReservationSlot slot, LocalDateTime reservedAt) {
+        return Reservation.reserve(name, slot, reservedAt.truncatedTo(ChronoUnit.MICROS));
+    }
+
     public static Reservation reservation(
             String name,
             ReservationDate date,
@@ -31,6 +39,10 @@ public class ReservationFixture {
             LocalDateTime reservedAt
     ) {
         return Reservation.reserve(name, ReservationSlot.of(date, time, theme), reservedAt.truncatedTo(ChronoUnit.MICROS));
+    }
+
+    public static Reservation waitReservation(String name, ReservationSlot slot) {
+        return Reservation.wait(name, slot, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation waitReservation(
@@ -49,6 +61,12 @@ public class ReservationFixture {
             Theme theme
     ) {
         Reservation reservation = Reservation.reserve(name, ReservationSlot.of(date, time, theme), LocalDateTime.now());
+        reservation.updateStatus(ReservationStatus.CANCELED);
+        return reservation;
+    }
+
+    public static Reservation canceledReservation(String name, ReservationSlot slot) {
+        Reservation reservation = Reservation.reserve(name, slot, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }

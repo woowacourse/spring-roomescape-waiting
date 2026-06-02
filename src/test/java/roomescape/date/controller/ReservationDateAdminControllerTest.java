@@ -6,6 +6,7 @@ import static roomescape.date.exception.ReservationDateErrorInformation.DATE_IS_
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
 import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
+import static roomescape.slot.fixture.SlotApiFixture.createSlot;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 
@@ -141,7 +142,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, "10:00");
         Integer themeId = createTheme(managerToken, "테마1");
-
+        createSlot(managerToken, dateId, timeId, themeId);
         createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         Map<String, Object> updateParams = new HashMap<>();
