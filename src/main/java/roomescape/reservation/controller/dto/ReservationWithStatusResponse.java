@@ -15,7 +15,7 @@ public record ReservationWithStatusResponse(
         Long waitingOrder
 ) {
 
-    public static ReservationWithStatusResponse from (ReservationWithStatusResult result) {
+    public static ReservationWithStatusResponse from(ReservationWithStatusResult result) {
         return new ReservationWithStatusResponse(
                 result.id(),
                 result.name(),

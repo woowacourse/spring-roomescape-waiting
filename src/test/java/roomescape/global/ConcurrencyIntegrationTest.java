@@ -36,12 +36,16 @@ class ConcurrencyIntegrationTest {
 
     @Autowired
     private DatabaseHelper databaseHelper;
+
     @Autowired
     private ReservationService reservationService;
+
     @Autowired
     private ReservationWaitingService reservationWaitingService;
+
     @Autowired
     private ReservationTimeService reservationTimeService;
+
     @Autowired
     private ThemeService themeService;
 
@@ -322,7 +326,6 @@ class ConcurrencyIntegrationTest {
                 100,
                 NotFoundException.class
         );
-
 
         // then
         assertThat(result.get(0)).isEqualTo(1);
