@@ -398,7 +398,7 @@ class ReservationServiceTest {
             save(waitReservation(name3, reservationDate1, reservationTime1, theme1));
 
             // when
-            reservationService.cancel(reservationInWaiting.getId(), name2);
+            reservationService.cancelByManager(reservationInWaiting.getId());
 
             // then
             assertThat(reservationRepository.findAll())
@@ -418,7 +418,7 @@ class ReservationServiceTest {
                 waitReservation(name2, reservationDate1, reservationTime1, theme1));
 
             // when
-            reservationService.cancel(reservationToCancel.getId(), name);
+            reservationService.cancelByManager(reservationToCancel.getId());
 
             // then
             assertThat(reservationInWaiting)

@@ -168,7 +168,7 @@ class ReservationServiceIntegrationTest {
 
 
         @Test
-        @DisplayName("중복된")
+        @DisplayName("같은 사람의 중복 슬롯에 대한 예약 요청 시 예외를 반환한다")
         void 실패() {
             // given
             String themeName = "테마1";
