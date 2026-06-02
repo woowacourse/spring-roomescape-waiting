@@ -1,0 +1,19 @@
+package roomescape.dto.response;
+
+import roomescape.domain.Theme;
+
+public record ThemeResponseDto(
+        Long id,
+        String name,
+        String thumbnailUrl,
+        String description
+) {
+    public static ThemeResponseDto from(Theme theme) {
+        return new ThemeResponseDto(
+                theme.getId(),
+                theme.getName().getValue(),
+                theme.getThumbnailUrl(),
+                theme.getDescription()
+        );
+    }
+}

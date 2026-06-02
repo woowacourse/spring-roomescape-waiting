@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>회원가입 — ESCAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--sur:#0f0f0f;--sur2:#181818;
+  --border:#525252;--text:#d4d4d4;--muted:#aaa;
+  --white:#ebebeb;--acc:#c22235;--acc-h:#e5485a;
+}
+body{
+  background-color:#080808;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,rgba(140,20,45,.32) 0%,transparent 52%),
+    radial-gradient(ellipse at 100% 100%,rgba(110,15,35,.22) 0%,transparent 52%);
+  background-attachment:fixed;
+  color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.7;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+}
+.card{
+  background:var(--sur);border:1px solid #2a2a2a;border-radius:12px;
+  padding:2.5rem 2rem;width:100%;max-width:380px;
+}
+.logo{
+  font-family:'Cinzel',serif;font-size:1.4rem;color:var(--acc);
+  text-decoration:none;display:block;text-align:center;margin-bottom:2rem;letter-spacing:.1em;
+}
+.field{margin-bottom:1.2rem}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;letter-spacing:.05em}
+input{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
+  color:var(--white);padding:.7rem 0;font-size:.95rem;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .3s;color-scheme:dark;
+}
+input:focus{border-color:var(--acc)}
+.btn{
+  width:100%;margin-top:1.8rem;padding:.85rem;border:none;border-radius:6px;
+  background:var(--acc);color:#fff;font-size:.9rem;font-family:'Inter',sans-serif;
+  cursor:pointer;transition:background .2s;
+}
+.btn:hover{background:var(--acc-h)}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:#e5485a;font-size:.82rem;margin-top:1rem;text-align:center;min-height:1.2em}
+.login-link{text-align:center;margin-top:1.2rem;font-size:.82rem;color:var(--muted)}
+.login-link a{color:var(--acc);text-decoration:none}
+.login-link a:hover{color:var(--acc-h)}
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="/" class="logo">ESCAPE</a>
+  <div class="field">
+    <label for="name">이름</label>
+    <input id="name" type="text" placeholder="이름" maxlength="20">
+  </div>
+  <div class="field">
+    <label for="email">이메일</label>
+    <input id="email" type="email" placeholder="example@email.com" autocomplete="email">
+  </div>
+  <div class="field">
+    <label for="password">비밀번호</label>
+    <input id="password" type="password" placeholder="비밀번호"
+           onkeydown="if(event.key==='Enter') doSignup()">
+  </div>
+  <button class="btn" id="signup-btn" onclick="doSignup()">회원가입</button>
+  <p class="err" id="err-msg"></p>
+  <p class="login-link">이미 계정이 있으신가요? <a href="/login">로그인</a></p>
+</div>
+
+<script>
+async function doSignup() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!name || !email || !password) {
+    document.getElementById('err-msg').textContent = '모든 항목을 입력해주세요';
+    return;
+  }
+
+  const btn = document.getElementById('signup-btn');
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    if (r.ok) {
+      location.href = '/login';
+    } else if (r.status === 409) {
+      document.getElementById('err-msg').textContent = '이미 사용 중인 이메일입니다';
+      btn.disabled = false;
+    } else {
+      document.getElementById('err-msg').textContent = '회원가입에 실패했습니다';
+      btn.disabled = false;
+    }
+  } catch {
+    document.getElementById('err-msg').textContent = '오류가 발생했습니다';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

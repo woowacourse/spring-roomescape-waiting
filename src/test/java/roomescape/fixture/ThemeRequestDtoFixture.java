@@ -1,0 +1,26 @@
+package roomescape.fixture;
+
+import roomescape.dto.request.ThemeRequestDto;
+
+public class ThemeRequestDtoFixture {
+
+    private static final String VALID_NAME = "방탈출테마";
+    private static final String VALID_THUMBNAIL_URL = "http://example.com/img.jpg";
+    private static final String VALID_DESCRIPTION = "방탈출 테마 설명";
+
+    public static ThemeRequestDto withBlankName() {
+        return new ThemeRequestDto("", VALID_THUMBNAIL_URL, VALID_DESCRIPTION);
+    }
+
+    public static ThemeRequestDto withNameExceedingMaxLength() {
+        return new ThemeRequestDto("a".repeat(41), VALID_THUMBNAIL_URL, VALID_DESCRIPTION);
+    }
+
+    public static ThemeRequestDto withInvalidThumbnailUrl() {
+        return new ThemeRequestDto(VALID_NAME, "not-a-url", VALID_DESCRIPTION);
+    }
+
+    public static ThemeRequestDto withDescriptionExceedingMaxLength() {
+        return new ThemeRequestDto(VALID_NAME, VALID_THUMBNAIL_URL, "a".repeat(201));
+    }
+}
