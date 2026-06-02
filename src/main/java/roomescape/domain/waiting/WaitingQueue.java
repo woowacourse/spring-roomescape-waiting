@@ -1,37 +1,45 @@
 package roomescape.domain.waiting;
 
-import java.time.LocalDate;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.springframework.scheduling.annotation.Scheduled;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.springframework.stereotype.Component;
 import roomescape.domain.waiting.dto.WaitingRequest;
-import roomescape.domain.waiting.dto.WaitingResponse;
+import roomescape.domain.waiting.dto.WaitingResult;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 
 @Component
 public class WaitingQueue {
 
-    private final ConcurrentMap<String, Object> locks = new ConcurrentHashMap<>();
-    private final WaitingService waitingService;
+    private final BlockingQueue<WaitingMessage> queue = new LinkedBlockingQueue<>();
+    private final ConcurrentMap<String, WaitingResult> results = new ConcurrentHashMap<>();
 
-    public WaitingQueue(WaitingService waitingService) {
-        this.waitingService = waitingService;
-    }
-
-    public WaitingResponse submit(WaitingRequest request) {
-        Object lock = locks.computeIfAbsent(slotKey(request), k -> new Object());
-        synchronized (lock) {
-            return waitingService.createWaiting(request);
+    public String enqueue(WaitingRequest request) {
+        String jobId = toJobId(request);
+        results.put(jobId, WaitingResult.pending());
+        try {
+            queue.add(new WaitingMessage(jobId, request));
+        } catch (IllegalStateException e) {
+            throw new RoomescapeException(ErrorCode.SERVER_OVERLOADED);
         }
+        return jobId;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void evictExpiredLocks() {
-        LocalDate today = LocalDate.now();
-        locks.keySet().removeIf(key -> LocalDate.parse(key.split(":")[0]).isBefore(today));
+    private String toJobId(WaitingRequest request) {
+        return request.date() + ":" + request.timeId() + ":" + request.themeId() + ":" + request.name();
     }
 
-    private String slotKey(WaitingRequest request) {
-        return request.date() + ":" + request.timeId() + ":" + request.themeId();
+    public WaitingMessage take() throws InterruptedException {
+        return queue.take();
+    }
+
+    public void storeResult(String jobId, WaitingResult result) {
+        results.put(jobId, result);
+    }
+
+    public WaitingResult getResult(String jobId) {
+        return results.get(jobId);
     }
 }

@@ -54,7 +54,7 @@ public class WaitingService {
                 theme
         );
 
-        String reservationOwner = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
+        String reservationOwner = reservationRepository.findNameByDateAndTimeIdAndThemeId(
                         waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
         waiting.validateNotOwnerOf(reservationOwner);
