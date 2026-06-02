@@ -16,7 +16,7 @@ public class Theme {
     private final String thumbnailImageUrl;
     private boolean isActive;
 
-    public Theme(Long id, String name, String description, String thumbnailImageUrl, boolean isActive) {
+    private Theme(Long id, String name, String description, String thumbnailImageUrl, boolean isActive) {
         validateTheme(name, description, thumbnailImageUrl);
         this.id = id;
         this.name = name;
@@ -25,8 +25,12 @@ public class Theme {
         this.isActive = isActive;
     }
 
-    public Theme(String name, String description, String thumbnailImageUrl) {
-        this(null, name, description, thumbnailImageUrl, true);
+    public static Theme create(String name, String description, String thumbnailImageUrl) {
+        return new Theme(null, name, description, thumbnailImageUrl, true);
+    }
+
+    public static Theme restore(Long id, String name, String description, String thumbnailImageUrl, boolean isActive) {
+        return new Theme(id, name, description, thumbnailImageUrl, isActive);
     }
 
     private static void validateTheme(String name, String description, String thumbnailImageUrl) {

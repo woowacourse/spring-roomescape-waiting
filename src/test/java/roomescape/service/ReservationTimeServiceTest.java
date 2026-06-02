@@ -46,7 +46,7 @@ class ReservationTimeServiceTest {
     void 이미_등록된_시간으로_등록을_시도하면_예외가_발생한다() {
         // given: 10시 예약 시간이 이미 등록되어 있음
         LocalTime startAt = LocalTime.of(10, 0);
-        reservationTimeRepository.save(new ReservationTime(startAt));
+        reservationTimeRepository.save(ReservationTime.create(startAt));
 
         ReservationTimeCommand command = new ReservationTimeCommand(startAt);
 
@@ -59,7 +59,7 @@ class ReservationTimeServiceTest {
     @Test
     void 식별자를_이용해_예약_시간을_비활성화_한다() {
         // given: 삭제할 예약 시간이 저장되어 있음
-        ReservationTime saved = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime saved = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Long id = saved.getId();
 
         // when: 해당 ID로 비활성화를 요청함
@@ -73,7 +73,7 @@ class ReservationTimeServiceTest {
     @Test
     void 식별자를_이용해_예약_시간을_다시_활성화한다() {
         // given: 삭제할 예약 시간이 저장되어 있음
-        ReservationTime saved = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime saved = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Long id = saved.getId();
         reservationTimeService.deactivate(id);
 

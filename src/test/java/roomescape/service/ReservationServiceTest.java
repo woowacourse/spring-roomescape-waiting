@@ -55,7 +55,7 @@ class ReservationServiceTest {
     @Test
     void 새로운_예약을_정상적으로_등록한다() {
         // given: 예약 시간이 먼저 등록되어 있음
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
         LocalDate reservationDate = LocalDate.now().plusDays(1);
         ReservationCommand command = new ReservationCommand("이프", reservationDate, theme.getId(), time.getId());

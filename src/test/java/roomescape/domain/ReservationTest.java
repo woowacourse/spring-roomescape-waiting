@@ -140,7 +140,7 @@ class ReservationTest {
     void 이미_지나버린_예약_정보에_예약을_하면_예외가_발생한다() {
         // given
         LocalDate pastDate = LocalDate.now().minusDays(1);
-        Reservation reservation = new Reservation(1L, pastDate, theme, reservationTime, List.of());
+        Reservation reservation = Reservation.restore(1L, pastDate, theme, reservationTime, List.of());
 
         // when & then
         assertThatThrownBy(() -> reservation.reserve("이프", FIXED))
@@ -229,7 +229,7 @@ class ReservationTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
-        ReservationTime anotherTime = new ReservationTime(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
+        ReservationTime anotherTime = ReservationTime.restore(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
 
         // when & then
         assertThat(reservation.isSameSlot(date.plusDays(1), reservationTime)).isFalse();
@@ -237,7 +237,7 @@ class ReservationTest {
     }
 
     private Reservation createReservationWithEntries(List<ReservationEntry> entries) {
-        return new Reservation(1L, LocalDate.now().plusDays(1), theme, reservationTime, entries);
+        return Reservation.restore(1L, LocalDate.now().plusDays(1), theme, reservationTime, entries);
     }
 
     private ReservationEntry entry(long id, String name, ReservationStatus status) {
@@ -245,6 +245,6 @@ class ReservationTest {
     }
 
     private ReservationEntry entry(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return ReservationEntry.from(id, name, status, createdAt);
+        return ReservationEntry.restore(id, name, status, createdAt);
     }
 }

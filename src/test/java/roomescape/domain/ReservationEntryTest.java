@@ -106,7 +106,7 @@ class ReservationEntryTest {
     @EnumSource(ReservationStatus.class)
     void status에_맞는_엔트리로_변환한다(ReservationStatus status) {
         // when
-        ReservationEntry entry = ReservationEntry.from(1L, "이프", status, FIXED);
+        ReservationEntry entry = ReservationEntry.restore(1L, "이프", status, FIXED);
 
         // then
         assertThat(entry.getStatus()).isEqualTo(status);
@@ -122,6 +122,6 @@ class ReservationEntryTest {
     }
 
     private ReservationEntry entry(Long id, ReservationStatus status) {
-        return ReservationEntry.from(id, "이프", status, LocalDateTime.now());
+        return ReservationEntry.restore(id, "이프", status, LocalDateTime.now());
     }
 }

@@ -14,7 +14,7 @@ import roomescape.domain.TimeStatus;
 public final class ReservationEntityMapper {
 
     public static final RowMapper<ReservationEntry> RESERVATION_ENTRY_ROW_MAPPER = (rs, rowNum) ->
-            ReservationEntry.from(
+            ReservationEntry.restore(
                     rs.getLong("entry_id"),
                     rs.getString("entry_name"),
                     ReservationStatus.valueOf(rs.getString("entry_status")),
@@ -25,19 +25,19 @@ public final class ReservationEntityMapper {
     }
 
     public static Reservation mapReservation(ResultSet rs) throws SQLException {
-        ReservationTime time = new ReservationTime(
+        ReservationTime time = ReservationTime.restore(
                 rs.getLong("time_id"),
                 rs.getTime("time_start").toLocalTime(),
                 TimeStatus.valueOf(rs.getString("time_status"))
         );
-        Theme theme = new Theme(
+        Theme theme = Theme.restore(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
                 rs.getString("description"),
                 rs.getString("thumbnail_image_url"),
                 rs.getBoolean("is_active")
         );
-        return new Reservation(
+        return Reservation.restore(
                 rs.getLong("res_id"),
                 rs.getDate("res_date").toLocalDate(),
                 theme,

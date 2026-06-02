@@ -22,7 +22,7 @@ public class Reservation {
     private final ReservationTime time;
     private final ReservationEntries entries;
 
-    public Reservation(Long id, LocalDate date, Theme theme, ReservationTime time, List<ReservationEntry> entries) {
+    private Reservation(Long id, LocalDate date, Theme theme, ReservationTime time, List<ReservationEntry> entries) {
         validateReservation(date, theme, time);
         this.id = id;
         this.date = date;
@@ -31,10 +31,19 @@ public class Reservation {
         this.entries = new ReservationEntries(entries);
     }
 
+    public static Reservation restore(Long id, LocalDate date, Theme theme, ReservationTime time,
+                                      List<ReservationEntry> entries) {
+        return new Reservation(id, date, theme, time, entries);
+    }
+
     public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time) {
-        Reservation reservation = new Reservation(null, date, theme, time, new ArrayList<>());
+        Reservation reservation =  Reservation.createEmptySlot(date,theme, time);
         validatePastDateTime(date, time);
         return reservation;
+    }
+
+    private static Reservation createEmptySlot(LocalDate date, Theme theme, ReservationTime time) {
+        return new Reservation(null, date, theme, time, new ArrayList<>());
     }
 
     private static void validatePastDateTime(LocalDate date, ReservationTime time) {

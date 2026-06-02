@@ -17,7 +17,7 @@ public class ReservationTime {
     private final LocalTime startAt;
     private TimeStatus status;
 
-    public ReservationTime(Long id, LocalTime startAt, TimeStatus status) {
+    private ReservationTime(Long id, LocalTime startAt, TimeStatus status) {
         if (startAt == null) {
             throw new RoomEscapeException("추가 할 예약 시작 시간 정보가 누락되었습니다.");
         }
@@ -26,8 +26,12 @@ public class ReservationTime {
         this.status = status;
     }
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt, TimeStatus.ACTIVE);
+    public static ReservationTime create(LocalTime startAt) {
+        return new ReservationTime(null, startAt, TimeStatus.ACTIVE);
+    }
+
+    public static ReservationTime restore(Long id, LocalTime startAt, TimeStatus status) {
+        return new ReservationTime(id, startAt, status);
     }
 
     public boolean isPast(LocalDate date) {

@@ -48,7 +48,7 @@ public class ReservationEntryDao {
             return ps;
         }, keyHolder);
 
-        return ReservationEntry.from(
+        return ReservationEntry.restore(
                 keyHolder.getKey().longValue(),
                 entry.getName(),
                 entry.getStatus(),

@@ -28,8 +28,8 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ReservationDataSource dataSource;
 
-    private final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
-    private final Theme theme = new Theme(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
+    private final ReservationTime reservationTime = ReservationTime.restore(1L, LocalTime.of(10, 0), TimeStatus.ACTIVE);
+    private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
 
     @BeforeEach
     void setUp() {
@@ -105,7 +105,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
                 ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
         );
 
-        Reservation updated = new Reservation(
+        Reservation updated = Reservation.restore(
                 saved.getId(),
                 LocalDate.now().plusDays(2),
                 theme,

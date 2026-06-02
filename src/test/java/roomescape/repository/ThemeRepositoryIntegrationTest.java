@@ -28,7 +28,7 @@ class ThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 테마를_저장하고_ID로_조회할_수_있다() {
         // given
-        Theme theme = new Theme("바니의 집", "바니의 집입니다", "http://image.png/image.com");
+        Theme theme = Theme.create("바니의 집", "바니의 집입니다", "http://image.png/image.com");
 
         // when
         Theme saved = themeRepository.save(theme);
@@ -40,7 +40,7 @@ class ThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 활성화된_테마_조회가_있는지_확인() {
         // given
-        Theme theme = new Theme("바니의 집", "바니의 집입니다", "http://image.png/image.com");
+        Theme theme = Theme.create("바니의 집", "바니의 집입니다", "http://image.png/image.com");
         themeRepository.save(theme);
 
         // when
@@ -53,7 +53,7 @@ class ThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 활성화된_테마가_있을_때_같은_테마를_추가하면_제약_위반() {
         // given
-        Theme theme = new Theme("바니의 집", "바니의 집입니다", "http://image.png/image.com");
+        Theme theme = Theme.create("바니의 집", "바니의 집입니다", "http://image.png/image.com");
         themeRepository.save(theme);
 
         // when & then: 무결성 위반 예외를 비즈니스 예외로 변경
@@ -65,7 +65,7 @@ class ThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Test
     void 테마_정보가_수정이_된다() {
         // given
-        Theme theme = new Theme("바니의 집", "바니의 집입니다", "http://image.png/image.com");
+        Theme theme = Theme.create("바니의 집", "바니의 집입니다", "http://image.png/image.com");
         Theme savedTheme = themeRepository.save(theme);
         savedTheme.deactivate();
 

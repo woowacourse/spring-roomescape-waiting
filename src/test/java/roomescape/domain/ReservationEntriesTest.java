@@ -154,6 +154,6 @@ class ReservationEntriesTest {
     }
 
     private ReservationEntry entry(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return ReservationEntry.from(id, name, status, createdAt);
+        return ReservationEntry.restore(id, name, status, createdAt);
     }
 }

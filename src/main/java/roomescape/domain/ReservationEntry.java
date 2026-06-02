@@ -17,14 +17,18 @@ public abstract class ReservationEntry {
     }
 
     public static ReservationEntry reserve(String name, LocalDateTime createdAt) {
-        return new ReservedEntry(null, name, createdAt);
+        return of(null, name, ReservationStatus.RESERVED, createdAt);
     }
 
     public static ReservationEntry waiting(String name, LocalDateTime createdAt) {
-        return new WaitingEntry(null, name, createdAt);
+        return of(null, name, ReservationStatus.WAITING, createdAt);
     }
 
-    public static ReservationEntry from(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+    public static ReservationEntry restore(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return of(id, name, status, createdAt);
+    }
+
+    private static ReservationEntry of(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
         return switch (status) {
             case RESERVED -> new ReservedEntry(id, name, createdAt);
             case WAITING -> new WaitingEntry(id, name, createdAt);
