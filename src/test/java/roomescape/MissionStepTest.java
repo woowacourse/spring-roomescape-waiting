@@ -87,7 +87,7 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
-                .body("code", is("DUPLICATE_RESERVATION"))
+                .body("code", is("DUPLICATE_RESOURCE"))
                 .body("detail", is("이미 예약된 시간입니다."));
     }
 
@@ -114,7 +114,7 @@ public class MissionStepTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(409)
-                .body("code", is("DUPLICATE_RESERVATION"))
+                .body("code", is("DUPLICATE_RESOURCE"))
                 .body("detail", is("이미 예약된 시간입니다."));
     }
 
@@ -247,7 +247,7 @@ public class MissionStepTest {
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(409)
-                .body("code", is("DUPLICATE_RESERVATION"))
+                .body("code", is("DUPLICATE_RESOURCE"))
                 .body("detail", is("이미 예약 대기를 신청한 시간입니다."));
     }
 

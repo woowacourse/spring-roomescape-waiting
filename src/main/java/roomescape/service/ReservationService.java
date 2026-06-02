@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.NotFoundException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -79,7 +79,7 @@ public class ReservationService {
         try {
             reservationRepository.update(updatedReservation);
         } catch (DuplicateKeyException e) {
-            throw new DuplicateReservationException("이미 예약된 시간입니다.");
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
         }
 
         return findUpdatedReservation(id);
@@ -91,14 +91,14 @@ public class ReservationService {
             return reservationRepository.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
         } catch (DuplicateKeyException e) {
-            throw new DuplicateReservationException("이미 예약된 시간입니다.");
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
         }
 
     }
 
     private Reservation findReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
     private Reservation findUpdatedReservation(Long id) {
@@ -108,7 +108,7 @@ public class ReservationService {
 
     private ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findBy(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 시간입니다."));
     }
 
     private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId, ReservationTime time) {
@@ -121,7 +121,7 @@ public class ReservationService {
 
     private Theme findTheme(Long themeId) {
         return themeRepository.findBy(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     private Reservation createUpdatedReservation(Reservation reservation, LocalDate date, Long timeId) {

@@ -3,7 +3,8 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.ResourceInUseException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -41,7 +42,7 @@ public class ReservationTimeService {
 
     private void validateDeletable(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new ResourceInUseException("예약이 존재하는 시간은 삭제할 수 없습니다.");
+            throw new RoomescapeException(ErrorCode.RESOURCE_IN_USE, "예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
     }
 }

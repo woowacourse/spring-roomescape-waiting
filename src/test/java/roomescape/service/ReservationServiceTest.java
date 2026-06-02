@@ -2,12 +2,12 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.InvalidInputException;
-import roomescape.exception.NotFoundException;
-import roomescape.exception.PastReservationException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -167,7 +167,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.create("브라운", pastDate, timeId, themeId))
-                .isInstanceOf(PastReservationException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_SCHEDULE)
                 .hasMessage("이미 지난 시간으로는 예약할 수 없습니다.");
 
         verify(reservationTimeRepository, times(1)).findBy(timeId);
@@ -283,7 +284,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.update(id, name, null, null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
 
         verify(reservationRepository, times(1)).findById(id);
@@ -300,7 +302,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.update(id, "브라운", date, 1L))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약입니다.");
 
         verify(reservationRepository, times(1)).findById(id);
@@ -322,7 +325,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.update(id, name, date.plusDays(1), timeId))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
 
         verify(reservationRepository, times(1)).findById(id);

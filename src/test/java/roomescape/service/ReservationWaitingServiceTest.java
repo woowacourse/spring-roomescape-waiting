@@ -3,10 +3,12 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DuplicateKeyException;
+
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.*;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
@@ -114,12 +116,13 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findBy(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        doThrow(new InvalidInputException("예약 가능한 시간에는 대기를 신청할 수 없습니다."))
+        doThrow(new RoomescapeException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다."))
                 .when(reservationWaitingValidator).validateWaiting(any(ReservationWaiting.class));
 
         // when & then
         assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
                 .hasMessage("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
 
         verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
@@ -138,7 +141,8 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
-                .isInstanceOf(DuplicateReservationException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
                 .hasMessage("이미 예약 대기를 신청한 시간입니다.");
     }
 
@@ -151,7 +155,8 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.create("브라운", date, timeId, theme.getId()))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 시간입니다.");
 
         verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
@@ -168,7 +173,8 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.create("브라운", date, time.getId(), themeId))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 테마입니다.");
 
         verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
@@ -198,12 +204,13 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(id, "브라운", date, time, theme);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
-        doThrow(new ForbiddenReservationException("본인의 예약 대기만 취소할 수 있습니다."))
+        doThrow(new RoomescapeException(ErrorCode.FORBIDDEN_RESOURCE, "본인의 예약 대기만 취소할 수 있습니다."))
                 .when(reservationWaitingValidator).validateUpdatableReservation(waiting, "구구");
 
         // when & then
         assertThatThrownBy(() -> service.delete(id, "구구"))
-                .isInstanceOf(ForbiddenReservationException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_RESOURCE)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
 
         verify(reservationWaitingRepository, never()).delete(id);
@@ -222,12 +229,13 @@ class ReservationWaitingServiceTest {
                 theme);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
-        doThrow(new PastReservationLockedException("이미 지난 예약 대기는 취소할 수 없습니다."))
+        doThrow(new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다."))
                 .when(reservationWaitingValidator).validateUpdatableReservation(waiting, name);
 
         // when & then
         assertThatThrownBy(() -> service.delete(id, name))
-                .isInstanceOf(PastReservationLockedException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_RESOURCE_LOCKED)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");
 
         verify(reservationWaitingRepository, never()).delete(id);
@@ -242,7 +250,8 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.delete(id, "브라운"))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약 대기입니다.");
 
         verify(reservationWaitingRepository, never()).delete(id);

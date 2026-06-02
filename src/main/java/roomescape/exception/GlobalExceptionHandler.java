@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
-                .orElse(ErrorCode.INVALID_INPUT.getMessage());
+                .orElse(ErrorCode.INVALID_INPUT.getDetail());
         return invalidInput(detail);
     }
 
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
                 .stream()
                 .findFirst()
                 .map(ConstraintViolation::getMessage)
-                .orElse(ErrorCode.INVALID_INPUT.getMessage());
+                .orElse(ErrorCode.INVALID_INPUT.getDetail());
         return invalidInput(detail);
     }
 
@@ -66,13 +66,14 @@ public class GlobalExceptionHandler {
             return modelAndView;
         }
         return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
 
     @ExceptionHandler(RoomescapeException.class)
     public ResponseEntity<ErrorResponse> handleRoomescapeException(RoomescapeException e) {
-        return ResponseEntity.status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.from(e));
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ErrorResponse.from(errorCode, e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -80,7 +81,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
         return ResponseEntity.status(errorCode.getStatus())
-                .body(ErrorResponse.from(errorCode));
+                .body(ErrorResponse.from(errorCode, errorCode.getDetail()));
     }
 
     private ResponseEntity<ErrorResponse> invalidInput(String detail) {

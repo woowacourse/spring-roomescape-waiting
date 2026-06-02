@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import roomescape.domain.Theme;
-import roomescape.exception.NotFoundException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.dto.PopularThemeResult;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
@@ -79,7 +81,7 @@ class ThemeControllerTest {
         given(reservationAvailabilityService.findAvailableTime(
                 eq(999L),
                 eq(LocalDate.of(2099, 1, 1))))
-                .willThrow(new NotFoundException("존재하지 않는 테마입니다."));
+                .willThrow(new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
 
         // when & then
         mockMvc.perform(get("/themes/999/times")

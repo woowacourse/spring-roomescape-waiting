@@ -1,12 +1,16 @@
 package roomescape.exception;
 
-public abstract class RoomescapeException extends RuntimeException {
+public class RoomescapeException extends RuntimeException {
 
     private final ErrorCode errorCode;
 
-    protected RoomescapeException(ErrorCode errorCode, String detail) {
+    public RoomescapeException(ErrorCode errorCode, String detail) {
         super(detail);
         this.errorCode = errorCode;
+    }
+
+    public RoomescapeException(ErrorCode errorCode) {
+        this(errorCode, errorCode.getDetail());
     }
 
     public ErrorCode getErrorCode() {

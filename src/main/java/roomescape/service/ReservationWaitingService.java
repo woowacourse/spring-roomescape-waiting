@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.NotFoundException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
@@ -79,12 +79,12 @@ public class ReservationWaitingService {
 
     private Theme findTheme(Long themeId) {
         return themeRepository.findBy(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     private ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findBy(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 시간입니다."));
     }
 
     private WaitingWithTurn save(ReservationWaiting waiting) {
@@ -93,12 +93,12 @@ public class ReservationWaitingService {
             return reservationWaitingRepository.findByIdWithTurn(id)
                     .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
         } catch (DuplicateKeyException e) {
-            throw new DuplicateReservationException("이미 예약 대기를 신청한 시간입니다.");
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약 대기를 신청한 시간입니다.");
         }
     }
 
     private ReservationWaiting findWaiting(Long id) {
         return reservationWaitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 대기입니다."));
     }
 }

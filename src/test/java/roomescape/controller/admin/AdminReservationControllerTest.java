@@ -6,10 +6,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
@@ -86,14 +88,14 @@ class AdminReservationControllerTest {
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
                 eq(1L)))
-                .willThrow(new DuplicateReservationException("이미 예약된 시간입니다."));
+                .willThrow(new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다."));
 
         // when & then
         mockMvc.perform(post("/admin/reservations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(validRequest()))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("DUPLICATE_RESERVATION"))
+                .andExpect(jsonPath("$.code").value("DUPLICATE_RESOURCE"))
                 .andExpect(jsonPath("$.detail").value("이미 예약된 시간입니다."));
 
         verify(reservationService, times(1)).createByAdmin(
