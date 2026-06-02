@@ -229,7 +229,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         };
     }
 
-    //TODO: Optional 처리
     @Override
     public List<Reservation> findByThemeSlotAndPending(Long themeSlotId) {
         String sql = """
