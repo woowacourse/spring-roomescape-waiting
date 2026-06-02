@@ -1,6 +1,8 @@
 package roomescape.waiting.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
@@ -34,6 +36,7 @@ public class ReservationWaitingService {
         return reservationWaitingDao.selectByName(name);
     }
 
+    @Transactional
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {
         validateReservationExists(themeId, date, timeId);
         validateAlreadyReserved(name, themeId, date, timeId);
@@ -44,9 +47,14 @@ public class ReservationWaitingService {
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime);
 
-        return reservationWaitingDao.insert(reservationWaiting);
+        try {
+            return reservationWaitingDao.insert(reservationWaiting);
+        } catch (DuplicateKeyException e) {
+            throw new RoomescapeException(ErrorCode.DUPLICATED_RESERVATION_WAITING);
+        }
     }
 
+    @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
         ReservationWaiting originReservationWaiting = reservationWaitingDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));

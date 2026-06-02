@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
@@ -83,6 +84,30 @@ public class ReservationWaitingServiceTest {
         when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong())).thenReturn(true);
 
         assertThatThrownBy(() ->reservationWaitingService.add(name, themeId, date, timeId))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessage(ErrorCode.DUPLICATED_RESERVATION_WAITING.getMessage());
+    }
+
+    @Test
+    void 동시_요청으로_중복_대기_신청_시_예외_발생() {
+        String name = "ever";
+        Long themeId = 1L;
+        LocalDate date = LocalDate.now().plusDays(1);
+        Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+
+        when(reservationDao.existsByThemeIdAndDateAndTimeId(anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(true);
+        when(reservationDao.existsByNameAndThemeIdAndDateAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(false);
+        when(reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(anyString(), anyLong(), any(LocalDate.class), anyLong()))
+                .thenReturn(false);
+        when(timeDao.selectById(anyLong()))
+                .thenReturn(Optional.of(reservationTime));
+        when(reservationWaitingDao.insert(any(ReservationWaiting.class)))
+                .thenThrow(new DuplicateKeyException("duplicate key"));
+
+        assertThatThrownBy(() -> reservationWaitingService.add(name, themeId, date, timeId))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.DUPLICATED_RESERVATION_WAITING.getMessage());
     }

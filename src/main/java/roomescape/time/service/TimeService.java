@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
@@ -41,6 +42,7 @@ public class TimeService {
         return timeDao.insert(time);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         List<Reservation> reservations = reservationDao.selectByTimeId(id);
         for (Reservation reservation : reservations) {

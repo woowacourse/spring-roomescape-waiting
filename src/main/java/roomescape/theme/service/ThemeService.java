@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.dao.ReservationDao;
@@ -38,6 +39,7 @@ public class ThemeService {
         return themeDao.insert(theme);
     }
 
+    @Transactional
     public void removeById(Long id) {
         validateThemeExists(id);
         validateNotReservedTheme(id);

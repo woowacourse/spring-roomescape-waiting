@@ -80,6 +80,7 @@ public class ReservationService {
         reservationDao.deleteById(id);
     }
 
+    @Transactional
     public void deleteByIdIfNameMatches(Long id, String name) {
         Reservation originReservation = reservationDao.selectById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));

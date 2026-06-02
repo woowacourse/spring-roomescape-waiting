@@ -72,7 +72,7 @@ class ReservationWaitingDaoTest {
         LocalDate date = LocalDate.now();
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime);
-        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime);
+        ReservationWaiting second = new ReservationWaiting("티버", 2L, date, reservationTime);
         ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime);
         reservationWaitingDao.insert(first);
         reservationWaitingDao.insert(second);
@@ -85,7 +85,7 @@ class ReservationWaitingDaoTest {
                 .containsOnly("티버");
         assertThat(actual)
                 .extracting(ReservationWaiting::getWaitingNumber)
-                .containsExactly(1L, 2L);
+                .containsExactly(1L, 1L);
     }
 
     @Test
