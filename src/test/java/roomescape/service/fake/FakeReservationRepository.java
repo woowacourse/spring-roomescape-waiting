@@ -35,7 +35,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 .stream()
                 .map(entry -> ReservationEntry.restore(
                         entry.getId() == null ? entryCounter.getAndIncrement() : entry.getId(),
-                        entry.getName(),
+                        entry.getReserverName(),
                         entry.getStatus(),
                         entry.getCreatedAt()
                 ))

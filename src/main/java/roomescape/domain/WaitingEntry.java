@@ -30,11 +30,11 @@ public class WaitingEntry extends ReservationEntry {
 
     @Override
     public ReservationEntry cancel() {
-        return new DeletedEntry(getId(), getName(), getCreatedAt());
+        return new DeletedEntry(getId(), getReserverName(), getCreatedAt());
     }
 
     @Override
     public ReservationEntry promote() {
-        return new ReservedEntry(getId(), getName(), getCreatedAt());
+        return new ReservedEntry(getId(), getReserverName(), getCreatedAt());
     }
 }

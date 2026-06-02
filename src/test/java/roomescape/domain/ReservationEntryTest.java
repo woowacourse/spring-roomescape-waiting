@@ -19,7 +19,7 @@ class ReservationEntryTest {
         assertThat(entry)
                 .extracting(
                         ReservationEntry::getId,
-                        ReservationEntry::getName,
+                        ReservationEntry::getReserverName,
                         ReservationEntry::getStatus
                 )
                 .containsExactly(null, "이프", ReservationStatus.RESERVED);
@@ -35,7 +35,7 @@ class ReservationEntryTest {
         assertThat(entry)
                 .extracting(
                         ReservationEntry::getId,
-                        ReservationEntry::getName,
+                        ReservationEntry::getReserverName,
                         ReservationEntry::getStatus
                 )
                 .containsExactly(null, "이프", ReservationStatus.WAITING);

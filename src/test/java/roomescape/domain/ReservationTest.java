@@ -58,7 +58,7 @@ class ReservationTest {
         // then
         assertThat(reservation.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
@@ -100,7 +100,7 @@ class ReservationTest {
 
         // then
         assertThat(reservation.getEntries())
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactlyInAnyOrder(
                         tuple("이프", ReservationStatus.RESERVED),
                         tuple("라텔", ReservationStatus.WAITING)
@@ -119,7 +119,7 @@ class ReservationTest {
         // then
         assertThat(reservation.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("라텔", ReservationStatus.RESERVED);
     }
 
@@ -160,7 +160,7 @@ class ReservationTest {
         ReservationEntry result = reservation.findActiveEntry(1L);
 
         // then
-        assertThat(result.getName()).isEqualTo("이프");
+        assertThat(result.getReserverName()).isEqualTo("이프");
     }
 
     @Test

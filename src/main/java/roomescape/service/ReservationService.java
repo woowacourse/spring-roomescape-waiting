@@ -66,13 +66,13 @@ public class ReservationService {
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
                                         LocalDate date, ReservationTime newTime, LocalDateTime now) {
         Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
-        ReservationEntry moved = target.joinWaitingList(entry.getName(), now);
+        ReservationEntry moved = target.joinWaitingList(entry.getReserverName(), now);
 
         current.cancelEntry(entry.getId());
         reservationRepository.save(current);
 
         Reservation saved = reservationRepository.save(target);
-        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getName(), moved.getStatus()));
+        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getReserverName(), moved.getStatus()));
     }
 
     private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {

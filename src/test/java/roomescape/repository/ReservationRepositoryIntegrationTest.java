@@ -53,7 +53,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         assertThat(dataSource.hasReservationById(saved.getId())).isTrue();
         assertThat(saved.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getId, ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getId, ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly(1L, "이프", ReservationStatus.RESERVED);
     }
 
@@ -85,7 +85,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         assertThat(find).isPresent();
         assertThat(find.get().getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getId, ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getId, ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly(1L, "이프", ReservationStatus.RESERVED);
     }
 
@@ -123,7 +123,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         assertThat(find.get().getDate()).isEqualTo(LocalDate.now().plusDays(2));
         assertThat(find.get().getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
@@ -162,7 +162,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         assertThat(find).isPresent();
         assertThat(find.get().getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
@@ -181,7 +181,7 @@ class ReservationRepositoryIntegrationTest extends BaseIntegrationTest {
         assertThat(find.get().getId()).isEqualTo(saved.getId());
         assertThat(find.get().getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 

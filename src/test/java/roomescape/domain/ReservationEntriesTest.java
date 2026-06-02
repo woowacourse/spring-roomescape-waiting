@@ -21,7 +21,7 @@ class ReservationEntriesTest {
         // then
         assertThat(entries.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
@@ -36,7 +36,7 @@ class ReservationEntriesTest {
         // then
         assertThat(entries.getEntries())
                 .singleElement()
-                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .extracting(ReservationEntry::getReserverName, ReservationEntry::getStatus)
                 .containsExactly("이프", ReservationStatus.WAITING);
     }
 

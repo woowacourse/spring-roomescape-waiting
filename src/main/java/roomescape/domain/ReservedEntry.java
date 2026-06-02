@@ -30,7 +30,7 @@ public class ReservedEntry extends ReservationEntry {
 
     @Override
     public ReservationEntry cancel() {
-        return new DeletedEntry(getId(), getName(), getCreatedAt());
+        return new DeletedEntry(getId(), getReserverName(), getCreatedAt());
     }
 
     @Override
