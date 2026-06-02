@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
@@ -468,12 +470,11 @@ class ReservationServiceTest {
     void 대기_순위는_같은_슬롯_내_createdAt_순서로_계산된다() {
         // given
         final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = SAVED_THEME;
         final LocalDate futureDate = LocalDate.of(2026, 5, 9);
 
-        waitingRepository.add(Waiting.of(1L, "크루", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
-        waitingRepository.add(Waiting.of(3L, CUSTOMER_NAME, Date.valueOf(futureDate), NOW, time, theme));
+        waitingRepository.add(Waiting.of(1L, "크루", Date.valueOf(futureDate), NOW.minusMinutes(2), time, SAVED_THEME));
+        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, SAVED_THEME));
+        waitingRepository.add(Waiting.of(3L, CUSTOMER_NAME, Date.valueOf(futureDate), NOW, time, SAVED_THEME));
 
         // when
         ReservationsAndWaitingsResponse response = reservationService.findReservationsAndWaitingsByCustomerName(CUSTOMER_NAME);
@@ -483,39 +484,99 @@ class ReservationServiceTest {
         assertThat(response.waitings().getFirst().rank()).isEqualTo(3);
     }
 
-    @Test
-    void 예약_취소_시_해당_슬롯의_가장_빠른_대기가_예약으로_전환된다() {
-        // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = SAVED_THEME;
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+    @Nested
+    @DisplayName("예약 취소시 대기를 승격한다")
+    class CancelReservationAndPromoteWaiting {
 
-        reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, futureDate, time, theme));
+        @Test
+        void 예약_취소_시_해당_슬롯의_가장_빠른_대기가_예약으로_전환된다() {
+            // given
+            final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+            final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
-        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+            reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, tomorrow, time, SAVED_THEME));
 
-        // when
-        reservationService.cancel(1L);
+            waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(tomorrow), NOW.minusMinutes(2), time, SAVED_THEME));
+            waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(tomorrow), NOW.minusMinutes(1), time, SAVED_THEME));
 
-        // then
-        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+            // when
+            reservationService.cancel(1L);
+
+            // then
+            assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+        }
+
+        @Test
+        void 예약_취소_시_대기가_없으면_예약만_삭제된다() {
+            // given
+            final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+            final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+
+            reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, tomorrow, time, SAVED_THEME));
+
+            // when
+            reservationService.cancel(1L);
+
+            // then
+            assertThat(reservationRepository.findById(1L)).isEmpty();
+            assertThat(reservationRepository.savedReservation()).isNull();
+        }
     }
 
-    @Test
-    void 예약_취소_시_대기가_없으면_예약만_삭제된다() {
-        // given
-        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
-        final Theme theme = SAVED_THEME;
-        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+    @Nested
+    @DisplayName("관리자의 예약 삭제시 대기를 승격한다")
+    class DeleteReservationAndPromoteWaiting {
 
-        reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, futureDate, time, theme));
+        @Test
+        void 오늘_이후의_예약_삭제_시_해당_슬롯의_가장_빠른_대기가_예약으로_전환된다() {
+            // given
+            final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+            final ReservationTime time = ReservationTime.of(1L, NOW.plusMinutes(1).toLocalTime());
 
-        // when
-        reservationService.cancel(1L);
+            reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, tomorrow, time, SAVED_THEME));
 
-        // then
-        assertThat(reservationRepository.findById(1L)).isEmpty();
+            waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(tomorrow), NOW.minusMinutes(2), time, SAVED_THEME));
+            waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(tomorrow), NOW.minusMinutes(1), time, SAVED_THEME));
+
+            // when
+            reservationService.delete(1L);
+
+            // then
+            assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+        }
+
+        @Test
+        void 오늘_이후의_예약_삭제_시_대기가_없으면_예약만_삭제된다() {
+            // given
+            final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+            final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+
+            reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, tomorrow, time, SAVED_THEME));
+
+            // when
+            reservationService.delete(1L);
+
+            // then
+            assertThat(reservationRepository.findById(1L)).isEmpty();
+            assertThat(reservationRepository.savedReservation()).isNull();
+        }
+
+        @Test
+        void 과거_슬롯의_예약_삭제_시_대기가_예약으로_전환되지_않는다() {
+            // given
+            final LocalDate today = NOW.toLocalDate();
+            final ReservationTime pastTime = ReservationTime.of(1L, NOW.minusMinutes(1).toLocalTime());
+
+            reservationRepository.add(Reservation.of(1L, CUSTOMER_NAME, today, pastTime, SAVED_THEME));
+
+            waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(today), NOW.minusHours(2), pastTime, SAVED_THEME));
+            waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(today), NOW.minusHours(1), pastTime, SAVED_THEME));
+
+            // when
+            reservationService.delete(1L);
+
+            // then
+            assertThat(reservationRepository.savedReservation()).isNull();
+        }
     }
-
 }

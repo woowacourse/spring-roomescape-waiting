@@ -75,13 +75,13 @@ public class Reservation {
     }
 
     public void validateCancelableByCustomer(final LocalDate today) {
-        if (!isBeforeReservationDate(today)) {
+        if (isReservationDatePastOrToday(today)) {
             throw new ReservationCancellationException();
         }
     }
 
     public void validateModifiableByCustomer(final LocalDate today) {
-        if (!isBeforeReservationDate(today)) {
+        if (isReservationDatePastOrToday(today)) {
             throw new ReservationModificationException();
         }
     }
@@ -90,8 +90,8 @@ public class Reservation {
         return reservationDateTime().isAfter(now);
     }
 
-    private boolean isBeforeReservationDate(final LocalDate today) {
-        return today.isBefore(date);
+    private boolean isReservationDatePastOrToday(final LocalDate today) {
+        return !today.isBefore(date);
     }
 
     private void validateRequiredValues(final LocalDate date, final ReservationTime time) {
