@@ -3,12 +3,14 @@ package roomescape.service;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.PopularTheme;
+import roomescape.domain.PopularThemeCondition;
+import roomescape.domain.PopularThemePolicy;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.PopularThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,10 +21,16 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final PopularThemePolicy popularThemePolicy;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(
+            ThemeRepository themeRepository,
+            ReservationRepository reservationRepository,
+            PopularThemePolicy popularThemePolicy
+    ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.popularThemePolicy = popularThemePolicy;
     }
 
     public List<Theme> findAll() {
@@ -40,11 +48,9 @@ public class ThemeService {
         deleteTheme(id);
     }
 
-    public List<PopularThemeResult> findWeeklyTopTen() {
-        LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusWeeks(1);
-        LocalDate endDate = today.minusDays(1);
-        return themeRepository.findPopular(startDate, endDate, 10);
+    public List<PopularTheme> findWeeklyTopTen(LocalDate today) {
+        PopularThemeCondition condition = popularThemePolicy.createCondition(today);
+        return themeRepository.findPopular(condition);
     }
 
     private void deleteTheme(Long id) {

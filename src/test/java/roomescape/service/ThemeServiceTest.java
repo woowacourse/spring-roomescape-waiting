@@ -4,12 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import roomescape.domain.PopularTheme;
+import roomescape.domain.PopularThemeCondition;
+import roomescape.domain.PopularThemePolicy;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.PopularThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +26,8 @@ class ThemeServiceTest {
 
     private final ThemeRepository themeRepository = mock();
     private final ReservationRepository reservationRepository = mock();
-    private final ThemeService service = new ThemeService(themeRepository, reservationRepository);
+    private final PopularThemePolicy popularThemePolicy = mock();
+    private final ThemeService service = new ThemeService(themeRepository, reservationRepository, popularThemePolicy);
 
     @Test
     void 전체_테마_조회_테스트() {
@@ -41,7 +44,7 @@ class ThemeServiceTest {
         // then
         assertThat(result).isEqualTo(themes);
         verify(themeRepository, times(1)).findAll();
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 
     @Test
@@ -77,7 +80,7 @@ class ThemeServiceTest {
                 () -> assertThat(captured.getDescription()).isEqualTo(description),
                 () -> assertThat(captured.getThumbnail()).isEqualTo(thumbnail));
 
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 
     @Test
@@ -93,7 +96,7 @@ class ThemeServiceTest {
         // then
         verify(reservationRepository, times(1)).existsByThemeId(id);
         verify(themeRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 
     @Test
@@ -111,7 +114,7 @@ class ThemeServiceTest {
 
         verify(reservationRepository, times(1)).existsByThemeId(id);
         verify(themeRepository, never()).delete(anyLong());
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 
     @Test
@@ -132,24 +135,33 @@ class ThemeServiceTest {
 
         verify(reservationRepository, times(1)).existsByThemeId(id);
         verify(themeRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 
     @Test
     void 인기_테마_조회_테스트() {
         // given
-        List<PopularThemeResult> popularThemes = List.of(
-                new PopularThemeResult(1L, "테스트 테마1", "테마 설명1", "썸네일 주소1", 2L),
-                new PopularThemeResult(2L, "테스트 테마2", "테마 설명2", "썸네일 주소2", 1L));
-        when(themeRepository.findPopular(any(LocalDate.class), any(LocalDate.class), eq(10)))
+        LocalDate today = LocalDate.of(2026, 6, 3);
+        PopularThemeCondition condition = new PopularThemeCondition(
+                LocalDate.of(2026, 5, 27),
+                LocalDate.of(2026, 6, 2),
+                10);
+        List<PopularTheme> popularThemes = List.of(
+                new PopularTheme(new Theme(1L, "테스트 테마1", "테마 설명1", "썸네일 주소1"), 2L),
+                new PopularTheme(new Theme(2L, "테스트 테마2", "테마 설명2", "썸네일 주소2"), 1L));
+
+        when(popularThemePolicy.createCondition(today))
+                .thenReturn(condition);
+        when(themeRepository.findPopular(condition))
                 .thenReturn(popularThemes);
 
         // when
-        List<PopularThemeResult> result = service.findWeeklyTopTen();
+        List<PopularTheme> result = service.findWeeklyTopTen(today);
 
         // then
         assertThat(result).isEqualTo(popularThemes);
-        verify(themeRepository, times(1)).findPopular(any(LocalDate.class), any(LocalDate.class), eq(10));
-        verifyNoMoreInteractions(themeRepository, reservationRepository);
+        verify(popularThemePolicy, times(1)).createCondition(today);
+        verify(themeRepository, times(1)).findPopular(condition);
+        verifyNoMoreInteractions(themeRepository, reservationRepository, popularThemePolicy);
     }
 }

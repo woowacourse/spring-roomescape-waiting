@@ -5,11 +5,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.PopularTheme;
+import roomescape.domain.PopularThemeCondition;
 import roomescape.domain.Theme;
-import roomescape.repository.dto.PopularThemeResult;
 
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +17,19 @@ import java.util.Optional;
 public class ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> new Theme(
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getString("description"),
+            resultSet.getString("thumbnail")
+    );
+
+    private final RowMapper<PopularTheme> popularThemeRowMapper = (resultSet, rowNum) -> new PopularTheme(
+            themeRowMapper.mapRow(resultSet, rowNum),
+            resultSet.getLong("reservation_count")
+    );
+
 
     public ThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -55,7 +68,7 @@ public class ThemeRepository {
         return jdbcTemplate.update(sql, id);
     }
 
-    public List<PopularThemeResult> findPopular(LocalDate startDate, LocalDate endDate, int limit) {
+    public List<PopularTheme> findPopular(PopularThemeCondition condition) {
         String sql = """
                 SELECT
                     t.id,
@@ -72,25 +85,12 @@ public class ThemeRepository {
                 ORDER BY reservation_count DESC, t.id ASC
                 LIMIT ?;
                 """;
-        return jdbcTemplate.query(sql, popularThemeRowMapper, startDate, endDate, limit);
+        return jdbcTemplate.query(
+                sql,
+                popularThemeRowMapper,
+                condition.getStartDate(),
+                condition.getEndDate(),
+                condition.getLimit()
+        );
     }
-
-    private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> {
-        Theme theme = new Theme(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail"));
-        return theme;
-    };
-
-    private final RowMapper<PopularThemeResult> popularThemeRowMapper = (resultSet, rowNum) -> {
-        PopularThemeResult theme = new PopularThemeResult(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail"),
-                resultSet.getLong("reservation_count"));
-        return theme;
-    };
 }

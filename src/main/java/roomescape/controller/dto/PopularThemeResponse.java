@@ -1,6 +1,6 @@
 package roomescape.controller.dto;
 
-import roomescape.repository.dto.PopularThemeResult;
+import roomescape.domain.PopularTheme;
 
 public record PopularThemeResponse(
         Long id,
@@ -9,13 +9,13 @@ public record PopularThemeResponse(
         String thumbnail,
         Long reservationCount
 ) {
-    public static PopularThemeResponse from(PopularThemeResult popularThemeResult) {
+    public static PopularThemeResponse from(PopularTheme popularTheme) {
         return new PopularThemeResponse(
-                popularThemeResult.id(),
-                popularThemeResult.name(),
-                popularThemeResult.description(),
-                popularThemeResult.thumbnail(),
-                popularThemeResult.reservationCount()
+                popularTheme.getTheme().getId(),
+                popularTheme.getTheme().getName(),
+                popularTheme.getTheme().getDescription(),
+                popularTheme.getTheme().getThumbnail(),
+                popularTheme.getReservationCount()
         );
     }
 }

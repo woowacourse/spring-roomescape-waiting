@@ -6,10 +6,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import roomescape.domain.PopularTheme;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
-import roomescape.repository.dto.PopularThemeResult;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
 import roomescape.service.result.TimeAvailabilityResult;
@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -97,8 +98,8 @@ class ThemeControllerTest {
     @Test
     void 인기_테마를_조회한다() throws Exception {
         // given
-        given(themeService.findWeeklyTopTen())
-                .willReturn(List.of(new PopularThemeResult(1L, "테마", "설명", "썸네일", 3L)));
+        given(themeService.findWeeklyTopTen(any(LocalDate.class)))
+                .willReturn(List.of(new PopularTheme(new Theme(1L, "테마", "설명", "썸네일"), 3L)));
 
         // when & then
         mockMvc.perform(get("/themes/popular"))
@@ -107,7 +108,7 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].name").value("테마"))
                 .andExpect(jsonPath("$[0].reservationCount").value(3));
 
-        verify(themeService, times(1)).findWeeklyTopTen();
+        verify(themeService, times(1)).findWeeklyTopTen(any(LocalDate.class));
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 

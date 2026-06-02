@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.PopularTheme;
+import roomescape.domain.PopularThemeCondition;
 import roomescape.domain.Theme;
-import roomescape.repository.dto.PopularThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -86,20 +87,22 @@ class ThemeRepositoryTest {
                 "포비", LocalDate.of(2026, 5, 2), 3L, theme2.getId());
 
         // when
-        List<PopularThemeResult> result = themeRepository.findPopular(
+        PopularThemeCondition condition = new PopularThemeCondition(
                 LocalDate.of(2026, 5, 1),
                 LocalDate.of(2026, 5, 3),
                 2);
 
+        List<PopularTheme> result = themeRepository.findPopular(condition);
+
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
-                () -> assertThat(result.get(0).id()).isEqualTo(theme2.getId()),
-                () -> assertThat(result.get(0).name()).isEqualTo("테마2"),
-                () -> assertThat(result.get(0).description()).isEqualTo("설명2"),
-                () -> assertThat(result.get(0).thumbnail()).isEqualTo("썸네일2"),
-                () -> assertThat(result.get(0).reservationCount()).isEqualTo(2),
-                () -> assertThat(result.get(1).id()).isEqualTo(theme1.getId()),
-                () -> assertThat(result.get(1).reservationCount()).isEqualTo(1));
+                () -> assertThat(result.get(0).getTheme().getId()).isEqualTo(theme2.getId()),
+                () -> assertThat(result.get(0).getTheme().getName()).isEqualTo("테마2"),
+                () -> assertThat(result.get(0).getTheme().getDescription()).isEqualTo("설명2"),
+                () -> assertThat(result.get(0).getTheme().getThumbnail()).isEqualTo("썸네일2"),
+                () -> assertThat(result.get(0).getReservationCount()).isEqualTo(2),
+                () -> assertThat(result.get(1).getTheme().getId()).isEqualTo(theme1.getId()),
+                () -> assertThat(result.get(1).getReservationCount()).isEqualTo(1));
     }
 }
