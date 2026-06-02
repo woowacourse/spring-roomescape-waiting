@@ -1,6 +1,5 @@
 package roomescape.dao;
 
-import org.apache.catalina.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -14,12 +13,12 @@ import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class WaitingDao {
@@ -84,7 +83,7 @@ public class WaitingDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public ReservationWaiting save(ReservationWaiting waiting) {
+    public Long create(ReservationWaiting waiting) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", waiting.getUserNameValue())
                 .addValue("date", waiting.getWaitingDate())
@@ -94,21 +93,10 @@ public class WaitingDao {
 
         Number waitingId = insertExecutor.executeAndReturnKey(params);
 
-        return findById(waitingId.longValue());
+        return waitingId.longValue();
     }
 
-    public void delete(ReservationWaiting waiting) {
-        String sql = """
-                DELETE FROM reservation_waiting WHERE id = ?
-                """;
-        int affected = jdbcTemplate.update(sql, waiting.getId());
-
-        if (affected == 0) {
-            throw new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다.");
-        }
-    }
-
-    public ReservationWaiting findById(long waitingId) {
+    public Optional<ReservationWaiting> findById(long waitingId) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -130,32 +118,26 @@ public class WaitingDao {
                 """;
         return jdbcTemplate.query(sql, rowMapper, waitingId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
+                .findFirst();
     }
 
-    public List<ReservationWaiting> findAllBySlot(Slot slot) {
+    public boolean existsBySlotAndName(Slot slot, UserName name) {
         String sql = """
-                SELECT
-                    waiting.id as waiting_id,
-                    waiting.name,
-                    waiting.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description,
-                    waiting.created_at as created_at
-                FROM reservation_waiting as waiting
-                INNER JOIN reservation_time as time
-                ON waiting.time_id = time.id
-                INNER JOIN theme as theme
-                ON waiting.theme_id = theme.id
-                WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
-                ORDER BY created_at;
-                """;
-        return jdbcTemplate.query(sql, rowMapper, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+            SELECT COUNT(1)
+            FROM reservation_waiting
+            WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
+            """;
+
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
+                name.getName()
+        );
+
+        return count != null && count > 0;
     }
 
     public List<WaitingWithRank> findAllByName(String name) {
@@ -181,5 +163,12 @@ public class WaitingDao {
                 WHERE ranked_waiting.name = ?
                 """;
         return jdbcTemplate.query(sql, withRankRowMapper, name);
+    }
+
+    public void delete(ReservationWaiting waiting) {
+        String sql = """
+                DELETE FROM reservation_waiting WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, waiting.getId());
     }
 }

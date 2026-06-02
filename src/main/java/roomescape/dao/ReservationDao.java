@@ -12,7 +12,6 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Schedule;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -57,7 +56,7 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Reservation save(Reservation reservation) {
+    public Long create(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getUserNameValue())
                 .addValue("date", reservation.getReservationDate())
@@ -66,35 +65,7 @@ public class ReservationDao {
 
         Number reservationId = insertExecutor.executeAndReturnKey(params);
 
-        String sql = """
-                SELECT 
-                    reservation.id as reservation_id,
-                    reservation.name,
-                    reservation.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description 
-                FROM reservation as reservation
-                INNER JOIN reservation_time as time
-                ON reservation.time_id = time.id
-                INNER JOIN theme as theme
-                ON reservation.theme_id = theme.id
-                WHERE reservation.id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, rowMapper, reservationId.longValue());
-    }
-
-    public void delete(Reservation reservation) {
-        String sql = "DELETE FROM reservation WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, reservation.getId());
-
-        if (affected == 0) {
-            throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
-        }
+        return reservationId.longValue();
     }
 
     public List<Reservation> findAllReservations() {
@@ -119,7 +90,7 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public Reservation findById(long reservationId) {
+    public Optional<Reservation> findById(Long reservationId) {
         String sql = """
                 SELECT
                     reservation.id as reservation_id,
@@ -138,8 +109,7 @@ public class ReservationDao {
                 """;
         return jdbcTemplate.query(sql, rowMapper, reservationId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
+                .findFirst();
     }
 
     public List<Reservation> findByName(String name) {
@@ -162,12 +132,6 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper, name);
     }
 
-    public Reservation updateDateAndTime(Reservation reservation) {
-        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, reservation.getReservationDate(), reservation.getReservationTime().getId(), reservation.getId());
-        return findById(reservation.getId());
-    }
-
     public Optional<Reservation> findBySlot(Slot slot) {
         String sql = """
                 SELECT
@@ -186,5 +150,36 @@ public class ReservationDao {
                         WHERE date = ? AND time_id = ? AND theme_id = ?;
                 """;
         return jdbcTemplate.query(sql, rowMapper, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId()).stream().findFirst();
+    }
+
+    public boolean existsBySlotAndIdNot(Long reservationId, Slot slot) {
+        String sql = """
+            SELECT COUNT(1)
+            FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ? 
+              AND id != ?  
+            """;
+
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
+                reservationId
+        );
+
+        return count != null && count > 0;
+    }
+
+    public void updateDateAndTime(Reservation reservation) {
+        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
+
+        jdbcTemplate.update(sql, reservation.getReservationDate(), reservation.getReservationTime().getId(), reservation.getId());
+    }
+
+    public void delete(Reservation reservation) {
+        String sql = "DELETE FROM reservation WHERE id = ?";
+        jdbcTemplate.update(sql, reservation.getId());
     }
 }

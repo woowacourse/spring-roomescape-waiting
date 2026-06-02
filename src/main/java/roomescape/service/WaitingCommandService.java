@@ -2,6 +2,7 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -27,22 +28,17 @@ public class WaitingCommandService {
     private final ThemeDao themeDao;
     private final Clock clock;
 
-    private ReservationTime findTimeReference(long timeId) {
-        try {
-            return reservationTimeDao.findById(timeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 예약 시간입니다.");
-        }
+    private ReservationTime findTimeReference(Long timeId) {
+        return reservationTimeDao.findById(timeId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 시간입니다."));
     }
 
-    private Theme findThemeReference(long themeId) {
-        try {
-            return themeDao.findById(themeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 테마입니다.");
-        }
+    private Theme findThemeReference(Long themeId) {
+            return themeDao.findById(themeId)
+                    .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
     }
 
+    @Transactional
     public ReservationWaiting create(WaitingCommand command) {
         ReservationTime time = findTimeReference(command.timeId());
         Theme theme = findThemeReference(command.themeId());
@@ -56,16 +52,19 @@ public class WaitingCommandService {
             throw new DuplicateException("내가 예약한 시간에 예약대기를 생성할 수 없습니다.");
         }
 
-        if (waitingDao.findAllBySlot(slot).stream()
-                .anyMatch(waiting -> Objects.equals(command.name(), waiting.getUserName()))) {
+        if (waitingDao.existsBySlotAndName(slot, command.name())) {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
 
-        return waitingDao.save(ReservationWaiting.create(command.name(), slot, LocalDateTime.now(clock)));
+        Long savedId = waitingDao.create(ReservationWaiting.create(command.name(), slot, LocalDateTime.now(clock)));
+        return waitingDao.findById(savedId)
+                .orElseThrow(() -> new ResourceNotFoundException("예약 대기가 정상적으로 생성되지 않았습니다."));
     }
 
+    @Transactional
     public void cancel(Long waitingId, UserName name) {
-        ReservationWaiting waiting = waitingDao.findById(waitingId);
+        ReservationWaiting waiting = waitingDao.findById(waitingId)
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 예약 대기입니다."));
         waiting.validateCancelable(LocalDateTime.now(clock));
         waiting.validateOwnedBy(name);
 

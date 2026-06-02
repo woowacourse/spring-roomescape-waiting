@@ -7,10 +7,10 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ThemeDao {
@@ -31,7 +31,7 @@ public class ThemeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Theme save(Theme theme) {
+    public Long create(Theme theme) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", theme.getThemeName())
                 .addValue("thumbnail_url", theme.getThumbnailUrl())
@@ -43,28 +43,16 @@ public class ThemeDao {
                 SELECT * FROM theme WHERE theme.id = ?
                 """;
 
-        return jdbcTemplate.queryForObject(sql, rowMapper, themeId.longValue());
+        return themeId.longValue();
     }
 
-    public void delete(Theme theme) {
-        String sql = """
-                DELETE FROM theme WHERE id = ?
-                """;
-        int affected = jdbcTemplate.update(sql, theme.getId());
-
-        if (affected == 0) {
-            throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");
-        }
-    }
-
-    public Theme findById(long themeId) {
+    public Optional<Theme> findById(Long themeId) {
         String sql = """
                 SELECT * FROM theme WHERE id = ?
                 """;
         return jdbcTemplate.query(sql, rowMapper, themeId)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다."));
+                .findFirst();
     }
 
     public List<Theme> findAllThemes() {
@@ -92,6 +80,12 @@ public class ThemeDao {
                 """;
 
         return jdbcTemplate.query(sql, rowMapper, startAt, endAt, limit);
+    }
 
+    public void delete(Theme theme) {
+        String sql = """
+                DELETE FROM theme WHERE id = ?
+                """;
+        jdbcTemplate.update(sql, theme.getId());
     }
 }
