@@ -14,9 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.exception.ReservationErrorCode;
-import roomescape.exception.ReservationTimeErrorCode;
-import roomescape.exception.ThemeErrorCode;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.reservationtime.exception.ReservationTimeErrorCode;
+import roomescape.theme.exception.ThemeErrorCode;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Sql(value = "/empty.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
