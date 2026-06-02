@@ -22,10 +22,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
-import roomescape.controller.admin.AdminReservationApiController;
 import roomescape.controller.admin.dto.request.AdminReservationRequest;
 import roomescape.controller.admin.dto.response.AdminReservationResponse;
 import roomescape.controller.admin.fixture.AdminReservationApiRequestFixture;
+import roomescape.exception.DuplicateEntityException;
+import roomescape.exception.RoomEscapeException;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
@@ -93,6 +94,36 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
                 .then().log().all()
                 .status(HttpStatus.NO_CONTENT);
         verify(reservationService, times(1)).cancelReservation(anyLong());
+    }
+
+    @Test
+    void 중복_예약_요청시_409를_반환한다() {
+        // given
+        AdminReservationRequest body = AdminReservationApiRequestFixture.reserveSuccessRequestFixture();
+        when(reservationService.reserve(any(ReservationCommand.class)))
+                .thenThrow(new DuplicateEntityException("이미 예약이 존재하는 시간입니다."));
+
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(body)
+                .when().post("/api/admin/reservations")
+                .then().log().all()
+                .status(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void 비즈니스_예외_발생시_400을_반환한다() {
+        // given
+        AdminReservationRequest body = AdminReservationApiRequestFixture.reserveSuccessRequestFixture();
+        when(reservationService.reserve(any(ReservationCommand.class)))
+                .thenThrow(new RoomEscapeException("비즈니스 예외"));
+
+        // when & then
+        RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(body)
+                .when().post("/api/admin/reservations")
+                .then().log().all()
+                .status(HttpStatus.BAD_REQUEST);
     }
 
     @Test

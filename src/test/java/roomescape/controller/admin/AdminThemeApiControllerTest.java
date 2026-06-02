@@ -20,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
-import roomescape.controller.admin.AdminThemeApiController;
 import roomescape.controller.admin.dto.request.AdminThemeRequest;
 import roomescape.controller.admin.dto.response.AdminThemeResponse;
 import roomescape.service.ThemeService;

@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
-import roomescape.controller.admin.AdminReservationTimeApiController;
 import roomescape.controller.admin.dto.response.AdminReservationTimeResponse;
 import roomescape.controller.admin.fixture.AdminReservationTimeApiRequestFixture;
 import roomescape.service.ReservationTimeService;
