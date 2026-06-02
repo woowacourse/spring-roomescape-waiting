@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
 
 import java.time.LocalDate;
@@ -14,6 +15,15 @@ public class FakeThemeSlotRepository implements ThemeSlotRepository {
 
     private final Map<Long, ThemeSlot> storage = new ConcurrentHashMap<>();
     private final AtomicLong sequence = new AtomicLong(1L);
+    private final ReservationRepository reservationRepository;
+
+    public FakeThemeSlotRepository() {
+        this.reservationRepository = null;
+    }
+
+    public FakeThemeSlotRepository(ReservationRepository reservationRepository) {
+        this.reservationRepository = reservationRepository;
+    }
 
     public void clear() {
         storage.clear();
@@ -47,6 +57,18 @@ public class FakeThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public Optional<ThemeSlot> findById(long id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
+    public Optional<ThemeSlot> findWithReservations(Long themeSlotId) {
+        return findById(themeSlotId).map(ts -> {
+            List<Reservation> reservations = (reservationRepository != null)
+                    ? reservationRepository.findAll().stream()
+                    .filter(r -> r.getThemeSlotId().equals(themeSlotId))
+                    .toList()
+                    : List.of();
+            return new ThemeSlot(ts.getId(), ts.getTheme(), ts.getDate(), ts.getTime(), ts.isReserved(), reservations);
+        });
     }
 
     @Override

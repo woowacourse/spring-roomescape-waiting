@@ -7,9 +7,15 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.reservationStatus.CancelledStatus;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
+import roomescape.domain.reservationStatus.CompletedStatus;
+import roomescape.domain.reservationStatus.PendingStatus;
+import roomescape.domain.reservationStatus.ReservationStatus;
 import roomescape.repository.ThemeSlotRepository;
 
 import java.sql.PreparedStatement;
@@ -171,6 +177,49 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
                 themeSlot.getDate(),
                 themeSlot.getTime().getId()
         );
+    }
+
+    @Override
+    public Optional<ThemeSlot> findWithReservations(Long themeSlotId) {
+        Optional<ThemeSlot> themeSlotOpt = findById(themeSlotId);
+        if (themeSlotOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        ThemeSlot themeSlot = themeSlotOpt.get();
+
+        List<Reservation> reservations = jdbcTemplate.query("""
+                        SELECT r.id AS r_id, 
+                               r.name AS r_name, 
+                               r.status AS r_status
+                        FROM reservation r
+                        WHERE r.theme_slot_id = ?
+                        """,
+                (rs, rowNum) -> new Reservation(
+                        rs.getLong("r_id"),
+                        rs.getString("r_name"),
+                        themeSlotId,
+                        themeSlot.getDate(),
+                        themeSlot.getTime(),
+                        themeSlot.getTheme(),
+                        toReservationStatus(rs.getString("r_status"))
+                ),
+                themeSlotId
+        );
+
+        return Optional.of(new ThemeSlot(
+                themeSlot.getId(), themeSlot.getTheme(), themeSlot.getDate(),
+                themeSlot.getTime(), themeSlot.isReserved(), reservations
+        ));
+    }
+
+    private ReservationStatus toReservationStatus(String status) {
+        return switch (status) {
+            case "PENDING" -> PendingStatus.getInstance();
+            case "CONFIRMED" -> ConfirmedStatus.getInstance();
+            case "COMPLETED" -> CompletedStatus.getInstance();
+            case "CANCELLED" -> CancelledStatus.getInstance();
+            default -> throw new IllegalArgumentException("존재하지 않는 예약 상태입니다.");
+        };
     }
 
     private RowMapper<ThemeSlot> rowMapper() {

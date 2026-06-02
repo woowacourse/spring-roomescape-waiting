@@ -1,7 +1,9 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ThemeSlot {
 
@@ -10,6 +12,7 @@ public class ThemeSlot {
     private final LocalDate date;
     private final Time time;
     private boolean isReserved;
+    private final Reservations reservations;
 
     public ThemeSlot(Theme theme, LocalDate date, Time time, boolean isReserved) {
         this.id = null;
@@ -17,6 +20,7 @@ public class ThemeSlot {
         this.date = date;
         this.time = time;
         this.isReserved = isReserved;
+        this.reservations = new Reservations(List.of());
     }
 
     public ThemeSlot(Long id, Theme theme, LocalDate date, Time time, boolean isReserved) {
@@ -25,10 +29,46 @@ public class ThemeSlot {
         this.date = date;
         this.time = time;
         this.isReserved = isReserved;
+        this.reservations = new Reservations(List.of());
+    }
+
+    public ThemeSlot(Long id, Theme theme, LocalDate date, Time time, boolean isReserved, List<Reservation> reservations) {
+        this.id = id;
+        this.theme = theme;
+        this.date = date;
+        this.time = time;
+        this.isReserved = isReserved;
+        this.reservations = new Reservations(reservations);
     }
 
     public static ThemeSlot of(Long id, ThemeSlot themeSlot) {
         return new ThemeSlot(id, themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.isReserved());
+    }
+
+    public Reservation addReservation(String name) {
+        reservations.validateDuplicate(name);
+        Reservation reservation = new Reservation(name, this.id, this.date, this.time, this.theme);
+        if (reservations.hasNoActiveReservation()) {
+            reservation.confirm();
+            this.isReserved = true;
+        }
+        reservations.add(reservation);
+        return reservation;
+    }
+
+        Reservation target = reservations.findById(reservationId);
+        boolean wasConfirmed = target.isConfirmed();
+        target.cancel();
+        if (wasConfirmed) {
+            Optional<Reservation> promoted = reservations.findFirstPending();
+            promoted.ifPresentOrElse(Reservation::confirm, () -> this.isReserved = false);
+            return promoted;
+        }
+        return Optional.empty();
+    }
+
+    public Reservation findReservationById(Long id) {
+        return reservations.findById(id);
     }
 
     public Long getId() {
@@ -51,8 +91,8 @@ public class ThemeSlot {
         return isReserved;
     }
 
-    public void swtichIsReserved() {
-        this.isReserved = !isReserved;
+    public Reservations getReservations() {
+        return reservations;
     }
 
     @Override

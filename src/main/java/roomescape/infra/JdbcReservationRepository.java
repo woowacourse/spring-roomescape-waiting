@@ -167,18 +167,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean isExistBy(Long reservationId) {
-        String sql = """
-                        SELECT EXISTS (
-                            SELECT 1
-                            FROM reservation 
-                            WHERE id = ? 
-                        ) 
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
-    }
-
-    @Override
     public void updateStatus(Reservation reservation) {
         String sql = """
                 UPDATE reservation 
@@ -271,21 +259,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.id
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, themeSlotId).stream().toList();
-    }
-
-    @Override
-    public boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId) {
-        String sql = """
-                        SELECT EXISTS (
-                            SELECT 1
-                            FROM reservation r
-                                INNER JOIN theme_slot ts 
-                                ON r.theme_slot_id = ts.id
-                            WHERE r.name = ?
-                            AND ts.id = ?
-                        )
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, themeSlotId));
     }
 
     @Override

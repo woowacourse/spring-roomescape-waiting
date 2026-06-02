@@ -64,11 +64,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean isExistBy(Long reservationId) {
-        return storage.containsKey(reservationId);
-    }
-
-    @Override
     public List<Reservation> findByName(String name) {
         return storage.values().stream()
                 .filter(reservation -> Objects.equals(reservation.getName(), name))
@@ -129,14 +124,6 @@ public class FakeReservationRepository implements ReservationRepository {
         return storage.values().stream()
                 .anyMatch(reservation ->
                         Objects.equals(reservation.getTime().getId(), timeId)
-                );
-    }
-
-    @Override
-    public boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId) {
-        return storage.values().stream()
-                .anyMatch(reservation ->
-                        reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlotId(), themeSlotId)
                 );
     }
 

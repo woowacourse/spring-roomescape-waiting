@@ -17,8 +17,6 @@ public interface ReservationRepository {
 
     boolean existsByThemeSlotId(long themeSlotId);
 
-    boolean isExistBy(Long reservationId);
-
     List<Reservation> findByName(String name);
 
     List<Reservation> findByThemeSlotAndPending(Long themeSlotId);
@@ -30,8 +28,6 @@ public interface ReservationRepository {
     boolean existsByThemeId(long themeId);
 
     boolean existsByTimeId(long timeId);
-
-    boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
 
     Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId);
 }

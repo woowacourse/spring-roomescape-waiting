@@ -39,10 +39,11 @@ class ReservationServiceTest {
     void setUp() {
         FakeTimeRepository fakeReservationTimeDao = new FakeTimeRepository();
         FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
-        fakeThemeSlotRepository = new FakeThemeSlotRepository();
+        FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
+        fakeThemeSlotRepository = new FakeThemeSlotRepository(fakeReservationRepository);
 
         reservationService = new ReservationService(
-                new FakeReservationRepository(),
+                fakeReservationRepository,
                 fakeThemeSlotRepository
         );
         savedTime = fakeReservationTimeDao.save(Time.of(LocalTime.of(10, 0)));
