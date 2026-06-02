@@ -73,7 +73,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 , id).stream().findFirst();
     }
 
-
     @Override
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
