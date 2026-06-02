@@ -38,7 +38,7 @@ public class ThemeService {
     }
 
     public List<Theme> readSlotOfThemes() {
-        return themeRepository.findSlogOfThemes();
+        return themeRepository.findSlotOfThemes();
     }
 
     public List<PopularThemeResult> readPopularThemes(int top) {

@@ -72,7 +72,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findSlogOfThemes() {
+    public List<Theme> findSlotOfThemes() {
         return List.of();
     }
 

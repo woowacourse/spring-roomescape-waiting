@@ -21,6 +21,6 @@ public interface ThemeRepository {
 
     boolean updateStatus(Theme theme);
 
-    List<Theme> findSlogOfThemes();
+    List<Theme> findSlotOfThemes();
 
 }

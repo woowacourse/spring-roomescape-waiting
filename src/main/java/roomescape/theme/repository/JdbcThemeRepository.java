@@ -132,7 +132,8 @@ public class JdbcThemeRepository implements ThemeRepository {
         ));
     }
 
-    public List<Theme> findThemesRegisteredSlot() {
+    @Override
+    public List<Theme> findSlotOfThemes() {
         String sql = """
                 SELECT DISTINCT t.*
                 FROM theme t
