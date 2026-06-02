@@ -1,0 +1,294 @@
+package roomescape.reservation;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.auth.Role;
+import roomescape.member.Member;
+import roomescape.reservation.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservationtime.ReservationTimeDao;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
+import roomescape.reservationwait.ReservationWaitDao;
+
+@JdbcTest
+@ActiveProfiles("test")
+@Import({ReservationService.class, ReservationDao.class, ReservationTimeDao.class, ReservationWaitDao.class})
+public class ReservationServiceIntegrationTest {
+
+    private static final long BROWN_ID = 1L;
+    private static final long JEONGKONG_ID = 2L;
+    private static final long RESERVATION_ID = 1L;
+    private static final long TIME_ID = 1L;
+    private static final long OTHER_TIME_ID = 2L;
+
+    private static final String INSERT_DEFAULT_STORE_SQL = """
+            INSERT INTO store (id, name)
+            VALUES (1, '강남점');
+            """;
+
+    private static final String INSERT_TWO_MEMBERS_SQL = """
+            INSERT INTO member (id, email, password, name, role)
+            VALUES (1, 'brown@email.com', 'password', '브라운', 'USER'),
+                   (2, 'jeongkong@email.com', 'password', '정콩이', 'USER');
+            """;
+
+    private static final String INSERT_DEFAULT_THEME_SQL = """
+            INSERT INTO theme (id, name, description, img_url)
+            VALUES (1, '테마', '설명', 'https://example.com/img.jpg');
+            """;
+
+    private static final String INSERT_TWO_TIMES_SQL = """
+            INSERT INTO reservation_time (id, start_at)
+            VALUES (1, '10:00'),
+                   (2, '11:00');
+            """;
+
+    private static final String INSERT_BROWN_RESERVATION_SQL = """
+            INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+            VALUES (1, 1, '2026-12-01', 1, 1, 1);
+            """;
+
+    private static final String INSERT_JEONGKONG_WAIT_SQL = """
+            INSERT INTO reservation_wait (id, reservation_id, member_id)
+            VALUES (1, 1, 2);
+            """;
+
+    private static final String INSERT_TWO_RESERVATIONS_SAME_THEME_SQL = """
+            INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+            VALUES (1, 1, '2026-12-01', 1, 1, 1),
+                   (2, 2, '2026-12-01', 2, 1, 1);
+            """;
+
+    private static final String INSERT_GANGNAM_MANAGER_SQL = """
+            INSERT INTO member (id, email, password, name, role, store_id)
+            VALUES (10, 'gangnam@email.com', 'password', '강남매니저', 'MANAGER', 1);
+            """;
+
+    private final ReservationService reservationService;
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public ReservationServiceIntegrationTest(ReservationService reservationService, JdbcTemplate jdbcTemplate) {
+        this.reservationService = reservationService;
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Nested
+    class 예약_생성 {
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL
+        })
+        void 예약이_존재할_경우_새_예약을_생성할_수_없다() {
+            // given: BROWN 이 이미 슬롯 점유
+            LocalDate sameDate = LocalDate.of(2026, 12, 1);
+
+            // when & then: 정콩이가 같은 슬롯 예약 시도 → UNIQUE 위반
+            assertThatThrownBy(() -> reservationService.createReservation(
+                    JEONGKONG_ID, sameDate, TIME_ID, 1L, 1L))
+                    .isInstanceOf(ReservationAlreadyExistsException.class);
+
+            // then: 원 예약 1건 그대로 유지
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation", Integer.class);
+            assertThat(count).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    class 예약_변경 {
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_TWO_RESERVATIONS_SAME_THEME_SQL
+        })
+        void 이미_예약된_시간으로는_예약을_변경할_수_없다() {
+            // given: BROWN 10:00, 정콩이 11:00 (같은 매장/날짜/테마)
+            LocalDate sameDate = LocalDate.of(2026, 12, 1);
+
+            // when & then: BROWN 이 정콩이의 슬롯으로 변경 시도 → UNIQUE 위반
+            assertThatThrownBy(() -> reservationService.updateReservation(
+                    RESERVATION_ID, sameDate, BROWN_ID, OTHER_TIME_ID))
+                    .isInstanceOf(ReservationAlreadyExistsException.class);
+
+            // then: BROWN 예약은 원 시간 그대로
+            Long currentTimeId = jdbcTemplate.queryForObject(
+                    "SELECT time_id FROM reservation WHERE id = ?",
+                    Long.class, RESERVATION_ID);
+            assertThat(currentTimeId).isEqualTo(TIME_ID);
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL
+        })
+        void 존재하지_않는_예약시간으로는_예약을_변경할_수_없다() {
+            // given: BROWN 예약 존재, time(999) 은 없음
+
+            // when & then: 없는 time 으로 변경 시도
+            assertThatThrownBy(() -> reservationService.updateReservation(
+                    RESERVATION_ID, LocalDate.of(2026, 12, 5), BROWN_ID, 999L))
+                    .isInstanceOf(ReservationTimeNotFoundException.class);
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_TWO_TIMES_SQL
+        })
+        void 존재하지_않는_예약은_변경할_수_없다() {
+            // given: time 만 있고 reservation 없음
+
+            // when & then: 없는 reservation(999) 변경 시도
+            assertThatThrownBy(() -> reservationService.updateReservation(
+                    999L, LocalDate.of(2026, 12, 1), BROWN_ID, TIME_ID))
+                    .isInstanceOf(ReservationNotFoundException.class);
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_GANGNAM_MANAGER_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL
+        })
+        void 매니저가_자기_매장_예약을_변경할_수_있다() {
+            // given: 강남 매니저 + BROWN 예약 (같은 매장)
+            Member gangnamManager = new Member(
+                    10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
+            LocalDate newDate = LocalDate.of(2026, 12, 5);
+
+            // when: 매니저가 다른 시간으로 변경
+            reservationService.updateReservationByManager(
+                    RESERVATION_ID, newDate, OTHER_TIME_ID, gangnamManager);
+
+            // then: DB 의 time_id 가 실제로 바뀜
+            Long currentTimeId = jdbcTemplate.queryForObject(
+                    "SELECT time_id FROM reservation WHERE id = ?",
+                    Long.class, RESERVATION_ID);
+            assertThat(currentTimeId).isEqualTo(OTHER_TIME_ID);
+        }
+    }
+
+    @Nested
+    class 예약_삭제 {
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL
+        })
+        void 대기자가_없으면_예약을_삭제한다() {
+            // given: BROWN 예약, 대기자 없음
+
+            // when: BROWN 이 본인 예약 취소
+            reservationService.deleteReservation(RESERVATION_ID, BROWN_ID);
+
+            // then: reservation row 가 DB 에서 사라짐
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation WHERE id = ?",
+                    Integer.class, RESERVATION_ID);
+            assertThat(count).isZero();
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL,
+                INSERT_JEONGKONG_WAIT_SQL
+        })
+        void 대기자가_있으면_가장_빠른_대기자에게_예약을_양도한다() {
+            // given: BROWN 예약 + 정콩이 대기
+
+            // when: BROWN 이 본인 예약 취소
+            reservationService.deleteReservation(RESERVATION_ID, BROWN_ID);
+
+            // then: reservation 주인이 정콩이로 양도됨
+            Long currentOwner = jdbcTemplate.queryForObject(
+                    "SELECT member_id FROM reservation WHERE id = ?",
+                    Long.class, RESERVATION_ID);
+            assertThat(currentOwner).isEqualTo(JEONGKONG_ID);
+
+            // then: 정콩이의 대기 row 사라짐
+            Integer waitCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation_wait WHERE reservation_id = ?",
+                    Integer.class, RESERVATION_ID);
+            assertThat(waitCount).isZero();
+        }
+
+        @Test
+        void 존재하지_않는_예약은_삭제할_수_없다() {
+            // given: 빈 DB
+
+            // when & then: 없는 reservation(999) 삭제 시도
+            assertThatThrownBy(() -> reservationService.deleteReservation(999L, BROWN_ID))
+                    .isInstanceOf(ReservationNotFoundException.class);
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_TWO_MEMBERS_SQL,
+                INSERT_GANGNAM_MANAGER_SQL,
+                INSERT_DEFAULT_THEME_SQL,
+                INSERT_TWO_TIMES_SQL,
+                INSERT_BROWN_RESERVATION_SQL
+        })
+        void 매니저가_자기_매장_예약을_삭제할_수_있다() {
+            // given: 강남 매니저 + BROWN 예약 (같은 매장)
+            Member gangnamManager = new Member(
+                    10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
+
+            // when: 매니저가 예약 삭제
+            reservationService.deleteReservationByManager(RESERVATION_ID, gangnamManager);
+
+            // then: reservation row 가 DB 에서 사라짐
+            Integer count = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservation WHERE id = ?",
+                    Integer.class, RESERVATION_ID);
+            assertThat(count).isZero();
+        }
+
+        @Test
+        void 매니저가_존재하지_않는_예약을_삭제할_수_없다() {
+            // given: 빈 DB + 매니저
+            Member gangnamManager = new Member(
+                    10L, "gangnam@email.com", "password", "강남매니저", Role.MANAGER, 1L);
+
+            // when & then: 없는 reservation 삭제 시도
+            assertThatThrownBy(() ->
+                    reservationService.deleteReservationByManager(999L, gangnamManager))
+                    .isInstanceOf(ReservationNotFoundException.class);
+        }
+    }
+}
