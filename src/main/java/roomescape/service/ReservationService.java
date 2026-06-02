@@ -1,5 +1,10 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.ReservationPatchRequest;
@@ -8,18 +13,17 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.*;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.PastReservationControlException;
+import roomescape.exception.PastTimeException;
+import roomescape.exception.ReservationNotFoundException;
+import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.Booking;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -61,17 +65,13 @@ public class ReservationService {
     public List<Booking> findReservationByName(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         List<Waiting> waitingList = waitingRepository.findByName(name);
-
         List<Booking> bookings = new ArrayList<>();
-
         for (Reservation reservation : reservations) {
             bookings.add(Booking.fromReservation(reservation));
         }
-
         for (Waiting waiting : waitingList) {
             bookings.add(Booking.fromWaiting(waiting));
         }
-
         return bookings;
     }
 
