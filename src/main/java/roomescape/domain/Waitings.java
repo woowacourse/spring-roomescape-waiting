@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -24,10 +25,10 @@ public class Waitings {
         this.waitings = assignRanks(waitings);
     }
 
-    public Waiting enqueue(Member member, Reservation reservation) {
+    public Waiting enqueue(Member member, Reservation reservation, LocalDateTime now) {
         validateReservationMatchesSlot(reservation);
         validateCanCreate(member);
-        Waiting created = Waiting.create(member, reservation);
+        Waiting created = Waiting.create(member, reservation, now);
         return created.withRank((long) waitings.size() + 1);
     }
 

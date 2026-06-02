@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
@@ -20,7 +21,10 @@ public class Waiting {
         this.rank = rank;
     }
 
-    static Waiting create(Member member, Reservation reservation) {
+    static Waiting create(Member member, Reservation reservation, LocalDateTime now) {
+        if (reservation.getSlot().isPast(now)) {
+            throw new BusinessRuleViolationException("지난 시간에 대한 대기 생성은 불가능합니다.");
+        }
         if (reservation.isSameMember(member)) {
             throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
         }

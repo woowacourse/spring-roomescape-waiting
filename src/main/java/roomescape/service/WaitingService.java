@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class WaitingService {
                 .orElseThrow(() -> new BusinessRuleViolationException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         Waitings waitings = waitingDao.findQueueBySlotForUpdate(reservation.getSlot());
-        Waiting ranked = waitings.enqueue(member, reservation);
+        Waiting ranked = waitings.enqueue(member, reservation, LocalDateTime.now());
         return waitingDao.insert(ranked);
     }
 
