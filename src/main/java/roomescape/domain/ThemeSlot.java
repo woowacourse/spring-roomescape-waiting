@@ -56,6 +56,7 @@ public class ThemeSlot {
         return reservation;
     }
 
+    public Optional<Reservation> cancelReservation(Long reservationId) {
         Reservation target = reservations.findById(reservationId);
         boolean wasConfirmed = target.isConfirmed();
         target.cancel();
