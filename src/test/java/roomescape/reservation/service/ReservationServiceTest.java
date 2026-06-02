@@ -248,8 +248,8 @@ class ReservationServiceTest {
             // given
             String nameInWaiting = "대기중인 사용자";
             save(reservation(name, reservationDate1, reservationTime1, theme1));
-            Reservation reservationInWaiting = save(
-                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting =
+                save(waitReservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
 
             // when
             Reservation actual = reservationService.cancel(reservationInWaiting.getId(),
@@ -376,8 +376,8 @@ class ReservationServiceTest {
             // given
             String nameInWaiting = "대기중인 사용자";
             save(reservation(name, reservationDate1, reservationTime1, theme1));
-            Reservation reservationInWaiting = save(
-                reservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
+            Reservation reservationInWaiting =
+                save(waitReservation(nameInWaiting, reservationDate1, reservationTime1, theme1));
 
             // when
             Reservation actual = reservationService.cancelByManager(reservationInWaiting.getId());
