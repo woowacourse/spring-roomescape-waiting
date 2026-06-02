@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.*;
+import roomescape.service.dto.ReservationInfoResult;
 
 @Repository
 public class ReservationDao {
@@ -43,6 +44,12 @@ public class ReservationDao {
                 rs.getObject("updated_at", LocalDateTime.class)
         );
     };
+
+    private static final RowMapper<ReservationInfoResult> reservationInfoResultRowMapper = (rs, rowNum) ->
+            new ReservationInfoResult(
+                    reservationRowMapper.mapRow(rs, rowNum),
+                    rs.getInt("waiting_order")
+            );
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
@@ -146,8 +153,17 @@ public class ReservationDao {
         return results.stream().findFirst();
     }
 
-    public List<Reservation> findByName(String name) {
+    public List<ReservationInfoResult> findByName(String name) {
         String sql = """
+            WITH active_orders AS (
+                SELECT id,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY schedule_id
+                           ORDER BY updated_at ASC, id ASC
+                       ) - 1 AS waiting_order
+                FROM reservation
+                WHERE status != ?
+            )
             SELECT r.id,
                    r.name,
                    r.status,
@@ -159,20 +175,31 @@ public class ReservationDao {
                    th.id            AS theme_id,
                    th.name          AS theme_name,
                    th.description   AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
+                   th.thumbnail_url AS theme_thumbnail,
+                   COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
+            LEFT JOIN active_orders     AS ao ON r.id          = ao.id
             WHERE r.name = ?
             ORDER BY s.date, t.start_at, r.updated_at
             """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name(), name);
     }
 
-    public List<Reservation> findAll() {
+    public List<ReservationInfoResult> findAll() {
         String sql = """
+            WITH active_orders AS (
+                SELECT id,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY schedule_id
+                           ORDER BY updated_at ASC, id ASC
+                       ) - 1 AS waiting_order
+                FROM reservation
+                WHERE status != ?
+            )
             SELECT r.id,
                    r.name,
                    r.status,
@@ -184,42 +211,17 @@ public class ReservationDao {
                    th.id            AS theme_id,
                    th.name          AS theme_name,
                    th.description   AS theme_description,
-                   th.thumbnail_url AS theme_thumbnail
+                   th.thumbnail_url AS theme_thumbnail,
+                   COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
+            LEFT JOIN active_orders     AS ao ON r.id          = ao.id
             ORDER BY r.id
             """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper);
-    }
-
-    public int findOrderByReservationId(long reservationId) {
-        String sql = """
-            SELECT COUNT(*)
-            FROM reservation target
-            INNER JOIN reservation previous
-                    ON previous.schedule_id = target.schedule_id
-                    AND (
-                        previous.updated_at < target.updated_at
-                       OR (
-                           previous.updated_at = target.updated_at
-                        AND previous.id < target.id
-                       )
-                   )
-                    AND previous.status != ?
-            WHERE target.id = ?
-              AND target.status != ?
-            """;
-
-        return jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                INACTIVE_STATUS.name(),
-                reservationId,
-                INACTIVE_STATUS.name()
-        );
+        return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name());
     }
 
     public int countReservationByScheduleId(long scheduleId) {

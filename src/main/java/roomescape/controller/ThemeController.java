@@ -44,8 +44,8 @@ public class ThemeController {
     public ResponseEntity<List<AvailableTimeResponse>> findAvailableTimes(
             @PathVariable long id,
             @RequestParam("date")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date) {
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
         return ResponseEntity.ok(reservationTimeService.findAvailableTimes(id, date));
     }
 }

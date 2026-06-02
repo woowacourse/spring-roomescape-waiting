@@ -13,6 +13,7 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.ReservationDao;
+import roomescape.service.dto.ReservationInfoResult;
 
 @Service
 @Transactional(readOnly = true)
@@ -93,7 +94,7 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         return reservationDao.findAll()
                 .stream()
-                .map(reservation -> toReservationResponse(reservation, now))
+                .map(result -> toReservationResponse(result, now))
                 .toList();
     }
 
@@ -101,14 +102,14 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         return reservationDao.findByName(name)
                 .stream()
-                .map(reservation -> toReservationResponse(reservation, now))
+                .map(result -> toReservationResponse(result, now))
                 .toList();
     }
 
-    private ReservationResponse toReservationResponse(Reservation reservation, LocalDateTime now) {
+    private ReservationResponse toReservationResponse(ReservationInfoResult result, LocalDateTime now) {
         return ReservationResponse.from(
-                reservation,
-                reservationDao.findOrderByReservationId(reservation.getId()),
+                result.reservation(),
+                result.order(),
                 now
         );
     }

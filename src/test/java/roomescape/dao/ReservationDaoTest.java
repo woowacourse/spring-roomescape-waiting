@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import roomescape.domain.Reserver;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationDao;
+import roomescape.service.dto.ReservationInfoResult;
 
 @JdbcTest
 @Import(ReservationDao.class)
@@ -145,21 +147,38 @@ class ReservationDaoTest {
         assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
-    @DisplayName("대기 순번은 같은 스케줄에서 나보다 먼저 신청한 취소되지 않은 예약 수다.")
+    @DisplayName("이름으로 예약을 조회하면 예약 정보와 대기 순번을 함께 반환한다.")
     @Test
-    void findOrderByReservationId() {
+    void findByNameWithOrder() {
         Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(15, 0), "비밀 연구소");
-        Long otherScheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 2), LocalTime.of(15, 30), "다른 연구소");
+        insertReservation("확정자", scheduleId, ReservationStatus.RESERVED, LocalDateTime.of(2026, 6, 1, 10, 0));
+        Long waitingId = insertReservation("대기자", scheduleId, ReservationStatus.WAITING,
+                LocalDateTime.of(2026, 6, 1, 10, 1));
+        insertReservation("취소자", scheduleId, ReservationStatus.CANCELED, LocalDateTime.of(2026, 6, 1, 10, 2));
+
+        List<ReservationInfoResult> results = reservationDao.findByName("대기자");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).reservation().getId()).isEqualTo(waitingId);
+        assertThat(results.get(0).order()).isEqualTo(1);
+    }
+
+    @DisplayName("전체 예약을 조회하면 취소 예약을 제외한 순번을 함께 반환한다.")
+    @Test
+    void findAllWithOrder() {
+        Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(15, 0), "비밀 연구소");
         insertReservation("확정자", scheduleId, ReservationStatus.RESERVED, LocalDateTime.of(2026, 6, 1, 10, 0));
         insertReservation("취소자", scheduleId, ReservationStatus.CANCELED, LocalDateTime.of(2026, 6, 1, 10, 1));
         Long waitingId = insertReservation("대기자", scheduleId, ReservationStatus.WAITING,
                 LocalDateTime.of(2026, 6, 1, 10, 2));
-        insertReservation("다른스케줄", otherScheduleId, ReservationStatus.RESERVED,
-                LocalDateTime.of(2026, 6, 1, 9, 0));
 
-        int order = reservationDao.findOrderByReservationId(waitingId);
+        List<ReservationInfoResult> results = reservationDao.findAll();
 
-        assertThat(order).isEqualTo(1);
+        assertThat(results)
+                .filteredOn(result -> result.reservation().getId().equals(waitingId))
+                .singleElement()
+                .extracting(ReservationInfoResult::order)
+                .isEqualTo(1);
     }
 
     @DisplayName("같은 이름과 스케줄의 취소되지 않은 예약 존재 여부를 조회한다.")

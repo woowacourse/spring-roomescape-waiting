@@ -34,6 +34,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.ReservationDao;
+import roomescape.service.dto.ReservationInfoResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -271,8 +272,7 @@ class ReservationServiceTest {
     void findByName() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
-        given(reservationDao.findByName("러로")).willReturn(List.of(reservation));
-        given(reservationDao.findOrderByReservationId(1L)).willReturn(2);
+        given(reservationDao.findByName("러로")).willReturn(List.of(new ReservationInfoResult(reservation, 2)));
 
         List<ReservationResponse> responses = reservationService.findByName("러로");
 
@@ -288,8 +288,7 @@ class ReservationServiceTest {
     void findByNameExpiredWaiting() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
         Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusDays(2));
-        given(reservationDao.findByName("러로")).willReturn(List.of(reservation));
-        given(reservationDao.findOrderByReservationId(1L)).willReturn(2);
+        given(reservationDao.findByName("러로")).willReturn(List.of(new ReservationInfoResult(reservation, 2)));
 
         List<ReservationResponse> responses = reservationService.findByName("러로");
 
