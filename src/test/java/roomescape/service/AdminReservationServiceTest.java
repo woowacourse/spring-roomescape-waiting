@@ -250,6 +250,24 @@ class AdminReservationServiceTest {
         }
 
         @Test
+        @DisplayName("과거 슬롯의 예약을 취소해도 대기자를 승격하지 않는다")
+        void doesNotPromoteForPastSlot() {
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            Reservation reservation = reservationDao.insert(Reservation.createByAdmin(
+                    member, pastDate, savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            Member waiter = saveMember("대기1", "waiting1@test.com");
+            jdbcTemplate.update(
+                    "INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (?, ?, ?, ?, ?)",
+                    waiter.getId(), pastDate, savedTime1.getId(), savedTheme1.getId(), storeId);
+
+            adminReservationService.cancelByAdmin(reservation.getId());
+
+            Integer bookedCount = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM reservations WHERE status = 'BOOKED'", Integer.class);
+            assertThat(bookedCount).isZero();
+        }
+
+        @Test
         @DisplayName("예약을 취소하면 첫 번째 대기자가 예약으로 승격되고 대기열에서 제거된다")
         void promotesFirstWaitingOnCancel() {
             Reservation reservation = reservationDao.insert(Reservation.createByAdmin(

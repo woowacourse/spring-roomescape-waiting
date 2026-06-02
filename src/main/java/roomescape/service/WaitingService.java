@@ -2,9 +2,11 @@ package roomescape.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.WaitingDao;
@@ -32,7 +34,11 @@ public class WaitingService {
 
         Waitings waitings = waitingDao.findQueueBySlotForUpdate(reservation.getSlot());
         Waiting ranked = waitings.enqueue(member, reservation, LocalDateTime.now());
-        return waitingDao.insert(ranked);
+        try {
+            return waitingDao.insert(ranked);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateEntityException("이미 대기 신청한 슬롯입니다.");
+        }
     }
 
     public void delete(Long waitingId) {
@@ -42,6 +48,9 @@ public class WaitingService {
     }
 
     public void promoteFirstWaiting(Reservation canceled) {
+        if (canceled.getSlot().isPast(LocalDateTime.now())) {
+            return;
+        }
         Waitings waitings = waitingDao.findQueueBySlotForUpdate(canceled.getSlot());
         waitings.peekFirst().ifPresent(first -> {
             reservationDao.insert(first.promote());
