@@ -49,23 +49,16 @@ public class ReservationWaitDao {
     public List<WaitingProjection> findWaitingsByMemberId(Long memberId) {
         String sql = """
                 SELECT
-                    ranked.order_num,
-                    ranked.reservation_id,
-                    ranked.member_id,
-                    ranked.created_at
-                FROM (
-                    SELECT
-                        reservation_id,
-                        member_id,
-                        created_at,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY reservation_id
-                            ORDER BY created_at
-                        ) AS order_num
-                    FROM reservation_wait
-                ) AS ranked
-                WHERE ranked.member_id = ?
-                ORDER BY ranked.created_at
+                    rw.reservation_id,
+                    rw.member_id,
+                    rw.created_at,
+                    (SELECT COUNT(*) + 1
+                     FROM reservation_wait sub
+                     WHERE sub.reservation_id = rw.reservation_id
+                       AND sub.created_at < rw.created_at) AS order_num
+                FROM reservation_wait rw
+                WHERE rw.member_id = ?
+                ORDER BY rw.created_at;
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingProjection(

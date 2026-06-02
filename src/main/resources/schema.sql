@@ -62,3 +62,6 @@ CREATE TABLE reservation_wait
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
     CONSTRAINT uq_reservation_wait_reservation_member UNIQUE (reservation_id, member_id)
 );
+
+CREATE INDEX idx_wait_reservation_created ON reservation_wait (reservation_id, created_at);
+CREATE INDEX idx_wait_member ON reservation_wait (member_id);
