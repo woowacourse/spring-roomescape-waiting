@@ -104,6 +104,16 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @DisplayName("처리되지 않은 예외가 발생하면 500을 반환하고 원인 메시지를 노출하지 않는다")
+    void returnsInternalServerErrorForUnhandledException() {
+        RestAssuredMockMvc.given()
+                .when().get("/test/illegal-argument")
+                .then()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("detail", equalTo("예상치 못한 오류가 발생했습니다."));
+    }
+
+    @Test
     @DisplayName("Path variable 타입 불일치 시 400을 반환한다")
     void returnsBadRequestForTypeMismatch() {
         RestAssuredMockMvc.given()
