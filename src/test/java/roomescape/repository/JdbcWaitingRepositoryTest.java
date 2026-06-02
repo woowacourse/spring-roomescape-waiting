@@ -66,13 +66,6 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     void 존재하지_않는_대기id로_대기를_조회하면_빈_Optional을_반환한다() {
-        // given
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.create(LocalTime.parse("10:00")));
-        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
-        Waiting waiting = Waiting.create("루드비코", LocalDate.parse("2026-05-06"), reservationTime,
-                theme, 1L);
-
         // when
         Optional<Waiting> result = waitingRepository.findById(2L);
 
@@ -122,7 +115,7 @@ class JdbcWaitingRepositoryTest {
                 Waiting.create("네오", LocalDate.parse("2026-05-06"), reservationTime1, theme, 2L));
 
         // when
-        List<Waiting> result = waitingRepository.findByName("코코");
+        List<Waiting> result = waitingRepository.findByName(name);
 
         // then
         assertThat(result).isEmpty();
@@ -282,8 +275,6 @@ class JdbcWaitingRepositoryTest {
         LocalDate date = LocalDate.parse("2026-05-06");
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
-        ReservationTime otherReservationTime = reservationTimeRepository.save(
-                ReservationTime.create(LocalTime.parse("11:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
 
         // when
@@ -301,8 +292,6 @@ class JdbcWaitingRepositoryTest {
         LocalDate date = LocalDate.parse("2026-05-06");
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
-        ReservationTime otherReservationTime = reservationTimeRepository.save(
-                ReservationTime.create(LocalTime.parse("11:00")));
         Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
         Long waitingNumber = 3L;
 

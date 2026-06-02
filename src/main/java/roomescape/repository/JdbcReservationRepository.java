@@ -128,38 +128,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
-        String sql = """
-                    SELECT r.id AS reservation_id,
-                           r.name,
-                           r.date,
-                           t.id AS reservation_time_id,
-                           t.start_at AS time_value,
-                           th.id AS reservation_theme_id,
-                           th.name AS reservation_theme_name,
-                           th.description AS reservation_theme_description,
-                           th.image_url AS reservation_theme_image_url
-                    FROM reservation AS r
-                    INNER JOIN reservation_time AS t
-                      ON r.time_id = t.id
-                    INNER JOIN theme AS th
-                      ON r.theme_id = th.id
-                    WHERE r.date = :date
-                      AND t.id = :time_id
-                      AND th.id = :theme_id
-                """;
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
-                .addValue("theme_id", theme.getId());
-
-        List<Reservation> results = jdbcTemplate.query(sql, params, getReservationRowMapper());
-        return results.stream().findFirst();
-    }
-
-    @Override
-    public Optional<Reservation> findByDateAndTimeAndThemeWithLock(LocalDate date, ReservationTime time, Theme theme) {
+    public Optional<Reservation> findByDateAndTimeAndThemeWithLock(LocalDate date,
+            ReservationTime time, Theme theme) {
         String sql = """
                     SELECT r.id AS reservation_id,
                            r.name,

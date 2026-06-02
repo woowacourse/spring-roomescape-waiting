@@ -17,8 +17,6 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
-    Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
-
     Optional<Reservation> findByDateAndTimeAndThemeWithLock(LocalDate date, ReservationTime time, Theme theme);
 
     Reservation update(Long id, LocalDate date, ReservationTime time);

@@ -6,9 +6,9 @@ import java.util.Optional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.dto.WaitingResponseDTO;
 
 public interface WaitingRepository {
+
     Waiting save(Waiting waiting);
 
     Optional<Waiting> findById(Long id);
@@ -17,12 +17,12 @@ public interface WaitingRepository {
 
     List<Waiting> findAll();
 
-    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time,
+            Theme theme);
 
-    Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme);
+    Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
+            Theme theme);
 
     void delete(Long id);
-
-    Long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
 }

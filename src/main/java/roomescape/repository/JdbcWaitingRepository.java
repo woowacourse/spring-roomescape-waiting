@@ -16,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.dto.WaitingResponseDTO;
 
 @Repository
 public class JdbcWaitingRepository implements WaitingRepository {
@@ -69,7 +68,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
-                                                 Theme theme) {
+            Theme theme) {
         String sql = """
                     SELECT MAX(waiting_number)
                     FROM waiting
@@ -195,23 +194,5 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 """;
         Map<String, Object> params = Map.of("id", id);
         jdbcTemplate.update(sql, params);
-    }
-
-    @Override
-    public Long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
-        String sql = """
-            SELECT COUNT(*)
-            FROM waiting
-            WHERE date = :date
-              AND time_id = :time_id
-              AND theme_id = :theme_id
-            """;
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", date)
-                .addValue("time_id", time.getId())
-                .addValue("theme_id", theme.getId());
-
-        return jdbcTemplate.queryForObject(sql, params, Long.class);
     }
 }

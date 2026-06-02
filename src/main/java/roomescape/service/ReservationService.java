@@ -32,16 +32,13 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final WaitingRepository waitingRepository;
 
     public ReservationService(Clock clock, ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-            WaitingRepository waitingRepository) {
+            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
         this.clock = clock;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
