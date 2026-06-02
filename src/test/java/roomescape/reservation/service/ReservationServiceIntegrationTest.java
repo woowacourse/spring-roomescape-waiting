@@ -18,6 +18,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.JdbcReservationRepository;
@@ -134,30 +135,32 @@ class ReservationServiceIntegrationTest {
         @DisplayName("예약이 취소되면 해당 슬롯의 대기 순번이 재정렬된다")
         void 성공3() {
             // given
-            String themeName = "테마1";
-            List<String> names = List.of("user1", "user2", "user3");
+            String name1 = "name1";
+            String name2 = "name2";
+            String name3 = "name3";
 
             ReservationTime time = saveTime();
             ReservationDate date = saveDate();
-            Theme theme = saveTheme(themeName);
+            Theme theme = saveTheme("theme1");
 
-            reservationRepository.save(reservation(names.get(0), date, time, theme));
-            Reservation firstWaiting = reservationRepository.save(waitReservation(names.get(1), date, time, theme));
-            reservationRepository.save(waitReservation(names.get(2), date, time, theme));
-            Long beforeWaitingTurn = reservationService.readAllByName(names.get(2))
+            Reservation reserved = reservationRepository.save(reservation(name1, date, time, theme));
+            Reservation firstWaiting = reservationRepository.save(waitReservation(name2, date, time, theme));
+            reservationRepository.save(waitReservation(name3, date, time, theme));
+
+            Long beforeWaitingTurn = reservationService.readAllByName(name3)
                 .getFirst()
                 .waitingTurn();
 
             // when
-            reservationService.cancel(firstWaiting.getId(), names.get(1));
-            List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(
-                names.get(2));
+            reservationService.cancel(reserved.getId(), name1);
+            List<ReservationWithWaitingTurn> actual = reservationService.readAllByName(name3);
+            Reservation promoted = reservationRepository.findById(firstWaiting.getId()).get();
 
             // then
             assertAll(
                 () -> assertThat(beforeWaitingTurn).isEqualTo(2),
-                () -> assertThat(actual.getFirst().waitingTurn())
-                    .isEqualTo(1)
+                () -> assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED),
+                () -> assertThat(actual.getFirst().waitingTurn()).isEqualTo(1)
             );
         }
     }
