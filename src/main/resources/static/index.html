@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background:
+                radial-gradient(1200px 600px at 80% -10%, #f59e0b1a, transparent 60%),
+                radial-gradient(900px 500px at -10% 30%, #6366f11a, transparent 60%),
+                #0b1220;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #0b1220cc;
+            border-bottom: 1px solid #1f2a3d;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        nav a {
+            color: #94a3b8;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-size: 0.875rem;
+            transition: color 0.15s;
+        }
+        nav a:hover { color: #f1f5f9; }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* ── 히어로 ── */
+        .hero {
+            margin-bottom: 3.5rem;
+            text-align: center;
+            padding: 2rem 0 1rem;
+        }
+        .hero h1 {
+            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.6rem;
+            letter-spacing: -1px;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        section + section { margin-top: 4rem; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .section-title {
+            font-size: 1.375rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.3rem 0.7rem;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px #f59e0b33;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+
+        /* ── 인기 테마 슬라이더 ── */
+        .slider-wrap {
+            position: relative;
+        }
+        .slider-wrap::before,
+        .slider-wrap::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 1rem;
+            width: 60px;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .slider-wrap::before {
+            left: 0;
+            background: linear-gradient(90deg, #0b1220, transparent);
+        }
+        .slider-wrap::after {
+            right: 0;
+            background: linear-gradient(-90deg, #0b1220, transparent);
+        }
+
+        .slider {
+            display: flex;
+            gap: 1.25rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding: 0.25rem 0.25rem 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: #475569 transparent;
+        }
+        .slider::-webkit-scrollbar { height: 8px; }
+        .slider::-webkit-scrollbar-track { background: transparent; }
+        .slider::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        .slider > .theme-card {
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: calc(50% - 1.25rem);
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1e293bdd;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: background 0.15s, border-color 0.15s;
+            backdrop-filter: blur(6px);
+        }
+        .slider-btn:hover { background: #334155; border-color: #f59e0b; }
+        .slider-btn.prev { left: -22px; }
+        .slider-btn.next { right: -22px; }
+        .slider-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        @media (max-width: 768px) {
+            .slider-btn { display: none; }
+        }
+
+        .theme-card {
+            background: linear-gradient(180deg, #1e293b 0%, #1a2438 100%);
+            border: 1px solid #2a3851;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: transform 0.25s ease, border-color 0.25s, box-shadow 0.25s;
+        }
+        .theme-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: linear-gradient(135deg, #f59e0b00, #f59e0b00);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            pointer-events: none;
+            transition: background 0.25s;
+        }
+        .theme-card:hover {
+            transform: translateY(-6px);
+            border-color: #f59e0b66;
+            box-shadow: 0 18px 40px #00000066, 0 0 0 1px #f59e0b22;
+        }
+        .theme-card:hover::before {
+            background: linear-gradient(135deg, #f59e0baa, #6366f1aa);
+        }
+
+        .card-thumbnail-wrap {
+            position: relative;
+            background: linear-gradient(180deg, #0f172a 0%, #0b1220 100%);
+        }
+
+        .card-thumbnail {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            padding: 0.75rem;
+            display: block;
+            filter: drop-shadow(0 6px 16px #00000088);
+            transition: transform 0.4s ease;
+        }
+        .theme-card:hover .card-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 0.5rem;
+        }
+
+        .card-rank {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 0.6rem;
+            border-radius: 999px;
+            background: #0f172acc;
+            backdrop-filter: blur(8px);
+            border: 1px solid #334155;
+            color: #cbd5e1;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .card-rank.top3 {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            border-color: transparent;
+            box-shadow: 0 6px 20px #f59e0b55;
+        }
+
+        .card-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.55;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-reserve {
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+            box-shadow: 0 4px 14px #f59e0b33;
+        }
+        .btn-reserve:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 6px 20px #f59e0b55;
+        }
+        .btn-reserve:active { transform: translateY(1px); }
+
+        .state-msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">🔐 방탈출</a>
+    <nav>
+        <a href="/reservation-cancel.html">내 예약</a>
+    </nav>
+</header>
+
+<main>
+    <div class="hero">
+        <h1>오늘 밤, <span>탈출</span>을 시작하다</h1>
+        <p>15개의 테마, 무한한 이야기. 당신의 추리력을 시험해보세요.</p>
+    </div>
+
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">🏆 이번 주 인기 테마</h2>
+            <span class="badge">TOP 10</span>
+        </div>
+        <div class="slider-wrap">
+            <button class="slider-btn prev" id="popular-prev" aria-label="이전">‹</button>
+            <div id="popular-list" class="slider">
+                <p class="state-msg">불러오는 중...</p>
+            </div>
+            <button class="slider-btn next" id="popular-next" aria-label="다음">›</button>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">📋 전체 테마</h2>
+        </div>
+        <div id="theme-list" class="theme-grid">
+            <p class="state-msg">불러오는 중...</p>
+        </div>
+    </section>
+</main>
+
+<script>
+    function goReservation(theme) {
+        sessionStorage.setItem('selectedTheme', JSON.stringify(theme));
+        location.href = '/reservation.html';
+    }
+
+    function createCard(theme, rank) {
+        const card = document.createElement('div');
+        card.className = 'theme-card';
+
+        const crown = rank != null && rank < 3 ? ['👑', '🥈', '🥉'][rank] + ' ' : '';
+        const rankHtml = rank != null
+            ? `<div class="card-rank ${rank < 3 ? 'top3' : ''}">${crown}${rank + 1}</div>`
+            : '';
+
+        card.innerHTML = `
+            <div class="card-thumbnail-wrap">
+                ${rankHtml}
+                <img class="card-thumbnail" src="${theme.thumbnail}" alt="${theme.name}"
+                     onerror="this.style.background='#334155';this.removeAttribute('src')">
+            </div>
+            <div class="card-body">
+                <div class="card-name">${theme.name}</div>
+                <div class="card-desc">${theme.description}</div>
+                <button class="btn-reserve">예약하기 →</button>
+            </div>
+        `;
+
+        card.querySelector('.btn-reserve').addEventListener('click', () => goReservation(theme));
+        return card;
+    }
+
+    async function load(url, containerId, ranked) {
+        const container = document.getElementById(containerId);
+        try {
+            const body = await fetch(url).then(r => r.json());
+            const themes = body.themes;
+            container.innerHTML = '';
+            if (!themes.length) {
+                container.innerHTML = '<p class="state-msg">데이터가 없습니다.</p>';
+                return;
+            }
+            themes.forEach((t, i) => container.appendChild(createCard(t, ranked ? i : null)));
+        } catch {
+            container.innerHTML = '<p class="state-msg">불러오기에 실패했습니다.</p>';
+        }
+    }
+
+    /* ── 인기 테마 슬라이더 컨트롤 ── */
+    function setupSlider(listId, prevId, nextId) {
+        const slider = document.getElementById(listId);
+        const prev = document.getElementById(prevId);
+        const next = document.getElementById(nextId);
+
+        const scrollByCard = (dir) => {
+            const card = slider.querySelector('.theme-card');
+            const step = card ? card.offsetWidth + 20 : 300;
+            slider.scrollBy({ left: dir * step, behavior: 'smooth' });
+        };
+
+        prev.addEventListener('click', () => scrollByCard(-1));
+        next.addEventListener('click', () => scrollByCard(1));
+
+        const updateBtns = () => {
+            const max = slider.scrollWidth - slider.clientWidth;
+            prev.disabled = slider.scrollLeft <= 0;
+            next.disabled = slider.scrollLeft >= max - 1;
+        };
+        slider.addEventListener('scroll', updateBtns);
+        new ResizeObserver(updateBtns).observe(slider);
+        setTimeout(updateBtns, 100);
+    }
+
+    load('/themes/popular?days=7&limit=10', 'popular-list', true)
+        .then(() => setupSlider('popular-list', 'popular-prev', 'popular-next'));
+    load('/themes', 'theme-list', false);
+</script>
+
+</body>
+</html>

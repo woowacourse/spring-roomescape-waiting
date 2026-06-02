@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약하기 · 방탈출</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background:
+                radial-gradient(900px 500px at 90% -10%, #f59e0b14, transparent 60%),
+                radial-gradient(700px 400px at -10% 20%, #6366f114, transparent 60%),
+                #0b1220;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #0b1220cc;
+            border-bottom: 1px solid #1f2a3d;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.15s;
+        }
+        .btn-back:hover { color: #f1f5f9; }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        /* ── 선택된 테마 패널 ── */
+        .theme-panel {
+            background: linear-gradient(135deg, #1e293b 0%, #1a2438 100%);
+            border: 1px solid #2a3851;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px #00000044;
+        }
+
+        .theme-panel img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            flex-shrink: 0;
+            background: #0f172a;
+            padding: 0.4rem;
+        }
+
+        .theme-panel-body {
+            padding: 1.25rem 1.25rem 1.25rem 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .theme-label {
+            font-size: 0.75rem;
+            color: #f59e0b;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .theme-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .theme-desc {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            line-height: 1.55;
+        }
+
+        /* ── 단계 카드 ── */
+        .step-card {
+            background: linear-gradient(180deg, #1e293b 0%, #1a2438 100%);
+            border: 1px solid #2a3851;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            position: relative;
+        }
+
+        .step-card.active {
+            border-color: #f59e0b66;
+            box-shadow: 0 0 0 1px #f59e0b22, 0 12px 30px #00000055;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #334155;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+        }
+        .step-card.active .step-num {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            box-shadow: 0 4px 14px #f59e0b55;
+        }
+        .step-card.done .step-num {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-size: 0; /* 숫자 숨기고 ::before 체크마크만 */
+        }
+        .step-card.done .step-num::before {
+            content: '✓';
+            font-size: 0.95rem;
+        }
+
+        .step-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        .step-card.active .step-title,
+        .step-card.done .step-title { color: #f1f5f9; }
+
+        .step-content { display: none; }
+        .step-card.active .step-content,
+        .step-card.done .step-content { display: block; }
+
+        /* ── 날짜 입력 ── */
+        input[type="date"] {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            padding: 0.7rem 1rem;
+            width: 100%;
+            max-width: 260px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input[type="date"]:focus { border-color: #f59e0b; }
+
+        /* ── 시간 슬롯 ── */
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .time-slot {
+            padding: 0.85rem 0.5rem;
+            border-radius: 12px;
+            border: 1px solid #2a3851;
+            background: #0b1220;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s, transform 0.1s;
+            user-select: none;
+        }
+        .time-slot:hover {
+            transform: translateY(-2px);
+        }
+        /* 예약 가능 (isAvailable = true) → 초록 계열 */
+        .time-slot.available:hover {
+            border-color: #22c55e;
+            background: #1e293b;
+        }
+        .time-slot.available.selected {
+            border-color: #22c55e;
+            background: linear-gradient(135deg, #22c55e22, #16a34a22);
+            color: #4ade80;
+            box-shadow: 0 4px 14px #22c55e33;
+        }
+        .time-slot.available::after {
+            content: '예약 가능';
+            display: block;
+            font-size: 0.7rem;
+            color: #4ade80;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* 예약 대기 (isAvailable = false, 이미 예약됨) → 파랑 계열 */
+        .time-slot.waiting {
+            border-color: #3b82f655;
+        }
+        .time-slot.waiting:hover {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+        .time-slot.waiting.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #3b82f622, #60a5fa22);
+            color: #60a5fa;
+            box-shadow: 0 4px 14px #3b82f633;
+        }
+        .time-slot.waiting::after {
+            content: '예약 대기';
+            display: block;
+            font-size: 0.7rem;
+            color: #60a5fa;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .state-msg {
+            color: #475569;
+            font-size: 0.9rem;
+            padding: 1rem 0;
+        }
+
+        /* ── 이름 입력 ── */
+        input[type="text"] {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 1rem;
+            padding: 0.7rem 1rem;
+            width: 100%;
+            max-width: 320px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input[type="text"]::placeholder { color: #475569; }
+        input[type="text"]:focus { border-color: #f59e0b; }
+
+        /* ── 예약하기 버튼 ── */
+        .btn-submit {
+            margin-top: 0.75rem;
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+            box-shadow: 0 6px 20px #f59e0b44;
+            letter-spacing: 0.3px;
+        }
+        .btn-submit:hover { filter: brightness(1.08); box-shadow: 0 8px 24px #f59e0b66; }
+        .btn-submit:active { transform: translateY(1px); }
+        .btn-submit:disabled {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
+        }
+
+        /* ── 완료 화면 ── */
+        .success-box {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .success-box .icon { font-size: 3.5rem; margin-bottom: 1rem; }
+        .success-box h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .success-box p { color: #94a3b8; margin-bottom: 1.5rem; }
+        .btn-home {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #f59e0b;
+            color: #0f172a;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* ── 에러 메시지 ── */
+        .error-msg {
+            margin-top: 0.75rem;
+            color: #f87171;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">🔐 방탈출</a>
+    <a href="/" class="btn-back">← 테마 목록으로</a>
+</header>
+
+<main id="main">
+    <!-- 선택된 테마 -->
+    <div class="theme-panel" id="theme-panel"></div>
+
+    <!-- Step 1: 날짜 -->
+    <div class="step-card active" id="step-date">
+        <div class="step-header">
+            <div class="step-num">1</div>
+            <div class="step-title">날짜 선택</div>
+        </div>
+        <div class="step-content">
+            <input type="date" id="date-input">
+        </div>
+    </div>
+
+    <!-- Step 2: 시간 -->
+    <div class="step-card" id="step-time">
+        <div class="step-header">
+            <div class="step-num">2</div>
+            <div class="step-title">시간 선택</div>
+        </div>
+        <div class="step-content">
+            <div class="time-grid" id="time-grid">
+                <p class="state-msg">날짜를 먼저 선택해주세요.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: 이름 + 예약 -->
+    <div class="step-card" id="step-name">
+        <div class="step-header">
+            <div class="step-num">3</div>
+            <div class="step-title">예약자 이름</div>
+        </div>
+        <div class="step-content">
+            <input type="text" id="name-input" placeholder="이름을 입력하세요" maxlength="20">
+            <button class="btn-submit" id="submit-btn" disabled>예약하기</button>
+            <p class="error-msg" id="error-msg" style="display:none"></p>
+        </div>
+    </div>
+</main>
+
+<script>
+    /* ── 상태 ── */
+    const state = {
+        theme: null,
+        date: null,
+        timeId: null,
+        timeName: null,
+        isWaiting: false,
+    };
+
+    /* ── 테마 로드 (sessionStorage) ── */
+    function initTheme() {
+        const raw = sessionStorage.getItem('selectedTheme');
+        if (!raw) { location.href = '/'; return; }
+
+        state.theme = JSON.parse(raw);
+        const { name, description, thumbnail } = state.theme;
+
+        document.getElementById('theme-panel').innerHTML = `
+            <img src="${thumbnail}" alt="${name}"
+                 onerror="this.style.background='#334155';this.removeAttribute('src')">
+            <div class="theme-panel-body">
+                <div class="theme-label">선택한 테마</div>
+                <div class="theme-name">${name}</div>
+                <div class="theme-desc">${description}</div>
+            </div>
+        `;
+    }
+
+    /* ── 날짜 선택 → 시간 조회 ── */
+    document.getElementById('date-input').addEventListener('change', async (e) => {
+        state.date = e.target.value;
+        state.timeId = null;
+        state.timeName = null;
+
+        setStep('time', 'active');
+        setStep('name', '');
+
+        const grid = document.getElementById('time-grid');
+        grid.innerHTML = '<p class="state-msg">불러오는 중...</p>';
+
+        try {
+            const body = await fetch(
+                `/themes/${state.theme.id}/available-times?date=${state.date}`
+            ).then(r => r.json());
+            const times = body.times;
+
+            grid.innerHTML = '';
+            if (!times.length) {
+                grid.innerHTML = '<p class="state-msg">등록된 시간이 없습니다.</p>';
+                return;
+            }
+
+            times.forEach(t => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot ' + (t.isAvailable ? 'available' : 'waiting');
+                slot.textContent = t.startAt;
+                slot.addEventListener('click', () => selectTime(slot, t));
+                grid.appendChild(slot);
+            });
+        } catch {
+            grid.innerHTML = '<p class="state-msg">시간 조회에 실패했습니다.</p>';
+        }
+    });
+
+    function selectTime(el, t) {
+        document.querySelectorAll('.time-slot.selected').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        state.timeId = t.id;
+        state.timeName = t.startAt;
+        state.isWaiting = !t.isAvailable;
+        setStep('time', 'done');
+        setStep('name', 'active');
+
+        const btn = document.getElementById('submit-btn');
+        btn.textContent = state.isWaiting ? '예약 대기하기' : '예약하기';
+        document.getElementById('name-input').focus();
+    }
+
+    /* ── 이름 입력 → 예약 버튼 활성화 ── */
+    document.getElementById('name-input').addEventListener('input', (e) => {
+        document.getElementById('submit-btn').disabled = !e.target.value.trim();
+    });
+
+    /* ── 서버 에러 메시지 추출 ── */
+    async function readErrorMessage(res, fallback) {
+        try {
+            const body = await res.json();
+            if (body && body.message) return body.message;
+        } catch { /* ignore */ }
+        return fallback;
+    }
+
+    /* ── 예약하기 ── */
+    document.getElementById('submit-btn').addEventListener('click', async () => {
+        const name = document.getElementById('name-input').value.trim();
+        const btn = document.getElementById('submit-btn');
+        const errEl = document.getElementById('error-msg');
+
+        const waiting = state.isWaiting;
+        const endpoint = waiting ? '/waitings' : '/reservations';
+        const defaultLabel = waiting ? '예약 대기하기' : '예약하기';
+
+        btn.disabled = true;
+        btn.textContent = waiting ? '예약 대기 중...' : '예약 중...';
+        errEl.style.display = 'none';
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    date: state.date,
+                    timeId: state.timeId,
+                    themeId: state.theme.id,
+                }),
+            });
+
+            if (!res.ok) {
+                const msg = await readErrorMessage(res, '요청에 실패했습니다. 다시 시도해주세요.');
+                errEl.textContent = msg;
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = defaultLabel;
+                return;
+            }
+
+            showSuccess(name, waiting);
+        } catch (e) {
+            errEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = defaultLabel;
+        }
+    });
+
+    /* ── 성공 화면 ── */
+    function showSuccess(name, waiting) {
+        const { theme, date, timeName } = state;
+        const icon = waiting ? '⏳' : '🎉';
+        const title = waiting ? '예약 대기가 등록되었습니다!' : '예약이 완료되었습니다!';
+        const detail = waiting
+            ? `${date} · ${timeName} 예약 대기 목록에 등록되었습니다.`
+            : `${date} · ${timeName} 예약이 확정되었습니다.`;
+        document.getElementById('main').innerHTML = `
+            <div class="success-box">
+                <div class="icon">${icon}</div>
+                <h2>${title}</h2>
+                <p>
+                    <strong>${name}</strong>님의 <strong>${theme.name}</strong><br>
+                    ${detail}
+                </p>
+                <a href="/" class="btn-home">메인으로 돌아가기</a>
+            </div>
+        `;
+    }
+
+    /* ── 단계 상태 전환 (active / done / '') ── */
+    function setStep(id, cls) {
+        const el = document.getElementById(`step-${id}`);
+        el.classList.remove('active', 'done');
+        if (cls) el.classList.add(cls);
+    }
+
+    /* 날짜 최솟값: 오늘 */
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('date-input').min = today;
+
+    initTheme();
+</script>
+
+</body>
+</html>
