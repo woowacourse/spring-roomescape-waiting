@@ -120,6 +120,7 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
     @Override
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
+        String sql = "DELETE FROM reservation_waiting WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 }

@@ -24,11 +24,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
     private static final String ALREADY_EXISTS_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
 
     private static final String SELECT_BASE = """
-            SELECT r.id as reservation_id, r.name, r.date,
-                   t.id as time_id, t.start_at as time_value,
-                   th.id as theme_id, th.name as theme_name,
-                   th.description as theme_description,
-                   th.thumbnail_image_url as theme_thumbnail
+            SELECT 
+                r.id as reservation_id, r.name, r.date,
+                t.id as time_id, t.start_at as time_value,
+                th.id as theme_id, th.name as theme_name,
+                th.description as theme_description,
+                th.thumbnail_image_url as theme_thumbnail
             FROM reservation as r
             INNER JOIN reservation_time as t ON r.time_id = t.id
             INNER JOIN theme as th ON r.theme_id = th.id
@@ -73,7 +74,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     public long count() {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reservation", Long.class);
+        String sql = "SELECT COUNT(*) FROM reservation";
+        Long count = jdbcTemplate.queryForObject(sql, Long.class);
         return count != null ? count : 0L;
     }
 
@@ -137,7 +139,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
+        String sql = "DELETE FROM reservation WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     public Optional<Reservation> findById(Long id) {

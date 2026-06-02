@@ -59,8 +59,9 @@ public class ThemeJdbcRepository implements ThemeRepository {
     }
 
     public void deleteById(Long id) {
+        String sql = "DELETE FROM theme WHERE id = ?";
         try {
-            jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
+            jdbcTemplate.update(sql, id);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(String.format(CANNOT_DELETE_THEME_IN_USE, id), e);
         }
@@ -84,12 +85,6 @@ public class ThemeJdbcRepository implements ThemeRepository {
                 ORDER BY COUNT(*) DESC
                 LIMIT ?;
                 """;
-        return jdbcTemplate.query(
-                sql,
-                themeRowMapper,
-                start,
-                end,
-                limit
-        );
+        return jdbcTemplate.query(sql, themeRowMapper, start, end, limit);
     }
 }

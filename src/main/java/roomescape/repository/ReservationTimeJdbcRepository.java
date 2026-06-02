@@ -32,7 +32,8 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
     }
 
     public List<ReservationTime> findAll() {
-        return jdbcTemplate.query("SELECT id, start_at FROM reservation_time ORDER BY start_at;", timeRowMapper);
+        String sql = "SELECT id, start_at FROM reservation_time ORDER BY start_at";
+        return jdbcTemplate.query(sql, timeRowMapper);
     }
 
     public ReservationTime save(ReservationTime time) {
@@ -57,8 +58,9 @@ public class ReservationTimeJdbcRepository implements ReservationTimeRepository 
     }
 
     public void deleteById(Long id) {
+        String sql = "DELETE FROM reservation_time WHERE id = ?";
         try {
-            jdbcTemplate.update("DELETE FROM reservation_time WHERE id = ?", id);
+            jdbcTemplate.update(sql, id);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(String.format(CANNOT_DELETE_TIME_IN_USE, id), e);
         }
