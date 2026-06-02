@@ -164,16 +164,8 @@ class ReservationDaoTest {
         reservationDao.delete(saved.getId());
 
         // then
-        List<ReservationResponse> all = reservationDao.findAll().stream()
-                .map(reservation -> ReservationResponse.of(
-                        reservation.getId(),
-                        reservation.getName(),
-                        reservation.getDate(),
-                        TimeResponse.from(reservation.getTime()),
-                        ThemeSimpleResponse.from(reservation.getTheme()),
-                        ReservationStatus.RESERVED
-                )).toList();
-        assertThat(all).isEmpty();
+        Reservation reservation = reservationDao.findById(saved.getId());
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
 
     @Nested

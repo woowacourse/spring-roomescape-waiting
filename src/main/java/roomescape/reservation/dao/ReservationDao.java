@@ -94,8 +94,8 @@ public class ReservationDao {
   }
 
   public void delete(Long id) {
-    String sql = "delete from reservation where id = ?";
-    jdbcTemplate.update(sql, id);
+    String sql = "update reservation set status = ? where id = ?";
+    jdbcTemplate.update(sql, ReservationStatus.CANCELED.name(), id);
   }
 
   public boolean existsByTimeId(Long timeId) {
