@@ -1,10 +1,13 @@
 package roomescape.reservationwaiting.service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
@@ -70,6 +73,14 @@ public class ReservationWaitingService {
         return reservationWaitings.stream()
                 .map(waiting -> ReservationWaitingTurnResponse.from(waiting, turns.get(waiting.getId())))
                 .toList();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW) // 별도 트랜잭션 생성
+    public Optional<ReservationWaiting> promoteWaiting(LocalDate date, Long timeId, Long themeId) {
+        Optional<ReservationWaiting> waiting = reservationWaitingRepository.findReservationWaitingBySlot(date, timeId,
+                themeId);
+        waiting.ifPresent(w -> reservationWaitingRepository.deleteById(w.getId()));
+        return waiting;
     }
 
     @NonNull

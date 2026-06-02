@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,8 @@ import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
-import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
+import roomescape.reservationwaiting.domain.ReservationWaiting;
+import roomescape.reservationwaiting.service.ReservationWaitingService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -30,7 +32,7 @@ public class ReservationService {
     private final ThemeService themeService;
     private final ReservationFactory reservationFactory;
     private final Clock clock;
-    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationWaitingService reservationWaitingService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
@@ -38,13 +40,13 @@ public class ReservationService {
             ThemeService themeService,
             ReservationFactory reservationFactory,
             Clock clock,
-            ReservationWaitingRepository reservationWaitingRepository) {
+            ReservationWaitingService reservationWaitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationFactory = reservationFactory;
         this.clock = clock;
-        this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @Transactional
@@ -76,14 +78,10 @@ public class ReservationService {
         }
         reservationRepository.deleteById(id);
 
-        reservationWaitingRepository.findReservationWaitingBySlot(
-                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
-                .ifPresent(waiting -> {
-                    ReservationRequest request = new ReservationRequest(waiting.getName(),
-                            waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
-                    createReservation(request);
-                    reservationWaitingRepository.deleteById(waiting.getId());
-                });
+        Optional<ReservationWaiting> promoteWaiting = reservationWaitingService.promoteWaiting(reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId());
+        promoteWaiting.ifPresent(w -> reservationRepository.save(
+                reservationFactory.create(w.getName(), w.getDate(), w.getTime(), w.getTheme())));
     }
 
     @Transactional
