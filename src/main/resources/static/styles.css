@@ -1,0 +1,164 @@
+:root {
+  --bg: radial-gradient(circle at 20% 10%, #203a43 0%, #0f2027 45%, #101418 100%);
+  --panel: rgba(255, 255, 255, 0.9);
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #ff6b35;
+  --accent-2: #f7c948;
+  --danger: #e11d48;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Noto Sans KR", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+  display: grid;
+  gap: 18px;
+}
+
+.hero h1 {
+  font-family: "Space Grotesk", sans-serif;
+  margin: 6px 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+}
+
+.hero p { color: #d6e2ea; margin: 0; }
+.eyebrow { color: var(--accent-2); letter-spacing: 0.14em; font-size: 0.82rem; }
+
+.panel {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 18px;
+  backdrop-filter: blur(4px);
+}
+
+.panel h2 { margin-top: 0; }
+
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+input, select, button {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: 0;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.05); }
+.ghost { background: #0f172a; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+
+.card img {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  display: block;
+}
+
+.card-body { padding: 10px; }
+.card h3 { margin: 0 0 6px; font-size: 1rem; }
+.card p { margin: 0 0 10px; color: var(--muted); font-size: 0.92rem; }
+.danger { background: var(--danger); width: 100%; }
+.reservation-delete { width: auto; }
+.reservation-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+.reservation-waiting {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
+.reservation-text {
+  color: var(--muted);
+}
+.reservation-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.reservation-update {
+  width: auto;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip { background: #0369a1; }
+.chip-waiting { background: #7c3aed; }
+.chip-selected {
+  background: #0284c7;
+  outline: 2px solid #075985;
+}
+.status-badge {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.status-reserved { background: #15803d; }
+.status-waiting { background: #7c3aed; }
+.list { color: var(--muted); }
+.rank-list { margin: 12px 0 0; padding-left: 20px; }
+.rank-list li { margin-bottom: 8px; }
+
+.message {
+  margin: 0;
+  color: #f8fafc;
+  min-height: 24px;
+}
+
+.admin-link {
+  color: #fff;
+  font-weight: 700;
+}
+
+.success-box {
+  margin-bottom: 12px;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-height: 0;
+}

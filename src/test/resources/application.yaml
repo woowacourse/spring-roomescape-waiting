@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:database
+
+  sql:
+    init:
+      data-locations:
+
+  clock:
+    zone: Asia/Seoul
