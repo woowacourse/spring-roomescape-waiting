@@ -26,6 +26,14 @@ public class Reservation {
         return new Reservation(null, name, ReservationStatus.WAITING, LocalDateTime.now());
     }
 
+    public void cancel() {
+        this.status = ReservationStatus.DELETED;
+    }
+
+    public void promote() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     public boolean isReserved() {
         return this.status == ReservationStatus.RESERVED;
     }
@@ -34,16 +42,8 @@ public class Reservation {
         return this.id != null && this.id.equals(id);
     }
 
-    public void cancel() {
-        this.status = ReservationStatus.DELETED;
-    }
-
     public boolean isWaiting() {
         return this.status == ReservationStatus.WAITING;
-    }
-
-    public void promote() {
-        this.status = ReservationStatus.RESERVED;
     }
 
     public boolean hasSameName(String name) {

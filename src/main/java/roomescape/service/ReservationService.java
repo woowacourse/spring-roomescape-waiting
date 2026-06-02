@@ -54,19 +54,19 @@ public class ReservationService {
         return saveAndCreateResult(slot, added);
     }
 
+    @Transactional
+    public void cancelReservation(long reservationId) {
+        ReservationSlot slot = findReservationSlot(reservationId);
+        slot.cancelReservation(reservationId);
+        reservationRepository.save(slot);
+    }
+
     private ReservationSlotResult saveAndCreateResult(ReservationSlot slot, Reservation reservation) {
         ReservationSlot saved = reservationRepository.save(slot);
         return ReservationSlotResult.from(
                 saved,
                 saved.findReservationByNameAndStatus(reservation.getName(), reservation.getStatus())
         );
-    }
-
-    @Transactional
-    public void cancelReservation(long reservationId) {
-        ReservationSlot slot = findReservationSlot(reservationId);
-        slot.cancelReservation(reservationId);
-        reservationRepository.save(slot);
     }
 
     private ReservationSlotResult moveReservation(

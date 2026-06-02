@@ -59,10 +59,6 @@ public class ReservationSlot {
         }
     }
 
-    public boolean isSameSlot(LocalDate date, ReservationTime time) {
-        return this.date.isEqual(date) && this.time.equals(time);
-    }
-
     public Reservation reserve(String name) {
         validateNotPast();
         validateDuplicateReservation(name);
@@ -81,20 +77,18 @@ public class ReservationSlot {
         return reservations.addReserved(name);
     }
 
+    public void cancelReservation(long reservationId) {
+        reservations.findById(reservationId)
+                .ifPresent(reservation -> {
+                    validateCancelable();
+                    boolean wasReserved = reservation.isReserved();
+                    reservation.cancel();
+                    promoteFirstWaiting(wasReserved);
+                });
+    }
+
     public List<Reservation> getReservations() {
         return reservations.getReservations();
-    }
-
-    private void validateNotPast() {
-        if (this.time.isPast(this.date)) {
-            throw new RoomEscapeException("이미 지난 예약입니다.");
-        }
-    }
-
-    private void validateDuplicateReservation(String name) {
-        if (reservations.hasReservationByName(name)) {
-            throw new DuplicateEntityException("이미 예약 또는 대기가 존재합니다. (%s)", name);
-        }
     }
 
     public Reservation findReservedReservation(long reservationId) {
@@ -108,19 +102,25 @@ public class ReservationSlot {
                 .orElseThrow(() -> new EntityNotFoundException("저장된 예약 찾을 수 없습니다."));
     }
 
-    public void cancelReservation(long reservationId) {
-        reservations.findById(reservationId)
-                .ifPresent(reservation -> {
-                    validateCancelable();
-                    boolean wasReserved = reservation.isReserved();
-                    reservation.cancel();
-                    promoteFirstWaiting(wasReserved);
-                });
+    public boolean isSameSlot(LocalDate date, ReservationTime time) {
+        return this.date.isEqual(date) && this.time.equals(time);
     }
 
     private void promoteFirstWaiting(boolean wasReserved) {
         if (wasReserved) {
             reservations.promoteFirstWaiting();
+        }
+    }
+
+    private void validateNotPast() {
+        if (this.time.isPast(this.date)) {
+            throw new RoomEscapeException("이미 지난 예약입니다.");
+        }
+    }
+
+    private void validateDuplicateReservation(String name) {
+        if (reservations.hasReservationByName(name)) {
+            throw new DuplicateEntityException("이미 예약 또는 대기가 존재합니다. (%s)", name);
         }
     }
 

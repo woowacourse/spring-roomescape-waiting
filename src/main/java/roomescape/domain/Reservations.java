@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import lombok.Getter;
 
-@Getter
 public class Reservations {
 
     private final List<Reservation> reservations;
@@ -27,6 +25,17 @@ public class Reservations {
         return reservation;
     }
 
+    public void promoteFirstWaiting() {
+        reservations.stream()
+                .filter(Reservation::isWaiting)
+                .min(Comparator.comparing(Reservation::getCreatedAt))
+                .ifPresent(Reservation::promote);
+    }
+
+    public List<Reservation> getReservations() {
+        return List.copyOf(reservations);
+    }
+
     public boolean hasReservationByName(String name) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.hasSameName(name));
@@ -35,10 +44,6 @@ public class Reservations {
     public boolean hasReservedReservation() {
         return reservations.stream()
                 .anyMatch(Reservation::isReserved);
-    }
-
-    public List<Reservation> getReservations() {
-        return List.copyOf(reservations);
     }
 
     public Optional<Reservation> findById(long id) {
@@ -51,12 +56,5 @@ public class Reservations {
         return reservations.stream()
                 .filter(reservation -> reservation.matches(name, status))
                 .findFirst();
-    }
-
-    public void promoteFirstWaiting() {
-        reservations.stream()
-                .filter(Reservation::isWaiting)
-                .min(Comparator.comparing(Reservation::getCreatedAt))
-                .ifPresent(Reservation::promote);
     }
 }
