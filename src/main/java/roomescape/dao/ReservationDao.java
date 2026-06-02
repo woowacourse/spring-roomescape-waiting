@@ -74,10 +74,32 @@ public class ReservationDao {
                 .stream().findFirst();
     }
 
-    // TODO
-//    public Optional<ReservationRank> findFirstRank(LocalDate date, long themeId, long timeId) {
-//
-//    }
+    public Optional<ReservationRank> findFirstRank(LocalDate date, long themeId, long timeId) {
+        String sql = """
+                    SELECT
+                    r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                    r.status,
+                    1 AS waiting_order
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.date = ?
+                    AND r.theme_id = ?
+                    AND r.time_id = ?
+                    AND r.status = 'WAITING'
+                    ORDER BY r.id ASC
+                    LIMIT 1
+                """;
+
+        return jdbcTemplate.query(sql,
+                (resultSet, rowNum) -> {
+                    Reservation reservation = reservationRowMapper.mapRow(resultSet, rowNum);
+                    return new ReservationRank(reservation, resultSet.getLong("waiting_order"));
+                },
+                date, themeId, timeId
+        ).stream().findFirst();
+    }
 
     public List<ReservationRank> findByName(String name) {
         String sql = """
@@ -96,6 +118,7 @@ public class ReservationDao {
                     ) sub
                     WHERE sub.name = ?
                 """;
+
         return jdbcTemplate.query(sql,
                 (resultSet, rowNum) -> {
                     Reservation reservation = reservationRowMapper.mapRow(resultSet, rowNum);
@@ -155,6 +178,18 @@ public class ReservationDao {
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
                 reservation.getTheme(), reservation.getStatus());
+    }
+
+    @Transactional
+    public void update(Long id, ReservationStatus status) {
+        jdbcTemplate.update(
+                """
+                            UPDATE reservation 
+                            SET status = ?
+                            WHERE id = ?
+                        """,
+                status.name(), id
+        );
     }
 
     @Transactional
