@@ -95,7 +95,7 @@ public class ReservationService {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
 
-        if (reservation.getStatus() == Status.CONFIRMED) {
+        if (reservation.isConfirmed()) {
             promoteFirstWaiting(reservation.getDate(), reservation.timeId(), reservation.themeId());
         }
     }

@@ -6,7 +6,6 @@ import static org.assertj.core.groups.Tuple.tuple;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
