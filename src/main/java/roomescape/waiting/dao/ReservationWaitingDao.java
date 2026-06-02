@@ -44,7 +44,10 @@ public class ReservationWaitingDao {
                         where ahead.theme_id = w.theme_id
                           and ahead.date = w.date
                           and ahead.time_id = w.time_id
-                          and ahead.created_at < w.created_at) as waiting_number
+                          and (
+                              ahead.created_at < w.created_at
+                              or (ahead.created_at = w.created_at and ahead.id < w.id)
+                          )) as waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
@@ -64,12 +67,15 @@ public class ReservationWaitingDao {
                         where ahead.theme_id = w.theme_id
                           and ahead.date = w.date
                           and ahead.time_id = w.time_id
-                          and ahead.created_at < w.created_at) as waiting_number
+                          and (
+                              ahead.created_at < w.created_at
+                              or (ahead.created_at = w.created_at and ahead.id < w.id)
+                          )) as waiting_number
                 from reservation_waiting w
                 join reservation_time t
                 on w.time_id = t.id
                 where w.name = ?
-                order by w.created_at
+                order by w.created_at asc, w.id asc
                 """;
 
         return jdbcTemplate.query(sql, rowMapper, name);
