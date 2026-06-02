@@ -14,6 +14,7 @@ import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 import roomescape.waiting.service.dto.ReservationWaitingResult;
+import roomescape.time.service.ReservationTimeService;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,12 +22,16 @@ public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationWaitingService(
-            ReservationWaitingRepository reservationWaitingRepository, ReservationRepository reservationRepository
+            ReservationWaitingRepository reservationWaitingRepository,
+            ReservationRepository reservationRepository,
+            ReservationTimeService reservationTimeService
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationTimeService = reservationTimeService;
     }
 
     @Transactional
@@ -58,6 +63,7 @@ public class ReservationWaitingService {
     }
 
     private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command) {
+        reservationTimeService.getByIdForUpdate(command.timeId());
         Reservation targetReservation = getReservationByDateAndTimeIdAndThemeId(command);
 
         validateNoDoubleBooking(command.date(), command.timeId(), command.name());

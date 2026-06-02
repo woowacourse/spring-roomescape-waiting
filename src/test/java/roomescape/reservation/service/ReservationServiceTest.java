@@ -62,7 +62,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         ReservationCommand command = new ReservationCommand("브라운", LocalDate.now().plusDays(1), 1L, 1L);
 
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
         given(reservationRepository.save(any()))
                 .willThrow(new DataIntegrityViolationException("duplicate"));
@@ -78,7 +78,7 @@ class ReservationServiceTest {
     void save_nonExistentTime_throwsNotFoundException() {
         // given
         ReservationCommand command = new ReservationCommand("브라운", LocalDate.now().plusDays(1), 999L, 1L);
-        given(reservationTimeService.getById(999L)).willThrow(new NotFoundException("Time not found"));
+        given(reservationTimeService.getByIdForUpdate(999L)).willThrow(new NotFoundException("Time not found"));
 
         // when & then
         assertThatThrownBy(() -> reservationService.save(command))
@@ -92,7 +92,7 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         ReservationCommand command = new ReservationCommand("브라운", LocalDate.now().plusDays(1), 1L, 999L);
 
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(999L)).willThrow(new NotFoundException("Theme not found"));
 
         // when & then
@@ -109,7 +109,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         ReservationCommand command = new ReservationCommand("브라운", date, 1L, 1L);
 
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
         given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "브라운")).willReturn(true);
 
@@ -128,7 +128,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         ReservationCommand command = new ReservationCommand("브라운", date, 1L, 1L);
 
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
         // 예약은 없지만(false) 대기열에 있음(true)
         given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "브라운")).willReturn(false);
@@ -148,7 +148,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
         ReservationCommand command = new ReservationCommand("브라운", LocalDate.now().minusDays(1), 1L, 1L);
 
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
 
         // when & then
@@ -217,7 +217,7 @@ class ReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().minusDays(1), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운"))
@@ -236,7 +236,7 @@ class ReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(1), 999L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeService.getById(999L)).willThrow(new NotFoundException("Time not found"));
+        given(reservationTimeService.getByIdForUpdate(999L)).willThrow(new NotFoundException("Time not found"));
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운"))
@@ -255,7 +255,7 @@ class ReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(targetDate, 1L, "브라운", 1L)).willReturn(true);
 
         // when & then
@@ -276,7 +276,7 @@ class ReservationServiceTest {
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationTimeService.getById(1L)).willReturn(time);
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(targetDate, 1L, "브라운", 1L)).willReturn(false);
         given(reservationWaitingRepository.existsByDateAndTimeIdAndName(targetDate, 1L, "브라운")).willReturn(true);
 
@@ -345,6 +345,7 @@ class ReservationServiceTest {
         ReservationWaiting w2 = new ReservationWaiting(20L, "정상대기자", new ReservationSlot(date, time, theme));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(targetReservation));
+        given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(reservationWaitingRepository.findAllByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L))
                 .willReturn(List.of(w1, w2));
 

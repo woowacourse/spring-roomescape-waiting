@@ -27,6 +27,7 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
@@ -42,8 +43,17 @@ class ReservationWaitingServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private ReservationTimeService reservationTimeService;
+
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        org.mockito.Mockito.lenient().when(reservationTimeService.getByIdForUpdate(any()))
+                .thenReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
+    }
 
     @Test
     @DisplayName("예약 대기 생성 시, 대기 신청 대상 예약이 존재하지 않으면 NotFoundException이 발생한다.")

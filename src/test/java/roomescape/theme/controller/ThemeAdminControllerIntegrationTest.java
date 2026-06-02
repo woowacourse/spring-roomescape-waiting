@@ -144,7 +144,6 @@ public class ThemeAdminControllerIntegrationTest {
                 .then().statusCode(201)
                 .extract().jsonPath().getLong("id");
 
-        // themeId = id를 참조하는 예약을 직접 삽입하여 사용 중인 상태로 만듦
         databaseHelper.insertReservationDirectly("브라운", LocalDate.now().plusDays(1), 1L, id);
 
         // when & then

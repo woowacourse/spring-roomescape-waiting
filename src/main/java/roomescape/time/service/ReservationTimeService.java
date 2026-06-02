@@ -47,6 +47,12 @@ public class ReservationTimeService {
     }
 
     @Transactional
+    public ReservationTime getByIdForUpdate(Long id) {
+        return reservationTimeRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
+    }
+
+    @Transactional
     public void deleteById(Long id) {
         ReservationTime deleteTarget = getById(id);
 

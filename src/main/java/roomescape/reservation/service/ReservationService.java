@@ -70,6 +70,8 @@ public class ReservationService {
         }
         reservation.validateExpiry();
 
+        reservationTimeService.getByIdForUpdate(reservation.getTimeId());
+
         List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByDateAndTimeIdAndThemeIdForUpdate(
                 reservation.getDate(),
                 reservation.getTimeId(),
@@ -106,7 +108,7 @@ public class ReservationService {
     }
 
     private Reservation buildNewReservation(ReservationCommand command) {
-        ReservationTime time = reservationTimeService.getById(command.timeId());
+        ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
         Reservation newReservation = Reservation.of(command.name(), command.date(), time, theme);
@@ -146,7 +148,7 @@ public class ReservationService {
         if (timeId == null) {
             return null;
         }
-        return reservationTimeService.getById(timeId);
+        return reservationTimeService.getByIdForUpdate(timeId);
     }
 
     private void validateNoDoubleBookingForUpdate(LocalDate date, ReservationTime time, String name,

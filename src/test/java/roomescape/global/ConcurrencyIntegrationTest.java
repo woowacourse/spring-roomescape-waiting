@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.ConflictException;
+import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -331,5 +332,126 @@ class ConcurrencyIntegrationTest {
         assertThat(result.get(0)).isEqualTo(1);
         assertThat(result.get(1)).isEqualTo(99);
         assertThat(result.get(2)).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("동일한 사용자가 동일한 시간에 서로 다른 테마를 동시에 예약하면 하나만 성공하고 하나는 예외가 발생한다")
+    void saveSameTimeDifferentThemeReservation() throws InterruptedException {
+        // given
+        createReservationTime("10:00");
+        createTheme("테마1", "설명1", "url1");
+        createTheme("테마2", "설명2", "url2");
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CountDownLatch readyLatch = new CountDownLatch(2);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(2);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        AtomicInteger unexpectedErrorCount = new AtomicInteger();
+
+        List<Runnable> tasks = List.of(
+                () -> reservationService.save(new ReservationCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                )),
+                () -> reservationService.save(new ReservationCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        2L
+                ))
+        );
+
+        for (Runnable task : tasks) {
+            executorService.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await();
+                    task.run();
+                    successCount.incrementAndGet();
+                } catch (InvalidBusinessStateException e) {
+                    duplicateCount.incrementAndGet();
+                } catch (Throwable throwable) {
+                    unexpectedErrorCount.incrementAndGet();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(1);
+        assertThat(unexpectedErrorCount.get()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("동일한 사용자가 동일한 시간에 예약과 예약 대기를 동시에 요청하면 하나만 성공하고 하나는 예외가 발생한다")
+    void saveSameTimeReservationAndWaiting() throws InterruptedException {
+        // given
+        createReservationTime("10:00");
+        createTheme("테마1", "설명1", "url1");
+        createTheme("테마2", "설명2", "url2");
+        createReservation("다른사람", LocalDate.now().plusDays(7), 1L, 1L);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        CountDownLatch readyLatch = new CountDownLatch(2);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(2);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        AtomicInteger unexpectedErrorCount = new AtomicInteger();
+
+        List<Runnable> tasks = List.of(
+                () -> reservationService.save(new ReservationCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        2L
+                )),
+                () -> reservationWaitingService.save(new ReservationWaitingCommand(
+                        "브라운",
+                        LocalDate.now().plusDays(7),
+                        1L,
+                        1L
+                ))
+        );
+
+        for (Runnable task : tasks) {
+            executorService.submit(() -> {
+                readyLatch.countDown();
+                try {
+                    startLatch.await();
+                    task.run();
+                    successCount.incrementAndGet();
+                } catch (InvalidBusinessStateException e) {
+                    duplicateCount.incrementAndGet();
+                } catch (Throwable throwable) {
+                    unexpectedErrorCount.incrementAndGet();
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+        executorService.shutdown();
+
+        // then
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(duplicateCount.get()).isEqualTo(1);
+        assertThat(unexpectedErrorCount.get()).isEqualTo(0);
     }
 }
