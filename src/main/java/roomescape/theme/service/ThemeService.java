@@ -32,8 +32,13 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
+    // TODO 더이상 필요하지 않으니 삭제.
     public List<Theme> readActiveThemes() {
         return themeRepository.findByIsActive(true);
+    }
+
+    public List<Theme> readSlotOfThemes() {
+        return themeRepository.findSlogOfThemes();
     }
 
     public List<PopularThemeResult> readPopularThemes(int top) {

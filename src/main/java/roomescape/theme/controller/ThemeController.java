@@ -20,7 +20,7 @@ public class ThemeController {
 
     @GetMapping("/themes")
     public ResponseEntity<List<ThemeDetailDto>> getActiveThemes() {
-        List<ThemeDetailDto> responseData = themeService.readActiveThemes().stream()
+        List<ThemeDetailDto> responseData = themeService.readSlotOfThemes().stream()
                 .map(ThemeDetailDto::from)
                 .toList();
         return ResponseEntity.ok(responseData);
