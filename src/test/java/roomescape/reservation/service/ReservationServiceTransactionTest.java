@@ -3,15 +3,18 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -28,8 +31,7 @@ import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.service.ReservationWaitingService;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 
-
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = NONE)
 public class ReservationServiceTransactionTest {
 
     @MockitoSpyBean
@@ -51,7 +53,7 @@ public class ReservationServiceTransactionTest {
     ReservationWaitingService reservationWaitingService;
 
     @Autowired
-    org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void tearDown() {
@@ -84,6 +86,8 @@ public class ReservationServiceTransactionTest {
         // then
         Optional<Reservation> result = reservationRepository.findById(testTargetId);
         Assertions.assertTrue(result.isPresent());
+        List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByName("임꺽정");
+        Assertions.assertFalse(waitings.isEmpty());
     }
 
     @Test
@@ -102,7 +106,6 @@ public class ReservationServiceTransactionTest {
                 .when(reservationWaitingRepository)
                 .delete(any(ReservationWaiting.class));
 
-
         // when
         assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName))
                 .isInstanceOf(RuntimeException.class);
@@ -110,6 +113,8 @@ public class ReservationServiceTransactionTest {
         // then
         Optional<Reservation> result = reservationRepository.findById(testTargetId);
         Assertions.assertTrue(result.isPresent());
+        List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByName("임꺽정");
+        Assertions.assertFalse(waitings.isEmpty());
     }
 
     private void saveReservationWaiting(ReservationResult reservationResult) {
@@ -122,8 +127,9 @@ public class ReservationServiceTransactionTest {
         reservationWaitingService.save(reservationWaitingCommand);
     }
 
-    private static ReservationCommand saveReservation(ReservationTimeResult reservationTimeResult,
-                                                      ThemeResult themeResult) {
+    private static ReservationCommand saveReservation(
+            ReservationTimeResult reservationTimeResult, ThemeResult themeResult
+    ) {
         return new ReservationCommand(
                 "홍길동",
                 LocalDate.now(),
