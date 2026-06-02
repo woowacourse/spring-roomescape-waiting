@@ -20,6 +20,25 @@ public class ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                resultSet.getLong("time_id"),
+                resultSet.getObject("time_value", LocalTime.class));
+        Theme theme = new Theme(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("description"),
+                resultSet.getString("thumbnail"));
+
+        return new Reservation(
+                resultSet.getLong("reservation_id"),
+                resultSet.getString("username"),
+                resultSet.getObject("date", LocalDate.class),
+                time,
+                theme
+        );
+    };
+
     public ReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -195,23 +214,4 @@ public class ReservationRepository {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
         return count != null && count > 0;
     }
-
-    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
-        ReservationTime time = new ReservationTime(
-                resultSet.getLong("time_id"),
-                resultSet.getObject("time_value", LocalTime.class));
-        Theme theme = new Theme(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail"));
-
-        Reservation reservation = new Reservation(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("username"),
-                resultSet.getObject("date", LocalDate.class),
-                time,
-                theme);
-        return reservation;
-    };
 }
