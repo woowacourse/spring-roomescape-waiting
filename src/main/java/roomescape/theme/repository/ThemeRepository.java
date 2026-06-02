@@ -1,7 +1,6 @@
 package roomescape.theme.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.theme.domain.Theme;
@@ -17,5 +16,5 @@ public interface ThemeRepository {
 
     boolean existsById(Long id);
 
-    boolean cancelById(Long id, LocalDateTime now);
+    boolean deleteById(Long id);
 }

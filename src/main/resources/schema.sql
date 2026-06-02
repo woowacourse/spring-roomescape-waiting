@@ -4,18 +4,15 @@ CREATE TABLE theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     thumbnail   VARCHAR(255) NOT NULL,
-    deleted_at  TIMESTAMP,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE reservation_time
 (
-    id           BIGINT NOT NULL AUTO_INCREMENT,
-    start_at     TIME   NOT NULL,
-    deleted_at   TIMESTAMP,
-    delete_token BIGINT NOT NULL DEFAULT 0,
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    start_at TIME   NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE (start_at, delete_token)
+    UNIQUE (start_at)
 );
 
 CREATE TABLE reservation

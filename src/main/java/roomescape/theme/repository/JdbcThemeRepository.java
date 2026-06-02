@@ -1,9 +1,7 @@
 package roomescape.theme.repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
                     resultSet.getString("description"),
-                    resultSet.getString("thumbnail"),
-                    toLocalDateTime(resultSet.getTimestamp("deleted_at"))
+                    resultSet.getString("thumbnail")
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -41,18 +38,17 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findAll() {
         return jdbcTemplate.query("""
-                SELECT id, name, description, thumbnail, deleted_at
+                SELECT id, name, description, thumbnail
                 FROM theme
-                WHERE deleted_at IS NULL
                 """, themeRowMapper);
     }
 
     @Override
     public Optional<Theme> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT id, name, description, thumbnail, deleted_at
+                        SELECT id, name, description, thumbnail
                         FROM theme
-                        WHERE id = ? AND deleted_at IS NULL
+                        WHERE id = ?
                         """, themeRowMapper, id)
                 .stream()
                 .findFirst();
@@ -65,15 +61,13 @@ public class JdbcThemeRepository implements ThemeRepository {
                             t.id,
                             t.name,
                             t.description,
-                            t.thumbnail,
-                            t.deleted_at
+                            t.thumbnail
                         FROM theme t
                         INNER JOIN reservation r
                             ON r.theme_id = t.id
                             AND r.status != 'CANCELED'
                         WHERE r.date BETWEEN ? AND ?
-                            AND t.deleted_at IS NULL
-                        GROUP BY t.id, t.name, t.description, t.thumbnail, t.deleted_at
+                        GROUP BY t.id, t.name, t.description, t.thumbnail
                         ORDER BY COUNT(r.id) DESC
                         LIMIT ?
                         """,
@@ -85,18 +79,17 @@ public class JdbcThemeRepository implements ThemeRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM theme
-                WHERE id = ? AND deleted_at IS NULL
+                WHERE id = ?
                 """, Integer.class, id);
         return count != null && count > 0;
     }
 
     @Override
-    public boolean cancelById(Long id, LocalDateTime now) {
+    public boolean deleteById(Long id) {
         int rowCount = jdbcTemplate.update("""
-                UPDATE theme
-                SET deleted_at = ?
-                WHERE id = ? AND deleted_at IS NULL
-                """, now, id);
+                DELETE FROM theme
+                WHERE id = ?
+                """, id);
         return rowCount > 0;
     }
 
@@ -114,12 +107,5 @@ public class JdbcThemeRepository implements ThemeRepository {
             preparedStatement.setString(3, theme.getThumbnail());
             return preparedStatement;
         }, keyHolder);
-    }
-
-    private LocalDateTime toLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
     }
 }

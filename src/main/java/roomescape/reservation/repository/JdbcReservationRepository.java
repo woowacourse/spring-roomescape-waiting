@@ -2,9 +2,7 @@ package roomescape.reservation.repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +25,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
+                resultSet.getTime("start_at").toLocalTime()
         );
 
         Theme theme = Theme.of(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail"),
-                toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
+                resultSet.getString("theme_thumbnail")
         );
 
         return Reservation.of(
@@ -51,16 +47,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
+                resultSet.getTime("start_at").toLocalTime()
         );
 
         Theme theme = Theme.of(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail"),
-                toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
+                resultSet.getString("theme_thumbnail")
         );
 
         return ReservationWaitingResult.from(Reservation.of(
@@ -84,12 +78,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.status AS status,
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at
+                    th.thumbnail AS theme_thumbnail
                 FROM reservation r
                 INNER JOIN reservation_time t
                     ON r.time_id = t.id
@@ -115,13 +107,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                         
                                 t.id AS time_id,
                                 t.start_at,
-                                t.deleted_at AS time_deleted_at,
                         
                                 th.id AS theme_id,
                                 th.name AS theme_name,
                                 th.description AS theme_description,
                                 th.thumbnail AS theme_thumbnail,
-                                th.deleted_at AS theme_deleted_at,
                         
                                 ROW_NUMBER() OVER (
                                     PARTITION BY r.date, t.id, th.id, r.status
@@ -151,12 +141,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.status AS status,
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at
+                    th.thumbnail AS theme_thumbnail
                 FROM reservation r
                 INNER JOIN reservation_time t
                     ON r.time_id = t.id
@@ -178,13 +166,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                 
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
                         ORDER BY r.created_at, r.id
@@ -209,13 +195,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                 
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
                         ORDER BY r.created_at, r.id
@@ -368,10 +352,4 @@ public class JdbcReservationRepository implements ReservationRepository {
         return null;
     }
 
-    private LocalDateTime toLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
-    }
 }

@@ -4,12 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
@@ -52,19 +49,6 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("삭제된 예약 시간은 id로 조회되지 않는다.")
-    public void findById_softDelete() {
-        // given
-        ReservationTime reservationTime = insertDeletedReservationTime(LocalTime.of(10, 0));
-
-        // when
-        Optional<ReservationTime> found = reservationTimeRepository.findById(reservationTime.getId());
-
-        // then
-        assertThat(found).isEmpty();
-    }
-
-    @Test
     @DisplayName("모든 예약 시간 목록을 조회한다")
     void findAll() {
         insertReservationTime(LocalTime.of(10, 0));
@@ -73,22 +57,6 @@ class JdbcReservationTimeRepositoryTest {
 
         assertThat(reservationTimes).hasSize(1);
         assertThat(reservationTimes.getFirst().getStartAt()).isEqualTo(LocalTime.of(10, 0));
-    }
-
-    @Test
-    @DisplayName("예약 시간 목록은 삭제되지 않은 예약 시간만 조회한다.")
-    public void findAll_softDelete() {
-        // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
-        ReservationTime activeTime = insertReservationTime(LocalTime.of(12, 0));
-
-        // when
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-
-        // then
-        assertThat(reservationTimes)
-                .extracting(ReservationTime::getId, ReservationTime::getStartAt)
-                .containsExactly(Tuple.tuple(activeTime.getId(), activeTime.getStartAt()));
     }
 
     @Test
@@ -101,45 +69,29 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("삭제된 예약 시간은 존재하지 않는 것으로 조회한다.")
-    public void existsByStartAt_softDelete() {
-        // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
-
-        // when
-        boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
-
-        // then
-        assertThat(exists).isFalse();
-    }
-
-    @Test
     @DisplayName("예약 시간을 삭제한다.")
     void delete_success() {
         // given
         ReservationTime reservationTime = insertReservationTime(LocalTime.of(10, 0));
-        LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
 
         // when
-        boolean deleted = reservationTimeRepository.cancelById(reservationTime.getId(), now);
+        boolean deleted = reservationTimeRepository.deleteById(reservationTime.getId());
 
         // then
         assertThat(deleted).isTrue();
         assertThat(reservationTimeRepository.findAll()).isEmpty();
-
-        Map<String, Object> deleteInfo = findDeleteInfoById(reservationTime.getId());
-        assertThat(((Timestamp) deleteInfo.get("deleted_at")).toLocalDateTime()).isEqualTo(now);
-        assertThat(((Number) deleteInfo.get("delete_token")).longValue()).isEqualTo(reservationTime.getId());
+        assertThat(reservationTimeRepository.findById(reservationTime.getId())).isEmpty();
+        assertThat(reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())).isFalse();
     }
 
     @Test
     @DisplayName("존재하지 않는 예약 시간은 삭제되지 않는다.")
-    public void cancelById_fail() {
+    public void deleteById_fail() {
         // given
         Long id = 1L;
 
         // when
-        boolean deleted = reservationTimeRepository.cancelById(id, LocalDateTime.now());
+        boolean deleted = reservationTimeRepository.deleteById(id);
 
         // then
         assertThat(deleted).isFalse();
@@ -171,8 +123,8 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("삭제된 예약은 이용 가능한 시간 조회에서 제외한다.")
-    public void findAllByDateAndThemeIdWithAvailability_softDelete() {
+    @DisplayName("취소된 예약은 이용 가능한 시간 조회에서 제외한다.")
+    public void findAllByDateAndThemeIdWithAvailability_canceledReservation() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -190,26 +142,6 @@ class JdbcReservationTimeRepositoryTest {
                 .containsExactly(Tuple.tuple(time, true));
     }
 
-    @Test
-    @DisplayName("삭제된 예약 시간은 이용 가능한 시간 조회에서 제외한다.")
-    public void findAllByDateAndThemeIdWithAvailability_deletedReservationTime() {
-        // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
-        ReservationTime activeTime = insertReservationTime(LocalTime.of(12, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2023, 8, 5);
-
-        // when
-        List<ReservationTimeAvailability> availableTimes =
-                reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(date, theme.getId());
-
-        // then
-        assertThat(availableTimes).hasSize(1)
-                .extracting(ReservationTimeAvailability::getReservationTime,
-                        ReservationTimeAvailability::isAvailable)
-                .containsExactly(Tuple.tuple(activeTime, true));
-    }
-
     private ReservationTime insertReservationTime(LocalTime startAt) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -219,22 +151,6 @@ class JdbcReservationTimeRepositoryTest {
                     VALUES (?)
                     """, new String[]{"id"});
             preparedStatement.setString(1, startAt.toString());
-            return preparedStatement;
-        }, keyHolder);
-
-        return ReservationTime.of(getGeneratedId(keyHolder), startAt);
-    }
-
-    private ReservationTime insertDeletedReservationTime(LocalTime startAt) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at, deleted_at)
-                    VALUES (?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             return preparedStatement;
         }, keyHolder);
 
@@ -286,14 +202,6 @@ class JdbcReservationTimeRepositoryTest {
             preparedStatement.setString(5, Status.CANCELED.toString());
             return preparedStatement;
         });
-    }
-
-    private Map<String, Object> findDeleteInfoById(Long id) {
-        return jdbcTemplate.queryForMap("""
-                SELECT deleted_at, delete_token
-                FROM reservation_time
-                WHERE id = ?
-                """, id);
     }
 
     private Long getGeneratedId(KeyHolder keyHolder) {

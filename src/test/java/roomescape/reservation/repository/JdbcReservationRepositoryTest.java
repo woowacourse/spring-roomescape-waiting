@@ -185,8 +185,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeId_AndGuestName_softDelete() {
+    @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 취소된 예약이면 존재하지 않는 것으로 확인한다.")
+    public void existsByDateAndTimeIdAndThemeId_AndGuestName_canceledReservation() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -241,8 +241,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 예약이 아닌 예약 중에서 겹치는 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeIdAndIdNot_AndStatusCanceled_softDeleteAndGuestName() {
+    @DisplayName("특정 예약이 아닌 예약 중에서 겹치는 예약이 취소된 예약이면 존재하지 않는 것으로 확인한다.")
+    public void existsByDateAndTimeIdAndThemeIdAndIdNot_AndStatusCanceled_canceledReservationAndGuestName() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -309,8 +309,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 예약 시간 id를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existByTimeId_softDelete() {
+    @DisplayName("특정 예약 시간 id를 가진 예약이 취소된 예약이면 존재하지 않는 것으로 확인한다.")
+    public void existByTimeId_canceledReservation() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -342,8 +342,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("특정 테마 id를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existByThemeId_softDelete() {
+    @DisplayName("특정 테마 id를 가진 예약이 취소된 예약이면 존재하지 않는 것으로 확인한다.")
+    public void existByThemeId_canceledReservation() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -447,7 +447,6 @@ class JdbcReservationRepositoryTest {
     private Reservation insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        LocalDateTime now = LocalDateTime.now();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
                     INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
@@ -469,15 +468,6 @@ class JdbcReservationRepositoryTest {
                 SELECT
                     r.date,
                     time_id
-                FROM reservation r
-                WHERE r.id = ?
-                """, id);
-    }
-
-    private Map<String, Object> findDeleteAtAndDeleteToken(Long id) {
-        return jdbcTemplate.queryForMap("""
-                SELECT
-                    deleted_at, delete_token
                 FROM reservation r
                 WHERE r.id = ?
                 """, id);
