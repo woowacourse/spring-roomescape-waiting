@@ -1,12 +1,11 @@
-package roomescape.reservationwaiting;
+package roomescape.repository.reservationwaiting;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
-import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 
-class FakeReservationWaitingRepository implements ReservationWaitingRepository {
+public class FakeReservationWaitingRepository implements ReservationWaitingRepository {
 
     private final Map<Long, ReservationWaiting> store = new LinkedHashMap<>();
     private final AtomicLong sequence = new AtomicLong(0);

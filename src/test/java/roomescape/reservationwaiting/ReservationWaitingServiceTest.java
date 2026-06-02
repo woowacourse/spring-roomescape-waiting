@@ -21,6 +21,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.FakeReservationWaitingRepository;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
 
 class ReservationWaitingServiceTest {
