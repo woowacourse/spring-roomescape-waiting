@@ -49,7 +49,7 @@ public class ThemeRepository {
             );
 
             return Optional.of(theme);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
@@ -69,7 +69,7 @@ public class ThemeRepository {
         return jdbcTemplate.update(sql, themeId) > 0;
     }
 
-    public List<Theme> findPopularThemes(LocalDate startDate, LocalDate today) {
+    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate today) {
         final String sql = """
                 SELECT
                     t.id,

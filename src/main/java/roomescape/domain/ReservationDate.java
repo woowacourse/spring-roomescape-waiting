@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Getter
 public class ReservationDate {
 
-    LocalDate date;
+    final LocalDate date;
 
     public ReservationDate(final LocalDate date) {
         validate(date);

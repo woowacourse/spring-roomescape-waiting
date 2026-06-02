@@ -49,7 +49,7 @@ public class ReservationRepository {
     }
 
     public List<Reservation> findByName(final String name) {
-        String sql = """
+        final String sql = """
                 SELECT
                     r.id AS reservation_id,
                     r.name AS reservation_name,
@@ -74,7 +74,7 @@ public class ReservationRepository {
     }
 
     public Optional<Reservation> findById(final Long reservationId) {
-        String sql = """
+        final String sql = """
                 SELECT
                     r.id AS reservation_id,
                     r.name AS reservation_name,
@@ -93,14 +93,14 @@ public class ReservationRepository {
                 """;
 
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(
+            final Reservation reservation = jdbcTemplate.queryForObject(
                     sql,
                     ReservationRepository::mapToDomain,
                     reservationId
             );
 
             return Optional.of(reservation);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
@@ -112,7 +112,7 @@ public class ReservationRepository {
                 WHERE date = ? AND time_id = ? AND theme_id = ?
                 """;
 
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, date, timeId, themeId);
 
         return count != null && count > 0;
     }
@@ -124,7 +124,7 @@ public class ReservationRepository {
                 WHERE time_id = ?
                 """;
 
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
 
         return count != null && count > 0;
     }
@@ -136,7 +136,7 @@ public class ReservationRepository {
                 WHERE theme_id = ?
                 """;
 
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
 
         return count != null && count > 0;
     }
@@ -182,7 +182,7 @@ public class ReservationRepository {
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            final PreparedStatement preparedStatement = connection.prepareStatement(
                     sql,
                     Statement.RETURN_GENERATED_KEYS
             );

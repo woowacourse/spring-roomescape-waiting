@@ -18,7 +18,7 @@ public class WaitingList {
 
     private final LocalDateTime createdAt;
 
-    private WaitingList(Long id, PersonName name, ReservationDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt) {
+    private WaitingList(final Long id, final PersonName name, final ReservationDate date, final Theme theme, final ReservationTime reservationTime, final LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.reservationDate = date;
@@ -27,11 +27,11 @@ public class WaitingList {
         this.createdAt = createdAt;
     }
 
-    public static WaitingList create(String name, LocalDate date, Theme theme, ReservationTime reservationTime) {
+    public static WaitingList create(final String name, final LocalDate date, final Theme theme, final ReservationTime reservationTime) {
         return new WaitingList(null, new PersonName(name), new ReservationDate(date), theme, reservationTime, LocalDateTime.now());
     }
 
-    public static WaitingList createWithId(Long id, String name, LocalDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt) {
+    public static WaitingList createWithId(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime reservationTime, final LocalDateTime createdAt) {
         return new WaitingList(id, new PersonName(name), new ReservationDate(date), theme, reservationTime, createdAt);
     }
 
@@ -39,7 +39,7 @@ public class WaitingList {
         return name.getName();
     }
 
-    public WaitingList withId(long waitingListId) {
+    public WaitingList withId(final long waitingListId) {
         return new WaitingList(waitingListId, name, reservationDate, theme, reservationTime, createdAt);
     }
 }

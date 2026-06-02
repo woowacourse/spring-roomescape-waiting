@@ -26,7 +26,7 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResult> create(
-            @Valid @RequestBody ReservationTimeCreateCommand request
+            @Valid @RequestBody final ReservationTimeCreateCommand request
     ) {
         final ReservationTimeResult result = reservationTimeService.create(request);
         return ResponseEntity.created(URI.create("/times/" + result.id()))
@@ -35,7 +35,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/{time-id}")
     public ResponseEntity<Void> delete(
-            @PathVariable("time-id") Long timeId
+            @PathVariable("time-id") final Long timeId
     ) {
         reservationTimeService.delete(timeId);
         return ResponseEntity.noContent().build();

@@ -13,7 +13,7 @@ public record WaitingListResult(
         int waitingOrder,
         ReservationStatus status
 ) {
-    public static WaitingListResult from(WaitingList waitingList, int waitingOrder) {
+    public static WaitingListResult from(final WaitingList waitingList, final int waitingOrder) {
         return new WaitingListResult(
                 waitingList.getId(),
                 waitingList.getName(),

@@ -74,7 +74,7 @@ public class ReservationService {
     }
 
     public void deleteWithValidation(final Long reservationId, final String name) {
-        Reservation reservation = getReservation(reservationId);
+        final Reservation reservation = getReservation(reservationId);
         validateReservationOwner(reservation, name);
         final LocalDate date = reservation.getDate();
         validateFutureOrPresentDate(date);
@@ -84,14 +84,14 @@ public class ReservationService {
     }
 
     public AvailableDateResult getReservationOptions() {
-        LocalDate today = LocalDate.now();
-        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
+        final LocalDate today = LocalDate.now();
+        final List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
 
         return new AvailableDateResult(dates);
     }
 
     public List<ReservationResult> getReservationsByName(final String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
+        final List<Reservation> reservations = reservationRepository.findByName(name);
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
@@ -157,7 +157,7 @@ public class ReservationService {
     }
 
     private void validateAvailable(final LocalDate date, final Long timeId, final Long themeId) {
-        boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
+        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 date,
                 timeId,
                 themeId

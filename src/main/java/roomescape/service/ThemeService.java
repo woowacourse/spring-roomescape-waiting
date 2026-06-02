@@ -29,7 +29,7 @@ public class ThemeService {
                 request.thumbnailUrl()
         );
 
-        Theme theme = themeRepository.save(themeWithoutId);
+        final Theme theme = themeRepository.save(themeWithoutId);
 
         return ThemeResult.from(theme);
     }
@@ -40,7 +40,7 @@ public class ThemeService {
             throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
         }
 
-        boolean deleted = themeRepository.deleteById(themeId);
+        final boolean deleted = themeRepository.deleteById(themeId);
 
         if (!deleted) {
             throw new BusinessException(ErrorCode.THEME_NOT_FOUND);

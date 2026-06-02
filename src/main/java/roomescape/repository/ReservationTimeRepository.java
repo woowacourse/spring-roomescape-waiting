@@ -41,14 +41,14 @@ public class ReservationTimeRepository {
                 """;
 
         try {
-            ReservationTime reservationTime = jdbcTemplate.queryForObject(
+            final ReservationTime reservationTime = jdbcTemplate.queryForObject(
                     sql,
                     this::mapToDomain,
                     timeId
             );
 
             return Optional.of(reservationTime);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
@@ -78,7 +78,7 @@ public class ReservationTimeRepository {
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
+            final PreparedStatement preparedStatement = connection.prepareStatement(
                     sql,
                     Statement.RETURN_GENERATED_KEYS
             );

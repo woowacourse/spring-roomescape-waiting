@@ -31,22 +31,22 @@ public class ReservationController {
 
     @GetMapping(path = "/available-times")
     public ResponseEntity<List<ReservationTimeStatusResult>> getReservationTimeStatuses(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("themeId") Long themeId
+            @RequestParam("date") final LocalDate date,
+            @RequestParam("themeId") final Long themeId
     ) {
         final List<ReservationTimeStatusResult> results = reservationService.getReservationTimeStatuses(date, themeId);
         return ResponseEntity.ok(results);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResult>> getReservationsByName(@RequestParam("name") String name) {
+    public ResponseEntity<List<ReservationResult>> getReservationsByName(@RequestParam("name") final String name) {
         final List<ReservationResult> results = reservationService.getReservationsByName(name);
         return ResponseEntity.ok(results);
     }
 
     @PostMapping
     public ResponseEntity<ReservationResult> create(
-            @Valid @RequestBody ReservationCreateCommand request
+            @Valid @RequestBody final ReservationCreateCommand request
     ) {
         final ReservationResult result = reservationService.create(request);
         return ResponseEntity.created(URI.create("/reservations/" + result.id()))
@@ -55,8 +55,8 @@ public class ReservationController {
 
     @DeleteMapping("/{reservation-id}")
     public ResponseEntity<Void> deleteByName(
-            @PathVariable("reservation-id") Long reservationId,
-            @RequestParam("name") String name
+            @PathVariable("reservation-id") final Long reservationId,
+            @RequestParam("name") final String name
     ) {
         reservationService.deleteWithValidation(reservationId, name);
         return ResponseEntity.noContent().build();
@@ -64,8 +64,8 @@ public class ReservationController {
 
     @PatchMapping("/{reservation-id}")
     public ResponseEntity<ReservationResult> modify(
-            @PathVariable("reservation-id") Long reservationId,
-            @Valid @RequestBody ReservationModifyRequest reservationModifyRequest
+            @PathVariable("reservation-id") final Long reservationId,
+            @Valid @RequestBody final ReservationModifyRequest reservationModifyRequest
     ) {
         final ReservationModifyCommand reservationModifyCommand = new ReservationModifyCommand(
                 reservationId,

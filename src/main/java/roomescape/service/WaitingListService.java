@@ -28,8 +28,8 @@ public class WaitingListService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<WaitingListResult> getWaitingListByName(String name) {
-        List<WaitingList> waitingLists = waitingListRepository.findByName(name);
+    public List<WaitingListResult> getWaitingListByName(final String name) {
+        final List<WaitingList> waitingLists = waitingListRepository.findByName(name);
         return waitingLists.stream()
                 .map(waitingList -> WaitingListResult.from(
                         waitingList, waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(waitingList)
@@ -38,12 +38,12 @@ public class WaitingListService {
     }
 
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
-        Theme findTheme = themeRepository.findById(createCommand.themeId())
+        final Theme findTheme = themeRepository.findById(createCommand.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
-        ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
+        final ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
 
-        WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
+        final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
         validateFuture(waitingList);
 
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
@@ -61,16 +61,16 @@ public class WaitingListService {
         }
 
         try {
-            WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
+            final WaitingList savedWaitingList = waitingListRepository.save(waitingList);
+            final int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
-        } catch (DataAccessException e) {
+        } catch (final DataAccessException e) {
             throw new DatabaseException(ErrorCode.UNIQUE_CONSTRAINT_VIOLATION);
         }
     }
 
     public void delete(final WaitingListDeleteCommand deleteCommand) {
-        WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
+        final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
         
         if (!findWaitingList.getName().equals(deleteCommand.name())) {
@@ -79,13 +79,13 @@ public class WaitingListService {
 
         validateFuture(findWaitingList);
         
-        boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
+        final boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
         }
     }
 
-    private static void validateFuture(WaitingList waitingList) {
+    private static void validateFuture(final WaitingList waitingList) {
         if (waitingList.getReservationDate().isPast()) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }

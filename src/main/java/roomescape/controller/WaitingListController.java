@@ -21,14 +21,14 @@ public class WaitingListController {
     private final WaitingListService waitingListService;
 
     @GetMapping
-    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam String name) {
+    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam final String name) {
         final List<WaitingListResult> results = waitingListService.getWaitingListByName(name);
         return ResponseEntity.ok().body(results);
     }
 
 
     @PostMapping
-    public ResponseEntity<WaitingListResult> create(@RequestBody @Valid WaitingListCreateCommand createCommand) {
+    public ResponseEntity<WaitingListResult> create(@RequestBody @Valid final WaitingListCreateCommand createCommand) {
         final WaitingListResult result = waitingListService.create(createCommand);
         return ResponseEntity.created(URI.create("/waiting-list/" + result.id()))
                 .body(result);
@@ -36,8 +36,8 @@ public class WaitingListController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<WaitingListResult> delete(
-            @PathVariable Long id,
-            @RequestBody WaitingListDeleteRequest waitingListDeleteRequest) {
+            @PathVariable final Long id,
+            @RequestBody final WaitingListDeleteRequest waitingListDeleteRequest) {
         final WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(id, waitingListDeleteRequest.name());
         waitingListService.delete(deleteCommand);
         return ResponseEntity.noContent()

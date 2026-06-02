@@ -49,12 +49,12 @@ public class WaitingListRepository {
                     id
             );
             return Optional.of(waitingList);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
-    public List<WaitingList> findByName(String name) {
+    public List<WaitingList> findByName(final String name) {
         final String sql = """
                 SELECT
                     w.id AS waiting_list_id,
@@ -84,7 +84,7 @@ public class WaitingListRepository {
                 WHERE theme_id = ? AND date = ? AND time_id = ? AND created_at <= ?;
                 """;
 
-        Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
+        final Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
                 waitingList.getTheme().getId(),
                 waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
@@ -104,7 +104,7 @@ public class WaitingListRepository {
                 WHERE name = ? AND theme_id = ? AND date = ? AND time_id = ?
                 """;
 
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, themeId, date, timeId);
+        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, themeId, date, timeId);
 
         return count != null && count > 0;
     }
@@ -151,7 +151,7 @@ public class WaitingListRepository {
         return generatedKey.longValue();
     }
 
-    public boolean deleteById(Long id) {
+    public boolean deleteById(final Long id) {
         final String sql = """
                 DELETE FROM waiting_list
                 WHERE id = ?

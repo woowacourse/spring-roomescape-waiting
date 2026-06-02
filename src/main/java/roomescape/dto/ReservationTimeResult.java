@@ -10,7 +10,7 @@ public record ReservationTimeResult(
         LocalTime endAt
 ) {
 
-    public static ReservationTimeResult from(ReservationTime reservationTime) {
+    public static ReservationTimeResult from(final ReservationTime reservationTime) {
         return new ReservationTimeResult(
                 reservationTime.getId(),
                 reservationTime.getStartAt(),

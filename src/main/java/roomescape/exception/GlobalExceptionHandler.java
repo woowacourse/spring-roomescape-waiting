@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RoomEscapeException.class)
-    public ResponseEntity<ErrorResponse> handleRoomEscapeException(RoomEscapeException e) {
+    public ResponseEntity<ErrorResponse> handleRoomEscapeException(final RoomEscapeException e) {
         final ErrorCode errorCode = e.getErrorCode();
         final ErrorResponse response = ErrorResponse.from(errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         final FieldError error = e.getBindingResult().getFieldErrors().getFirst();
         final String errorCodeMessage = Objects.requireNonNull(error.getDefaultMessage(), "INVALID_INPUT_VALUE");
         final ErrorCode errorCode = ErrorCode.valueOf(errorCodeMessage);
