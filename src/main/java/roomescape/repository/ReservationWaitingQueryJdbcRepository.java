@@ -13,23 +13,18 @@ import roomescape.domain.projection.ReservationWaitingWithOrder;
 @Repository
 public class ReservationWaitingQueryJdbcRepository implements ReservationWaitingQueryRepository {
 
-    private static final String SELECT_BASE = """
-            WITH ordered_waiting AS (
-                SELECT rw.id as waiting_id, rw.name as waiting_name, rw.reservation_id,
-                    ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
-                FROM reservation_waiting as rw
-            )
-            SELECT 
+    private static final String SELECT_WAITING_WITH_ORDER = """
+            SELECT
                 ow.waiting_id, ow.waiting_name, ow.waiting_order,
                 r.date,
                 t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name,
                 th.description as theme_description,
                 th.thumbnail_image_url as theme_thumbnail
-            FROM ordered_waiting as ow
-            INNER JOIN reservation as r ON ow.reservation_id = r.id
-            INNER JOIN reservation_time as t ON r.time_id = t.id
-            INNER JOIN theme as th ON r.theme_id = th.id
+            FROM ordered_waiting ow
+            INNER JOIN reservation r ON ow.reservation_id = r.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -61,14 +56,53 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
 
     @Override
     public Optional<ReservationWaitingWithOrder> findById(Long id) {
-        String sql = SELECT_BASE + " WHERE ow.waiting_id = ?";
+        String sql = """
+                WITH target_waiting AS (
+                    SELECT id, reservation_id
+                    FROM reservation_waiting
+                    WHERE id = ?
+                ),
+                ordered_waiting AS (
+                    SELECT 
+                        rw.id as waiting_id,
+                        rw.name as waiting_name,
+                        rw.reservation_id,
+                        ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
+                    FROM reservation_waiting rw
+                    INNER JOIN target_waiting tw ON rw.reservation_id = tw.reservation_id
+                )
+                """
+                + SELECT_WAITING_WITH_ORDER
+                + """
+                INNER JOIN target_waiting tw ON ow.waiting_id = tw.id
+                """;
         List<ReservationWaitingWithOrder> results = jdbcTemplate.query(sql, waitingWithOrderRowMapper, id);
         return results.stream().findFirst();
     }
 
     @Override
     public List<ReservationWaitingWithOrder> findByMember(Member member) {
-        String sql = SELECT_BASE + " WHERE ow.waiting_name = ? ORDER BY ow.waiting_order ASC";
+        String sql = """
+                WITH my_waiting AS (
+                    SELECT id, reservation_id
+                    FROM reservation_waiting
+                    WHERE name = ?
+                ),
+                ordered_waiting AS (
+                    SELECT 
+                        rw.id as waiting_id,
+                        rw.name as waiting_name,
+                        rw.reservation_id,
+                        ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
+                    FROM reservation_waiting rw
+                    INNER JOIN my_waiting mw ON rw.reservation_id = mw.reservation_id
+                )
+                """
+                + SELECT_WAITING_WITH_ORDER
+                + """ 
+                INNER JOIN my_waiting mw ON ow.waiting_id = mw.id
+                ORDER BY r.date DESC, t.start_at ASC, ow.waiting_order ASC
+                """;
         return jdbcTemplate.query(sql, waitingWithOrderRowMapper, member.name());
     }
 }
