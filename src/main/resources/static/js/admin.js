@@ -84,6 +84,10 @@ function initTabs() {
 
             const panelId = button.dataset.panel;
             document.getElementById(panelId).classList.add("active");
+
+            if (panelId === "slot-panel") {
+                loadSlotSelectionData();
+            }
         });
     });
 }
@@ -555,4 +559,140 @@ function formatTime(value) {
     if (!value) return "";
     const parts = value.split(":");
     return `${parts[0]}:${parts[1]}:${parts[2] ?? "00"}`;
+}
+
+// 슬롯 관리용 선택 상태
+let slotSelectedDate = null;
+let slotSelectedTime = null;
+let slotSelectedTheme = null;
+
+async function loadSlotSelectionData() {
+    slotSelectedDate = null;
+    slotSelectedTime = null;
+    slotSelectedTheme = null;
+
+    await Promise.all([
+        loadSlotSelectableDates(),
+        loadSlotSelectableTimes(),
+        loadSlotSelectableThemes()
+    ]);
+}
+
+async function loadSlotSelectableDates() {
+    const response = await authFetch("/admin/dates");
+    if (!response || !response.ok) return;
+    const dates = await response.json();
+
+    const list = document.getElementById("slot-date-list");
+    list.innerHTML = "";
+
+    dates.forEach(date => {
+        const item = document.createElement("div");
+        item.className = `selectable-item ${date.isActive ? "" : "disabled"}`;
+        item.innerHTML = `
+            <div class="item-info">
+                <span class="item-title">${date.date}</span>
+                <span class="item-sub">ID: ${date.id}</span>
+            </div>
+            <span class="badge ${date.isActive ? "active" : "inactive"}">${date.isActive ? "활성" : "비활성"}</span>
+        `;
+
+        item.onclick = () => {
+            if (!date.isActive) return;
+            document.querySelectorAll("#slot-date-list .selectable-item").forEach(el => el.classList.remove("selected"));
+            item.classList.add("selected");
+            slotSelectedDate = date;
+        };
+
+        list.appendChild(item);
+    });
+}
+
+async function loadSlotSelectableTimes() {
+    const response = await authFetch("/admin/times");
+    if (!response || !response.ok) return;
+    const times = await response.json();
+
+    const list = document.getElementById("slot-time-list");
+    list.innerHTML = "";
+
+    times.forEach(time => {
+        const item = document.createElement("div");
+        item.className = `selectable-item ${time.isActive ? "" : "disabled"}`;
+        item.innerHTML = `
+            <div class="item-info">
+                <span class="item-title">${formatTime(time.startAt)}</span>
+                <span class="item-sub">ID: ${time.id}</span>
+            </div>
+            <span class="badge ${time.isActive ? "active" : "inactive"}">${time.isActive ? "활성" : "비활성"}</span>
+        `;
+
+        item.onclick = () => {
+            if (!time.isActive) return;
+            document.querySelectorAll("#slot-time-list .selectable-item").forEach(el => el.classList.remove("selected"));
+            item.classList.add("selected");
+            slotSelectedTime = time;
+        };
+
+        list.appendChild(item);
+    });
+}
+
+async function loadSlotSelectableThemes() {
+    const response = await authFetch("/admin/themes");
+    if (!response || !response.ok) return;
+    const themes = await response.json();
+
+    const list = document.getElementById("slot-theme-list");
+    list.innerHTML = "";
+
+    themes.forEach(theme => {
+        const item = document.createElement("div");
+        item.className = `selectable-item ${theme.isActive ? "" : "disabled"}`;
+        item.innerHTML = `
+            <div class="item-info">
+                <span class="item-title">${theme.name}</span>
+                <span class="item-sub">ID: ${theme.id}</span>
+            </div>
+            <span class="badge ${theme.isActive ? "active" : "inactive"}">${theme.isActive ? "활성" : "비활성"}</span>
+        `;
+
+        item.onclick = () => {
+            if (!theme.isActive) return;
+            document.querySelectorAll("#slot-theme-list .selectable-item").forEach(el => el.classList.remove("selected"));
+            item.classList.add("selected");
+            slotSelectedTheme = theme;
+        };
+
+        list.appendChild(item);
+    });
+}
+
+async function createSlot() {
+    if (!slotSelectedDate || !slotSelectedTime || !slotSelectedTheme) {
+        alert("날짜, 시간, 테마를 모두 선택해주세요.");
+        return;
+    }
+
+    const response = await authFetch("/admin/slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            dateId: slotSelectedDate.id,
+            timeId: slotSelectedTime.id,
+            themeId: slotSelectedTheme.id
+        })
+    });
+
+    if (!response || !response.ok) {
+        if (response) await handleResponseError(response, "슬롯 생성에 실패했습니다.");
+        return;
+    }
+
+    alert("슬롯이 성공적으로 생성되었습니다.");
+    // 선택 상태 초기화
+    document.querySelectorAll(".selectable-item").forEach(el => el.classList.remove("selected"));
+    slotSelectedDate = null;
+    slotSelectedTime = null;
+    slotSelectedTheme = null;
 }
