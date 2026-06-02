@@ -10,8 +10,7 @@ public record SlotDetailDto(
         LocalDate date,
         LocalTime startAt,
         String themeName,
-        String description,
-        String thumbnailUrl
+        String description
 ) {
 
     public static SlotDetailDto from(ReservationSlot slot) {
@@ -20,8 +19,7 @@ public record SlotDetailDto(
                 slot.getDate().getDate(),
                 slot.getTime().getStartAt(),
                 slot.getTheme().getName(),
-                slot.getTheme().getDescription(),
-                slot.getTheme().getThumbnailUrl()
+                slot.getTheme().getDescription()
         );
     }
 
