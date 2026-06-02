@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.WaitingErrorCode;
@@ -120,23 +119,6 @@ public class Waiting {
 
     public Long getWaitingNumber() {
         return waitingNumber;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Waiting that = (Waiting) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @Override

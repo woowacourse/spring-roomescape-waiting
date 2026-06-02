@@ -63,6 +63,7 @@ class JdbcReservationTimeRepositoryTest {
         // then
         assertThat(found)
                 .hasSize(2)
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(reservationTime1, reservationTime2);
     }
 

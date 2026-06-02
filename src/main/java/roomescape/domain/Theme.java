@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import java.util.Objects;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
 
@@ -82,23 +81,6 @@ public class Theme {
 
     public Long getRunningTime() {
         return runningTime;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @Override

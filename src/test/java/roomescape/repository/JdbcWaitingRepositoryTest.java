@@ -99,6 +99,7 @@ class JdbcWaitingRepositoryTest {
         // then
         assertThat(result)
                 .hasSize(2)
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(waiting1, waiting2);
     }
 

@@ -74,6 +74,7 @@ class JdbcThemeRepositoryTest {
         // then
         assertThat(foundThemes)
                 .hasSize(2)
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
                         savedHorror,
                         savedSuspect

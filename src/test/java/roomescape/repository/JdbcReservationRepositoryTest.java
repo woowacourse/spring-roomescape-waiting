@@ -93,6 +93,7 @@ class JdbcReservationRepositoryTest {
         // then
         assertThat(foundReservations)
                 .hasSize(2)
+                .usingRecursiveFieldByFieldElementComparator()
                 .containsExactlyInAnyOrder(
                         savedRudevicoReservation, savedCocoReservation
                 );
