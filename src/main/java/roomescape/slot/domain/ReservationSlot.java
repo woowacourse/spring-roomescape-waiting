@@ -72,5 +72,4 @@ public class ReservationSlot {
         return theme.getId();
     }
 
-
 }

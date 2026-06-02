@@ -140,9 +140,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 WHERE t.is_active = TRUE;
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource();
-
         return jdbcTemplate.query(sql, params, themeRowMapper);
-
     }
 
 }
