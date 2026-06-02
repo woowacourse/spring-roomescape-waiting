@@ -28,15 +28,6 @@ public class WaitingListService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<WaitingListResult> getWaitingListByName(final String name) {
-        final List<WaitingList> waitingLists = waitingListRepository.findByName(name);
-        return waitingLists.stream()
-                .map(waitingList -> WaitingListResult.from(
-                        waitingList, waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(waitingList)
-                        )
-                ).toList();
-    }
-
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         final ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
@@ -83,6 +74,15 @@ public class WaitingListService {
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
         }
+    }
+
+    public List<WaitingListResult> getWaitingListByName(final String name) {
+        final List<WaitingList> waitingLists = waitingListRepository.findByName(name);
+        return waitingLists.stream()
+                .map(waitingList -> WaitingListResult.from(
+                        waitingList, waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(waitingList)
+                        )
+                ).toList();
     }
 
     private static void validateFuture(final WaitingList waitingList) {

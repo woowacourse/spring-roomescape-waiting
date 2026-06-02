@@ -24,6 +24,21 @@ public class ReservationTimeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    public ReservationTime save(final ReservationTime newReservationTime) {
+        final long newTimeId = insertReservationTime(newReservationTime);
+
+        return newReservationTime.withId(newTimeId);
+    }
+
+    public boolean delete(final Long timeId) {
+        final String sql = """
+                DELETE FROM reservation_time
+                WHERE id = ?
+                """;
+
+        return jdbcTemplate.update(sql, timeId) > 0;
+    }
+
     public List<ReservationTime> findAll() {
         final String sql = """
                 SELECT id, start_at, end_at
@@ -55,22 +70,6 @@ public class ReservationTimeRepository {
             return Optional.empty();
         }
     }
-
-    public ReservationTime save(final ReservationTime newReservationTime) {
-        final long newTimeId = insertReservationTime(newReservationTime);
-
-        return newReservationTime.withId(newTimeId);
-    }
-
-    public boolean delete(final Long timeId) {
-        final String sql = """
-                DELETE FROM reservation_time
-                WHERE id = ?
-                """;
-
-        return jdbcTemplate.update(sql, timeId) > 0;
-    }
-
 
     private long insertReservationTime(final ReservationTime reservationTime) {
         final String sql = """

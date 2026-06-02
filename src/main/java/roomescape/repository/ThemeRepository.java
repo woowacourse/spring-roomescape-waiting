@@ -24,6 +24,21 @@ public class ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    public Theme save(final Theme themeWithoutId) {
+        final long themeId = insertTheme(themeWithoutId);
+
+        return themeWithoutId.withId(themeId);
+    }
+
+    public boolean deleteById(final Long themeId) {
+        final String sql = """
+                DELETE FROM theme
+                WHERE id = ?
+                """;
+
+        return jdbcTemplate.update(sql, themeId) > 0;
+    }
+
     public List<Theme> findAll() {
         final String sql = """
                 SELECT id, name, description, thumbnail_url
@@ -51,21 +66,6 @@ public class ThemeRepository {
         } catch (final EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-    }
-
-    public Theme save(final Theme themeWithoutId) {
-        final long themeId = insertTheme(themeWithoutId);
-
-        return themeWithoutId.withId(themeId);
-    }
-
-    public boolean deleteById(final Long themeId) {
-        final String sql = """
-                DELETE FROM theme
-                WHERE id = ?
-                """;
-
-        return jdbcTemplate.update(sql, themeId) > 0;
     }
 
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate today) {

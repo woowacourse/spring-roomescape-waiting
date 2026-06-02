@@ -61,15 +61,6 @@ public class ReservationController {
                 .body(result);
     }
 
-    @DeleteMapping("/{reservation-id}")
-    public ResponseEntity<Void> deleteByName(
-            @PathVariable("reservation-id") final Long reservationId,
-            @RequestParam("name") final String name
-    ) {
-        reservationService.deleteWithValidation(reservationId, name);
-        return ResponseEntity.noContent().build();
-    }
-
     @PatchMapping("/{reservation-id}")
     public ResponseEntity<ReservationResult> modify(
             @PathVariable("reservation-id") final Long reservationId,
@@ -83,5 +74,14 @@ public class ReservationController {
         );
         final ReservationResult result = reservationService.modify(reservationModifyCommand);
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{reservation-id}")
+    public ResponseEntity<Void> deleteByName(
+            @PathVariable("reservation-id") final Long reservationId,
+            @RequestParam("name") final String name
+    ) {
+        reservationService.deleteWithValidation(reservationId, name);
+        return ResponseEntity.noContent().build();
     }
 }

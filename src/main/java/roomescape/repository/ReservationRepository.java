@@ -28,6 +28,36 @@ public class ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    public Reservation save(final Reservation newReservation) {
+        final long newReservationId = insertReservation(newReservation);
+
+        return newReservation.withId(newReservationId);
+    }
+
+    public void updateDateAndTime(final Reservation reservation) {
+        final String sql = """
+                UPDATE reservation
+                SET date = ?, time_id = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(
+                sql,
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getId()
+        );
+    }
+
+    public boolean deleteById(final Long reservationId) {
+        final String sql = """
+                DELETE FROM reservation
+                WHERE id = ?
+                """;
+
+        return jdbcTemplate.update(sql, reservationId) > 0;
+    }
+
     public List<Reservation> findAll() {
         final String sql = """
                 SELECT
@@ -171,12 +201,6 @@ public class ReservationRepository {
                 .toList();
     }
 
-    public Reservation save(final Reservation newReservation) {
-        final long newReservationId = insertReservation(newReservation);
-
-        return newReservation.withId(newReservationId);
-    }
-
     private long insertReservation(final Reservation reservation) {
         final String sql = """
                 INSERT INTO reservation (name, date, time_id, theme_id)
@@ -210,30 +234,6 @@ public class ReservationRepository {
         }
 
         return generatedKey.longValue();
-    }
-
-    public void updateDateAndTime(final Reservation reservation) {
-        final String sql = """
-                UPDATE reservation
-                SET date = ?, time_id = ?
-                WHERE id = ?
-                """;
-
-        jdbcTemplate.update(
-                sql,
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getId()
-        );
-    }
-
-    public boolean deleteById(final Long reservationId) {
-        final String sql = """
-                DELETE FROM reservation
-                WHERE id = ?
-                """;
-
-        return jdbcTemplate.update(sql, reservationId) > 0;
     }
 
     /**

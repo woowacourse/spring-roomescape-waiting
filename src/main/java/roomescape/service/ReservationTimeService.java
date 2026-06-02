@@ -19,13 +19,6 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<ReservationTimeResult> getTimes() {
-        return reservationTimeRepository.findAll()
-                .stream()
-                .map(ReservationTimeResult::from)
-                .toList();
-    }
-
     public ReservationTimeResult create(final ReservationTimeCreateCommand data) {
         final ReservationTime reservationTime = ReservationTime.create(
                 data.startAt(),
@@ -48,5 +41,12 @@ public class ReservationTimeService {
         if (!deleted) {
             throw new BusinessException(ErrorCode.TIME_NOT_FOUND);
         }
+    }
+
+    public List<ReservationTimeResult> getTimes() {
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTimeResult::from)
+                .toList();
     }
 }

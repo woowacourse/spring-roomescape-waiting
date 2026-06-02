@@ -30,24 +30,6 @@ public class ReservationService {
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
-    public List<ReservationResult> getReservations() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResult::from)
-                .toList();
-    }
-
-    public List<ReservationTimeStatusResult> getReservationTimeStatuses(final LocalDate date, final Long themeId) {
-        return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId)
-                .stream()
-                .map(reservationTimesWithStatus -> new ReservationTimeStatusResult(
-                        reservationTimesWithStatus.id(),
-                        reservationTimesWithStatus.startAt(),
-                        reservationTimesWithStatus.reserved()
-                ))
-                .toList();
-    }
-
     public ReservationResult create(final ReservationCreateCommand data) {
         final LocalDate date = data.date();
         validateFutureOrPresentDate(date);
@@ -63,38 +45,6 @@ public class ReservationService {
 
         final Reservation savedReservation = reservationRepository.save(newReservation);
         return ReservationResult.from(savedReservation);
-    }
-
-    public void delete(final Long reservationId) {
-        final boolean deleted = reservationRepository.deleteById(reservationId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
-    }
-
-    public void deleteWithValidation(final Long reservationId, final String name) {
-        final Reservation reservation = getReservation(reservationId);
-        validateReservationOwner(reservation, name);
-        final LocalDate date = reservation.getDate();
-        validateFutureOrPresentDate(date);
-        final ReservationTime reservationTime = reservation.getTime();
-        validateFutureOrPresentTime(date, reservationTime);
-        delete(reservationId);
-    }
-
-    public AvailableDateResult getReservationOptions() {
-        final LocalDate today = LocalDate.now();
-        final List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
-
-        return new AvailableDateResult(dates);
-    }
-
-    public List<ReservationResult> getReservationsByName(final String name) {
-        final List<Reservation> reservations = reservationRepository.findByName(name);
-        return reservations.stream()
-                .map(ReservationResult::from)
-                .toList();
     }
 
     public ReservationResult modify(final ReservationModifyCommand reservationModifyCommand) {
@@ -125,6 +75,56 @@ public class ReservationService {
 
         reservationRepository.updateDateAndTime(modifiedReservation);
         return ReservationResult.from(modifiedReservation);
+    }
+
+    public void delete(final Long reservationId) {
+        final boolean deleted = reservationRepository.deleteById(reservationId);
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        }
+    }
+
+    public void deleteWithValidation(final Long reservationId, final String name) {
+        final Reservation reservation = getReservation(reservationId);
+        validateReservationOwner(reservation, name);
+        final LocalDate date = reservation.getDate();
+        validateFutureOrPresentDate(date);
+        final ReservationTime reservationTime = reservation.getTime();
+        validateFutureOrPresentTime(date, reservationTime);
+        delete(reservationId);
+    }
+
+    public List<ReservationResult> getReservations() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(ReservationResult::from)
+                .toList();
+    }
+
+    public List<ReservationTimeStatusResult> getReservationTimeStatuses(final LocalDate date, final Long themeId) {
+        return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId)
+                .stream()
+                .map(reservationTimesWithStatus -> new ReservationTimeStatusResult(
+                        reservationTimesWithStatus.id(),
+                        reservationTimesWithStatus.startAt(),
+                        reservationTimesWithStatus.reserved()
+                ))
+                .toList();
+    }
+
+    public AvailableDateResult getReservationOptions() {
+        final LocalDate today = LocalDate.now();
+        final List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
+
+        return new AvailableDateResult(dates);
+    }
+
+    public List<ReservationResult> getReservationsByName(final String name) {
+        final List<Reservation> reservations = reservationRepository.findByName(name);
+        return reservations.stream()
+                .map(ReservationResult::from)
+                .toList();
     }
 
     private Reservation getReservation(final Long reservationId) {

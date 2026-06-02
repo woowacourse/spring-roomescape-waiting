@@ -28,6 +28,20 @@ public class WaitingListRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    public WaitingList save(final WaitingList waitingListWithoutId) {
+        final long waitingListId = insertWaitingList(waitingListWithoutId);
+
+        return waitingListWithoutId.withId(waitingListId);
+    }
+
+    public boolean deleteById(Long id) {
+        final String sql = """
+                DELETE FROM waiting_list
+                WHERE id = ?
+                """;
+        return jdbcTemplate.update(sql, id) > 0;
+    }
+
     public Optional<WaitingList> findById(final Long id) {
         final String sql = """
                 SELECT
@@ -114,12 +128,6 @@ public class WaitingListRepository {
         return count != null && count > 0;
     }
 
-    public WaitingList save(final WaitingList waitingListWithoutId) {
-        final long waitingListId = insertWaitingList(waitingListWithoutId);
-
-        return waitingListWithoutId.withId(waitingListId);
-    }
-
     private long insertWaitingList(final WaitingList waitingList) {
         final String sql = """
                 INSERT INTO waiting_list (name, date, time_id, theme_id, created_at)
@@ -156,14 +164,6 @@ public class WaitingListRepository {
         return generatedKey.longValue();
     }
 
-    public boolean deleteById(Long id) {
-        final String sql = """
-                DELETE FROM waiting_list
-                WHERE id = ?
-                """;
-        return jdbcTemplate.update(sql, id) > 0;
-    }
-
     /**
      * ResultSet - Domain 매핑 메서드
      */
@@ -178,7 +178,7 @@ public class WaitingListRepository {
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail_url")
+                resultSet.getString("thumbnail_url")
         );
 
         return WaitingList.createWithId(
