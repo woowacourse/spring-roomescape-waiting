@@ -9,28 +9,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final LoginCheckInterceptor loginCheckInterceptor;
-    private final AdminAuthorizationInterceptor adminAuthorizationInterceptor;
+    private final AuthInterceptor authInterceptor;
     private final LoginUserArgumentResolver loginUserArgumentResolver;
 
     public WebConfig(
-            LoginCheckInterceptor loginCheckInterceptor,
-            AdminAuthorizationInterceptor adminAuthorizationInterceptor,
+            AuthInterceptor authInterceptor,
             LoginUserArgumentResolver loginUserArgumentResolver
     ) {
-        this.loginCheckInterceptor = loginCheckInterceptor;
-        this.adminAuthorizationInterceptor = adminAuthorizationInterceptor;
+        this.authInterceptor = authInterceptor;
         this.loginUserArgumentResolver = loginUserArgumentResolver;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginCheckInterceptor)
-                .addPathPatterns("/reservations", "/reservations/**");
-        registry.addInterceptor(adminAuthorizationInterceptor)
-                .addPathPatterns("/admin/reservations", "/admin/reservations/**",
-                        "/admin/themes", "/admin/themes/**",
-                        "/admin/times", "/admin/times/**");
+        registry.addInterceptor(authInterceptor);
     }
 
     @Override

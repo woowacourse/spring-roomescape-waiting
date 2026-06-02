@@ -25,6 +25,6 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
             WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        return request.getAttribute(LoginCheckInterceptor.LOGIN_USER_ID);
+        return request.getAttribute(AuthContext.LOGIN_USER_ID);
     }
 }

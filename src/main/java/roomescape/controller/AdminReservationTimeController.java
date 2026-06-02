@@ -13,10 +13,12 @@ import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
 import roomescape.dto.reservationtime.request.CreateReservationTimeRequest;
 import roomescape.dto.reservationtime.response.ReservationTimeResponse;
+import roomescape.infrastructure.AdminOnly;
 import roomescape.service.ReservationTimeService;
 
 @RestController
 @RequestMapping("/admin/times")
+@AdminOnly
 public class AdminReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;

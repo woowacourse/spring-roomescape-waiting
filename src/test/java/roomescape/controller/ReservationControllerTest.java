@@ -37,16 +37,14 @@ import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.fixture.Fixtures;
-import roomescape.infrastructure.AdminAuthorizationInterceptor;
-import roomescape.infrastructure.LoginCheckInterceptor;
+import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(controllers = ReservationController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
-                classes = {WebConfig.class, LoginCheckInterceptor.class,
-                        AdminAuthorizationInterceptor.class, LoginUserArgumentResolver.class}))
+                classes = {WebConfig.class, AuthInterceptor.class, LoginUserArgumentResolver.class}))
 @Import(LoginUserIdTestResolverConfig.class)
 class ReservationControllerTest {
 

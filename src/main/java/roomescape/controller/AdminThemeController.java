@@ -13,10 +13,12 @@ import roomescape.domain.Theme;
 import roomescape.dto.theme.command.CreateThemeCommand;
 import roomescape.dto.theme.request.CreateThemeRequest;
 import roomescape.dto.theme.response.ThemeResponse;
+import roomescape.infrastructure.AdminOnly;
 import roomescape.service.ThemeService;
 
 @RestController
 @RequestMapping("/admin/themes")
+@AdminOnly
 public class AdminThemeController {
 
     private final ThemeService themeService;

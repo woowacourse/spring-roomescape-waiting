@@ -20,11 +20,13 @@ import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
 import roomescape.dto.reservation.request.UpdateReservationRequest;
 import roomescape.dto.reservation.response.WaitingReservationResponse;
+import roomescape.infrastructure.LoginRequired;
 import roomescape.infrastructure.LoginUserId;
 import roomescape.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
+@LoginRequired
 public class ReservationController {
 
     private final ReservationService reservationService;

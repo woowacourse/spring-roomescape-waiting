@@ -18,16 +18,14 @@ import roomescape.domain.PopularTheme;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.response.ThemeReservationTimeResponse;
 import roomescape.dto.theme.response.ThemeResponses;
-import roomescape.infrastructure.AdminAuthorizationInterceptor;
-import roomescape.infrastructure.LoginCheckInterceptor;
+import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
 import roomescape.service.ThemeService;
 
 @WebMvcTest(controllers = ThemeController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
-                classes = {WebConfig.class, LoginCheckInterceptor.class,
-                        AdminAuthorizationInterceptor.class, LoginUserArgumentResolver.class}))
+                classes = {WebConfig.class, AuthInterceptor.class, LoginUserArgumentResolver.class}))
 class ThemeControllerTest {
 
     @Autowired

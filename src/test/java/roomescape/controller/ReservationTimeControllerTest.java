@@ -16,16 +16,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.response.ReservationTimeResponses;
-import roomescape.infrastructure.AdminAuthorizationInterceptor;
-import roomescape.infrastructure.LoginCheckInterceptor;
+import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
 import roomescape.service.ReservationTimeService;
 
 @WebMvcTest(controllers = ReservationTimeController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
-                classes = {WebConfig.class, LoginCheckInterceptor.class,
-                        AdminAuthorizationInterceptor.class, LoginUserArgumentResolver.class}))
+                classes = {WebConfig.class, AuthInterceptor.class, LoginUserArgumentResolver.class}))
 class ReservationTimeControllerTest {
 
     @Autowired
