@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -44,17 +43,12 @@ public class JdbcThemeRepository implements ThemeRepository {
     public Optional<Theme> findById(Long id) {
         String sql = "SELECT * FROM `theme` WHERE `id` = (?)";
 
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, (resultSet, rowNumber) -> {
-                        String name = resultSet.getString("name");
-                        String description = resultSet.getString("description");
-                        String thumbnailUrl = resultSet.getString("thumbnail_url");
-                        return new Theme(id, name, description, thumbnailUrl);
-                    }, id));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, (resultSet, rowNumber) -> {
+            String name = resultSet.getString("name");
+            String description = resultSet.getString("description");
+            String thumbnailUrl = resultSet.getString("thumbnail_url");
+            return new Theme(id, name, description, thumbnailUrl);
+        }, id).stream().findAny();
     }
 
     @Override

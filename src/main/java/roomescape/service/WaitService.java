@@ -2,14 +2,14 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.WaitRepository;
 
-@Component
+@Service
 @Transactional(readOnly = true)
 public class WaitService {
 
@@ -49,6 +49,7 @@ public class WaitService {
         return waitRepository.findAll();
     }
 
+    @Transactional
     public void delete(Long id) {
         waitRepository.delete(id);
     }

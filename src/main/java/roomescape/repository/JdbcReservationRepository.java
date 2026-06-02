@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -55,12 +54,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         + "INNER JOIN `theme` th ON r.theme_id = th.id "
                         + "WHERE r.id = (?)";
 
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, reservationRowMapper(), id));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, reservationRowMapper(), id).stream().findFirst();
     }
 
     @Override
@@ -72,12 +66,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         + "INNER JOIN `theme` th ON r.theme_id = th.id "
                         + "WHERE r.date = (?) AND r.time_id = (?) AND r.theme_id = (?)";
 
-        try {
-            return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, reservationRowMapper(), date, timeId, themeId));
-        } catch (EmptyResultDataAccessException exception) {
-            return Optional.empty();
-        }
+        return jdbcTemplate.query(sql, reservationRowMapper(), date, timeId, themeId).stream().findFirst();
     }
 
     @Override
