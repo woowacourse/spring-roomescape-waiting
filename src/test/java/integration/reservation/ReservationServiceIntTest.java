@@ -65,7 +65,7 @@ class ReservationServiceIntTest extends BaseIntegrationTest {
     @Test
     void 예약_취소_시_대기자를_예약으로_승격한다() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = LocalDate.now().plusDays(2);
         ReservationSlotResult reservation = reservationService.reserve(new ReservationCommand("이프", date, 1L, 1L));
         reservationService.addWaiting(new ReservationCommand("라텔", date, 1L, 1L));
 

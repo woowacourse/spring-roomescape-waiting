@@ -109,14 +109,24 @@ public class ReservationSlot {
     }
 
     public void cancelReservation(long reservationId) {
-        Reservation reservation = reservations.findById(reservationId)
-                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+        reservations.findById(reservationId)
+                .ifPresent(reservation -> {
+                    validateCancelable();
+                    boolean wasReserved = reservation.isReserved();
+                    reservation.cancel();
+                    promoteFirstWaiting(wasReserved);
+                });
+    }
 
-        boolean wasReserved = reservation.isReserved();
-        reservation.cancel();
-
+    private void promoteFirstWaiting(boolean wasReserved) {
         if (wasReserved) {
             reservations.promoteFirstWaiting();
+        }
+    }
+
+    private void validateCancelable() {
+        if (!date.isAfter(LocalDate.now().plusDays(1))) {
+            throw new RoomEscapeException("예약 하루 전에는 취소할 수 없습니다.");
         }
     }
 }

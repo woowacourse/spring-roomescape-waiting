@@ -54,7 +54,7 @@ public class ReservationFixture {
     }
 
     public static ReservationSlot createDefaultReservationWithName(String name) {
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = LocalDate.now().plusDays(2);
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
         ReservationSlot slot = ReservationSlot.createSlot(date, theme, time);

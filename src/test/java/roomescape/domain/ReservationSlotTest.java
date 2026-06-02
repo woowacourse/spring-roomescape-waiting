@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
@@ -197,16 +198,36 @@ class ReservationSlotTest {
     }
 
     @Test
-    void 존재하지_않는_엔트리를_취소하면_예외가_발생한다() {
+    void 예약_하루_전에는_예약을_취소할_수_없다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                1L,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(reservation(1L, "이프", ReservationStatus.RESERVED))
+        );
+
+        // when & then
+        assertThatThrownBy(() -> slot.cancelReservation(1L))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("예약 하루 전에는 취소할 수 없습니다.");
+    }
+
+    @Test
+    void 존재하지_않는_엔트리를_취소하면_아무_일도_일어나지_않는다() {
         // given
         ReservationSlot slot = createReservationWithReservations(List.of(
                 reservation(1L, "이프", ReservationStatus.RESERVED)
         ));
 
         // when & then
-        assertThatThrownBy(() -> slot.cancelReservation(999L))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("예약 정보를 찾을 수 없습니다.");
+        assertThatCode(() -> slot.cancelReservation(999L))
+                .doesNotThrowAnyException();
+        assertThat(slot.getReservations())
+                .singleElement()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.RESERVED);
     }
 
     @Test
@@ -236,7 +257,7 @@ class ReservationSlotTest {
     }
 
     private ReservationSlot createReservationWithReservations(List<Reservation> reservations) {
-        return new ReservationSlot(1L, LocalDate.now().plusDays(1), theme, reservationTime, reservations);
+        return new ReservationSlot(1L, LocalDate.now().plusDays(2), theme, reservationTime, reservations);
     }
 
     private Reservation reservation(long id, String name, ReservationStatus status) {
