@@ -2,8 +2,9 @@ package roomescape.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 public record ReservationModifyCommand(
         @NotNull(message = "RESERVATION_ID_NULL")

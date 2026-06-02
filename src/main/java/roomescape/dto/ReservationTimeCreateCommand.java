@@ -1,8 +1,9 @@
 package roomescape.dto;
 
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalTime;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalTime;
 
 public record ReservationTimeCreateCommand(
         @DateTimeFormat(pattern = "hh:mm")

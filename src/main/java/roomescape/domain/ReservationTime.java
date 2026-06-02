@@ -1,11 +1,10 @@
 package roomescape.domain;
 
 import lombok.Getter;
-
-import java.time.LocalTime;
-
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+
+import java.time.LocalTime;
 
 @Getter
 public class ReservationTime {
