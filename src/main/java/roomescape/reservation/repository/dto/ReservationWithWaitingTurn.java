@@ -14,7 +14,7 @@ public record ReservationWithWaitingTurn(
     String themeName,
     String themeThumbnailUrl,
     ReservationStatus status,
-    LocalDateTime reservedAt,
+    LocalDateTime requestedAt,
     Long waitingTurn
 ) {
 

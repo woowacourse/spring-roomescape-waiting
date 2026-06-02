@@ -45,13 +45,13 @@ CREATE TABLE IF NOT EXISTS reservation_slot
 
 CREATE TABLE IF NOT EXISTS reservation
 (
-    id          BIGINT                                   NOT NULL AUTO_INCREMENT,
-    name        VARCHAR(255)                             NOT NULL,
-    date_id     BIGINT                                   NOT NULL,
-    time_id     BIGINT                                   NOT NULL,
-    theme_id    BIGINT                                   NOT NULL,
-    reserved_at TIMESTAMP                                NOT NULL,
-    status      ENUM ('RESERVED', 'WAITING', 'CANCELED') NOT NULL,
+    id           BIGINT                                   NOT NULL AUTO_INCREMENT,
+    name         VARCHAR(255)                             NOT NULL,
+    date_id      BIGINT                                   NOT NULL,
+    time_id      BIGINT                                   NOT NULL,
+    theme_id     BIGINT                                   NOT NULL,
+    requested_at TIMESTAMP                                NOT NULL,
+    status       ENUM ('RESERVED', 'WAITING', 'CANCELED') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (date_id) REFERENCES reservation_date (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

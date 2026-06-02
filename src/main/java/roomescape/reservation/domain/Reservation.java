@@ -32,30 +32,30 @@ public class Reservation {
     private ReservationTime time;
     private Theme theme;
     private ReservationStatus status;
-    private LocalDateTime reservedAt;
+    private LocalDateTime requestedAt;
 
     public static Reservation create(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
+        ReservationTime time, Theme theme, LocalDateTime requestedAt) {
+        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, requestedAt);
     }
 
     public static Reservation wait(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
-        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, reservedAt);
+        ReservationTime time, Theme theme, LocalDateTime requestedAt) {
+        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, requestedAt);
     }
 
     private static Reservation of(String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime requestedAt) {
         validate(name, reservationDate, time, theme);
         validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
+        return new Reservation(null, name, reservationDate, time, theme, status, requestedAt);
     }
 
     public static Reservation load(Long id, String name, ReservationDate reservationDate,
-        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime requestedAt) {
         validate(name, reservationDate, time, theme);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status, reservedAt);
+        return new Reservation(id, name, reservationDate, time, theme, status, requestedAt);
     }
 
     public void cancel(String requesterName) {
@@ -141,8 +141,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public void changeReservedAt(LocalDateTime now) {
-        this.reservedAt = now;
+    public void changeRequestedAt(LocalDateTime now) {
+        this.requestedAt = now;
     }
 
     private void validateOwner(String requesterName) {

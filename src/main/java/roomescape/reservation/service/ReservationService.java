@@ -101,7 +101,7 @@ public class ReservationService {
         lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
         decideStatus(command, reservation);
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
-        reservation.changeReservedAt(LocalDateTime.now());
+        reservation.changeRequestedAt(LocalDateTime.now());
         reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }
@@ -117,7 +117,7 @@ public class ReservationService {
 
         lockSlot(command.dateId(), command.timeId(), reservation.getTheme().getId());
         decideStatus(command, reservation);
-        reservation.changeReservedAt(LocalDateTime.now());
+        reservation.changeRequestedAt(LocalDateTime.now());
         reservationRepository.updateScheduleAndStatus(reservation);
         return reservation;
     }

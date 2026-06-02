@@ -399,7 +399,7 @@ class ReservationServiceTest {
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getReservedAt())
+            assertThat(actual.getRequestedAt())
                 .isAfterOrEqualTo(beforeChange)
                 .isBeforeOrEqualTo(afterChange);
         }
@@ -425,7 +425,7 @@ class ReservationServiceTest {
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getReservedAt())
+            assertThat(actual.getRequestedAt())
                 .isAfterOrEqualTo(beforeChange)
                 .isBeforeOrEqualTo(afterChange);
         }
@@ -542,7 +542,7 @@ class ReservationServiceTest {
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-            assertThat(actual.getReservedAt())
+            assertThat(actual.getRequestedAt())
                 .isAfterOrEqualTo(beforeChange)
                 .isBeforeOrEqualTo(afterChange);
         }
@@ -567,7 +567,7 @@ class ReservationServiceTest {
             assertThat(actual.getDate()).isEqualTo(reservationDate2);
             assertThat(actual.getTime()).isEqualTo(reservationTime2);
             assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(actual.getReservedAt())
+            assertThat(actual.getRequestedAt())
                 .isAfterOrEqualTo(beforeChange)
                 .isBeforeOrEqualTo(afterChange);
         }
