@@ -4,6 +4,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +30,7 @@ import roomescape.time.application.dto.ReservationTimeCommand;
 import roomescape.time.application.dto.ReservationTimeInfo;
 import roomescape.time.domain.ReservationTime;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.datasource.hikari.maximum-pool-size=30"})
 class ReservationFacadeTest {
 
     @Autowired
@@ -183,6 +186,51 @@ class ReservationFacadeTest {
         Assertions.assertThat(lisaReservations.get(0).status()).isEqualTo(Status.ACTIVE);
     }
 
+    @Test
+    @DisplayName("10명의 사용자가 동시에 같은 예약을 시도하면 1명만 확정(ACTIVE)되고 9명은 대기(PENDING) 상태가 된다.")
+    void concurrentAddReservationTest() throws InterruptedException {
+        int threadCount = 20;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            final String username = "사용자" + i;
+            executorService.submit(() -> {
+                try {
+                    readyLatch.countDown();
+                    startLatch.await();
+                    ReservationCreateCommand command = createCommand(username, time.getId());
+                    facade.addReservation(command);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    System.out.println(username + " 예약 실패: " + e.getMessage());
+                } finally {
+                    doneLatch.countDown();
+                }
+            });
+        }
+        readyLatch.await();
+        startLatch.countDown();
+        doneLatch.await();
+
+        List<ReservationInfo> allReservations = facade.getReservations();
+
+        long activeCount = allReservations.stream()
+                .filter(res -> res.status() == Status.ACTIVE)
+                .count();
+        long pendingCount = allReservations.stream()
+                .filter(res -> res.status() == Status.PENDING)
+                .count();
+
+        Assertions.assertThat(allReservations).hasSize(threadCount);
+        Assertions.assertThat(activeCount).isEqualTo(1);
+        Assertions.assertThat(pendingCount).isEqualTo(threadCount - 1);
+    }
+
     private ReservationCreateCommand createCommand(String name, Long timeId) {
         return ReservationCreateCommand.builder()
                 .name(name)
@@ -195,7 +243,7 @@ class ReservationFacadeTest {
     private ReservationTime createNewTime() {
         ReservationTimeInfo info = reservationTimeService.addReservationTime(
                 ReservationTimeCommand.builder()
-                        .startAt(LocalTime.now(clock).plusHours(1)) // 기존 시간과 다르게 +1시간
+                        .startAt(LocalTime.now(clock).plusHours(1))
                         .build()
         );
         return ReservationTime.builder()
