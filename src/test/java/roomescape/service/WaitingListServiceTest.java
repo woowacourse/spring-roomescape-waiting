@@ -337,6 +337,7 @@ class WaitingListServiceTest {
         WaitingList waitingList = WaitingList.createWithId(1L, name, LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now().minusDays(1));
 
         given(waitingListRepository.findByName(name)).willReturn(List.of(waitingList));
+        given(waitingListRepository.findWaitingOrderByDateAndTimeAndTheme(waitingList)).willReturn(2);
 
         // when
         List<WaitingListResult> responses = waitingListService.getWaitingListByName(name);
@@ -345,5 +346,6 @@ class WaitingListServiceTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().name()).isEqualTo(name);
         assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.WAITING_LIST);
+        assertThat(responses.getFirst().waitingOrder()).isEqualTo(2);
     }
 }
