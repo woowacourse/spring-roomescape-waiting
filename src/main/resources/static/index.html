@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- ─── Login view ────────────────────────────── -->
+<main id="loginView" class="page login-wrap hidden">
+    <div class="login-card card">
+        <div class="card-header">
+            <h1 class="card-title">방탈출 예약</h1>
+            <p class="card-subtitle">로그인 후 예약을 진행하거나 매장을 관리하세요.</p>
+        </div>
+        <div class="field">
+            <label class="field-label" for="loginEmail">이메일</label>
+            <input id="loginEmail" type="email" placeholder="brown@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+            <label class="field-label" for="loginPassword">비밀번호</label>
+            <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password">
+        </div>
+        <div class="button-row">
+            <button id="loginButton" class="btn btn-primary" type="button" style="width: 100%;">로그인</button>
+        </div>
+        <p class="field-hint" style="margin-top: 16px;">
+            테스트 계정 예시: brown@email.com / manager-gangnam@email.com (모두 password)
+        </p>
+    </div>
+</main>
+
+<!-- ─── User view ─────────────────────────────── -->
+<main id="userView" class="page hidden">
+    <header class="topbar">
+        <div class="brand">
+            <h1 class="brand-title">방탈출 예약</h1>
+            <p class="brand-subtitle">원하는 매장과 테마, 시간을 선택해 예약하세요.</p>
+        </div>
+        <div class="user-chip">
+            <span class="badge user">사용자</span>
+            <strong id="userName">-</strong>
+            <button id="userLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
+        </div>
+    </header>
+
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">최근 인기 테마</h2>
+            <p class="card-subtitle">지난 7일간 예약이 많았던 테마입니다.</p>
+        </div>
+        <div id="popularRow" class="popular-row">
+            <div class="skeleton" style="min-width: 180px;"></div>
+            <div class="skeleton" style="min-width: 180px;"></div>
+            <div class="skeleton" style="min-width: 180px;"></div>
+        </div>
+        <p id="popularEmpty" class="empty hidden">최근 인기 테마가 없습니다.</p>
+    </section>
+
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">예약하기</h2>
+            <p class="card-subtitle">매장 → 테마 → 날짜 → 시간 순으로 선택합니다.</p>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="userStoreSelect">매장</label>
+            <select id="userStoreSelect">
+                <option value="">매장을 선택하세요</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <span class="field-label">테마</span>
+            <div id="userThemeGrid" class="theme-grid">
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+            </div>
+            <p id="userThemeEmpty" class="empty hidden">등록된 테마가 없습니다.</p>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="userReservationDate">날짜</label>
+            <input id="userReservationDate" type="date">
+        </div>
+
+        <div class="field">
+            <span class="field-label">시간</span>
+            <p id="userTimeHint" class="field-hint">매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.</p>
+            <div id="userTimeGrid" class="time-grid"></div>
+        </div>
+
+        <div class="button-row">
+            <button id="userReserveButton" class="btn btn-primary" type="button" disabled>예약하기</button>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">내 예약 / 대기</h2>
+            <p class="card-subtitle">내가 만든 예약과 신청한 대기를 함께 확인합니다.</p>
+        </div>
+        <div class="button-row" style="margin-bottom: 16px;">
+            <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">새로 고침</button>
+        </div>
+
+        <div class="tab-bar" role="tablist">
+            <button id="tabReservations" class="tab-btn active" type="button" role="tab" data-tab="reservations">
+                예약 <span id="reservationsCount" class="tab-count">0</span>
+            </button>
+            <button id="tabWaitings" class="tab-btn" type="button" role="tab" data-tab="waitings">
+                대기 <span id="waitingsCount" class="tab-count">0</span>
+            </button>
+        </div>
+
+        <div id="reservationsPane" class="tab-pane" role="tabpanel">
+            <div id="myReservationsList" class="reservation-list"></div>
+            <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
+        </div>
+
+        <div id="waitingsPane" class="tab-pane hidden" role="tabpanel">
+            <div id="myWaitingsList" class="reservation-list"></div>
+            <p id="myWaitingsEmpty" class="empty">대기 목록을 불러와 주세요.</p>
+        </div>
+    </section>
+</main>
+
+<!-- ─── Manager view ─────────────────────────── -->
+<main id="managerView" class="page hidden">
+    <header class="topbar">
+        <div class="brand">
+            <h1 class="brand-title">매장 관리</h1>
+            <p class="brand-subtitle"><span id="managerStoreName">-</span>의 예약을 관리합니다.</p>
+        </div>
+        <div class="user-chip">
+            <span class="badge">매니저</span>
+            <strong id="managerName">-</strong>
+            <button id="managerLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
+        </div>
+    </header>
+
+    <section class="card">
+        <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+                <h2 class="card-title">예약 목록</h2>
+                <p class="card-subtitle">자기 매장의 모든 예약입니다.</p>
+            </div>
+            <button id="refreshManagerButton" class="btn btn-sm btn-secondary" type="button">새로고침</button>
+        </div>
+        <div class="table-wrap">
+            <table class="reservation-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>테마</th>
+                    <th style="text-align: right;">관리</th>
+                </tr>
+                </thead>
+                <tbody id="managerTableBody"></tbody>
+            </table>
+        </div>
+        <p id="managerEmpty" class="empty hidden">이 매장에 예약이 없습니다.</p>
+    </section>
+</main>
+
+<!-- ─── Edit modal ───────────────────────────── -->
+<div id="editModalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 class="modal-title">예약 변경</h3>
+        <div class="field">
+            <span class="field-label">예약 ID</span>
+            <div id="editModalReservationId" class="modal-readonly">-</div>
+        </div>
+        <div class="field">
+            <label class="field-label" for="editModalDate">날짜</label>
+            <input id="editModalDate" type="date">
+        </div>
+        <div class="field">
+            <label class="field-label" for="editModalTimeSelect">시간</label>
+            <select id="editModalTimeSelect">
+                <option value="">시간을 선택하세요</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button id="editModalCancelButton" class="btn btn-secondary" type="button">취소</button>
+            <button id="editModalSubmitButton" class="btn btn-primary" type="button">변경하기</button>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Wait success modal ───────────────────── -->
+<div id="waitSuccessModalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="wait-modal-header">
+            <div class="wait-order-badge" id="waitOrderBadge">1</div>
+            <h3 class="wait-modal-title">대기 신청이 완료되었습니다</h3>
+            <p class="wait-modal-subtitle">순서가 되면 예약이 자동으로 확정됩니다.</p>
+        </div>
+        <div class="wait-info-grid">
+            <div class="wait-info-item">
+                <span class="wait-info-label">대기 순번</span>
+                <span id="waitInfoOrder" class="wait-info-value">-</span>
+            </div>
+            <div class="wait-info-item">
+                <span class="wait-info-label">테마</span>
+                <span id="waitInfoTheme" class="wait-info-value">-</span>
+            </div>
+            <div class="wait-info-item">
+                <span class="wait-info-label">예약 날짜</span>
+                <span id="waitInfoDate" class="wait-info-value">-</span>
+            </div>
+            <div class="wait-info-item">
+                <span class="wait-info-label">예약 시간</span>
+                <span id="waitInfoTime" class="wait-info-value">-</span>
+            </div>
+        </div>
+        <div class="modal-actions" style="justify-content: center;">
+            <button id="waitSuccessCloseButton" class="btn btn-primary" type="button">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Toast container ──────────────────────── -->
+<div id="toastContainer" role="status" aria-live="polite" aria-atomic="false"></div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

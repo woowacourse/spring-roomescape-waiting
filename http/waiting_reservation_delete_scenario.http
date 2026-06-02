@@ -1,0 +1,56 @@
+### 1. 일반 사용자 루시(Lucy) 로그인
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+email=lucy@email.com&password=password
+
+> {%
+  client.global.set("lucy_cookie", response.headers.valueOf("Set-Cookie").split(";")[0]);
+%}
+
+### 2. 루시의 내 예약 조회 (기존 예약 ID 85 확인)
+GET http://localhost:8080/api/v1/reservations
+Cookie: {{lucy_cookie}}
+
+# 응답 확인: "reservations" 목록에 ID 85 예약이 확정(Confirmed) 상태로 존재해야 합니다.
+
+### 3. 일반 사용자 브라운(Brown) 로그인
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+email=brown@email.com&password=password
+
+> {%
+  client.global.set("brown_cookie", response.headers.valueOf("Set-Cookie").split(";")[0]);
+%}
+
+### 4. 브라운의 내 예약/대기 조회 (대기 순번 1번 확인)
+GET http://localhost:8080/api/v1/reservations
+Cookie: {{brown_cookie}}
+
+# 응답 확인: "waitings" 목록에 reservationId: 85, order: 1 로 대기 예약이 존재해야 합니다.
+
+### 5. 강남 매장 매니저 로그인
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+email=manager-gangnam@email.com&password=password
+
+> {%
+  client.global.set("manager_cookie", response.headers.valueOf("Set-Cookie").split(";")[0]);
+%}
+
+### 6. 매니저 권한으로 강남점 85번 예약 삭제 (대기가 달린 예약 취소)
+DELETE http://localhost:8080/api/v1/admin/store/reservations/85
+Cookie: {{manager_cookie}}
+
+# 응답 확인: 204 No Content 반환
+# 내부 로직: 85번 예약이 삭제되면서 대기 1순위였던 브라운(Brown)이 자동으로 확정 예약자로 등록(승격)됩니다.
+
+### 7. [검증] 브라운(Brown) 로그인 상태로 재조회
+GET http://localhost:8080/api/v1/reservations
+Cookie: {{brown_cookie}}
+
+# 응답 확인:
+# 1. "waitings" 목록은 비어 있어야 합니다.
+# 2. "reservations" 목록에 방금 대기에서 승격된 예약이 새롭게 등록되어 있어야 합니다.
