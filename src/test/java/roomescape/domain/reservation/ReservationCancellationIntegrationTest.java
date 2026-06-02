@@ -17,6 +17,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 @SpringBootTest
 @Sql("/truncate.sql")
@@ -46,7 +47,7 @@ class ReservationCancellationIntegrationTest {
     }
 
     @Test
-    void 사용자가_본인의_예약을_취소하면_같은_슬롯의_1순위_대기가_예약으로_변경되고_예약_대기에서_삭제된다() {
+    void 사용자가_본인의_예약을_취소하면_같은_슬롯의_1순위_대기가_예약으로_승격된다() {
         Reservation cancelledReservation = reservationRepository.save(
             Reservation.createWithoutId(
                 "테스터",
@@ -66,7 +67,7 @@ class ReservationCancellationIntegrationTest {
         WaitingReservation firstWaiting = waitingReservationRepository.save(
             waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
-        WaitingReservation secondWaiting = waitingReservationRepository.save(
+        waitingReservationRepository.save(
             waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
@@ -76,12 +77,36 @@ class ReservationCancellationIntegrationTest {
         assertThat(reservationRepository.findByName("이산")).hasSize(1);
         assertThat(reservationRepository.findByName("다른슬롯")).isEmpty();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isEmpty();
-        assertThat(waitingReservationRepository.findById(secondWaiting.getId())).isPresent();
         assertThat(waitingReservationRepository.findById(otherSlotOldest.getId())).isPresent();
     }
 
     @Test
-    void 사용자가_본인의_예약을_수정하면_기존_슬롯의_1순위_대기가_예약으로_변경되고_예약_대기에서_삭제된다() {
+    void 사용자가_본인의_예약을_취소하면_남은_예약_대기_순번이_재계산된다() {
+        Reservation cancelledReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        waitingReservationRepository.save(
+            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+        );
+
+        reservationService.cancelReservation(cancelledReservation.getId());
+
+        assertThat(waitingReservationRepository.findAllByNameWithRank("고래"))
+            .singleElement()
+            .extracting(WaitingReservationWithRank::rank)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void 사용자가_본인의_예약을_수정하면_기존_슬롯의_1순위_대기가_예약으로_승격된다() {
         Reservation updatedReservation = reservationRepository.save(
             Reservation.createWithoutId(
                 "테스터",
@@ -98,7 +123,7 @@ class ReservationCancellationIntegrationTest {
         WaitingReservation firstWaiting = waitingReservationRepository.save(
             waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
         );
-        WaitingReservation secondWaiting = waitingReservationRepository.save(
+        waitingReservationRepository.save(
             waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
         );
 
@@ -111,13 +136,48 @@ class ReservationCancellationIntegrationTest {
         );
 
         Reservation movedReservation = reservationRepository.findById(updatedReservation.getId()).orElseThrow();
-        Reservation promotedReservation = reservationRepository.findByName("이산").get(0);
+        Reservation promotedReservation = reservationRepository.findByName("이산").getFirst();
         assertThat(movedReservation.getDate().getId()).isEqualTo(newSlot.date().getId());
         assertThat(movedReservation.getTime().getId()).isEqualTo(newSlot.time().getId());
         assertThat(promotedReservation.getDate().getId()).isEqualTo(cancelledSlot.date().getId());
         assertThat(promotedReservation.getTime().getId()).isEqualTo(cancelledSlot.time().getId());
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isEmpty();
-        assertThat(waitingReservationRepository.findById(secondWaiting.getId())).isPresent();
+    }
+
+    @Test
+    void 사용자가_본인의_예약을_수정하면_남은_예약_대기_순번이_재계산된다() {
+        Reservation updatedReservation = reservationRepository.save(
+            Reservation.createWithoutId(
+                "테스터",
+                cancelledSlot.date(),
+                cancelledSlot.time(),
+                cancelledSlot.theme()
+            )
+        );
+        Slot newSlot = insertSlot(
+            102L, LocalDate.now().plusDays(3),
+            202L, LocalTime.of(11, 0),
+            302L, "스릴러"
+        );
+        waitingReservationRepository.save(
+            waiting("이산", cancelledSlot, LocalDateTime.of(2026, 5, 6, 10, 0))
+        );
+        waitingReservationRepository.save(
+            waiting("고래", cancelledSlot, LocalDateTime.of(2026, 5, 7, 10, 0))
+        );
+
+        reservationService.updateReservation(
+            updatedReservation.getId(),
+            new ReservationUpdateRequest(
+                newSlot.date().getId(),
+                newSlot.time().getId()
+            )
+        );
+
+        assertThat(waitingReservationRepository.findAllByNameWithRank("고래"))
+            .singleElement()
+            .extracting(WaitingReservationWithRank::rank)
+            .isEqualTo(1L);
     }
 
     private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
