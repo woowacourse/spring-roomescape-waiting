@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.domain.User;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.infrastructure.AdminOnly;
-import roomescape.infrastructure.LoginUserId;
+import roomescape.infrastructure.LoginUser;
 import roomescape.service.ReservationService;
 
 @Validated
@@ -30,17 +31,17 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<ReservationResponses> readReservations(
-            @LoginUserId Long managerId,
+            @LoginUser User manager,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
             @RequestParam(required = false) @Size(min = 1) String name
     ) {
-        return ResponseEntity.ok(reservationService.getReservations(page, size, name, managerId));
+        return ResponseEntity.ok(reservationService.getReservations(page, size, name, manager));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@LoginUserId Long managerId, @PathVariable Long id) {
-        reservationService.deleteReservation(id, managerId);
+    public ResponseEntity<Void> deleteReservation(@LoginUser User manager, @PathVariable Long id) {
+        reservationService.deleteReservation(id, manager);
         return ResponseEntity.ok().build();
     }
 }

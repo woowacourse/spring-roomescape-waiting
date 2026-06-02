@@ -31,7 +31,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.UserRepository;
 
 @Service
 public class ReservationService {
@@ -39,26 +38,23 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final UserRepository userRepository;
     private final StoreRepository storeRepository;
     private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ThemeRepository themeRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              UserRepository userRepository,
                               StoreRepository storeRepository,
                               TimeProvider timeProvider) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.userRepository = userRepository;
         this.storeRepository = storeRepository;
         this.timeProvider = timeProvider;
     }
 
-    public ReservationResponses getReservations(int page, int size, String name, Long managerId) {
-        List<Long> storeIds = storeRepository.findStoreIdsByUserId(managerId);
+    public ReservationResponses getReservations(int page, int size, String name, User manager) {
+        List<Long> storeIds = storeRepository.findStoreIdsByUserId(manager.getId());
         if (storeIds.isEmpty()) {
             return ReservationResponses.of(List.of(), false);
         }
@@ -83,8 +79,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationWithStatusResponses getMyReservations(Long userId) {
-        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(userId);
+    public ReservationWithStatusResponses getMyReservations(User user) {
+        Map<Reservation, Integer> myReservations = reservationRepository.findAllByUserIdWithWaitingOrder(user.getId());
 
         List<Reservation> reservations = new ArrayList<>();
         Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
@@ -135,7 +131,7 @@ public class ReservationService {
     public Reservation updateOwnReservation(UpdateReservationCommand command) {
         Reservation existing = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
-        validateReservationOwner(command.userId(), existing);
+        validateReservationOwner(command.user(), existing);
         validateExistingNotInPast(existing);
         validateIsReserved(existing);
 
@@ -154,10 +150,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long reservationId, Long managerId) {
+    public void deleteReservation(Long reservationId, User manager) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("예약", reservationId));
-        validateManagesStore(managerId, reservation.getStore().getId());
+        validateManagesStore(manager.getId(), reservation.getStore().getId());
         reservationRepository.deleteById(reservationId);
     }
 
@@ -165,24 +161,20 @@ public class ReservationService {
     public void cancelOwnReservation(CancelReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
-        validateReservationOwner(command.userId(), reservation);
+        validateReservationOwner(command.user(), reservation);
         validateExistingNotInPast(reservation);
 
         reservationRepository.deleteById(command.reservationId());
     }
 
     private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
         ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
         Store store = storeRepository.findById(command.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
-        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store,
-                status);
-        return newReservation;
+        return new Reservation(null, command.user(), theme, command.date(), reservationTime, store, status);
     }
 
     private void validateIsReserved(Reservation existing) {
@@ -214,8 +206,8 @@ public class ReservationService {
         }
     }
 
-    private static void validateReservationOwner(Long userId, Reservation reservation) {
-        if (!reservation.getUser().getId().equals(userId)) {
+    private static void validateReservationOwner(User user, Reservation reservation) {
+        if (!reservation.getUser().getId().equals(user.getId())) {
             throw new ReservationOwnerMismatchException();
         }
     }

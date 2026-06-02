@@ -52,7 +52,7 @@ class ReservationServiceTest {
         storeRepository = new FakeStoreRepository();
         storeRepository.save(Fixtures.store("매장"));
         service = new ReservationService(reservationRepository, themeRepository, reservationTimeRepository,
-                userRepository, storeRepository, new TestClockConfig().timeProvider());
+                storeRepository, new TestClockConfig().timeProvider());
         manager = buildUser("매니저");
         storeRepository.assignManager(Fixtures.DEFAULT_STORE_ID, manager.getId());
     }
@@ -63,7 +63,7 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         Reservation created = service.createReservation(
-                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId));
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId));
 
         assertThat(created.getId()).isPositive();
         assertThat(created.getUser().getName()).isEqualTo("브라운");
@@ -79,7 +79,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
 
         assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 5), timeId)))
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 5), timeId)))
                 .isInstanceOf(PastDateTimeReservationException.class)
                 .hasMessage("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다.");
     }
@@ -91,10 +91,10 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         service.createReservation(
-                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), timeId));
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId));
 
         assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(other.getId(), themeId, LocalDate.of(2026, 5, 8), timeId)))
+                Fixtures.createCommand(other, themeId, LocalDate.of(2026, 5, 8), timeId)))
                 .isInstanceOf(DuplicateReservationException.class)
                 .hasMessage("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요.");
     }
@@ -105,7 +105,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown.getId(), 9999L, LocalDate.of(2026, 5, 8), timeId)))
+                Fixtures.createCommand(brown, 9999L, LocalDate.of(2026, 5, 8), timeId)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("테마")
                 .hasMessageContaining("9999");
@@ -117,7 +117,7 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
 
         assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown.getId(), themeId, LocalDate.of(2026, 5, 8), 9999L)))
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), 9999L)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("예약 시간")
                 .hasMessageContaining("9999");
@@ -132,7 +132,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 3)));
 
-        ReservationResponses responses = service.getReservations(0, 2, null, manager.getId());
+        ReservationResponses responses = service.getReservations(0, 2, null, manager);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.hasNext()).isTrue();
@@ -146,7 +146,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1)));
         reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 2)));
 
-        ReservationResponses responses = service.getReservations(0, 2, null, manager.getId());
+        ReservationResponses responses = service.getReservations(0, 2, null, manager);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.hasNext()).isFalse();
@@ -162,7 +162,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3)));
 
-        ReservationResponses responses = service.getReservations(0, 10, "브라운", manager.getId());
+        ReservationResponses responses = service.getReservations(0, 10, "브라운", manager);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
@@ -178,7 +178,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3)));
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown.getId());
+        ReservationWithStatusResponses responses = service.getMyReservations(brown);
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
@@ -198,7 +198,7 @@ class ReservationServiceTest {
         reservationRepository.save(
                 buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
 
-        ReservationWithStatusResponses results = service.getMyReservations(brown.getId());
+        ReservationWithStatusResponses results = service.getMyReservations(brown);
 
         assertThat(results.waitingReservations()).hasSize(1);
         assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
@@ -210,7 +210,7 @@ class ReservationServiceTest {
     void getMyReservations_예약과_대기가_없으면_빈_목록을_반환한다() {
         User brown = buildUser("브라운");
 
-        ReservationWithStatusResponses responses = service.getMyReservations(brown.getId());
+        ReservationWithStatusResponses responses = service.getMyReservations(brown);
 
         assertThat(responses.reservations()).isEmpty();
         assertThat(responses.waitingReservations()).isEmpty();
@@ -241,7 +241,7 @@ class ReservationServiceTest {
 
     @Test
     void deleteReservation_없는_id이면_ResourceNotFoundException() {
-        assertThatThrownBy(() -> service.deleteReservation(9999L, manager.getId()))
+        assertThatThrownBy(() -> service.deleteReservation(9999L, manager))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("예약")
                 .hasMessageContaining("9999");
@@ -255,9 +255,9 @@ class ReservationServiceTest {
         Long reservationId = reservationRepository.save(
                 buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6)));
 
-        service.deleteReservation(reservationId, manager.getId());
+        service.deleteReservation(reservationId, manager);
 
-        ReservationResponses responses = service.getReservations(0, 10, null, manager.getId());
+        ReservationResponses responses = service.getReservations(0, 10, null, manager);
         assertThat(responses.reservations()).extracting("id").doesNotContain(reservationId);
     }
 
@@ -269,7 +269,7 @@ class ReservationServiceTest {
         Long reservationId = reservationRepository.save(
                 buildReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 6), 999L));
 
-        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager.getId()))
+        assertThatThrownBy(() -> service.deleteReservation(reservationId, manager))
                 .isInstanceOf(StoreManagementForbiddenException.class);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
@@ -282,7 +282,7 @@ class ReservationServiceTest {
         Long mine = reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1)));
         reservationRepository.save(buildReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 2), 999L));
 
-        ReservationResponses responses = service.getReservations(0, 10, null, manager.getId());
+        ReservationResponses responses = service.getReservations(0, 10, null, manager);
 
         assertThat(responses.reservations()).extracting("id").containsExactly(mine);
     }
@@ -295,7 +295,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         reservationRepository.save(buildReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1)));
 
-        ReservationResponses responses = service.getReservations(0, 10, null, stranger.getId());
+        ReservationResponses responses = service.getReservations(0, 10, null, stranger);
 
         assertThat(responses.reservations()).isEmpty();
         assertThat(responses.hasNext()).isFalse();
@@ -310,7 +310,7 @@ class ReservationServiceTest {
         Long reservationId = reservationRepository.save(
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other.getId())))
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other)))
                 .isInstanceOf(ReservationOwnerMismatchException.class);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
@@ -319,7 +319,7 @@ class ReservationServiceTest {
     void cancelOwnReservation_없는_id이면_ResourceNotFoundException() {
         User brown = buildUser("브라운");
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown.getId())))
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -331,7 +331,7 @@ class ReservationServiceTest {
         Long reservationId = reservationRepository.save(
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1)));
 
-        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown)))
                 .isInstanceOf(PastReservationModificationException.class);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
@@ -347,7 +347,7 @@ class ReservationServiceTest {
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         Reservation updated = service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown.getId(), themeId2, LocalDate.of(2026, 6, 2), timeId2));
+                Fixtures.updateCommand(reservationId, brown, themeId2, LocalDate.of(2026, 6, 2), timeId2));
 
         assertThat(updated.getDate()).isEqualTo(LocalDate.of(2026, 6, 2));
         assertThat(updated.getTheme().getId()).isEqualTo(themeId2);
@@ -364,7 +364,7 @@ class ReservationServiceTest {
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, other.getId(), themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(reservationId, other, themeId, LocalDate.of(2026, 6, 2), timeId)))
                 .isInstanceOf(ReservationOwnerMismatchException.class);
     }
 
@@ -377,7 +377,7 @@ class ReservationServiceTest {
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1)));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown.getId(), themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
                 .isInstanceOf(PastReservationModificationException.class);
     }
 
@@ -390,7 +390,7 @@ class ReservationServiceTest {
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown.getId(), themeId, LocalDate.of(2026, 5, 1), timeId)))
+                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 5, 1), timeId)))
                 .isInstanceOf(PastDateTimeReservationException.class);
     }
 
@@ -406,7 +406,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(other, themeId, timeId2, LocalDate.of(2026, 6, 2)));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown.getId(), themeId, LocalDate.of(2026, 6, 2), timeId2)))
+                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId2)))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -419,7 +419,7 @@ class ReservationServiceTest {
                 buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         Reservation updated = service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown.getId(), themeId, LocalDate.of(2026, 6, 1), timeId));
+                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 1), timeId));
 
         assertThat(updated.getId()).isEqualTo(reservationId);
     }
@@ -431,7 +431,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(9999L, brown.getId(), themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(9999L, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -449,7 +449,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         WaitingReservationResponse result = service.createWaitingReservation(
-                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId));
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId));
 
         assertThat(result.date()).isEqualTo(LocalDate.of(2026, 6, 1));
         assertThat(result.themeName()).isEqualTo("공포");
@@ -465,7 +465,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId)))
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId)))
                 .isInstanceOf(ReservationNotFoundForWaitingException.class);
     }
 
@@ -478,7 +478,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(1, 5, 1)));
 
         assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(1, 5, 1), timeId)))
+                Fixtures.createCommand(charles, themeId, LocalDate.of(1, 5, 1), timeId)))
                 .isInstanceOf(PastDateTimeReservationException.class);
     }
 
@@ -488,7 +488,7 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
         assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles.getId(), 9999L, LocalDate.of(2026, 6, 1), timeId)))
+                Fixtures.createCommand(charles, 9999L, LocalDate.of(2026, 6, 1), timeId)))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("테마")
                 .hasMessageContaining("9999");
@@ -504,7 +504,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
         assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId)))
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId)))
                 .isInstanceOf(DuplicateWaitingReservationException.class);
     }
 

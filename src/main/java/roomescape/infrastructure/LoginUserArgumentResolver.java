@@ -7,14 +7,23 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.domain.User;
+import roomescape.exception.UnauthenticatedException;
+import roomescape.repository.UserRepository;
 
 @Component
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
 
+    private final UserRepository userRepository;
+
+    public LoginUserArgumentResolver(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(LoginUserId.class)
-                && parameter.getParameterType().equals(Long.class);
+        return parameter.hasParameterAnnotation(LoginUser.class)
+                && parameter.getParameterType().equals(User.class);
     }
 
     @Override
@@ -25,6 +34,8 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
             WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        return request.getAttribute(AuthContext.LOGIN_USER_ID);
+        Long userId = (Long) request.getAttribute(AuthContext.LOGIN_USER_ID);
+        return userRepository.findById(userId)
+                .orElseThrow(UnauthenticatedException::new);
     }
 }

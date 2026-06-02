@@ -8,20 +8,22 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.infrastructure.LoginUserId;
+import roomescape.domain.User;
+import roomescape.fixture.Fixtures;
+import roomescape.infrastructure.LoginUser;
 
 @TestConfiguration
 public class LoginUserIdTestResolverConfig implements WebMvcConfigurer {
 
-    public static final Long FIXED_USER_ID = 1L;
+    public static final User FIXED_USER = Fixtures.memberWithId(1L, "브라운");
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new HandlerMethodArgumentResolver() {
             @Override
             public boolean supportsParameter(MethodParameter parameter) {
-                return parameter.hasParameterAnnotation(LoginUserId.class)
-                        && parameter.getParameterType().equals(Long.class);
+                return parameter.hasParameterAnnotation(LoginUser.class)
+                        && parameter.getParameterType().equals(User.class);
             }
 
             @Override
@@ -31,7 +33,7 @@ public class LoginUserIdTestResolverConfig implements WebMvcConfigurer {
                     NativeWebRequest webRequest,
                     WebDataBinderFactory binderFactory
             ) {
-                return FIXED_USER_ID;
+                return FIXED_USER;
             }
         });
     }

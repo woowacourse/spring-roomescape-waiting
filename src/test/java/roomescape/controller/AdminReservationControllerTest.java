@@ -23,12 +23,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.domain.User;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AuthInterceptor;
+import roomescape.infrastructure.LoginUser;
 import roomescape.infrastructure.LoginUserArgumentResolver;
-import roomescape.infrastructure.LoginUserId;
 import roomescape.infrastructure.WebConfig;
 import roomescape.service.ReservationService;
 
@@ -37,7 +38,7 @@ import roomescape.service.ReservationService;
                 classes = {WebConfig.class, AuthInterceptor.class, LoginUserArgumentResolver.class}))
 class AdminReservationControllerTest {
 
-    private static final long MANAGER_ID = 7L;
+    private static final User MANAGER = Fixtures.memberWithId(7L, "매니저");
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,14 +53,14 @@ class AdminReservationControllerTest {
             resolvers.add(new HandlerMethodArgumentResolver() {
                 @Override
                 public boolean supportsParameter(MethodParameter parameter) {
-                    return parameter.hasParameterAnnotation(LoginUserId.class)
-                            && parameter.getParameterType().equals(Long.class);
+                    return parameter.hasParameterAnnotation(LoginUser.class)
+                            && parameter.getParameterType().equals(User.class);
                 }
 
                 @Override
                 public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-                    return MANAGER_ID;
+                    return MANAGER;
                 }
             });
         }
@@ -67,7 +68,7 @@ class AdminReservationControllerTest {
 
     @Test
     void GET_admin_reservations_서비스가_반환한_목록과_hasNext를_그대로_응답한다() throws Exception {
-        given(reservationService.getReservations(0, 20, null, MANAGER_ID))
+        given(reservationService.getReservations(0, 20, null, MANAGER))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
         mockMvc.perform(get("/admin/reservations"))
@@ -79,26 +80,26 @@ class AdminReservationControllerTest {
 
     @Test
     void GET_admin_reservations_page와_size_쿼리_파라미터를_그대로_위임한다() throws Exception {
-        given(reservationService.getReservations(2, 5, null, MANAGER_ID))
+        given(reservationService.getReservations(2, 5, null, MANAGER))
                 .willReturn(ReservationResponses.of(List.of(), true));
 
         mockMvc.perform(get("/admin/reservations?page=2&size=5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hasNext").value(true));
 
-        verify(reservationService).getReservations(2, 5, null, MANAGER_ID);
+        verify(reservationService).getReservations(2, 5, null, MANAGER);
     }
 
     @Test
     void GET_admin_reservations_name_쿼리_파라미터가_있으면_서비스에_위임한다() throws Exception {
-        given(reservationService.getReservations(0, 20, "브라운", MANAGER_ID))
+        given(reservationService.getReservations(0, 20, "브라운", MANAGER))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
         mockMvc.perform(get("/admin/reservations?name=브라운"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reservations.size()").value(1));
 
-        verify(reservationService).getReservations(0, 20, "브라운", MANAGER_ID);
+        verify(reservationService).getReservations(0, 20, "브라운", MANAGER);
     }
 
     @Test
@@ -134,13 +135,13 @@ class AdminReservationControllerTest {
         mockMvc.perform(delete("/admin/reservations/3"))
                 .andExpect(status().isOk());
 
-        verify(reservationService).deleteReservation(3L, MANAGER_ID);
+        verify(reservationService).deleteReservation(3L, MANAGER);
     }
 
     @Test
     void DELETE_admin_reservations_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         willThrow(new ResourceNotFoundException("예약", 9999L))
-                .given(reservationService).deleteReservation(9999L, MANAGER_ID);
+                .given(reservationService).deleteReservation(9999L, MANAGER);
 
         mockMvc.perform(delete("/admin/reservations/9999"))
                 .andExpect(status().isNotFound())

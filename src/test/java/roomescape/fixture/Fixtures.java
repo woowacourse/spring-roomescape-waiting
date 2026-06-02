@@ -88,16 +88,29 @@ public final class Fixtures {
         return new Reservation(null, user, theme, date, time, store, ReservationStatus.RESERVED);
     }
 
+    public static CreateReservationCommand createCommand(User user, long themeId, LocalDate date, long timeId) {
+        return new CreateReservationCommand(user, themeId, date, timeId, DEFAULT_STORE_ID);
+    }
+
     public static CreateReservationCommand createCommand(long userId, long themeId, LocalDate date, long timeId) {
-        return new CreateReservationCommand(userId, themeId, date, timeId, DEFAULT_STORE_ID);
+        return createCommand(memberWithId(userId, "브라운"), themeId, date, timeId);
+    }
+
+    public static UpdateReservationCommand updateCommand(
+            long reservationId, User user, long themeId, LocalDate date, long timeId) {
+        return new UpdateReservationCommand(reservationId, user, themeId, date, timeId);
     }
 
     public static UpdateReservationCommand updateCommand(
             long reservationId, long userId, long themeId, LocalDate date, long timeId) {
-        return new UpdateReservationCommand(reservationId, userId, themeId, date, timeId);
+        return updateCommand(reservationId, memberWithId(userId, "브라운"), themeId, date, timeId);
+    }
+
+    public static CancelReservationCommand cancelCommand(long reservationId, User user) {
+        return new CancelReservationCommand(reservationId, user);
     }
 
     public static CancelReservationCommand cancelCommand(long reservationId, long userId) {
-        return new CancelReservationCommand(reservationId, userId);
+        return cancelCommand(reservationId, memberWithId(userId, "브라운"));
     }
 }

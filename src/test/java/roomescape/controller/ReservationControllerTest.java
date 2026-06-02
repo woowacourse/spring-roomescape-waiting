@@ -59,7 +59,7 @@ class ReservationControllerTest {
 
     @Test
     void GET_reservations_mine_로그인_사용자의_예약_목록을_응답한다() throws Exception {
-        given(reservationService.getMyReservations(1L))
+        given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER))
                 .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
                         Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
 
@@ -69,12 +69,12 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
                 .andExpect(jsonPath("$.hasNext").value(false));
 
-        verify(reservationService).getMyReservations(1L);
+        verify(reservationService).getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER);
     }
 
     @Test
     void GET_reservations_mine_예약_확정과_예약_대기_목록을_구분해서_응답한다() throws Exception {
-        given(reservationService.getMyReservations(1L))
+        given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER))
                 .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
                         Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
 
@@ -86,7 +86,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
                 .andExpect(jsonPath("$.waitingReservations[0].waitingOrder").value(1));
 
-        verify(reservationService).getMyReservations(1L);
+        verify(reservationService).getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER);
     }
 
 
