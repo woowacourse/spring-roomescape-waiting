@@ -53,18 +53,11 @@ public class ReservationService {
     @Transactional
     public Reservation makeReservation(ReservationCommand command) {
         if (reservationRepository.existByDateAndTimeIdAndThemeId(
-                command.date(),
-                command.timeId(),
-                command.themeId())
-        ) {
+                command.date(), command.timeId(), command.themeId())) {
             throw new DuplicateReservationException();
         }
 
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
-                command.date(), command.timeId(), command.themeId()
-        )) {
-            throw new ReservationSlotHasWaitingException();
-        }
+        validateDoNotHaveWaiting(command.date(), command.timeId(), command.themeId());
 
         ReservationTime time = getReservationTime(command.timeId());
         validateExpiry(command.date(), time.getStartAt());
@@ -74,15 +67,16 @@ public class ReservationService {
 
         try {
             return reservationRepository.save(
-                    Reservation.of(
-                            command.name(),
-                            command.date(),
-                            time,
-                            theme
-                    )
+                    Reservation.of(command.name(), command.date(), time, theme)
             );
         } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
+        }
+    }
+
+    private void validateDoNotHaveWaiting(LocalDate date, Long timeId, Long themeId) {
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new ReservationSlotHasWaitingException();
         }
     }
 
@@ -194,13 +188,11 @@ public class ReservationService {
             throw new DuplicateReservationException();
         }
 
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+        validateDoNotHaveWaiting(
                 updated.getDate(),
                 updated.getReservationTime().getId(),
                 updated.getTheme().getId()
-        )) {
-            throw new ReservationSlotHasWaitingException();
-        }
+        );
 
         try {
             reservationRepository.update(updated);
