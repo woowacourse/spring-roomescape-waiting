@@ -120,19 +120,6 @@ class ReservationDaoTest {
     }
 
     @Test
-    void 예약_날짜_시간_변경() {
-        LocalDate newDate = LocalDate.now().plusDays(5);
-        Long newTimeId = 2L;
-
-        reservationDao.update(1L, newDate, newTimeId);
-
-        Optional<Reservation> updated = reservationDao.findById(1L);
-
-        assertThat(updated.get().getDate()).isEqualTo(newDate);
-        assertThat(updated.get().getTime().getId()).isEqualTo(newTimeId);
-    }
-
-    @Test
     void 예약_삭제() {
         reservationDao.delete(1L);
 

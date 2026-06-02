@@ -194,20 +194,6 @@ public class ReservationDao {
     }
 
     @Transactional
-    public void update(Long id, LocalDate date, Long timeId) {
-        jdbcTemplate.update(
-                """
-                            UPDATE reservation
-                            SET date = ?, time_id = ?
-                            WHERE id = ?
-                        """,
-                date,
-                timeId,
-                id
-        );
-    }
-
-    @Transactional
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
