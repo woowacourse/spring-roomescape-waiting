@@ -14,7 +14,7 @@ class NameTest {
     class Constructor {
 
         @Test
-        @DisplayName("2~15글자이면 생성에 성공한다")
+        @DisplayName("2~40글자이면 생성에 성공한다")
         void createsWithValidName() {
             Name name = new Name("홍길동");
 
@@ -36,9 +36,9 @@ class NameTest {
         }
 
         @Test
-        @DisplayName("16글자이면 예외를 던진다")
+        @DisplayName("41글자이면 예외를 던진다")
         void throwsWhenTooLong() {
-            assertThatThrownBy(() -> new Name("가".repeat(16)))
+            assertThatThrownBy(() -> new Name("가".repeat(41)))
                     .isInstanceOf(InvalidInputException.class);
         }
     }
