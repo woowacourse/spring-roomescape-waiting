@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,12 @@ public class TimeSlotService {
         try {
             return timeSlotRepository.getByDateTimeAndTheme(date, time.getId(), theme.getId());
         } catch (NotFoundTimeSlotException e) {
+            return getOrCreateTimeSlot(date, time, theme);
+        }
+    }
+
+    private TimeSlot getOrCreateTimeSlot(LocalDate date, ReservationTime time, Theme theme) {
+        try {
             return timeSlotRepository.save(
                     TimeSlot.builder()
                             .date(date)
@@ -29,6 +36,8 @@ public class TimeSlotService {
                             .theme(theme)
                             .build()
             );
+        } catch (DataIntegrityViolationException e) {
+            return timeSlotRepository.getByDateTimeAndTheme(date, time.getId(), theme.getId());
         }
     }
 }
