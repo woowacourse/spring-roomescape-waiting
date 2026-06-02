@@ -1,15 +1,16 @@
 package roomescape.controller.dto;
 
-import roomescape.service.result.TimeAvailabilityResult;
+import roomescape.domain.TimeAvailability;
 
 public record TimeAvailabilityResponse(
         ReservationTimeResponse time,
         boolean available
 ) {
 
-    public static TimeAvailabilityResponse from(TimeAvailabilityResult result) {
+    public static TimeAvailabilityResponse from(TimeAvailability timeAvailability) {
         return new TimeAvailabilityResponse(
-                new ReservationTimeResponse(result.timeId(), result.startAt()),
-                result.available());
+                ReservationTimeResponse.from(timeAvailability.getTime()),
+                timeAvailability.isAvailable()
+        );
     }
 }

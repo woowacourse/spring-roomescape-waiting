@@ -71,6 +71,21 @@ class ThemeRepositoryTest {
     }
 
     @Test
+    void 테마_id에_해당하는_테마가_존재하는지_확인한다() {
+        // given
+        Theme theme = themeRepository.insert(new Theme(null, "새로운 테마", "새로운 테마 설명", "새로운 썸네일 링크"));
+
+        // when
+        boolean exists = themeRepository.existsById(theme.getId());
+        boolean notExists = themeRepository.existsById(999L);
+
+        // then
+        assertAll(
+                () -> assertThat(exists).isTrue(),
+                () -> assertThat(notExists).isFalse());
+    }
+
+    @Test
     void 인기_테마를_조회한다() {
         // given
         Theme theme1 = themeRepository.insert(new Theme(null, "테마1", "설명1", "썸네일1"));

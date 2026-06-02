@@ -14,6 +14,7 @@ public record ReservationStatusResponse(
         Status status,
         Long turn
 ) {
+
     public static ReservationStatusResponse from(ReservationStatus reservationStatus) {
         return new ReservationStatusResponse(
                 reservationStatus.id(),

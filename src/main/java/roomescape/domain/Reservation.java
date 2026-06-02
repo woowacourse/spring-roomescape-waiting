@@ -40,10 +40,6 @@ public class Reservation {
         return date.equals(other.date) && time.equals(other.time);
     }
 
-    public boolean hasTime(ReservationTime time) {
-        return this.time.equals(time);
-    }
-
     public Long getId() {
         return id;
     }

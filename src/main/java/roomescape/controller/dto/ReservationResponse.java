@@ -18,6 +18,7 @@ public record ReservationResponse(
                 reservation.getName(),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
-                ReservationThemeResponse.from(reservation.getTheme()));
+                ReservationThemeResponse.from(reservation.getTheme())
+        );
     }
 }

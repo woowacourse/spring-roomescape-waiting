@@ -164,31 +164,6 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void 테마와_날짜에_해당하는_예약_목록을_조회한다() {
-        // given
-        ReservationTime time1 = findTimeByStartAt("15:00");
-        ReservationTime time2 = findTimeByStartAt("12:00");
-        Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
-        Theme otherTheme = new Theme(2L, "다른 테마 이름", "다른 테마 설명", "다른 썸네일");
-        reservationRepository.insert(new Reservation(null, "브라운", date, time1, theme));
-        reservationRepository.insert(new Reservation(null, "구구", date, time2, otherTheme));
-        reservationRepository.insert(new Reservation(null, "포비", date.plusDays(1), time2, theme));
-
-        // when
-        List<Reservation> result = reservationRepository.findReservationsByThemeAndDate(theme.getId(), date);
-
-        // then
-        assertAll(
-                () -> assertThat(result).hasSize(1),
-                () -> assertThat(result).extracting(Reservation::getName)
-                        .containsExactly("브라운"),
-                () -> assertThat(result).extracting(Reservation::getDate)
-                        .containsExactly(date),
-                () -> assertThat(result).extracting(reservation -> reservation.getTheme().getId())
-                        .containsExactly(theme.getId()));
-    }
-
-    @Test
     void 테마_id에_해당하는_예약이_존재하는지_확인한다() {
         // given
         ReservationTime time = findTimeByStartAt("15:00");

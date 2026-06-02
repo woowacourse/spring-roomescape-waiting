@@ -129,17 +129,6 @@ class ReservationTest {
         assertThat(reservation.hasSameSchedule(differentSchedule)).isFalse();
     }
 
-    @Test
-    void 예약_시간이_같은지_확인한다() {
-        // given
-        ReservationTime time = new ReservationTime(1L, startAt);
-        Reservation reservation = reservation("브라운", date, time);
-
-        // when & then
-        assertThat(reservation.hasTime(time)).isTrue();
-        assertThat(reservation.hasTime(new ReservationTime(2L, LocalTime.parse("11:00")))).isFalse();
-    }
-
     private Reservation reservation(String name, LocalDate date, ReservationTime time) {
         Theme theme = new Theme(null, "테마 이름", "테마 설명", "썸네일");
         return new Reservation(null, name, date, time, theme);

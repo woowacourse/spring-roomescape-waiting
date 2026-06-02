@@ -144,29 +144,6 @@ public class ReservationRepository {
                 reservation.getId());
     }
 
-    public List<Reservation> findReservationsByThemeAndDate(Long themeId, LocalDate date) {
-        String sql = """
-                SELECT
-                    r.id as reservation_id,
-                    r.name as username,
-                    r.date,
-                    rt.id as time_id,
-                    rt.start_at as time_value,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description,
-                    t.thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as rt
-                  ON r.time_id = rt.id
-                INNER JOIN theme as t
-                  ON r.theme_id = t.id
-                WHERE t.id = ?\s
-                AND r.date = ?;
-                """;
-        return jdbcTemplate.query(sql, reservationRowMapper, themeId, date);
-    }
-
     public boolean existsBySlot(Reservation reservation) {
         String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(

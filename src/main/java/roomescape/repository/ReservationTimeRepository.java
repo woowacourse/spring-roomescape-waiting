@@ -6,8 +6,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.TimeAvailability;
 
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,11 @@ public class ReservationTimeRepository {
     private final RowMapper<ReservationTime> timeRowMapper = (resultSet, rowNum) -> new ReservationTime(
             resultSet.getLong("id"),
             resultSet.getObject("start_at", LocalTime.class)
+    );
+
+    private final RowMapper<TimeAvailability> timeAvailabilityRowMapper = (resultSet, rowNum) -> new TimeAvailability(
+            timeRowMapper.mapRow(resultSet, rowNum),
+            resultSet.getBoolean("available")
     );
 
     public ReservationTimeRepository(JdbcTemplate jdbcTemplate) {
@@ -55,5 +62,21 @@ public class ReservationTimeRepository {
     public int delete(Long id) {
         String sql = "DELETE FROM reservation_time WHERE id = ?;";
         return jdbcTemplate.update(sql, id);
+    }
+
+    public List<TimeAvailability> findAvailabilitiesByThemeIdAndDate(Long themeId, LocalDate date) {
+        String sql = """
+            SELECT
+                rt.id,
+                rt.start_at,
+                CASE WHEN r.id IS NULL THEN true ELSE false END AS available
+            FROM reservation_time AS rt
+            LEFT JOIN reservation AS r
+                ON r.time_id = rt.id
+               AND r.theme_id = ?
+               AND r.date = ?
+            ORDER BY rt.id;
+            """;
+        return jdbcTemplate.query(sql, timeAvailabilityRowMapper, themeId, date);
     }
 }

@@ -7,12 +7,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.domain.PopularTheme;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.TimeAvailability;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationAvailabilityService;
 import roomescape.service.ThemeService;
-import roomescape.service.result.TimeAvailabilityResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -59,10 +60,12 @@ class ThemeControllerTest {
     @Test
     void 예약_가능_시간을_조회한다() throws Exception {
         // given
-        given(reservationAvailabilityService.findAvailableTime(
+        given(reservationAvailabilityService.findAvailableTimes(
                 eq(1L),
                 eq(LocalDate.of(2099, 1, 1))))
-                .willReturn(List.of(new TimeAvailabilityResult(1L, LocalTime.of(10, 0), true)));
+                .willReturn(List.of(new TimeAvailability(
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        true)));
 
         // when & then
         mockMvc.perform(get("/themes/1/times")
@@ -72,14 +75,14 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[0].time.startAt").value("10:00:00"))
                 .andExpect(jsonPath("$[0].available").value(true));
 
-        verify(reservationAvailabilityService, times(1)).findAvailableTime(1L, LocalDate.of(2099, 1, 1));
+        verify(reservationAvailabilityService, times(1)).findAvailableTimes(1L, LocalDate.of(2099, 1, 1));
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 
     @Test
     void 존재하지_않는_테마의_예약_가능_시간_조회시_에러_응답() throws Exception {
         // given
-        given(reservationAvailabilityService.findAvailableTime(
+        given(reservationAvailabilityService.findAvailableTimes(
                 eq(999L),
                 eq(LocalDate.of(2099, 1, 1))))
                 .willThrow(new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
@@ -91,7 +94,7 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 테마입니다."));
 
-        verify(reservationAvailabilityService, times(1)).findAvailableTime(999L, LocalDate.of(2099, 1, 1));
+        verify(reservationAvailabilityService, times(1)).findAvailableTimes(999L, LocalDate.of(2099, 1, 1));
         verifyNoMoreInteractions(themeService, reservationAvailabilityService);
     }
 

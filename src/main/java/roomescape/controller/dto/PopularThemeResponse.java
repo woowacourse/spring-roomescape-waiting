@@ -9,6 +9,7 @@ public record PopularThemeResponse(
         String thumbnail,
         Long reservationCount
 ) {
+
     public static PopularThemeResponse from(PopularTheme popularTheme) {
         return new PopularThemeResponse(
                 popularTheme.getTheme().getId(),

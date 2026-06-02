@@ -10,6 +10,7 @@ public record ReservationThemeResponse(
     public static ReservationThemeResponse from(Theme theme) {
         return new ReservationThemeResponse(
                 theme.getId(),
-                theme.getName());
+                theme.getName()
+        );
     }
 }

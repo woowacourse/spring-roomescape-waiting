@@ -20,6 +20,7 @@ public record ReservationWaitingResponse(
                 waitingResult.date(),
                 ReservationWaitingTimeResponse.from(waitingResult.time()),
                 ReservationWaitingThemeResponse.from(waitingResult.theme()),
-                waitingResult.turn());
+                waitingResult.turn()
+        );
     }
 }

@@ -14,6 +14,7 @@ public record ThemeResponse(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),
-                theme.getThumbnail());
+                theme.getThumbnail()
+        );
     }
 }
