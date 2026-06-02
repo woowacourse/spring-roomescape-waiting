@@ -59,4 +59,15 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(
+            Exception e
+    ) {
+        ErrorCode errorCode = ErrorCode.COMMON_SERVER_ERROR;
+        ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        return ResponseEntity
+                .internalServerError()
+                .body(errorResponse);
+    }
+
 }
