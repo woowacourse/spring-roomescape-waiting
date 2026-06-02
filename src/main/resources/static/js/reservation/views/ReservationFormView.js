@@ -9,6 +9,7 @@ export default class ReservationFormView extends View {
     this.nameInput = qs("#nameInput", element);
     this.dateInput = qs("#dateInput", element);
     this.submitButton = qs('[data-role="submit-button"]', element);
+    this.waitingNotice = qs('[data-role="waiting-notice"]', element);
 
     this.bindEvents();
   }
@@ -64,5 +65,6 @@ export default class ReservationFormView extends View {
 
     this.submitButton.textContent = submitMode === "waiting" ? "대기 등록" : isEdit ? "예약 변경" : "예약 확정";
     this.submitButton.disabled = !canSubmit;
+    this.waitingNotice.hidden = submitMode !== "waiting";
   }
 }

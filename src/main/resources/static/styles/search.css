@@ -65,6 +65,13 @@ label {
     background: #e9edf1;
 }
 
+.policy-note {
+    margin: 10px 0 0;
+    color: #8b95a1;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
 .empty-state {
     height: 120px;
     display: flex;
