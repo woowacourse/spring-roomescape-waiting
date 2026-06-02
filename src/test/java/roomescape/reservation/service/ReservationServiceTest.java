@@ -22,8 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.reservation.MyReservation;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.TotalReservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.theme.Theme;
@@ -69,11 +69,11 @@ public class ReservationServiceTest {
         when(themeDao.selectById(waitingThemeId))
                 .thenReturn(Optional.of(new Theme(waitingThemeId, "대기 테마", "설명", "image")));
 
-        List<TotalReservation> actual = reservationService.findAllByName(name);
+        List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(2);
         assertThat(actual.get(0).getThemeName()).isEqualTo("예약 테마");
-        assertThat(actual.get(0).getWaitingNumber()).isNull();
+        assertThat(actual.get(0).getWaitingNumber()).isEqualTo(0L);
         assertThat(actual.get(1).getThemeName()).isEqualTo("대기 테마");
         assertThat(actual.get(1).getWaitingNumber()).isEqualTo(1L);
     }
@@ -92,10 +92,10 @@ public class ReservationServiceTest {
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.of(new Theme(themeId, "테마", "설명", "image")));
 
-        List<TotalReservation> actual = reservationService.findAllByName(name);
+        List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(2)
-                .allSatisfy(totalReservation -> assertThat(totalReservation.getWaitingNumber()).isNull());
+                .allSatisfy(myReservation -> assertThat(myReservation.getWaitingNumber()).isEqualTo(0L));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class ReservationServiceTest {
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.of(new Theme(themeId, "은하수", "description", "image")));
 
-        List<TotalReservation> actual = reservationService.findAllByName(name);
+        List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(1);
         assertThat(actual.getFirst().getName()).isEqualTo(name);
@@ -125,7 +125,7 @@ public class ReservationServiceTest {
         when(reservationDao.selectByName(name)).thenReturn(List.of());
         when(waitingDao.selectByName(name)).thenReturn(List.of());
 
-        List<TotalReservation> actual = reservationService.findAllByName(name);
+        List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).isEmpty();
     }

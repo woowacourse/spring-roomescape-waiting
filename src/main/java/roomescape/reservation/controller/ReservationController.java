@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.dto.MyReservationsResponse;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.TotalReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @Validated
@@ -46,9 +46,9 @@ public class ReservationController {
     }
 
     @GetMapping(value = "/reservations/list", params = "name")
-    public ResponseEntity<List<TotalReservationResponse>> readAllByName(@RequestParam String name) {
-        List<TotalReservationResponse> totalReservations = reservationService.findAllByName(name).stream()
-                .map(TotalReservationResponse::from)
+    public ResponseEntity<List<MyReservationsResponse>> readAllByName(@RequestParam String name) {
+        List<MyReservationsResponse> totalReservations = reservationService.findAllByName(name).stream()
+                .map(MyReservationsResponse::from)
                 .toList();
         return ResponseEntity.ok().body(totalReservations);
     }

@@ -223,7 +223,7 @@ public class ReservationWaitingServiceTest {
         when(reservationWaitingDao.selectById(waitingId))
                 .thenReturn(Optional.of(reservationWaiting));
 
-        ReservationWaiting actual = reservationWaitingService.getWaitingDetails(waitingId);
+        ReservationWaiting actual = reservationWaitingService.findById(waitingId);
 
         assertThat(actual.getWaitingNumber()).isEqualTo(3L);
     }
