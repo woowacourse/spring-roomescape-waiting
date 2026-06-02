@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
@@ -27,25 +28,30 @@ import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
+import roomescape.domain.Waiting;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.AdminReservationRequestDto;
 import roomescape.dto.request.ReservationPatchDto;
+import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.PageResponse;
 
 @JdbcTest
-@Import({AdminReservationService.class, ReservationCreator.class, ReservationJdbcDao.class, TimeJdbcDao.class,
-        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})
+@Import({AdminReservationService.class, ReservationCreator.class, WaitingService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
+        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class, WaitingJdbcDao.class})
 @ActiveProfiles("test")
 class AdminReservationServiceTest {
 
     @Autowired
     private AdminReservationService adminReservationService;
+    @Autowired
+    private WaitingService waitingService;
     @Autowired
     private ReservationDao reservationDao;
     @Autowired
@@ -81,6 +87,13 @@ class AdminReservationServiceTest {
         savedTheme2 = themeDao.insert(new Theme(new Name("방탈출 이름2"), "http://thumbnail_url", "방탈출을 할 수 있다."));
         requestDto1 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
         requestDto2 = new AdminReservationRequestDto(member.getId(), LocalDate.now().plusDays(2), savedTime2.getId(), savedTheme2.getId(), storeId);
+    }
+
+    private Member saveMember(String name, String email) {
+        jdbcTemplate.update(
+                "INSERT INTO members(name, email, password, role) VALUES (?, ?, ?, ?)",
+                name, email, "password", "USER");
+        return memberDao.findByEmail(email).orElseThrow();
     }
 
     @Nested
@@ -223,6 +236,30 @@ class AdminReservationServiceTest {
         void throwsWhenIdNotFound() {
             assertThatThrownBy(() -> adminReservationService.cancelByAdmin(-1L))
                     .isInstanceOf(EntityNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("예약을 취소하면 첫 번째 대기자가 예약으로 승격되고 대기열에서 제거된다")
+        void promotesFirstWaitingOnCancel() {
+            Reservation reservation = reservationDao.insert(Reservation.createByAdmin(
+                    member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            Member firstWaiter = saveMember("대기1", "waiting1@test.com");
+            Member secondWaiter = saveMember("대기2", "waiting2@test.com");
+            WaitingRequestDto waitingDto = new WaitingRequestDto(
+                    LocalDate.now().plusDays(1), savedTime1.getId(), savedTheme1.getId(), storeId);
+            waitingService.create(waitingDto, firstWaiter);
+            waitingService.create(waitingDto, secondWaiter);
+
+            adminReservationService.cancelByAdmin(reservation.getId());
+
+            assertThat(reservationDao.findAllByMemberId(firstWaiter.getId()))
+                    .anyMatch(r -> r.getStatus() == ReservationStatus.BOOKED);
+            assertThat(waitingService.findAll())
+                    .singleElement()
+                    .satisfies(remaining -> {
+                        assertThat(remaining.getMember().getId()).isEqualTo(secondWaiter.getId());
+                        assertThat(remaining.getRank()).isEqualTo(1L);
+                    });
         }
     }
 
