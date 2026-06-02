@@ -5,6 +5,8 @@ import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class ReservationEntryTest {
 
@@ -98,6 +100,25 @@ class ReservationEntryTest {
 
         // then
         assertThat(promoted.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ReservationStatus.class)
+    void status에_맞는_엔트리로_변환한다(ReservationStatus status) {
+        // when
+        ReservationEntry entry = ReservationEntry.from(1L, "이프", status, FIXED);
+
+        // then
+        assertThat(entry.getStatus()).isEqualTo(status);
+    }
+
+    @Test
+    void 삭제_상태이면_비활성이다() {
+        // given
+        ReservationEntry entry = entry(1L, ReservationStatus.DELETED);
+
+        // when & then
+        assertThat(entry.isActive()).isFalse();
     }
 
     private ReservationEntry entry(Long id, ReservationStatus status) {
