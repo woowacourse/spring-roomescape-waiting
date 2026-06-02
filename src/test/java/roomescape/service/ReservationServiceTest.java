@@ -15,6 +15,7 @@ import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.UserReservationRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
@@ -41,6 +42,9 @@ class ReservationServiceTest {
     private WaitingRepository waitingRepository;
 
     @Mock
+    private UserReservationRepository userReservationRepository;
+
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
@@ -53,7 +57,7 @@ class ReservationServiceTest {
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, waitingRepository, reservationTimeRepository, themeRepository, fixedClock
+                reservationRepository, userReservationRepository, reservationTimeRepository, themeRepository, fixedClock
         );
     }
 
@@ -228,13 +232,13 @@ class ReservationServiceTest {
         //given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(18, 0));
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme);
-        Waiting waiting = new Waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme);
 
-        when(reservationRepository.findByName("브라운")).thenReturn(List.of(reservation));
-        when(waitingRepository.findByName("브라운")).thenReturn(List.of(waiting));
-        when(waitingRepository.countByThemeIdAndDateAndTimeIdAndIdLessThanEqual(
-                waiting.getId(), theme, waiting.getDate(), time)).thenReturn(2L);
+        List<UserReservation> userReservations = List.of(
+                UserReservation.reserved(1L, "브라운", LocalDate.of(2026, 5, 11), time, theme),
+                UserReservation.waiting(2L, "브라운", LocalDate.of(2026, 5, 11), time, theme, 2L)
+        );
+
+        when(userReservationRepository.findByName("브라운", 0, 10)).thenReturn(userReservations);
 
         //when
         List<UserReservation> result = reservationService.findUserReservations("브라운", 0, 10);

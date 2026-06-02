@@ -45,12 +45,12 @@ public class UserReservationRepository {
                 JOIN theme t ON w.theme_id = t.id
                 WHERE w.name = ?
                 
-                ORDER BY date, time_id, theme_id
+                ORDER BY date, time_id, theme_id, status
                 LIMIT ?
                 OFFSET ?
                 """;
         int offset = Math.max(page, 0) * size;
-        return jdbctemplate.query(sql, reservationRowsMapper(), name, size, offset);
+        return jdbctemplate.query(sql, reservationRowsMapper(), name, name, size, offset);
     }
 
     private RowMapper<UserReservation> reservationRowsMapper() {
