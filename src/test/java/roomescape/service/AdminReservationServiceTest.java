@@ -239,6 +239,17 @@ class AdminReservationServiceTest {
         }
 
         @Test
+        @DisplayName("이미 취소된 예약을 다시 취소하면 예외를 반환한다")
+        void throwsWhenCancelingAlreadyCanceled() {
+            Reservation saved = reservationDao.insert(Reservation.createByAdmin(
+                    member, LocalDate.now().plusDays(1), savedTime1, savedTheme1, new Store(storeId, "강남점")));
+            adminReservationService.cancelByAdmin(saved.getId());
+
+            assertThatThrownBy(() -> adminReservationService.cancelByAdmin(saved.getId()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+
+        @Test
         @DisplayName("예약을 취소하면 첫 번째 대기자가 예약으로 승격되고 대기열에서 제거된다")
         void promotesFirstWaitingOnCancel() {
             Reservation reservation = reservationDao.insert(Reservation.createByAdmin(

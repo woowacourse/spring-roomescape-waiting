@@ -59,6 +59,9 @@ public class Reservation {
     }
 
     private void doCancel(LocalDateTime now) {
+        if (!isActive()) {
+            throw new BusinessRuleViolationException("이미 취소된 예약입니다.");
+        }
         this.status = ReservationStatus.CANCELED;
         this.deletedAt = now;
     }
