@@ -46,7 +46,7 @@ class ReservationCancellationIntegrationTest {
     }
 
     @Test
-    void 사용자가_본인의_예약을_취소하면_같은_슬롯의_1순위_대기가_예약으로_변경된다() {
+    void 사용자가_본인의_예약을_취소하면_같은_슬롯의_1순위_대기가_예약으로_변경되고_예약_대기에서_삭제된다() {
         Reservation cancelledReservation = reservationRepository.save(
             Reservation.createWithoutId(
                 "테스터",
@@ -81,7 +81,7 @@ class ReservationCancellationIntegrationTest {
     }
 
     @Test
-    void 사용자가_본인의_예약을_수정하면_기존_슬롯의_1순위_대기가_예약으로_변경된다() {
+    void 사용자가_본인의_예약을_수정하면_기존_슬롯의_1순위_대기가_예약으로_변경되고_예약_대기에서_삭제된다() {
         Reservation updatedReservation = reservationRepository.save(
             Reservation.createWithoutId(
                 "테스터",
