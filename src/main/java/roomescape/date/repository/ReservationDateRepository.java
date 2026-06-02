@@ -14,6 +14,8 @@ public interface ReservationDateRepository {
 
     List<ReservationDate> findAll();
 
+    List<ReservationDate> findSlotOfDatesByThemeId(Long themeId);
+
     List<ReservationDate> findAllAfterToday();
 
     ReservationDate save(ReservationDate reservationDate);

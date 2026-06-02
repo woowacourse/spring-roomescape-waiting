@@ -27,6 +27,10 @@ public class ReservationDateService {
         return reservationDateRepository.findAll();
     }
 
+    public List<ReservationDate> readSlotOfDatesByThemeId(Long themeId) {
+        return reservationDateRepository.findSlotOfDatesByThemeId(themeId);
+    }
+
     public List<ReservationDate> readDatesAfterToday() {
         return reservationDateRepository.findAllAfterToday();
     }

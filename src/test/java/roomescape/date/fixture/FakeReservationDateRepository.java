@@ -31,6 +31,11 @@ public class FakeReservationDateRepository implements ReservationDateRepository 
     }
 
     @Override
+    public List<ReservationDate> findSlotOfDatesByThemeId(Long themeId) {
+        return List.of();
+    }
+
+    @Override
     public ReservationDate save(ReservationDate reservationDate) {
         autoIncrement();
         ReservationDate savedReservationDate = ReservationDate.load(autoIncrement, reservationDate.getDate(), true);
