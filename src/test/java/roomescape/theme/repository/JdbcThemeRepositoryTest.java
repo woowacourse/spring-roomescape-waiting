@@ -164,8 +164,13 @@ class JdbcThemeRepositoryTest {
         ReservationTime otherTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
         LocalDate targetDate = LocalDate.of(2026, 5, 1);
 
-        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, activeTheme, Status.WAITING);
-        sqlFixtureGenerator.insertDeletedReservation("포비", targetDate, otherTime, deletedTheme);
+        sqlFixtureGenerator.insertReservation(
+                "브라운",
+                sqlFixtureGenerator.insertReservationSlot(targetDate, time, activeTheme),
+                Status.WAITING);
+        sqlFixtureGenerator.insertDeletedReservation(
+                "포비",
+                sqlFixtureGenerator.insertReservationSlot(targetDate, otherTime, deletedTheme));
 
         // when
         List<Theme> topThemes = jdbcThemeRepository.findTopThemesByReservationCount(
@@ -195,8 +200,14 @@ class JdbcThemeRepositoryTest {
         ReservationTime otherTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
         LocalDate targetDate = LocalDate.of(2026, 5, 1);
 
-        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, activeTheme, Status.WAITING);
-        sqlFixtureGenerator.insertReservation("포비", targetDate, otherTime, deletedTheme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation(
+                "브라운",
+                sqlFixtureGenerator.insertReservationSlot(targetDate, time, activeTheme),
+                Status.WAITING);
+        sqlFixtureGenerator.insertReservation(
+                "포비",
+                sqlFixtureGenerator.insertReservationSlot(targetDate, otherTime, deletedTheme),
+                Status.WAITING);
 
         // when
         List<Theme> topThemes = jdbcThemeRepository.findTopThemesByReservationCount(

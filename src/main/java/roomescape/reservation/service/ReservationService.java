@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.dto.PageResult;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.exception.RetryableReservationCreateException;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.common.retry.RetryOnException;
@@ -32,6 +34,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
@@ -42,7 +45,9 @@ public class ReservationService {
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
-        Reservation saved = reservationCreator.createReservation(guestName, date, time, theme);
+        ReservationSlot reservationSlot = reservationSlotRepository.upsert(ReservationSlot.create(date, time, theme));
+
+        Reservation saved = reservationCreator.createReservation(guestName, reservationSlot);
         return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
     }
@@ -66,14 +71,20 @@ public class ReservationService {
         reservationValidator.validateBeforeEdit(beforeReservation, changedDate, changedTimeId, requestGuestName);
 
         ReservationTime changedTime = getReservationTime(changedTimeId);
+        ReservationSlot changedSlot = reservationSlotRepository.upsert(
+                ReservationSlot.create(changedDate, changedTime, beforeReservation.getTheme()));
 
-        Status afterStatus = determineState(changedDate, changedTimeId, beforeReservation.getTheme().getId());
-        Reservation changedReservation = beforeReservation.changeDateTimeAndStatus(
-                changedDate, changedTime, afterStatus, LocalDateTime.now(clock));
+        Status afterStatus = determineState(changedSlot);
+        Reservation changedReservation = Reservation.of(
+                beforeReservation.getId(),
+                beforeReservation.getGuestName(),
+                changedSlot,
+                afterStatus,
+                LocalDateTime.now(clock));
 
         reservationValidator.validateEdit(changedReservation);
 
-        updateDateAndTimeAndStatus(changedReservation);
+        updateSlotAndStatus(changedReservation, changedSlot);
         updateTopWaitingConfirmed(beforeReservation);
     }
 
@@ -128,11 +139,10 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
-    private void updateDateAndTimeAndStatus(Reservation reservation) {
-        if (!reservationRepository.updateDateAndTimeAndStatus(
+    private void updateSlotAndStatus(Reservation reservation, ReservationSlot slot) {
+        if (!reservationRepository.updateSlotAndStatus(
                 reservation.getId(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                slot.getId(),
                 reservation.getStatus(),
                 reservation.getLastModifiedAt()
         )) {
@@ -146,8 +156,8 @@ public class ReservationService {
         }
     }
 
-    private Status determineState(LocalDate date, Long timeId, Long themeId) {
-        if (!reservationRepository.existsBySlotAndStatusConfirmed(date, timeId, themeId)) {
+    private Status determineState(ReservationSlot slot) {
+        if (!reservationRepository.existsBySlotAndStatusConfirmed(slot)) {
             return CONFIRMED;
         }
         return Status.WAITING;

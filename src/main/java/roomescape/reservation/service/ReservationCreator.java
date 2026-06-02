@@ -5,17 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.retry.RetryOnException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.exception.RetryableReservationCreateException;
 import roomescape.reservation.service.validator.ReservationValidator;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static roomescape.reservation.domain.Status.CONFIRMED;
@@ -30,17 +26,17 @@ public class ReservationCreator {
 
     @Transactional
     @RetryOnException(retryOn = RetryableReservationCreateException.class)
-    public Reservation createReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        Status status = determineState(date, time.getId(), theme.getId());
+    public Reservation createReservation(String guestName, ReservationSlot reservationSlot) {
+        Status status = determineState(reservationSlot);
         Reservation reservation = Reservation.create(
-                guestName, date, time, theme, status, LocalDateTime.now(clock));
+                guestName, reservationSlot, status, LocalDateTime.now(clock));
         reservationValidator.validateCreate(reservation);
 
         return reservationRepository.save(reservation);
     }
 
-    private Status determineState(LocalDate date, Long timeId, Long themeId) {
-        if (!reservationRepository.existsBySlotAndStatusConfirmed(date, timeId, themeId)) {
+    private Status determineState(ReservationSlot reservationSlot) {
+        if (!reservationRepository.existsBySlotAndStatusConfirmed(reservationSlot)) {
             return CONFIRMED;
         }
         return Status.WAITING;

@@ -28,35 +28,8 @@ class ReservationTest {
     @DisplayName("예약자 이름이 비어있으면 도메인 예외가 발생한다.")
     void create_fail_when_name_is_blank() {
         assertDomainException(
-                () -> Reservation.create(" ", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING, LocalDateTime.now()),
+                () -> Reservation.create(" ", ReservationSlot.create(LocalDate.of(2023, 8, 5), time, theme), Status.WAITING, LocalDateTime.now()),
                 INVALID_RESERVATION_GUEST_NAME
-        );
-    }
-
-    @Test
-    @DisplayName("예약 날짜가 null이면 도메인 예외가 발생한다.")
-    void create_fail_when_date_is_null() {
-        assertDomainException(
-                () -> Reservation.create("브라운", null, time, theme, Status.WAITING, LocalDateTime.now()),
-                INVALID_RESERVATION_DATE
-        );
-    }
-
-    @Test
-    @DisplayName("예약 시간이 null이면 도메인 예외가 발생한다.")
-    void create_fail_when_time_is_null() {
-        assertDomainException(
-                () -> Reservation.create("브라운", LocalDate.of(2023, 8, 5), null, theme, Status.WAITING, LocalDateTime.now()),
-                INVALID_RESERVATION_TIME
-        );
-    }
-
-    @Test
-    @DisplayName("예약 테마가 null이면 도메인 예외가 발생한다.")
-    void create_fail_when_theme_is_null() {
-        assertDomainException(
-                () -> Reservation.create("브라운", LocalDate.of(2023, 8, 5), time, null, Status.WAITING, LocalDateTime.now()),
-                INVALID_THEME
         );
     }
 

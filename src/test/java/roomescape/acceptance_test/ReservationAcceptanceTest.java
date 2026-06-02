@@ -85,7 +85,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(reservation, editRequest);
 
         // then
-        예약_수정이_성공한다(response, reservation);
+        예약_수정이_성공한다(response);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(myReservation, editRequest);
 
         // then
-        예약_수정이_성공한다(response, myReservation);
+        예약_수정이_성공한다(response);
         내_예약_목록에서_예약_상태를_응답받는다(
                 내_예약_목록_조회를_요청하면(myReservation.guestName()),
                 myReservation,

@@ -1,23 +1,15 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.common.dto.PageResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.test_config.MutableClock;
 import roomescape.test_config.TestClockConfig;
@@ -26,32 +18,22 @@ import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Import({TestClockConfig.class, SQLFixtureGenerator.class, ReservationConcurrencyTest.ConcurrencyTestConfig.class})
+@Import({TestClockConfig.class, SQLFixtureGenerator.class})
 @Sql(value = "/acceptance-cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationConcurrencyTest {
 
     @Autowired
     private ReservationService reservationService;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
 
     @Autowired
     private SQLFixtureGenerator sqlFixtureGenerator;
@@ -61,13 +43,6 @@ class ReservationConcurrencyTest {
 
     @Autowired
     private MutableClock clock;
-
-    @BeforeEach
-    void resetConcurrencyTestDouble() {
-        if (reservationRepository instanceof SynchronizedReservationRepository synchronizedReservationRepository) {
-            synchronizedReservationRepository.reset();
-        }
-    }
 
     @Test
     @DisplayName("동시에 같은 날짜, 시간, 테마로 예약하면 확정 예약은 하나만 생성되어야 한다.")
@@ -105,9 +80,13 @@ class ReservationConcurrencyTest {
         LocalDate targetDate = LocalDate.of(2025, 5, 12);
 
         Reservation brown = sqlFixtureGenerator.insertReservation(
-                "브라운", originalDate, brownTime, theme, Status.CONFIRMED);
+                "브라운",
+                sqlFixtureGenerator.insertReservationSlot(originalDate, brownTime, theme),
+                Status.CONFIRMED);
         Reservation pobi = sqlFixtureGenerator.insertReservation(
-                "포비", originalDate, pobiTime, theme, Status.CONFIRMED);
+                "포비",
+                sqlFixtureGenerator.insertReservationSlot(originalDate, pobiTime, theme),
+                Status.CONFIRMED);
 
         // when
         executeConcurrently(
@@ -158,11 +137,13 @@ class ReservationConcurrencyTest {
     private long countReservationsByStatus(LocalDate date, Long timeId, Long themeId, Status status) {
         Long count = jdbcTemplate.queryForObject("""
                         SELECT COUNT(*)
-                        FROM reservation
-                        WHERE date = :date
-                          AND time_id = :timeId
-                          AND theme_id = :themeId
-                          AND status = :status
+                        FROM reservation r
+                        INNER JOIN reservation_slot s
+                            ON r.slot_id = s.id
+                        WHERE s.date = :date
+                          AND s.time_id = :timeId
+                          AND s.theme_id = :themeId
+                          AND r.status = :status
                         """,
                 new MapSqlParameterSource()
                         .addValue("date", Date.valueOf(date))
@@ -174,117 +155,4 @@ class ReservationConcurrencyTest {
         return count == null ? 0 : count;
     }
 
-    @TestConfiguration
-    static class ConcurrencyTestConfig {
-
-        @Bean
-        @Primary
-        ReservationRepository synchronizedReservationRepository(JdbcReservationRepository delegate) {
-            return new SynchronizedReservationRepository(delegate);
-        }
-    }
-
-    private static class SynchronizedReservationRepository implements ReservationRepository {
-
-        private final ReservationRepository delegate;
-        private final CyclicBarrier concurrentCreateBarrier = new CyclicBarrier(2);
-        private final AtomicInteger confirmedStatusCheckCount = new AtomicInteger();
-
-        private SynchronizedReservationRepository(ReservationRepository delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public Optional<Reservation> findById(Long id) {
-            return delegate.findById(id);
-        }
-
-        @Override
-        public Optional<ReservationWaitingDto> findWaitingById(Long id) {
-            return delegate.findWaitingById(id);
-        }
-
-        @Override
-        public PageResult<Reservation> findAllByStatusCanceledNot(int page, int size) {
-            return delegate.findAllByStatusCanceledNot(page, size);
-        }
-
-        @Override
-        public List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName) {
-            return delegate.findWaitingAllByGuestName(guestName);
-        }
-
-        @Override
-        public Optional<Reservation> findBySlotAndStatusWaitingAndWaitingNumberIsOne(
-                LocalDate date, Long timeId, Long themeId) {
-            return delegate.findBySlotAndStatusWaitingAndWaitingNumberIsOne(date, timeId, themeId);
-        }
-
-        @Override
-        public Reservation save(Reservation reservation) {
-            return delegate.save(reservation);
-        }
-
-        @Override
-        public boolean updateDateAndTimeAndStatus(
-                Long id, LocalDate date, Long timeId, Status status, LocalDateTime lastModifiedAt) {
-            return delegate.updateDateAndTimeAndStatus(id, date, timeId, status, lastModifiedAt);
-        }
-
-        @Override
-        public boolean updateStatus(Long id, Status status) {
-            return delegate.updateStatus(id, status);
-        }
-
-        @Override
-        public boolean cancelById(Long id) {
-            return delegate.cancelById(id);
-        }
-
-        @Override
-        public boolean existsBySlotAndGuestNameExceptCanceled(
-                LocalDate date, Long timeId, Long themeId, String guestName) {
-            return delegate.existsBySlotAndGuestNameExceptCanceled(date, timeId, themeId, guestName);
-        }
-
-        @Override
-        public boolean existsBySlotAndStatusConfirmed(LocalDate date, Long timeId, Long themeId) {
-            boolean exists = delegate.existsBySlotAndStatusConfirmed(date, timeId, themeId);
-            if (confirmedStatusCheckCount.incrementAndGet() <= 2) {
-                awaitConcurrentCreate();
-            }
-            return exists;
-        }
-
-        @Override
-        public boolean existsBySlotExceptReservation(LocalDate date, Long timeId, Long themeId, Long excludedId) {
-            return delegate.existsBySlotExceptReservation(date, timeId, themeId, excludedId);
-        }
-
-        @Override
-        public boolean existByTimeId(Long timeId) {
-            return delegate.existByTimeId(timeId);
-        }
-
-        @Override
-        public boolean existByThemeId(Long themeId) {
-            return delegate.existByThemeId(themeId);
-        }
-
-        private void awaitConcurrentCreate() {
-            try {
-                concurrentCreateBarrier.await(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException(e);
-            } catch (BrokenBarrierException | TimeoutException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        private void reset() {
-            confirmedStatusCheckCount.set(0);
-            concurrentCreateBarrier.reset();
-        }
-    }
 }

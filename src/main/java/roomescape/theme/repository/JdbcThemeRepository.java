@@ -70,10 +70,12 @@ public class JdbcThemeRepository implements ThemeRepository {
                             t.thumbnail,
                             t.deleted_at
                         FROM theme t
+                        INNER JOIN reservation_slot s
+                            ON s.theme_id = t.id
                         INNER JOIN reservation r
-                            ON r.theme_id = t.id
+                            ON r.slot_id = s.id
                             AND r.status != 'CANCELED'
-                        WHERE r.date BETWEEN :startDate AND :endDate
+                        WHERE s.date BETWEEN :startDate AND :endDate
                             AND t.deleted_at IS NULL
                         GROUP BY t.id, t.name, t.description, t.thumbnail, t.deleted_at
                         ORDER BY COUNT(r.id) DESC

@@ -7,7 +7,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.JdbcReservationSlotRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
@@ -31,7 +34,8 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
         ThemeService.class,
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class
+        JdbcThemeRepository.class,
+        JdbcReservationSlotRepository.class
 })
 class ThemeServiceTest {
 
@@ -46,6 +50,9 @@ class ThemeServiceTest {
 
     @Autowired
     ThemeRepository themeRepository;
+
+    @Autowired
+    ReservationSlotRepository slotRepository;
 
     @Test
     @DisplayName("이미 예약 정보가 존재하는 테마는 삭제할 수 없다.")
@@ -74,7 +81,8 @@ class ThemeServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(Reservation.create(name, date, time, theme, Status.WAITING, LocalDateTime.now()));
+        ReservationSlot reservationSlot = slotRepository.upsert(ReservationSlot.create(date, time, theme));
+        return reservationRepository.save(Reservation.create(name, reservationSlot, Status.WAITING, LocalDateTime.now()));
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
