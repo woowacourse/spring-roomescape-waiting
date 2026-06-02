@@ -90,4 +90,8 @@ public class Reservation {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
+    public long getSlotId() {
+        return slot.getId();
+    }
 }

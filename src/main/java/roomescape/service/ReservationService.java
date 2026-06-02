@@ -86,9 +86,9 @@ public class ReservationService {
         }
 
         try {
-            Long previousSlotId = existed.getSlot().getId();
+            Long previousSlotId = existed.getSlotId();
             Reservation moved = updateSlot(existed, reservationRequest);
-            promoteOrCleanup(previousSlotId);
+            promoteOrCleanupSlot(previousSlotId);
             return ReservationResponse.from(moved);
         } catch (DuplicateKeyException e) {
             throw new ReservationAlreadyExistException();
@@ -110,10 +110,10 @@ public class ReservationService {
         if (deleted == 0) {
             throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
         }
-        promoteOrCleanup(reservation.getSlot().getId());
+        promoteOrCleanupSlot(reservation.getSlot().getId());
     }
 
-    private void promoteOrCleanup(Long slotId) {
+    private void promoteOrCleanupSlot(Long slotId) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstBySlotId(slotId);
         if (firstWaiting.isEmpty()) {
             deleteSlot(slotId);
