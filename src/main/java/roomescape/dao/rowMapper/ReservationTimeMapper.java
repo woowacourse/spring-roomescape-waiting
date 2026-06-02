@@ -18,7 +18,7 @@ public final class ReservationTimeMapper {
                 rs.getLong("id"),
                 rs.getTime("start_at").toLocalTime()
         ),
-        rs.getBoolean("reserved"));
+        rs.getBoolean("reservable"));
     };
 
     private ReservationTimeMapper() {

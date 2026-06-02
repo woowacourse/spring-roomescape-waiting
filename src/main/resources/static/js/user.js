@@ -41,7 +41,7 @@
     selectedTheme: null,
     selectedDate: null,
     selectedTimeId: null,
-    selectedTimeIsReserved: false,
+    selectedTimeIsReservable: false,
     availableDates: new Set(),
     calendarMonth: new Date(),
     editing: null,
@@ -344,14 +344,14 @@
     if (state.editing) {
       reserveSubmitBtn.textContent = "예약 변경";
     } else {
-      reserveSubmitBtn.textContent = state.selectedTimeIsReserved ? "대기 신청" : "예약 완료";
+      reserveSubmitBtn.textContent = state.selectedTimeIsReservable ? "예약 완료" : "대기 신청";
     }
   }
 
   function clearTimeChips() {
     timeChips.innerHTML = "";
     state.selectedTimeId = null;
-    state.selectedTimeIsReserved = false;
+    state.selectedTimeIsReservable = false;
   }
 
   function selectTimeChip(chip) {
@@ -362,7 +362,7 @@
     chip.classList.add("is-active");
     chip.setAttribute("aria-checked", "true");
     state.selectedTimeId = Number(chip.dataset.timeId);
-    state.selectedTimeIsReserved = chip.dataset.reserved === "true";
+    state.selectedTimeIsReservable = chip.dataset.reservable === "true";
     updateSubmitButton();
   }
 
@@ -395,7 +395,7 @@
         chip.type = "button";
         chip.className = "time-chip";
         chip.dataset.timeId = String(s.timeResponse.id);
-        chip.dataset.reserved = s.isReserved ? "true" : "false";
+        chip.dataset.reservable = s.isReservable ? "true" : "false";
         chip.setAttribute("role", "radio");
         chip.setAttribute("aria-checked", "false");
 
@@ -405,11 +405,11 @@
 
         const statusEl = document.createElement("span");
         statusEl.className = "time-chip__status";
-        if (state.editing && s.isReserved) {
+        if (state.editing && !s.isReservable) {
           statusEl.textContent = "예약됨";
           chip.disabled = true;
         } else {
-          statusEl.textContent = s.isReserved ? "대기 가능" : "예약 가능";
+          statusEl.textContent = s.isReservable ? "예약 가능" : "대기 가능";
         }
 
         chip.append(timeEl, statusEl);
@@ -448,7 +448,7 @@
     const timeId = state.selectedTimeId;
     const name = nameInput.value.trim();
     if (!timeId || !name) return;
-    const isReserved = state.selectedTimeIsReserved;
+    const isReservable = state.selectedTimeIsReservable;
     const editing = state.editing;
     try {
       if (editing) {
@@ -472,19 +472,7 @@
         loadPopular();
         return;
       }
-      if (isReserved) {
-        await fetchJson("/waitings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            date: state.selectedDate,
-            timeId,
-            themeId: state.selectedTheme.id,
-          }),
-        });
-        reserveMessage.textContent = "대기 신청이 완료되었습니다.";
-      } else {
+      if (isReservable) {
         await fetchJson("/reservations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -496,6 +484,18 @@
           }),
         });
         reserveMessage.textContent = "예약이 완료되었습니다.";
+      } else {
+        await fetchJson("/waitings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            date: state.selectedDate,
+            timeId,
+            themeId: state.selectedTheme.id,
+          }),
+        });
+        reserveMessage.textContent = "대기 신청이 완료되었습니다.";
       }
       reserveMessage.classList.add("message--ok");
       loadPopular();
@@ -505,9 +505,9 @@
     } catch (e) {
       reserveMessage.textContent = e.message || (editing
           ? "예약 변경에 실패했습니다. 입력값을 확인해 주세요."
-          : isReserved
-              ? "대기 신청에 실패했습니다. 입력값을 확인해 주세요."
-              : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.");
+          : isReservable
+              ? "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요."
+              : "대기 신청에 실패했습니다. 입력값을 확인해 주세요.");
       reserveMessage.classList.add("message--err");
     }
   });

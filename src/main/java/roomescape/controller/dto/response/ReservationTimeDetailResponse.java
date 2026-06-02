@@ -4,12 +4,12 @@ import roomescape.service.dto.result.ReservationTimeDetailResult;
 
 public record ReservationTimeDetailResponse (
         ReservationTimeResponse timeResponse,
-        boolean isReserved
+        boolean isReservable
 ){
     public static ReservationTimeDetailResponse from(ReservationTimeDetailResult result){
         return new ReservationTimeDetailResponse(
                 ReservationTimeResponse.from(result.timeResult()),
-                result.isReserved()
+                result.isReservable()
         );
     }
 }

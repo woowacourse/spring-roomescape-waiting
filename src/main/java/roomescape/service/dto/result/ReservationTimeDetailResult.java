@@ -4,12 +4,12 @@ import roomescape.dao.dto.TimeQueryResult;
 
 public record ReservationTimeDetailResult(
         ReservationTimeResult timeResult,
-        boolean isReserved
+        boolean isReservable
 ) {
     public static ReservationTimeDetailResult from(TimeQueryResult result) {
         return new ReservationTimeDetailResult(
                 ReservationTimeResult.from(result.reservationTime()),
-                result.isReserved()
+                result.isReservable()
         );
     }
 }
