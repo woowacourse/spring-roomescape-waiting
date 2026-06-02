@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
@@ -45,6 +46,7 @@ public class ReservationFacade {
                 .toList();
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ReservationInfo addReservation(final ReservationCreateCommand command) {
         ReservationTime time = timeService.getTime(command.timeId(), command.date());
         Theme theme = themeService.getThemeById(command.themeId());
@@ -66,13 +68,14 @@ public class ReservationFacade {
                 .ifPresent(activeReservationService::savePromoted);
     }
 
+    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo changeReservation(final Long id, final ReservationChangeCommand command) {
         ReservationTime time = timeService.getTime(command.timeId(), command.date());
         Theme theme = themeService.getThemeById(command.themeId());
         TimeSlot slot = timeSlotService.getTimeSlot(command.date(), time, theme);
 
         boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId(), id);
-        
+
         if (command.status().equals(Status.PENDING)) {
             isSlotFull = activeReservationService.existsBySlotId(slot.getId());
             return changePendingReservation(id, command, slot, isSlotFull);

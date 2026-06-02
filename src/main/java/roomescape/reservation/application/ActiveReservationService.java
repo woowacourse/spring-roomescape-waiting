@@ -24,7 +24,6 @@ public class ActiveReservationService {
     private final Clock clock;
     private final ActiveReservationRepository reservationRepository;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ReservationInfo add(final TimeSlot slot, final ReservationCreateCommand command) {
         if (reservationRepository.existsByActiveSlotId(slot.getId())) {
             throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
@@ -52,7 +51,6 @@ public class ActiveReservationService {
         }
     }
 
-    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo change(final Long id, final TimeSlot slot, final ReservationChangeCommand command) {
         try {
             ActiveReservation reservation = reservationRepository.getById(id);
