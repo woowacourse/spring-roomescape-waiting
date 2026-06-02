@@ -10,7 +10,7 @@ public class ReservationWaiting {
     private final String name;
     private final LocalDateTime requestedAt;
 
-    public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestedAt) {
+    private ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestedAt) {
         this.id = id;
         this.reservation = reservation;
         this.name = ReserverName.from(name).value();
