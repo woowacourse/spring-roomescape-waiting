@@ -21,7 +21,6 @@ import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -127,7 +126,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
         given(reservationDao.findWaitingById(1L))
-                .willReturn(Optional.of(new ReservationWaiting(1L, reservation, 1)));
+                .willReturn(Optional.of(reservation));
 
         reservationWaitingService.deleteWaiting(1L);
 

@@ -74,14 +74,6 @@ public class ReservationService {
         return reservationDao.findByName(username);
     }
 
-    @Transactional
-    public Reservation saveEntry(String name, LocalDate date, long timeId, long themeId) {
-        ReservationTime time = validateReservationTime(timeId);
-        Theme theme = validateTheme(themeId);
-        Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
-        return reservationDao.save(reservation);
-    }
-
     @Transactional(readOnly = true)
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);

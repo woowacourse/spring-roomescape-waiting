@@ -32,7 +32,6 @@ public class ReservationDao {
     );
 
     private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (rs, rowNum) -> new ReservationWaiting(
-            rs.getLong("reservation_id"),
             new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("name"),
@@ -145,18 +144,17 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationRowMapper, username);
     }
 
-    public Optional<ReservationWaiting> findWaitingById(long id) {
+    public Optional<Reservation> findWaitingById(long id) {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, r.created_at, r.status,
                        t.id AS time_id, t.start_at AS time_value,
-                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
-                       0 AS waiting_order
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
                 WHERE r.id = ? AND r.status = 'WAITING'
                 """;
-        return jdbcTemplate.query(sql, reservationWaitingRowMapper, id).stream().findFirst();
+        return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
     }
 
     public List<ReservationWaiting> findAllWaitingByName(String username) {

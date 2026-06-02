@@ -17,6 +17,7 @@ import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWaiting;
 import roomescape.service.ReservationWaitingService;
 
 @RequestMapping("/reservations/waiting")
@@ -47,7 +48,7 @@ public class ReservationWaitingController {
     public ResponseEntity<ReservationWaitingsResponse> getReservationWaiting(@RequestParam String username) {
         List<ReservationWaitingResponse> responses = reservationWaitingService.findAllWaitingByName(username)
                 .stream()
-                .map(ReservationWaitingResponse::from)
+                .map(w -> ReservationWaitingResponse.from(w.reservation(), w.waitingNumber()))
                 .toList();
         return ResponseEntity.ok(new ReservationWaitingsResponse(responses));
     }

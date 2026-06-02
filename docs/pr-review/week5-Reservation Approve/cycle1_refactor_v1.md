@@ -11,7 +11,7 @@
 ### Domain
 - [x] `ReservationStatus` enum 신규 추가 (`CONFIRMED`, `WAITING`)
 - [x] `Reservation`에 `status` 필드 추가
-- [ ] `ReservationWaiting` 도메인 클래스 삭제
+- [x] `ReservationWaiting` 도메인 클래스 삭제
 
 ### DAO
 - [x] `ReservationWaitingDao` 전체 삭제
@@ -20,12 +20,12 @@
 - [x] `ReservationDao` — 대기 관련 메서드 흡수: `findWaitingById`, `findAllWaitingByName`, `existsWaitingBy...`
 
 ### Service
-- [ ] `ReservationService` — `saveEntry()` 제거
+- [x] `ReservationService` — `saveEntry()` 제거
 - [x] `ReservationWaitingService` — `saveWaiting()`: 단일 테이블 INSERT (status='WAITING')
 - [x] `ReservationWaitingService` — `deleteWaiting()`: 단일 DELETE
 
 ### Controller / DTO
-- [ ] `ReservationWaitingResponse` — `from(ReservationWaiting)` → `from(Reservation, long waitingNumber)` 로 변경
+- [x] `ReservationWaitingResponse` — `from(ReservationWaiting)` → `from(Reservation, long waitingNumber)` 로 변경
 
 ### Test
 - [x] `ReservationWaitingDaoTest` 삭제 (또는 `ReservationDao`로 이관)

@@ -52,8 +52,8 @@ public class ReservationWaitingService {
 
     @Transactional
     public void deleteWaiting(long id) {
-        reservationDao.findWaitingById(id).ifPresent(waiting -> {
-            waiting.reservation().validateCancellable(LocalDateTime.now(clock));
+        reservationDao.findWaitingById(id).ifPresent(reservation -> {
+            reservation.validateCancellable(LocalDateTime.now(clock));
             reservationDao.delete(id);
         });
     }
