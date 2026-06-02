@@ -161,6 +161,7 @@ public class WaitingAcceptanceTest {
                 .then().log().all()
                 .statusCode(201);
     }
+
     private void createDefaultTime(String startAt) {
         Map<String, String> timeParams = new HashMap<>();
         timeParams.put("startAt", startAt);

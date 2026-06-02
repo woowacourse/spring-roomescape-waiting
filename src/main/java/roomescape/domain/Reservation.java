@@ -81,7 +81,7 @@ public class Reservation {
     }
 
     public void validateNotMyReservation(String inputName) {
-        if(name.equals(inputName)) {
+        if (name.equals(inputName)) {
             throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
     }

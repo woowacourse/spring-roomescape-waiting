@@ -10,12 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservedTimeResponseDTO;
-import roomescape.dto.WaitingResponseDTO;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
@@ -23,7 +21,6 @@ import roomescape.exception.ThemeErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
