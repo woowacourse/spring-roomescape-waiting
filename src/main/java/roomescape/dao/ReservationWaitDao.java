@@ -75,9 +75,10 @@ public class ReservationWaitDao {
                         reservation_id,
                         member_id,
                         created_at,
+                        id,
                         ROW_NUMBER() OVER (
                             PARTITION BY reservation_id
-                            ORDER BY created_at
+                            ORDER BY created_at, id
                         ) AS order_num
                     FROM reservation_wait
                 ) AS ranked
@@ -130,7 +131,7 @@ public class ReservationWaitDao {
                         id,
                         ROW_NUMBER() OVER (
                             PARTITION BY reservation_id
-                            ORDER BY created_at
+                            ORDER BY created_at, id
                         ) AS order_num
                     FROM reservation_wait
                 ) AS ranked
