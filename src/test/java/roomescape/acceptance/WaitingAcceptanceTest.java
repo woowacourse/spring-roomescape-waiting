@@ -82,27 +82,8 @@ public class WaitingAcceptanceTest {
 
     @Test
     void 대기_등록할_예약이_존재하지_않으면_대기를_생성할_수_없고_즉시_예약할_수_있다() {
-        Map<String, String> timeParams = new HashMap<>();
-        timeParams.put("startAt", "10:00");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(timeParams)
-                .when().post("/api/admin/times")
-                .then().log().all()
-                .statusCode(201);
-
-        Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
-        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
-        themeParams.put("imageUrl", "https://image.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/api/admin/themes")
-                .then().log().all()
-                .statusCode(201);
+        createDefaultTime("10:00");
+        createDefaultTheme("귀신 찾기");
 
         Map<String, Object> waiting = new HashMap<>();
         waiting.put("name", "코코");
