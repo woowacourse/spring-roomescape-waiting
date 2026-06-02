@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.util.Validator;
+
 import java.time.LocalDateTime;
 
 public class ReservationWait {
@@ -38,32 +40,20 @@ public class ReservationWait {
     }
 
     private void validateId(Long id) {
-        if (id != null && id <= 0) {
-            throw new IllegalArgumentException("Id는 0보다 작거나 같을 수 없습니다.");
-        }
+        Validator.positive(id, "Id는 0보다 작거나 같을 수 없습니다.");
     }
 
     private void validateReservationId(Long reservationId) {
-        if (reservationId == null) {
-            throw new IllegalArgumentException("예약 ID는 null일 수 없습니다.");
-        }
-        if (reservationId <= 0) {
-            throw new IllegalArgumentException("예약 ID는 0보다 작거나 같을 수 없습니다.");
-        }
+        Validator.notNull(reservationId, "예약 ID는 null일 수 없습니다.");
+        Validator.positive(reservationId, "예약 ID는 0보다 작거나 같을 수 없습니다.");
     }
 
     private void validateMemberId(Long memberId) {
-        if (memberId == null) {
-            throw new IllegalArgumentException("회원 ID는 null일 수 없습니다.");
-        }
-        if (memberId <= 0) {
-            throw new IllegalArgumentException("회원 ID는 0보다 작거나 같을 수 없습니다.");
-        }
+        Validator.notNull(memberId, "회원 ID는 null일 수 없습니다.");
+        Validator.positive(memberId, "회원 ID는 0보다 작거나 같을 수 없습니다.");
     }
 
     private void validateCreatedAt(LocalDateTime createdAt) {
-        if (createdAt == null) {
-            throw new IllegalArgumentException("생성 시간은 null일 수 없습니다.");
-        }
+        Validator.notNull(createdAt, "생성 시간은 null일 수 없습니다.");
     }
 }

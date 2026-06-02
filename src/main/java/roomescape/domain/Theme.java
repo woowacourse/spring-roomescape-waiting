@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.util.Validator;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -38,21 +40,15 @@ public class Theme {
     }
 
     private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(name, "이름은 비어 있을 수 없습니다.");
     }
 
     private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("설명은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(description, "설명은 비어 있을 수 없습니다.");
     }
 
     private void validateImgUrl(String imgUrl) {
-        if (imgUrl == null || imgUrl.isBlank()) {
-            throw new IllegalArgumentException("URL은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(imgUrl, "URL은 비어 있을 수 없습니다.");
         try {
             URI uri = new URI(imgUrl);
             String scheme = uri.getScheme();

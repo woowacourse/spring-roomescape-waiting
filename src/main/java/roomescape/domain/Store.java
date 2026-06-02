@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.util.Validator;
+
 public class Store {
 
     private static final int MAX_NAME_LENGTH = 50;
@@ -23,9 +25,7 @@ public class Store {
     }
 
     private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("매장 이름은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(name, "매장 이름은 비어 있을 수 없습니다.");
         if (name.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("매장 이름은 " + MAX_NAME_LENGTH + "자 이하여야 합니다.");
         }

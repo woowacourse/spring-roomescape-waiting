@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import roomescape.exception.auth.WrongStoreAccessException;
+import roomescape.util.Validator;
 
 import java.time.LocalDate;
 
@@ -59,44 +60,26 @@ public class Reservation {
     }
 
     private void validateMemberId(Long memberId) {
-        if (memberId == null) {
-            throw new IllegalArgumentException("회원 ID는 비어 있을 수 없습니다.");
-        }
-
-        if (memberId <= 0) {
-            throw new IllegalArgumentException("회원 ID는 양수여야 합니다.");
-        }
+        Validator.notNull(memberId, "회원 ID는 비어 있을 수 없습니다.");
+        Validator.positive(memberId, "회원 ID는 양수여야 합니다.");
     }
 
     private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("날짜는 비어 있을 수 없습니다.");
-        }
+        Validator.notNull(date, "날짜는 비어 있을 수 없습니다.");
     }
 
     private void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("예약시간은 비어 있을 수 없습니다.");
-        }
+        Validator.notNull(time, "예약시간은 비어 있을 수 없습니다.");
     }
 
     private void validateThemeId(Long themeId) {
-        if (themeId == null) {
-            throw new IllegalArgumentException("테마 ID는 비어 있을 수 없습니다.");
-        }
-
-        if (themeId <= 0) {
-            throw new IllegalArgumentException("테마 ID는 양수여야 합니다.");
-        }
+        Validator.notNull(themeId, "테마 ID는 비어 있을 수 없습니다.");
+        Validator.positive(themeId, "테마 ID는 양수여야 합니다.");
     }
 
     private void validateStoreId(Long storeId) {
-        if (storeId == null) {
-            throw new IllegalArgumentException("매장 ID는 비어 있을 수 없습니다.");
-        }
-        if (storeId <= 0) {
-            throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
-        }
+        Validator.notNull(storeId, "매장 ID는 비어 있을 수 없습니다.");
+        Validator.positive(storeId, "매장 ID는 양수여야 합니다.");
     }
 
     public boolean isReservedBy(long memberId) {

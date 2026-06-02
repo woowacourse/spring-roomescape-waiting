@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.util.Validator;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,8 +31,6 @@ public class ReservationTime {
     }
 
     private void validateStartAt(LocalTime startAt) {
-        if (startAt == null) {
-            throw new IllegalArgumentException("예약 시작 시간은 비어 있을 수 없습니다.");
-        }
+        Validator.notNull(startAt, "예약 시작 시간은 비어 있을 수 없습니다.");
     }
 }

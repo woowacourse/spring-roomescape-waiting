@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import roomescape.auth.Role;
+import roomescape.util.Validator;
 
 public class Member {
 
@@ -57,24 +58,18 @@ public class Member {
     }
 
     private void validateEmail(String email) {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("이메일은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(email, "이메일은 비어 있을 수 없습니다.");
         if (!email.matches(EMAIL_PATTERN)) {
             throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
         }
     }
 
     private void validatePassword(String password) {
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("비밀번호는 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(password, "비밀번호는 비어 있을 수 없습니다.");
     }
 
     private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 비어 있을 수 없습니다.");
-        }
+        Validator.notBlank(name, "이름은 비어 있을 수 없습니다.");
         if (name.length() < MIN_NAME_LENGTH || name.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("이름은 2자 이상 10자 이하여야 합니다.");
         }
@@ -84,15 +79,11 @@ public class Member {
     }
 
     private void validateRole(Role role) {
-        if (role == null) {
-            throw new IllegalArgumentException("권한은 비어 있을 수 없습니다.");
-        }
+        Validator.notNull(role, "권한은 비어 있을 수 없습니다.");
     }
 
     private void validateStoreId(Long storeId) {
-        if (storeId != null && storeId <= 0) {
-            throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
-        }
+        Validator.positive(storeId, "매장 ID는 양수여야 합니다.");
     }
 
     private void validateRoleStoreId(Role role, Long storeId) {
