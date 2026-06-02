@@ -168,7 +168,7 @@ public class WaitingAcceptanceTest {
 
     private void createWaiting(String name) {
         Map<String, Object> waiting = new HashMap<>();
-        waiting.put("name", "코코");
+        waiting.put("name", name);
         waiting.put("date", "2026-08-05");
         waiting.put("timeId", 1L);
         waiting.put("themeId", 1L);
@@ -194,7 +194,7 @@ public class WaitingAcceptanceTest {
 
     private void createDefaultTheme(String name) {
         Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "귀신찾기");
+        themeParams.put("name", name);
         themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
         themeParams.put("imageUrl", "https://image.png");
 
@@ -208,7 +208,7 @@ public class WaitingAcceptanceTest {
 
     private void createDefaultReservation(String name) {
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", "브라운");
+        reservation.put("name", name);
         reservation.put("date", "2026-08-05");
         reservation.put("timeId", 1L);
         reservation.put("themeId", 1L);
