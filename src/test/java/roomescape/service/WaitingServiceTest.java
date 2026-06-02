@@ -70,6 +70,9 @@ class WaitingServiceTest {
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void 중복_대기_예외_발생() {
         Waiting waiting = createTransientWaiting();
+        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(waiting.getTimeSlot()));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(waiting.getTheme()));
+        given(reservationRepository.existsByNameAndDateAndTimeAndTheme("브라운", waiting.getDate(), 1L, 1L)).willReturn(false);
         given(waitingRepository.exists("브라운", waiting.getDate(), 1L, 1L)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.saveWaiting("브라운", waiting.getDate(), 1L, 1L))
