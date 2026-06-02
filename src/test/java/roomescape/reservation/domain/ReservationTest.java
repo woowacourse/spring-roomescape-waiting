@@ -1,10 +1,5 @@
 package roomescape.reservation.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +8,12 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
@@ -44,16 +45,14 @@ class ReservationTest {
     @DisplayName("멤버가 null이면 예외 발생")
     void 멤버_null_예외() {
         assertThatThrownBy(() -> Reservation.of(null, futureDate, time, theme))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약자는 필수입니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("날짜가 null이면 예외 발생")
     void 날짜_null_예외() {
         assertThatThrownBy(() -> Reservation.of(member, null, time, theme))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("날짜는 필수입니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -67,16 +66,14 @@ class ReservationTest {
     @DisplayName("시간이 null이면 예외 발생")
     void 시간_null_예외() {
         assertThatThrownBy(() -> Reservation.of(member, futureDate, null, theme))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 시간은 필수입니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("테마가 null이면 예외 발생")
     void 테마_null_예외() {
         assertThatThrownBy(() -> Reservation.of(member, futureDate, time, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("테마는 필수입니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

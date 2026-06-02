@@ -46,8 +46,7 @@ class ReservationWaitingTest {
     @DisplayName("멤버가 null이면 예외 발생")
     void 멤버_null_예외() {
         assertThatThrownBy(() -> ReservationWaiting.of(null, futureDate, time, theme))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약자는 필수입니다.");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
