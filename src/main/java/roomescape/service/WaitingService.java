@@ -34,9 +34,9 @@ public class WaitingService {
 
     @Transactional
     public WaitingWithNumber saveWaiting(String name, LocalDate date, Long timeId, Long themeId) {
-        validateDuplicatedWaiting(name, date, timeId, themeId);
         Waiting waiting = createWaiting(name, date, timeId, themeId);
         validateAlreadyReserved(name, date, timeId, themeId);
+        validateDuplicatedWaiting(name, date, timeId, themeId);
         Waiting saveWaiting = waitingRepository.save(waiting);
         return findWaitingWithNumber(saveWaiting.getId());
     }
