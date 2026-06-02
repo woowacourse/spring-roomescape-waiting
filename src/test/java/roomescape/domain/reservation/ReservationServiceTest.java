@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot;
+package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,9 +14,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -24,6 +21,8 @@ import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlotService;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
