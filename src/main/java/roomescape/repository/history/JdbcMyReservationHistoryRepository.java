@@ -8,29 +8,31 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.repository.history.dto.MyReservationHistoryRow;
 
 @Repository
-public class JdbcMyHistoryRepository implements MyHistoryRepository {
+public class JdbcMyReservationHistoryRepository implements MyReservationHistoryRepository {
 
-    private static final RowMapper<MyHistory> historyRowMapper = (resultSet, rowNumber) -> new MyHistory(
-            resultSet.getLong("reservation_id"),
-            getNullableLong(resultSet, "waiting_id"),
-            resultSet.getString("status"),
-            resultSet.getString("history_name"),
-            resultSet.getDate("date").toLocalDate(),
-            mapTheme(resultSet),
-            mapReservationTime(resultSet),
-            resultSet.getInt("sequence")
-    );
+    private static final RowMapper<MyReservationHistoryRow> historyRowMapper =
+            (resultSet, rowNumber) -> new MyReservationHistoryRow(
+                    resultSet.getLong("reservation_id"),
+                    getNullableLong(resultSet, "waiting_id"),
+                    resultSet.getString("status"),
+                    resultSet.getString("history_name"),
+                    resultSet.getDate("date").toLocalDate(),
+                    mapTheme(resultSet),
+                    mapReservationTime(resultSet),
+                    resultSet.getInt("sequence")
+            );
 
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcMyHistoryRepository(final JdbcTemplate jdbcTemplate) {
+    public JdbcMyReservationHistoryRepository(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public List<MyHistory> findByUserName(final String name) {
+    public List<MyReservationHistoryRow> findByUserName(final String name) {
         String sql = """
                 SELECT 'RESERVATION' AS status,
                        r.id AS reservation_id,

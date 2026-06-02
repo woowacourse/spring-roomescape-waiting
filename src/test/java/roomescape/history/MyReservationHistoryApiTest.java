@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:my-history-api")
 @AutoConfigureMockMvc
-class MyHistoryApiTest {
+class MyReservationHistoryApiTest {
 
     @Autowired
     private MockMvc mockMvc;

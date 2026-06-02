@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
-import roomescape.controller.history.dto.MyHistoryResponse;
+import roomescape.controller.history.dto.MyReservationHistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.exception.ErrorCode;
-import roomescape.service.history.MyHistoryService;
+import roomescape.service.history.MyReservationHistoryService;
 import roomescape.service.history.ReservationHistoryStatus;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -19,16 +19,16 @@ public class ReservationPageModelAssembler {
 
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final MyHistoryService myHistoryService;
+    private final MyReservationHistoryService myReservationHistoryService;
 
     public ReservationPageModelAssembler(
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final MyHistoryService myHistoryService
+            final MyReservationHistoryService myReservationHistoryService
     ) {
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
-        this.myHistoryService = myHistoryService;
+        this.myReservationHistoryService = myReservationHistoryService;
     }
 
     public ThemeResponse resolveSelectedTheme(final Long themeId) {
@@ -65,7 +65,7 @@ public class ReservationPageModelAssembler {
         model.addAttribute("reservationTimes", reservationTimeService.getAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList());
-        List<MyHistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
+        List<MyReservationHistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
         model.addAttribute("availableTimes", getAvailableTimes(
                 selectedThemeId,
                 selectedTheme,
@@ -79,7 +79,7 @@ public class ReservationPageModelAssembler {
             final Long selectedThemeId,
             final ThemeResponse selectedTheme,
             final LocalDate selectedDate,
-            final List<MyHistoryResponse> myHistories
+            final List<MyReservationHistoryResponse> myHistories
     ) {
         if (selectedTheme == null || selectedDate == null) {
             return List.of();
@@ -94,7 +94,7 @@ public class ReservationPageModelAssembler {
     }
 
     private Long findWaitingId(
-            final List<MyHistoryResponse> myHistories,
+            final List<MyReservationHistoryResponse> myHistories,
             final LocalDate selectedDate,
             final Long selectedThemeId,
             final Long timeId
@@ -104,12 +104,12 @@ public class ReservationPageModelAssembler {
                 .filter(history -> history.date().equals(selectedDate))
                 .filter(history -> history.theme().id().equals(selectedThemeId))
                 .filter(history -> history.time().id().equals(timeId))
-                .map(MyHistoryResponse::waitingId)
+                .map(MyReservationHistoryResponse::waitingId)
                 .findFirst()
                 .orElse(null);
     }
 
-    private List<MyHistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
+    private List<MyReservationHistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
         if (reservationName == null || reservationName.isBlank()) {
             return List.of();
         }
@@ -118,8 +118,8 @@ public class ReservationPageModelAssembler {
             return List.of();
         }
 
-        return myHistoryService.getAllByName(reservationName).stream()
-                .map(MyHistoryResponse::from)
+        return myReservationHistoryService.getAllByName(reservationName).stream()
+                .map(MyReservationHistoryResponse::from)
                 .toList();
     }
 }
