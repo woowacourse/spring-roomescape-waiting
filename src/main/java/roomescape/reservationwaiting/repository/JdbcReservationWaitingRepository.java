@@ -120,4 +120,10 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
         return jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId) >= 1;
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        String query = "select count(*) from reservation_waiting where id = ?";
+        return jdbcTemplate.queryForObject(query, Integer.class, id) >= 1;
+    }
 }
