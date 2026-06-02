@@ -51,4 +51,28 @@ class WaitingServiceIntegrationTest {
         assertThat(waitingRepository.findById(response.id())).isPresent();
         assertThat(reservationRepository.findById(oldReservationId)).isEmpty();
     }
+
+    @Test
+    @DisplayName("기존 예약자가 다른 예약 슬롯에 대기 신청하면 기존 슬롯의 첫 대기자가 예약으로 승격된다.")
+    void save_테스트_4() {
+        long oldReservationId = 1L;
+        long oldScheduleId = 1L;
+        long targetScheduleId = 6L; // 2026-05-06, timeId=3, themeId=2
+        long firstWaitingMemberId = 2L;
+        long secondWaitingMemberId = 3L;
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 6), 3L, 2L, oldReservationId);
+
+        Waiting firstWaiting = waitingRepository.save(new Waiting(null, firstWaitingMemberId, oldScheduleId));
+        Waiting secondWaiting = waitingRepository.save(new Waiting(null, secondWaitingMemberId, oldScheduleId));
+
+        WaitingResponse response = waitingService.save(request, 1L);
+
+        assertThat(response.scheduleId()).isEqualTo(targetScheduleId);
+        assertThat(response.waitingOrder()).isEqualTo(1L);
+        assertThat(reservationRepository.findById(oldReservationId)).isEmpty();
+        assertThat(reservationRepository.existsByMemberIdAndScheduleId(firstWaitingMemberId, oldScheduleId)).isTrue();
+        assertThat(waitingRepository.findById(firstWaiting.getId())).isEmpty();
+        assertThat(waitingRepository.countByScheduleIdAndIdLessThanEqual(oldScheduleId, secondWaiting.getId()))
+                .isEqualTo(1L);
+    }
 }

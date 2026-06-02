@@ -179,6 +179,12 @@ class WaitingServiceTest {
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
+        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
+                .thenReturn(false);
+        when(reservationRepository.existsByScheduleId(scheduleId))
+                .thenReturn(true);
         when(reservationRepository.findById(request.reservationId()))
                 .thenReturn(Optional.of(reservation));
 

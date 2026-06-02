@@ -9,9 +9,9 @@ import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
-import roomescape.waiting.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +26,13 @@ public class WaitingService {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
 
-        if (body.reservationId() != null) {
-            deleteReservationIfPresent(body.reservationId(), memberId);
-        }
-
         validateMemberNotAlreadyReserved(memberId, scheduleId);
         validateMemberNotAlreadyWaiting(memberId, scheduleId);
         validateWaitingTargetExists(scheduleId);
+
+        if (body.reservationId() != null) {
+            deleteReservationAndPromoteWaiting(body.reservationId(), memberId);
+        }
 
         Waiting waiting = waitingRepository.save(body.toDomain(memberId, scheduleId));
         long waitingOrder = waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId());
@@ -73,7 +73,7 @@ public class WaitingService {
         }
     }
 
-    private void deleteReservationIfPresent(long reservationId, long memberId) {
+    private void deleteReservationAndPromoteWaiting(long reservationId, long memberId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
@@ -81,6 +81,14 @@ public class WaitingService {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
 
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(reservation.getScheduleId())
+                .orElse(null);
+        if (firstWaiting != null) {
+            waitingRepository.deleteById(firstWaiting.getId());
+            reservationRepository.deleteById(reservationId);
+            reservationRepository.save(new Reservation(null, firstWaiting.getMemberId(), reservation.getScheduleId()));
+            return;
+        }
         reservationRepository.deleteById(reservationId);
     }
 }
