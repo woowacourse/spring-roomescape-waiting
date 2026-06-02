@@ -60,4 +60,8 @@ public class ReservationSlotService {
         reservationDateRepository.findById(dateId)
             .orElseThrow(() -> new NotFoundException(ReservationDateErrors.RESERVATION_DATE_NOT_EXIST));
     }
+
+    public void deleteReservationSlot(Long id) {
+        reservationSlotRepository.deleteById(id);
+    }
 }

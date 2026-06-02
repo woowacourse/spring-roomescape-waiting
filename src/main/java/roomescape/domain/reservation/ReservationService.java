@@ -16,7 +16,6 @@ import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationslot.ReservationSlot;
-import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.reservationslot.ReservationSlotService;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
@@ -35,7 +34,6 @@ import roomescape.support.exception.errors.ReservationTimeErrors;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
     private final UserService userService;
     private final ReservationSlotService reservationSlotService;
@@ -137,7 +135,7 @@ public class ReservationService {
         List<Reservation> orderedReservations = reservationRepository.findAllByReservationIdOrder(
             reservationSlot.getId());
         if (orderedReservations.isEmpty()) {
-            reservationSlotRepository.deleteById(reservationSlot.getId());
+            reservationSlotService.deleteReservationSlot(reservationSlot.getId());
         }
     }
 
