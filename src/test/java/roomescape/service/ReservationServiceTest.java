@@ -224,6 +224,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsBySlot(any(Reservation.class)))
                 .thenReturn(false);
+        when(reservationRepository.update(any(Reservation.class)))
+                .thenReturn(1);
 
         // when
         Reservation result = service.updateByUser(id, name, updateDate, timeId, now);
@@ -262,6 +264,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(Reservation.class)))
                 .thenReturn(false);
+        when(reservationRepository.update(any(Reservation.class)))
+                .thenReturn(1);
 
         // when
         Reservation result = service.updateByUser(id, name, updateDate, null, now);
@@ -270,6 +274,33 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getTime()).isEqualTo(time));
+        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).existsBySlot(any(Reservation.class));
+        verify(reservationRepository, times(1)).update(any(Reservation.class));
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+    }
+
+    @Test
+    void 사용자_본인_예약_변경시_수정할_예약이_없으면_예외_발생() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        LocalDate updateDate = date.plusDays(1);
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createByUserReservation(id, name, date, time);
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationRepository.existsBySlot(any(Reservation.class)))
+                .thenReturn(false);
+        when(reservationRepository.update(any(Reservation.class)))
+                .thenReturn(0);
+
+        // when & then
+        assertThatThrownBy(() -> service.updateByUser(id, name, updateDate, null, now))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
+                .hasMessage("존재하지 않는 예약입니다.");
+
         verify(reservationRepository, times(1)).findById(id);
         verify(reservationRepository, times(1)).existsBySlot(any(Reservation.class));
         verify(reservationRepository, times(1)).update(any(Reservation.class));

@@ -141,7 +141,10 @@ public class ReservationService {
 
     private void updateReservation(Reservation updatedReservation) {
         try {
-            reservationRepository.update(updatedReservation);
+            int updatedCount = reservationRepository.update(updatedReservation);
+            if (updatedCount == 0) {
+                throw new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다.");
+            }
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
         }
