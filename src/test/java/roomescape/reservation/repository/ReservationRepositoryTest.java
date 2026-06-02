@@ -279,5 +279,26 @@ class ReservationRepositoryTest {
                     .containsExactly(ReservationStatus.RESERVED, null)
             );
         }
+
+        @Test
+        @DisplayName("지난 대기 예약은 대기 순번을 가지지 않는다")
+        void 성공2() {
+            // given
+            ReservationDate pastDate = jdbcReservationDateRepository.save(
+                ReservationDate.load(1L, LocalDate.now().minusDays(1), true));
+            Reservation waiting = save(Reservation.load(1L, name, pastDate, reservationTime1, theme,
+                ReservationStatus.WAITING, LocalDateTime.now()));
+
+            // when
+            List<ReservationWithWaitingTurn> actual =
+                jdbcReservationRepository.findMyReservationsWithWaitingTurn(name);
+
+            // then
+            assertThat(actual)
+                .filteredOn(reservation -> reservation.id().equals(waiting.getId()))
+                .singleElement()
+                .extracting("status", "waitingTurn")
+                .containsExactly(ReservationStatus.WAITING, null);
+        }
     }
 }

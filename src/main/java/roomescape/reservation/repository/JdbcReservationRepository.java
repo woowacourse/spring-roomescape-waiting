@@ -268,22 +268,25 @@ public class JdbcReservationRepository implements ReservationRepository {
                 r.status,
                 r.requested_at,
                 CASE 
-                    WHEN r.status = 'WAITING' THEN (
-                        SELECT COUNT(*) + 1 
-                        FROM reservation wait
-                        WHERE wait.date_id = r.date_id
-                            AND wait.time_id = r.time_id
-                            AND wait.theme_id = r.theme_id
-                            AND wait.status = 'WAITING'
-                            AND (wait.requested_at < r.requested_at 
-                                OR (wait.requested_at = r.requested_at AND wait.id < r.id)
-                            )
-                            AND (
-                                d.date > CURRENT_DATE 
-                                OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
-                            )
+                    WHEN r.status = 'WAITING'
+                        AND(
+                            d.date > CURRENT_DATE
+                            OR (d.date = CURRENT_DATE AND t.start_at > CURRENT_TIME)
+                        )
+                    THEN (
+                    SELECT COUNT(*) + 1 
+                    FROM reservation wait
+                    WHERE wait.date_id = r.date_id
+                        AND wait.time_id = r.time_id
+                        AND wait.theme_id = r.theme_id
+                        AND wait.status = 'WAITING'
+                        AND (
+                            wait.requested_at < r.requested_at 
+                            OR (wait.requested_at = r.requested_at AND wait.id < r.id)
+                        )
                     )
-                           END AS waiting_turn
+                    ELSE NULL
+                END AS waiting_turn
             FROM reservation r
             INNER JOIN reservation_date d ON r.date_id = d.id
             INNER JOIN reservation_time t ON r.time_id = t.id

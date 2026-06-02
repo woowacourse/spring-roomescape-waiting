@@ -670,7 +670,7 @@ class ReservationServiceTest {
             assertThat(actual).isPresent()
                 .get()
                 .extracting("status")
-                .isEqualTo(ReservationStatus.RESERVED);
+                .isEqualTo(ReservationStatus.WAITING);
         }
 
 
