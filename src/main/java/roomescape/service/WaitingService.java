@@ -40,6 +40,14 @@ public class WaitingService {
         }
     }
 
+    public void promoteFirstWaiting(Reservation canceled) {
+        Waitings waitings = waitingDao.findQueueBySlotForUpdate(canceled.getSlot());
+        waitings.peekFirst().ifPresent(first -> {
+            reservationDao.insert(first.promote());
+            waitingDao.delete(first.getId());
+        });
+    }
+
     @Transactional(readOnly = true)
     public List<Waiting> findAll() {
         return waitingDao.findAllQueues().stream()

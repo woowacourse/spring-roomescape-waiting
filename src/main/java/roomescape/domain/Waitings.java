@@ -3,7 +3,9 @@ package roomescape.domain;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
+
 import roomescape.common.DomainAssert;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DuplicateEntityException;
@@ -27,6 +29,10 @@ public class Waitings {
         validateCanCreate(member);
         Waiting created = Waiting.create(member, reservation);
         return created.withRank((long) waitings.size() + 1);
+    }
+
+    public Optional<Waiting> peekFirst() {
+        return waitings.stream().findFirst();
     }
 
     public List<Waiting> getAll() {

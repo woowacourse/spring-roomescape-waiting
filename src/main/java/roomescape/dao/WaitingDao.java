@@ -1,8 +1,6 @@
 package roomescape.dao;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.domain.Waitings;

@@ -43,6 +43,10 @@ public class Waiting {
         return this.member.equals(member);
     }
 
+    public Reservation promote() {
+        return Reservation.createByAdmin(member, slot.getDate(), slot.getTime(), slot.getTheme(), slot.getStore());
+    }
+
     public boolean isInStore(Store store) {
         return slot.getStore().equals(store);
     }

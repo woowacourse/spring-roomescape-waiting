@@ -21,17 +21,20 @@ import roomescape.dto.request.ReservationRequestDto;
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final TimeDao timeDao;
+    private final WaitingService waitingService;
     private final ReservationAuthorizationService authorizationService;
     private final ReservationCreator reservationCreator;
 
     public ReservationService(
             ReservationDao reservationDao,
             TimeDao timeDao,
+            WaitingService waitingService,
             ReservationAuthorizationService authorizationService,
             ReservationCreator reservationCreator
     ) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
+        this.waitingService = waitingService;
         this.authorizationService = authorizationService;
         this.reservationCreator = reservationCreator;
     }
@@ -74,5 +77,6 @@ public class ReservationService {
         Reservation reservation = findActiveById(id);
         reservation.cancelByUser(LocalDateTime.now());
         reservationDao.update(reservation);
+        waitingService.promoteFirstWaiting(reservation);
     }
 }
