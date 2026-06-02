@@ -1,0 +1,69 @@
+package roomescape.service;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import roomescape.domain.Theme;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomEscapeException;
+import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.request.ServiceThemeCreateRequest;
+
+@Service
+public class ThemeService {
+
+    private static final int RANKING_LIMIT = 10;
+    private static final int MAX_RANKING_PERIOD = 366;
+
+    private final ThemeRepository themeRepository;
+    private final Clock clock;
+
+    public ThemeService(ThemeRepository themeRepository, Clock clock) {
+        this.themeRepository = themeRepository;
+        this.clock = clock;
+    }
+
+    public Theme save(ServiceThemeCreateRequest requestDto) {
+        return themeRepository.save(requestDto.toEntity());
+    }
+
+    public List<Theme> findAll() {
+        return themeRepository.findAll();
+    }
+
+    public void delete(Long id) {
+        themeRepository.delete(id);
+    }
+
+    public List<Theme> findRanking(LocalDate startDate, LocalDate endDate) {
+        validateRankingPeriod(startDate, endDate);
+        return themeRepository.findRanking(startDate, endDate, RANKING_LIMIT);
+    }
+
+    public Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new RoomEscapeException(DomainErrorCode.NOT_FOUND_THEME));
+    }
+
+    public void validateExistTheme(Long themeId) {
+        if (!themeRepository.existsById(themeId)) {
+            throw new RoomEscapeException(DomainErrorCode.NOT_FOUND_THEME);
+        }
+    }
+
+    private void validateRankingPeriod(LocalDate startDate, LocalDate endDate) {
+        LocalDate localDate = LocalDate.now(clock);
+
+        if (startDate.isAfter(localDate) || endDate.isAfter(localDate)) {
+            throw new RoomEscapeException(DomainErrorCode.FUTURE_RANKING_PERIOD);
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new RoomEscapeException(DomainErrorCode.INVALID_RANKING_PERIOD);
+        }
+        if (ChronoUnit.DAYS.between(startDate, endDate) > MAX_RANKING_PERIOD) {
+            throw new RoomEscapeException(DomainErrorCode.LONG_RANKING_PERIOD, MAX_RANKING_PERIOD);
+        }
+    }
+}

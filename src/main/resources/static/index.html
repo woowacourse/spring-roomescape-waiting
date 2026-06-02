@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방탈출 예약</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+
+    <header class="header">
+      <div>
+        <p class="eyebrow">Room Escape</p>
+        <h1>방탈출 예약</h1>
+      </div>
+      <div class="header-side">
+        <a class="admin-link" href="/admin.html">관리자 페이지</a>
+        <p class="header-description">테마와 날짜를 선택하고 예약 가능한 시간을 확인하세요.</p>
+      </div>
+    </header>
+
+    <div class="reservation-layout" aria-label="예약 영역">
+      <section class="section" aria-label="테마 선택">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Theme</p>
+            <h2>테마 선택</h2>
+          </div>
+        </div>
+        <div id="theme-list" class="theme-grid"></div>
+      </section>
+
+      <aside class="reservation-panel">
+        <form id="reservation-form" class="reservation-form">
+          <div class="field">
+            <label for="selected-theme">선택된 테마</label>
+            <output id="selected-theme" class="selected-theme">테마를 선택하세요</output>
+          </div>
+
+          <div class="field">
+            <label for="reservation-date">날짜</label>
+            <input id="reservation-date" name="date" type="date" required>
+          </div>
+
+          <div class="field">
+            <label>시간 선택</label>
+            <div id="time-list" class="time-grid"></div>
+          </div>
+
+          <div class="field">
+            <label for="reservation-name">예약자 이름</label>
+            <input id="reservation-name" name="name" type="text" placeholder="이름을 입력하세요" required>
+          </div>
+
+          <button id="submit-button" class="primary-button" type="submit" disabled>예약하기</button>
+        </form>
+
+        <div id="reservation-result" class="result" hidden></div>
+      </aside>
+    </div>
+
+    <section class="section" aria-labelledby="my-reservations-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">My Reservation</p>
+          <h2 id="my-reservations-title">내 예약 조회</h2>
+        </div>
+      </div>
+      <form id="reservation-search-form" class="search-form">
+        <div class="field">
+          <label for="reservation-search-name">예약자 이름</label>
+          <input id="reservation-search-name" name="name" type="text" placeholder="예약 시 입력한 이름" required>
+        </div>
+        <button class="secondary-button" type="submit">조회</button>
+      </form>
+      <div id="reservation-search-result" class="reservation-list"></div>
+    </section>
+
+    <section class="section" aria-labelledby="ranking-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Popular</p>
+          <h2 id="ranking-title">최근 1주 인기 테마</h2>
+        </div>
+        <span id="ranking-period" class="period"></span>
+      </div>
+      <div id="ranking-list" class="theme-grid"></div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
