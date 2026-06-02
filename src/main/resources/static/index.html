@@ -268,15 +268,18 @@
         }
 
         reservations.forEach((reservation) => {
-            const isWaiting = reservation.waitingNumber !== undefined && reservation.waitingNumber !== null;
+            const waitingNumber = Number(reservation.waitingNumber ?? 0);
+            const isWaiting = waitingNumber > 0;
             const row = document.createElement('tr');
+            row.dataset.resourceKey = reservation.resourceKey;
+
             const nameCell = document.createElement('td');
             nameCell.textContent = reservation.name;
 
             const statusCell = document.createElement('td');
             const statusBadge = document.createElement('span');
             statusBadge.className = `status-badge ${isWaiting ? 'waiting' : 'reserved'}`;
-            statusBadge.textContent = isWaiting ? '대기' : '예약';
+            statusBadge.textContent = reservation.status;
             statusCell.append(statusBadge);
 
             const themeCell = document.createElement('td');
@@ -289,7 +292,12 @@
             timeCell.textContent = reservation.startAt ?? reservation.time?.startAt ?? '';
 
             const waitingNumberCell = document.createElement('td');
-            waitingNumberCell.textContent = isWaiting ? reservation.waitingNumber : '-';
+            if (isWaiting) {
+                const waitingNumberBadge = document.createElement('span');
+                waitingNumberBadge.className = 'waiting-number-badge';
+                waitingNumberBadge.textContent = `내 대기 순번: ${waitingNumber}번`;
+                waitingNumberCell.append(waitingNumberBadge);
+            }
 
             const actionCell = document.createElement('td');
             const actions = document.createElement('div');
@@ -298,7 +306,7 @@
             cancelButton.className = 'danger-button';
             cancelButton.type = 'button';
             cancelButton.dataset.cancelId = reservation.id;
-            cancelButton.dataset.cancelType = isWaiting ? 'waiting' : 'reservation';
+            cancelButton.dataset.resourceKey = reservation.resourceKey;
             cancelButton.textContent = '취소';
             actions.append(cancelButton);
             actionCell.append(actions);
@@ -396,11 +404,13 @@
 
         button.disabled = true;
         try {
-            const cancelUrl = button.dataset.cancelType === 'waiting'
+            const resourceKey = button.dataset.resourceKey;
+            const isWaiting = resourceKey?.startsWith('waiting:');
+            const cancelUrl = isWaiting
                 ? `/reservation-waitings/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`
                 : `/reservations/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`;
             await requestJson(cancelUrl, {method: 'DELETE'});
-            setStatus(reservationStatusEl, button.dataset.cancelType === 'waiting' ? '대기를 취소했습니다.' : '예약을 취소했습니다.');
+            setStatus(reservationStatusEl, isWaiting ? '대기를 취소했습니다.' : '예약을 취소했습니다.');
             await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
         } catch (error) {
             button.disabled = false;
