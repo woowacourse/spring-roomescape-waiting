@@ -7,11 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingException;
-import roomescape.exception.ThemeNotFoundException;
-import roomescape.exception.TimeSlotNotFoundException;
-import roomescape.exception.WaitingNotFoundException;
+import roomescape.exception.DuplicateException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
@@ -59,33 +56,33 @@ public class WaitingService {
 
     private void validateDuplicatedWaiting(String name, LocalDate date, Long timeId, Long themeId) {
         if (waitingRepository.exists(name, date, timeId, themeId)) {
-            throw new DuplicateWaitingException();
+            throw new DuplicateException("해당 날짜의 시간과 테마는 이미 예약 대기되어 있습니다.");
         }
     }
 
     private void validateAlreadyReserved(String name, LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByNameAndDateAndTimeAndTheme(name, date, timeId, themeId)) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
         }
     }
 
     private Waiting findWaiting(Long id) {
         return waitingRepository.findById(id)
-                .orElseThrow(WaitingNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당하는 예약 대기 정보를 찾을 수 없습니다."));
     }
 
     private WaitingWithNumber findWaitingWithNumber(Long id) {
         return waitingRepository.findWaitingWithNumberById(id)
-                .orElseThrow(WaitingNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당하는 예약 대기 정보를 찾을 수 없습니다."));
     }
 
     private TimeSlot findTimeSlot(Long id) {
         return timeSlotRepository.findById(id)
-                .orElseThrow(TimeSlotNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
     }
 
     private Theme findTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
 }

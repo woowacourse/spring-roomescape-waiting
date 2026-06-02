@@ -9,11 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
-import roomescape.domain.Waiting;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.ReservationNotFoundException;
-import roomescape.exception.ThemeNotFoundException;
-import roomescape.exception.TimeSlotNotFoundException;
+import roomescape.exception.DuplicateException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
@@ -48,7 +45,7 @@ public class ReservationService {
 
     public Reservation findReservationById(long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 
     public List<ReservationAndWaiting> findReservationAndWaitingByName(String name) {
@@ -99,17 +96,17 @@ public class ReservationService {
 
     private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeAndTheme(date, timeId, themeId)) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
         }
     }
 
     private TimeSlot findTimeSlot(Long id) {
         return timeSlotRepository.findById(id)
-                .orElseThrow(TimeSlotNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
     }
 
     private Theme findTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
 }

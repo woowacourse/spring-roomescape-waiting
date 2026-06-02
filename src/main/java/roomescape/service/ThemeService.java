@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.exception.ResourceInUseException;
-import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ public class ThemeService {
 
     public Theme findThemeById(long id) {
         return themeRepository.findById(id)
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
 
     @Transactional
