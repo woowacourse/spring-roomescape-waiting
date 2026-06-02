@@ -4,10 +4,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import roomescape.date.domain.ReservationDate;
+import roomescape.date.fixture.ReservationDateFixture;
+import roomescape.slot.domain.ReservationSlot;
 import roomescape.support.ServiceSupport;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
 import roomescape.theme.fixture.ThemeFixture;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.fixture.ReservationTimeFixture;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -148,6 +153,77 @@ class ThemeServiceIntegrationTest extends ServiceSupport {
         // then
         assertThat(themeRepository.findById(savedTheme.getId()).get().isActive())
                 .isFalse();
+    }
+
+    @Test
+    @DisplayName("슬롯에 등록된 활성화 테마를 조회한다.")
+    void readSlotOfThemes() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time = saveTime(ReservationTimeFixture.activeTime15());
+        saveSlot(ReservationSlot.of(date, time, theme));
+
+        // when
+        List<Theme> actual = themeService.readSlotOfThemes();
+
+        // then
+        assertThat(actual)
+                .hasSize(1);
+
+        assertThat(actual.get(0))
+                .usingRecursiveComparison()
+                .isEqualTo(theme);
+    }
+
+    @Test
+    @DisplayName("슬롯이 없는 테마는 슬롯 테마 조회 시 반환되지 않는다.")
+    void readSlotOfThemes_without_slot() {
+        // given
+        saveTheme(ThemeFixture.activeTheme());
+
+        // when
+        List<Theme> actual = themeService.readSlotOfThemes();
+
+        // then
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("비활성화 테마는 슬롯이 있어도 슬롯 테마 조회 시 반환되지 않는다.")
+    void readSlotOfThemes_inactive_theme_not_returned() {
+        // given
+        Theme inactiveTheme = saveTheme(ThemeFixture.inActiveTheme());
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time = saveTime(ReservationTimeFixture.activeTime15());
+        saveSlot(ReservationSlot.of(date, time, inactiveTheme));
+
+        // when
+        List<Theme> actual = themeService.readSlotOfThemes();
+
+        // then
+        assertThat(actual)
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("여러 슬롯이 등록된 테마는 슬롯 테마 조회 시 한 번만 반환된다.")
+    void readSlotOfThemes_multiple_slots_distinct() {
+        // given
+        Theme theme = saveTheme(ThemeFixture.activeTheme());
+        ReservationDate date = saveDate(ReservationDateFixture.activeOneWeekLater());
+        ReservationTime time1 = saveTime(ReservationTimeFixture.activeTime15());
+        ReservationTime time2 = saveTime(ReservationTimeFixture.activeTime16());
+        saveSlot(ReservationSlot.of(date, time1, theme));
+        saveSlot(ReservationSlot.of(date, time2, theme));
+
+        // when
+        List<Theme> actual = themeService.readSlotOfThemes();
+
+        // then
+        assertThat(actual)
+                .hasSize(1);
     }
 
     private List<Theme> saveAll(List<Theme> themes) {
