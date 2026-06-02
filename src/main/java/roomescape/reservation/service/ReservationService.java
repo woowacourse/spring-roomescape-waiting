@@ -124,7 +124,8 @@ public class ReservationService {
         try {
             return reservationRepository.save(reservation);
         } catch (DuplicateKeyException exception) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
+            Reservation waiting = Reservation.create(reservation.getGuestName(), reservation.getSlot(), Status.WAITING);
+            return reservationRepository.save(waiting);
         }
     }
 
