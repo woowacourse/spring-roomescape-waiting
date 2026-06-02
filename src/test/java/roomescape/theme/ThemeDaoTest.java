@@ -79,12 +79,16 @@ public class ThemeDaoTest {
 
     @Test
     void 테마를_추가한다() {
+        // given: 신규 테마 정보
+
+        // when: insert (DB 가 id 채워서 반환)
         long id = themeDao.insertTheme(
                 "심해 탈출",
                 "가라앉는 잠수함에서 탈출하는 테마",
                 "https://images.example.com/themes/deep-sea.jpg"
         );
 
+        // then: DB 에 저장된 row 검증
         Theme theme = themeDao.findById(id);
 
         assertThat(id).isPositive();

@@ -24,9 +24,11 @@ public class ThemeServiceTest {
 
     @Test
     void 존재하지_않는_테마_삭제는_멱등하게_성공한다() {
+        // given: DAO 가 0 rows affected 반환
         when(themeDao.delete(1L))
                 .thenReturn(0);
 
+        // when & then: 예외 없이 통과
         assertThatCode(() -> themeService.deleteTheme(1L))
                 .doesNotThrowAnyException();
         verify(themeDao).delete(1L);
@@ -34,9 +36,11 @@ public class ThemeServiceTest {
 
     @Test
     void 예약이_있는_테마는_삭제할_수_없다() {
+        // given: DAO 가 FK 위반 예외 던짐
         when(themeDao.delete(1L))
                 .thenThrow(new DataIntegrityViolationException("foreign key violation"));
 
+        // when & then: Service 가 도메인 예외로 변환
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
                 .isInstanceOf(ThemeInUseException.class);
     }

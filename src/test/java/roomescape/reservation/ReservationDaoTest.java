@@ -157,6 +157,7 @@ public class ReservationDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void 예약을_수정한다() {
+        // given: 기존 예약 조회 후 수정본 준비
         Reservation current = reservationDao.findReservationById(1L);
         Reservation modified = new Reservation(
                 current.getId(),
@@ -167,8 +168,10 @@ public class ReservationDaoTest {
                 current.getStoreId()
         );
 
+        // when: 수정 실행
         reservationDao.update(modified);
 
+        // then: DB 상태가 수정본대로 변경됨
         Reservation updatedReservation = reservationDao.findReservationById(1L);
         assertThat(updatedReservation)
                 .extracting(
@@ -197,6 +200,7 @@ public class ReservationDaoTest {
             INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_추가한다() {
+        // given: 신규 예약 후보 (id null)
         Reservation candidate = new Reservation(
                 null,
                 1L,
@@ -206,8 +210,10 @@ public class ReservationDaoTest {
                 1L
         );
 
+        // when: insert 실행 (DB 가 id 채워서 반환)
         Reservation inserted = reservationDao.insert(candidate);
 
+        // then: DB 에 저장된 row 검증
         Reservation reservation = reservationDao.findReservationById(inserted.getId());
 
         assertThat(inserted.getId()).isPositive();
@@ -327,11 +333,14 @@ public class ReservationDaoTest {
             INSERT_RESERVATIONS_ACROSS_STORES_SQL
     })
     void 예약한_사용자id를_수정한다() {
+        // given: 기존 예약 조회 + 양도 후보 생성
         Reservation current = reservationDao.findReservationById(1L);
         Reservation promoted = current.promoteTo(2L);
 
+        // when: 양도 적용
         reservationDao.update(promoted);
 
+        // then: member_id 가 2 로 변경됨
         Reservation updatedReservation = reservationDao.findReservationById(1L);
         assertThat(updatedReservation.getMemberId()).isEqualTo(2L);
     }

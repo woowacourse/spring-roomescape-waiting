@@ -37,6 +37,7 @@ public class ReservationWaitServiceTest {
 
     @Test
     void 예약대기를_생성한다() {
+        // given: 정콩이 예약, DAO stub 세팅
         long id = 1L;
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
@@ -58,8 +59,10 @@ public class ReservationWaitServiceTest {
         when(reservationWaitDao.insert(any(ReservationWait.class)))
                 .thenReturn(reservationWait);
 
+        // when: BROWN 대기 신청
         ReservationWait result = reservationWaitService.createReservationWait(BROWN_ID, 1L);
 
+        // then: 반환값 + DAO 호출 검증
         assertThat(reservationWait).usingRecursiveComparison().isEqualTo(result);
         verify(reservationWaitDao).insert(argThat(w ->
                 w.getMemberId().equals(BROWN_ID) && w.getReservationId().equals(1L)));
@@ -67,6 +70,7 @@ public class ReservationWaitServiceTest {
 
     @Test
     void 같은_사용자는_같은_슬롯에_예약대기를_걸_수_없다() {
+        // given: 정콩이 예약, DAO 가 중복 예외 던지도록 stub
         long id = 1L;
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
@@ -81,8 +85,9 @@ public class ReservationWaitServiceTest {
         when(reservationDao.findReservationById(1L)).thenReturn(reservation);
         when(reservationWaitDao.insert(any(ReservationWait.class)))
                 .thenThrow(new DuplicateKeyException("Duplicate key exception"));
+
+        // when & then: Service 가 도메인 예외로 변환
         assertThatThrownBy(() -> reservationWaitService.createReservationWait(BROWN_ID, 1L))
                 .isInstanceOf(ReservationWaitAlreadyExistsException.class);
     }
-
 }

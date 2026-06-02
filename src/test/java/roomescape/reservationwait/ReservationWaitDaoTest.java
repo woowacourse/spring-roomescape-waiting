@@ -67,12 +67,15 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATIONS_SQL,
     })
     void 예약대기를_생성한다() {
+        // given: 대기 후보 (id / createdAt null)
         long reservationId = 1L;
         long memberId = 2L;
         ReservationWait candidate = new ReservationWait(null, reservationId, memberId, null);
 
+        // when: insert 실행 (DB 가 id + createdAt 채워서 반환)
         ReservationWait inserted = reservationWaitDao.insert(candidate);
 
+        // then: DB 가 채운 필드 검증
         assertThat(inserted.getId()).isPositive();
         assertThat(inserted)
                 .extracting(
@@ -132,10 +135,14 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATION_WAITS_SQL
     })
     void reservationId와_memberId로_예약대기를_삭제한다() {
+        // given: wait(id=1) 의 reservation_id=1, member_id=2
         long reservationId = 1L;
         long memberId = 2L;
 
+        // when: 복합 키로 삭제
         reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
+
+        // then: 해당 wait row 사라짐
         Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(1L);
         assertThat(wait.isEmpty()).isTrue();
     }

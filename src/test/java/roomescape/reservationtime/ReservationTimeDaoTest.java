@@ -107,8 +107,12 @@ public class ReservationTimeDaoTest {
 
     @Test
     void 예약시간을_추가한다() {
+        // given: 10:00 시작 시간
+
+        // when: insert (DB 가 id 채워서 반환)
         long id = reservationTimeDao.insertWithKeyHolder(LocalTime.of(10, 0));
 
+        // then: DB 에 저장된 row 검증
         ReservationTime reservationTime = reservationTimeDao.findReservationTimeById(id);
 
         assertThat(id).isPositive();
