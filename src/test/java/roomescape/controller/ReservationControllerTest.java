@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -56,7 +57,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.userReservations[0].time.startAt").value("18:00"))
                 .andExpect(jsonPath("$.userReservations[0].theme.name").value("공포방"))
                 .andExpect(jsonPath("$.userReservations[0].status").value("RESERVED"))
-                .andExpect(jsonPath("$.userReservations[0].rank").value(0))
+                .andExpect(jsonPath("$.userReservations[0].rank", nullValue()))
                 .andExpect(jsonPath("$.userReservations[1].status").value("WAITING"))
                 .andExpect(jsonPath("$.userReservations[1].rank").value(2));
 
@@ -72,7 +73,7 @@ class ReservationControllerTest {
     @Test
     void 예약_생성_요청을_받으면_DTO의_이름_날짜_시간_id_테마_id를_Service에_전달하고_결과를_반환한다() throws Exception {
         Reservation created = new Reservation(1L, "레서", LocalDate.of(2026, 5, 6),
-                new ReservationTime(1L, LocalTime.of(18,0)),
+                new ReservationTime(1L, LocalTime.of(18, 0)),
                 new Theme(1L, "공포방", "무서운방입니다.", "image-url"));
 
         when(reservationService.createReservation(any(), any(), anyLong(), anyLong())).thenReturn(created);

@@ -19,10 +19,11 @@ public record UserReservation(
 ) {
 
     public static UserReservation reserved(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new UserReservation(id, name, date, time, theme, ReservationStatus.RESERVED, 0L);
+        return new UserReservation(id, name, date, time, theme, ReservationStatus.RESERVED, null);
     }
 
-    public static UserReservation waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, long entryRank) {
+    public static UserReservation waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+                                          long entryRank) {
         if (entryRank <= 0) {
             throw new BusinessException(ErrorCode.INVALID_WAITING_RANK);
         }
