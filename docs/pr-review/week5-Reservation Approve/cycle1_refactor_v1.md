@@ -30,4 +30,4 @@
 ### Test
 - [x] `ReservationWaitingDaoTest` 삭제 (또는 `ReservationDao`로 이관)
 - [x] `ReservationWaitingServiceTest` — 변경된 service 시그니처에 맞게 수정
-- [ ] `ReservationDaoTest` — 추가된 메서드 테스트 추가
+- [x] `ReservationDaoTest` — 추가된 메서드 테스트 추가
