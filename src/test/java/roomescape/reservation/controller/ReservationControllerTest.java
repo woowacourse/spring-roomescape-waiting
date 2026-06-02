@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -64,15 +65,15 @@ public class ReservationControllerTest {
                 .body("[0].themeName", is("은하수"))
                 .body("[0].date", is(date))
                 .body("[0].startAt", is("10:00"))
-                .body("[0].status", is("RESERVED"))
-                .body("[0].waitingNumber", is(0))
+                .body("[0].status", is("예약 확정"))
+                .body("[0].waitingNumber", nullValue())
                 .body("[1].resourceKey", is("waiting:" + waitingId))
                 .body("[1].id", is(waitingId))
                 .body("[1].name", is(name))
                 .body("[1].themeName", is("지구"))
                 .body("[1].date", is(date))
                 .body("[1].startAt", is("11:00"))
-                .body("[1].status", is("WAITING"))
+                .body("[1].status", is("대기중"))
                 .body("[1].waitingNumber", is(1));
     }
 
