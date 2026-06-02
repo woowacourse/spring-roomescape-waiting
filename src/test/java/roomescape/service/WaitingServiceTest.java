@@ -56,10 +56,11 @@ class WaitingServiceTest {
                 .willReturn(Optional.of(theme));
         given(reservationRepository.findByDateAndTimeAndThemeWithLock(date, reservationTime, theme))
                 .willReturn(Optional.of(Reservation.of(1L, "name", date, reservationTime, theme)));
+        given(waitingRepository.existsByNameAndDateAndTimeAndTheme(name, date, reservationTime,
+                theme))
+                .willReturn(false);
         given(waitingRepository.findMaxWaitingNumberBy(date, reservationTime, theme))
                 .willReturn(Optional.of(1L));
-        given(waitingRepository.existsByNameAndDateAndTimeAndTheme(name, date, reservationTime, theme))
-                .willReturn(false);
         given(waitingRepository.save(any(Waiting.class)))
                 .willAnswer(invocation -> {
                     Waiting waiting = invocation.getArgument(0);
@@ -192,5 +193,47 @@ class WaitingServiceTest {
                 .isEqualTo(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
     }
 
+    @Test
+    void 존재하지_않는_대기는_삭제할_수_없다() {
+        // given
+        Long notExistId = 5L;
+        given(waitingRepository.findById(notExistId))
+                .willReturn(Optional.empty());
 
+        // when & then
+        assertThatThrownBy(() -> waitingService.deleteWaiting(notExistId))
+                .isInstanceOf(RoomEscapeException.class)
+                .extracting("errorCode")
+                .isEqualTo(WaitingErrorCode.WAITING_NOT_FOUND);
+    }
+
+    @Test
+    void 과거의_대기는_삭제할_수_없다() {
+        // given
+        String name = "namu";
+        LocalDate date = LocalDate.parse("2022-11-11");
+        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Theme theme = Theme.of(1L, "공포의 병원", "버려진 정신병원에서 탈출해야 합니다.",
+                "https://picsum.photos/200/300");
+
+        given(waitingRepository.findById(1L))
+                .willReturn(Optional.of(
+                        Waiting.of(
+                                1L,
+                                name,
+                                date,
+                                reservationTime,
+                                theme,
+                                1L
+                        )
+                ));
+
+        Long notExistId = 1L;
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.deleteWaiting(notExistId))
+                .isInstanceOf(RoomEscapeException.class)
+                .extracting("errorCode")
+                .isEqualTo(WaitingErrorCode.WAITING_PAST_TIME);
+    }
 }
