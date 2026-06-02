@@ -3,9 +3,10 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import roomescape.exception.AppException;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.InvalidReservationStateException;
+import roomescape.exception.UnauthorizedReservationException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.Reservation;
@@ -35,7 +36,7 @@ public class ReservationService {
 
         boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), request.timeId(), request.themeId());
         if (isAlreadyExist) {
-            throw new AppException(HttpStatus.CONFLICT, "이미 예약된 예약을 중복 예약할 수 없습니다.");
+            throw new DuplicateReservationException("이미 예약된 예약을 중복 예약할 수 없습니다.");
         }
 
         ReservationStatus status = ReservationStatus.RESERVED;
@@ -89,7 +90,7 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
         if (reservation.getStatus() != ReservationStatus.RESERVED) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "예약 상태의 예약만 취소할 수 있습니다.");
+            throw new InvalidReservationStateException("예약 상태의 예약만 취소할 수 있습니다.");
         }
         delete(reservationId);
     }
@@ -98,7 +99,7 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(reservationId);
         validateReservationAuthority(name, reservation);
         if (reservation.getStatus() != ReservationStatus.WAITING) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "대기 상태의 예약만 취소할 수 있습니다.");
+            throw new InvalidReservationStateException("대기 상태의 예약만 취소할 수 있습니다.");
         }
         reservationDao.delete(reservationId);
     }
@@ -116,14 +117,14 @@ public class ReservationService {
 
     private static void validateReservationAuthority(String name, Reservation reservation) {
         if (!Objects.equals(reservation.getName(), name)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "다른 사람의 예약은 변경할 수 없습니다.");
+            throw new UnauthorizedReservationException("다른 사람의 예약은 변경할 수 없습니다.");
         }
     }
 
     private void isReservationExists(LocalDate date, Long timeId, Long themeId) {
         boolean reservationExist = reservationDao.existsByTimeIdAndThemeId(date, timeId, themeId);
         if (reservationExist) {
-            throw new AppException(HttpStatus.CONFLICT, "해당 시간대는 이미 예약이 완료되었습니다.");
+            throw new DuplicateReservationException("해당 시간대는 이미 예약이 완료되었습니다.");
         }
     }
 }

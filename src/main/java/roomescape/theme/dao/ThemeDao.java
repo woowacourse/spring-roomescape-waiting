@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.exception.AppException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.ResourceInUseException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -48,7 +48,7 @@ public class ThemeDao {
             String sql = "SELECT id, name, description, image_url FROM theme WHERE id = ?";
             return jdbcTemplate.queryForObject(sql, themeRowMapper(), id);
         } catch (EmptyResultDataAccessException e) {
-            throw new AppException(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다. id = " + id);
+            throw new NotFoundException("존재하지 않는 테마입니다. id = " + id);
         }
     }
 
@@ -58,7 +58,7 @@ public class ThemeDao {
             int deletedRowCount = jdbcTemplate.update(sql, id);
             return deletedRowCount > 0;
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(HttpStatus.CONFLICT, "사용 중인 테마는 삭제할 수 없습니다. id = " + id);
+            throw new ResourceInUseException("사용 중인 테마는 삭제할 수 없습니다. id = " + id);
         }
     }
 

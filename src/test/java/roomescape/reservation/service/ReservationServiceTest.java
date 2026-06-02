@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.AppException;
+import roomescape.exception.DuplicateReservationException;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dao.ReservationTimeDao;
 import roomescape.reservation.domain.Reservation;
@@ -99,7 +99,7 @@ class ReservationServiceTest {
 
       // when // then
       assertThatThrownBy(() -> reservationService.create(request))
-          .isInstanceOf(AppException.class);
+          .isInstanceOf(DuplicateReservationException.class);
     }
   }
 }

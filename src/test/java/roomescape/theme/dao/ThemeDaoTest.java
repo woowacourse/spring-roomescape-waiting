@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.exception.AppException;
+import roomescape.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ReservedThemeResponse;
@@ -94,7 +94,7 @@ class ThemeDaoTest {
         void 존재하지_않는_ID로_조회하면_예외를_던진다() {
             // when // then
             assertThatThrownBy(() -> themeDao.findById(999L))
-                    .isInstanceOf(AppException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("존재하지 않는 테마");
         }
     }

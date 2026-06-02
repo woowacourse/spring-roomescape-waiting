@@ -15,7 +15,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
-import roomescape.exception.AppException;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.InvalidReservationStateException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.ResourceInUseException;
+import roomescape.exception.UnauthorizedReservationException;
 
 @Component
 public class CustomExceptionResolver implements HandlerExceptionResolver, Ordered {
@@ -32,8 +36,28 @@ public class CustomExceptionResolver implements HandlerExceptionResolver, Ordere
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
                                          @Nullable Object handler, Exception ex) {
         try {
-            if (ex instanceof AppException appException) {
-                writeJsonResponse(response, appException.getStatus(), appException.getMessage());
+            if (ex instanceof DuplicateReservationException) {
+                writeJsonResponse(response, HttpStatus.CONFLICT, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof ResourceInUseException) {
+                writeJsonResponse(response, HttpStatus.CONFLICT, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof InvalidReservationStateException) {
+                writeJsonResponse(response, HttpStatus.BAD_REQUEST, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof UnauthorizedReservationException) {
+                writeJsonResponse(response, HttpStatus.FORBIDDEN, ex.getMessage());
+                return new ModelAndView();
+            }
+
+            if (ex instanceof NotFoundException) {
+                writeJsonResponse(response, HttpStatus.NOT_FOUND, ex.getMessage());
                 return new ModelAndView();
             }
 

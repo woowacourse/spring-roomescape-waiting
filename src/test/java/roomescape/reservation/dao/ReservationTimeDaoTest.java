@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.exception.AppException;
+import roomescape.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
@@ -98,7 +98,7 @@ class ReservationTimeDaoTest {
         void 존재하지_않는_ID로_조회하면_예외를_던진다() {
             // when // then
             assertThatThrownBy(() -> reservationTimeDao.findById(999L))
-                    .isInstanceOf(AppException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("존재하지 않는 예약 시간");
         }
     }
