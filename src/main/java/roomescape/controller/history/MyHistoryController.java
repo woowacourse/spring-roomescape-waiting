@@ -10,7 +10,7 @@ import roomescape.controller.history.dto.MyHistoryResponse;
 import roomescape.service.history.MyHistoryService;
 
 @RestController
-@RequestMapping("/historys")
+@RequestMapping("/my-histories")
 public class MyHistoryController {
 
     private final MyHistoryService myHistoryService;

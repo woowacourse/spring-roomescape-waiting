@@ -39,7 +39,7 @@ class MyHistoryApiTest {
     @Test
     @DisplayName("이름으로 내 예약과 대기 내역을 함께 조회한다")
     void getHistoriesByName() throws Exception {
-        mockMvc.perform(get("/historys/아루"))
+        mockMvc.perform(get("/my-histories/아루"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status").value("RESERVATION"))
                 .andExpect(jsonPath("$[0].name").value("아루"))
