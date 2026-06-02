@@ -49,12 +49,12 @@ public class WaitingListRepository {
                     id
             );
             return Optional.of(waitingList);
-        } catch (final EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
-    public List<WaitingList> findByName(final String name) {
+    public List<WaitingList> findByName(String name) {
         final String sql = """
                 SELECT
                     w.id AS waiting_list_id,
@@ -77,17 +77,17 @@ public class WaitingListRepository {
         return jdbcTemplate.query(sql, this::mapToDomain, name).stream().toList();
     }
 
-    public int findWaitingOrderByIdAndThemeAndDateAndTime(final WaitingList waitingList) {
+    public int findWaitingOrderByIdAndDateAndTimeAndTheme(final WaitingList waitingList) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
-                WHERE theme_id = ? AND date = ? AND time_id = ? AND created_at <= ?;
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND created_at <= ?
                 """;
 
-        final Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
-                waitingList.getTheme().getId(),
+        Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
                 waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
+                waitingList.getTheme().getId(),
                 Timestamp.valueOf(waitingList.getCreatedAt()
                 ));
 
@@ -97,14 +97,14 @@ public class WaitingListRepository {
         return 0;
     }
 
-    public boolean existsByNameAndThemeAndDateAndTime(final String name, final Long themeId, final LocalDate date, final Long timeId) {
+    public boolean existsByNameAndDateAndTimeAndTheme(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
-                WHERE name = ? AND theme_id = ? AND date = ? AND time_id = ?
+                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?
                 """;
 
-        final Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, themeId, date, timeId);
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
 
         return count != null && count > 0;
     }
@@ -117,7 +117,7 @@ public class WaitingListRepository {
 
     private long insertWaitingList(final WaitingList waitingList) {
         final String sql = """
-                INSERT INTO waiting_list (name, date, theme_id, time_id, created_at)
+                INSERT INTO waiting_list (name, date, time_id, theme_id, created_at)
                 VALUES (?, ?, ?, ?, ?)
                 """;
 
@@ -131,8 +131,8 @@ public class WaitingListRepository {
 
             preparedStatement.setString(1, waitingList.getName());
             preparedStatement.setDate(2, Date.valueOf(waitingList.getReservationDate().getDate()));
-            preparedStatement.setLong(3, waitingList.getTheme().getId());
-            preparedStatement.setLong(4, waitingList.getReservationTime().getId());
+            preparedStatement.setLong(3, waitingList.getReservationTime().getId());
+            preparedStatement.setLong(4, waitingList.getTheme().getId());
             preparedStatement.setTimestamp(5, Timestamp.valueOf(waitingList.getCreatedAt()));
 
             return preparedStatement;
@@ -151,7 +151,7 @@ public class WaitingListRepository {
         return generatedKey.longValue();
     }
 
-    public boolean deleteById(final Long id) {
+    public boolean deleteById(Long id) {
         final String sql = """
                 DELETE FROM waiting_list
                 WHERE id = ?
@@ -180,8 +180,8 @@ public class WaitingListRepository {
                 resultSet.getLong("waiting_list_id"),
                 resultSet.getString("waiting_list_name"),
                 resultSet.getDate("waiting_list_date").toLocalDate(),
-                theme,
                 reservationTime,
+                theme,
                 resultSet.getTimestamp("created_at").toLocalDateTime()
         );
     }

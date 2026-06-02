@@ -32,18 +32,18 @@ public class WaitingListService {
         final List<WaitingList> waitingLists = waitingListRepository.findByName(name);
         return waitingLists.stream()
                 .map(waitingList -> WaitingListResult.from(
-                        waitingList, waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(waitingList)
+                        waitingList, waitingListRepository.findWaitingOrderByIdAndDateAndTimeAndTheme(waitingList)
                         )
                 ).toList();
     }
 
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
-        final Theme findTheme = themeRepository.findById(createCommand.themeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
         final ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
+        final Theme findTheme = themeRepository.findById(createCommand.themeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
 
-        final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
+        final WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findReservationTime, findTheme);
         validateFuture(waitingList);
 
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
@@ -53,8 +53,8 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
-        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
-                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId()
+        if (waitingListRepository.existsByNameAndDateAndTimeAndTheme(
+                waitingList.getName(), waitingList.getReservationDate().getDate(), findTheme.getId(), findReservationTime.getId()
             )
         ) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
@@ -62,7 +62,7 @@ public class WaitingListService {
 
         try {
             final WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            final int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
+            final int waitingOrder = waitingListRepository.findWaitingOrderByIdAndDateAndTimeAndTheme(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
         } catch (final DataAccessException e) {
             throw new DatabaseException(ErrorCode.UNIQUE_CONSTRAINT_VIOLATION);
