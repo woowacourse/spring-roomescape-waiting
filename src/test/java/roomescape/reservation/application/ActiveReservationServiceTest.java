@@ -93,13 +93,7 @@ class ActiveReservationServiceTest {
     @DisplayName("확정 예약이 없는 경우 새 예약은 확정 예약으로 저장된다.")
     void normalTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand command = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        ReservationInfo saved = activeReservationService.add(slot, command);
+        ReservationInfo saved = activeReservationService.add(slot, createCommand("포비", time.getId()));
         Assertions.assertThat(saved.status()).isEqualTo(Status.ACTIVE);
     }
 
@@ -107,20 +101,8 @@ class ActiveReservationServiceTest {
     @DisplayName("확정 예약이 있는 경우 예외가 발생한다.")
     void pendingNormalTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand pobiCommand = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        activeReservationService.add(slot, pobiCommand);
-        ReservationCreateCommand lisaCommand = ReservationCreateCommand.builder()
-                .name("리사")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        Assertions.assertThatThrownBy(() -> activeReservationService.add(slot, lisaCommand))
+        activeReservationService.add(slot, createCommand("포비", time.getId()));
+        Assertions.assertThatThrownBy(() -> activeReservationService.add(slot, createCommand("리사", time.getId())))
                 .isInstanceOf(ReservationInUseException.class);
     }
 
@@ -128,16 +110,10 @@ class ActiveReservationServiceTest {
     @DisplayName("변경하려는 시간에 예약이 없으면, 시간이 변경된다.")
     void changeTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand pobiCommand = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        ReservationInfo saved = activeReservationService.add(slot, pobiCommand);
-
+        ReservationCreateCommand command = createCommand("포비", time.getId());
+        ReservationInfo saved = activeReservationService.add(slot, command);
         TimeSlot newSlot = timeSlotService.getTimeSlot(LocalDate.now(clock).plusDays(1), time, theme);
-        ReservationInfo reservationInfo = activeReservationService.change(saved.id(), newSlot, pobiCommand.name());
+        ReservationInfo reservationInfo = activeReservationService.change(saved.id(), newSlot, command.name());
         Assertions.assertThat(reservationInfo.date()).isEqualTo(newSlot.getDate());
     }
 
@@ -145,14 +121,17 @@ class ActiveReservationServiceTest {
     @DisplayName("예약을 취소하면, 해당 시간 슬롯의 예약 조회시 false를 반환한다.")
     void cancelTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand pobiCommand = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        ReservationInfo saved = activeReservationService.add(slot, pobiCommand);
+        ReservationInfo saved = activeReservationService.add(slot, createCommand("포비", time.getId()));
         activeReservationService.cancel(saved.id(), saved.name());
         Assertions.assertThat(activeReservationService.existsBySlotId(slot.getId())).isFalse();
+    }
+
+    private ReservationCreateCommand createCommand(String name, Long timeId) {
+        return ReservationCreateCommand.builder()
+                .name(name)
+                .date(LocalDate.now(clock))
+                .timeId(timeId)
+                .themeId(theme.getId())
+                .build();
     }
 }

@@ -96,12 +96,7 @@ class PendingReservationServiceTest {
     @DisplayName("해당 사용자의 대기 중인 예약이 없으면 저장된다.")
     void normalTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand command = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
+        ReservationCreateCommand command = createCommand("포비", time.getId());
         ReservationInfo saved = pendingReservationService.add(slot, command);
         Assertions.assertThat(saved.name()).isEqualTo(command.name());
         Assertions.assertThat(saved.status()).isEqualTo(Status.PENDING);
@@ -111,13 +106,7 @@ class PendingReservationServiceTest {
     @DisplayName("대기 상태인 예약을 다른 날짜의 대기 상태로 변경하면 정상 동작한다.")
     void changeTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand command = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        ReservationInfo saved = pendingReservationService.add(slot, command);
+        ReservationInfo saved = pendingReservationService.add(slot, createCommand("포비", time.getId()));
         TimeSlot newSlot = timeSlotService.getTimeSlot(LocalDate.now(clock).plusDays(1), time, theme);
         ReservationInfo reservationInfo = pendingReservationService.change(saved.id(), newSlot, saved.name());
         Assertions.assertThat(reservationInfo.date()).isEqualTo(newSlot.getDate());
@@ -127,20 +116,8 @@ class PendingReservationServiceTest {
     @DisplayName("가장 먼저 생성된 예약을 Active로 변경하면 대기 상태에 있던 예약은 사라진다.")
     void popNextPendingTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand pobiCommand = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        ReservationInfo saved = pendingReservationService.add(slot, pobiCommand);
-        ReservationCreateCommand lisaCommand = ReservationCreateCommand.builder()
-                .name("리사")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-        pendingReservationService.add(slot, lisaCommand);
+        ReservationInfo saved = pendingReservationService.add(slot, createCommand("포비", time.getId()));
+        pendingReservationService.add(slot, createCommand("리사", time.getId()));
         Optional<ActiveReservation> activeReservation = pendingReservationService.popNextPendingAndPromote(
                 slot.getId());
         Assertions.assertThat(activeReservation).isNotNull();
@@ -152,17 +129,19 @@ class PendingReservationServiceTest {
     @DisplayName("예약을 취소하면 조회 시 빈배열이 반환된다.")
     void cancelTest() {
         TimeSlot slot = timeSlotService.getTimeSlot(LocalDate.now(clock), time, theme);
-        ReservationCreateCommand pobiCommand = ReservationCreateCommand.builder()
-                .name("포비")
-                .date(LocalDate.now(clock))
-                .timeId(time.getId())
-                .themeId(theme.getId())
-                .build();
-
-        ReservationInfo saved = pendingReservationService.add(slot, pobiCommand);
+        ReservationInfo saved = pendingReservationService.add(slot, createCommand("포비", time.getId()));
         Assertions.assertThat(pendingReservationService.getReservations()).hasSize(1);
 
         pendingReservationService.cancel(saved.id(), saved.name());
         Assertions.assertThat(pendingReservationService.getReservations()).isEmpty();
+    }
+
+    private ReservationCreateCommand createCommand(String name, Long timeId) {
+        return ReservationCreateCommand.builder()
+                .name(name)
+                .date(LocalDate.now(clock))
+                .timeId(timeId)
+                .themeId(theme.getId())
+                .build();
     }
 }
