@@ -84,6 +84,21 @@ class ReservationQueryTest extends BaseIntegrationTest {
     }
 
     @Test
+    void 예약_상태의_대기_순번은_null이다() {
+        // when
+        ReservationSearchResponse result = reservationQuery.search(
+                new ReservationSearchCondition("채원"),
+                new Pageable(1, 10)
+        ).content().getFirst();
+
+        // then
+        assertAll(
+                () -> assertThat(result.status()).isEqualTo("RESERVED"),
+                () -> assertThat(result.waitingRank()).isNull()
+        );
+    }
+
+    @Test
     void 먼저_생성된_대기_예약이_더_낮은_대기_순번을_가진다() {
         // given
         LocalDateTime now = LocalDateTime.now();
