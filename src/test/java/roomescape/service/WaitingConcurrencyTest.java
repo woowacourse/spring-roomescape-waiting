@@ -1,3 +1,5 @@
+package roomescape.service;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -19,7 +21,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.WaitingService;
 
 @SpringBootTest(classes = RoomescapeApplication.class)
 @Sql(scripts = "/empty.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
