@@ -159,7 +159,6 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult reservationTimeResult = saveReservationTime();
         ThemeResult themeResult = saveTheme();
 
-        // 시간 하나 더 생성 (수정용)
         ReservationTimeCommand command2 = new ReservationTimeCommand(LocalTime.now().plusHours(2));
         ReservationTimeResult time2 = reservationTimeService.save(command2);
 
