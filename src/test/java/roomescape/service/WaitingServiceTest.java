@@ -17,10 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingException;
+import roomescape.exception.DuplicateException;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.PastTimeException;
-import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
@@ -63,7 +62,8 @@ class WaitingServiceTest {
         given(waitingRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> waitingService.removeWaiting(1L, "브라운"))
-                .isInstanceOf(WaitingNotFoundException.class);
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("해당하는 예약 대기 정보를 찾을 수 없습니다.");
     }
 
     @Test
@@ -73,7 +73,8 @@ class WaitingServiceTest {
         given(waitingRepository.exists("브라운", waiting.getDate(), 1L, 1L)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.saveWaiting("브라운", waiting.getDate(), 1L, 1L))
-                .isInstanceOf(DuplicateWaitingException.class);
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage("해당 날짜의 시간과 테마는 이미 예약 대기되어 있습니다.");
     }
 
     @Test
@@ -85,7 +86,8 @@ class WaitingServiceTest {
         given(reservationRepository.existsByNameAndDateAndTimeAndTheme("브라운", waiting.getDate(), 1L, 1L)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.saveWaiting("브라운", waiting.getDate(), 1L, 1L))
-                .isInstanceOf(DuplicateReservationException.class);
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
 
     @Test

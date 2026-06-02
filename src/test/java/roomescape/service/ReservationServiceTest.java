@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
-import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
@@ -66,7 +66,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(
                 () -> reservationService.saveReservation("토미", futureDate, savedTimeSlot.getId(), savedTheme.getId()))
-                .isInstanceOf(DuplicateReservationException.class)
+                .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
 
@@ -174,7 +174,8 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.updateReservation(
                 target.getId(), "브라운", futureDate, otherTime.getId()
-        )).isInstanceOf(DuplicateReservationException.class);
+        )).isInstanceOf(DuplicateException.class)
+                .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
 
     @Test

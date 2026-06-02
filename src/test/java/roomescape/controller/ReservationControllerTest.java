@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,8 +31,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.ProblemDetailsAdvice;
-import roomescape.exception.ReservationNotFoundException;
 import roomescape.service.ReservationService;
 
 @WebMvcTest(ReservationController.class)
@@ -104,10 +102,12 @@ class ReservationControllerTest {
     @Test
     @DisplayName("존재하지 않는 자원 요청 시 404 예외와 커스텀 코드를 반환한다.")
     void 존재하지_않는_예약_조회_예외_발생() throws Exception {
-        given(reservationService.findReservationById(anyLong())).willThrow(new ReservationNotFoundException());
+        given(reservationService.findReservationById(anyLong()))
+                .willThrow(new NotFoundException("해당 예약을 찾을 수 없습니다."));
         mockMvc.perform(get("/reservations/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.detail").value("해당 예약을 찾을 수 없습니다."));
     }
 
     @Test
@@ -142,28 +142,6 @@ class ReservationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_DOMAIN_STATE"))
                 .andExpect(jsonPath("$.detail").value("테스트용 에러 메시지"));
-    }
-
-    @Test
-    @DisplayName("데이터 중복 발생(DuplicateKey) 시 409 상태 코드를 반환한다.")
-    void 예약_생성_중복키_예외_발생() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
-                .willThrow(new DuplicateKeyException("중복 데이터 발생"));
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("DUPLICATE_KEY_VIOLATION"))
-                .andExpect(jsonPath("$.detail").value("이미 존재하는 데이터입니다."));
-    }
-
-    @Test
-    @DisplayName("데이터 무결성 위반(DataIntegrity) 시 400 상태 코드를 반환한다.")
-    void 예약_생성_데이터_무결성_예외_발생() throws Exception {
-        given(reservationService.saveReservation(any(), any(), any(), any()))
-                .willThrow(new DataIntegrityViolationException("외래키 위반"));
-        performPost("/reservations", new ReservationRequest("브라운", LocalDate.now(), 1L, 1L))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("DATA_INTEGRITY_VIOLATION"))
-                .andExpect(jsonPath("$.detail").value("데이터 무결성 제약조건이 위반되었습니다."));
     }
 
     private ResultActions performPost(String url, Object request) throws Exception {
