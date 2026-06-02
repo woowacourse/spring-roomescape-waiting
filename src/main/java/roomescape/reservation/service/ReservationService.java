@@ -47,14 +47,22 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
 
-        for (int i = 0; i < MAX_RETRY; i++) {
+        return retryOnDuplicateKey(MAX_RETRY, () -> {
             Status status = determineState(date, timeId, themeId);
             Reservation reservation = Reservation.create(
                     guestName, date, time, theme, status, LocalDateTime.now(clock));
             reservationValidator.validateCreate(reservation);
 
+            Reservation saved = reservationRepository.save(reservation);
+            return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
+                    .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
+        });
+    }
+
+    private <T> T retryOnDuplicateKey(int retryCount, RetryableOperation<T> operation) {
+        for (int i = 0; i < retryCount; i++) {
             try {
-                return saveAndFind(reservation);
+                return operation.execute();
             } catch (DuplicateKeyException e) {
                 handleDuplicateKey(e);
             }
@@ -71,12 +79,6 @@ public class ReservationService {
             }
             case WAITING_GUEST_SLOT -> throw new DomainException(RESERVATION_ALREADY_EXISTS);
         }
-    }
-
-    private ReservationWaitingResult saveAndFind(Reservation reservation) {
-        Reservation saved = reservationRepository.save(reservation);
-        return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
-                .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
     }
 
     public PageResult<Reservation> findAllReservations(int page, int size) {
@@ -181,5 +183,4 @@ public class ReservationService {
         }
         return Status.WAITING;
     }
-
 }
