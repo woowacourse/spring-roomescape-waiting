@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
@@ -7,6 +8,7 @@ import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
@@ -43,7 +45,7 @@ public class ReservationService {
 
         reservationPolicy.validateCreate(reservation);
 
-        Reservation saved = reservationRepository.save(reservation);
+        Reservation saved = saveReservation(reservation);
 
         return reservationRepository.findWaitingById(saved.getId())
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
@@ -118,7 +120,23 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
+    private Reservation saveReservation(Reservation reservation) {
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new DomainException(RESERVATION_ALREADY_EXISTS);
+        }
+    }
+
     private void updateReservation(Reservation reservation) {
+        try {
+            updateSlot(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new DomainException(RESERVATION_ALREADY_EXISTS);
+        }
+    }
+
+    private void updateSlot(Reservation reservation) {
         if (!reservationRepository.updateSlot(
                 reservation.getId(),
                 reservation.getSlot(),

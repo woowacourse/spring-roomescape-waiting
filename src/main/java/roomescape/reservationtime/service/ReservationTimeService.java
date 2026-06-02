@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
@@ -29,13 +30,10 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTime create(LocalTime startAt) {
         ReservationTime reservationTime = ReservationTime.create(startAt);
-        validateNotDuplicated(reservationTime);
 
-        return reservationTimeRepository.save(reservationTime);
-    }
-
-    private void validateNotDuplicated(ReservationTime reservationTime) {
-        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
+        try {
+            return reservationTimeRepository.save(reservationTime);
+        } catch (DuplicateKeyException exception) {
             throw new DomainException(RESERVATION_TIME_ALREADY_EXISTS);
         }
     }
