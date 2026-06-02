@@ -18,6 +18,7 @@ import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -29,19 +30,21 @@ public class ReservationService {
     private final ThemeService themeService;
     private final ReservationFactory reservationFactory;
     private final Clock clock;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
             ReservationFactory reservationFactory,
-            Clock clock
-    ) {
+            Clock clock,
+            ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationFactory = reservationFactory;
         this.clock = clock;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     @Transactional
@@ -72,6 +75,15 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_CANCEL);
         }
         reservationRepository.deleteById(id);
+
+        reservationWaitingRepository.findReservationWaitingBySlot(
+                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+                .ifPresent(waiting -> {
+                    ReservationRequest request = new ReservationRequest(waiting.getName(),
+                            waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
+                    createReservation(request);
+                    reservationWaitingRepository.deleteById(waiting.getId());
+                });
     }
 
     @Transactional

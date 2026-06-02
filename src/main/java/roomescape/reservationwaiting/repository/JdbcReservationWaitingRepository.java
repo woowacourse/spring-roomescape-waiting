@@ -109,6 +109,13 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findReservationWaitingBySlot(LocalDate date, Long timeId, Long themeId) {
+        String query = "SELECT * FROM (" + BASE_QUERY
+                + ") sub WHERE sub.reservation_date = ? AND sub.time_id = ? AND sub.theme_id = ? ORDER BY sub.created_at";
+        return jdbcTemplate.query(query, rowMapper, date, timeId, themeId).stream().findFirst();
+    }
+
+    @Override
     public boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId) {
         String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
         return jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId) >= 1;

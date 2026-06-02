@@ -15,6 +15,9 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findByName(String name);
 
+    Optional<ReservationWaiting> findReservationWaitingBySlot(LocalDate date, Long timeId,
+                                                              Long themeId);
+
     boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId);
 
     Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId);
