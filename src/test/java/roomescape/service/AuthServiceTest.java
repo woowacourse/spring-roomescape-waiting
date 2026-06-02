@@ -5,28 +5,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
-import roomescape.domain.User;
 import roomescape.dto.auth.command.LoginCommand;
 import roomescape.exception.InvalidLoginException;
 import roomescape.infrastructure.JwtTokenProvider;
-import roomescape.repository.fake.FakeUserRepository;
 
-class AuthServiceTest {
+class AuthServiceTest extends ServiceIntegrationTest {
 
-    private static final String SECRET = "/BWxvVt/eMsTVSq+RI9kRCrZKK38KNGIWi7ilxCg9So=";
-
-    private FakeUserRepository userRepository;
-    private JwtTokenProvider jwtProvider;
+    @Autowired
     private AuthService authService;
+
+    @Autowired
+    private JwtTokenProvider jwtProvider;
 
     @BeforeEach
     void setUp() {
-        userRepository = new FakeUserRepository();
-        jwtProvider = new JwtTokenProvider(SECRET, 3600000L);
-        authService = new AuthService(userRepository, jwtProvider);
-        userRepository.save(new User("brown@test.com", Password.ofEncrypted("pw"), "브라운", Role.MEMBER));
+        String hashedPassword = Password.ofEncrypted("pw").getValue();
+        jdbcTemplate.update(
+                "INSERT INTO users(name, username, password, role) VALUES (?, ?, ?, ?)",
+                "브라운", "brown@test.com", hashedPassword, Role.MEMBER.name());
     }
 
     @Test
