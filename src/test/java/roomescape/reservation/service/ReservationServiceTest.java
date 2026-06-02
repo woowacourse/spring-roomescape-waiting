@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
@@ -613,7 +613,7 @@ class ReservationServiceTest {
                 )));
 
         when(reservationRepository.save(any()))
-                .thenThrow(DataIntegrityViolationException.class);
+                .thenThrow(DuplicateKeyException.class);
 
         when(reservationWaitingRepository.deleteById(any()))
                 .thenReturn(1);

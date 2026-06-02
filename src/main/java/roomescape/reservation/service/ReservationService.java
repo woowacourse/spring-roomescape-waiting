@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -209,7 +208,7 @@ public class ReservationService {
             reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
                     original.getDate(), original.getReservationTime().getId(), original.getTheme().getId()
             ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
         }
     }
@@ -231,7 +230,7 @@ public class ReservationService {
             reservationRepository.save(
                     Reservation.of(waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme())
             );
-        } catch (DataIntegrityViolationException e) {
+        } catch (DuplicateKeyException e) {
             throw new DuplicateReservationException();
         }
     }
