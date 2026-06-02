@@ -73,7 +73,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = getById(id);
-        if (reservation.isPast(clock)) {
+        if (!reservation.isCancelable(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_CANCEL);
         }
         reservationRepository.deleteById(id);
@@ -89,7 +89,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
-        if (reservation.isPast(clock)) {
+        if (!reservation.isCancelable(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
         }
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(request.date(), request.timeId(),
@@ -97,8 +97,19 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.DUPLICATE_RESERVATION);
         }
 
+        LocalDate oldDate = reservation.getDate();
+        Long oldTimeId = reservation.getTime().getId();
+        Long oldThemeId = reservation.getTheme().getId();
+
         reservation.reschedule(request.date(), reservationTimeService.getById(request.timeId()), clock);
         reservationRepository.update(id, request.date(), request.timeId());
+
+        try {
+            reservationWaitingService.promoteWaiting(oldDate, oldTimeId, oldThemeId);
+        } catch (Exception e) {
+            log.warn("승격 실패: date={}, timeId={}, themeId={}", oldDate, oldTimeId, oldThemeId, e);
+        }
+
         return ReservationResponse.from(getById(id));
     }
 

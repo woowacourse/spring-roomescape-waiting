@@ -54,6 +54,10 @@ public class Reservation {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
+    public boolean isCancelable(Clock clock) {
+        return LocalDateTime.now(clock).isBefore(LocalDateTime.of(date, time.getStartAt()).minusHours(12));
+    }
+
     public Long getId() {
         return id;
     }
