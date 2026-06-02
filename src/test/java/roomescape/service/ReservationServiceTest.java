@@ -30,6 +30,7 @@ import roomescape.dao.jdbc.StoreJdbcDao;
 import roomescape.dao.jdbc.ReservationJdbcDao;
 import roomescape.dao.jdbc.ThemeJdbcDao;
 import roomescape.dao.jdbc.TimeJdbcDao;
+import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
@@ -42,8 +43,9 @@ import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
 
 @JdbcTest
-@Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, ReservationJdbcDao.class, TimeJdbcDao.class,
-        ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class})
+@Import({ReservationService.class, ReservationCreator.class, ReservationAuthorizationService.class, WaitingService.class,
+        ReservationJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, MemberJdbcDao.class, StoreJdbcDao.class,
+        WaitingJdbcDao.class})
 @ActiveProfiles("test")
 class ReservationServiceTest {
 
