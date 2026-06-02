@@ -46,7 +46,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.now().minusDays(1), 1L, 1L);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("이미 지난 시간/날짜는 예약할 수 없습니다.");
     }
 

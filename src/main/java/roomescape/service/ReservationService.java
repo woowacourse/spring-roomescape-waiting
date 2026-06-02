@@ -115,7 +115,7 @@ public class ReservationService {
     private void validateReservationDateTime(LocalDate date, ReservationTime time) {
         LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
         if (targetDateTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("이미 지난 시간/날짜는 예약할 수 없습니다.");
+            throw new IllegalStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
         }
     }
 
