@@ -3,7 +3,6 @@ package roomescape.auth.service;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Waiting;
@@ -19,7 +18,7 @@ public class WaitingAuthorizationService {
     public void validateMemberCanAccess(Long memberId, Long waitingId) {
         Waiting waiting = findWaiting(waitingId);
         if (!waiting.isOwnedBy(memberId)) {
-            throw new HiddenResourceException();
+            throw new UnauthorizedException();
         }
     }
 

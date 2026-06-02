@@ -155,14 +155,14 @@ class WaitingControllerE2ETest extends BaseE2ETest {
         }
 
         @Test
-        @DisplayName("타인 대기를 삭제하면 404를 반환한다")
+        @DisplayName("타인 대기를 삭제하면 403을 반환한다")
         void deleteOthersWaiting() {
             Long otherWaitingId = seedWaiting(otherUserId, timeId, themeId, storeId, LocalDate.now().plusDays(1));
 
             RestAssured.given()
                     .sessionId(userSession)
                     .when().delete("/waitings/" + otherWaitingId)
-                    .then().statusCode(HttpStatus.NOT_FOUND.value());
+                    .then().statusCode(HttpStatus.FORBIDDEN.value());
         }
     }
 }

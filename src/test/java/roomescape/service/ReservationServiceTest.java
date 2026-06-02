@@ -20,7 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.common.exception.HiddenResourceException;
+import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
@@ -210,17 +210,17 @@ class ReservationServiceTest {
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), savedTime2.getId());
 
             assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
-                    .isInstanceOf(HiddenResourceException.class);
+                    .isInstanceOf(UnauthorizedException.class);
         }
 
         @Test
-        @DisplayName("다른 사람의 예약을 존재하지 않는 시간으로 수정해도 숨김 예외를 반환한다")
-        void throwsHiddenResourceWhenMemberMismatchWithUnknownTime() {
+        @DisplayName("다른 사람의 예약을 존재하지 않는 시간으로 수정해도 권한 예외를 반환한다")
+        void throwsUnauthorizedWhenMemberMismatchWithUnknownTime() {
             Reservation saved = reservationService.create(member, requestDto1);
             ReservationPatchDto updateDto = new ReservationPatchDto(LocalDate.now().plusDays(3), -1L);
 
             assertThatThrownBy(() -> reservationService.updateByUser(saved.getId(), -1L, updateDto))
-                    .isInstanceOf(HiddenResourceException.class);
+                    .isInstanceOf(UnauthorizedException.class);
         }
 
         @Test
@@ -272,7 +272,7 @@ class ReservationServiceTest {
                     Reservation.createByAdmin(member, LocalDate.now().plusDays(1), savedTime1, savedTheme1));
 
             assertThatThrownBy(() -> reservationService.cancel(saved.getId(), -1L))
-                    .isInstanceOf(HiddenResourceException.class);
+                    .isInstanceOf(UnauthorizedException.class);
         }
     }
 }

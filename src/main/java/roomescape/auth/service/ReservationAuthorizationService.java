@@ -4,7 +4,6 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
@@ -21,7 +20,7 @@ public class ReservationAuthorizationService {
     public void validateMemberCanAccess(Long memberId, Long reservationId) {
         Reservation reservation = findReservation(reservationId);
         if (!reservation.isOwnedBy(memberId)) {
-            throw new HiddenResourceException();
+            throw new UnauthorizedException();
         }
     }
 

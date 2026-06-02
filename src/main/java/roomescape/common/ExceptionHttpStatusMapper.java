@@ -6,7 +6,6 @@ import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.common.exception.HiddenResourceException;
 import roomescape.common.exception.InvalidInputException;
 import roomescape.common.exception.UnauthenticatedException;
 import roomescape.common.exception.UnauthorizedException;
@@ -16,7 +15,6 @@ public class ExceptionHttpStatusMapper {
             InvalidInputException.class, HttpStatus.BAD_REQUEST,
             BusinessRuleViolationException.class, HttpStatus.BAD_REQUEST,
             EntityNotFoundException.class, HttpStatus.NOT_FOUND,
-            HiddenResourceException.class, HttpStatus.NOT_FOUND,
             DuplicateEntityException.class, HttpStatus.CONFLICT,
             UnauthenticatedException.class, HttpStatus.UNAUTHORIZED,
             UnauthorizedException.class, HttpStatus.FORBIDDEN
