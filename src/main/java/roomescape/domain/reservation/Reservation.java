@@ -44,6 +44,10 @@ public class Reservation {
         return name;
     }
 
+    public ReservationSlot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
         return slot.getDate();
     }
