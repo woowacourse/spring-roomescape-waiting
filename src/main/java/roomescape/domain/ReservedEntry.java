@@ -4,8 +4,16 @@ import java.time.LocalDateTime;
 
 public class ReservedEntry extends ReservationEntry {
 
-    public ReservedEntry(Long id, String name, LocalDateTime createdAt) {
+    private ReservedEntry(Long id, String name, LocalDateTime createdAt) {
         super(id, name, createdAt);
+    }
+
+    public static ReservedEntry restore(Long id, String name, LocalDateTime createdAt) {
+        return new ReservedEntry(id, name, createdAt);
+    }
+
+    public static ReservedEntry of(String name, LocalDateTime createdAt) {
+        return new ReservedEntry(null, name, createdAt);
     }
 
     @Override
@@ -30,7 +38,7 @@ public class ReservedEntry extends ReservationEntry {
 
     @Override
     public ReservationEntry cancel() {
-        return new DeletedEntry(getId(), getReserverName(), getCreatedAt());
+        return DeletedEntry.restore(getId(), getReserverName(), getCreatedAt());
     }
 
     @Override

@@ -4,8 +4,16 @@ import java.time.LocalDateTime;
 
 public class WaitingEntry extends ReservationEntry {
 
-    public WaitingEntry(Long id, String name, LocalDateTime createdAt) {
+    private WaitingEntry(Long id, String name, LocalDateTime createdAt) {
         super(id, name, createdAt);
+    }
+
+    public static WaitingEntry restore(Long id, String name, LocalDateTime createdAt) {
+        return new WaitingEntry(id, name, createdAt);
+    }
+
+    public static WaitingEntry of(String name, LocalDateTime createdAt) {
+        return new WaitingEntry(null, name, createdAt);
     }
 
     @Override
@@ -30,11 +38,11 @@ public class WaitingEntry extends ReservationEntry {
 
     @Override
     public ReservationEntry cancel() {
-        return new DeletedEntry(getId(), getReserverName(), getCreatedAt());
+        return DeletedEntry.restore(getId(), getReserverName(), getCreatedAt());
     }
 
     @Override
     public ReservationEntry promote() {
-        return new ReservedEntry(getId(), getReserverName(), getCreatedAt());
+        return ReservedEntry.restore(getId(), getReserverName(), getCreatedAt());
     }
 }

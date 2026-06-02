@@ -32,9 +32,9 @@ public abstract class ReservationEntry {
     private static ReservationEntry of(Long id, String reserverName, ReservationStatus status,
                                        LocalDateTime createdAt) {
         return switch (status) {
-            case RESERVED -> new ReservedEntry(id, reserverName, createdAt);
-            case WAITING -> new WaitingEntry(id, reserverName, createdAt);
-            case DELETED -> new DeletedEntry(id, reserverName, createdAt);
+            case RESERVED -> ReservedEntry.restore(id, reserverName, createdAt);
+            case WAITING -> WaitingEntry.restore(id, reserverName, createdAt);
+            case DELETED -> DeletedEntry.restore(id, reserverName, createdAt);
         };
     }
 
