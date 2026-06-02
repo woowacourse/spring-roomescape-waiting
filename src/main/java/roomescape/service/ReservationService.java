@@ -17,7 +17,6 @@ import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
-import roomescape.dto.reservation.response.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -106,32 +105,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createReservation(CreateReservationCommand command) {
-        Reservation newReservation = buildReservation(command, ReservationStatus.RESERVED);
+    public Reservation create(CreateReservationCommand command, ReservationStatus status) {
+        Reservation newReservation = buildReservation(command, status);
 
         validateNotPastDateTime(newReservation);
-        validateNotDuplicated(newReservation);
+        validateCreatable(newReservation, status);
 
         Long newReservationId = reservationRepository.save(newReservation);
         return newReservation.withId(newReservationId);
-    }
-
-    @Transactional
-    public WaitingReservationResponse createWaitingReservation(CreateReservationCommand command) {
-        Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
-
-        validateReservationIsFullyBooked(command);
-
-        validateNotPastDateTime(newWaitingReservation);
-
-        validateNotDuplicatedWaiting(newWaitingReservation);
-
-        Long newReservationId = reservationRepository.save(newWaitingReservation);
-        Reservation saved = newWaitingReservation.withId(newReservationId);
-
-        int waitingOrder = reservationRepository.countWaitingByDateAndTimeAndThemeAndStore(
-                saved.getDate(), saved.getTime().getId(), saved.getTheme().getId(), saved.getStore().getId());
-        return WaitingReservationResponse.from(saved, waitingOrder);
     }
 
     @Transactional
@@ -190,9 +171,19 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationIsFullyBooked(CreateReservationCommand command) {
+    private void validateCreatable(Reservation reservation, ReservationStatus status) {
+        if (status == ReservationStatus.WAITING) {
+            validateReservationIsFullyBooked(reservation);
+            validateNotDuplicatedWaiting(reservation);
+            return;
+        }
+        validateNotDuplicated(reservation);
+    }
+
+    private void validateReservationIsFullyBooked(Reservation reservation) {
         boolean isReservedExist = reservationRepository.existsByDateAndTimeAndThemeAndStoreAndStatus(
-                command.date(), command.timeId(), command.themeId(), command.storeId(), ReservationStatus.RESERVED
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
+                reservation.getStore().getId(), ReservationStatus.RESERVED
         );
 
         if (!isReservedExist) {

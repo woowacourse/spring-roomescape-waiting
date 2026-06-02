@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
@@ -26,10 +27,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.domain.ReservationStatus;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
-import roomescape.dto.reservation.response.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -102,7 +103,7 @@ class ReservationControllerTest {
 
     @Test
     void POST_reservations_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
-        given(reservationService.createReservation(any(CreateReservationCommand.class)))
+        given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED)))
                 .willReturn(Fixtures.sampleReservation(7L));
 
         Map<String, Object> body = Map.of(
@@ -121,7 +122,7 @@ class ReservationControllerTest {
     @Test
     void POST_reservations_서비스가_DuplicateReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
         willThrow(new DuplicateReservationException())
-                .given(reservationService).createReservation(any(CreateReservationCommand.class));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-06",
@@ -139,7 +140,7 @@ class ReservationControllerTest {
     @Test
     void POST_reservations_서비스가_PastDateTimeReservationException을_던지면_422_와_메시지를_반환한다() throws Exception {
         willThrow(new PastDateTimeReservationException())
-                .given(reservationService).createReservation(any(CreateReservationCommand.class));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-06",
@@ -381,8 +382,8 @@ class ReservationControllerTest {
 
     @Test
     void POST_reservations_waiting_생성된_대기_예약을_body에_담고_Location_헤더와_함께_201을_반환한다() throws Exception {
-        given(reservationService.createWaitingReservation(any(CreateReservationCommand.class)))
-                .willReturn(WaitingReservationResponse.from(Fixtures.sampleWaitingReservation(7L), 2));
+        given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING)))
+                .willReturn(Fixtures.sampleWaitingReservation(7L));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-05-01",
@@ -395,14 +396,13 @@ class ReservationControllerTest {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/reservations/7"))
-                .andExpect(jsonPath("$.id").value(7))
-                .andExpect(jsonPath("$.waitingOrder").value(2));
+                .andExpect(jsonPath("$.id").value(7));
     }
 
     @Test
     void POST_reservations_waiting_서비스가_ReservationNotFoundForWaitingException을_던지면_409과_메시지를_반환한다() throws Exception {
         willThrow(new ReservationNotFoundForWaitingException())
-                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-06-02",
@@ -420,7 +420,7 @@ class ReservationControllerTest {
     @Test
     void POST_reservations_waiting_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
         willThrow(new PastDateTimeReservationException())
-                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-06-02",
@@ -438,7 +438,7 @@ class ReservationControllerTest {
     @Test
     void POST_reservations_waiting_서비스가_DuplicateWaitingReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
         willThrow(new DuplicateWaitingReservationException())
-                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+                .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
                 "date", "2026-06-02",

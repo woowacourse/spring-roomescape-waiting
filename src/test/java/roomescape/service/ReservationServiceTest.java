@@ -17,7 +17,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
-import roomescape.dto.reservation.response.WaitingReservationResponse;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -62,8 +61,8 @@ class ReservationServiceTest {
         User brown = buildUser("브라운");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        Reservation created = service.createReservation(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId));
+        Reservation created = service.create(
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED);
 
         assertThat(created.getId()).isPositive();
         assertThat(created.getUser().getName()).isEqualTo("브라운");
@@ -78,8 +77,8 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
 
-        assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 5), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 5), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(PastDateTimeReservationException.class)
                 .hasMessage("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다.");
     }
@@ -90,11 +89,11 @@ class ReservationServiceTest {
         User other = buildUser("다른사람");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        service.createReservation(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId));
+        service.create(
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED);
 
-        assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(other, themeId, LocalDate.of(2026, 5, 8), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(other, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(DuplicateReservationException.class)
                 .hasMessage("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요.");
     }
@@ -104,8 +103,8 @@ class ReservationServiceTest {
         User brown = buildUser("브라운");
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
-        assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown, 9999L, LocalDate.of(2026, 5, 8), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(brown, 9999L, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("테마")
                 .hasMessageContaining("9999");
@@ -116,8 +115,8 @@ class ReservationServiceTest {
         User brown = buildUser("브라운");
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "https://thumbnail.url"));
 
-        assertThatThrownBy(() -> service.createReservation(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), 9999L)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), 9999L), ReservationStatus.RESERVED))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("예약 시간")
                 .hasMessageContaining("9999");
@@ -466,14 +465,15 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
-        WaitingReservationResponse result = service.createWaitingReservation(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId));
+        Reservation result = service.create(
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING);
 
-        assertThat(result.date()).isEqualTo(LocalDate.of(2026, 6, 1));
-        assertThat(result.themeName()).isEqualTo("공포");
-        assertThat(result.name()).isEqualTo("샤를");
-        assertThat(result.time()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(result.waitingOrder()).isEqualTo(1);
+        assertThat(result.getId()).isPositive();
+        assertThat(result.getDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(result.getTheme().getName()).isEqualTo("공포");
+        assertThat(result.getUser().getName()).isEqualTo("샤를");
+        assertThat(result.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
@@ -482,8 +482,8 @@ class ReservationServiceTest {
         Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
-        assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(ReservationNotFoundForWaitingException.class);
     }
 
@@ -495,8 +495,8 @@ class ReservationServiceTest {
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(1, 5, 1)));
 
-        assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(1, 5, 1), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(charles, themeId, LocalDate.of(1, 5, 1), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(PastDateTimeReservationException.class);
     }
 
@@ -505,8 +505,8 @@ class ReservationServiceTest {
         User charles = buildUser("샤를");
         Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 
-        assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles, 9999L, LocalDate.of(2026, 6, 1), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(charles, 9999L, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("테마")
                 .hasMessageContaining("9999");
@@ -521,8 +521,8 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
         reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, LocalDate.of(2026, 6, 1)));
 
-        assertThatThrownBy(() -> service.createWaitingReservation(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId)))
+        assertThatThrownBy(() -> service.create(
+                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(DuplicateWaitingReservationException.class);
     }
 

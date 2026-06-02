@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.dto.reservation.command.CancelReservationCommand;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.request.CreateReservationRequest;
@@ -23,7 +24,6 @@ import roomescape.dto.reservation.response.ReservationResponse;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
 import roomescape.dto.reservation.request.UpdateReservationRequest;
-import roomescape.dto.reservation.response.WaitingReservationResponse;
 import roomescape.domain.User;
 import roomescape.infrastructure.LoginRequired;
 import roomescape.infrastructure.LoginUser;
@@ -59,23 +59,23 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @LoginUser User loginUser,
             @Valid @RequestBody CreateReservationRequest request) {
-        Reservation createdReservation = reservationService.createReservation(
-                CreateReservationCommand.of(loginUser, request));
+        Reservation createdReservation = reservationService.create(
+                CreateReservationCommand.of(loginUser, request), ReservationStatus.RESERVED);
 
         URI location = URI.create("/reservations/" + createdReservation.getId());
         return ResponseEntity.created(location).body(ReservationResponse.from(createdReservation));
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<WaitingReservationResponse> createWaitingReservation(
+    public ResponseEntity<ReservationResponse> createWaitingReservation(
             @LoginUser User loginUser,
             @Valid @RequestBody CreateReservationRequest request
     ) {
-        WaitingReservationResponse response = reservationService.createWaitingReservation(
-                CreateReservationCommand.of(loginUser, request));
+        Reservation createdWaiting = reservationService.create(
+                CreateReservationCommand.of(loginUser, request), ReservationStatus.WAITING);
 
-        URI location = URI.create("/reservations/" + response.id());
-        return ResponseEntity.created(location).body(response);
+        URI location = URI.create("/reservations/" + createdWaiting.getId());
+        return ResponseEntity.created(location).body(ReservationResponse.from(createdWaiting));
     }
 
 
