@@ -28,6 +28,7 @@ import roomescape.repository.FakeTimeRepository;
 class ReservationServiceTest {
 
     private ReservationService reservationService;
+    private FakeThemeSlotRepository fakeThemeSlotRepository;
     private Time savedTime;
     private Theme savedTheme;
     private ThemeSlot savedThemeSlot1;
@@ -38,7 +39,7 @@ class ReservationServiceTest {
     void setUp() {
         FakeTimeRepository fakeReservationTimeDao = new FakeTimeRepository();
         FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
-        FakeThemeSlotRepository fakeThemeSlotRepository = new FakeThemeSlotRepository();
+        fakeThemeSlotRepository = new FakeThemeSlotRepository();
 
         reservationService = new ReservationService(
                 new FakeReservationRepository(),
@@ -87,7 +88,7 @@ class ReservationServiceTest {
     void saveReservationByNotExistsThemeSlot() {
         Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot1.getId());
         assertThat(reservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
-        assertThat(reservation.getThemeSlot().isReserved()).isEqualTo(true);
+        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isTrue();
     }
 
     @Test
@@ -133,7 +134,7 @@ class ReservationServiceTest {
         //then
         Reservation findReservation = reservationService.findReservation(reservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
-        assertThat(findReservation.getThemeSlot().isReserved()).isTrue();
+        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isTrue();
     }
 
     @Test
@@ -164,7 +165,7 @@ class ReservationServiceTest {
         //then
         Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
-        assertThat(confirmReservation.getThemeSlot().isReserved()).isFalse();
+        assertThat(fakeThemeSlotRepository.findById(savedThemeSlot1.getId()).get().isReserved()).isFalse();
     }
 
     @Test

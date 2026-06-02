@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
-import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.reservationStatus.*;
 import roomescape.repository.ReservationRepository;
@@ -33,19 +32,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getLong("r_id"),
             rs.getString("name"),
-            new ThemeSlot(
-                    rs.getLong("theme_slot_id"),
-                    new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("theme_description"),
-                            rs.getString("theme_thumbnail_url")
-                    ),
-                    rs.getObject("date", LocalDate.class),
-                    new Time(
-                            rs.getLong("t_id"),
-                            rs.getObject("start_at", LocalTime.class)),
-                    rs.getBoolean("is_reserved")
+            rs.getLong("theme_slot_id"),
+            rs.getObject("date", LocalDate.class),
+            new Time(rs.getLong("t_id"), rs.getObject("start_at", LocalTime.class)),
+            new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail_url")
             ),
             toStatus(rs.getString("status"))
     );
@@ -148,7 +142,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private Map<String, Object> createParams(Reservation reservation) {
         return Map.of(
                 "name", reservation.getName(),
-                "theme_slot_id", reservation.getThemeSlot().getId(),
+                "theme_slot_id", reservation.getThemeSlotId(),
                 "status", reservation.getReservationStatusName()
         );
     }
@@ -206,7 +200,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
 
         jdbcTemplate.update(sql,
-                reservation.getThemeSlot().getId(),
+                reservation.getThemeSlotId(),
                 reservation.getId()
         );
     }

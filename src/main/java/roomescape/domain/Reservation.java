@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.domain.reservationStatus.CancelledStatus;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.domain.reservationStatus.ReservationStatus;
 
@@ -10,22 +12,31 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final ThemeSlot themeSlot;
+    private final Long themeSlotId;
+    private final LocalDate date;
+    private final Time time;
+    private final Theme theme;
     private ReservationStatus reservationStatus;
 
-    public Reservation(String name, ThemeSlot themeSlot) {
-        validate(name, themeSlot);
+    public Reservation(String name, Long themeSlotId, LocalDate date, Time time, Theme theme) {
+        validate(name, date, time, theme);
         this.id = null;
         this.name = name;
-        this.themeSlot = themeSlot;
+        this.themeSlotId = themeSlotId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
         this.reservationStatus = PendingStatus.getInstance();
     }
 
-    public Reservation(Long id, String name, ThemeSlot themeSlot, ReservationStatus reservationStatus) {
-        validate(name, themeSlot);
+    public Reservation(Long id, String name, Long themeSlotId, LocalDate date, Time time, Theme theme, ReservationStatus reservationStatus) {
+        validate(name, date, time, theme);
         this.id = id;
         this.name = name;
-        this.themeSlot = themeSlot;
+        this.themeSlotId = themeSlotId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
         this.reservationStatus = reservationStatus;
     }
 
@@ -33,22 +44,25 @@ public class Reservation {
         return new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getThemeSlot(),
+                reservation.getThemeSlotId(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
                 reservation.getReservationStatus()
         );
     }
 
-    private void validate(String name, ThemeSlot themeSlot) {
+    private void validate(String name, LocalDate date, Time time, Theme theme) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("예약자 이름은 필수이며 비어있을 수 없습니다.");
         }
-        if (themeSlot == null || themeSlot.getDate() == null) {
+        if (date == null) {
             throw new IllegalArgumentException("예약 날짜는 필수입니다.");
         }
-        if (themeSlot.getTime() == null) {
+        if (time == null) {
             throw new IllegalArgumentException("유효하지 않은 예약 시간대입니다.");
         }
-        if (themeSlot.getTheme() == null) {
+        if (theme == null) {
             throw new IllegalArgumentException("유효하지 않은 테마입니다.");
         }
     }
@@ -61,20 +75,20 @@ public class Reservation {
         return name;
     }
 
+    public Long getThemeSlotId() {
+        return themeSlotId;
+    }
+
     public LocalDate getDate() {
-        return themeSlot.getDate();
+        return date;
     }
 
     public Time getTime() {
-        return themeSlot.getTime();
+        return time;
     }
 
     public Theme getTheme() {
-        return themeSlot.getTheme();
-    }
-
-    public ThemeSlot getThemeSlot() {
-        return themeSlot;
+        return theme;
     }
 
     public ReservationStatus getReservationStatus() {
@@ -103,6 +117,18 @@ public class Reservation {
 
     public boolean isPendingStatus() {
         return reservationStatus == PendingStatus.getInstance();
+    }
+
+    public boolean isPending() {
+        return reservationStatus == PendingStatus.getInstance();
+    }
+
+    public boolean isConfirmed() {
+        return reservationStatus == ConfirmedStatus.getInstance();
+    }
+
+    public boolean isCancelled() {
+        return reservationStatus == CancelledStatus.getInstance();
     }
 
     @Override

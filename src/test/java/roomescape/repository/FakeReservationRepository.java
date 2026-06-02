@@ -39,7 +39,10 @@ public class FakeReservationRepository implements ReservationRepository {
         Reservation savedReservation = new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getThemeSlot(),
+                reservation.getThemeSlotId(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
                 reservation.getReservationStatus()
         );
         storage.put(id, savedReservation);
@@ -55,7 +58,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsByThemeSlotId(long themeSlotId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
-                        Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
+                        Objects.equals(reservation.getThemeSlotId(), themeSlotId)
                                 && !"CANCELLED".equals(reservation.getReservationStatusName())
                 );
     }
@@ -75,7 +78,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByThemeSlotAndPending(Long themeSlotId) {
         return storage.values().stream()
-                .filter(reservation -> Objects.equals(reservation.getThemeSlot().getId(), themeSlotId))
+                .filter(reservation -> Objects.equals(reservation.getThemeSlotId(), themeSlotId))
                 .filter(reservation -> "PENDING".equals(reservation.getReservationStatusName()))
                 .sorted(Comparator.comparing(Reservation::getId))
                 .toList();
@@ -103,7 +106,10 @@ public class FakeReservationRepository implements ReservationRepository {
         Reservation newReservation = new Reservation(
                 getReservation.getId(),
                 getReservation.getName(),
-                reservation.getThemeSlot(),
+                reservation.getThemeSlotId(),
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
                 getReservation.getReservationStatus()
         );
         storage.remove(id);
@@ -130,14 +136,14 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
-                        reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
+                        reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlotId(), themeSlotId)
                 );
     }
 
     @Override
     public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
         return storage.values().stream()
-                .filter(reservation -> reservation.getThemeSlot().getId().equals(themeSlotId) && reservation.getReservationStatus().equals(
+                .filter(reservation -> reservation.getThemeSlotId().equals(themeSlotId) && reservation.getReservationStatus().equals(
                         PendingStatus.getInstance()))
                 .sorted()
                 .findFirst();

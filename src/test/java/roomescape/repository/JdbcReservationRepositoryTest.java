@@ -45,7 +45,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("예약을 저장하고 영속화된 객체를 반환한다.")
     void save() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        Reservation reservation = new Reservation("브라운", themeSlot);
+        Reservation reservation = new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme());
         Reservation savedReservation = jdbcReservationRepository.save(reservation);
         assertThat(savedReservation.getId()).isPositive();
     }
@@ -54,7 +54,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("식별자로 예약 객체를 조회한다.")
     void findById() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_14, false);
-        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
         Reservation foundReservation = jdbcReservationRepository.findById(savedReservation.getId()).get();
         assertThat(foundReservation.getName()).isEqualTo("브라운");
     }
@@ -63,7 +63,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("모든 예약 객체 목록을 조회한다.")
     void findAll() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_18, false);
-        jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
         List<Reservation> reservations = jdbcReservationRepository.findAll();
         assertThat(reservations).hasSize(1);
     }
@@ -72,7 +72,7 @@ class JdbcReservationRepositoryTest {
     @DisplayName("식별자로 예약을 삭제한다.")
     void deleteById() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_10, false);
-        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
         jdbcReservationRepository.deleteById(savedReservation.getId());
         assertThat(jdbcReservationRepository.findAll()).isEmpty();
     }
@@ -99,10 +99,10 @@ class JdbcReservationRepositoryTest {
     @DisplayName("같은 슬롯에 대한 대기 예약은 신청 순서대로 가져와진다")
     void assignWaitingOrderByApplicationOrder() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
-        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme(), ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
 
         List<Reservation> pendingReservations = jdbcReservationRepository.findByThemeSlotAndPending(
                 themeSlot.getId());
@@ -116,10 +116,10 @@ class JdbcReservationRepositoryTest {
     @DisplayName("같은 슬롯에 대한 대기 예약은 전부 PENDING 상태다")
     void findByThemeSlotAndPendingMustBePending(){
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
-        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme(), ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
 
         List<Reservation> pendingReservations = jdbcReservationRepository.findByThemeSlotAndPending(
                 themeSlot.getId());
@@ -133,10 +133,10 @@ class JdbcReservationRepositoryTest {
     @DisplayName("같은 테마 슬롯 조건의 PENDING 예약을 ID순으로 가장 먼저 조회한다.")
     void findFirstPendingReservationByThemeSlotOrderByIdAsc() {
         ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
-        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
-        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
-        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme(), ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
 
         Optional<Reservation> reservation = jdbcReservationRepository.findRecentReservationByThemeSlot(
                 themeSlot.getId());

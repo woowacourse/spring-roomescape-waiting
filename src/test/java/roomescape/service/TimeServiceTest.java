@@ -112,7 +112,7 @@ class TimeServiceTest {
         Theme theme = fakeThemeRepository.save(new Theme("테마1", "설명", "test.com"));
         Time time = reservationTimeService.saveTime(LocalTime.of(10, 0));
         ThemeSlot themeSlot = fakeThemeSlotRepository.save(new ThemeSlot(theme, LocalDate.now().plusDays(1), time, false));
-        fakeReservationRepository.save(new Reservation("브라운", themeSlot));
+        fakeReservationRepository.save(new Reservation("브라운", themeSlot.getId(), themeSlot.getDate(), themeSlot.getTime(), themeSlot.getTheme()));
 
         assertThatThrownBy(() -> reservationTimeService.removeTime(time.getId()))
                 .isInstanceOf(CustomException.class)
