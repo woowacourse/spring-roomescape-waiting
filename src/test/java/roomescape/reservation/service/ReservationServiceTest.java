@@ -11,8 +11,8 @@ import roomescape.reservation.domain.exception.ReservationAlreadyExistsException
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
-import roomescape.reservation.service.dto.request.ReservationCreateRequest;
-import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
