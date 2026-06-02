@@ -21,7 +21,7 @@
 
 ### 예약 날짜 관리
 
-- 사용자는 예약 가능한 날짜 목록을 조회한다.
+- 사용자는 예약 날짜 목록을 조회한다.
 - 관리자는 전체 예약 날짜 목록을 조회한다.
 - 관리자는 예약 날짜를 추가한다.
 - 관리자는 예약 날짜를 삭제한다.
@@ -30,7 +30,7 @@
 
 ### 예약 시간 관리
 
-- 사용자는 특정 날짜와 테마에 대한 예약 가능 시간 목록을 조회한다.
+- 사용자는 특정 날짜와 테마에 대한 예약 슬롯 목록을 조회한다.
 - 관리자는 전체 예약 시간 목록을 조회한다.
 - 관리자는 예약 시간을 추가한다.
 - 관리자는 예약 시간을 삭제한다.
@@ -100,7 +100,7 @@
       "url": "/themes/scary"
     },
     "userName": "보예",
-    "waitingNumber": null,
+    "waitingNumber": 0,
     "reservationStatus": "CONFIRMED"
   }
 ]
@@ -253,11 +253,11 @@
 - 인증: 관리자
 - 응답 `204 No Content`
 
-### 예약 시간
+### 예약 슬롯
 
-#### `GET /reservation-times/availability?themeId={themeId}&dateId={dateId}`
+#### `GET /reservation-slots?themeId={themeId}&dateId={dateId}`
 
-- 설명: 특정 테마와 날짜의 예약 가능 시간 조회
+- 설명: 특정 테마와 날짜의 예약 슬롯 조회
 - 응답 `200 OK`
 
 ```json
@@ -265,12 +265,12 @@
   {
     "timeId": 1,
     "startAt": "10:00",
-    "available": false
+    "waitingNumber": 0
   },
   {
     "timeId": 2,
     "startAt": "11:00",
-    "available": true
+    "waitingNumber": 1
   }
 ]
 ```
