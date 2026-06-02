@@ -153,6 +153,25 @@ class JdbcWaitingReservationRepositoryTest {
         assertThat(waitingReservationRepository.findById(actual.getId())).isEmpty();
     }
 
+    @Test
+    void 예약_대기를_취소하면_같은_슬롯의_남은_예약_대기_순번이_재계산된다() {
+        WaitingReservation whale = waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
+        waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 8, 10, 0)));
+        waitingReservationRepository.save(waiting("보예", LocalDateTime.of(2026, 5, 9, 10, 0)));
+
+        waitingReservationRepository.deleteById(whale.getId());
+
+        assertThat(waitingReservationRepository.findAllByNameWithRank("이산"))
+                .singleElement()
+                .extracting(WaitingReservationWithRank::rank)
+                .isEqualTo(1L);
+
+        assertThat(waitingReservationRepository.findAllByNameWithRank("보예"))
+                .singleElement()
+                .extracting(WaitingReservationWithRank::rank)
+                .isEqualTo(2L);
+    }
+
     private WaitingReservation waiting(String name, LocalDateTime createdAt) {
         return WaitingReservation.createWithoutId(name, date, time, theme, createdAt);
     }
