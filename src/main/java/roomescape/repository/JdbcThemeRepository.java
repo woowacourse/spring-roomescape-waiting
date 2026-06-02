@@ -62,7 +62,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findPopularThemes(Long topCount, LocalDate fromDate, LocalDate toDate) {
+    public List<Theme> findPopularThemes(Long limit, LocalDate startDate, LocalDate endDate) {
         String sql = """
                 SELECT
                     t.id,
@@ -86,9 +86,9 @@ public class JdbcThemeRepository implements ThemeRepository {
         return jdbcTemplate.query(
                 sql,
                 rowMapper(),
-                fromDate,
-                toDate,
-                topCount
+                startDate,
+                endDate,
+                limit
         );
     }
 

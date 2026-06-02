@@ -37,7 +37,7 @@ public class FakeThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findPopularThemes(Long topCount, LocalDate fromDate, LocalDate toDate) {
+    public List<Theme> findPopularThemes(Long limit, LocalDate startDate, LocalDate endDate) {
         return List.of();
     }
 }

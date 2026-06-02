@@ -1,8 +1,10 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import roomescape.controller.dto.ThemeResponses;
 import roomescape.domain.Theme;
 import roomescape.service.ThemeService;
 
+@Validated
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
@@ -38,12 +41,14 @@ public class ThemeController {
         return ResponseEntity.ok(ThemeResponse.from(theme));
     }
 
-    @GetMapping(params = {"topCount", "during"})
+    @GetMapping(params = {"limit", "days"})
     public ResponseEntity<ThemeResponses> getPopularThemes(
-            @RequestParam("topCount") Long topCount,
-            @RequestParam("during") Long during
+            @RequestParam("limit") @Positive
+            Long limit,
+            @RequestParam("days") @Positive
+            Long days
     ) {
-        return ResponseEntity.ok(ThemeResponses.from(themeService.findPopularThemes(topCount, during)));
+        return ResponseEntity.ok(ThemeResponses.from(themeService.findPopularThemes(limit, days)));
     }
 
     @PostMapping
