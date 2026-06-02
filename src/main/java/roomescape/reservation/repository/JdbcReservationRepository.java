@@ -269,10 +269,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean updateStatus(Long id, Status status) {
         int rowCount = jdbcTemplate.update("""
-                UPDATE reservation
-                SET status = ?, confirmed_token = ?
-                WHERE id = ?
-                """, status.toString(), toConfirmedToken(status), id);
+            UPDATE reservation
+            SET status = ?, confirmed_token = ?
+            WHERE id = ?
+              AND status = ?
+            """,
+                status.toString(),
+                toConfirmedToken(status),
+                id,
+                Status.WAITING.toString()
+        );
         return rowCount == 1;
     }
 
