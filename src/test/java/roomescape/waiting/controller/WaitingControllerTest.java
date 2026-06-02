@@ -36,6 +36,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
+import roomescape.waiting.domain.exception.NoReservationForWaitingException;
 import roomescape.waiting.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.waiting.domain.exception.WaitingNotFoundException;
 import roomescape.waiting.domain.exception.WaitingSlotDuplicateException;
@@ -184,6 +185,32 @@ class WaitingControllerTest {
             final Exception expectedException = new WaitingSlotDuplicateException();
             response.then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value())
+                .body("message", is(expectedException.getMessage()));
+        }
+
+        @Test
+        void 예약이_없는_슬롯에_대기를_등록하면_422를_반환한다() {
+            //given
+            final ReservationTime time = insertReservationTime("11:00:00");
+            final Theme theme = insertTheme("링", "공포 테마", "http:~");
+
+            final Map<String, String> body = Map.of(
+                "name", "재키",
+                "date", "2026-05-26",
+                "timeId", time.getId().toString(),
+                "themeId", theme.getId().toString()
+            );
+
+            //when
+            final Response response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/waitings");
+
+            //then
+            final Exception expectedException = new NoReservationForWaitingException();
+            response.then().log().all()
+                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
                 .body("message", is(expectedException.getMessage()));
         }
     }

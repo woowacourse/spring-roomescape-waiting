@@ -16,7 +16,7 @@ public class FakeWaitingRepository implements WaitingRepository {
     private final List<Waiting> waitings = new ArrayList<>();
 
     @Override
-    public Optional<Waiting> save(final Waiting waiting) {
+    public Waiting save(final Waiting waiting) {
         final Waiting savedWaitingWithId = Waiting.of(
             1L,
             waiting.getCustomerName().name(),
@@ -26,7 +26,7 @@ public class FakeWaitingRepository implements WaitingRepository {
             waiting.getTheme()
         );
         waitings.add(savedWaitingWithId);
-        return Optional.of(savedWaitingWithId);
+        return savedWaitingWithId;
     }
 
     @Override

@@ -9,7 +9,7 @@ import roomescape.waiting.repository.dto.WaitingWithRank;
 
 public interface WaitingRepository {
 
-    Optional<Waiting> save(Waiting waiting);
+    Waiting save(Waiting waiting);
 
     boolean deleteById(long id);
 

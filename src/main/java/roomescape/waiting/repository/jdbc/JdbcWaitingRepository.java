@@ -65,38 +65,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<Waiting> save(final Waiting waiting) {
+    public Waiting save(final Waiting waiting) {
         final String sql = """
             INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
-            SELECT ?, ?, ?, ?
-            FROM reservation
-            WHERE date = ? AND time_id = ? AND theme_id = ?
+            VALUES (?, ?, ?, ?)
             """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        int updateCount = jdbcTemplate.update(con -> {
+        jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, waiting.getCustomerName().name());
+            ps.setString(1, waiting.getCustomerNameValue());
             ps.setDate(2, Date.valueOf(waiting.getReservationDate()));
-            ps.setLong(3, waiting.getTime().getId());
-            ps.setLong(4, waiting.getTheme().getId());
-            ps.setDate(5, Date.valueOf(waiting.getReservationDate()));
-            ps.setLong(6, waiting.getTime().getId());
-            ps.setLong(7, waiting.getTheme().getId());
+            ps.setLong(3, waiting.getTimeId());
+            ps.setLong(4, waiting.getThemeId());
             return ps;
         }, keyHolder);
-
-        if (updateCount == 0) {
-            return Optional.empty();
-        }
 
         Number key = keyHolder.getKey();
         if (key == null) {
             throw new IllegalStateException("insert 성공 후 generated key를 가져올 수 없습니다.");
         }
         final long id = key.longValue();
-        return Optional.of(findById(id)
-            .orElseThrow(() -> new IllegalStateException("insert 성공 후 waiting 조회에 실패했습니다")));
+        return findById(id)
+            .orElseThrow(() -> new IllegalStateException("insert 성공 후 waiting 조회에 실패했습니다"));
     }
 
     @Override

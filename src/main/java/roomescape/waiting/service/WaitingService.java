@@ -37,8 +37,7 @@ public class WaitingService {
         );
 
         try {
-            return waitingRepository.save(waiting)
-                .orElseThrow(NoReservationForWaitingException::new);
+            return waitingRepository.save(waiting);
         } catch (DuplicateKeyException exception) {
             throw new WaitingSlotDuplicateException();
         }

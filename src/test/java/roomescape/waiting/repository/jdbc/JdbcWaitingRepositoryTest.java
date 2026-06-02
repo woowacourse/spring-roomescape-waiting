@@ -70,31 +70,11 @@ class JdbcWaitingRepositoryTest {
             );
 
             //when
-            final Waiting saved = jdbcWaitingRepository.save(waiting).get();
+            final Waiting saved = jdbcWaitingRepository.save(waiting);
 
             //then
             assertThat(saved.getId()).isNotNull();
             assertThat(saved.getCreatedAt()).isNotNull();
-        }
-
-        @Test
-        void 예약이_없는_슬롯에_대기를_등록하면_empty가_반환된다() {
-            //given
-            ReservationTime time = insertReservationTime("11:00:00");
-            Theme theme = insertTheme("링", "공포 테마", "http:~");
-            Waiting waiting = Waiting.create(
-                "코로구",
-                NOW.plusDays(1).toLocalDate(),
-                time,
-                theme,
-                NOW
-            );
-
-            //when
-            final Optional<Waiting> result = jdbcWaitingRepository.save(waiting);
-
-            //then
-            assertThat(result).isEmpty();
         }
     }
 

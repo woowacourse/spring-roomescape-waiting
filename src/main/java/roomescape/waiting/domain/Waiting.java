@@ -75,6 +75,10 @@ public class Waiting {
         );
     }
 
+    public String getCustomerNameValue() {
+        return customerName.name();
+    }
+
     public long getTimeId() {
         return time.getId();
     }

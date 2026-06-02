@@ -90,6 +90,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
+        final String sql = """
+            SELECT COUNT(1)
+            FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ?
+            """;
+        final Integer count = jdbcTemplate.queryForObject(
+            sql,
+            Integer.class,
+            Date.valueOf(date),
+            reservationTimeId,
+            themeId
+        );
+
+        return count != null && count != 0;
+    }
+
+    @Override
     public Optional<Reservation> findById(final Long reservationId) {
         final String sql = """
                 SELECT

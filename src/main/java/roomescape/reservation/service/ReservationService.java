@@ -34,6 +34,7 @@ import roomescape.waiting.service.dto.response.WaitingResponse;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationService {
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
@@ -44,6 +45,7 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
     private final Clock clock;
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -51,6 +53,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ReservationsAndWaitingsResponse findReservationsAndWaitingsByCustomerName(final String customerName) {
         final LocalDateTime now = LocalDateTime.now(clock);
         final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
@@ -71,6 +74,7 @@ public class ReservationService {
                 ).toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimesWithStatus> getReservationTimeStatuses(final LocalDate date, final Long themeId) {
         return reservationRepository.findReservationTimeStatusesByDateAndThemeId(date, themeId);
     }
@@ -105,7 +109,6 @@ public class ReservationService {
         return updateSchedule(data, originReservation);
     }
 
-    @Transactional
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
@@ -114,7 +117,6 @@ public class ReservationService {
         promoteEarliestWaiting(reservation);
     }
 
-    @Transactional
     public void delete(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
 
@@ -122,6 +124,7 @@ public class ReservationService {
         promoteEarliestWaiting(reservation);
     }
 
+    @Transactional(readOnly = true)
     public ReservationOptionResponse getReservationOptions() {
         LocalDate today = LocalDate.now(clock);
         List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
@@ -132,6 +135,11 @@ public class ReservationService {
                 .toList();
 
         return new ReservationOptionResponse(dates, themes);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsBySlot(final LocalDate date, final long reservationTimeId, final long themeId) {
+        return reservationRepository.existsBySlot(date, reservationTimeId, themeId);
     }
 
     private ReservationResponse updateSchedule(final ReservationUpdateRequest data, final Reservation originReservation) {

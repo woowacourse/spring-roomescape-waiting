@@ -24,4 +24,6 @@ public interface ReservationRepository {
     List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(LocalDate date, Long themeId);
 
     List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now);
+
+    boolean existsBySlot(LocalDate date, long reservationTimeId, long themeId);
 }

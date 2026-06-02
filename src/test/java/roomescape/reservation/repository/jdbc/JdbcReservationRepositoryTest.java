@@ -1,6 +1,18 @@
 package roomescape.reservation.repository.jdbc;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -10,16 +22,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
-
-import java.time.*;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -90,6 +95,79 @@ class JdbcReservationRepositoryTest {
 
         assertThat(reservation).isPresent();
         assertThat(reservation.get().getCustomerName()).isEqualTo("브라운");
+    }
+
+    @Nested
+    @DisplayName("슬롯(날짜, 시간, 테마) 정보로 예약이 존재하는지 확인한다")
+    class ExistsBySlot {
+
+        @Test
+        void 동일한_슬롯_정보의_예약이_존재하면_TRUE_를_반환한다() {
+            // given
+            insertReservationTime("10:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertReservation("브라운", date.toString(), 1L, 1L);
+
+            // when
+            final boolean existsBySlot = reservationRepository.existsBySlot(date, 1L, 1L);
+
+            // then
+            assertThat(existsBySlot).isTrue();
+        }
+
+        @Test
+        void 날짜가_달라_동일한_슬롯_정보의_예약이_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertReservation("브라운", date.toString(), 1L, 1L);
+
+            final LocalDate otherDate = date.plusDays(1);
+
+            // when
+            final boolean existsBySlot = reservationRepository.existsBySlot(otherDate, 1L, 1L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
+        }
+
+        @Test
+        void 시간이_달라_동일한_슬롯_정보의_예약이_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00");
+            insertReservationTime("12:00");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertReservation("브라운", date.toString(), 1L, 1L);
+
+            // when
+            final boolean existsBySlot = reservationRepository.existsBySlot(date, 2L, 1L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
+        }
+
+        @Test
+        void 테마가_달라_동일한_슬롯_정보의_예약이_존재하지_않으면_FALSE_를_반환한다() {
+            // given
+            insertReservationTime("10:00");
+            insertTheme("링", "공포 테마", "http:~");
+            insertTheme("링", "공포 테마", "http:~");
+
+            final LocalDate date = LocalDate.parse("2026-08-05");
+            insertReservation("브라운", date.toString(), 1L, 1L);
+
+            // when
+            final boolean existsBySlot = reservationRepository.existsBySlot(date, 1L, 2L);
+
+            // then
+            assertThat(existsBySlot).isFalse();
+        }
     }
 
     @Test
