@@ -21,6 +21,20 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
+    private final RowMapper<Reservation> reservationrowMapper = (rs, rowNum) -> new Reservation(
+            rs.getLong("r_id"),
+            rs.getString("name"),
+            rs.getObject("date", LocalDate.class),
+            new TimeSlot(
+                    rs.getLong("t_id"),
+                    rs.getObject("start_at", LocalTime.class)),
+            new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail_url")
+            )
+    );
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -46,7 +60,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN time_slot t ON r.time_id = t.id 
                 INNER JOIN theme theme  ON r.theme_id = theme.id
                 """;
-        return jdbcTemplate.query(sql, rowMapper());
+        return jdbcTemplate.query(sql, reservationrowMapper);
     }
 
     @Override
@@ -67,7 +81,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN theme th ON r.theme_id = th.id
                 WHERE r.id = ?
                 """;
-        List<Reservation> reservations = jdbcTemplate.query(sql, rowMapper(), reservationId);
+        List<Reservation> reservations = jdbcTemplate.query(sql, reservationrowMapper, reservationId);
         return Optional.ofNullable(DataAccessUtils.singleResult(reservations));
     }
 
@@ -89,7 +103,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN theme th ON r.theme_id = th.id
                 WHERE r.name = ?
                 """;
-        return jdbcTemplate.query(sql, rowMapper(), name);
+        return jdbcTemplate.query(sql, reservationrowMapper, name);
     }
 
     @Override
@@ -131,7 +145,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                   AND r.time_id = ? 
                   AND r.theme_id = ?
                 """;
-        return jdbcTemplate.query(sql, rowMapper(), date, timeId, themeId)
+        return jdbcTemplate.query(sql, reservationrowMapper, date, timeId, themeId)
                 .stream()
                 .findAny();
     }
@@ -159,23 +173,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 "date", reservation.getDate(),
                 "time_id", reservation.getTimeSlot().getId(),
                 "theme_id", reservation.getTheme().getId()
-        );
-    }
-
-    private RowMapper<Reservation> rowMapper() {
-        return (rs, rowNum) -> new Reservation(
-                rs.getLong("r_id"),
-                rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                new TimeSlot(
-                        rs.getLong("t_id"),
-                        rs.getObject("start_at", LocalTime.class)),
-                new Theme(
-                        rs.getLong("theme_id"),
-                        rs.getString("theme_name"),
-                        rs.getString("theme_description"),
-                        rs.getString("theme_thumbnail_url")
-                )
         );
     }
 }
