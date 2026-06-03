@@ -13,6 +13,8 @@ public record ReservationModifyRequest(
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
 
-        Long timeId
+        Long timeId,
+
+        Long themeId
 ) {
 }

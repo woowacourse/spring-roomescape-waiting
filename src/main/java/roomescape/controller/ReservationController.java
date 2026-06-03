@@ -71,7 +71,8 @@ public class ReservationController {
                 reservationId,
                 reservationModifyRequest.name(),
                 reservationModifyRequest.date(),
-                reservationModifyRequest.timeId()
+                reservationModifyRequest.timeId(),
+
         );
         final ReservationResult result = reservationService.modify(reservationModifyCommand);
         return ResponseEntity.ok(result);

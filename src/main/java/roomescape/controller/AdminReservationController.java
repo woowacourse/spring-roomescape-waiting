@@ -29,7 +29,7 @@ public class AdminReservationController {
     public ResponseEntity<Void> delete(
             @PathVariable("reservation-id") Long reservationId
     ) {
-        reservationService.delete(reservationId);
+        reservationService.deleteAsAdmin(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

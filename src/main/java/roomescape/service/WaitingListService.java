@@ -10,7 +10,6 @@ import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
-import roomescape.dto.WaitingListRow;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;

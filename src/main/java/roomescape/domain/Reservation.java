@@ -69,14 +69,23 @@ public class Reservation {
         );
     }
 
-    public Reservation modify(final LocalDate newDate, final ReservationTime newReservationTime) {
+    public Reservation modify(final LocalDate newDate, final ReservationTime newReservationTime, final Theme theme) {
         return new Reservation(
                 this.id,
                 this.name,
                 new ReservationDate(newDate),
                 newReservationTime,
-                this.theme
+                theme
         );
+    }
+
+    public void validateNotPast() {
+        if (reservationDate.isPast()) {
+            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
+        }
+        if (reservationDate.isToday() && time.isBefore()) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
+        }
     }
 
     public String getName() {
