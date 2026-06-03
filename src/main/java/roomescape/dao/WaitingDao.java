@@ -101,6 +101,26 @@ public class WaitingDao {
         return jdbcTemplate.query(sql, RANK_MAPPER, name);
     }
 
+    public Optional<Waiting> findFirstBySlotIdOrderByCreatedAt(Long slotId) {
+        String sql = """
+                SELECT
+                    w.id,
+                    w.created_at,
+                    w.slot_id,
+                    w.name
+                FROM waiting w
+                WHERE w.slot_id=?
+                ORDER BY w.created_at ASC
+                LIMIT 1;
+                """;
+
+        List<Waiting> waitings = jdbcTemplate.query(sql, ROW_MAPPER, slotId);
+        if (waitings.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(waitings.get(0));
+    }
+
     public boolean existsByCreatedAtAndSlotAndName(long slotId, String name) {
         String sql = """
                 SELECT EXISTS (

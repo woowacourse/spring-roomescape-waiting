@@ -59,6 +59,31 @@ public class SlotDao {
         return slot.createWithId(generatedId.longValue());
     }
 
+    public Optional<Slot> findById(Long slotId) {
+        String sql = """
+                SELECT s.id,
+                       s.date,
+                       rt.id as time_id,
+                       rt.start_at,
+                       t.id as theme_id,
+                       t.name as theme_name,
+                       t.description,
+                       t.thumbnail
+                FROM slot AS s
+                INNER JOIN reservation_time AS rt
+                    ON s.time_id = rt.id
+                INNER JOIN theme AS t
+                    ON s.theme_id = t.id
+                WHERE s.id = ?
+                """;
+
+        try {
+            return Optional.of(jdbcTemplate.queryForObject(sql, ROW_MAPPER, slotId));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
     public Optional<Slot> findByDateAndTimeAndTheme(LocalDate date, long timeId, long themeId) {
         String sql = """
                 SELECT s.id, 
