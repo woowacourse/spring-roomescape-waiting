@@ -13,8 +13,8 @@ public enum ReservationDateErrorCode implements ErrorCode {
         "예약 날짜 데이터가 유효하지 않거나 누락되었습니다.", "playDay 필드의 데이터 형식(yyyy-MM-dd) 및 유효성을 확인하십시오."),
     RESERVATION_DATE_DUPLICATED(HttpStatus.CONFLICT,
         "동일한 날짜 값을 가진 엔티티가 이미 존재합니다.", "데이터베이스의 중복 데이터 여부를 확인하십시오."),
-    TODAY_NOT_MODIFIED(HttpStatus.BAD_REQUEST,
-        "당일 예약은 수정 및 취소가 불가능합니다.", "예약일이 오늘 이후인 예약만 변경할 수 있습니다."),
+    RESERVATION_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
+        "예약 시작 10분 전부터는 예약 생성, 수정 및 취소가 불가능합니다.", "예약 시작 10분 전보다 이전에만 요청할 수 있습니다."),
     ;
 
     private final HttpStatus httpStatus;

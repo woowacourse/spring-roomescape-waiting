@@ -1,19 +1,15 @@
 package roomescape.domain.waitingreservation;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ReservationSchedule;
 import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateService;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeService;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeService;
+import roomescape.domain.reservation.ReservationSlotResolver;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
@@ -26,21 +22,21 @@ public class WaitingReservationService {
 
     private final WaitingReservationRepository waitingReservationRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationDateService reservationDateService;
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
+    private final ReservationSlotResolver reservationSlotResolver;
     private final Clock clock;
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
-        ReservationDate date = reservationDateService.findById(request.dateId());
-        ReservationTime time = reservationTimeService.findById(request.timeId());
-        Theme theme = themeService.findById(request.themeId());
-        ReservationSlot slot = new ReservationSlot(date, time, theme);
-        validateNotPast(slot.schedule());
+        ReservationSlot slot = reservationSlotResolver.resolve(request.dateId(), request.timeId(), request.themeId());
+        validateReservableDate(slot);
         validateSlotIsReserved(slot);
         validateDuplicationOfWaitingReservation(request.name(), slot);
 
-        WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
+        WaitingReservation waitingReservation = request.toEntity(
+                slot.date(),
+                slot.time(),
+                slot.theme(),
+                LocalDateTime.now(clock)
+        );
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
     }
@@ -67,9 +63,9 @@ public class WaitingReservationService {
         }
     }
 
-    private void validateNotPast(ReservationSchedule schedule) {
-        if (schedule.isPast(clock)) {
-            throw new RoomescapeException(WaitingReservationErrorCode.PAST_TIME_NOT_ALLOWED);
+    private void validateReservableDate(ReservationSlot slot) {
+        if (slot.isClosedForReservation(clock)) {
+            throw new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_DATE_NOT_ALLOWED);
         }
     }
 
@@ -81,7 +77,7 @@ public class WaitingReservationService {
     }
 
     public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
-        return waitingReservationRepository.findAllByNameWithRank(name)
+        return waitingReservationRepository.findUpcomingByNameWithRank(name, LocalDate.now(clock), LocalTime.now(clock))
             .stream()
             .map(WaitingReservationWithRankResponse::from)
             .toList();

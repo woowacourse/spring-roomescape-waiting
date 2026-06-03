@@ -18,19 +18,15 @@ import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.ReservationUpdateRequest;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
-import roomescape.domain.reservationdate.ReservationDateService;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
-import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
-import roomescape.domain.theme.ThemeService;
 import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
 class ReservationServiceTest {
@@ -52,17 +48,9 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository();
         waitingReservationRepository = new FakeWaitingReservationRepository();
 
-        ReservationDateService reservationDateService = new ReservationDateService(
-                reservationRepository, reservationDateRepository);
-        ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository, reservationRepository);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
-
         reservationService = new ReservationService(
                 reservationRepository,
-                reservationDateService,
-                reservationTimeService,
-                themeService,
+                new ReservationSlotResolver(reservationDateRepository, reservationTimeRepository, themeRepository),
                 waitingReservationRepository,
                 CLOCK
         );
@@ -86,7 +74,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("과거 시간으로 예약 생성 시 예외가 발생한다.")
+    @DisplayName("마감된 일시로 예약 생성 시 예외가 발생한다.")
     void createReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().minusDays(1)));
@@ -98,7 +86,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -199,19 +187,20 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("당일 예약 삭제 시 예외가 발생한다.")
-    void cancelTodayReservation() {
+    @DisplayName("마감된 예약 삭제 시 예외가 발생한다.")
+    void cancelClosedReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
-        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(23, 59)));
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.now().plusMinutes(9)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
 
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId("당일예약테스터", date, time, theme));
+                Reservation.createWithoutId("마감예약테스터", date, time, theme));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId()))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationDateErrorCode.TODAY_NOT_MODIFIED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -238,7 +227,25 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("과거 시간으로 예약 수정 시 예외가 발생한다.")
+    @DisplayName("기존 예약과 같은 날짜와 시간으로 예약 수정 시 예외가 발생한다.")
+    void updateReservationWithoutChange() {
+        ReservationDate date = reservationDateRepository.save(
+                ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
+
+        ReservationCreationResponse creationResponse = reservationService.createReservation(
+                new ReservationCreationRequest("테스터", date.getId(), time.getId(), theme.getId()));
+
+        ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(date.getId(), time.getId());
+
+        assertThatThrownBy(() -> reservationService.updateReservation(creationResponse.id(), updateRequest))
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining(ReservationErrorCode.RESERVATION_NOT_CHANGED.getMessage());
+    }
+
+    @Test
+    @DisplayName("마감된 일시로 예약 수정 시 예외가 발생한다.")
     void updateReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
@@ -255,7 +262,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.updateReservation(creationResponse.id(), updateRequest))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -282,22 +289,23 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("당일 예약 수정 시 예외가 발생한다.")
-    void updateTodayReservation() {
+    @DisplayName("마감된 예약 수정 시 예외가 발생한다.")
+    void updateClosedReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
-        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(23, 59)));
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.now().plusMinutes(9)));
         ReservationTime newTime = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(14, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
 
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId("당일예약테스터", date, time, theme));
+                Reservation.createWithoutId("마감예약테스터", date, time, theme));
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(date.getId(), newTime.getId());
 
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), updateRequest))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationDateErrorCode.TODAY_NOT_MODIFIED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.RESERVATION_DATE_NOT_ALLOWED.getMessage());
     }
 
     private static class FakeReservationRepository implements ReservationRepository {
@@ -353,6 +361,15 @@ class ReservationServiceTest {
         }
 
         @Override
+        public List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime) {
+            return findByName(name).stream()
+                    .filter(r -> r.getDate().getPlayDay().isAfter(currentDate)
+                            || (r.getDate().getPlayDay().isEqual(currentDate)
+                            && r.getTime().getStartAt().isAfter(currentTime)))
+                    .toList();
+        }
+
+        @Override
         public Optional<Reservation> findById(Long id) {
             return reservations.stream().filter(r -> r.getId().equals(id)).findFirst();
         }
@@ -402,6 +419,15 @@ class ReservationServiceTest {
 
         @Override
         public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
+            return List.of();
+        }
+
+        @Override
+        public List<WaitingReservationWithRank> findUpcomingByNameWithRank(
+                String name,
+                LocalDate currentDate,
+                LocalTime currentTime
+        ) {
             return List.of();
         }
 
