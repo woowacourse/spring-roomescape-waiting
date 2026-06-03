@@ -41,6 +41,18 @@ public class Reservation {
         }
     }
 
+    public boolean isEarlierThan(Reservation target) {
+        int byTime = createdAt.compareTo(target.getCreatedAt());
+        if (byTime != 0) {
+            return byTime < 0;
+        }
+        return id < target.getId();
+    }
+
+    public boolean isSameSlot(Reservation target) {
+        return slot.isSame(target);
+    }
+
     public long getId() {
         return id;
     }

@@ -18,8 +18,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ReservationCreateRequest;
+import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.Status;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -61,7 +61,7 @@ class ReservationServiceIntegrationTest {
                 ready.countDown();
                 try {
                     start.await();
-                    ReservationResult result = reservationService.reserve(request, LocalDateTime.now());
+                    RankedReservation result = reservationService.reserve(request, LocalDateTime.now());
 
                     if (result.getReservation().getStatus() == Status.APPROVED) {
                         approved.incrementAndGet();

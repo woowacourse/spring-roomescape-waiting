@@ -4,6 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,5 +28,21 @@ public class ReservationTest {
                 Arguments.of(name, null, Status.APPROVED),
                 Arguments.of(name, slot, null)
         );
+    }
+
+    @Test
+    void 과거_예약인지_비교할_수_있다() {
+        Reservation past = RoomEscapeFixture.reservationWithPast();
+        Reservation future = RoomEscapeFixture.reservationWithFuture();
+
+        Assertions.assertThat(past.isEarlierThan(future)).isTrue();
+    }
+
+    @Test
+    void 시점이_같을때_id가_더_작으면_false를_반환한다() {
+        Reservation id1WithSameDate = RoomEscapeFixture.reservationWithApproved();
+        Reservation id2WithSameDate = RoomEscapeFixture.reservationWithPast();
+
+        Assertions.assertThat(id1WithSameDate.isEarlierThan(id2WithSameDate)).isFalse();
     }
 }

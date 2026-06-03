@@ -22,10 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
+import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
@@ -212,7 +212,7 @@ class ReservationServiceTest {
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(
                 List.of(DUMMY, waitingSaved));
 
-        ReservationResult result = reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59));
+        RankedReservation result = reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59));
 
         Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
     }
@@ -290,7 +290,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
-        ReservationResult result = reservationService.find(EXISTS_ID);
+        RankedReservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getReservation().getId()).isEqualTo(EXISTS_ID);
         Assertions.assertThat(result.getRank().getValue()).isEqualTo(0);
@@ -308,9 +308,8 @@ class ReservationServiceTest {
     @Test
     void 이름_없이_목록_조회시_전체_예약을_반환한다() {
         given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
-        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
-        List<ReservationResult> results = reservationService.findList(null);
+        List<RankedReservation> results = reservationService.findList(null);
 
         Assertions.assertThat(results).hasSize(1);
         Assertions.assertThat(results.get(0).getReservation().getId()).isEqualTo(EXISTS_ID);
@@ -318,10 +317,9 @@ class ReservationServiceTest {
 
     @Test
     void 이름으로_목록_조회시_해당_이름의_예약만_반환한다() {
-        given(reservationRepository.findAllByName(NAME)).willReturn(List.of(DUMMY));
-        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
+        given(reservationRepository.findAll()).willReturn(List.of(DUMMY));
 
-        List<ReservationResult> results = reservationService.findList(NAME);
+        List<RankedReservation> results = reservationService.findList(NAME);
 
         Assertions.assertThat(results).hasSize(1);
         Assertions.assertThat(results.get(0).getReservation().getName().getValue()).isEqualTo(NAME);
@@ -332,7 +330,7 @@ class ReservationServiceTest {
         given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(DUMMY));
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
-        ReservationResult result = reservationService.find(EXISTS_ID);
+        RankedReservation result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.APPROVED);
     }
@@ -345,7 +343,7 @@ class ReservationServiceTest {
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any()))
                 .willReturn(List.of(DUMMY, waiting));
 
-        ReservationResult result = reservationService.find(2L);
+        RankedReservation result = reservationService.find(2L);
 
         Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
         Assertions.assertThat(result.getRank().getValue()).isEqualTo(1);

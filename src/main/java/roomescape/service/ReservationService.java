@@ -4,7 +4,6 @@ import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -12,10 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Rank;
+import roomescape.domain.reservation.RankedReservation;
+import roomescape.domain.reservation.RankedReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
@@ -43,7 +43,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult reserve(ReservationCreateRequest request, LocalDateTime now) {
+    public RankedReservation reserve(ReservationCreateRequest request, LocalDateTime now) {
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
         Theme theme = findThemeByThemeId(request.getThemeId());
 
@@ -71,46 +71,30 @@ public class ReservationService {
 
         Rank rank = reservations.rankOf(saved);
 
-        return new ReservationResult(rank, saved);
+        return new RankedReservation(rank, saved);
     }
 
-    public ReservationResult find(long reservationId) {
+    public RankedReservation find(long reservationId) {
         Reservation reservation = findReservationById(reservationId);
 
-        Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
-                reservation.getTime(), reservation.getTheme(), reservation.getDate()));
+        List<Reservation> sameSlots = reservationRepository.findByTimeAndThemeAndDate(
+                reservation.getTime(), reservation.getTheme(), reservation.getDate());
 
-        Rank rank = reservations.rankOf(reservation);
-
-        return new ReservationResult(rank, reservation);
+        return RankedReservation.decideRankFrom(reservation, sameSlots);
     }
 
-    public List<ReservationResult> findList(String name) {
-        List<Reservation> reservations = findListByName(name);
-        List<ReservationResult> reservationResults = new ArrayList<>();
+    public List<RankedReservation> findList(String name) {
+        RankedReservations rankedReservations = new RankedReservations(reservationRepository.findAll());
 
-        for (Reservation reservation : reservations) {
-            Reservations sameScheduleReservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
-                    reservation.getTime(), reservation.getTheme(), reservation.getDate()));
-
-            Rank rank = sameScheduleReservations.rankOf(reservation);
-
-            ReservationResult result = new ReservationResult(rank, reservation);
-            reservationResults.add(result);
-        }
-
-        return reservationResults;
-    }
-
-    private List<Reservation> findListByName(String name) {
         if (name == null) {
-            return reservationRepository.findAll();
+            return rankedReservations.resultsOf();
         }
-        return reservationRepository.findAllByName(name);
+        return rankedReservations.resultsOf(name);
     }
+
 
     @Transactional
-    public ReservationResult update(ReservationUpdateRequest request, long id, LocalDateTime now) {
+    public RankedReservation update(ReservationUpdateRequest request, long id, LocalDateTime now) {
         Reservation originReservation = findReservationById(id);
         originReservation.ensureNotPast(now);
 
@@ -139,7 +123,7 @@ public class ReservationService {
 
         Rank rank = reservations.rankOf(updated);
 
-        return new ReservationResult(rank, updated);
+        return new RankedReservation(rank, updated);
     }
 
     @Transactional

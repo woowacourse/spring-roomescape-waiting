@@ -10,10 +10,10 @@ import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.request.ThemeFamousFindRequest;
 import roomescape.domain.reservation.Rank;
+import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
@@ -34,6 +34,8 @@ public class RoomEscapeFixture {
     private static final Slot SLOT = Slot.create(FUTURE_DATE, TIME, THEME);
     private static final Rank APPROVE_RANK = new Rank(1);
     private static final Rank WAITING_RANK = new Rank(2);
+    private static final LocalDateTime PAST_DATE_TIME = LocalDateTime.of(2000, 11, 11, 10, 0);
+    private static final LocalDateTime FUTURE_DATE_TIME = LocalDateTime.of(2099, 11, 11, 10, 0);
 
     public static Theme theme() {
         return THEME;
@@ -63,12 +65,24 @@ public class RoomEscapeFixture {
         return Reservation.load(2L, NAME, SLOT, Status.WAITING, LocalDateTime.now(FIXED_CLOCK));
     }
 
-    public static ReservationResult reservationResultWithApproved() {
-        return new ReservationResult(APPROVE_RANK, reservationWithApproved());
+    public static Reservation reservationWithPast() {
+        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, PAST_DATE_TIME);
     }
 
-    public static ReservationResult reservationResultWithWaiting() {
-        return new ReservationResult(WAITING_RANK, reservationWithWaiting());
+    public static Reservation reservationWithFuture() {
+        return Reservation.load(2L, NAME, SLOT, Status.APPROVED, FUTURE_DATE_TIME);
+    }
+
+    public static Reservation reservationWithLocalDateTime(LocalDateTime dateTime) {
+        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, dateTime);
+    }
+
+    public static RankedReservation reservationResultWithApproved() {
+        return new RankedReservation(APPROVE_RANK, reservationWithApproved());
+    }
+
+    public static RankedReservation reservationResultWithWaiting() {
+        return new RankedReservation(WAITING_RANK, reservationWithWaiting());
     }
 
     public static ThemeFamousFindRequest themeFamousFindRequest() {

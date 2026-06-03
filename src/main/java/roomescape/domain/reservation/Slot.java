@@ -28,6 +28,10 @@ public class Slot {
         return new Slot(id, date, time, theme);
     }
 
+    public boolean isSame(Reservation target) {
+        return id == target.getSlot().getId();
+    }
+
     public long getId() {
         return id;
     }
