@@ -90,6 +90,7 @@ public class ReservationDao {
                     AND r.status = 'WAITING'
                     ORDER BY r.id ASC
                     LIMIT 1
+                    FOR UPDATE
                 """;
 
         return jdbcTemplate.query(sql,
