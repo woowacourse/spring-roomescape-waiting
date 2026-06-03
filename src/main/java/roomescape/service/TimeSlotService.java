@@ -3,13 +3,13 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ResourceInUseException;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.service.dto.AvailableTimeSlot;
@@ -20,10 +20,13 @@ public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, ThemeRepository themeRepository) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, ThemeRepository themeRepository,
+                           ReservationRepository reservationRepository) {
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<TimeSlot> allTimes() {
@@ -44,12 +47,9 @@ public class TimeSlotService {
 
     @Transactional
     public void removeTime(long timeId) {
-        try {
-            findTimeSlotById(timeId);
-            timeSlotRepository.deleteById(timeId);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceInUseException("예약 시간");
-        }
+        findTimeSlotById(timeId);
+        validateTimeSlotDeletable(timeId);
+        timeSlotRepository.deleteById(timeId);
     }
 
     public List<AvailableTimeSlot> findAvailableTimes(long themeId, LocalDate date) {
@@ -60,7 +60,13 @@ public class TimeSlotService {
 
     private void checkDuplicatedStartAt(LocalTime startAt) {
         if (timeSlotRepository.findByStartAt(startAt).isPresent()) {
-            throw new DuplicateException("이미 등록된 예약대 시간입니다. (" + startAt + ")");
+            throw new DuplicateException("이미 등록된 예약 시간대입니다. (" + startAt + ")");
+        }
+    }
+
+    private void validateTimeSlotDeletable(long timeId) {
+        if (reservationRepository.existsByTimeId(timeId)) {
+            throw new ResourceInUseException("예약 시간");
         }
     }
 }

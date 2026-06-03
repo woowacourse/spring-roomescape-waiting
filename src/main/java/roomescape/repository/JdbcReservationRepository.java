@@ -157,6 +157,20 @@ public class JdbcReservationRepository implements ReservationRepository {
         return count != null && count > 0;
     }
 
+    @Override
+    public boolean existsByThemeId(Long themeId) {
+        String sql = "SELECT count(*) FROM reservation WHERE theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "SELECT count(*) FROM reservation WHERE time_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+        return count != null && count > 0;
+    }
+
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")

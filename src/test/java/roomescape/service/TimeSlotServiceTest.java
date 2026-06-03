@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.TimeSlot;
+import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
 
@@ -20,7 +21,9 @@ class TimeSlotServiceTest {
     void setUp() {
         FakeTimeSlotRepository fakeTimeRepository = new FakeTimeSlotRepository();
         FakeThemeRepository fakeThemeRepository = new FakeThemeRepository();
-        reservationTimeSlotService = new TimeSlotService(fakeTimeRepository, fakeThemeRepository);
+        FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
+        reservationTimeSlotService = new TimeSlotService(fakeTimeRepository, fakeThemeRepository,
+                fakeReservationRepository);
     }
 
     @Test

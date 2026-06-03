@@ -1,11 +1,11 @@
 package roomescape.service;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.exception.ResourceInUseException;
 import roomescape.exception.NotFoundException;
+import roomescape.exception.ResourceInUseException;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -16,9 +16,11 @@ import java.util.List;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<Theme> allTheme() {
@@ -38,17 +40,20 @@ public class ThemeService {
 
     @Transactional
     public void removeTheme(long themeId) {
-        try {
-            findThemeById(themeId);
-            themeRepository.deleteById(themeId);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceInUseException("테마");
-        }
+        findThemeById(themeId);
+        validateThemeDeletable(themeId);
+        themeRepository.deleteById(themeId);
     }
 
     public List<Theme> findPopularThemes(Long limit, Long days) {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = LocalDate.now().minusDays(days);
         return themeRepository.findPopularThemes(limit, startDate, endDate);
+    }
+
+    private void validateThemeDeletable(long themeId) {
+        if (reservationRepository.existsByThemeId(themeId)) {
+            throw new ResourceInUseException("테마");
+        }
     }
 }

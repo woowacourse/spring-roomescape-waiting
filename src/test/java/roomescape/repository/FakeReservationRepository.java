@@ -67,6 +67,18 @@ public class FakeReservationRepository implements ReservationRepository {
                 .anyMatch(reservation -> isDuplicate(reservation, date, timeId, themeId));
     }
 
+    @Override
+    public boolean existsByThemeId(Long themeId) {
+        return storage.values().stream()
+                .anyMatch(reservation -> reservation.getTheme().getId().equals(themeId));
+    }
+
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        return storage.values().stream()
+                .anyMatch(reservation -> reservation.getTimeSlot().getId().equals(timeId));
+    }
+
     private boolean isDuplicate(Reservation reservation, LocalDate date, Long timeId, Long themeId) {
         return reservation.getDate().equals(date)
                 && reservation.getTimeSlot().getId().equals(timeId)
