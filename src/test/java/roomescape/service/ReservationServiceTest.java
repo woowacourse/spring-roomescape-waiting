@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.controller.dto.DisplayStatus;
 import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
@@ -68,7 +67,7 @@ class ReservationServiceTest {
         given(reservationDao.save(any(Reservation.class))).willReturn(1L);
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        Long reservationId = reservationService.saveReservation(request);
+        Long reservationId = reservationService.saveReservationByAdmin(request);
 
         assertThat(reservationId).isEqualTo(1L);
         verify(reservationDao).save(reservationCaptor.capture());
@@ -92,7 +91,7 @@ class ReservationServiceTest {
         given(reservationDao.save(any(Reservation.class))).willReturn(2L);
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        reservationService.saveReservation(request);
+        reservationService.saveReservationByAdmin(request);
 
         verify(reservationDao).save(reservationCaptor.capture());
         assertThat(reservationCaptor.getValue().getStatus()).isEqualTo(ReservationStatus.WAITING);
@@ -100,7 +99,7 @@ class ReservationServiceTest {
 
     @DisplayName("로그인 회원으로 예약을 생성하면 회원 조회 없이 저장한다.")
     @Test
-    void saveReservationByLoginMember() {
+    void saveReservationByAdminByLoginMember() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Member member = member(1L, "러로");
         UserReservationRequest request = new UserReservationRequest(schedule.getDate(), 1L, 1L);
@@ -111,7 +110,7 @@ class ReservationServiceTest {
         given(reservationDao.save(any(Reservation.class))).willReturn(1L);
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
-        reservationService.saveReservation(request, member);
+        reservationService.saveReservationByMember(request, member);
 
         verify(reservationDao).save(reservationCaptor.capture());
         assertThat(reservationCaptor.getValue().getMember()).isEqualTo(member);
@@ -129,7 +128,7 @@ class ReservationServiceTest {
                 .willReturn(schedule);
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(true);
 
-        assertThatThrownBy(() -> reservationService.saveReservation(request))
+        assertThatThrownBy(() -> reservationService.saveReservationByAdmin(request))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
@@ -149,7 +148,7 @@ class ReservationServiceTest {
         given(reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())).willReturn(false);
         given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
 
-        assertThatThrownBy(() -> reservationService.saveReservation(request))
+        assertThatThrownBy(() -> reservationService.saveReservationByAdmin(request))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.PAST_RESERVATION);

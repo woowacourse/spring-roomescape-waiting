@@ -30,7 +30,7 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<Void> create(@Valid @RequestBody AdminReservationRequest request) {
-        Long reservationId = reservationService.saveReservation(request);
+        Long reservationId = reservationService.saveReservationByAdmin(request);
         URI location = URI.create("/reservations/" + reservationId);
         return ResponseEntity
                 .created(location)

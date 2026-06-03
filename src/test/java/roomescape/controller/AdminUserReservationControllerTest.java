@@ -38,7 +38,7 @@ import roomescape.service.ReservationService;
 
 @WebMvcTest(AdminReservationController.class)
 @Import({DomainErrorHttpMapper.class, AdminAuthorizationInterceptor.class, WebConfig.class})
-class AdminReservationControllerTest {
+class AdminUserReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -78,7 +78,7 @@ class AdminReservationControllerTest {
     @Test
     void create() throws Exception {
         given(authService.getLoginMember(7L)).willReturn(admin());
-        given(reservationService.saveReservation(any())).willReturn(1L);
+        given(reservationService.saveReservationByAdmin(any())).willReturn(1L);
 
         mockMvc.perform(post("/admin/reservations")
                         .session(adminSession())

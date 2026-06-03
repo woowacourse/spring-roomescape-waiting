@@ -20,12 +20,12 @@ import roomescape.service.ThemeService;
 @RequestMapping("/themes")
 @RestController
 @Validated
-public class ThemeController {
+public class UserThemeController {
 
     private final ThemeService themeService;
     private final ReservationTimeService reservationTimeService;
 
-    public ThemeController(ThemeService themeService, ReservationTimeService reservationTimeService) {
+    public UserThemeController(ThemeService themeService, ReservationTimeService reservationTimeService) {
         this.themeService = themeService;
         this.reservationTimeService = reservationTimeService;
     }

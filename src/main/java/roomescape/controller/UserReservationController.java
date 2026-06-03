@@ -23,11 +23,11 @@ import roomescape.service.ReservationService;
 @RequestMapping("/reservations")
 @RestController
 @Validated
-public class ReservationController {
+public class UserReservationController {
 
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public UserReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -41,7 +41,7 @@ public class ReservationController {
             @Valid @RequestBody UserReservationRequest request,
             @LoginMember Member member
     ) {
-        Long reservationId = reservationService.saveReservation(request, member);
+        Long reservationId = reservationService.saveReservationByMember(request, member);
         URI location = URI.create("/reservations/" + reservationId);
         return ResponseEntity
                 .created(location)

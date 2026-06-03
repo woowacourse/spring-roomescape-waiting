@@ -34,24 +34,29 @@ public class ReservationService {
     }
 
     @Transactional
-    public Long saveReservation(AdminReservationRequest request) {
+    public Long saveReservationByAdmin(AdminReservationRequest request) {
         Member member = getMemberById(request.memberId());
-        return saveReservation(request.date(), request.timeId(), request.themeId(), member);
+        LocalDateTime now = LocalDateTime.now();
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
+
+        if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
+            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
+        }
+
+        Reservation reservation = Reservation.createBy(
+                member,
+                schedule,
+                calculateReservationStatus(schedule.getId()),
+                now
+        );
+
+        return reservationDao.save(reservation);
     }
 
     @Transactional
-    public Long saveReservation(UserReservationRequest request, Member member) {
-        return saveReservation(request.date(), request.timeId(), request.themeId(), member);
-    }
-
-    private Long saveReservation(
-            java.time.LocalDate date,
-            Long timeId,
-            Long themeId,
-            Member member
-    ) {
+    public Long saveReservationByMember(UserReservationRequest request, Member member) {
         LocalDateTime now = LocalDateTime.now();
-        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(date, timeId, themeId);
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
 
         if (reservationDao.existByMemberIdAndScheduleId(member.getId(), schedule.getId())) {
             throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");

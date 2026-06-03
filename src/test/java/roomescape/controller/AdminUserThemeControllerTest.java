@@ -31,7 +31,7 @@ import roomescape.service.ThemeService;
 
 @WebMvcTest(AdminThemeController.class)
 @Import({DomainErrorHttpMapper.class, AdminAuthorizationInterceptor.class, WebConfig.class})
-class AdminThemeControllerTest {
+class AdminUserThemeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

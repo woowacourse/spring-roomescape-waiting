@@ -23,9 +23,9 @@ import roomescape.global.DomainErrorHttpMapper;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 
-@WebMvcTest(ThemeController.class)
+@WebMvcTest(UserThemeController.class)
 @Import(DomainErrorHttpMapper.class)
-class ThemeControllerTest {
+class UserThemeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

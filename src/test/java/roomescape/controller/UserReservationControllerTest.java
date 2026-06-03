@@ -37,9 +37,9 @@ import roomescape.global.WebConfig;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 
-@WebMvcTest(ReservationController.class)
+@WebMvcTest(UserReservationController.class)
 @Import({DomainErrorHttpMapper.class, LoginMemberArgumentResolver.class, WebConfig.class})
-class ReservationControllerTest {
+class UserReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,7 +55,7 @@ class ReservationControllerTest {
     void create() throws Exception {
         Member member = member();
         given(authService.getLoginMember(1L)).willReturn(member);
-        given(reservationService.saveReservation(any(UserReservationRequest.class), any(Member.class))).willReturn(1L);
+        given(reservationService.saveReservationByMember(any(UserReservationRequest.class), any(Member.class))).willReturn(1L);
 
         mockMvc.perform(post("/reservations")
                         .session(loginSession())
