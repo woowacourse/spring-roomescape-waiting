@@ -38,7 +38,7 @@ public class ReservationTimeRepository {
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return ReservationTime.of(generatedKey, time.getStartAt());
+        return time.withId(generatedKey);
     }
 
     public List<ReservationTime> findAll() {

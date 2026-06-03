@@ -23,6 +23,10 @@ public class Theme {
         return new Theme(0L, name, description, thumbnailUrl);
     }
 
+    public Theme withId(long id) {
+        return new Theme(id, name, description, thumbnailUrl);
+    }
+
     public long getId() {
         return id;
     }

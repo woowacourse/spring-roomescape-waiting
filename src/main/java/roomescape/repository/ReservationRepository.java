@@ -115,16 +115,14 @@ public class ReservationRepository {
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return Reservation.load(generatedKey, reservation.getName(), reservation.getSlot(),
-                reservation.getStatus(), reservation.getCreatedAt());
+        return reservation.withId(generatedKey);
     }
 
-    public Reservation update(long id, Reservation target) {
-        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getSlot().getId(),
-                target.getCreatedAt(), id);
+    public Reservation update(long id, Reservation reservation) {
+        jdbcTemplate.update(UPDATE, reservation.getName().getValue(), reservation.getSlot().getId(),
+                reservation.getCreatedAt(), id);
 
-        return Reservation.load(id, target.getName(), target.getSlot(),
-                target.getStatus(), target.getCreatedAt());
+        return reservation.withId(id);
     }
 
     public void deleteById(Long id) {

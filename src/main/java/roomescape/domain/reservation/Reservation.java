@@ -53,6 +53,10 @@ public class Reservation {
         return slot.isSame(target);
     }
 
+    public Reservation withId(long id) {
+        return new Reservation(id, name, slot, status, createdAt);
+    }
+
     public long getId() {
         return id;
     }

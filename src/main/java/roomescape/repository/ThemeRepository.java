@@ -42,7 +42,7 @@ public class ThemeRepository {
                 "thumbnail_url", theme.getThumbnailUrl().getValue()
         );
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return Theme.load(generatedKey, theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
+        return theme.withId(generatedKey);
     }
 
     public List<Theme> findAll() {
