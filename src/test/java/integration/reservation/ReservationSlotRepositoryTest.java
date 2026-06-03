@@ -124,7 +124,7 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     void 예약_엔트리_상태를_수정한다() {
         // given
         ReservationSlot saved = reservationRepository.save(
-                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime)
+                ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(2), theme, reservationTime)
         );
         long reservationId = reservedReservationId(saved);
 
