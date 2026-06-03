@@ -185,6 +185,38 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdForUpdate(long reservationId) {
+        String sql = "SELECT * FROM reservation WHERE id = :id FOR UPDATE";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", reservationId);
+
+        return template.query(sql, params,
+                (resultSet, rowNum) -> new Reservation(
+                        resultSet.getLong("id"),
+                        resultSet.getLong("member_id"),
+                        resultSet.getLong("schedule_id")
+                )
+        ).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByScheduleIdForUpdate(long scheduleId) {
+        String sql = "SELECT * FROM reservation WHERE schedule_id = :scheduleId FOR UPDATE";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("scheduleId", scheduleId);
+
+        return template.query(sql, params,
+                (resultSet, rowNum) -> new Reservation(
+                        resultSet.getLong("id"),
+                        resultSet.getLong("member_id"),
+                        resultSet.getLong("schedule_id")
+                )
+        ).stream().findFirst();
+    }
+
+    @Override
     public boolean existsByScheduleId(long scheduleId) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE schedule_id = :scheduleId)";
 

@@ -67,7 +67,7 @@ public class WaitingService {
     }
 
     private void validateWaitingTargetExists(long scheduleId) {
-        if (!reservationRepository.existsByScheduleId(scheduleId)
+        if (reservationRepository.findByScheduleIdForUpdate(scheduleId).isEmpty()
                 && !waitingRepository.existsByScheduleId(scheduleId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }

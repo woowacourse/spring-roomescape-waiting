@@ -49,6 +49,7 @@ class WaitingServiceTest {
     void save_테스트_1() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, null);
         long scheduleId = 1L;
+        Reservation reservation = new Reservation(1L, 1L, 1L);
         Waiting savedWaiting = new Waiting(10L, MEMBER_ID, scheduleId);
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
@@ -57,10 +58,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(false);
-        when(waitingRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForUpdate(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
@@ -122,8 +121,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(false);
+        when(reservationRepository.findByScheduleIdForUpdate(scheduleId))
+                .thenReturn(Optional.empty());
         when(waitingRepository.existsByScheduleId(scheduleId))
                 .thenReturn(false);
 
@@ -153,8 +152,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForUpdate(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
@@ -183,8 +182,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForUpdate(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(reservationRepository.findById(request.reservationId()))
                 .thenReturn(Optional.of(reservation));
 
@@ -200,6 +199,7 @@ class WaitingServiceTest {
     void save_테스트_7() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L, null);
         long scheduleId = 1L;
+        Reservation reservation = new Reservation(1L, MEMBER_ID, scheduleId);
         Waiting waiting = new Waiting(
                 10L,
                 MEMBER_ID,
@@ -212,8 +212,8 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(waitingRepository.existsByScheduleIdAndMemberId(scheduleId, MEMBER_ID))
                 .thenReturn(false);
-        when(reservationRepository.existsByScheduleId(scheduleId))
-                .thenReturn(true);
+        when(reservationRepository.findByScheduleIdForUpdate(scheduleId))
+                .thenReturn(Optional.of(reservation));
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(waiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId()))

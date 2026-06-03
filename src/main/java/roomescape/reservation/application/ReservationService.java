@@ -7,18 +7,18 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationPeriod;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.application.readmodel.ReservationReadModel;
 import roomescape.reservation.dto.request.ReservationSaveRequest;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.MyReservationsAndWaitingsDetailResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
-import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
-import roomescape.waiting.application.readmodel.WaitingReadModel;
 import roomescape.waiting.WaitingRepository;
+import roomescape.waiting.application.readmodel.WaitingReadModel;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -48,35 +48,38 @@ public class ReservationService {
 
     @Transactional
     public void deleteByIdForUser(long reservationId, long memberId) {
-        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
                 .orElse(null);
-        if (reservationDetail == null) {
+        if (reservation == null) {
             return;
         }
+        validateReservationOwner(reservationId, memberId, reservation);
 
-        validateReservationOwner(reservationId, reservationDetail, memberId);
+        ReservationDetailProjection reservationDetail = getReservationDetailOrThrow(reservationId);
         validateNotPast(reservationDetail);
-        long scheduleId = resolveScheduleId(reservationDetail.date(), reservationDetail.timeId(), reservationDetail.themeId());
-        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
+
+        deleteReservationAndPromoteWaiting(reservationId, reservation.getScheduleId());
     }
 
     @Transactional
     public void deleteByIdForManager(long reservationId) {
-        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
                 .orElse(null);
-        if (reservationDetail == null) {
+        if (reservation == null) {
             return;
         }
 
+        ReservationDetailProjection reservationDetail = getReservationDetailOrThrow(reservationId);
         validateNotPast(reservationDetail);
-        long scheduleId = resolveScheduleId(reservationDetail.date(), reservationDetail.timeId(), reservationDetail.themeId());
-        deleteReservationAndPromoteWaiting(reservationId, scheduleId);
+
+        deleteReservationAndPromoteWaiting(reservationId, reservation.getScheduleId());
     }
 
     @Transactional
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
+        Reservation reservation = getReservationOrThrow(reservationId);
+        validateReservationOwner(reservationId, memberId, reservation);
         ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
-        validateReservationOwner(reservationId, oldReservation, memberId);
 
         return updateReservationAndPromoteWaiting(body, reservationId, oldReservation);
     }
@@ -113,6 +116,11 @@ public class ReservationService {
         List<ReservationReadModel> reservationReadModels = ReservationReadModel.from(reservationRepository.findAll());
 
         return MyReservationsAndWaitingsDetailResponse.from(reservationReadModels);
+    }
+
+    private ReservationDetailProjection getReservationDetailOrThrow(long reservationId) {
+        return reservationRepository.findDetailById(reservationId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private Comparator<MyReservationsAndWaitingsDetailResponse> reservationOrderComparator(ReservationPeriod period) {
@@ -208,10 +216,10 @@ public class ReservationService {
 
     private void validateReservationOwner(
             long reservationId,
-            ReservationDetailProjection reservationDetail,
-            long memberId
+            long memberId,
+            Reservation reservation
     ) {
-        if (!Objects.equals(reservationDetail.memberId(), memberId)) {
+        if (!reservation.isSameMemberId(memberId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
     }
