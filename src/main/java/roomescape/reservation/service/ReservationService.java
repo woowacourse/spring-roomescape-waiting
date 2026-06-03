@@ -12,12 +12,15 @@ import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.BookingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationwaiting.domain.ReservationWaiting;
+import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
@@ -28,29 +31,48 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
-            ThemeService themeService
+            ThemeService themeService,
+            ReservationWaitingRepository reservationWaitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     @Transactional
-    public ReservationResponse createReservation(Member member, ReservationRequest request) {
+    public BookingResponse createReservation(Member member, ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
+        LocalDate date = request.date();
+        Long timeId = request.timeId();
+        Long themeId = request.themeId();
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
-            throw new DuplicateReservationException();
+        reservationRepository.lockSlot(date, timeId, themeId);
+        validateNotAlreadyBooked(member.getId(), date, timeId, themeId);
+
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            ReservationWaiting waiting = reservationWaitingRepository.save(
+                    ReservationWaiting.of(member, date, time, theme));
+            return BookingResponse.waiting(waiting);
         }
 
-        Reservation saved = reservationRepository.save(
-                Reservation.of(member, request.date(), time, theme));
-        return ReservationResponse.from(saved);
+        Reservation saved = reservationRepository.save(Reservation.of(member, date, time, theme));
+        return BookingResponse.reserved(saved);
+    }
+
+    private void validateNotAlreadyBooked(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId)) {
+            throw new BusinessException(HttpStatus.CONFLICT, "이미 예약한 슬롯입니다.");
+        }
+        if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId)) {
+            throw new BusinessException(HttpStatus.CONFLICT, "이미 대기 중인 슬롯입니다.");
+        }
     }
 
     public List<ReservationResponse> getReservationsByMemberId(Long memberId) {
@@ -68,7 +90,20 @@ public class ReservationService {
         if (reservation.isPast()) {
             throw new PastTimeCancelException();
         }
+        reservationRepository.lockSlot(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId());
         reservationRepository.deleteById(id);
+        promoteFirstWaiting(reservation);
+    }
+
+    private void promoteFirstWaiting(Reservation canceled) {
+        reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
+                        canceled.getDate(), canceled.getTime().getId(), canceled.getTheme().getId())
+                .ifPresent(waiting -> {
+                    reservationWaitingRepository.deleteById(waiting.getId());
+                    reservationRepository.save(Reservation.of(
+                            waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()));
+                });
     }
 
     @Transactional

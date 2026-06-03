@@ -118,6 +118,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public void lockSlot(LocalDate date, Long timeId, Long themeId) {
+        String query = "SELECT id FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? FOR UPDATE";
+        jdbcTemplate.query(query, idMapper, date, timeId, themeId);
+    }
+
+    @Override
     public void deleteById(Long id) {
         String query = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(query, id);

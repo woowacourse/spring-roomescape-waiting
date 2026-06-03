@@ -103,6 +103,24 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String query = """
+                SELECT rw.id AS waiting_id, rw.date,
+                       m.id AS member_id, m.name AS member_name, m.email AS member_email, m.password AS member_password, m.role AS member_role,
+                       rt.id AS time_id, rt.start_at AS time_start_at, rt.finish_at AS time_finish_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.image_url AS theme_image_url
+                FROM reservation_waiting rw
+                JOIN member m ON rw.member_id = m.id
+                JOIN reservation_time rt ON rw.time_id = rt.id
+                JOIN theme t ON rw.theme_id = t.id
+                WHERE rw.date = ? AND rw.time_id = ? AND rw.theme_id = ?
+                ORDER BY rw.created_at
+                LIMIT 1
+                """;
+        return jdbcTemplate.query(query, rowMapper, date, timeId, themeId).stream().findFirst();
+    }
+
+    @Override
     public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId,
                                                               Long themeId) {
         String query = """

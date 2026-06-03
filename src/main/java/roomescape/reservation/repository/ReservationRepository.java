@@ -19,6 +19,8 @@ public interface ReservationRepository {
 
     boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 
+    void lockSlot(LocalDate date, Long timeId, Long themeId);
+
     void deleteById(Long id);
 
 }
