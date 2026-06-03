@@ -4,16 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
+import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingLine;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.NotOwnerException;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.domain.WaitingWithNumber;
 
@@ -23,21 +20,16 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
-    private final TimeSlotRepository timeSlotRepository;
-    private final ThemeRepository themeRepository;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository,
-                          TimeSlotRepository timeSlotRepository, ThemeRepository themeRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
-        this.timeSlotRepository = timeSlotRepository;
-        this.themeRepository = themeRepository;
     }
 
     @Transactional
     public WaitingWithNumber saveWaiting(String name, LocalDate date, Long timeId, Long themeId) {
-        Waiting waiting = createWaiting(name, date, timeId, themeId);
-        validateAlreadyReserved(name, date, timeId, themeId);
+        Reservation reservation = findReservation(date, timeId, themeId);
+        Waiting waiting = Waiting.from(reservation, name, LocalDateTime.now());
         validateDuplicatedWaiting(name, date, timeId, themeId);
         Waiting saveWaiting = waitingRepository.save(waiting);
         return createWaitingWithNumber(saveWaiting);
@@ -51,21 +43,9 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    private Waiting createWaiting(String name, LocalDate date, Long timeId, Long themeId) {
-        TimeSlot timeSlot = findTimeSlot(timeId);
-        Theme theme = findTheme(themeId);
-        return new Waiting(name, date, timeSlot, theme, LocalDateTime.now());
-    }
-
     private void validateDuplicatedWaiting(String name, LocalDate date, Long timeId, Long themeId) {
         if (waitingRepository.exists(name, date, timeId, themeId)) {
             throw new DuplicateException("해당 날짜의 시간과 테마는 이미 예약 대기되어 있습니다.");
-        }
-    }
-
-    private void validateAlreadyReserved(String name, LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByNameAndDateAndTimeAndTheme(name, date, timeId, themeId)) {
-            throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
         }
     }
 
@@ -73,6 +53,11 @@ public class WaitingService {
         if (!waiting.isOwner(requestName)) {
             throw new NotOwnerException();
         }
+    }
+
+    private Reservation findReservation(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(() -> new NotFoundException("예약되지 않은 슬롯입니다."));
     }
 
     private Waiting findWaiting(Long id) {
@@ -87,15 +72,5 @@ public class WaitingService {
                 waiting.getTheme().getId()
         ));
         return new WaitingWithNumber(waiting, waitingLine.findWaitingNumber(waiting));
-    }
-
-    private TimeSlot findTimeSlot(Long id) {
-        return timeSlotRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("해당 시간대를 찾을 수 없습니다."));
-    }
-
-    private Theme findTheme(Long id) {
-        return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("해당 테마를 찾을 수 없습니다."));
     }
 }

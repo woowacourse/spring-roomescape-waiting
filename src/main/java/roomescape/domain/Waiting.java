@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.exception.DuplicateException;
 import roomescape.exception.PastTimeException;
 
 public class Waiting {
@@ -23,9 +24,20 @@ public class Waiting {
         this.createdAt = createdAt;
     }
 
-    public Waiting(String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime createdAt) {
+    private Waiting(String name, LocalDate date, TimeSlot timeSlot, Theme theme, LocalDateTime createdAt) {
         this(null, name, date, timeSlot, theme, createdAt);
         validateCreatable(date, timeSlot, createdAt);
+    }
+
+    public static Waiting from(Reservation reservation, String name, LocalDateTime createdAt) {
+        validateNotReservationOwner(reservation, name);
+        return new Waiting(name, reservation.getDate(), reservation.getTimeSlot(), reservation.getTheme(), createdAt);
+    }
+
+    private static void validateNotReservationOwner(Reservation reservation, String waitingName) {
+        if (reservation.isOwner(waitingName)) {
+            throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
+        }
     }
 
     private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme,
