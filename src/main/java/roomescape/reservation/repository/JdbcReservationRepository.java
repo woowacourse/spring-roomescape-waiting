@@ -2,6 +2,8 @@ package roomescape.reservation.repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
@@ -26,51 +27,41 @@ import roomescape.theme.domain.Theme;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+    private final RowMapper<Reservation> reservationRowMapper =
+            (rs, rowNum) -> mapReservation(rs);
+
+    private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper =
+            (rs, rowNum) -> ReservationWaitingResult.from(
+                    mapReservation(rs),
+                    rs.getLong("wait_number")
+            );
+
+    private Reservation mapReservation(ResultSet rs) throws SQLException {
         ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime()
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime()
         );
 
         Theme theme = Theme.of(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail")
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("theme_thumbnail")
+        );
+
+        ReservationSlot reservationSlot = ReservationSlot.of(
+                rs.getDate("date").toLocalDate(),
+                reservationTime,
+                theme
         );
 
         return Reservation.of(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("guest_name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme,
-                Status.from(resultSet.getString("status"))
+                rs.getLong("reservation_id"),
+                rs.getString("guest_name"),
+                reservationSlot,
+                Status.from(rs.getString("status"))
         );
-    };
-    private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime()
-        );
-
-        Theme theme = Theme.of(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail")
-        );
-
-        return ReservationWaitingResult.from(Reservation.of(
-                        resultSet.getLong("reservation_id"),
-                        resultSet.getString("guest_name"),
-                        resultSet.getDate("date").toLocalDate(),
-                        reservationTime,
-                        theme,
-                        Status.from(resultSet.getString("status"))),
-                resultSet.getLong("wait_number")
-        );
-    };
+    }
 
     @Override
     public Optional<Reservation> findById(Long id) {
@@ -232,8 +223,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, confirmed_token)
-                            VALUES (?, ?, ?, ?, ?, ?)
+                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, confirmed_token, waiting_token)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
@@ -243,6 +234,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setLong(4, reservation.getSlot().themeId());
             preparedStatement.setString(5, reservation.getStatus().name());
             preparedStatement.setObject(6, toConfirmedToken(reservation.getStatus()));
+            preparedStatement.setObject(7, toWaitingToken(reservation.getStatus()));
             return preparedStatement;
         }, keyHolder);
 
@@ -254,7 +246,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         try {
             String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?, status = ?, confirmed_token = ?
+                SET date = ?, time_id = ?, status = ?, confirmed_token = ?, waiting_token = ?
                 WHERE id = ?
                 """;
 
@@ -264,6 +256,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     slot.timeId(),
                     status.name(),
                     toConfirmedToken(status),
+                    toWaitingToken(status),
                     id
             );
 
@@ -279,7 +272,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET status = ?, confirmed_token = NULL
+                SET status = ?, confirmed_token = NULL, waiting_token = NULL
                 WHERE id = ?
                 """, Status.CANCELED.toString(), id);
 
@@ -290,12 +283,13 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean updateStatus(Long id, Status status) {
         int rowCount = jdbcTemplate.update("""
             UPDATE reservation
-            SET status = ?, confirmed_token = ?
+            SET status = ?, confirmed_token = ?, waiting_token = ?
             WHERE id = ?
               AND status = ?
             """,
                 status.toString(),
                 toConfirmedToken(status),
+                toWaitingToken(status),
                 id,
                 Status.WAITING.toString()
         );
@@ -331,7 +325,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservationBySlot(ReservationSlot slot) {
+    public boolean existsConfirmedReservationBySlot(ReservationSlot slot) {
         return existsReservation("""
                         date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         """,
@@ -373,7 +367,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Integer toConfirmedToken(Status status) {
-        if (status == Status.CONFIRMED) {
+        if (status.isConfirmed()) {
+            return 1;
+        }
+        return null;
+    }
+
+    private Integer toWaitingToken(Status status) {
+        if (status.isWaiting()) {
             return 1;
         }
         return null;

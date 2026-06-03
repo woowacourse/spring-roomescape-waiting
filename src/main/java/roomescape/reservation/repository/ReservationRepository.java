@@ -31,7 +31,7 @@ public interface ReservationRepository {
 
     boolean existsBySlotAndGuestNameExceptCanceled(ReservationSlot slot, String guestName);
 
-    boolean existsReservationBySlot(ReservationSlot slot);
+    boolean existsConfirmedReservationBySlot(ReservationSlot slot);
 
     boolean existByTimeId(Long timeId);
 

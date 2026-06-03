@@ -12,6 +12,7 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESER
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
@@ -32,6 +34,7 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.test_config.MutableTimeManager;
 import roomescape.test_config.TestTimeManagerConfig;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -405,9 +408,84 @@ class ReservationServiceTest {
                 .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
     }
 
-    private Reservation insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme,
-                                                   String guestName) {
-        return insertReservation(guestName, date, time, theme, Status.CONFIRMED);
+    // 1️⃣ findAllReservations() 테스트
+    @Test
+    @DisplayName("모든 예약을 페이지 단위로 조회한다.")
+    void findAllReservations_success() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme, Status.CONFIRMED);
+        insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING);
+
+        // when
+        List<Reservation> reservations = reservationService.findAllReservations(2, 1);
+
+        // then
+        assertThat(reservations).hasSize(1);
+    }
+
+    // 2️⃣ findByGuestName() 테스트
+    @Test
+    @DisplayName("예약자 이름으로 모든 예약을 조회한다.")
+    void findByGuestName_success() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
+        insertReservation("브라운", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING);
+        insertReservation("포비", LocalDate.of(2023, 8, 7), time, theme, Status.CONFIRMED);
+
+        // when
+        List<ReservationWaitingResult> reservations = reservationService.findByGuestName("브라운");
+
+        // then
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations).allMatch(r -> r.guestName().equals("브라운"));
+    }
+
+    @Test
+    @DisplayName("예약자 이름으로 취소되지 않은 예약만 조회한다.")
+    void findByGuestNameExceptCanceled_success() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
+        insertReservation("브라운", LocalDate.of(2023, 8, 6), time, theme, Status.CANCELED);
+        insertReservation("브라운", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING);
+
+        // when
+        List<ReservationWaitingResult> reservations = reservationService.findByGuestNameExceptCanceled("브라운");
+
+        // then
+        assertThat(reservations).hasSize(2)
+                .extracting(ReservationWaitingResult::status)
+                .doesNotContain(Status.CANCELED);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마로 예약하려는 경우 예외가 발생한다.")
+    void create_fail_theme_not_found() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        Long invalidThemeId = 999L;
+
+        timeManager.setFixed(LocalDate.of(2025, 5, 10));
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.create("포비", date, time.getId(), invalidThemeId))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.message());
+    }
+
+    private void insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme,
+                                            String guestName) {
+        insertReservation(guestName, date, time, theme, Status.CONFIRMED);
     }
 
     private Reservation insertWaitingReservation(LocalDate existDate, ReservationTime existTime, String guestName) {
@@ -425,6 +503,6 @@ class ReservationServiceTest {
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme,
                                           Status status) {
-        return reservationRepository.save(Reservation.create(name, date, time, theme, status));
+        return reservationRepository.save(Reservation.create(name, ReservationSlot.of(date, time, theme), status));
     }
 }

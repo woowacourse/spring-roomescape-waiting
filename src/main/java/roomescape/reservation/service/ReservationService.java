@@ -8,7 +8,6 @@ import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
@@ -36,32 +35,17 @@ public class ReservationService {
 
     @Transactional
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
-        ReservationTime time = getReservationTime(timeId);
+        ReservationTime reservationTime = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
-
-        ReservationSlot slot = ReservationSlot.of(date, time, theme);
-        Status status = determineState(slot);
-
-        Reservation reservation = Reservation.create(guestName, slot, status);
+        ReservationSlot reservationSlot = ReservationSlot.of(date, reservationTime, theme);
+        Reservation reservation = Reservation.create(guestName, reservationSlot, determineState(reservationSlot));
 
         reservationPolicy.validateCreate(reservation);
 
-        Reservation saved = saveReservation(reservation);
+        Reservation saved = reservationRepository.save(reservation);
 
         return reservationRepository.findWaitingById(saved.getId())
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
-    }
-
-    public List<Reservation> findAllReservations(int page, int size) {
-        return reservationRepository.findAll(page, size);
-    }
-
-    public List<ReservationWaitingResult> findByGuestName(String guestName) {
-        return reservationRepository.findAllByGuestName(guestName);
-    }
-
-    public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
-        return reservationRepository.findAllByGuestNameExceptCanceled(guestName);
     }
 
     @Transactional
@@ -94,6 +78,18 @@ public class ReservationService {
         cancelReservation(id);
     }
 
+    public List<Reservation> findAllReservations(int page, int size) {
+        return reservationRepository.findAll(page, size);
+    }
+
+    public List<ReservationWaitingResult> findByGuestName(String guestName) {
+        return reservationRepository.findAllByGuestName(guestName);
+    }
+
+    public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
+        return reservationRepository.findAllByGuestNameExceptCanceled(guestName);
+    }
+
     private void cancelReservation(Long id) {
         Reservation reservation = getReservation(id);
 
@@ -106,11 +102,6 @@ public class ReservationService {
         }
     }
 
-    private Theme getTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
-    }
-
     private Reservation getReservation(Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
@@ -121,13 +112,9 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
-    private Reservation saveReservation(Reservation reservation) {
-        try {
-            return reservationRepository.save(reservation);
-        } catch (ReservationConflictException exception) {
-            Reservation waiting = Reservation.create(reservation.getGuestName(), reservation.getSlot(), Status.WAITING);
-            return reservationRepository.save(waiting);
-        }
+    private Theme getTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
     }
 
     private void updateReservation(Reservation reservation) {
@@ -172,7 +159,7 @@ public class ReservationService {
     }
 
     private Status determineState(ReservationSlot slot) {
-        if (!reservationRepository.existsReservationBySlot(slot)) {
+        if (!reservationRepository.existsConfirmedReservationBySlot(slot)) {
             return Status.CONFIRMED;
         }
         return Status.WAITING;

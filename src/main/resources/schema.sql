@@ -25,9 +25,11 @@ CREATE TABLE reservation
     status          VARCHAR(50)  NOT NULL,
     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     confirmed_token TINYINT,
+    waiting_token TINYINT,
 
     PRIMARY KEY (id),
     UNIQUE (date, time_id, theme_id, confirmed_token),
+    UNIQUE (guest_name, date, time_id, theme_id, waiting_token),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

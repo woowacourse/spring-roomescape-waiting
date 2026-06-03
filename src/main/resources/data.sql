@@ -20,80 +20,96 @@ VALUES (1, '10:00:00'),
        (5, '18:00:00'),
        (6, '20:00:00');
 
-INSERT INTO reservation (id,
-                         guest_name,
-                         date,
-                         time_id,
-                         theme_id,
-                         status)
-VALUES (1, 'guest-1', '2026-05-13', 1, 1, 'RESERVED'),
-       (2, 'guest-2', '2026-05-13', 2, 1, 'RESERVED'),
-       (3, 'guest-3', '2026-05-14', 1, 1, 'RESERVED'),
-       (4, 'guest-4', '2026-05-15', 1, 1, 'RESERVED'),
-       (5, 'guest-5', '2026-05-16', 1, 1, 'RESERVED'),
-       (6, 'guest-6', '2026-05-17', 1, 1, 'RESERVED'),
-       (7, 'guest-7', '2026-05-04', 1, 1, 'RESERVED'),
-       (8, 'guest-8', '2026-05-05', 1, 1, 'WAITING'),
-       (9, 'guest-9', '2026-05-05', 2, 1, 'WAITING'),
-       (10, 'guest-10', '2026-05-05', 3, 1, 'CANCELED'),
+INSERT INTO reservation (
+    id,
+    guest_name,
+    date,
+    time_id,
+    theme_id,
+    status,
+    confirmed_token,
+    waiting_token
+)
+VALUES
+-- Theme 1
+(1, 'guest-1', '2026-05-13', 1, 1, 'CONFIRMED', 1, NULL),
+(2, 'guest-2', '2026-05-13', 2, 1, 'CONFIRMED', 1, NULL),
+(3, 'guest-3', '2026-05-14', 1, 1, 'CONFIRMED', 1, NULL),
+(4, 'guest-4', '2026-05-15', 1, 1, 'CONFIRMED', 1, NULL),
+(5, 'guest-5', '2026-05-16', 1, 1, 'CONFIRMED', 1, NULL),
+(6, 'guest-6', '2026-05-17', 1, 1, 'CONFIRMED', 1, NULL),
+(7, 'guest-7', '2026-05-04', 1, 1, 'CONFIRMED', 1, NULL),
+(8, 'guest-8', '2026-05-05', 1, 1, 'WAITING', NULL, 1),
+(9, 'guest-9', '2026-05-05', 2, 1, 'WAITING', NULL, 1),
+(10, 'guest-10', '2026-05-05', 3, 1, 'CANCELED', NULL, NULL),
 
-       (11, 'guest-11', '2026-04-29', 1, 2, 'RESERVED'),
-       (12, 'guest-12', '2026-04-29', 2, 2, 'RESERVED'),
-       (13, 'guest-13', '2026-04-30', 1, 2, 'WAITING'),
-       (14, 'guest-14', '2026-05-01', 1, 2, 'RESERVED'),
-       (15, 'guest-15', '2026-05-02', 1, 2, 'CANCELED'),
-       (16, 'guest-16', '2026-05-03', 1, 2, 'WAITING'),
-       (17, 'guest-17', '2026-05-04', 1, 2, 'RESERVED'),
-       (18, 'guest-18', '2026-05-05', 1, 2, 'WAITING'),
-       (19, 'guest-19', '2026-05-05', 2, 2, 'RESERVED'),
+-- Theme 2
+(11, 'guest-11', '2026-04-29', 1, 2, 'CONFIRMED', 1, NULL),
+(12, 'guest-12', '2026-04-29', 2, 2, 'CONFIRMED', 1, NULL),
+(13, 'guest-13', '2026-04-30', 1, 2, 'WAITING', NULL, 1),
+(14, 'guest-14', '2026-05-01', 1, 2, 'CONFIRMED', 1, NULL),
+(15, 'guest-15', '2026-05-02', 1, 2, 'CANCELED', NULL, NULL),
+(16, 'guest-16', '2026-05-03', 1, 2, 'WAITING', NULL, 1),
+(17, 'guest-17', '2026-05-04', 1, 2, 'CONFIRMED', 1, NULL),
+(18, 'guest-18', '2026-05-05', 1, 2, 'WAITING', NULL, 1),
+(19, 'guest-19', '2026-05-05', 2, 2, 'CONFIRMED', 1, NULL),
 
-       (20, 'guest-20', '2026-04-29', 1, 3, 'RESERVED'),
-       (21, 'guest-21', '2026-04-29', 2, 3, 'WAITING'),
-       (22, 'guest-22', '2026-04-30', 1, 3, 'RESERVED'),
-       (23, 'guest-23', '2026-05-01', 1, 3, 'RESERVED'),
-       (24, 'guest-24', '2026-05-02', 1, 3, 'WAITING'),
-       (25, 'guest-25', '2026-05-03', 1, 3, 'CANCELED'),
-       (26, 'guest-26', '2026-05-04', 1, 3, 'RESERVED'),
-       (27, 'guest-27', '2026-05-05', 1, 3, 'WAITING'),
+-- Theme 3
+(20, 'guest-20', '2026-04-29', 1, 3, 'CONFIRMED', 1, NULL),
+(21, 'guest-21', '2026-04-29', 2, 3, 'WAITING', NULL, 1),
+(22, 'guest-22', '2026-04-30', 1, 3, 'CONFIRMED', 1, NULL),
+(23, 'guest-23', '2026-05-01', 1, 3, 'CONFIRMED', 1, NULL),
+(24, 'guest-24', '2026-05-02', 1, 3, 'WAITING', NULL, 1),
+(25, 'guest-25', '2026-05-03', 1, 3, 'CANCELED', NULL, NULL),
+(26, 'guest-26', '2026-05-04', 1, 3, 'CONFIRMED', 1, NULL),
+(27, 'guest-27', '2026-05-05', 1, 3, 'WAITING', NULL, 1),
 
-       (28, 'guest-28', '2026-04-29', 1, 4, 'RESERVED'),
-       (29, 'guest-29', '2026-04-29', 2, 4, 'WAITING'),
-       (30, 'guest-30', '2027-04-30', 1, 4, 'RESERVED'),
-       (31, 'guest-31', '2027-05-01', 1, 4, 'WAITING'),
-       (32, 'guest-32', '2027-05-02', 1, 4, 'RESERVED'),
-       (33, 'guest-33', '2027-05-03', 1, 4, 'CANCELED'),
-       (34, 'guest-34', '2027-05-04', 1, 4, 'WAITING'),
+-- Theme 4
+(28, 'guest-28', '2026-04-29', 1, 4, 'CONFIRMED', 1, NULL),
+(29, 'guest-29', '2026-04-29', 2, 4, 'WAITING', NULL, 1),
+(30, 'guest-30', '2027-04-30', 1, 4, 'CONFIRMED', 1, NULL),
+(31, 'guest-31', '2027-05-01', 1, 4, 'WAITING', NULL, 1),
+(32, 'guest-32', '2027-05-02', 1, 4, 'CONFIRMED', 1, NULL),
+(33, 'guest-33', '2027-05-03', 1, 4, 'CANCELED', NULL, NULL),
+(34, 'guest-34', '2027-05-04', 1, 4, 'WAITING', NULL, 1),
 
-       (35, 'guest-35', '2027-04-29', 1, 5, 'RESERVED'),
-       (36, 'guest-36', '2027-04-29', 2, 5, 'WAITING'),
-       (37, 'guest-37', '2027-04-30', 1, 5, 'RESERVED'),
-       (38, 'guest-38', '2027-05-01', 1, 5, 'WAITING'),
-       (39, 'guest-39', '2027-05-02', 1, 5, 'RESERVED'),
-       (40, 'guest-40', '2027-05-03', 1, 5, 'CANCELED'),
+-- Theme 5
+(35, 'guest-35', '2027-04-29', 1, 5, 'CONFIRMED', 1, NULL),
+(36, 'guest-36', '2027-04-29', 2, 5, 'WAITING', NULL, 1),
+(37, 'guest-37', '2027-04-30', 1, 5, 'CONFIRMED', 1, NULL),
+(38, 'guest-38', '2027-05-01', 1, 5, 'WAITING', NULL, 1),
+(39, 'guest-39', '2027-05-02', 1, 5, 'CONFIRMED', 1, NULL),
+(40, 'guest-40', '2027-05-03', 1, 5, 'CANCELED', NULL, NULL),
 
-       (41, 'guest-41', '2027-04-29', 1, 6, 'RESERVED'),
-       (42, 'guest-42', '2027-04-29', 2, 6, 'WAITING'),
-       (43, 'guest-43', '2027-04-30', 1, 6, 'RESERVED'),
-       (44, 'guest-44', '2027-05-01', 1, 6, 'WAITING'),
-       (45, 'guest-45', '2027-05-02', 1, 6, 'RESERVED'),
+-- Theme 6
+(41, 'guest-41', '2027-04-29', 1, 6, 'CONFIRMED', 1, NULL),
+(42, 'guest-42', '2027-04-29', 2, 6, 'WAITING', NULL, 1),
+(43, 'guest-43', '2027-04-30', 1, 6, 'CONFIRMED', 1, NULL),
+(44, 'guest-44', '2027-05-01', 1, 6, 'WAITING', NULL, 1),
+(45, 'guest-45', '2027-05-02', 1, 6, 'CONFIRMED', 1, NULL),
 
-       (46, 'guest-46', '2027-04-29', 1, 7, 'RESERVED'),
-       (47, 'guest-47', '2027-04-29', 2, 7, 'WAITING'),
-       (48, 'guest-48', '2027-04-30', 1, 7, 'RESERVED'),
-       (49, 'guest-49', '2027-05-01', 1, 7, 'CANCELED'),
+-- Theme 7
+(46, 'guest-46', '2027-04-29', 1, 7, 'CONFIRMED', 1, NULL),
+(47, 'guest-47', '2027-04-29', 2, 7, 'WAITING', NULL, 1),
+(48, 'guest-48', '2027-04-30', 1, 7, 'CONFIRMED', 1, NULL),
+(49, 'guest-49', '2027-05-01', 1, 7, 'CANCELED', NULL, NULL),
 
-       (50, 'guest-50', '2027-04-29', 1, 8, 'RESERVED'),
-       (51, 'guest-51', '2027-04-29', 2, 8, 'WAITING'),
-       (52, 'guest-52', '2027-04-30', 1, 8, 'RESERVED'),
+-- Theme 8
+(50, 'guest-50', '2027-04-29', 1, 8, 'CONFIRMED', 1, NULL),
+(51, 'guest-51', '2027-04-29', 2, 8, 'WAITING', NULL, 1),
+(52, 'guest-52', '2027-04-30', 1, 8, 'CONFIRMED', 1, NULL),
 
-       (53, 'guest-53', '2027-04-29', 1, 9, 'RESERVED'),
-       (54, 'guest-54', '2027-04-29', 2, 9, 'WAITING'),
+-- Theme 9
+(53, 'guest-53', '2027-04-29', 1, 9, 'CONFIRMED', 1, NULL),
+(54, 'guest-54', '2027-04-29', 2, 9, 'WAITING', NULL, 1),
 
-       (55, 'guest-55', '2027-04-29', 1, 10, 'RESERVED'),
+-- Theme 10
+(55, 'guest-55', '2027-04-29', 1, 10, 'CONFIRMED', 1, NULL),
 
-       (56, 'guest-56', '2027-05-06', 1, 11, 'RESERVED'),
-       (57, 'guest-57', '2027-05-06', 2, 11, 'WAITING'),
-       (58, 'guest-58', '2027-04-28', 1, 11, 'CANCELED');
+-- Theme 11
+(56, 'guest-56', '2027-05-06', 1, 11, 'CONFIRMED', 1, NULL),
+(57, 'guest-57', '2027-05-06', 2, 11, 'WAITING', NULL, 1),
+(58, 'guest-58', '2027-04-28', 1, 11, 'CANCELED', NULL, NULL);
 
 ALTER TABLE theme
     ALTER COLUMN id RESTART WITH 13;

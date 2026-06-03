@@ -29,24 +29,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme,
-                                     Status status) {
-        return create(guestName, ReservationSlot.of(date, time, theme), status);
-    }
-
     public static Reservation create(String guestName, ReservationSlot slot, Status status) {
         return new Reservation(null, guestName, slot, status);
-    }
-
-    public static Reservation of(
-            long id,
-            String guestName,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme,
-            Status status
-    ) {
-        return of(id, guestName, ReservationSlot.of(date, time, theme), status);
     }
 
     public static Reservation of(long id, String guestName, ReservationSlot slot, Status status) {
@@ -55,7 +39,7 @@ public class Reservation {
 
     public Reservation withId(long id) {
         require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
-        return of(id, guestName, slot, status);
+        return new Reservation(id, guestName, slot, status);
     }
 
     private void validateReservation(String guestName, ReservationSlot slot) {
@@ -109,6 +93,6 @@ public class Reservation {
     }
 
     public Reservation changeSlot(ReservationSlot changedSlot, Status status) {
-        return of(id, guestName, changedSlot, status);
+        return new Reservation(id, guestName, changedSlot, status);
     }
 }
