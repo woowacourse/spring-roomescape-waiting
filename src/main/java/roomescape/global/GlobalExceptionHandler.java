@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -25,6 +26,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.errorCode().status())
                 .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("참조 중인 데이터가 존재하여 삭제할 수 없습니다."));
     }
 
     @ExceptionHandler

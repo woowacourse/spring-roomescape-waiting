@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.theme.application.dto.PopularThemeQueryResult;
 import roomescape.theme.application.dto.ThemeCreateCommand;
 import roomescape.theme.application.dto.ThemeQueryResult;
@@ -20,7 +19,6 @@ import roomescape.theme.domain.repository.ThemeRepository;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationQueryService queryService;
 
     @Transactional(readOnly = true)
     public ThemeQueryResult findById(Long id) {
@@ -30,9 +28,8 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeQueryResult> findAll() {
-        List<Theme> themes = themeRepository.findAll();
-
-        return themes.stream().map(ThemeQueryResult::from)
+        return themeRepository.findAll().stream()
+                .map(ThemeQueryResult::from)
                 .toList();
     }
 
@@ -47,19 +44,11 @@ public class ThemeService {
     public ThemeQueryResult save(ThemeCreateCommand request) {
         Theme theme = request.toEntity();
         validateDuplicateTheme(theme);
-
         return ThemeQueryResult.from(themeRepository.save(theme));
     }
 
     public int delete(long id) {
-        validateNoReReservationExists(id);
         return themeRepository.delete(id);
-    }
-
-    private void validateNoReReservationExists(long id) {
-        if (queryService.existsByThemeId(id)) {
-            throw new RoomEscapeException(ThemeErrorCode.THEME_DELETE_NOT_ALLOWED);
-        }
     }
 
     private void validateDuplicateTheme(Theme theme) {

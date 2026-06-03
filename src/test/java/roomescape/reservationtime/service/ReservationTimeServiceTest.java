@@ -10,12 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.fake.FakeAvailableReservationTimeRepository;
-import roomescape.fake.FakeReservationQueryRepository;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.fake.FakeThemeRepository;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.application.dto.AvailableReservationTimeQueryResult;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
@@ -27,7 +25,6 @@ class ReservationTimeServiceTest {
     private FakeReservationTimeRepository timeRepository;
     private FakeReservationRepository reservationRepository;
     private FakeAvailableReservationTimeRepository availableTimeRepository;
-    private ReservationQueryService reservationQueryService;
     private ReservationTimeService timeService;
 
     @BeforeEach
@@ -35,18 +32,10 @@ class ReservationTimeServiceTest {
         timeRepository = new FakeReservationTimeRepository();
         reservationRepository = new FakeReservationRepository(new FakeThemeRepository(), timeRepository);
         availableTimeRepository = new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
-        reservationQueryService = new ReservationQueryService(
-                new FakeReservationQueryRepository(reservationRepository));
-        timeService = new ReservationTimeService(timeRepository, availableTimeRepository, reservationQueryService);
+        timeService = new ReservationTimeService(timeRepository, availableTimeRepository);
 
-        timeRepository.save(ReservationTime.builder()
-                .startAt(LocalTime.of(9, 0))
-                .build()
-        );
-        timeRepository.save(ReservationTime.builder()
-                .startAt(LocalTime.of(10, 0))
-                .build()
-        );
+        timeRepository.save(ReservationTime.builder().startAt(LocalTime.of(9, 0)).build());
+        timeRepository.save(ReservationTime.builder().startAt(LocalTime.of(10, 0)).build());
     }
 
     @DisplayName("날짜/테마 선택 시 예약 가능한 시간 조회를 테스트 합니다.")
@@ -70,12 +59,8 @@ class ReservationTimeServiceTest {
         LocalDate date = LocalDate.of(2026, 5, 6);
 
         reservationRepository.save(Reservation.builder()
-                .name("스타크")
-                .date(date)
-                .themeId(1L)
-                .timeId(1L)
-                .build()
-        );
+                .name("스타크").date(date).themeId(1L).timeId(1L)
+                .build());
 
         List<AvailableReservationTimeQueryResult> timeResponses = timeService.findAvailableTimes(themeId, date);
 
@@ -88,9 +73,7 @@ class ReservationTimeServiceTest {
     @DisplayName("중복된 타임 추가 시 예외 발생을 테스트합니다.")
     @Test
     void save_duplicated_time_exception() {
-        ReservationTimeCreateCommand createRequestDto = new ReservationTimeCreateCommand(LocalTime.of(9, 0));
-
-        assertThatThrownBy(() -> timeService.save(createRequestDto))
+        assertThatThrownBy(() -> timeService.save(new ReservationTimeCreateCommand(LocalTime.of(9, 0))))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("시간 09:00이(가) 이미 존재합니다.");
     }

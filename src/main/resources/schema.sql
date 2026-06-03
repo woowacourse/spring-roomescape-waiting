@@ -22,7 +22,9 @@ CREATE TABLE reservation
     theme_id BIGINT       NOT NULL,
     time_id  BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uq_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
+    CONSTRAINT uq_reservation_date_theme_time UNIQUE (date, theme_id, time_id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id)
 );
 
 CREATE TABLE waiting
@@ -33,5 +35,7 @@ CREATE TABLE waiting
     theme_id BIGINT       NOT NULL,
     time_id  BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT uq_waiting_date_theme_time UNIQUE (name, date, theme_id, time_id)
+    CONSTRAINT uq_waiting_date_theme_time UNIQUE (name, date, theme_id, time_id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id)
 );
