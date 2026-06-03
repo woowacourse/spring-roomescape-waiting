@@ -137,7 +137,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         int affected = jdbcTemplate.update(sql, time.getId());
         if (affected == 0) {
-            throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage());
+            throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND);
         }
     }
 }

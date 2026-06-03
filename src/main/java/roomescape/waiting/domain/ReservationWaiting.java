@@ -30,13 +30,13 @@ public class ReservationWaiting {
         LocalDateTime targetTime = LocalDateTime.of(getDate(), getTime().getStartAt());
 
         if (current.isAfter(targetTime)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_TIME);
         }
     }
 
     public void validateOwner(String userName) {
         if (!this.name.equals(userName)) {
-            throw new ForbiddenException(ReservationWaitingErrorCode.AUTHORIZATION_FAIL.getMessage());
+            throw new ForbiddenException(ReservationWaitingErrorCode.AUTHORIZATION_FAIL);
         }
     }
 

@@ -29,7 +29,7 @@ public class ThemeService {
             Theme saved = themeRepository.save(newTheme);
             return ThemeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
+            throw new ConflictException(ThemeErrorCode.DUPLICATE_THEME);
         }
     }
 
@@ -42,7 +42,7 @@ public class ThemeService {
     public Theme findById(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(
-                        () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage())
+                        () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND)
                 );
     }
 
@@ -53,7 +53,7 @@ public class ThemeService {
         try {
             themeRepository.delete(deleteTarget);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ThemeErrorCode.THEME_IN_USE.getMessage());
+            throw new ConflictException(ThemeErrorCode.THEME_IN_USE);
         }
     }
 }

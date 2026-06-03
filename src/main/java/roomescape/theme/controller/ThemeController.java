@@ -49,7 +49,7 @@ public class ThemeController {
 
     private static void validatePeriodAndLimit(int period, int limit) {
         if (period < 1 || limit < 1) {
-            throw new BadRequestException(ThemeErrorCode.INVALID_PERIOD_OR_LIMIT.getMessage());
+            throw new BadRequestException(ThemeErrorCode.INVALID_PERIOD_OR_LIMIT);
         }
     }
 }

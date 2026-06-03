@@ -11,7 +11,7 @@ public record ReservationUpdateRequest(
 ) {
     public ReservationUpdateRequest {
         if (date == null && timeId == null) {
-            throw new BadRequestException(ReservationErrorCode.INVALID_UPDATE_FORMAT.getMessage());
+            throw new BadRequestException(ReservationErrorCode.INVALID_UPDATE_FORMAT);
         }
     }
 

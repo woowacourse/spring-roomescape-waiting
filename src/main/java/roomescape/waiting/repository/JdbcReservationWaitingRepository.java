@@ -10,11 +10,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
+import roomescape.waiting.exception.ReservationWaitingErrorCode;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -149,7 +151,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         int affected = jdbcTemplate.update(sql, reservationWaiting.getId());
         if (affected == 0) {
-            throw new roomescape.global.exception.NotFoundException(roomescape.waiting.exception.ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
+            throw new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND);
         }
     }
 

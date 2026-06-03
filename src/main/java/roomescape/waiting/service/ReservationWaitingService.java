@@ -42,7 +42,7 @@ public class ReservationWaitingService {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);
             return ReservationWaitingResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
+            throw new ConflictException(ReservationWaitingErrorCode.DUPLICATE_WAITING);
         }
     }
 
@@ -58,7 +58,7 @@ public class ReservationWaitingService {
     private ReservationWaiting getById(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(
-                        () -> new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage())
+                        () -> new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND)
                 );
     }
 
@@ -82,7 +82,7 @@ public class ReservationWaitingService {
         return reservationRepository.findByDateAndTimeIdAndThemeId(
                 command.date(), command.timeId(), command.themeId()
         ).orElseThrow(
-                () -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND.getMessage())
+                () -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND)
         );
     }
 
@@ -93,13 +93,13 @@ public class ReservationWaitingService {
 
     private void validateNoSameTimeBooking(LocalDate date, Long timeId, String name) {
         if (reservationRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
     private void validateNoSameTimeWaiting(LocalDate date, Long timeId, String name) {
         if (reservationWaitingRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
-            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 }

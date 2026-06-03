@@ -31,25 +31,25 @@ public class ReservationTimeService {
             ReservationTime saved = reservationTimeRepository.save(reservationTime);
             return ReservationTimeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME.getMessage());
+            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
         }
     }
 
     private void validateReservationTimeUniqueness(LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME.getMessage());
+            throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
         }
     }
 
     public ReservationTime getById(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND));
     }
 
     @Transactional
     public ReservationTime getByIdForUpdate(Long id) {
         return reservationTimeRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND));
     }
 
     @Transactional
@@ -59,7 +59,7 @@ public class ReservationTimeService {
         try {
             reservationTimeRepository.delete(deleteTarget);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(TimeErrorCode.TIME_IN_USE.getMessage());
+            throw new ConflictException(TimeErrorCode.TIME_IN_USE);
         }
     }
 }

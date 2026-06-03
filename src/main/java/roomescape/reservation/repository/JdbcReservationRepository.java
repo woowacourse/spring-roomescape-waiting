@@ -10,15 +10,15 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.exception.ReservationErrorCode;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -333,7 +333,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getId()
         );
         if (affected == 0) {
-            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
+            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
@@ -345,7 +345,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
         int affected = jdbcTemplate.update(sql, reservation.getId());
         if (affected == 0) {
-            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
+            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 }

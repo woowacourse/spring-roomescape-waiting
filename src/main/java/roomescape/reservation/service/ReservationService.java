@@ -49,7 +49,7 @@ public class ReservationService {
             Reservation saved = reservationRepository.save(buildNewReservation(command));
             return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
+            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -59,7 +59,7 @@ public class ReservationService {
         try {
             reservationRepository.update(updated);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
+            throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -104,7 +104,7 @@ public class ReservationService {
 
     public Reservation getById(Long id) {
         return reservationRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage())
+                () -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND)
         );
     }
 
@@ -126,14 +126,14 @@ public class ReservationService {
     private void validateNoSameTimeBooking(LocalDate date, ReservationTime time, String name) {
         if (reservationRepository.existsByDateAndTimeIdAndName(date, time.getId(), name)) {
             throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME.getMessage());
+                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
     }
 
     private void validateNoSameTimeWaiting(LocalDate date, Long timeId, String name) {
         if (reservationWaitingRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
             throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME.getMessage());
+                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
     }
 
@@ -156,7 +156,7 @@ public class ReservationService {
                                                   Long excludeId) {
         if (reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(date, time.getId(), name, excludeId)) {
             throw new InvalidBusinessStateException(
-                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME.getMessage());
+                    ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
         validateNoSameTimeWaiting(date, time.getId(), name);
     }

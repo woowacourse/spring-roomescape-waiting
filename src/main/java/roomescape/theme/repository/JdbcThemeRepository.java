@@ -96,7 +96,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
         int affected = jdbcTemplate.update(sql, theme.getId());
         if (affected == 0) {
-            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
+            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND);
         }
     }
 }

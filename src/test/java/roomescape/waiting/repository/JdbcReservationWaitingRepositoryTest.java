@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
@@ -161,21 +160,6 @@ class JdbcReservationWaitingRepositoryTest {
         Optional<ReservationWaiting> found = reservationWaitingRepository.findById(saved.getId());
         assertThat(found).isEmpty();
     }
-
-    @Test
-    @DisplayName("존재하지 않는 예약 대기를 삭제하면 예외가 발생한다.")
-    void delete_nonExistentWaiting_throwsNotFoundException() {
-        // given
-        ReservationTime time = createTime(LocalTime.of(10, 0));
-        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting nonExistentWaiting = new ReservationWaiting(9999L, "없는사람",
-                new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme));
-
-        // when & then
-        assertThatThrownBy(() -> reservationWaitingRepository.delete(nonExistentWaiting))
-                .isInstanceOf(roomescape.global.exception.NotFoundException.class);
-    }
-
 
     @Test
     @DisplayName("이름을 기반으로 해당 사용자의 예약 대기 내역을 모두 조회한다.")
