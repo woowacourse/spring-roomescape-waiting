@@ -1,7 +1,9 @@
 package roomescape.domain.waitingreservation;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -98,7 +100,7 @@ public class WaitingReservationService {
     }
 
     public List<WaitingReservationWithRankResponse> getWaitingReservationsWithRankByName(String name) {
-        return waitingReservationRepository.findAllByNameWithRank(name)
+        return waitingReservationRepository.findUpcomingByNameWithRank(name, LocalDate.now(clock), LocalTime.now(clock))
             .stream()
             .map(WaitingReservationWithRankResponse::from)
             .toList();

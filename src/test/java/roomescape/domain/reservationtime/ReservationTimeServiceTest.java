@@ -169,6 +169,11 @@ class ReservationTimeServiceTest {
         }
 
         @Override
+        public List<Reservation> findUpcomingByName(String name, java.time.LocalDate currentDate, LocalTime currentTime) {
+            return null;
+        }
+
+        @Override
         public Optional<Reservation> findById(Long id) {
             return Optional.empty();
         }

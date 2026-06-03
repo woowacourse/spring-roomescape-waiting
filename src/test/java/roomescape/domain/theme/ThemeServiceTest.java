@@ -93,6 +93,7 @@ class ThemeServiceTest {
         @Override public int countByReservationDateId(Long id) { return 0; }
         @Override public List<Long> findReservedTimes(Long themeId, Long dateId) { return null; }
         @Override public List<Reservation> findByName(String name) { return null; }
+        @Override public List<Reservation> findUpcomingByName(String name, LocalDate currentDate, java.time.LocalTime currentTime) { return null; }
         @Override public Optional<Reservation> findById(Long id) { return Optional.empty(); }
         @Override public int updateReservation(Long id, Long d, Long t) { return 0; }
         @Override public boolean existsByDateIdAndTimeIdAndThemeId(Long d, Long t, Long th) { return false; }

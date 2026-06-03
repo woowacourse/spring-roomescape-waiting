@@ -172,6 +172,32 @@ class JdbcWaitingReservationRepositoryTest {
                 .isEqualTo(2L);
     }
 
+    @Test
+    void 이름으로_예약_시작_시각이_지나지_않은_예약_대기와_순번을_조회한다() {
+        waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 7, 10, 0)));
+
+        Slot futureSlot = insertSlot(
+                102L, LocalDate.of(2026, 5, 10),
+                202L, LocalTime.of(10, 1),
+                302L, "미래"
+        );
+        waitingReservationRepository.save(waiting("고래", futureSlot, LocalDateTime.of(2026, 5, 7, 10, 0)));
+        waitingReservationRepository.save(waiting("이산", futureSlot, LocalDateTime.of(2026, 5, 8, 10, 0)));
+
+        List<WaitingReservationWithRank> waitings = waitingReservationRepository.findUpcomingByNameWithRank(
+                "이산",
+                LocalDate.of(2026, 5, 10),
+                LocalTime.of(10, 0)
+        );
+
+        assertThat(waitings).singleElement()
+                .extracting(result -> result.waitingReservation().getTime().getStartAt())
+                .isEqualTo(LocalTime.of(10, 1));
+        assertThat(waitings).singleElement()
+                .extracting(WaitingReservationWithRank::rank)
+                .isEqualTo(2L);
+    }
+
     private WaitingReservation waiting(String name, LocalDateTime createdAt) {
         return WaitingReservation.createWithoutId(name, date, time, theme, createdAt);
     }

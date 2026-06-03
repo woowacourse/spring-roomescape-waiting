@@ -363,6 +363,15 @@ class ReservationServiceTest {
         }
 
         @Override
+        public List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime) {
+            return findByName(name).stream()
+                    .filter(r -> r.getDate().getPlayDay().isAfter(currentDate)
+                            || (r.getDate().getPlayDay().isEqual(currentDate)
+                            && r.getTime().getStartAt().isAfter(currentTime)))
+                    .toList();
+        }
+
+        @Override
         public Optional<Reservation> findById(Long id) {
             return reservations.stream().filter(r -> r.getId().equals(id)).findFirst();
         }
@@ -412,6 +421,15 @@ class ReservationServiceTest {
 
         @Override
         public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
+            return List.of();
+        }
+
+        @Override
+        public List<WaitingReservationWithRank> findUpcomingByNameWithRank(
+                String name,
+                LocalDate currentDate,
+                LocalTime currentTime
+        ) {
             return List.of();
         }
 

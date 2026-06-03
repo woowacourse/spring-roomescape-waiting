@@ -97,6 +97,34 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("이름으로 예약 시작 시각이 지나지 않은 예약을 조회한다.")
+    void findUpcomingByName() {
+        Reservation pastReservation = Reservation.createWithoutId("테스터", reservationDate, reservationTime, theme);
+        reservationRepository.save(pastReservation);
+
+        ReservationDate futureDate = ReservationDate.of(102L, LocalDate.of(2026, 5, 15));
+        ReservationTime futureTime = ReservationTime.of(202L, LocalTime.of(10, 1));
+        Theme futureTheme = Theme.of(302L, "미래테마", "설명", "url");
+        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)",
+                futureDate.getId(), futureDate.getPlayDay().toString());
+        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)",
+                futureTime.getId(), futureTime.getStartAt().toString());
+        jdbcTemplate.update("insert into theme(id, name, content, url) values (?, ?, ?, ?)",
+                futureTheme.getId(), futureTheme.getName(), futureTheme.getContent(), futureTheme.getUrl());
+        reservationRepository.save(Reservation.createWithoutId("테스터", futureDate, futureTime, futureTheme));
+
+        List<Reservation> reservations = reservationRepository.findUpcomingByName(
+                "테스터",
+                LocalDate.of(2026, 5, 15),
+                LocalTime.of(10, 0)
+        );
+
+        assertThat(reservations).singleElement()
+                .extracting(reservation -> reservation.getTime().getStartAt())
+                .isEqualTo(LocalTime.of(10, 1));
+    }
+
+    @Test
     @DisplayName("날짜, 시간, 테마가 중복되는 예약이 있는지 확인한다.")
     void existsByDateIdAndTimeIdAndThemeId() {
         Reservation reservation = Reservation.createWithoutId("테스터", reservationDate, reservationTime, theme);

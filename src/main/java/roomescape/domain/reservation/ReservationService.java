@@ -2,6 +2,8 @@ package roomescape.domain.reservation;
 
 import jakarta.validation.Valid;
 import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +58,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
+        return reservationRepository.findUpcomingByName(name, LocalDate.now(clock), LocalTime.now(clock)).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }

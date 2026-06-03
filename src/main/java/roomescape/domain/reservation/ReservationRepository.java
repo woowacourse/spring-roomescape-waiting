@@ -1,5 +1,7 @@
 package roomescape.domain.reservation;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +22,8 @@ public interface ReservationRepository {
     int countByThemeId(Long id);
 
     List<Reservation> findByName(String name);
+
+    List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime);
 
     Optional<Reservation> findById(Long id);
 

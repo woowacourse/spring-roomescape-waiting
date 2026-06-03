@@ -75,6 +75,21 @@ public class JdbcReservationRepository implements ReservationRepository {
             order by rd.play_day
             """;
 
+    private static final String FIND_UPCOMING_BY_NAME_SQL =
+        """
+            select r.id, r.name,
+                   rd.id as date_id, rd.play_day,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation r
+            join reservation_date rd on r.date_id = rd.id
+            join reservation_time rt on r.time_id = rt.id
+            join theme th on r.theme_id = th.id
+            where r.name = ?
+              and (rd.play_day > ? or (rd.play_day = ? and rt.start_at > ?))
+            order by rd.play_day, rt.start_at
+            """;
+
     private static final String FIND_BY_ID_SQL =
         """
             select r.id, r.name,
@@ -172,6 +187,19 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByName(String name) {
         return jdbcTemplate.query(FIND_BY_NAME_SQL, reservationRowMapper(), name);
+    }
+
+    @Override
+    public List<Reservation> findUpcomingByName(String name, LocalDate currentDate, LocalTime currentTime) {
+        String currentDateValue = currentDate.toString();
+        return jdbcTemplate.query(
+            FIND_UPCOMING_BY_NAME_SQL,
+            reservationRowMapper(),
+            name,
+            currentDateValue,
+            currentDateValue,
+            currentTime.toString()
+        );
     }
 
     @Override

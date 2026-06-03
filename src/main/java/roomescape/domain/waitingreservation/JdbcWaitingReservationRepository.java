@@ -69,6 +69,30 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
                     order by rd.play_day asc, rt.start_at asc, ranked.id asc
                     """;
 
+    private static final String FIND_UPCOMING_BY_NAME_WITH_RANK_SQL =
+            """
+                    select ranked.id, ranked.name, ranked.created_at, ranked.waiting_rank,
+                           rd.id as date_id, rd.play_day,
+                           rt.id as time_id, rt.start_at,
+                           th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+                    from (
+                        select wr.id, wr.name, wr.date_id, wr.time_id, wr.theme_id, wr.created_at,
+                               row_number() over (
+                                   partition by wr.date_id, wr.time_id, wr.theme_id
+                                   order by wr.created_at asc, wr.id asc
+                               ) as waiting_rank
+                        from waiting_reservation wr
+                        join reservation_date rd on wr.date_id = rd.id
+                        join reservation_time rt on wr.time_id = rt.id
+                        where rd.play_day > ? or (rd.play_day = ? and rt.start_at > ?)
+                    ) ranked
+                    join reservation_date rd on ranked.date_id = rd.id
+                    join reservation_time rt on ranked.time_id = rt.id
+                    join theme th on ranked.theme_id = th.id
+                    where ranked.name = ?
+                    order by rd.play_day asc, rt.start_at asc, ranked.id asc
+                    """;
+
     private static final String DELETE_BY_ID_SQL = "delete from waiting_reservation where id = ?";
 
     private static final String FIND_BY_ID_SQL =
@@ -125,6 +149,23 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
     @Override
     public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
         return jdbcTemplate.query(FIND_ALL_BY_NAME_WITH_RANK_SQL, waitingReservationWithRankRowMapper(), name);
+    }
+
+    @Override
+    public List<WaitingReservationWithRank> findUpcomingByNameWithRank(
+            String name,
+            LocalDate currentDate,
+            LocalTime currentTime
+    ) {
+        String currentDateValue = currentDate.toString();
+        return jdbcTemplate.query(
+                FIND_UPCOMING_BY_NAME_WITH_RANK_SQL,
+                waitingReservationWithRankRowMapper(),
+                currentDateValue,
+                currentDateValue,
+                currentTime.toString(),
+                name
+        );
     }
 
     @Override
