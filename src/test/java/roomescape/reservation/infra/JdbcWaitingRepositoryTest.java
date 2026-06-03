@@ -68,14 +68,15 @@ class JdbcWaitingRepositoryTest {
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
         User stark = ReservationFixture.userNameStark();
 
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 4))
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
         Waiting waiting = Waiting.builder()
                 .user(stark)
-                .slot(ReservationSlot.builder()
-                        .date(LocalDate.of(2026, 5, 4))
-                        .themeId(themeId)
-                        .timeId(timeId)
-                        .startAt(LocalTime.of(9, 0))
-                        .build())
+                .slot(slot)
                 .build();
 
         Waiting savedWaiting = waitingRepository.save(waiting);
@@ -85,6 +86,7 @@ class JdbcWaitingRepositoryTest {
             assertSoftly.assertThat(savedWaiting.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 4));
             assertSoftly.assertThat(savedWaiting.getSlot().themeId()).isEqualTo(themeId);
             assertSoftly.assertThat(savedWaiting.getSlot().timeId()).isEqualTo(timeId);
+            assertSoftly.assertThat(savedWaiting.getRank().value()).isEqualTo(1);
         });
     }
 
@@ -97,14 +99,15 @@ class JdbcWaitingRepositoryTest {
         testHelper.insertWaiting("스타크", date, themeId, timeId);
         User stark = ReservationFixture.userNameStark();
 
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
         Waiting waiting = Waiting.builder()
                 .user(stark)
-                .slot(ReservationSlot.builder()
-                        .date(date)
-                        .themeId(themeId)
-                        .timeId(timeId)
-                        .startAt(LocalTime.of(9, 0))
-                        .build())
+                .slot(slot)
                 .build();
 
         assertThatThrownBy(() -> waitingRepository.save(waiting))
@@ -127,9 +130,9 @@ class JdbcWaitingRepositoryTest {
         assertThat(waitingRepository.delete(waitingId)).isEqualTo(1);
     }
 
-    @DisplayName("방탈출 예약 대기의 순번을 테스트합니다.")
+    @DisplayName("방탈출 예약 대기 추가 시 다음 순번 저장을 테스트합니다.")
     @Test
-    void calculate_waiting_rank() {
+    void save_waiting_with_next_rank() {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -145,25 +148,30 @@ class JdbcWaitingRepositoryTest {
                 themeId,
                 timeId
         );
-        Long thirdWaitingId = testHelper.insertWaiting(
+        testHelper.insertWaiting(
                 "네오",
                 date,
                 themeId,
                 timeId
         );
-        User neo = ReservationFixture.userNameNeo();
 
-        ReservationSlot slot = waitingRepository.findSlotById(thirdWaitingId)
-                .orElseThrow();
-
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        User kaya = User.builder()
+                .name("카야")
+                .build();
         Waiting waiting = Waiting.builder()
-                .id(thirdWaitingId)
-                .user(neo)
+                .user(kaya)
                 .slot(slot)
                 .build();
 
-        Long rank = waitingRepository.getRank(waiting);
-        assertThat(rank).isEqualTo(3L);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        assertThat(savedWaiting.getRank().value()).isEqualTo(4);
     }
 
     @DisplayName("대기가 여러개 있을 때 첫번째 대기만 조회해오는 것을 테스트합니다.")
@@ -205,6 +213,7 @@ class JdbcWaitingRepositoryTest {
             assertSoftly.assertThat(waiting.getId()).isEqualTo(firstWaitingId);
             assertSoftly.assertThat(waiting.getUser()).isEqualTo(stark);
             assertSoftly.assertThat(waiting.getSlot()).isEqualTo(slot);
+            assertSoftly.assertThat(waiting.getRank().value()).isEqualTo(1);
         });
 
     }

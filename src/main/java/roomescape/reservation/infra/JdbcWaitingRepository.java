@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.UniqueConstraintViolationException;
+import roomescape.reservation.domain.Rank;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
@@ -47,25 +48,15 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findFirstBySlot(ReservationSlot slot) {
         return jdbcTemplate.query("""
-                                SELECT w.id, w.name
-                                    FROM waiting w
-                                    WHERE w.date = ?
-                                AND w.theme_id = ?
-                                AND w.time_id = ?
-                                ORDER BY w.id ASC
+                                SELECT w.id, w.name, w.rank
+                                FROM waiting w
+                                WHERE w.date = ?
+                                  AND w.theme_id = ?
+                                  AND w.time_id = ?
+                                ORDER BY w.rank ASC
                                 LIMIT 1
                                 """,
-                        (rs, rowNum) -> {
-                            User user = User.builder()
-                                    .name(rs.getString("name"))
-                                    .build();
-
-                            return Waiting.builder()
-                                    .id(rs.getLong("id"))
-                                    .user(user)
-                                    .slot(slot)
-                                    .build();
-                        },
+                        (rs, rowNum) -> toWaiting(rs.getLong("id"), rs.getString("name"), rs.getInt("rank"), slot),
                         slot.date(),
                         slot.themeId(),
                         slot.timeId())
@@ -75,40 +66,58 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getSlot();
+        Rank rank = getNextRank(slot);
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", waiting.getUserName())
                 .addValue("date", slot.date())
                 .addValue("theme_id", slot.themeId())
-                .addValue("time_id", slot.timeId());
+                .addValue("time_id", slot.timeId())
+                .addValue("rank", rank.value());
 
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-            return waiting.withId(id);
+            return waiting.withId(id).withRank(rank);
         } catch (DuplicateKeyException e) {
             throw new UniqueConstraintViolationException(e);
         }
     }
 
-    @Override
-    public Long getRank(Waiting waiting) {
-        ReservationSlot slot = waiting.getSlot();
-        return jdbcTemplate.queryForObject("""
-                            SELECT COUNT(*)
-                            FROM waiting
-                            WHERE id <= ?
-                              AND date = ? 
-                              AND theme_id = ?
-                              AND time_id = ?
+    private Rank getNextRank(ReservationSlot slot) {
+        Integer rank = jdbcTemplate.queryForObject("""
+                        SELECT COALESCE(MAX(rank), 0) + 1
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
                         """,
-                Long.class,
-                waiting.getId(),
+                Integer.class,
                 slot.date(),
                 slot.themeId(),
                 slot.timeId());
+
+        return Rank.builder()
+                .value(rank)
+                .build();
     }
 
     @Override
     public Integer delete(Long id) {
         return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    }
+
+    private Waiting toWaiting(Long id, String name, int rankValue, ReservationSlot slot) {
+        User user = User.builder()
+                .name(name)
+                .build();
+        Rank rank = Rank.builder()
+                .value(rankValue)
+                .build();
+
+        return Waiting.builder()
+                .id(id)
+                .user(user)
+                .slot(slot)
+                .rank(rank)
+                .build();
     }
 }

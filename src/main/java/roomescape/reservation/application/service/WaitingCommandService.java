@@ -45,12 +45,10 @@ public class WaitingCommandService {
 
         try {
             Waiting savedWaiting = waitingRepository.save(waiting);
-            Long rank = waitingRepository.getRank(savedWaiting);
             return WaitingResult.from(
                     savedWaiting,
                     ThemeResult.from(theme),
-                    ReservationTimeResult.from(time),
-                    rank
+                    ReservationTimeResult.from(time)
             );
         } catch (UniqueConstraintViolationException e) {
             throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");

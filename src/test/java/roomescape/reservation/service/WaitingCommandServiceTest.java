@@ -58,7 +58,7 @@ class WaitingCommandServiceTest {
             softly.assertThat(savedWaiting.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(savedWaiting.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
             softly.assertThat(savedWaiting.status()).isEqualTo(Status.WAITING);
-            softly.assertThat(savedWaiting.rank()).isEqualTo(1L);
+            softly.assertThat(savedWaiting.rank()).isEqualTo(1);
         });
     }
 
@@ -89,7 +89,7 @@ class WaitingCommandServiceTest {
         WaitingCreateCommand request = ReservationFixture.futureKayaWaitingCreateCommand(themeId, timeId, NOW);
         WaitingResult savedWaiting = waitingCommandService.save(request);
 
-        assertThat(savedWaiting.rank()).isEqualTo(3L);
+        assertThat(savedWaiting.rank()).isEqualTo(3);
     }
 
     @DisplayName("확정된 예약이 존재하지 않을 경우, 예약 대기 생성 예외를 테스트합니다.")

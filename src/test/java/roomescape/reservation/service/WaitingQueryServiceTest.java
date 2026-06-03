@@ -67,7 +67,7 @@ class WaitingQueryServiceTest {
             softly.assertThat(first.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(first.time()).isEqualTo(new ReservationTimeResult(nineTimeId, LocalTime.of(9, 0)));
             softly.assertThat(first.status()).isEqualTo(Status.WAITING);
-            softly.assertThat(first.rank()).isEqualTo(2L);
+            softly.assertThat(first.rank()).isEqualTo(2);
 
             softly.assertThat(second.id()).isPositive();
             softly.assertThat(second.name()).isEqualTo("피노");
@@ -75,7 +75,7 @@ class WaitingQueryServiceTest {
             softly.assertThat(second.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(second.time()).isEqualTo(new ReservationTimeResult(tenTimeId, LocalTime.of(10, 0)));
             softly.assertThat(second.status()).isEqualTo(Status.WAITING);
-            softly.assertThat(second.rank()).isEqualTo(1L);
+            softly.assertThat(second.rank()).isEqualTo(1);
         });
     }
 }

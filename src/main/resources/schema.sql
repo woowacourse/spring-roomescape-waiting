@@ -30,6 +30,7 @@ CREATE TABLE waiting (
     date     DATE         NOT NULL,
     theme_id BIGINT       NOT NULL,
     time_id  BIGINT       NOT NULL,
+    rank INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

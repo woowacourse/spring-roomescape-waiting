@@ -15,12 +15,15 @@ public class Waiting {
     private final Long id;
     private final User user;
     private final ReservationSlot slot;
+    @With
+    private final Rank rank;
 
     @Builder
-    public Waiting(Long id, User user, ReservationSlot slot) {
+    public Waiting(Long id, User user, ReservationSlot slot, Rank rank) {
         this.id = id;
         this.user = Objects.requireNonNull(user);
         this.slot = Objects.requireNonNull(slot);
+        this.rank = rank;
     }
 
     public static Waiting create(User user, ReservationSlot slot, LocalDateTime now) {

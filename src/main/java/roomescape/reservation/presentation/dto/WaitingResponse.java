@@ -15,7 +15,7 @@ public record WaitingResponse(
         ThemeResponse theme,
         ReservationTimeResponse time,
         Status status,
-        Long rank
+        int rank
 ) {
     public static WaitingResponse from(WaitingResult result) {
         return new WaitingResponse(

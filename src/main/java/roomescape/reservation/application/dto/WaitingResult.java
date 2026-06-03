@@ -12,12 +12,11 @@ public record WaitingResult(
         ThemeResult theme,
         ReservationTimeResult time,
         Status status,
-        Long rank
+        int rank
 ) {
 
     public static WaitingResult from(Waiting waiting, ThemeResult themeResult,
-                                     ReservationTimeResult timeResult,
-                                     Long rank) {
+                                     ReservationTimeResult timeResult) {
         return new WaitingResult(
                 waiting.getId(),
                 waiting.getUserName(),
@@ -25,7 +24,7 @@ public record WaitingResult(
                 themeResult,
                 timeResult,
                 Status.WAITING,
-                rank
+                waiting.getRank().value()
         );
     }
 

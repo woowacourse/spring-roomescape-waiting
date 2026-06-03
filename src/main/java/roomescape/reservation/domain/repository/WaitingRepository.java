@@ -11,7 +11,5 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    Long getRank(Waiting waiting);
-
     Integer delete(Long id);
 }
