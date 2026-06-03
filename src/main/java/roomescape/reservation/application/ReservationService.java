@@ -184,7 +184,7 @@ public class ReservationService {
     }
 
     private void deleteReservationAndPromoteWaiting(long reservationId, long scheduleId) {
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(scheduleId)
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForUpdate(scheduleId)
                 .orElse(null);
         if (firstWaiting != null) {
             waitingRepository.deleteById(firstWaiting.getId());

@@ -90,7 +90,7 @@ class ReservationServiceTest {
                 oldReservation.getTimeId(),
                 oldReservation.getThemeId()
         )).thenReturn(1L);
-        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
+        when(waitingRepository.findFirstByScheduleIdForUpdate(1L)).thenReturn(Optional.empty());
 
         assertThatCode(() -> reservationService.deleteByIdForUser(reservationId, 1L))
                 .doesNotThrowAnyException();
@@ -127,7 +127,7 @@ class ReservationServiceTest {
                 oldReservation.getTimeId(),
                 oldReservation.getThemeId()
         )).thenReturn(scheduleId);
-        when(waitingRepository.findFirstByScheduleId(scheduleId)).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findFirstByScheduleIdForUpdate(scheduleId)).thenReturn(Optional.of(waiting));
 
         reservationService.deleteByIdForUser(reservationId, 1L);
 
@@ -153,7 +153,7 @@ class ReservationServiceTest {
                 oldReservation.getTimeId(),
                 oldReservation.getThemeId()
         )).thenReturn(1L);
-        when(waitingRepository.findFirstByScheduleId(1L)).thenReturn(Optional.empty());
+        when(waitingRepository.findFirstByScheduleIdForUpdate(1L)).thenReturn(Optional.empty());
 
         assertThatCode(() -> reservationService.deleteByIdForManager(reservationId))
                 .doesNotThrowAnyException();

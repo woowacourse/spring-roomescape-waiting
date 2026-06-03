@@ -95,6 +95,25 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstByScheduleIdForUpdate(long scheduleId) {
+        String sql = """
+                SELECT id, member_id, schedule_id
+                FROM waiting
+                WHERE schedule_id = :scheduleId
+                ORDER BY id ASC
+                LIMIT 1
+                FOR UPDATE
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("scheduleId", scheduleId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
     public boolean existsByScheduleIdAndMemberId(long scheduleId, long memberId) {
         String sql = """
                 SELECT EXISTS (SELECT 1 FROM waiting WHERE member_id = :memberId AND schedule_id = :scheduleId)

@@ -13,6 +13,8 @@ public interface WaitingRepository {
 
     Optional<Waiting> findFirstByScheduleId(long scheduleId);
 
+    Optional<Waiting> findFirstByScheduleIdForUpdate(long scheduleId);
+
     boolean existsByScheduleIdAndMemberId(long scheduleId, long memberId);
 
     boolean existsByScheduleId(long scheduleId);
