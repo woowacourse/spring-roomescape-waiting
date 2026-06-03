@@ -39,7 +39,7 @@ public class ReservationService {
 
         reservation.validateNotPast();
 
-        validateNotDuplicated(reservation, findTheme, findReservationTime);
+        validateNotDuplicated(reservation);
 
         try {
             final Reservation savedReservation = reservationRepository.save(reservation);
@@ -90,7 +90,7 @@ public class ReservationService {
         final Reservation modifiedReservation = originalReservation.modify(command.date(), findReservationTime, findTheme);
 
         modifiedReservation.validateNotPast();
-        validateNotDuplicated(modifiedReservation, findTheme, findReservationTime);
+        validateNotDuplicated(modifiedReservation);
 
         reservationRepository.updateDateAndTime(modifiedReservation);
 
@@ -108,21 +108,17 @@ public class ReservationService {
         reservation.validateOwner(name);
         reservation.validateNotPast();
 
-        deleteInternal(reservationId);
+        deleteInternal(reservation);
     }
 
     @Transactional
     public void deleteAsAdmin(final Long reservationId) {
-        deleteInternal(reservationId);
+        deleteInternal(findReservationOrThrow(reservationId));
     }
 
-    private void deleteInternal(final Long reservationId) {
-        final Reservation findReservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-
-        reservationRepository.deleteById(findReservation.getId());
-
-        promoteFirstWaitingList(findReservation);
+    private void deleteInternal(final Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
+        promoteFirstWaitingList(reservation);
     }
 
     private void promoteFirstWaitingList(Reservation reservation) {
@@ -138,9 +134,9 @@ public class ReservationService {
         }
     }
 
-    private void validateNotDuplicated(final Reservation reservation, final Theme findTheme, final ReservationTime findReservationTime) {
+    private void validateNotDuplicated(final Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getReservationDate().getDate(), findTheme.getId(), findReservationTime.getId())) {
+                reservation.getReservationDate().getDate(), reservation.getTheme().getId(), reservation.getTime().getId())) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
         }
     }

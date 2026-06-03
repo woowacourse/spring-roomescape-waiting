@@ -22,11 +22,11 @@ public class ThemeService {
 
     private static final int DATA_RANGE = 7;
 
-    public ThemeResult create(final ThemeCreateCommand request) {
+    public ThemeResult create(final ThemeCreateCommand command) {
         final Theme themeWithoutId = Theme.create(
-                request.name(),
-                request.description(),
-                request.thumbnailUrl()
+                command.name(),
+                command.description(),
+                command.thumbnailUrl()
         );
 
         final Theme theme = themeRepository.save(themeWithoutId);

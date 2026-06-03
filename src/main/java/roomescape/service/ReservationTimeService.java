@@ -19,10 +19,10 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeResult create(final ReservationTimeCreateCommand data) {
+    public ReservationTimeResult create(final ReservationTimeCreateCommand command) {
         final ReservationTime reservationTime = ReservationTime.create(
-                data.startAt(),
-                data.endAt()
+                command.startAt(),
+                command.endAt()
         );
 
         final ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
