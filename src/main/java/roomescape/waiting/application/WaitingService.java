@@ -40,8 +40,9 @@ public class WaitingService {
         return WaitingResponse.of(waiting, waitingOrder);
     }
 
+    @Transactional
     public void deleteByIdForUser(long waitingId, long memberId) {
-        Waiting waiting = waitingRepository.findById(waitingId)
+        Waiting waiting = waitingRepository.findByIdForUpdate(waitingId)
                 .orElse(null);
         if (waiting == null) {
             return;
@@ -74,14 +75,14 @@ public class WaitingService {
     }
 
     private void deleteReservationAndPromoteWaiting(long reservationId, long memberId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findByIdForUpdate(reservationId)
                 .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
 
         if (!reservation.isSameMemberId(memberId)) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
         }
 
-        Waiting firstWaiting = waitingRepository.findFirstByScheduleId(reservation.getScheduleId())
+        Waiting firstWaiting = waitingRepository.findFirstByScheduleIdForUpdate(reservation.getScheduleId())
                 .orElse(null);
         if (firstWaiting != null) {
             waitingRepository.deleteById(firstWaiting.getId());

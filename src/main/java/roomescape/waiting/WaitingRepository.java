@@ -11,6 +11,8 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(long waitingId);
 
+    Optional<Waiting> findByIdForUpdate(long waitingId);
+
     Optional<Waiting> findFirstByScheduleId(long scheduleId);
 
     Optional<Waiting> findFirstByScheduleIdForUpdate(long scheduleId);

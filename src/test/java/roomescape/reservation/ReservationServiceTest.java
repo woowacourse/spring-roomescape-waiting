@@ -157,28 +157,25 @@ class ReservationServiceTest {
     @DisplayName("유저는 본인 예약 수정에 성공한다.")
     void updateForUser_테스트_1() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+        when(waitingRepository.findFirstByScheduleIdForUpdate(3L)).thenReturn(Optional.empty());
 
         ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, 1L);
 
         assertThat(response.id()).isEqualTo(reservationId);
+        assertThat(response.memberId()).isEqualTo(1L);
+        assertThat(response.scheduleId()).isEqualTo(99L);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);
     }
 
@@ -186,28 +183,25 @@ class ReservationServiceTest {
     @DisplayName("매니저는 예약 수정에 성공한다.")
     void updateForManager_테스트_1() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        Reservation updated = new Reservation(reservationId, 1L, 99L);
 
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(3L);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(3L)).thenReturn(Optional.empty());
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+        when(waitingRepository.findFirstByScheduleIdForUpdate(3L)).thenReturn(Optional.empty());
 
         ReservationSaveResponse response = reservationService.updateForManager(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
+        assertThat(response.memberId()).isEqualTo(1L);
+        assertThat(response.scheduleId()).isEqualTo(99L);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);
     }
 
@@ -215,15 +209,14 @@ class ReservationServiceTest {
     @DisplayName("유저는 타인 예약 수정을 할 수 없다.")
     void updateForUser_테스트_2() {
         long reservationId = 4L;
+        Reservation reservation = reservation(reservationId, 1L, 3L);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, 2L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
-        );
 
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, 1L))
                 .isInstanceOf(EscapeRoomException.class);
+        verify(reservationRepository).findDetailById(reservationId);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
     }
 
@@ -237,7 +230,7 @@ class ReservationServiceTest {
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
         doThrow(new EscapeRoomException(ErrorCode.PAST_SCHEDULE))
                 .when(scheduleService)
@@ -255,27 +248,23 @@ class ReservationServiceTest {
     @DisplayName("유저 예약 수정으로 기존 슬롯이 비면 선두 대기자가 자동 승격된다.")
     void updateForUser_테스트_4() {
         long reservationId = 4L;
+        long oldScheduleId = 30L;
+        long newScheduleId = 99L;
+
+        Reservation reservation = reservation(reservationId, 1L, oldScheduleId);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        long oldScheduleId = 30L;
-        long newScheduleId = 99L;
         Waiting waiting = new Waiting(200L, 5L, oldScheduleId);
-        Reservation updated = new Reservation(reservationId, 1L, newScheduleId);
 
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(oldScheduleId);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
         when(reservationRepository.existsByScheduleIdAndIdNot(newScheduleId, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, newScheduleId)).thenReturn(1);
-        when(waitingRepository.findFirstByScheduleId(oldScheduleId)).thenReturn(Optional.of(waiting));
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+        when(waitingRepository.findFirstByScheduleIdForUpdate(oldScheduleId)).thenReturn(Optional.of(waiting));
 
         reservationService.updateForUser(request, reservationId, 1L);
 
@@ -291,19 +280,17 @@ class ReservationServiceTest {
     @DisplayName("예약 수정 시 기존 스케줄과 새 스케줄이 같으면 예외가 발생한다")
     void updateForUser_테스트_5() {
         long reservationId = 1L;
+        long oldScheduleId = 30L;
+        long newScheduleId = 30L;
+
+        Reservation reservation = reservation(reservationId, 1L, oldScheduleId);
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
                 reservationId, 1L, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
-        long oldScheduleId = 30L;
-        long newScheduleId = 30L;
 
+        when(reservationRepository.findByIdForUpdate(reservationId)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(
-                oldReservation.date(),
-                oldReservation.getTimeId(),
-                oldReservation.getThemeId()
-        )).thenReturn(oldScheduleId);
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(newScheduleId);
 

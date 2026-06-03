@@ -77,6 +77,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findByIdForUpdate(long waitingId) {
+        String sql = """
+                SELECT id, member_id, schedule_id
+                FROM waiting
+                WHERE id = :waitingId
+                FOR UPDATE
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper)
+                .stream()
+                .findFirst();
+    }
+
+    @Override
     public Optional<Waiting> findFirstByScheduleId(long scheduleId) {
         String sql = """
                 SELECT id, member_id, schedule_id
