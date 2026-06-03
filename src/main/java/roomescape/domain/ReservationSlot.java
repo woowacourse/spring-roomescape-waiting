@@ -23,6 +23,7 @@ public class ReservationSlot {
     }
 
     public void validateNotPast(LocalDateTime now) {
+        Objects.requireNonNull(now, "현재 시간은 필수값 입니다.");
         if (time.isPast(date, now)) {
             throw new RoomEscapeException(ReservationSlotErrorCode.PAST_DATETIME);
         }
@@ -46,5 +47,22 @@ public class ReservationSlot {
 
     public long getThemeId() {
         return theme.getId();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        ReservationSlot that = (ReservationSlot) object;
+        return Objects.equals(date, that.date)
+                && Objects.equals(time, that.time)
+                && Objects.equals(theme, that.theme);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, time, theme);
     }
 }
