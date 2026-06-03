@@ -15,7 +15,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 
 @Import(ReservationSlotService.class)
-class ReservationSlotServiceTest extends ServiceSupport {
+class ReservationSlotServiceIntegrationTest extends ServiceSupport {
 
     @Autowired
     private ReservationSlotService reservationSlotService;
