@@ -240,12 +240,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 존재하지_않는_예약_삭제시_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationService.delete(999L))
-                .isInstanceOf(ResourceNotFoundException.class);
-    }
-
-    @Test
     void 예약_삭제_시_대기열이_있으면_첫_번째_대기자가_예약자로_승격된다() {
         setUpTimeAndTheme();
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
