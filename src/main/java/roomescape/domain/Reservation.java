@@ -25,7 +25,7 @@ public class Reservation {
     public static Reservation create(String name, LocalDate date,
                                      ReservationTime time, Theme theme,
                                      ReservationPolicy policy) {
-        policy.validateCreatable(date, time.getStartAt());
+        policy.validateCreatable(ReservationDateTime.of(date, time.getStartAt()));
         return new Reservation(null, name, date, time, theme);
     }
 
@@ -36,6 +36,10 @@ public class Reservation {
 
     public static Reservation promote(Waiting w) {
         return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme());
+    }
+
+    public ReservationDateTime scheduledAt() {
+        return ReservationDateTime.of(date, time.getStartAt());
     }
 
     private static void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
