@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,7 @@ public class ReservationService {
         if (name != null) {
             reservation.validateOwner(name);
         }
-        reservation.validateExpiry();
+        reservation.validateExpiry(LocalDateTime.now());
 
         reservationTimeService.getByIdForUpdate(reservation.getTimeId());
 
@@ -111,7 +112,7 @@ public class ReservationService {
         ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
-        Reservation newReservation = Reservation.of(command.name(), command.date(), time, theme);
+        Reservation newReservation = Reservation.construct(command.name(), command.date(), time, theme, LocalDateTime.now());
         validateNoDoubleBooking(command.date(), time, command.name());
 
         return newReservation;
@@ -139,7 +140,7 @@ public class ReservationService {
     private Reservation buildUpdatedReservation(ReservationUpdateCommand command, Long id, String name) {
         Reservation reservation = getById(id);
         ReservationTime newTime = getReservationTime(command.timeId());
-        Reservation updated = reservation.update(command.date(), newTime, name);
+        Reservation updated = reservation.update(command.date(), newTime, name, LocalDateTime.now());
         validateNoDoubleBookingForUpdate(updated.getDate(), updated.getTime(), name, id);
         return updated;
     }
@@ -177,11 +178,12 @@ public class ReservationService {
         reservationWaitingRepository.delete(waiting);
 
 
-        Reservation newReservation = Reservation.of(
+        Reservation newReservation = Reservation.construct(
                 waiting.getName(),
                 waiting.getDate(),
                 waiting.getTime(),
-                waiting.getTheme()
+                waiting.getTheme(),
+                LocalDateTime.now()
         );
         reservationRepository.save(newReservation);
     }

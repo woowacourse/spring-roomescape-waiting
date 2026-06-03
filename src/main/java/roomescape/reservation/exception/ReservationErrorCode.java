@@ -1,6 +1,8 @@
 package roomescape.reservation.exception;
 
-public enum ReservationErrorCode {
+import roomescape.global.exception.ErrorCode;
+
+public enum ReservationErrorCode implements ErrorCode {
     RESERVATION_NOT_FOUND("요청하신 예약을 찾을 수 없습니다. 예약 번호를 다시 확인해 주세요."),
     DUPLICATE_RESERVATION("이미 예약된 시간대입니다. 다른 날짜나 시간을 선택해 주세요."),
     INVALID_DATE("과거 날짜로는 예약할 수 없습니다. 오늘 이후의 유효한 날짜를 선택해 주세요."),

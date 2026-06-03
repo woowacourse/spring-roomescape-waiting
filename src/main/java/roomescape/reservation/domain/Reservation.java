@@ -14,21 +14,25 @@ public class Reservation {
     private final String name;
     private final ReservationSlot slot;
 
-    public Reservation(Long id, String name, ReservationSlot slot) {
+    private Reservation(Long id, String name, ReservationSlot slot) {
         this.id = id;
         this.name = name;
         this.slot = slot;
     }
 
-    public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation construct(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
         Reservation reservation = new Reservation(null, name, new ReservationSlot(date, time, theme));
-        reservation.validateExpiry();
+        reservation.validateExpiry(requestTime);
         return reservation;
     }
 
-    public Reservation update(LocalDate newDate, ReservationTime newTime, String userName) {
+    public static Reservation reconstruct(Long id, String name, ReservationSlot slot) {
+        return new Reservation(id, name, slot);
+    }
+
+    public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
         validateOwner(userName);
-        validateExpiry();
+        validateExpiry(requestTime);
 
         LocalDate targetDate = getNewDateValue(newDate);
         ReservationTime targetTime = getNewReservationTimeValue(newTime);
@@ -38,7 +42,7 @@ public class Reservation {
                 this.name,
                 new ReservationSlot(targetDate, targetTime, this.slot.theme())
         );
-        updated.validateExpiry();
+        updated.validateExpiry(requestTime);
 
         return updated;
     }
@@ -59,20 +63,19 @@ public class Reservation {
 
     public void validateOwner(String name) {
         if (!this.name.equals(name)) {
-            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
+            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL);
         }
     }
 
-    public void validateExpiry() {
-        LocalDate today = LocalDate.now();
-        if (this.slot.date().isBefore(today)) {
-            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE.getMessage());
+    public void validateExpiry(LocalDateTime requestTime) {
+        LocalDate requestDate = requestTime.toLocalDate();
+        if (this.slot.date().isBefore(requestDate)) {
+            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE);
         }
-        LocalDateTime current = LocalDateTime.now();
 
         LocalDateTime targetTime = LocalDateTime.of(getDate(), getTime().getStartAt());
-        if (current.isAfter(targetTime)) {
-            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME.getMessage());
+        if (requestTime.isAfter(targetTime)) {
+            throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME);
         }
     }
 

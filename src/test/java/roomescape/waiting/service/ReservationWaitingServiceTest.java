@@ -77,7 +77,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -100,7 +100,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -124,7 +124,7 @@ class ReservationWaitingServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(pastDate, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(pastDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", pastDate, 1L, 1L
@@ -149,7 +149,7 @@ class ReservationWaitingServiceTest {
         LocalTime pastTime = LocalTime.now().minusHours(1);
         ReservationTime time = new ReservationTime(1L, pastTime);
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(today, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(today, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", today, 1L, 1L);
 
@@ -171,7 +171,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -281,7 +281,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = new Reservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", futureDate, 1L, 1L);
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));

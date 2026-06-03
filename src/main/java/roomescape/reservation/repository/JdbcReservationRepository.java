@@ -42,7 +42,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 theme
         );
 
-        return new Reservation(
+        return Reservation.reconstruct(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 slot
@@ -75,7 +75,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         long id = keyHolder.getKey().longValue();
 
-        return new Reservation(
+        return Reservation.reconstruct(
                 id,
                 reservation.getName(),
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())

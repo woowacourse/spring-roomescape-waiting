@@ -45,7 +45,7 @@ class ReservationAdminControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme));
+        Reservation reservation = Reservation.reconstruct(1L, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme));
 
         given(reservationService.findAll()).willReturn(List.of(ReservationResult.from(reservation)));
 

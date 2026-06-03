@@ -7,6 +7,7 @@ import java.sql.Time;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -48,7 +49,7 @@ class JdbcReservationRepositoryTest {
 
         // when
         Reservation saved = reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
@@ -68,7 +69,7 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
@@ -77,7 +78,7 @@ class JdbcReservationRepositoryTest {
 
         // when & then
         assertThatThrownBy(() -> reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
@@ -143,14 +144,14 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         Reservation saved = reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
                 )
         );
 
-        Reservation updated = saved.update(LocalDate.now().plusDays(5), null, "브라운");
+        Reservation updated = saved.update(LocalDate.now().plusDays(5), null, "브라운", LocalDateTime.now());
 
         // when
         reservationRepository.update(updated);
@@ -170,7 +171,7 @@ class JdbcReservationRepositoryTest {
         // when & then
         assertThatThrownBy(
                 () -> reservationRepository.update(
-                        new Reservation(
+                        Reservation.reconstruct(
                                 999L,
                                 "브라운",
                                 new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
@@ -188,7 +189,7 @@ class JdbcReservationRepositoryTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.now().plusDays(5), time, theme)
@@ -196,14 +197,14 @@ class JdbcReservationRepositoryTest {
         );
 
         Reservation saved = reservationRepository.save(
-                new Reservation(
+                Reservation.reconstruct(
                         null,
                         "브라운",
                         new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
                 )
         );
 
-        Reservation updated = saved.update(LocalDate.now().plusDays(5), time, "브라운");
+        Reservation updated = saved.update(LocalDate.now().plusDays(5), time, "브라운", LocalDateTime.now());
 
         // when & then
         assertThatThrownBy(
@@ -383,7 +384,7 @@ class JdbcReservationRepositoryTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(
-                new Reservation(null, name, new ReservationSlot(date, time, theme))
+                Reservation.reconstruct(null, name, new ReservationSlot(date, time, theme))
         );
     }
 

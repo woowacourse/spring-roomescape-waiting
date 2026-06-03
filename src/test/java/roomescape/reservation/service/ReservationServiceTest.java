@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -176,7 +177,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "포비",
+        Reservation reservation = Reservation.reconstruct(1L, "포비",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(2), 1L);
 
@@ -194,7 +195,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(1), 1L);
 
@@ -212,7 +213,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().minusDays(1), 1L);
 
@@ -231,7 +232,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(1), 999L);
 
@@ -250,7 +251,7 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate targetDate = LocalDate.now().plusDays(2);
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
@@ -271,7 +272,7 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate targetDate = LocalDate.now().plusDays(2);
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
@@ -304,7 +305,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "포비",
+        Reservation reservation = Reservation.reconstruct(1L, "포비",
                 new ReservationSlot(LocalDate.now().plusDays(1), time, theme));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -321,7 +322,7 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운",
+        Reservation reservation = Reservation.reconstruct(1L, "브라운",
                 new ReservationSlot(LocalDate.now().minusDays(1), time, theme));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -339,7 +340,7 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation targetReservation = new Reservation(1L, "브라운", new ReservationSlot(date, time, theme));
+        Reservation targetReservation = Reservation.reconstruct(1L, "브라운", new ReservationSlot(date, time, theme));
 
         ReservationWaiting w1 = new ReservationWaiting(10L, "중복대기자", new ReservationSlot(date, time, theme));
         ReservationWaiting w2 = new ReservationWaiting(20L, "정상대기자", new ReservationSlot(date, time, theme));
@@ -359,7 +360,7 @@ class ReservationServiceTest {
         then(reservationRepository).should().delete(targetReservation);
         then(reservationWaitingRepository).should().findAllByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L);
         then(reservationWaitingRepository).should().delete(w2);
-        then(reservationRepository).should().save(Reservation.of("정상대기자", date, time, theme));
+        then(reservationRepository).should().save(Reservation.reconstruct(null, "정상대기자", new ReservationSlot(date, time, theme)));
     }
 
 
