@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ErrorResponse handleRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException exception) {
-        log.warn("[Invalid API Access]", exception);
+        log.info("[Invalid API Access Error]", exception);
 
         return new ErrorResponse(HttpStatus.METHOD_NOT_ALLOWED.value(), HttpStatus.METHOD_NOT_ALLOWED.name(),
                 ErrorCode.INVALID_METHOD_REQUEST.getMessage());
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ErrorResponse handleNoResourceFoundException(
             NoResourceFoundException exception) {
-        log.warn("[Invalid API Access]", exception);
+        log.info("[Invalid API Access Error]", exception);
 
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND.name(),
                 ErrorCode.INVALID_URL_REQUEST.getMessage());
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(CustomInvalidRequestException.class)
     public ErrorResponse handleInvalidRequestException(CustomInvalidRequestException exception) {
-        log.warn("[Invalid Request Error]", exception);
+        log.info("[Invalid Request Error]", exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
                 exception.getErrorCode().getMessage());
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-        log.warn("[Invalid Request Error]", exception);
+        log.info("[Invalid Request Error]", exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
                 ErrorCode.INVALID_JSON_REQUEST.getMessage());
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ErrorResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception) {
-        log.warn("[Invalid Request Error]", exception);
+        log.info("[Invalid Request Error]", exception);
 
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.name(),
                 ErrorCode.TYPE_MISMATCH_REQUEST.getMessage());
