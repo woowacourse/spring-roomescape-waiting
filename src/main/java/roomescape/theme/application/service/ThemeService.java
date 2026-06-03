@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
-import roomescape.theme.application.dto.PopularThemeQueryResult;
 import roomescape.theme.application.dto.ThemeCreateCommand;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.exception.ThemeErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.presentation.dto.PopularThemeResponse;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @RequiredArgsConstructor
 @Transactional
@@ -21,30 +21,30 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
 
     @Transactional(readOnly = true)
-    public ThemeQueryResult findById(Long id) {
-        return ThemeQueryResult.from(themeRepository.findById(id)
+    public ThemeResponse findById(Long id) {
+        return ThemeResponse.from(themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND)));
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeQueryResult> findAll() {
+    public List<ThemeResponse> findAll() {
         return themeRepository.findAll().stream()
-                .map(ThemeQueryResult::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<PopularThemeQueryResult> findPopularThemes(LocalDate today) {
+    public List<PopularThemeResponse> findPopularThemes(LocalDate today) {
         return themeRepository.findTop10PopularThemesBetween(today.minusWeeks(1), today.minusDays(1))
                 .stream()
-                .map(PopularThemeQueryResult::from)
+                .map(PopularThemeResponse::from)
                 .toList();
     }
 
-    public ThemeQueryResult save(ThemeCreateCommand request) {
+    public ThemeResponse save(ThemeCreateCommand request) {
         Theme theme = request.toEntity();
         validateDuplicateTheme(theme);
-        return ThemeQueryResult.from(themeRepository.save(theme));
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
     public int delete(long id) {

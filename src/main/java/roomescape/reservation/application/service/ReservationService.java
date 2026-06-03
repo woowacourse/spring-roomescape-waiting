@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
@@ -18,11 +17,10 @@ import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
-import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.exception.ThemeErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -38,54 +36,51 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
 
     @Transactional(readOnly = true)
-    public List<ReservationQueryResult> findAll() {
-        List<ReservationDetail> result = reservationRepository.findAll();
-        return result.stream()
-                .map(ReservationQueryResult::from)
+    public List<ReservationResponse> findAll() {
+        return reservationRepository.findAll().stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationQueryResult> findAllByName(String name) {
+    public List<ReservationResponse> findAllByName(String name) {
         return reservationRepository.findByName(name).stream()
-                .map(this::toQueryResult)
+                .map(this::toResponse)
                 .toList();
     }
 
-    public ReservationQueryResult save(ReservationCreateCommand request, LocalDateTime currentDateTime) {
-        ReservationTimeQueryResult timeQueryResult = findTimeById(request.timeId());
-        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
+    public ReservationResponse save(ReservationCreateCommand request, LocalDateTime currentDateTime) {
+        ReservationTime time = findTimeById(request.timeId());
+        validateReservationDateTime(request.date(), time.getStartAt(), currentDateTime);
 
-        ThemeQueryResult themeQueryResult = findThemeById(request.themeId());
-
-        Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
+        Theme theme = findThemeById(request.themeId());
+        Reservation reservation = request.toEntity(theme.getId(), time.getId());
 
         if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
-            Waiting savedWaitingResult = waitingRepository.save(Waiting.of(
+            Waiting savedWaiting = waitingRepository.save(Waiting.of(
                     null,
                     reservation.getName(),
                     reservation.getDate(),
                     reservation.getThemeId(),
                     reservation.getTimeId()));
-
-            return ReservationQueryResult.from(savedWaitingResult, themeQueryResult, timeQueryResult);
+            return ReservationResponse.from(savedWaiting, theme, time);
         }
-        return ReservationQueryResult.from(reservationRepository.save(reservation), themeQueryResult, timeQueryResult);
+        return ReservationResponse.from(reservationRepository.save(reservation), theme, time);
     }
 
-    public ReservationQueryResult update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
+    public ReservationResponse update(ReservationUpdateCommand request, LocalDateTime currentDateTime) {
         ReservationDetail reservationDetail = getReservationDetail(request.id());
         Reservation reservation = toReservation(reservationDetail);
         validateOwner(request.name(), reservation);
         validateReservationNotPast(reservationDetail, currentDateTime);
 
-        ReservationTimeQueryResult timeQueryResult = findTimeById(request.timeId());
-        validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
+        ReservationTime time = findTimeById(request.timeId());
+        validateReservationDateTime(request.date(), time.getStartAt(), currentDateTime);
         validateDuplicateReservation(request, reservation);
 
         Reservation updatedReservation = reservation.update(request.date(), request.timeId());
         Reservation savedReservation = reservationRepository.update(updatedReservation);
-        return toQueryResult(savedReservation);
+        return toResponse(savedReservation);
     }
 
     public int delete(Long id, String name, LocalDateTime currentDateTime) {
@@ -107,16 +102,14 @@ public class ReservationService {
         return reservationRepository.delete(id);
     }
 
-    private ThemeQueryResult findThemeById(Long id) {
-        Theme theme = themeRepository.findById(id)
+    private Theme findThemeById(Long id) {
+        return themeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
-        return ThemeQueryResult.from(theme);
     }
 
-    private ReservationTimeQueryResult findTimeById(Long id) {
-        ReservationTime time = timeRepository.findById(id)
+    private ReservationTime findTimeById(Long id) {
+        return timeRepository.findById(id)
                 .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.TIME_NOT_FOUND));
-        return ReservationTimeQueryResult.from(time);
     }
 
     private ReservationDetail getReservationDetail(Long id) {
@@ -158,10 +151,10 @@ public class ReservationService {
         }
     }
 
-    private ReservationQueryResult toQueryResult(Reservation reservation) {
-        ThemeQueryResult themeQueryResult = findThemeById(reservation.getThemeId());
-        ReservationTimeQueryResult timeQueryResult = findTimeById(reservation.getTimeId());
-        return ReservationQueryResult.from(reservation, themeQueryResult, timeQueryResult);
+    private ReservationResponse toResponse(Reservation reservation) {
+        Theme theme = findThemeById(reservation.getThemeId());
+        ReservationTime time = findTimeById(reservation.getTimeId());
+        return ReservationResponse.from(reservation, theme, time);
     }
 
     private Reservation toReservation(ReservationDetail reservationDetail) {

@@ -14,9 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.service.ThemeService;
 import roomescape.theme.presentation.controller.AdminThemeController;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @WebMvcTest(AdminThemeController.class)
 class AdminThemeControllerTest {
@@ -30,7 +30,7 @@ class AdminThemeControllerTest {
     @Test
     void create_theme() throws Exception {
         given(themeService.save(any()))
-                .willReturn(ThemeQueryResult.from(1L, "theme", "description", "img"));
+                .willReturn(new ThemeResponse(1L, "theme", "description", "img"));
 
         mockMvc.perform(post("/admin/themes")
                         .contentType(MediaType.APPLICATION_JSON)

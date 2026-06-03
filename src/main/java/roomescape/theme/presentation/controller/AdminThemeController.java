@@ -26,7 +26,7 @@ public class AdminThemeController {
             @Valid @RequestBody ThemeCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ThemeResponse.from(themeService.save(request.toCommand())));
+                .body(themeService.save(request.toCommand()));
     }
 
     @DeleteMapping("/{id}")

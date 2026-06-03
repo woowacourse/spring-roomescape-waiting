@@ -2,13 +2,11 @@ package roomescape.reservationtime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,12 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.RoomEscapeException;
-import roomescape.reservationtime.application.dto.AvailableReservationTimeQueryResult;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationtime.application.service.ReservationTimeService;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.AvailableReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.presentation.dto.AvailableReservationTimeResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {
@@ -40,11 +37,11 @@ class ReservationTimeServiceTest {
                 new AvailableReservationTime(2L, LocalTime.of(10, 0), true)
         ));
 
-        List<AvailableReservationTimeQueryResult> result = timeService.findAvailableTimes(1L, LocalDate.of(2026, 5, 6));
+        List<AvailableReservationTimeResponse> result = timeService.findAvailableTimes(1L, LocalDate.of(2026, 5, 6));
 
         assertThat(result).containsExactly(
-                new AvailableReservationTimeQueryResult(1L, LocalTime.of(9, 0), true),
-                new AvailableReservationTimeQueryResult(2L, LocalTime.of(10, 0), true)
+                new AvailableReservationTimeResponse(1L, LocalTime.of(9, 0), true),
+                new AvailableReservationTimeResponse(2L, LocalTime.of(10, 0), true)
         );
     }
 
@@ -56,11 +53,11 @@ class ReservationTimeServiceTest {
                 new AvailableReservationTime(2L, LocalTime.of(10, 0), true)
         ));
 
-        List<AvailableReservationTimeQueryResult> result = timeService.findAvailableTimes(1L, LocalDate.of(2026, 5, 6));
+        List<AvailableReservationTimeResponse> result = timeService.findAvailableTimes(1L, LocalDate.of(2026, 5, 6));
 
         assertThat(result).containsExactly(
-                new AvailableReservationTimeQueryResult(1L, LocalTime.of(9, 0), false),
-                new AvailableReservationTimeQueryResult(2L, LocalTime.of(10, 0), true)
+                new AvailableReservationTimeResponse(1L, LocalTime.of(9, 0), false),
+                new AvailableReservationTimeResponse(2L, LocalTime.of(10, 0), true)
         );
     }
 

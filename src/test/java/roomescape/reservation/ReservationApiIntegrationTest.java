@@ -61,10 +61,10 @@ class ReservationApiIntegrationTest {
                 .body("id", greaterThan(0))
                 .body("name", equalTo("스타크"))
                 .body("date", equalTo("2028-05-06"))
-                .body("time.id", equalTo(timeId.intValue()))
-                .body("time.startAt", equalTo("09:00"))
-                .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("theme name"));
+                .body("timeId", equalTo(timeId.intValue()))
+                .body("startAt", equalTo("09:00"))
+                .body("themeId", equalTo(themeId.intValue()))
+                .body("themeName", equalTo("theme name"));
     }
 
     @DisplayName("이름으로 본인 예약 목록 조회 API를 테스트합니다.")
@@ -108,7 +108,7 @@ class ReservationApiIntegrationTest {
                 .statusCode(200)
                 .body("id", equalTo(reservationId.intValue()))
                 .body("date", equalTo("2028-05-07"))
-                .body("time.id", equalTo(secondTimeId.intValue()));
+                .body("timeId", equalTo(secondTimeId.intValue()));
     }
 
     @DisplayName("본인 예약 취소 API를 테스트합니다.")

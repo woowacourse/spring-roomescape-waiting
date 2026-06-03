@@ -19,17 +19,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
-import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -75,7 +73,7 @@ class ReservationServiceTest {
         when(reservationRepository.existsByDateAndThemeAndTime(any(), any(), any())).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
 
-        ReservationQueryResult result = reservationService.save(
+        ReservationResponse result = reservationService.save(
                 new ReservationCreateCommand("스타크", LocalDate.of(2026, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0));
 
@@ -83,8 +81,10 @@ class ReservationServiceTest {
             softly.assertThat(result.id()).isEqualTo(1L);
             softly.assertThat(result.name()).isEqualTo("스타크");
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-            softly.assertThat(result.time()).isEqualTo(new ReservationTimeQueryResult(1L, LocalTime.of(10, 0)));
-            softly.assertThat(result.theme()).isEqualTo(new ThemeQueryResult(1L, "theme name", "theme description", "theme img url"));
+            softly.assertThat(result.timeId()).isEqualTo(1L);
+            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(10, 0));
+            softly.assertThat(result.themeId()).isEqualTo(1L);
+            softly.assertThat(result.themeName()).isEqualTo("theme name");
         });
     }
 
@@ -132,13 +132,14 @@ class ReservationServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(timeRepository.findById(2L)).thenReturn(Optional.of(time2));
 
-        ReservationQueryResult result = reservationService.update(
+        ReservationResponse result = reservationService.update(
                 new ReservationUpdateCommand(1L, "스타크", LocalDate.of(2026, 5, 7), 2L),
                 LocalDateTime.of(2000, 1, 1, 0, 0));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 7));
-            softly.assertThat(result.time()).isEqualTo(new ReservationTimeQueryResult(2L, LocalTime.of(11, 0)));
+            softly.assertThat(result.timeId()).isEqualTo(2L);
+            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(11, 0));
         });
     }
 
@@ -159,25 +160,23 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 날짜/테마/시간에 예약 요청 시 대기로 저장되어야 한다.")
     @Test
     void save_as_waiting_when_reservation_already_exists() {
-        Reservation waiting = Reservation.builder()
-                .id(1L).name("카야").date(LocalDate.of(2026, 5, 6)).themeId(1L).timeId(1L)
-                .build();
-
         when(timeRepository.findById(1L)).thenReturn(Optional.of(time1));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateAndThemeAndTime(any(), any(), any())).thenReturn(true);
         when(waitingRepository.save(any())).thenReturn(
                 roomescape.reservation.domain.Waiting.of(1L, "카야", LocalDate.of(2026, 5, 6), 1L, 1L));
 
-        ReservationQueryResult result = reservationService.save(
+        ReservationResponse result = reservationService.save(
                 new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L),
                 LocalDateTime.of(2000, 1, 1, 0, 0));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.name()).isEqualTo("카야");
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-            softly.assertThat(result.time()).isEqualTo(new ReservationTimeQueryResult(1L, LocalTime.of(10, 0)));
-            softly.assertThat(result.theme()).isEqualTo(new ThemeQueryResult(1L, "theme name", "theme description", "theme img url"));
+            softly.assertThat(result.timeId()).isEqualTo(1L);
+            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(10, 0));
+            softly.assertThat(result.themeId()).isEqualTo(1L);
+            softly.assertThat(result.themeName()).isEqualTo("theme name");
         });
     }
 

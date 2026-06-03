@@ -15,11 +15,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import roomescape.reservation.application.dto.WaitingQueryResult;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.presentation.controller.WaitingController;
-import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
-import roomescape.theme.application.dto.ThemeQueryResult;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @WebMvcTest(WaitingController.class)
 class WaitingControllerTest {
@@ -35,37 +33,15 @@ class WaitingControllerTest {
     void find_waitings_by_name() throws Exception {
         given(waitingService.findAllByName("카야"))
                 .willReturn(List.of(
-                        new WaitingQueryResult(
-                                1L,
-                                "카야",
-                                LocalDate.of(2026, 5, 27),
-                                new ThemeQueryResult(
-                                        1L,
-                                        "공포테마",
-                                        "무서운 테마",
-                                        "thumbnail1.jpg"
-                                ),
-                                new ReservationTimeQueryResult(
-                                        1L,
-                                        LocalTime.of(10, 0)
-                                ),
-                                1L
+                        new WaitingResponse(
+                                1L, "카야", LocalDate.of(2026, 5, 27),
+                                1L, "공포테마", "무서운 테마", "thumbnail1.jpg",
+                                1L, LocalTime.of(10, 0), 1L
                         ),
-                        new WaitingQueryResult(
-                                2L,
-                                "카야",
-                                LocalDate.of(2026, 5, 28),
-                                new ThemeQueryResult(
-                                        2L,
-                                        "추리테마",
-                                        "재미있는 추리 테마",
-                                        "thumbnail2.jpg"
-                                ),
-                                new ReservationTimeQueryResult(
-                                        2L,
-                                        LocalTime.of(14, 0)
-                                ),
-                                2L
+                        new WaitingResponse(
+                                2L, "카야", LocalDate.of(2026, 5, 28),
+                                2L, "추리테마", "재미있는 추리 테마", "thumbnail2.jpg",
+                                2L, LocalTime.of(14, 0), 2L
                         )
                 ));
 

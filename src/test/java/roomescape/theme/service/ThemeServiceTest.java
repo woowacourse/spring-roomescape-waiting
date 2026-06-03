@@ -18,13 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.RoomEscapeException;
-import roomescape.theme.application.dto.PopularThemeQueryResult;
 import roomescape.theme.application.dto.ThemeCreateCommand;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.service.ThemeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.PopularTheme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.presentation.dto.PopularThemeResponse;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -45,7 +45,7 @@ class ThemeServiceTest {
         when(themeRepository.existsByNameAndDescription(any())).thenReturn(false);
         when(themeRepository.save(any())).thenReturn(theme);
 
-        ThemeQueryResult result = themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
+        ThemeResponse result = themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.id()).isEqualTo(1L);
@@ -78,7 +78,7 @@ class ThemeServiceTest {
     void find_theme() {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
-        ThemeQueryResult result = themeService.findById(1L);
+        ThemeResponse result = themeService.findById(1L);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.id()).isEqualTo(1L);
@@ -108,14 +108,14 @@ class ThemeServiceTest {
         );
         when(themeRepository.findAll()).thenReturn(themes);
 
-        List<ThemeQueryResult> result = themeService.findAll();
+        List<ThemeResponse> result = themeService.findAll();
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result).hasSize(3);
             softly.assertThat(result).containsExactly(
-                    new ThemeQueryResult(1L, "theme name1", "theme description1", "theme img url1"),
-                    new ThemeQueryResult(2L, "theme name2", "theme description2", "theme img url2"),
-                    new ThemeQueryResult(3L, "theme name3", "theme description3", "theme img url3")
+                    new ThemeResponse(1L, "theme name1", "theme description1", "theme img url1"),
+                    new ThemeResponse(2L, "theme name2", "theme description2", "theme img url2"),
+                    new ThemeResponse(3L, "theme name3", "theme description3", "theme img url3")
             );
         });
     }
@@ -130,7 +130,7 @@ class ThemeServiceTest {
                 new PopularTheme(1L, "theme name", "theme description", "theme img url", 10)
         ));
 
-        List<PopularThemeQueryResult> result = themeService.findPopularThemes(LocalDate.of(2026, 5, 6));
+        List<PopularThemeResponse> result = themeService.findPopularThemes(LocalDate.of(2026, 5, 6));
 
         verify(themeRepository).findTop10PopularThemesBetween(fromCaptor.capture(), toCaptor.capture());
 
@@ -138,7 +138,7 @@ class ThemeServiceTest {
             softly.assertThat(fromCaptor.getValue()).isEqualTo(LocalDate.of(2026, 4, 29));
             softly.assertThat(toCaptor.getValue()).isEqualTo(LocalDate.of(2026, 5, 5));
             softly.assertThat(result).containsExactly(
-                    new PopularThemeQueryResult(1L, "theme name", "theme description", "theme img url", 10)
+                    new PopularThemeResponse(1L, "theme name", "theme description", "theme img url", 10)
             );
         });
     }

@@ -16,9 +16,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.reservationtime.application.dto.AvailableReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
 import roomescape.reservationtime.presentation.controller.ReservationTimeController;
+import roomescape.reservationtime.presentation.dto.AvailableReservationTimeResponse;
 
 @WebMvcTest(ReservationTimeController.class)
 class ReservationTimeControllerTest {
@@ -33,8 +33,8 @@ class ReservationTimeControllerTest {
     void find_available_times() throws Exception {
         given(reservationTimeService.findAvailableTimes(eq(1L), eq(LocalDate.of(2028, 5, 4))))
                 .willReturn(List.of(
-                        new AvailableReservationTimeQueryResult(1L, LocalTime.of(9, 0), true),
-                        new AvailableReservationTimeQueryResult(2L, LocalTime.of(10, 0), false)
+                        new AvailableReservationTimeResponse(1L, LocalTime.of(9, 0), true),
+                        new AvailableReservationTimeResponse(2L, LocalTime.of(10, 0), false)
                 ));
 
         mockMvc.perform(get("/times")

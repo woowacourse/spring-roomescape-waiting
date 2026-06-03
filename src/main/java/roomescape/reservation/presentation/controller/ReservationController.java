@@ -31,11 +31,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll(@RequestParam String name) {
-        List<ReservationResponse> responses = reservationService.findAllByName(name).stream()
-                .map(ReservationResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(reservationService.findAllByName(name));
     }
 
     @PostMapping
@@ -45,7 +41,7 @@ public class ReservationController {
         ReservationCreateCommand createCommand = request.toCommand();
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(reservationService.save(createCommand, LocalDateTime.now())));
+                .body(reservationService.save(createCommand, LocalDateTime.now()));
     }
 
     @PatchMapping("/{id}")
@@ -55,9 +51,7 @@ public class ReservationController {
     ) {
         ReservationUpdateCommand command = request.toCommand(id);
 
-        return ResponseEntity.ok(
-                ReservationResponse.from(reservationService.update(command, LocalDateTime.now()))
-        );
+        return ResponseEntity.ok(reservationService.update(command, LocalDateTime.now()));
     }
 
     @DeleteMapping("/{id}")

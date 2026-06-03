@@ -25,11 +25,7 @@ public class AdminReservationTimeController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> findAll() {
-        return ResponseEntity.ok(
-                timeService.findAll().stream()
-                        .map(ReservationTimeResponse::from)
-                        .toList()
-        );
+        return ResponseEntity.ok(timeService.findAll());
     }
 
     @PostMapping
@@ -37,7 +33,7 @@ public class AdminReservationTimeController {
             @Valid @RequestBody ReservationTimeCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationTimeResponse.from(timeService.save(request.toCommand())));
+                .body(timeService.save(request.toCommand()));
     }
 
     @DeleteMapping("/{id}")

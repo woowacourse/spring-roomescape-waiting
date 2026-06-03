@@ -13,10 +13,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.theme.application.dto.PopularThemeQueryResult;
-import roomescape.theme.application.dto.ThemeQueryResult;
 import roomescape.theme.application.service.ThemeService;
 import roomescape.theme.presentation.controller.ThemeController;
+import roomescape.theme.presentation.dto.PopularThemeResponse;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
@@ -30,8 +30,8 @@ class ThemeControllerTest {
     @Test
     void find_all_themes() throws Exception {
         given(themeService.findAll()).willReturn(List.of(
-                ThemeQueryResult.from(1L, "theme 1", "description 1", "img 1"),
-                ThemeQueryResult.from(2L, "theme 2", "description 2", "img 2")
+                new ThemeResponse(1L, "theme 1", "description 1", "img 1"),
+                new ThemeResponse(2L, "theme 2", "description 2", "img 2")
         ));
 
         mockMvc.perform(get("/themes"))
@@ -46,8 +46,8 @@ class ThemeControllerTest {
     @Test
     void find_popular_themes() throws Exception {
         given(themeService.findPopularThemes(org.mockito.ArgumentMatchers.any())).willReturn(List.of(
-                new PopularThemeQueryResult(1L, "theme 1", "description 1", "img 1", 2),
-                new PopularThemeQueryResult(2L, "theme 2", "description 2", "img 2", 1)
+                new PopularThemeResponse(1L, "theme 1", "description 1", "img 1", 2),
+                new PopularThemeResponse(2L, "theme 2", "description 2", "img 2", 1)
         ));
 
         mockMvc.perform(get("/themes/popular-top-10"))

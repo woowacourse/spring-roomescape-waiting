@@ -15,11 +15,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.presentation.controller.ReservationController;
-import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
-import roomescape.theme.application.dto.ThemeQueryResult;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @WebMvcTest(ReservationController.class)
 public class ReservationControllerTest {
@@ -33,12 +31,12 @@ public class ReservationControllerTest {
     @Test
     void save_reservation() throws Exception {
         given(reservationService.save(any(), any()))
-                .willReturn(new ReservationQueryResult(
+                .willReturn(new ReservationResponse(
                         1L,
                         "카야",
                         LocalDate.of(2028, 5, 6),
-                        new ThemeQueryResult(1L, "theme", "desc", "img"),
-                        new ReservationTimeQueryResult(1L, LocalTime.of(9, 0))
+                        1L, "theme", "desc", "img",
+                        1L, LocalTime.of(9, 0)
                 ));
 
         mockMvc.perform(post("/reservations")

@@ -35,10 +35,6 @@ public class WaitingController {
 
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> findAll(@RequestParam String name) {
-        List<WaitingResponse> responses = waitingService.findAllByName(name).stream()
-                .map(WaitingResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(waitingService.findAllByName(name));
     }
 }

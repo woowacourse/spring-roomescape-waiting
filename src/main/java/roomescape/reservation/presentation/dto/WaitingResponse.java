@@ -2,22 +2,26 @@ package roomescape.reservation.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
-import roomescape.reservation.application.dto.WaitingQueryResult;
-import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
-import roomescape.theme.application.dto.ThemeQueryResult;
+import java.time.LocalTime;
+import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
 
 public record WaitingResponse(
-        Long id, String name, @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-        ThemeQueryResult theme, ReservationTimeQueryResult time, Long order
-
+        Long id,
+        String name,
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+        Long themeId,
+        String themeName,
+        String themeDescription,
+        String thumbnailImgUrl,
+        Long timeId,
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
+        Long order
 ) {
-
-    public static WaitingResponse from(WaitingQueryResult waitingQueryResult) {
-        return new WaitingResponse(waitingQueryResult.id(),
-                waitingQueryResult.name(),
-                waitingQueryResult.date(),
-                waitingQueryResult.theme(),
-                waitingQueryResult.time(),
-                waitingQueryResult.order());
+    public static WaitingResponse from(WaitingOrderDetail detail) {
+        return new WaitingResponse(
+                detail.waitingId(), detail.username(), detail.date(),
+                detail.themeId(), detail.themeName(), detail.themeDescription(), detail.thumbnailImgUrl(),
+                detail.timeId(), detail.startAt(), detail.order()
+        );
     }
 }

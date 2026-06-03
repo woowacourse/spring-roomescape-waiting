@@ -20,19 +20,11 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
-        return ResponseEntity.ok(
-                themeService.findAll().stream()
-                        .map(ThemeResponse::from)
-                        .toList()
-        );
+        return ResponseEntity.ok(themeService.findAll());
     }
 
     @GetMapping("/popular-top-10")
     public ResponseEntity<List<PopularThemeResponse>> findPopularThemes() {
-        return ResponseEntity.ok(
-                themeService.findPopularThemes(LocalDate.now()).stream()
-                        .map(PopularThemeResponse::from)
-                        .toList()
-        );
+        return ResponseEntity.ok(themeService.findPopularThemes(LocalDate.now()));
     }
 }
