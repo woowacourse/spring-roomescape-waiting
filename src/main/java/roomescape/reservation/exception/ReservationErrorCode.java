@@ -17,7 +17,9 @@ public enum ReservationErrorCode implements ErrorPolicy {
     CANNOT_EDIT_SAME_DATE_TIME("기존 날짜,시간으로는 수정할 수 없습니다.", BAD_REQUEST),
     CANNOT_CHANGE_ALREADY_STARTED_RESERVATION("이미 시작된 예약은 변경할 수 없습니다.", UNPROCESSABLE_ENTITY),
     CANNOT_CHANGE_OTHER_GUEST_RESERVATION("본인의 예약만 변경할 수 있습니다.", FORBIDDEN),
-    CANNOT_CHANGE_ALREADY_CANCELED("이미 취소된 예약은 변경할 수 없습니다.", CONFLICT);
+    CANNOT_CHANGE_ALREADY_CANCELED("이미 취소된 예약은 변경할 수 없습니다.", CONFLICT),
+    RESERVATION_CREATE_FAIL("예약 생성에 실패했습니다.", INTERNAL_SERVER_ERROR)
+    ;
 
     private final String code;
     private final String message;

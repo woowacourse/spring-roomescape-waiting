@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -8,9 +9,13 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.common.dto.PageResult;
+import roomescape.common.exception.DomainException;
+import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
+import roomescape.reservation.repository.exception.ReservationUniqueConstraint;
+import roomescape.reservation.repository.exception.RetryableReservationCreateException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -20,9 +25,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static roomescape.reservation.domain.Status.CANCELED;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
 
 @Repository
 @RequiredArgsConstructor
@@ -232,21 +237,36 @@ public class JdbcReservationRepository implements ReservationRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         ReservationToken reservationToken = ReservationToken.from(reservation.getStatus());
 
-        jdbcTemplate.update("""
-                        INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at, confirm_token, waiting_token)
-                        VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt, :confirmToken, :waitingToken)
-                        """,
-                new MapSqlParameterSource()
-                        .addValue("guestName", reservation.getGuestName())
-                        .addValue("date", Date.valueOf(reservation.getDate()))
-                        .addValue("timeId", reservation.getTime().getId())
-                        .addValue("themeId", reservation.getTheme().getId())
-                        .addValue("status", reservation.getStatus().toString())
-                        .addValue("lastModifiedAt", Timestamp.valueOf(reservation.getLastModifiedAt()))
-                        .addValue("confirmToken", reservationToken.confirmToken())
-                        .addValue("waitingToken", reservationToken.waitingToken()),
-                keyHolder,
-                new String[]{"id"});
+        try {
+            jdbcTemplate.update("""
+                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at, confirm_token, waiting_token)
+                            VALUES (:guestName, :date, :timeId, :themeId, :status, :lastModifiedAt, :confirmToken, :waitingToken)
+                            """,
+                    new MapSqlParameterSource()
+                            .addValue("guestName", reservation.getGuestName())
+                            .addValue("date", Date.valueOf(reservation.getDate()))
+                            .addValue("timeId", reservation.getTime().getId())
+                            .addValue("themeId", reservation.getTheme().getId())
+                            .addValue("status", reservation.getStatus().toString())
+                            .addValue("lastModifiedAt", Timestamp.valueOf(reservation.getLastModifiedAt()))
+                            .addValue("confirmToken", reservationToken.confirmToken())
+                            .addValue("waitingToken", reservationToken.waitingToken()),
+                    keyHolder,
+                    new String[]{"id"});
+        } catch (DuplicateKeyException e) {
+            ReservationUniqueConstraint constraint = ReservationUniqueConstraint.from(e)
+                    .orElseThrow(() -> new DomainException(GlobalErrorCode.SERVER_ERROR));
+
+            if (constraint == ReservationUniqueConstraint.CONFIRMED_SLOT) {
+                throw new RetryableReservationCreateException();
+            }
+
+            if (constraint == ReservationUniqueConstraint.WAITING_GUEST_SLOT) {
+                throw new DomainException(RESERVATION_ALREADY_EXISTS);
+            }
+
+            throw e;
+        }
 
         return reservation.withId(keyHolder.getKey().longValue());
     }

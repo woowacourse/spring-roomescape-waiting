@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.exception;
 
 import org.springframework.dao.DuplicateKeyException;
 

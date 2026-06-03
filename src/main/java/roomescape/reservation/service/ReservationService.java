@@ -1,20 +1,19 @@
 package roomescape.reservation.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.dto.PageResult;
-import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.exception.RetryableReservationCreateException;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.common.retry.RetryOnException;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationUniqueConstraint;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -40,45 +39,19 @@ public class ReservationService {
     private final ReservationValidator reservationValidator;
     private final Clock clock;
 
-    private static final int MAX_RETRY = 3;
-
     @Transactional
+    @RetryOnException(retryOn = RetryableReservationCreateException.class)
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
+        Status status = determineState(date, timeId, themeId);
+        Reservation reservation = Reservation.create(
+                guestName, date, time, theme, status, LocalDateTime.now(clock));
+        reservationValidator.validateCreate(reservation);
 
-        return retryOnDuplicateKey(MAX_RETRY, () -> {
-            Status status = determineState(date, timeId, themeId);
-            Reservation reservation = Reservation.create(
-                    guestName, date, time, theme, status, LocalDateTime.now(clock));
-            reservationValidator.validateCreate(reservation);
-
-            Reservation saved = reservationRepository.save(reservation);
-            return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
-                    .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
-        });
-    }
-
-    private <T> T retryOnDuplicateKey(int retryCount, RetryableOperation<T> operation) {
-        for (int i = 0; i < retryCount; i++) {
-            try {
-                return operation.execute();
-            } catch (DuplicateKeyException e) {
-                handleDuplicateKey(e);
-            }
-        }
-        throw new DomainException(GlobalErrorCode.SERVER_ERROR);
-    }
-
-    private void handleDuplicateKey(DuplicateKeyException exception) {
-        ReservationUniqueConstraint constraint = ReservationUniqueConstraint.from(exception)
-                .orElseThrow(() -> new DomainException(GlobalErrorCode.SERVER_ERROR));
-
-        switch (constraint) {
-            case CONFIRMED_SLOT -> {
-            }
-            case WAITING_GUEST_SLOT -> throw new DomainException(RESERVATION_ALREADY_EXISTS);
-        }
+        Reservation saved = reservationRepository.save(reservation);
+        return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
+                .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
     }
 
     public PageResult<Reservation> findAllReservations(int page, int size) {
