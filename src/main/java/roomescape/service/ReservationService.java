@@ -53,10 +53,10 @@ public class ReservationService {
     public void cancelReservation(long reservationId, String name) {
         LocalDateTime now = LocalDateTime.now();
         Reserver reserver = new Reserver(name);
-        Reservation reservation = getById(reservationId);
 
-        scheduleService.lockById(reservation.getSchedule().getId());
-        reservation = getById(reservationId);
+        long scheduleId = getScheduleIdByReservationId(reservationId);
+        scheduleService.lockById(scheduleId);
+        Reservation reservation = getById(reservationId);
 
         if (reservation.isAlreadyCanceled()) {
             return;
@@ -118,6 +118,12 @@ public class ReservationService {
 
     private Reservation getById(long id) {
         return reservationDao.findById(id).orElseThrow(()
+                -> new RoomescapeException(DomainErrorCode.NOT_FOUND_RESERVATION, "해당 ID의 예약이 존재하지 않습니다. ID: " + id)
+        );
+    }
+
+    private long getScheduleIdByReservationId(long id) {
+        return reservationDao.findScheduleIdById(id).orElseThrow(()
                 -> new RoomescapeException(DomainErrorCode.NOT_FOUND_RESERVATION, "해당 ID의 예약이 존재하지 않습니다. ID: " + id)
         );
     }

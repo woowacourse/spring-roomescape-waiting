@@ -127,6 +127,7 @@ class ReservationServiceTest {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation reserved = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
         Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findScheduleIdById(1L)).willReturn(Optional.of(schedule.getId()));
         given(reservationDao.findById(1L)).willReturn(Optional.of(reserved));
         given(reservationDao.findFirstByScheduleIdAndStatus(schedule.getId(), ReservationStatus.WAITING))
                 .willReturn(Optional.of(waiting));
@@ -150,6 +151,7 @@ class ReservationServiceTest {
     void cancelWaitingReservationDoesNotPromote() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation waiting = reservation(2L, "현미밥", schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findScheduleIdById(2L)).willReturn(Optional.of(schedule.getId()));
         given(reservationDao.findById(2L)).willReturn(Optional.of(waiting));
         ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
 
@@ -168,6 +170,7 @@ class ReservationServiceTest {
     void cancelAlreadyCanceledReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation canceled = reservation(1L, "러로", schedule, ReservationStatus.CANCELED, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findScheduleIdById(1L)).willReturn(Optional.of(schedule.getId()));
         given(reservationDao.findById(1L)).willReturn(Optional.of(canceled));
 
         reservationService.cancelReservation(1L, "러로");
@@ -181,6 +184,7 @@ class ReservationServiceTest {
     void cancelOtherUserReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation reservation = reservation(1L, "러로", schedule, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(1));
+        given(reservationDao.findScheduleIdById(1L)).willReturn(Optional.of(schedule.getId()));
         given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(1L, "다른사람"))
@@ -195,7 +199,7 @@ class ReservationServiceTest {
     @DisplayName("존재하지 않는 예약을 취소하면 예외를 던진다.")
     @Test
     void cancelNotFoundReservation() {
-        given(reservationDao.findById(404L)).willReturn(Optional.empty());
+        given(reservationDao.findScheduleIdById(404L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.cancelReservation(404L, "러로"))
                 .isInstanceOf(RoomescapeException.class)

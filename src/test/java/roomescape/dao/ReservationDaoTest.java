@@ -64,6 +64,17 @@ class ReservationDaoTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
+    @DisplayName("예약 ID로 스케줄 ID를 조회한다.")
+    @Test
+    void findScheduleIdById() {
+        Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(11, 0), "우주선");
+        Long reservationId = insertReservation("러로", scheduleId, ReservationStatus.RESERVED,
+                LocalDateTime.of(2026, 6, 1, 10, 0));
+
+        assertThat(reservationDao.findScheduleIdById(reservationId)).contains(scheduleId);
+        assertThat(reservationDao.findScheduleIdById(999L)).isEmpty();
+    }
+
     @DisplayName("상태만 변경하면 신청 순서 기준 시각은 유지된다.")
     @Test
     void changeStatusOnly() {

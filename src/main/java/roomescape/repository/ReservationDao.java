@@ -114,6 +114,12 @@ public class ReservationDao {
         return results.stream().findFirst();
     }
 
+    public Optional<Long> findScheduleIdById(long id) {
+        String sql = "SELECT schedule_id FROM reservation WHERE id = ?";
+        List<Long> results = jdbcTemplate.queryForList(sql, Long.class, id);
+        return results.stream().findFirst();
+    }
+
     public Optional<Reservation> findFirstByScheduleIdAndStatus(long scheduleId, ReservationStatus status) {
         String sql = """
             SELECT r.id,
