@@ -122,7 +122,7 @@ public class ReservationService {
 
     private ReservationDetailProjection getReservationDetailOrThrow(long reservationId) {
         return reservationRepository.findDetailById(reservationId)
-                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
     }
 
     private Comparator<MyReservationsAndWaitingsDetailResponse> reservationOrderComparator(ReservationPeriod period) {
