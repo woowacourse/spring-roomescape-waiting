@@ -28,20 +28,20 @@
 
 ### 예약
 
-| 용어          | 설명                          |
-|-------------|-----------------------------|
-| reservation | 방탈출 예약 정보                   |
-| reserver    | 예약자                         |
-| slot        | date + time + theme로 구성된 단위 |
+| 용어          | 설명                            |
+|-------------|-------------------------------|
+| reservation | 방탈출 예약 정보                     |
+| reserver    | 예약자                           |
+| slot        | 예약하는 슬롯 (date + time + theme) |
 
 ### 대기
 
-| 용어      | 설명                          |
-|---------|-----------------------------|
-| waiting | 다른 사용자에 의해 예약된 슬롯에 신청하는 것   |
-| waiter  | 대기자                         |
-| order   | 대기 순번                       |
-| slot    | date + time + theme로 구성된 단위 |
+| 용어      | 설명                            |
+|---------|-------------------------------|
+| waiting | 다른 사용자에 의해 예약된 슬롯에 신청하는 것     |
+| waiter  | 대기자                           |
+| order   | 대기 순번                         |
+| slot    | 대기하는 슬롯 (date + time + theme) |
 
 ### 사용자
 
@@ -63,6 +63,19 @@
 
 - [x] member의 reservation과 waiting이 상태로 구분되어 함께 표시된다.
 - [x] waiting에는 본인의 waiting order도 함께 보여준다.
+
+## 3단계 - 예약 대기 승인
+
+- [ ] waiting가 reservation으로 전환된다. (구현 방식 택 1)
+    - [ ] 자동 전환(reservation 취소 시 waiting order 1번이 자동으로 전환)
+    - [ ] 수동 승인(admin이 waiting을 확인하고 승인/거절)
+- [ ] waiting이 reservation으로 전환되면 해당 slot의 나머지 waiting order가 재정렬된다.
+    - [ ] reservation이 취소되면 해당 slot의 waiting order가 재정렬된다.
+
+- [ ] 요구사항에 명시되지 않은 엣지 케이스를 스스로 식별하고 처리한다.
+
+- [ ] 토론에서 정한 트랜잭션 경계에 맞춰 함께 일어나야 하는 데이터 변경을 묶고 테스트 한다.
+    - [ ] 중간 실패 시 데이터 일관성이 유지되는지 테스트로 확인한다.
 
 ## API 명세
 
