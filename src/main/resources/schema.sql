@@ -21,7 +21,7 @@ CREATE TABLE slot
     time_id  BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE (`date`, time_id, theme_id),
+    CONSTRAINT uq_slot_date_time_theme UNIQUE (`date`, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
@@ -42,6 +42,6 @@ CREATE TABLE reservation
     name    VARCHAR(50) NOT NULL,
     slot_id BIGINT,
     PRIMARY KEY (id),
-    UNIQUE (slot_id),
+    CONSTRAINT uq_reservation_slot UNIQUE (slot_id),
     FOREIGN KEY (slot_id) REFERENCES slot (id)
 );
