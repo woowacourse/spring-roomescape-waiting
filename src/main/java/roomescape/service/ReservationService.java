@@ -116,6 +116,16 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
         reservation.verifyCancelableBy(name, LocalDateTime.now());
         reservationRepository.deleteById(id);
+
+        promoteFirstWaitlistToReservation(reservation);
+    }
+
+    private void promoteFirstWaitlistToReservation(Reservation reservation) {
+        waitlistRepository.findFirstWaitlistByReservationSlot(reservation)
+                .ifPresent(firstWaitlist -> {
+                    reservationRepository.save(firstWaitlist.toReservation());
+                    waitlistRepository.deleteById(firstWaitlist.getId());
+                });
     }
 
     @Transactional

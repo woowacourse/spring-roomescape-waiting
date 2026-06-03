@@ -51,6 +51,10 @@ public class Waitlist {
         }
     }
 
+    public Reservation toReservation() {
+        return new Reservation(id, name, date, time, theme);
+    }
+
     public Long getId() {
         return id;
     }
