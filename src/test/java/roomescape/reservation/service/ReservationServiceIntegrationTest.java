@@ -32,7 +32,7 @@ import roomescape.time.fixture.ReservationTimeFixture;
 
 import java.util.List;
 
-@Import(ReservationService.class)
+@Import({ReservationService.class, ReservationRescheduleService.class})
 class ReservationServiceIntegrationTest extends ServiceSupport {
 
     private final String name = "송송";
@@ -59,6 +59,9 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationRescheduleService rescheduleService;
 
     @Test
     @DisplayName("나의 예약 목록을 조회하면, 대기 순번을 조회한다.")
@@ -474,6 +477,20 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
         assertThatThrownBy(() -> reservationService.changeSchedule(command))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_WAITING.getMessage());
+    }
+
+    @Test
+    @DisplayName("순번을 재정렬하면, 대기 1순위가 예약이 된다.")
+    void reschedule() {
+        Reservation waited = saveWaitReservation(name, slot1);
+
+        // when
+        rescheduleService.rescheduleWaitingOrder(slot1);
+        Reservation actual = reservationRepository.findById(waited.getId()).get();
+
+        // then
+        Assertions.assertThat(actual.isReserved())
+                .isTrue();
     }
 
     private void savePastSlot(Long pastDateId, Long pastTimeId, Theme theme) {
