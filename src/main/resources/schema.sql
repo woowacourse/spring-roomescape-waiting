@@ -1,21 +1,18 @@
-CREATE TABLE IF NOT EXISTS reservation_time
-(
+CREATE TABLE IF NOT EXISTS reservation_time (
     id          BIGINT    NOT NULL AUTO_INCREMENT,
     start_at    TIME      NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS theme
-(
+CREATE TABLE IF NOT EXISTS theme (
     id               BIGINT          NOT NULL AUTO_INCREMENT,
     name             VARCHAR(255)    NOT NULL UNIQUE,
     description      VARCHAR(255)    NOT NULL,
     thumbnail_url    TEXT            NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY      (id)
 );
 
-CREATE TABLE IF NOT EXISTS schedule
-(
+CREATE TABLE IF NOT EXISTS schedule (
     id           BIGINT    NOT NULL AUTO_INCREMENT,
     date         DATE      NOT NULL,
     time_id      BIGINT    NOT NULL,
@@ -27,18 +24,32 @@ CREATE TABLE IF NOT EXISTS schedule
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
-CREATE TABLE IF NOT EXISTS reservation
-(
+CREATE TABLE IF NOT EXISTS users (
+    id          BIGINT           NOT NULL AUTO_INCREMENT,
+    login_id    VARCHAR(255)     NOT NULL UNIQUE,
+    name        VARCHAR(10)      NOT NULL,
+    password    VARCHAR(255)     NOT NULL,
+    role        VARCHAR(20)      NOT NULL,
+    PRIMARY KEY (id),
+
+    CONSTRAINT check_member_role CHECK (role IN ('USER', 'ADMIN'))
+);
+
+CREATE TABLE IF NOT EXISTS reservation (
     id             BIGINT          NOT NULL AUTO_INCREMENT,
-    name           VARCHAR(255)    NOT NULL,
+    user_id        BIGINT          NOT NULL,
     schedule_id    BIGINT          NOT NULL,
     status         VARCHAR(20)     NOT NULL DEFAULT 'RESERVED',
     updated_at     DATETIME        NOT NULL,
     PRIMARY KEY    (id),
 
     CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED', 'WAITING', 'CANCELED')),
+    FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (schedule_id) REFERENCES schedule (id)
 );
 
 CREATE INDEX idx_reservation_schedule_id
     ON reservation(schedule_id);
+
+CREATE INDEX idx_reservation_user_schedule_status
+    ON reservation(user_id, schedule_id, status);

@@ -17,7 +17,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reserver;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationDao;
@@ -45,10 +46,11 @@ class ReservationDaoTest {
                 LocalDate.of(2026, 7, 1),
                 new ReservationTime(timeId, LocalTime.of(10, 0))
         );
+        Member member = insertMember("러로");
 
         Long reservationId = reservationDao.save(new Reservation(
                 null,
-                new Reserver("러로"),
+                member,
                 schedule,
                 ReservationStatus.RESERVED,
                 LocalDateTime.of(2026, 6, 1, 12, 0)
@@ -57,7 +59,7 @@ class ReservationDaoTest {
         Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
 
         assertThat(reservation.getId()).isEqualTo(reservationId);
-        assertThat(reservation.getReserver().getName()).isEqualTo("러로");
+        assertThat(reservation.getMember().getName()).isEqualTo("러로");
         assertThat(reservation.getSchedule().getId()).isEqualTo(scheduleId);
         assertThat(reservation.getSchedule().getTheme().getName()).isEqualTo("잠긴 방");
         assertThat(reservation.getSchedule().getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -114,7 +116,7 @@ class ReservationDaoTest {
         Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
         reservationDao.changeStatusWithUpdateAt(new Reservation(
                 reservation.getId(),
-                reservation.getReserver(),
+                reservation.getMember(),
                 reservation.getSchedule(),
                 ReservationStatus.CANCELED,
                 canceledAt
@@ -135,7 +137,7 @@ class ReservationDaoTest {
         Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
         reservationDao.changeStatusWithUpdateAt(new Reservation(
                 reservation.getId(),
-                reservation.getReserver(),
+                reservation.getMember(),
                 reservation.getSchedule(),
                 ReservationStatus.CANCELED,
                 LocalDateTime.of(2026, 6, 1, 11, 0)
@@ -163,19 +165,21 @@ class ReservationDaoTest {
         assertThat(waiting.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
-    @DisplayName("이름으로 예약을 조회하면 예약 정보와 대기 순번을 함께 반환한다.")
+    @DisplayName("회원 ID로 예약을 조회하면 예약 정보와 대기 순번을 함께 반환한다.")
     @Test
-    void findByNameWithOrder() {
+    void findByMemberIdWithOrder() {
         Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(15, 0), "비밀 연구소");
-        insertReservation("확정자", scheduleId, ReservationStatus.RESERVED, LocalDateTime.of(2026, 6, 1, 10, 0));
-        Long waitingId = insertReservation("대기자", scheduleId, ReservationStatus.WAITING,
+        Member reservedMember = insertMember("확정자");
+        Member waitingMember = insertMember("대기자");
+        insertReservation(reservedMember, scheduleId, ReservationStatus.RESERVED, LocalDateTime.of(2026, 6, 1, 10, 0));
+        Long waitingId = insertReservation(waitingMember, scheduleId, ReservationStatus.WAITING,
                 LocalDateTime.of(2026, 6, 1, 10, 1));
-        insertReservation("취소자", scheduleId, ReservationStatus.CANCELED, LocalDateTime.of(2026, 6, 1, 10, 2));
 
-        List<ReservationInfoResult> results = reservationDao.findByName("대기자");
+        List<ReservationInfoResult> results = reservationDao.findByMemberId(waitingMember.getId());
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).reservation().getId()).isEqualTo(waitingId);
+        assertThat(results.get(0).reservation().getMember().getName()).isEqualTo("대기자");
         assertThat(results.get(0).order()).isEqualTo(1);
     }
 
@@ -197,17 +201,18 @@ class ReservationDaoTest {
                 .isEqualTo(1);
     }
 
-    @DisplayName("같은 이름과 스케줄의 취소되지 않은 예약 존재 여부를 조회한다.")
+    @DisplayName("같은 회원과 스케줄의 취소되지 않은 예약 존재 여부를 조회한다.")
     @Test
-    void existByNameAndScheduleId() {
+    void existByMemberIdAndScheduleId() {
         Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(16, 0), "잠수함");
-        insertReservation("러로", scheduleId, ReservationStatus.CANCELED, LocalDateTime.of(2026, 6, 1, 10, 0));
+        Member member = insertMember("러로");
+        insertReservation(member, scheduleId, ReservationStatus.CANCELED, LocalDateTime.of(2026, 6, 1, 10, 0));
 
-        assertThat(reservationDao.existByNameAndScheduleId("러로", scheduleId)).isFalse();
+        assertThat(reservationDao.existByMemberIdAndScheduleId(member.getId(), scheduleId)).isFalse();
 
-        insertReservation("러로", scheduleId, ReservationStatus.WAITING, LocalDateTime.of(2026, 6, 1, 10, 1));
+        insertReservation(member, scheduleId, ReservationStatus.WAITING, LocalDateTime.of(2026, 6, 1, 10, 1));
 
-        assertThat(reservationDao.existByNameAndScheduleId("러로", scheduleId)).isTrue();
+        assertThat(reservationDao.existByMemberIdAndScheduleId(member.getId(), scheduleId)).isTrue();
     }
 
     private Long insertScheduleWithDependencies(LocalDate date, LocalTime startAt, String themeName) {
@@ -242,23 +247,45 @@ class ReservationDaoTest {
         );
     }
 
+    private Member insertMember(String name) {
+        String loginId = name + "-" + System.nanoTime();
+        jdbcTemplate.update(
+                "INSERT INTO users (login_id, name, password, role) VALUES (?, ?, ?, ?)",
+                loginId,
+                name,
+                "password",
+                Role.USER.name()
+        );
+        Long id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE login_id = ?", Long.class, loginId);
+        return new Member(id, loginId, name, "password", Role.USER);
+    }
+
     private Long insertReservation(
             String name,
             Long scheduleId,
             ReservationStatus status,
             LocalDateTime updatedAt
     ) {
+        return insertReservation(insertMember(name), scheduleId, status, updatedAt);
+    }
+
+    private Long insertReservation(
+            Member member,
+            Long scheduleId,
+            ReservationStatus status,
+            LocalDateTime updatedAt
+    ) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, schedule_id, status, updated_at) VALUES (?, ?, ?, ?)",
-                name,
+                "INSERT INTO reservation (user_id, schedule_id, status, updated_at) VALUES (?, ?, ?, ?)",
+                member.getId(),
                 scheduleId,
                 status.name(),
                 updatedAt
         );
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM reservation WHERE name = ? AND schedule_id = ? AND updated_at = ?",
+                "SELECT id FROM reservation WHERE user_id = ? AND schedule_id = ? AND updated_at = ?",
                 Long.class,
-                name,
+                member.getId(),
                 scheduleId,
                 updatedAt
         );

@@ -122,12 +122,25 @@ class ThemeDaoTest {
     }
 
     private void insertReservation(String name, Long scheduleId, ReservationStatus status) {
+        Long userId = insertUser(name);
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, schedule_id, status, updated_at) VALUES (?, ?, ?, ?)",
-                name,
+                "INSERT INTO reservation (user_id, schedule_id, status, updated_at) VALUES (?, ?, ?, ?)",
+                userId,
                 scheduleId,
                 status.name(),
                 LocalDateTime.of(2026, 6, 1, 10, 0)
         );
+    }
+
+    private Long insertUser(String name) {
+        String loginId = name + "-" + System.nanoTime();
+        jdbcTemplate.update(
+                "INSERT INTO users (login_id, name, password, role) VALUES (?, ?, ?, ?)",
+                loginId,
+                name,
+                "password",
+                "USER"
+        );
+        return jdbcTemplate.queryForObject("SELECT id FROM users WHERE login_id = ?", Long.class, loginId);
     }
 }

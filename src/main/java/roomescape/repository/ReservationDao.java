@@ -35,10 +35,17 @@ public class ReservationDao {
                 rs.getDate("schedule_date").toLocalDate(),
                 time
         );
+        Member member = new Member(
+                rs.getLong("user_id"),
+                rs.getString("user_login_id"),
+                rs.getString("user_name"),
+                rs.getString("user_password"),
+                Role.valueOf(rs.getString("user_role"))
+        );
 
         return new Reservation(
                 rs.getLong("id"),
-                new Reserver(rs.getString("name")),
+                member,
                 schedule,
                 ReservationStatus.valueOf(rs.getString("status")),
                 rs.getObject("updated_at", LocalDateTime.class)
@@ -63,7 +70,7 @@ public class ReservationDao {
 
     public Long save(Reservation reservation) {
         return jdbcInsert.executeAndReturnKey(Map.of(
-                "name", reservation.getReserver().getName(),
+                "user_id", reservation.getMember().getId(),
                 "schedule_id", reservation.getSchedule().getId(),
                 "status", reservation.getStatus().name(),
                 "updated_at", reservation.getUpdateAt()
@@ -92,7 +99,11 @@ public class ReservationDao {
     public Optional<Reservation> findById(long id) {
         String sql = """
                 SELECT r.id,
-                    r.name,
+                    u.id AS user_id,
+                    u.login_id AS user_login_id,
+                    u.name AS user_name,
+                    u.password AS user_password,
+                    u.role AS user_role,
                     r.status,
                     r.updated_at,
                     s.id   AS schedule_id,
@@ -104,6 +115,7 @@ public class ReservationDao {
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail
                 FROM reservation AS r
+                INNER JOIN users            AS u  ON r.user_id     = u.id
                 INNER JOIN schedule         AS s  ON r.schedule_id = s.id
                 INNER JOIN reservation_time AS t  ON s.time_id     = t.id
                 INNER JOIN theme            AS th ON s.theme_id    = th.id
@@ -123,7 +135,11 @@ public class ReservationDao {
     public Optional<Reservation> findFirstByScheduleIdAndStatus(long scheduleId, ReservationStatus status) {
         String sql = """
             SELECT r.id,
-                   r.name,
+                   u.id             AS user_id,
+                   u.login_id       AS user_login_id,
+                   u.name           AS user_name,
+                   u.password       AS user_password,
+                   u.role           AS user_role,
                    r.status,
                    r.updated_at,
                    s.id             AS schedule_id,
@@ -135,6 +151,7 @@ public class ReservationDao {
                    th.description   AS theme_description,
                    th.thumbnail_url AS theme_thumbnail
             FROM reservation AS r
+            INNER JOIN users            AS u  ON r.user_id     = u.id
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
@@ -148,7 +165,7 @@ public class ReservationDao {
         return results.stream().findFirst();
     }
 
-    public List<ReservationInfoResult> findByName(String name) {
+    public List<ReservationInfoResult> findByMemberId(Long memberId) {
         String sql = """
             WITH active_orders AS (
                 SELECT id,
@@ -160,7 +177,11 @@ public class ReservationDao {
                 WHERE status != ?
             )
             SELECT r.id,
-                   r.name,
+                   u.id             AS user_id,
+                   u.login_id       AS user_login_id,
+                   u.name           AS user_name,
+                   u.password       AS user_password,
+                   u.role           AS user_role,
                    r.status,
                    r.updated_at,
                    s.id             AS schedule_id,
@@ -173,15 +194,16 @@ public class ReservationDao {
                    th.thumbnail_url AS theme_thumbnail,
                    COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
+            INNER JOIN users            AS u  ON r.user_id     = u.id
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
             LEFT JOIN active_orders     AS ao ON r.id          = ao.id
-            WHERE r.name = ?
+            WHERE u.id = ?
             ORDER BY s.date DESC
             """;
 
-        return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name(), name);
+        return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name(), memberId);
     }
 
     public List<ReservationInfoResult> findAll() {
@@ -196,7 +218,11 @@ public class ReservationDao {
                 WHERE status != ?
             )
             SELECT r.id,
-                   r.name,
+                   u.id             AS user_id,
+                   u.login_id       AS user_login_id,
+                   u.name           AS user_name,
+                   u.password       AS user_password,
+                   u.role           AS user_role,
                    r.status,
                    r.updated_at,
                    s.id             AS schedule_id,
@@ -209,6 +235,7 @@ public class ReservationDao {
                    th.thumbnail_url AS theme_thumbnail,
                    COALESCE(ao.waiting_order, 0) AS waiting_order
             FROM reservation AS r
+            INNER JOIN users            AS u  ON r.user_id     = u.id
             INNER JOIN schedule         AS s  ON r.schedule_id = s.id
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
@@ -230,17 +257,17 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, Integer.class, scheduleId, INACTIVE_STATUS.name());
     }
 
-    public boolean existByNameAndScheduleId(String name, Long scheduleId) {
+    public boolean existByMemberIdAndScheduleId(Long memberId, Long scheduleId) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
                     FROM reservation
-                    WHERE name    = ?
+                    WHERE user_id = ?
                       AND schedule_id = ?
                       AND status     != ?
                 )
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, scheduleId, INACTIVE_STATUS.name());
+        return jdbcTemplate.queryForObject(sql, Boolean.class, memberId, scheduleId, INACTIVE_STATUS.name());
     }
 }
