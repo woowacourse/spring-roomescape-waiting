@@ -112,7 +112,8 @@ public class ReceptionFacade {
                 throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);
             }
             Wait newWait = waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));
-            return ReceptionResponse.from(newWait, waitService.calculateOrder(newWait), ReservationStatus.WAITING.name());
+            return ReceptionResponse.from(newWait, waitService.calculateOrder(newWait),
+                    ReservationStatus.WAITING.name());
         }).orElseGet(() -> {
             Reservation saved = reservationService.save(request, reservationTime, theme);
             return ReceptionResponse.from(saved, 0L, ReservationStatus.CONFIRMED.name());
