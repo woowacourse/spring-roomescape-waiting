@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.date.domain.ReservationDate;
-import roomescape.date.exception.ReservationDateException;
-import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.slot.domain.ReservationSlot;
 import roomescape.slot.exception.ReservationSlotException;
@@ -17,22 +14,13 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeException;
-import roomescape.theme.repository.ThemeRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.ReservationTimeException;
-import roomescape.time.repository.ReservationTimeRepository;
 
 import java.util.List;
 
-import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
-import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
-import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,9 +28,6 @@ import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationDateRepository reservationDateRepository;
-    private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
     public List<Reservation> readAll() {
@@ -80,16 +65,10 @@ public class ReservationService {
     @Transactional
     public Reservation changeSchedule(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
-        ReservationTime newTime = getReservationTime(command.timeId());
-        newTime.validateIsInactive();
+        ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
+        validateAlreadyBookedByOthers(newSlot);
 
-        ReservationDate newDate = getReservationDate(command.dateId());
-        newDate.validateIsInactive();
-
-        ReservationSlot slot = findSlot(newDate, newTime, reservation.getTheme());
-        validateAlreadyBookedByOthers(slot);
-
-        reservation.changeSchedule(command.requesterName(), slot, LocalDateTime.now());
+        reservation.changeSchedule(command.requesterName(), newSlot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
     }
@@ -97,33 +76,12 @@ public class ReservationService {
     @Transactional
     public Reservation changeScheduleByManager(ReservationChangeCommand command) {
         Reservation reservation = getReservation(command.id());
-        ReservationTime newTime = getReservationTime(command.timeId());
-        newTime.validateIsInactive();
+        ReservationSlot newSlot = getSlot(command.dateId(), command.timeId(), reservation.getSlot().getThemeId());
+        validateAlreadyBookedByOthers(newSlot);
 
-        ReservationDate newDate = getReservationDate(command.dateId());
-        newDate.validateIsInactive();
-
-        ReservationSlot slot = findSlot(newDate, newTime, reservation.getTheme());
-        validateAlreadyBookedByOthers(slot);
-
-        reservation.changeScheduleByManager(slot, LocalDateTime.now());
+        reservation.changeScheduleByManager(newSlot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
-    }
-
-    private ReservationTime getReservationTime(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ReservationTimeException(TIME_NOT_FOUND));
-    }
-
-    private ReservationDate getReservationDate(Long dateId) {
-        return reservationDateRepository.findById(dateId)
-                .orElseThrow(() -> new ReservationDateException(DATE_NOT_FOUND));
-    }
-
-    private Theme getTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ThemeException(THEME_NOT_FOUND));
     }
 
     private Reservation getReservation(Long id) {
@@ -133,11 +91,6 @@ public class ReservationService {
 
     private ReservationSlot getSlot(Long dateId, Long timeId, Long themeId) {
         return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(dateId, timeId, themeId)
-                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
-    }
-
-    private ReservationSlot findSlot(ReservationDate date, ReservationTime time, Theme theme) {
-        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(date.getId(), time.getId(), theme.getId())
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 
