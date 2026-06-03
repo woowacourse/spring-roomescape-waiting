@@ -34,6 +34,9 @@ CREATE TABLE reservation (
     slot_id BIGINT       NOT NULL,
     status         VARCHAR(20)  NOT NULL,
     active_status  VARCHAR(20)  NOT NULL,
+
+    -- ACTIVE 상태의 같은 슬롯/이름 중복을 DB 레벨에서 방지하기 위한 파생 컬럼입니다.
+    -- CANCELED 이력은 active_name이 NULL이 되어 같은 이름으로 여러 번 남길 수 있습니다.
     active_name    VARCHAR(20) GENERATED ALWAYS AS (
         CASE WHEN active_status = 'ACTIVE' THEN name ELSE NULL END
     ),
