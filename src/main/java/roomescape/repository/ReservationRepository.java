@@ -32,7 +32,7 @@ public class ReservationRepository {
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", newReservation.getName())
                 .addValue("date", Date.valueOf(newReservation.getReservationDate().getDate()))
                 .addValue("timeId", newReservation.getTime().getId())
@@ -88,7 +88,7 @@ public class ReservationRepository {
                 ORDER BY r.id
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", name);
 
         return jdbcTemplate.query(sql, param, reservationRowMapper())
@@ -116,9 +116,9 @@ public class ReservationRepository {
                 """;
 
         try {
-            MapSqlParameterSource param = new MapSqlParameterSource()
+            final MapSqlParameterSource param = new MapSqlParameterSource()
                     .addValue("id", reservationId);
-            Reservation reservation = jdbcTemplate.queryForObject(sql, param, reservationRowMapper());
+            final Reservation reservation = jdbcTemplate.queryForObject(sql, param, reservationRowMapper());
             return Optional.of(reservation);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -142,7 +142,7 @@ public class ReservationRepository {
                 ORDER BY rt.start_at;
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("themeId", themeId);
 
@@ -158,12 +158,12 @@ public class ReservationRepository {
                 WHERE date = :date AND time_id = :timeId AND theme_id = :themeId
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId);
 
-        Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return count != null && count > 0;
     }
 
@@ -174,10 +174,10 @@ public class ReservationRepository {
                 WHERE time_id = :timeId
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("timeId", timeId);
 
-        Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return count != null && count > 0;
     }
 
@@ -188,10 +188,10 @@ public class ReservationRepository {
                 WHERE theme_id = :themeId
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("themeId", themeId);
 
-        Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return count != null && count > 0;
     }
 
@@ -202,7 +202,7 @@ public class ReservationRepository {
                 WHERE id = :id
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("date", reservation.getReservationDate().getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("id", reservation.getId());
@@ -216,7 +216,7 @@ public class ReservationRepository {
                 WHERE id = :id
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("id", reservationId);
 
         jdbcTemplate.update(sql, param);

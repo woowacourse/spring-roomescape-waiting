@@ -28,14 +28,14 @@ public class ThemeRepository {
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", theme.getName())
                 .addValue("description", theme.getDescription())
                 .addValue("thumbnailUrl", theme.getThumbnailUrl());
 
         jdbcTemplate.update(sql, param, keyHolder);
 
-        Long themeId = keyHolder.getKey().longValue();
+        final Long themeId = keyHolder.getKey().longValue();
         return theme.withId(themeId);
     }
 
@@ -56,7 +56,7 @@ public class ThemeRepository {
                 """;
 
         try {
-            MapSqlParameterSource param = new MapSqlParameterSource()
+            final MapSqlParameterSource param = new MapSqlParameterSource()
                     .addValue("id", themeId);
             final Theme theme = jdbcTemplate.queryForObject(sql, param, rowMapper());
             return Optional.of(theme);
@@ -65,7 +65,7 @@ public class ThemeRepository {
         }
     }
 
-    public List<Theme> findPopularThemes(LocalDate startDate, LocalDate today) {
+    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate today) {
         final String sql = """
                 SELECT
                     t.id,
@@ -88,7 +88,7 @@ public class ThemeRepository {
                 LIMIT 10;
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("startDate", startDate)
                 .addValue("endDate", today);
 
@@ -102,7 +102,8 @@ public class ThemeRepository {
                 DELETE FROM theme
                 WHERE id = :id
                 """;
-        MapSqlParameterSource param = new MapSqlParameterSource()
+
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("id", themeId);
 
         return jdbcTemplate.update(sql, param) > 0;

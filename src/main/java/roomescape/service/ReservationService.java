@@ -33,8 +33,8 @@ public class ReservationService {
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
     public ReservationResult create(final ReservationCreateCommand data) {
-        Theme findTheme = findThemeOrThrow(data.themeId());
-        ReservationTime findReservationTime = findReservationTimeOrThrow(data.timeId());
+        final Theme findTheme = findThemeOrThrow(data.themeId());
+        final ReservationTime findReservationTime = findReservationTimeOrThrow(data.timeId());
         validateAvailable(data.date(), findReservationTime.getId(), findTheme.getId());
 
         final Reservation newReservation = Reservation.create(data.name(), data.date(), findReservationTime, findTheme);
@@ -45,14 +45,14 @@ public class ReservationService {
     }
 
     public AvailableDateResult getReservationOptions() {
-        LocalDate today = LocalDate.now();
-        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
+        final LocalDate today = LocalDate.now();
+        final List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
 
         return new AvailableDateResult(dates);
     }
 
     public List<ReservationResult> getReservationsByName(final String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
+        final List<Reservation> reservations = reservationRepository.findByName(name);
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
@@ -83,8 +83,8 @@ public class ReservationService {
         final String personName = reservationModifyCommand.name();
         validateReservationOwner(originalReservation, personName);
 
-        ReservationTime findReservationTime = findReservationTimeOrThrow(reservationModifyCommand.timeId());
-        Theme findTheme = findThemeOrThrow(reservationModifyCommand.themeId());
+        final ReservationTime findReservationTime = findReservationTimeOrThrow(reservationModifyCommand.timeId());
+        final Theme findTheme = findThemeOrThrow(reservationModifyCommand.themeId());
 
         final Reservation modifiedReservation = originalReservation.modify(
                 reservationModifyCommand.date(),
@@ -101,7 +101,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteWithValidation(final Long reservationId, final String name) {
-        Reservation reservation = findReservationOrThrow(reservationId);
+        final Reservation reservation = findReservationOrThrow(reservationId);
 
         validateReservationOwner(reservation, name);
 
@@ -114,17 +114,17 @@ public class ReservationService {
     }
 
     private void deleteInternal(final Long reservationId) {
-        Reservation findReservation = reservationRepository.findById(reservationId)
+        final Reservation findReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
 
         reservationRepository.deleteById(findReservation.getId());
 
-        Optional<WaitingList> findFirstWaitingList = waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(findReservation.getReservationDate().getDate(), findReservation.getTime(), findReservation.getTheme());
+        final Optional<WaitingList> findFirstWaitingList = waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(findReservation.getReservationDate().getDate(), findReservation.getTime(), findReservation.getTheme());
         if (findFirstWaitingList.isEmpty()) {
             return;
         }
 
-        WaitingList waitingList = findFirstWaitingList.get();
+        final WaitingList waitingList = findFirstWaitingList.get();
 
         final Reservation newReservation = Reservation.create(waitingList.getName(), waitingList.getReservationDate().getDate(), waitingList.getReservationTime(), waitingList.getTheme());
         reservationRepository.save(newReservation);
@@ -133,7 +133,7 @@ public class ReservationService {
     }
 
     private void validateAvailable(final LocalDate date, final Long timeId, final Long themeId) {
-        boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
+        final boolean isAlreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 date,
                 timeId,
                 themeId
@@ -153,13 +153,13 @@ public class ReservationService {
         }
     }
 
-    private void validateReservation(Reservation reservation,Theme findTheme, ReservationTime findReservationTime) {
+    private void validateReservation(final Reservation reservation, final Theme findTheme, final ReservationTime findReservationTime) {
         reservation.validateNotPast();
 
         validateNotDuplicated(reservation, findTheme, findReservationTime);
     }
 
-    private void validateNotDuplicated(Reservation reservation, Theme findTheme, ReservationTime findReservationTime) {
+    private void validateNotDuplicated(final Reservation reservation, final Theme findTheme, final ReservationTime findReservationTime) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getReservationDate().getDate(), findTheme.getId(), findReservationTime.getId())) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);

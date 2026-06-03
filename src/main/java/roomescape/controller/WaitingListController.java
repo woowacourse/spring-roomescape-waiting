@@ -28,15 +28,15 @@ public class WaitingListController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam String name) {
+    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam final String name) {
         final List<WaitingListResult> results = waitingListService.getWaitingListByName(name);
         return ResponseEntity.ok().body(results);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<WaitingListResult> delete(
-            @PathVariable Long id,
-            @RequestBody WaitingListDeleteRequest waitingListDeleteRequest) {
+            @PathVariable final Long id,
+            @RequestBody final WaitingListDeleteRequest waitingListDeleteRequest) {
         final WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(id, waitingListDeleteRequest.name());
         waitingListService.delete(deleteCommand);
         return ResponseEntity.noContent()

@@ -22,7 +22,6 @@ public class ReservationTimeRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-
     public ReservationTime save(final ReservationTime newReservationTime) {
         final String sql = """
                 INSERT INTO reservation_time (start_at, end_at)
@@ -31,7 +30,7 @@ public class ReservationTimeRepository {
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("startAt", Time.valueOf(newReservationTime.getStartAt()))
                 .addValue("endAt", Time.valueOf(newReservationTime.getEndAt()));
 
@@ -61,9 +60,9 @@ public class ReservationTimeRepository {
                 """;
 
         try {
-            MapSqlParameterSource param = new MapSqlParameterSource()
+            final MapSqlParameterSource param = new MapSqlParameterSource()
                     .addValue("id", timeId);
-            ReservationTime reservationTime = jdbcTemplate.queryForObject(sql, param, rowMapper());
+            final ReservationTime reservationTime = jdbcTemplate.queryForObject(sql, param, rowMapper());
             return Optional.of(reservationTime);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -76,7 +75,7 @@ public class ReservationTimeRepository {
                 WHERE id = :id
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("id", timeId);
 
         return jdbcTemplate.update(sql, param) > 0;

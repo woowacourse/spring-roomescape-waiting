@@ -33,7 +33,7 @@ public class WaitingListRepository {
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", waitingListWithoutId.getName())
                 .addValue("date", Date.valueOf(waitingListWithoutId.getReservationDate().getDate()))
                 .addValue("timeId", waitingListWithoutId.getReservationTime().getId())
@@ -67,7 +67,7 @@ public class WaitingListRepository {
                 """;
 
         try {
-            MapSqlParameterSource param = new MapSqlParameterSource()
+            final MapSqlParameterSource param = new MapSqlParameterSource()
                     .addValue("id", id);
             final WaitingList waitingList = jdbcTemplate.queryForObject(sql, param, waitingListRowMapper());
             return Optional.of(waitingList);
@@ -109,7 +109,7 @@ public class WaitingListRepository {
                 WHERE w.name = :name
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", name);
 
         return jdbcTemplate.query(sql, param, waitingListRowRowMapper()).stream().toList();
@@ -122,13 +122,13 @@ public class WaitingListRepository {
                 WHERE date = :date AND time_id = :timeId AND theme_id = :themeId AND created_at <= :createdAt;
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("date", waitingList.getReservationDate().getDate())
                 .addValue("timeId", waitingList.getReservationTime().getId())
                 .addValue("themeId", waitingList.getTheme().getId())
                 .addValue("createdAt", Timestamp.valueOf(waitingList.getCreatedAt()));
 
-        Integer waitingOrder = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        final Integer waitingOrder = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return waitingOrder != null ? waitingOrder : 0;
     }
 
@@ -157,7 +157,7 @@ public class WaitingListRepository {
                 """;
 
         try {
-            MapSqlParameterSource param = new MapSqlParameterSource()
+            final MapSqlParameterSource param = new MapSqlParameterSource()
                     .addValue("date", date)
                     .addValue("timeId", time.getId())
                     .addValue("themeId", theme.getId());
@@ -175,13 +175,13 @@ public class WaitingListRepository {
                 WHERE name = :name AND date = :date AND time_id = :timeId AND theme_id = :themeId
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", name)
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId);
 
-        Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return count != null && count > 0;
     }
 
@@ -191,7 +191,7 @@ public class WaitingListRepository {
                 WHERE id = :id
                 """;
 
-        MapSqlParameterSource param = new MapSqlParameterSource()
+        final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, param);
