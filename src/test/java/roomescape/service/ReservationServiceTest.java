@@ -22,6 +22,8 @@ import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
+import roomescape.exception.ReservationNotReservedException;
+import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.StoreManagementForbiddenException;
@@ -203,6 +205,59 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other.getId())))
                 .isInstanceOf(ReservationOwnerMismatchException.class);
+        assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    void cancelOwnReservation_본인의_예약을_취소한다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
+
+        service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
+
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
+    }
+
+    @Test
+    void cancelOwnReservation_예약_대기이면_예외() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildWaitingReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
+
+        assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
+                .isInstanceOf(ReservationNotReservedException.class);
+        assertThat(reservationRepository.findById(reservationId)).isPresent();
+    }
+
+    @Test
+    void cancelOwnWaitingReservation_본인의_예약_대기를_취소한다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildWaitingReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
+
+        service.cancelOwnWaitingReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
+
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
+    }
+
+    @Test
+    void cancelOwnWaitingReservation_예약_확정이면_예외() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        Long reservationId = reservationRepository.save(
+                buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8)));
+
+        assertThatThrownBy(
+                () -> service.cancelOwnWaitingReservation(Fixtures.cancelCommand(reservationId, brown.getId())))
+                .isInstanceOf(ReservationNotWaitingException.class);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 

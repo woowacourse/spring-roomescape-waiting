@@ -22,6 +22,7 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(UnauthorizedException.class, HttpStatus.FORBIDDEN),
             Map.entry(ReservationNotFoundForWaitingException.class, HttpStatus.CONFLICT),
             Map.entry(ReservationNotReservedException.class, HttpStatus.CONFLICT),
+            Map.entry(ReservationNotWaitingException.class, HttpStatus.CONFLICT),
             Map.entry(DuplicateWaitingReservationException.class, HttpStatus.CONFLICT)
     );
 
