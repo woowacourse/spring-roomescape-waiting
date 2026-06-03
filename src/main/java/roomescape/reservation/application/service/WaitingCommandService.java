@@ -56,14 +56,15 @@ public class WaitingCommandService {
     }
 
     public void delete(Long id, LocalDateTime now) {
-        ReservationSlot slot = waitingRepository.findSlotById(id)
+        Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
 
-        slot.validateDeletable(now);
+        waiting.getSlot().validateDeletable(now);
 
         if (waitingRepository.delete(id) == 0) {
             throw new NotFoundException("존재하지 않는 대기입니다.");
         }
+        waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
     }
 
     private void validateNoReservationConflict(String username, ReservationSlot slot) {

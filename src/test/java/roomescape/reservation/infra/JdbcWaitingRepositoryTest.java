@@ -38,9 +38,9 @@ class JdbcWaitingRepositoryTest {
         testHelper = new TestDataHelper(jdbcTemplate);
     }
 
-    @DisplayName("ID로 슬롯 조회를 테스트합니다")
+    @DisplayName("ID로 예약 대기 조회를 테스트합니다.")
     @Test
-    void find_slot_by_id() {
+    void find_by_id() {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
         LocalDate date = LocalDate.of(2026, 5, 6);
@@ -50,14 +50,17 @@ class JdbcWaitingRepositoryTest {
                 themeId,
                 timeId
         );
-        ReservationSlot slot = waitingRepository.findSlotById(waitingId)
+        Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow();
 
         SoftAssertions.assertSoftly(assertSoftly -> {
-            assertSoftly.assertThat(slot.date()).isEqualTo(date);
-            assertSoftly.assertThat(slot.themeId()).isEqualTo(themeId);
-            assertSoftly.assertThat(slot.timeId()).isEqualTo(timeId);
-            assertSoftly.assertThat(slot.startAt()).isEqualTo(LocalTime.of(9, 0));
+            assertSoftly.assertThat(waiting.getId()).isEqualTo(waitingId);
+            assertSoftly.assertThat(waiting.getUser().name()).isEqualTo("스타크");
+            assertSoftly.assertThat(waiting.getSlot().date()).isEqualTo(date);
+            assertSoftly.assertThat(waiting.getSlot().themeId()).isEqualTo(themeId);
+            assertSoftly.assertThat(waiting.getSlot().timeId()).isEqualTo(timeId);
+            assertSoftly.assertThat(waiting.getSlot().startAt()).isEqualTo(LocalTime.of(9, 0));
+            assertSoftly.assertThat(waiting.getRank().value()).isEqualTo(1);
         });
     }
 
@@ -128,6 +131,45 @@ class JdbcWaitingRepositoryTest {
         );
 
         assertThat(waitingRepository.delete(waitingId)).isEqualTo(1);
+    }
+
+    @DisplayName("예약 대기 순번 재정렬 시 같은 슬롯의 뒤 순번을 당기는 것을 테스트합니다.")
+    @Test
+    void rebalance_rank() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+        Long waitingId = testHelper.insertWaiting(
+                "피노",
+                date,
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                date,
+                themeId,
+                timeId
+        );
+
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow();
+        ReservationSlot slot = waiting.getSlot();
+        waitingRepository.delete(waitingId);
+        waitingRepository.rebalanceRank(waiting.getSlot(), waiting.getRank());
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(starkRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+        });
     }
 
     @DisplayName("방탈출 예약 대기 추가 시 다음 순번 저장을 테스트합니다.")

@@ -20,6 +20,7 @@ import roomescape.reservation.application.dto.WaitingCreateCommand;
 import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.application.dto.WaitingResult.Status;
 import roomescape.reservation.application.service.WaitingCommandService;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -162,6 +163,46 @@ class WaitingCommandServiceTest {
         );
 
         assertThatNoException().isThrownBy(() -> waitingCommandService.delete(waitingId, NOW));
+    }
+
+    @DisplayName("예약 대기 삭제 시 뒤 순번을 당기는 것을 테스트합니다.")
+    @Test
+    void delete_waiting_and_decrement_next_ranks() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        Long waitingId = testHelper.insertWaiting(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        waitingCommandService.delete(waitingId, NOW);
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(starkRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+        });
     }
 
     @DisplayName("삭제할 예약 대기가 없을 시 예외 발생을 테스트합니다.")

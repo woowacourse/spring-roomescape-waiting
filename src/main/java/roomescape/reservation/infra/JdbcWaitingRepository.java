@@ -29,20 +29,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<ReservationSlot> findSlotById(Long id) {
+    public Optional<Waiting> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT w.date, w.theme_id, w.time_id, rt.start_at
-                            FROM waiting w
-                            JOIN reservation_time rt ON w.time_id = rt.id
-                            WHERE w.id = ?
+                        SELECT w.id, w.name, w.date, w.theme_id, w.time_id, rt.start_at, w.rank
+                        FROM waiting w
+                        JOIN reservation_time rt ON w.time_id = rt.id
+                        WHERE w.id = ?
                         """,
-                (rs, rowNum) -> ReservationSlot.builder()
-                        .date(rs.getDate("date").toLocalDate())
-                        .themeId(rs.getLong("theme_id"))
-                        .timeId(rs.getLong("time_id"))
-                        .startAt(rs.getObject("start_at", LocalTime.class))
-                        .build()
-                , id).stream().findFirst();
+                (rs, rowNum) -> {
+                    ReservationSlot slot = ReservationSlot.builder()
+                            .date(rs.getDate("date").toLocalDate())
+                            .themeId(rs.getLong("theme_id"))
+                            .timeId(rs.getLong("time_id"))
+                            .startAt(rs.getObject("start_at", LocalTime.class))
+                            .build();
+
+                    return toWaiting(rs.getLong("id"), rs.getString("name"), rs.getInt("rank"), slot);
+                }, id).stream().findFirst();
     }
 
     @Override
@@ -103,6 +106,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Integer delete(Long id) {
         return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    }
+
+    @Override
+    public void rebalanceRank(ReservationSlot slot, Rank rank) {
+        jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = rank - 1
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                          AND rank > ?
+                        """,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId(),
+                rank.value());
     }
 
     private Waiting toWaiting(Long id, String name, int rankValue, ReservationSlot slot) {

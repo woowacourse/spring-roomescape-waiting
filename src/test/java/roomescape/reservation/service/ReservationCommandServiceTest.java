@@ -275,6 +275,12 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
         User stark = ReservationFixture.userNameStark();
 
         reservationCommandService.delete(reservationId, NOW);
@@ -286,9 +292,11 @@ class ReservationCommandServiceTest {
                 .startAt(LocalTime.of(10, 0))
                 .build();
         Reservation promoteReservation = testHelper.findReservationBySlot(slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(promoteReservation.getUser()).isEqualTo(stark);
+            softly.assertThat(neoRank).isEqualTo(1);
             softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });

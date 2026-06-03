@@ -85,6 +85,22 @@ public class TestDataHelper {
                 timeId);
     }
 
+    public Integer findWaitingRank(String name, ReservationSlot slot) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT rank
+                        FROM waiting
+                        WHERE name = ?
+                          AND date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        """,
+                Integer.class,
+                name,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
+    }
+
     public Reservation findReservationBySlot(ReservationSlot slot) {
         return jdbcTemplate.queryForObject("""
                         SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
