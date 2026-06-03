@@ -127,6 +127,27 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 변경하려는_시간에_같은_이름의_대기가_있으면_중복_예외가_발생한다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+
+        LocalDate currentDate = LocalDate.now().plusDays(2);
+        LocalDate targetDate = currentDate.plusDays(1);
+
+        ReservationSlot current = reservationRepository.save(createWithNameAndDate("이프", currentDate));
+        reservationService.reserve(new ReservationCommand("찰리", targetDate, 1L, time.getId()));
+        reservationService.addWaiting(new ReservationCommand("이프", targetDate, 1L, time.getId()));
+
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(targetDate, time.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.change(reservedReservationId(current), command))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
+    }
+
+    @Test
     void 기존_예약_정보에서_예약_시간을_변경할_수_있다() {
         // given
         ReservationSlot slot = createDefaultReservationWithName("이프");
