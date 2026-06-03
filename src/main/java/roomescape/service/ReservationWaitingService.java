@@ -18,7 +18,6 @@ import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -37,14 +36,13 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
-        ReservationSlot slot = new ReservationSlot(command.reservationDate(), command.timeId(), command.themeId());
-
-        ReservationTime reservationTime = getTime(slot.getTimeId());
-        Theme theme = getTheme(slot.getThemeId());
+        ReservationTime reservationTime = getTime(command.timeId());
+        Theme theme = getTheme(command.themeId());
+        ReservationSlot slot = new ReservationSlot(command.reservationDate(),reservationTime,theme);
 
         validateReservationExists(slot);
+        slot.validateNotPast(now);
         validateUniqueReservationWaiting(command.name(), slot);
-        validatePastDatetime(slot.getDate(), now, reservationTime);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot.getDate(), reservationTime, theme);
         ReservationWaiting savedReservationWaiting;
@@ -87,12 +85,6 @@ public class ReservationWaitingService {
         boolean exists = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
-        }
-    }
-
-    private void validatePastDatetime(LocalDate date, LocalDateTime now, ReservationTime reservationTime) {
-        if (reservationTime.isPast(date, now)) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
         }
     }
 }
