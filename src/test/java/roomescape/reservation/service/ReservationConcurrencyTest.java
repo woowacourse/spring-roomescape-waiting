@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,18 +59,90 @@ class ReservationConcurrencyTest {
     @Test
     @DisplayName("다른 사용자들이 같은 슬롯에 동시에 예약하면 하나만 예약 확정되고 나머지는 대기가 된다.")
     void create_success_whenDifferentUsersReserveSameSlotConcurrently() throws Exception {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 1)));
-        Theme theme = themeRepository.save(new Theme("동시 예약 테스트", "동시 예약 테스트용 테마", "https://example.com/concurrent.png"));
+        ReservationTime time = saveReservationTime(10, 1);
+        Theme theme = saveTheme("동시 예약 테스트");
         LocalDate date = LocalDate.now().plusDays(1);
 
-        List<CreateResult> results = runConcurrently(REQUEST_COUNT, index ->
-                create("사용자-" + index, date, time, theme)
+        List<ExecutionResult> results = runConcurrently(REQUEST_COUNT, index ->
+                reservationService.create("사용자-" + index, date, time.getId(), theme.getId())
         );
 
+        assertThat(results).allMatch(ExecutionResult::isSuccess);
+        assertQueueIsConsistent(date, theme, REQUEST_COUNT);
+    }
+
+    @Test
+    @DisplayName("같은 사용자가 같은 슬롯에 동시에 예약하면 하나만 성공하고 나머지는 중복으로 거부된다.")
+    void create_fail_whenSameUserReservesSameSlotConcurrently() throws Exception {
+        ReservationTime time = saveReservationTime(10, 2);
+        Theme theme = saveTheme("동시 중복 예약 테스트");
+        LocalDate date = LocalDate.now().plusDays(2);
+
+        List<ExecutionResult> results = runConcurrently(REQUEST_COUNT, index ->
+                reservationService.create("브라운", date, time.getId(), theme.getId())
+        );
+
+        assertThat(results).filteredOn(ExecutionResult::isSuccess).hasSize(1);
+        assertThat(results)
+                .filteredOn(result -> result.throwable() instanceof ConflictException)
+                .hasSize(REQUEST_COUNT - 1);
+        assertQueueIsConsistent(date, theme, 1);
+    }
+
+    @Test
+    @DisplayName("다른 사용자들이 동시에 같은 슬롯으로 예약을 변경하면 하나만 예약 확정되고 나머지는 대기가 된다.")
+    void updateDateTime_success_whenDifferentUsersMoveToSameSlotConcurrently() throws Exception {
+        ReservationTime originalTime = saveReservationTime(10, 3);
+        ReservationTime targetTime = saveReservationTime(10, 4);
+        Theme theme = saveTheme("동시 예약 변경 테스트");
+        LocalDate originalDate = LocalDate.now().plusDays(3);
+        LocalDate targetDate = LocalDate.now().plusDays(4);
+        List<Reservation> reservations = new ArrayList<>();
+        for (int index = 0; index < REQUEST_COUNT; index++) {
+            reservations.add(reservationService.create(
+                    "변경 사용자-" + index,
+                    originalDate,
+                    originalTime.getId(),
+                    theme.getId()
+            ));
+        }
+
+        List<ExecutionResult> results = runConcurrently(REQUEST_COUNT, index -> {
+            Reservation reservation = reservations.get(index);
+            return reservationService.updateDateTime(
+                    reservation.getId(),
+                    reservation.getName(),
+                    targetDate,
+                    targetTime.getId()
+            );
+        });
+
+        assertThat(results).allMatch(ExecutionResult::isSuccess);
+        assertThat(results)
+                .extracting(ExecutionResult::reservation)
+                .allSatisfy(reservation -> {
+                    assertThat(reservation.getDate()).isEqualTo(targetDate);
+                    assertThat(reservation.getTime()).isEqualTo(targetTime);
+                });
+        assertQueueIsConsistent(targetDate, theme, REQUEST_COUNT);
+    }
+
+    private ReservationTime saveReservationTime(int hour, int minute) {
+        return reservationTimeRepository.save(new ReservationTime(LocalTime.of(hour, minute)));
+    }
+
+    private Theme saveTheme(String name) {
+        return themeRepository.save(new Theme(
+                name,
+                name + "용 테마",
+                "https://example.com/theme.png"
+        ));
+    }
+
+    private void assertQueueIsConsistent(LocalDate date, Theme theme, int reservationCount) {
         List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, theme.getId());
 
-        assertThat(results).allMatch(CreateResult::isSuccess);
-        assertThat(reservations).hasSize(REQUEST_COUNT);
+        assertThat(reservations).hasSize(reservationCount);
         assertThat(reservations)
                 .extracting(Reservation::getStatus)
                 .filteredOn(status -> status == ReservationStatus.RESERVED)
@@ -79,63 +150,40 @@ class ReservationConcurrencyTest {
         assertThat(reservations)
                 .extracting(Reservation::getStatus)
                 .filteredOn(status -> status == ReservationStatus.WAITING)
-                .hasSize(REQUEST_COUNT - 1);
+                .hasSize(reservationCount - 1);
         assertThat(reservations)
                 .extracting(Reservation::getWaitingRank)
-                .containsExactlyInAnyOrderElementsOf(LongStream.range(0, REQUEST_COUNT).boxed().toList());
+                .containsExactlyInAnyOrderElementsOf(LongStream.range(0, reservationCount).boxed().toList());
     }
 
-    @Test
-    @DisplayName("같은 사용자가 같은 슬롯에 동시에 예약하면 하나만 성공하고 나머지는 중복으로 거부된다.")
-    void create_fail_whenSameUserReservesSameSlotConcurrently() throws Exception {
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 2)));
-        Theme theme = themeRepository.save(new Theme("동시 중복 예약 테스트", "동시 중복 예약 테스트용 테마", "https://example.com/duplicate.png"));
-        LocalDate date = LocalDate.now().plusDays(2);
-
-        List<CreateResult> results = runConcurrently(REQUEST_COUNT, index ->
-                create("브라운", date, time, theme)
-        );
-
-        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, theme.getId());
-
-        assertThat(results).filteredOn(CreateResult::isSuccess).hasSize(1);
-        assertThat(results)
-                .filteredOn(result -> result.throwable() instanceof ConflictException)
-                .hasSize(REQUEST_COUNT - 1);
-        assertThat(reservations).hasSize(1);
-        assertThat(reservations.get(0).getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(reservations.get(0).getWaitingRank()).isZero();
-    }
-
-    private CreateResult create(String name, LocalDate date, ReservationTime time, Theme theme) {
-        try {
-            reservationService.create(name, date, time.getId(), theme.getId());
-            return CreateResult.success();
-        } catch (Throwable throwable) {
-            return CreateResult.failure(throwable);
-        }
-    }
-
-    private List<CreateResult> runConcurrently(
+    private List<ExecutionResult> runConcurrently(
             int taskCount,
-            IntFunction<CreateResult> task
+            IntFunction<Reservation> task
     ) throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(taskCount);
         CountDownLatch readyLatch = new CountDownLatch(taskCount);
         CountDownLatch startLatch = new CountDownLatch(1);
 
         try {
-            List<Future<CreateResult>> futures = new ArrayList<>();
+            List<Future<ExecutionResult>> futures = new ArrayList<>();
             for (int index = 0; index < taskCount; index++) {
                 final int taskIndex = index;
-                futures.add(executorService.submit(callable(readyLatch, startLatch, () -> task.apply(taskIndex))));
+                futures.add(executorService.submit(() -> {
+                    readyLatch.countDown();
+                    startLatch.await();
+                    try {
+                        return ExecutionResult.success(task.apply(taskIndex));
+                    } catch (Throwable throwable) {
+                        return ExecutionResult.failure(throwable);
+                    }
+                }));
             }
 
             readyLatch.await();
             startLatch.countDown();
 
-            List<CreateResult> results = new ArrayList<>();
-            for (Future<CreateResult> future : futures) {
+            List<ExecutionResult> results = new ArrayList<>();
+            for (Future<ExecutionResult> future : futures) {
                 results.add(future.get());
             }
             return results;
@@ -144,25 +192,13 @@ class ReservationConcurrencyTest {
         }
     }
 
-    private Callable<CreateResult> callable(
-            CountDownLatch readyLatch,
-            CountDownLatch startLatch,
-            Callable<CreateResult> task
-    ) {
-        return () -> {
-            readyLatch.countDown();
-            startLatch.await();
-            return task.call();
-        };
-    }
-
-    private record CreateResult(Throwable throwable) {
-        private static CreateResult success() {
-            return new CreateResult(null);
+    private record ExecutionResult(Reservation reservation, Throwable throwable) {
+        private static ExecutionResult success(Reservation reservation) {
+            return new ExecutionResult(reservation, null);
         }
 
-        private static CreateResult failure(Throwable throwable) {
-            return new CreateResult(throwable);
+        private static ExecutionResult failure(Throwable throwable) {
+            return new ExecutionResult(null, throwable);
         }
 
         private boolean isSuccess() {
