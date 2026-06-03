@@ -63,8 +63,7 @@ public class ReservationManager {
         }
         if (activeReservationService.existsById(id)) {
             Long slotId = activeReservationService.cancel(id, command.name());
-            pendingReservationService.popNextPendingAndPromote(slotId)
-                    .ifPresent(activeReservationService::savePromoted);
+            promoteNextPending(slotId);
             return;
         }
         throw new ReservationNotFoundException("해당 예약을 찾을 수 없습니다.");
@@ -101,23 +100,27 @@ public class ReservationManager {
         if (isSlotFull) {
             return fallbackToPending(id, command, slot);
         }
+        Long oldSlotId = activeReservationService.getSlotId(id);
+        ReservationInfo changedInfo;
         try {
-            Long oldSlotId = activeReservationService.getSlotId(id);
-            ReservationInfo changedInfo = activeReservationService.change(id, slot, command.name());
-            if (!oldSlotId.equals(slot.getId())) {
-                pendingReservationService.popNextPendingAndPromote(oldSlotId)
-                        .ifPresent(activeReservationService::savePromoted);
-            }
-            return changedInfo;
+            changedInfo = activeReservationService.change(id, slot, command.name());
         } catch (ReservationInUseException e) {
             return fallbackToPending(id, command, slot);
         }
+        if (!oldSlotId.equals(slot.getId())) {
+            promoteNextPending(oldSlotId);
+        }
+        return changedInfo;
     }
 
     private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
         Long oldSlotId = activeReservationService.cancel(id, command.name());
+        promoteNextPending(oldSlotId);
+        return pendingReservationService.add(slot, command.toCreateCommand());
+    }
+
+    private void promoteNextPending(Long oldSlotId) {
         pendingReservationService.popNextPendingAndPromote(oldSlotId)
                 .ifPresent(activeReservationService::savePromoted);
-        return pendingReservationService.add(slot, command.toCreateCommand());
     }
 }
