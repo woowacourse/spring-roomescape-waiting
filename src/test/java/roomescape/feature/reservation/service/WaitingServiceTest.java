@@ -84,7 +84,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(date, time, theme))
                 .thenReturn(true);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -111,7 +111,7 @@ class WaitingServiceTest {
             when(themeRepository.findThemeByIdAndNotDeleted(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsReservationAndStatus(any(Reservation.class), any()))
                 .thenReturn(false);
-            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(date, time, theme))
+            when(reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(date, time, theme))
                 .thenReturn(false);
 
             // when & then
@@ -180,12 +180,11 @@ class WaitingServiceTest {
             Theme theme = themeWithId(1L);
             Reservation waiting = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
-            Reservation canceledWaiting = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
 
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(waiting));
-            when(reservationRepository.update(any(Reservation.class))).thenReturn(canceledWaiting);
+            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.CANCELED))
+                .thenReturn(1);
 
             // when
             ReservationCancelResponseDto result = waitingService.cancelWaitingReservation(1L, new ReserverName("예약자"));
@@ -193,8 +192,28 @@ class WaitingServiceTest {
             // then
             assertThat(result.id()).isEqualTo(1L);
 
-            verify(reservationRepository).update(any(Reservation.class));
+            verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.CANCELED);
             verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
+        }
+
+        @Test
+        void 취소_직전_상태가_바뀌어_갱신되지_않으면_예외가_발생한다() {
+            // given
+            LocalDate futureDate = LocalDate.now().plusYears(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation waiting = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.WAITING);
+
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(waiting));
+            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.CANCELED))
+                .thenReturn(0);
+
+            // when & then
+            assertThatThrownBy(() -> waitingService.cancelWaitingReservation(1L, new ReserverName("예약자")))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("대기중인 예약이 아닙니다.");
         }
 
         @Test
@@ -208,7 +227,7 @@ class WaitingServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
 
-            verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
         }
 
         @Test
@@ -228,7 +247,7 @@ class WaitingServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 취소할 권한이 없습니다.");
 
-            verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
         }
 
         @Test
@@ -248,7 +267,7 @@ class WaitingServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("대기중인 예약이 아닙니다.");
 
-            verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
         }
 
         @Test
@@ -268,7 +287,7 @@ class WaitingServiceTest {
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
 
-            verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
         }
     }
 }

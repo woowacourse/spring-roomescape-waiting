@@ -450,7 +450,7 @@ class JdbcReservationRepositoryTest {
             Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
                 reservation.getDate(), time, theme);
 
             // then
@@ -466,7 +466,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.update(reservation.cancelActive(new ReserverName(ReservationFixture.FUTURE.getName())));
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
                 reservation.getDate(), time, theme);
 
             // then
@@ -581,6 +581,153 @@ class JdbcReservationRepositoryTest {
                     tuple(reservation2.getId(), ReservationStatus.ACTIVE)
                 );
             assertThat(reservationRepository.existsReservationByIdAndNotDeleted(reservation1.getId())).isFalse();
+        }
+    }
+
+    @Nested
+    class 상태_조건부_변경 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 현재_상태가_기대값과_일치하면_상태를_변경하고_1을_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.ACTIVE));
+
+            // when
+            int changed = reservationRepository.changeStatus(
+                active.getId(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+
+            // then
+            assertThat(changed).isEqualTo(1);
+            assertThat(reservationRepository.findAllReservations())
+                .filteredOn(found -> found.getId().equals(active.getId()))
+                .extracting(Reservation::getStatus)
+                .containsExactly(ReservationStatus.CANCELED);
+        }
+
+        @Test
+        void 현재_상태가_기대값과_다르면_변경하지_않고_0을_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.ACTIVE));
+
+            // when: 기대 상태를 WAITING으로 주지만 실제는 ACTIVE
+            int changed = reservationRepository.changeStatus(
+                active.getId(), ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+
+            // then
+            assertThat(changed).isZero();
+            assertThat(reservationRepository.findAllReservations())
+                .filteredOn(found -> found.getId().equals(active.getId()))
+                .extracting(Reservation::getStatus)
+                .containsExactly(ReservationStatus.ACTIVE);
+        }
+    }
+
+    @Nested
+    class 낙관적_락 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 버전이_일치하면_수정에_성공한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            Reservation saved = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE));
+            Reservation reread = reservationRepository.findReservationByIdAndNotDeleted(saved.getId()).orElseThrow();
+
+            // when
+            Reservation updated = reservationRepository.update(
+                reread.update(new ReserverName("예약자"), date.plusDays(1), time, theme));
+
+            // then
+            assertThat(updated.getId()).isEqualTo(saved.getId());
+            assertThat(reservationRepository.findReservationByIdAndNotDeleted(saved.getId()))
+                .get()
+                .extracting(Reservation::getDate)
+                .isEqualTo(date.plusDays(1));
+        }
+
+        @Test
+        void 읽은_뒤_다른_요청이_먼저_변경했으면_CONCURRENT_MODIFICATION_예외가_발생한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            Reservation saved = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE));
+            // 동시 수정 시뮬레이션: 같은 행을 먼저 변경해 버전을 올린다
+            reservationRepository.changeStatus(saved.getId(), ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+
+            // when & then: 오래된 버전(0)을 가진 객체로 수정 시도
+            Reservation stale = saved.update(new ReserverName("예약자"), date.plusDays(1), time, theme);
+            assertThatThrownBy(() -> reservationRepository.update(stale))
+                .isInstanceOf(GeneralException.class)
+                .hasMessage("다른 요청이 먼저 예약을 변경했습니다. 다시 시도해주세요.");
+        }
+    }
+
+    @Nested
+    class 활성_또는_대기_예약_존재_여부 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 활성_예약이_있으면_true를_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Reservation active = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
+
+            // when & then
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(active.getDate(), time, theme)).isTrue();
+        }
+
+        @Test
+        void 대기_예약이_있으면_true를_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            reservationRepository.save(
+                Reservation.create(new ReserverName("예약자1"), date, time, theme, ReservationStatus.ACTIVE));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("예약자2"), date, time, theme, ReservationStatus.WAITING));
+
+            // when & then
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(date, time, theme)).isTrue();
+        }
+
+        @Test
+        void 취소되거나_삭제된_예약만_있으면_false를_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            LocalDate date = LocalDate.now().plusYears(1);
+            Reservation active = reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.ACTIVE));
+            reservationRepository.update(active.delete());
+
+            // when & then
+            assertThat(reservationRepository.existsActiveOrWaitingReservation(date, time, theme)).isFalse();
         }
     }
 }

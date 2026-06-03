@@ -72,7 +72,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.ACTIVE);
 
-        validateNotReservedByOther(reservation);
+        validateNotReservedOrWaitedByOther(reservation);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
@@ -115,7 +115,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
         Reservation updated = existingReservation.update(command.name(), command.date(), newTime, newTheme);
 
-        validateNotReservedByOther(updated);
+        validateNotReservedOrWaitedByOther(updated);
 
         try {
             return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
@@ -130,7 +130,13 @@ public class ReservationManagementService implements ReservationService, AdminRe
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        Reservation canceledReservation = reservationRepository.update(reservation.cancelActive(name));
+        Reservation canceledReservation = reservation.cancelActive(name);
+        int changedRowCount = reservationRepository.changeStatus(
+                id, ReservationStatus.ACTIVE, ReservationStatus.CANCELED);
+        if (changedRowCount == 0) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+
         eventPublisher.publishEvent(new ActiveReservationCancelEvent(
                 canceledReservation.getTime().getId(),
                 canceledReservation.getTheme().getId(),
@@ -178,11 +184,18 @@ public class ReservationManagementService implements ReservationService, AdminRe
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelWaiting(name)));
+        Reservation canceledReservation = reservation.cancelWaiting(name);
+        int changedRowCount = reservationRepository.changeStatus(
+                id, ReservationStatus.WAITING, ReservationStatus.CANCELED);
+        if (changedRowCount <= 0) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+
+        return reservationMapper.toCancelResponseDto(canceledReservation);
     }
 
-    private void validateNotReservedByOther(Reservation reservation) {
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+    private void validateNotReservedOrWaitedByOther(Reservation reservation) {
+        if (reservationRepository.existsActiveOrWaitingReservation(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme())) {
@@ -203,7 +216,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
     }
 
     private void validateAlreadyReserved(Reservation reservation) {
-        boolean alreadyReserved = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
+        boolean alreadyReserved = reservationRepository.existsReservationByDateAndTimeAndThemeAndActive(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme()

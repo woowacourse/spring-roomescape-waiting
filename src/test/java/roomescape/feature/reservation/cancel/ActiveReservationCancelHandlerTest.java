@@ -1,6 +1,5 @@
 package roomescape.feature.reservation.cancel;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -13,7 +12,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,20 +48,20 @@ class ActiveReservationCancelHandlerTest {
     class 가장_빠른_대기_예약을_확정한다 {
 
         @Test
-        void 가장_빠른_순번의_대기_예약을_ACTIVE로_확정한다() {
+        void 가장_빠른_순번의_대기_예약을_WAITING에서_ACTIVE로_확정한다() {
             // given
             Reservation waiting = Reservation.reconstruct(
                     1L, new ReserverName("예약자"), DATE, time(), theme(), ReservationStatus.WAITING);
             when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
                     .thenReturn(Optional.of(waiting));
+            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
+                    .thenReturn(1);
 
             // when
             reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
 
             // then
-            ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-            verify(reservationRepository).update(captor.capture());
-            assertThat(captor.getValue().getStatus()).isEqualTo(ReservationStatus.ACTIVE);
+            verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
         }
 
         @Test
@@ -76,7 +74,30 @@ class ActiveReservationCancelHandlerTest {
             reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
 
             // then
-            verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+        }
+
+        @Test
+        void 후보_대기가_그_사이_취소되면_다음_순번을_승격한다() {
+            // given
+            Reservation first = Reservation.reconstruct(
+                    1L, new ReserverName("1순위"), DATE, time(), theme(), ReservationStatus.WAITING);
+            Reservation second = Reservation.reconstruct(
+                    2L, new ReserverName("2순위"), DATE, time(), theme(), ReservationStatus.WAITING);
+            when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
+                    .thenReturn(Optional.of(first))
+                    .thenReturn(Optional.of(second));
+            when(reservationRepository.changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
+                    .thenReturn(0);
+            when(reservationRepository.changeStatus(2L, ReservationStatus.WAITING, ReservationStatus.ACTIVE))
+                    .thenReturn(1);
+
+            // when
+            reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+
+            // then
+            verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
+            verify(reservationRepository).changeStatus(2L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
         }
 
         @Test

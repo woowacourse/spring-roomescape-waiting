@@ -25,11 +25,15 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
+    int changeStatus(Long id, ReservationStatus from, ReservationStatus to);
+
     int countByIdLessThanEqualAndDateAndTimeAndTheme(Long id, LocalDate date, Time time, Theme theme);
 
     boolean existsReservationByIdAndNotDeleted(Long id);
 
-    boolean existsReservationByDateAndTimeAndThemeAndNotDeleted(LocalDate date, Time time, Theme theme);
+    boolean existsReservationByDateAndTimeAndThemeAndActive(LocalDate date, Time time, Theme theme);
 
     boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status);
+
+    boolean existsActiveOrWaitingReservation(LocalDate date, Time time, Theme theme);
 }

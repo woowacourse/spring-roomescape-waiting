@@ -1,11 +1,13 @@
 package roomescape.feature.reservation.domain;
 
 import java.time.LocalDate;
+import lombok.Getter;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.error.exception.GeneralException;
 
+@Getter
 public class Reservation {
 
     private final Long id;
@@ -13,26 +15,35 @@ public class Reservation {
     private final Schedule schedule;
     private final Theme theme;
     private final ReservationStatus status;
+    private final long version;
 
-    private Reservation(Long id, ReserverName name, Schedule schedule, Theme theme, ReservationStatus status) {
+    private Reservation(Long id, ReserverName name, Schedule schedule, Theme theme, ReservationStatus status,
+        long version) {
         this.id = id;
         this.name = name;
         this.schedule = schedule;
         this.theme = theme;
         this.status = status;
+        this.version = version;
     }
 
     public static Reservation create(ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
         Schedule schedule = new Schedule(date, time);
         validateFuture(schedule);
 
-        return new Reservation(null, name, schedule, theme, status);
+        return new Reservation(null, name, schedule, theme, status, 0L);
     }
 
     public static Reservation reconstruct(
         Long id, ReserverName name, LocalDate date,
         Time time, Theme theme, ReservationStatus status) {
-        return new Reservation(id, name, new Schedule(date, time), theme, status);
+        return new Reservation(id, name, new Schedule(date, time), theme, status, 0L);
+    }
+
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date,
+        Time time, Theme theme, ReservationStatus status, long version) {
+        return new Reservation(id, name, new Schedule(date, time), theme, status, version);
     }
 
     public Reservation update(ReserverName requestName, LocalDate newDate, Time newTime, Theme newTheme) {
@@ -40,7 +51,7 @@ public class Reservation {
         validateUpdatable(requestName, newSchedule);
         validateChanged(newSchedule, newTheme);
 
-        return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
+        return new Reservation(this.id, this.name, newSchedule, newTheme, this.status, this.version);
     }
 
     public Reservation delete() {
@@ -48,7 +59,7 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.ALREADY_DELETED);
         }
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.DELETED);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.DELETED, this.version);
     }
 
     public Reservation cancelActive(ReserverName requestName) {
@@ -57,7 +68,7 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED, this.version);
     }
 
     public Reservation cancelWaiting(ReserverName requestName) {
@@ -66,7 +77,7 @@ public class Reservation {
         }
         validateCancelable(requestName);
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED, this.version);
     }
 
     public Reservation confirmWaiting() {
@@ -74,7 +85,7 @@ public class Reservation {
             throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
         }
 
-        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.ACTIVE);
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.ACTIVE, this.version);
     }
 
     private void validateCancelable(ReserverName requestName) {
@@ -123,31 +134,11 @@ public class Reservation {
         return currentId != null && currentId.equals(newId);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public ReserverName getName() {
-        return name;
-    }
-
-    public boolean hasDifferentName(ReserverName name) {
-        return !this.name.equals(name);
-    }
-
     public LocalDate getDate() {
         return schedule.date();
     }
 
     public Time getTime() {
         return schedule.time();
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }
