@@ -23,13 +23,11 @@ import java.util.Optional;
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
     private static final Logger log = LoggerFactory.getLogger(JdbcReservationRepository.class);
-    private static final String QUEUE_POSITION_SUBQUERY = """
-            SELECT COUNT(*)
-            FROM reservation same_slot
-            WHERE same_slot.date = r.date
-             AND same_slot.time_id = r.time_id
-             AND same_slot.theme_id = r.theme_id
-             AND same_slot.request_order <= r.request_order
+    private static final String QUEUE_POSITION_EXPRESSION = """
+            ROW_NUMBER() OVER (
+                PARTITION BY r.date, r.time_id, r.theme_id
+                ORDER BY r.request_order ASC, r.id ASC
+            )
             """;
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
@@ -73,14 +71,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Reservation> findByName(String name) {
         String sql = selectReservationsByNameSql();
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, name, name, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = selectReservationByIdSql();
 
-        return jdbcTemplate.query(sql, reservationRowMapper, id)
+        return jdbcTemplate.query(sql, reservationRowMapper, id, id)
                 .stream()
                 .findFirst();
     }
@@ -133,8 +131,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
@@ -149,6 +147,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private String selectReservationsByNameSql() {
         return """
+                WITH target_slots AS (
+                    SELECT DISTINCT date,
+                                    time_id,
+                                    theme_id
+                    FROM reservation
+                    WHERE name = ?
+                )
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -188,13 +193,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
+                        JOIN target_slots target
+                            ON target.date = r.date
+                           AND target.time_id = r.time_id
+                           AND target.theme_id = r.theme_id
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
-                        WHERE r.name = ?
                     ) ranked
+                    WHERE ranked.name = ?
                     UNION ALL
                     SELECT h.reservation_id,
                            h.name,
@@ -224,6 +233,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private String selectReservationByIdSql() {
         return """
+                WITH target_slot AS (
+                    SELECT date,
+                           time_id,
+                           theme_id
+                    FROM reservation
+                    WHERE id = ?
+                )
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -263,13 +279,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (""" + QUEUE_POSITION_SUBQUERY + """
-                                ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
+                        JOIN target_slot target
+                            ON target.date = r.date
+                           AND target.time_id = r.time_id
+                           AND target.theme_id = r.theme_id
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
-                        WHERE r.id = ?
                     ) ranked
+                    WHERE ranked.reservation_id = ?
                 ) result
                 ORDER BY result.date ASC,
                          result.start_at ASC,
@@ -319,14 +339,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                                t.description AS theme_description,
                                t.thumbnail AS theme_thumbnail,
                                r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
+                               """ + QUEUE_POSITION_EXPRESSION + """
+                               AS queue_position
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
