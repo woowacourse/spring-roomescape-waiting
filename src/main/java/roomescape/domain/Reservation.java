@@ -65,8 +65,4 @@ public class Reservation {
     public boolean hasSameName(String name) {
         return this.name.equals(name);
     }
-
-    public boolean matches(String name, ReservationStatus status) {
-        return this.name.equals(name) && this.status == status;
-    }
 }

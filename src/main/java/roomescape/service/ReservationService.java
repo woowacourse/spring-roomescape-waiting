@@ -61,14 +61,6 @@ public class ReservationService {
         reservationRepository.save(slot);
     }
 
-    private ReservationSlotResult saveAndCreateResult(ReservationSlot slot, Reservation reservation) {
-        ReservationSlot saved = reservationRepository.save(slot);
-        return ReservationSlotResult.from(
-                saved,
-                saved.findReservationByNameAndStatus(reservation.getName(), reservation.getStatus())
-        );
-    }
-
     private ReservationSlotResult moveReservation(
             Reservation reservation,
             ReservationSlot current,
@@ -80,6 +72,11 @@ public class ReservationService {
         reservationRepository.save(current);
 
         return saveAndCreateResult(target, moved);
+    }
+
+    private ReservationSlotResult saveAndCreateResult(ReservationSlot slot, Reservation reservation) {
+        ReservationSlot saved = reservationRepository.save(slot);
+        return ReservationSlotResult.from(saved, saved.findActiveEntryByName(reservation.getName()));
     }
 
     private ReservationSlot findOrCreateSlot(ReservationCommand command) {

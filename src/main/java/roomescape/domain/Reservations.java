@@ -62,9 +62,10 @@ public class Reservations {
                 .findFirst();
     }
 
-    public Optional<Reservation> findByNameAndStatus(String name, ReservationStatus status) {
+    public Optional<Reservation> findActiveEntryByName(String name) {
         return reservations.stream()
-                .filter(reservation -> reservation.matches(name, status))
+                .filter(Reservation::isActive)
+                .filter(reservation -> reservation.hasSameName(name))
                 .findFirst();
     }
 }
