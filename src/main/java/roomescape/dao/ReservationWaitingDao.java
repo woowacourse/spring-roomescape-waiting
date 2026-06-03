@@ -8,7 +8,6 @@ import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.dto.query.ReservationWaitingWithOrder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,34 +35,6 @@ public class ReservationWaitingDao {
                 resultSet.getDate("reservation_date").toLocalDate(),
                 reservationTime,
                 theme
-        );
-    };
-
-    private static final RowMapper<ReservationWaitingWithOrder> WITH_ORDER_ROW_MAPPER = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = new ReservationTime(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime()
-        );
-
-        Theme theme = new Theme(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail")
-        );
-
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
-                resultSet.getLong("id"),
-                resultSet.getString("waiting_name"),
-                resultSet.getTimestamp("created_at").toLocalDateTime(),
-                resultSet.getDate("reservation_date").toLocalDate(),
-                reservationTime,
-                theme
-        );
-
-        return new ReservationWaitingWithOrder(
-                reservationWaiting,
-                resultSet.getInt("waiting_order")
         );
     };
 
@@ -136,36 +107,6 @@ public class ReservationWaitingDao {
     public List<ReservationWaiting> selectByName(String name) {
         String sql = baseSelectSql() + "WHERE rw.name = ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, name);
-    }
-
-    public List<ReservationWaitingWithOrder> selectByNameWithOrder(String name) {
-        String sql = """
-                SELECT *
-                FROM (
-                    SELECT rw.id,
-                           rw.name AS waiting_name,
-                           rw.created_at,
-                           rw.reservation_date,
-                           rt.id AS time_id,
-                           rt.start_at,
-                           t.id AS theme_id,
-                           t.name AS theme_name,
-                           t.description,
-                           t.thumbnail,
-                           ROW_NUMBER() OVER (
-                               PARTITION BY rw.reservation_date, rw.time_id, rw.theme_id
-                               ORDER BY rw.created_at, rw.id
-                           ) AS waiting_order
-                    FROM reservation_waiting AS rw
-                    INNER JOIN reservation_time AS rt
-                    ON rw.time_id = rt.id
-                    INNER JOIN theme AS t
-                    ON rw.theme_id = t.id
-                ) AS ordered_waiting
-                WHERE waiting_name = ?
-                """;
-
-        return jdbcTemplate.query(sql, WITH_ORDER_ROW_MAPPER, name);
     }
 
     private String baseSelectSql() {

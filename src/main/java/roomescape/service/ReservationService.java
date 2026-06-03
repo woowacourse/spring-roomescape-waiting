@@ -11,10 +11,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
@@ -45,7 +42,7 @@ public class ReservationService {
     public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.date(),reservationTime,theme);
+        ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
 
         slot.validateNotPast(now);
         validateUniqueReservation(slot);
@@ -71,11 +68,19 @@ public class ReservationService {
                 .map(MyReservationResponse::fromReservation)
                 .toList();
 
-        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByNameWithOrder(name).stream()
-                .map(waitingWithOrder -> MyReservationResponse.fromReservationWaiting(
-                        waitingWithOrder.reservationWaiting(),
-                        waitingWithOrder.order()
-                ))
+        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
+                .map(waiting -> {
+                    ReservationSlot slot = new ReservationSlot(
+                            waiting.getReservationDate(),
+                            waiting.getTime(),
+                            waiting.getTheme()
+                    );
+
+                    ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
+                    int order = waitings.orderOf(waiting);
+
+                    return MyReservationResponse.fromReservationWaiting(waiting, order);
+                })
                 .toList();
 
         List<MyReservationResponse> reservationResponses = new ArrayList<>();
