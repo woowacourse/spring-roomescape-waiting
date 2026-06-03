@@ -29,6 +29,10 @@ public class ReservationWaiting {
         return this.name.equals(name);
     }
 
+    public Reservation promoteToReservation() {
+        return new Reservation(null, name, slot);
+    }
+
     public ReservationSlot getSlot() {
         return slot;
     }

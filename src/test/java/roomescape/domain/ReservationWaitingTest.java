@@ -86,6 +86,21 @@ class ReservationWaitingTest {
         assertThat(reservation.isPast(LocalDateTime.now())).isTrue();
     }
 
+    @Test
+    void 예약_대기를_예약으로_승격한다() {
+        // given
+        ReservationSlot slot = slot(date, new ReservationTime(1L, startAt));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot);
+
+        // when
+        Reservation result = waiting.promoteToReservation();
+
+        // then
+        assertThat(result.getId()).isNull();
+        assertThat(result.getName()).isEqualTo(waiting.getName());
+        assertThat(result.getSlot()).isEqualTo(slot);
+    }
+
     private ReservationWaiting waiting(String name, LocalDate date, ReservationTime time) {
         return new ReservationWaiting(null, name, slot(date, time));
     }

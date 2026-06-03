@@ -3,19 +3,18 @@ package roomescape.service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -24,16 +23,19 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationWaitingRepository waitingRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
+            ReservationWaitingRepository waitingRepository,
             ReservationValidator reservationValidator) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
         this.reservationValidator = reservationValidator;
     }
 
@@ -72,7 +74,8 @@ public class ReservationService {
 
     @Transactional
     public void deleteByAdmin(Long id) {
-        reservationRepository.delete(id);
+        reservationRepository.findByIdForUpdate(id)
+                        .ifPresent(this::deleteAndPromoteWaiting);
     }
 
     @Transactional
@@ -106,7 +109,7 @@ public class ReservationService {
     }
 
     private Reservation findReservation(Long id) {
-        return reservationRepository.findById(id)
+        return reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
@@ -137,6 +140,18 @@ public class ReservationService {
             return findReservationTime(updateTimeId);
         }
         return originalTime;
+    }
+
+    private void deleteAndPromoteWaiting(Reservation reservation) {
+        Optional<ReservationWaiting> firstWaiting = waitingRepository.findFirstBySlotForUpdate(reservation.getSlot());
+        reservationRepository.delete(reservation.getId());
+        firstWaiting.ifPresent(this::promoteWaiting);
+    }
+
+    private void promoteWaiting(ReservationWaiting firstWaiting) {
+        Reservation promotedReservation = firstWaiting.promoteToReservation();
+        insertReservation(promotedReservation);
+        waitingRepository.delete(firstWaiting.getId());
     }
 
     private void updateReservation(Reservation updatedReservation) {

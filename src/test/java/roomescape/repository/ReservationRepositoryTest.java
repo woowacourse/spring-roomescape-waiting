@@ -73,7 +73,7 @@ class ReservationRepositoryTest {
         assertAll(
                 () -> assertThat(deletedCount).isEqualTo(1),
                 () -> assertThat(reservations).hasSize(1),
-                () -> assertThat(reservationRepository.findById(id1)).isEmpty());
+                () -> assertThat(reservationRepository.findByIdForUpdate(id1)).isEmpty());
     }
 
     @Test
@@ -114,7 +114,7 @@ class ReservationRepositoryTest {
         int updatedCount = reservationRepository.update(updatedReservation);
 
         // then
-        Reservation result = reservationRepository.findById(id).get();
+        Reservation result = reservationRepository.findByIdForUpdate(id).get();
         assertAll(
                 () -> assertThat(updatedCount).isEqualTo(1),
                 () -> assertThat(result.getSlot().getDate()).isEqualTo(updateDate),

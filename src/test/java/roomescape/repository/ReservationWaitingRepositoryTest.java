@@ -148,6 +148,44 @@ class ReservationWaitingRepositoryTest {
                 () -> assertThat(result.turn()).isEqualTo(2L));
     }
 
+    @Test
+    void 슬롯의_첫번째_예약_대기를_조회한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        ReservationWaiting firstWaiting = waitingRepository.insert(new ReservationWaiting(null, "브라운", slot));
+        waitingRepository.insert(new ReservationWaiting(null, "구구", slot));
+        waitingRepository.insert(new ReservationWaiting(null, "도라", new ReservationSlot(date, otherTime, theme)));
+
+        // when
+        ReservationWaiting result = waitingRepository.findFirstBySlotForUpdate(slot).get();
+
+        // then
+        assertAll(
+                () -> assertThat(result.getId()).isEqualTo(firstWaiting.getId()),
+                () -> assertThat(result.getName()).isEqualTo("브라운"),
+                () -> assertThat(result.getSlot().getDate()).isEqualTo(slot.getDate()),
+                () -> assertThat(result.getSlot().getTime().getId()).isEqualTo(slot.getTime().getId()),
+                () -> assertThat(result.getSlot().getTheme().getId()).isEqualTo(slot.getTheme().getId()));
+    }
+
+    @Test
+    void 슬롯에_예약_대기가_없으면_빈_값을_반환한다() {
+        // given
+        ReservationTime time = findTimeByStartAt("15:00");
+        ReservationTime otherTime = findTimeByStartAt("12:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", new ReservationSlot(date, otherTime, theme)));
+
+        // when
+        boolean result = waitingRepository.findFirstBySlotForUpdate(new ReservationSlot(date, time, theme)).isEmpty();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
     private ReservationTime findTimeByStartAt(String startAt) {
         String sql = "SELECT id, start_at FROM reservation_time WHERE start_at = ?;";
         return jdbcTemplate.queryForObject(

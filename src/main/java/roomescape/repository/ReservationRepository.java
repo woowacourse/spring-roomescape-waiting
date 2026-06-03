@@ -66,7 +66,7 @@ public class ReservationRepository {
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findByIdForUpdate(Long id) {
         String sql = """
                 SELECT
                     r.id as reservation_id,
@@ -83,7 +83,8 @@ public class ReservationRepository {
                   ON r.time_id = rt.id
                 INNER JOIN theme as t
                   ON r.theme_id = t.id
-                WHERE r.id = ?;
+                WHERE r.id = ?
+                FOR UPDATE;
                 """;
         List<Reservation> result = jdbcTemplate.query(sql, reservationRowMapper, id);
         return result.stream().findAny();

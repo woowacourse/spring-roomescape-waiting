@@ -2,15 +2,19 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.springframework.dao.DuplicateKeyException;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 
 import java.time.LocalDate;
@@ -30,11 +34,13 @@ class ReservationServiceTest {
     private final ReservationRepository reservationRepository = mock();
     private final ReservationTimeRepository reservationTimeRepository = mock();
     private final ThemeRepository themeRepository = mock();
+    private final ReservationWaitingRepository waitingRepository = mock();
     private final ReservationValidator reservationValidator = new ReservationValidator(reservationRepository);
     private final ReservationService service = new ReservationService(
             reservationRepository,
             reservationTimeRepository,
             themeRepository,
+            waitingRepository,
             reservationValidator);
 
     private final LocalDate date = LocalDate.now().plusDays(1);
@@ -184,14 +190,14 @@ class ReservationServiceTest {
         Long id = 1L;
         String name = "브라운";
         Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
 
         // when
         service.deleteByUser(id, name, now);
 
         // then
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).delete(id);
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
@@ -200,13 +206,103 @@ class ReservationServiceTest {
     void 관리자_예약을_삭제한다() {
         // given
         Long id = 1L;
+        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.empty());
 
         // when
         service.deleteByAdmin(id);
 
         // then
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
         verify(reservationRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 관리자_예약_삭제시_첫번째_대기를_예약으로_자동_승격한다() {
+        // given
+        Long id = 1L;
+        Long waitingId = 2L;
+        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.<Reservation>getArgument(0).withId(3L));
+
+        // when
+        service.deleteByAdmin(id);
+
+        // then
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        InOrder inOrder = inOrder(reservationRepository, waitingRepository);
+        inOrder.verify(reservationRepository).findByIdForUpdate(id);
+        inOrder.verify(waitingRepository).findFirstBySlotForUpdate(reservation.getSlot());
+        inOrder.verify(reservationRepository).delete(id);
+        inOrder.verify(reservationRepository).insert(captor.capture());
+        inOrder.verify(waitingRepository).delete(waitingId);
+
+        Reservation promotedReservation = captor.getValue();
+        assertAll(
+                () -> assertThat(promotedReservation.getId()).isNull(),
+                () -> assertThat(promotedReservation.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()));
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 존재하지_않는_예약을_관리자가_삭제하면_아무것도_하지_않는다() {
+        // given
+        Long id = 999L;
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.empty());
+
+        // when
+        service.deleteByAdmin(id);
+
+        // then
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
+        verify(reservationRepository, never()).delete(any());
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 자동_승격할_예약_등록이_실패하면_대기는_삭제하지_않는다() {
+        // given
+        Long id = 1L;
+        Long waitingId = 2L;
+        Reservation reservation = createByUserReservation(id, "브라운", date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenThrow(new DuplicateKeyException("duplicate"));
+
+        // when & then
+        assertThatThrownBy(() -> service.deleteByAdmin(id))
+                .isInstanceOf(RoomescapeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
+                .hasMessage("이미 예약된 시간입니다.");
+
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
+        verify(reservationRepository, times(1)).delete(id);
+        verify(reservationRepository, times(1)).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -219,7 +315,7 @@ class ReservationServiceTest {
         ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
         ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
         Reservation reservation = createByUserReservation(id, name, date, originalTime);
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.of(updateTime));
@@ -239,7 +335,7 @@ class ReservationServiceTest {
                 () -> assertThat(result.getSlot().getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getSlot().getTime()).isEqualTo(updateTime),
                 () -> assertThat(result.getSlot().getTheme()).isEqualTo(reservation.getSlot().getTheme()));
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationTimeRepository, times(1)).findById(timeId);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
         verify(reservationRepository, times(1)).update(captor.capture());
@@ -261,7 +357,7 @@ class ReservationServiceTest {
         LocalDate updateDate = date.plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
         Reservation reservation = createByUserReservation(id, name, date, time);
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
@@ -275,7 +371,7 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.getSlot().getDate()).isEqualTo(updateDate),
                 () -> assertThat(result.getSlot().getTime()).isEqualTo(time));
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
         verify(reservationRepository, times(1)).update(any(Reservation.class));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
@@ -289,7 +385,7 @@ class ReservationServiceTest {
         LocalDate updateDate = date.plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
         Reservation reservation = createByUserReservation(id, name, date, time);
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
@@ -302,7 +398,7 @@ class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약입니다.");
 
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
         verify(reservationRepository, times(1)).update(any(Reservation.class));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
@@ -314,7 +410,7 @@ class ReservationServiceTest {
         Long id = 1L;
         String name = "브라운";
         Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
 
         // when & then
@@ -323,7 +419,7 @@ class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
 
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, never()).update(any(Reservation.class));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
@@ -332,7 +428,7 @@ class ReservationServiceTest {
     void 존재하지_않는_예약_변경시_예외_발생() {
         // given
         Long id = 999L;
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.empty());
 
         // when & then
@@ -341,7 +437,7 @@ class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약입니다.");
 
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, never()).update(any(Reservation.class));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
     }
@@ -353,7 +449,7 @@ class ReservationServiceTest {
         String name = "브라운";
         Long timeId = 999L;
         Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
-        when(reservationRepository.findById(id))
+        when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(timeId))
                 .thenReturn(Optional.empty());
@@ -364,7 +460,7 @@ class ReservationServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
 
-        verify(reservationRepository, times(1)).findById(id);
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationTimeRepository, times(1)).findById(timeId);
         verify(reservationRepository, never()).update(any(Reservation.class));
         verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
