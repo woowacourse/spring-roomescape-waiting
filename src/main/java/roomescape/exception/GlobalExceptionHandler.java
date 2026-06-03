@@ -1,9 +1,11 @@
 package roomescape.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -53,6 +55,39 @@ public class GlobalExceptionHandler {
                 .orElse(ErrorCode.COMMON_BAD_REQUEST.getMessage());
 
         ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), message);
+
+        return ResponseEntity
+                .badRequest()
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException e
+    ) {
+        ErrorCode errorCode = ErrorCode.COMMON_BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                errorCode.getCode(),
+                errorCode.getMessage()
+        );
+
+        return ResponseEntity
+                .badRequest()
+                .body(errorResponse);
+    }
+
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e
+    ) {
+        ErrorCode errorCode = ErrorCode.COMMON_BAD_REQUEST;
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                errorCode.getCode(),
+                errorCode.getMessage()
+        );
 
         return ResponseEntity
                 .badRequest()
