@@ -543,7 +543,11 @@ async function submitReschedule() {
 }
 
 async function cancelReservation(id) {
-  if (!confirm("해당 예약을 취소하시겠습니까?")) {
+  const reservation = reservations.find(reservation => reservation.id === id);
+  const confirmMessage = reservation?.status === "WAITING"
+      ? "예약 대기를 취소하시겠습니까?"
+      : "해당 예약을 취소하시겠습니까?";
+  if (!confirm(confirmMessage)) {
     return;
   }
 

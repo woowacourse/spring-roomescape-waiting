@@ -321,7 +321,11 @@ async function createReservation() {
     return;
   }
 
-  alert("예약이 완료되었습니다.");
+  const reservation = await response.json();
+  const successMessage = reservation.status === "WAITING"
+      ? "예약 대기가 완료되었습니다."
+      : "예약이 완료되었습니다.";
+  alert(successMessage);
   location.href = "/reservation-lookup";
 }
 

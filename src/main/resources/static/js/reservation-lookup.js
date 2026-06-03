@@ -140,7 +140,7 @@ function renderReservations(reservations) {
 
     if (!isCanceled) {
       cancelButton.addEventListener("click", async () => {
-        await cancelReservation(reservation.id);
+        await cancelReservation(reservation);
       });
 
       if (canReschedule) {
@@ -283,14 +283,17 @@ async function submitReschedule() {
   await loadMyReservations();
 }
 
-async function cancelReservation(reservationId) {
-  const confirmed = confirm("예약을 취소하시겠습니까?");
+async function cancelReservation(reservation) {
+  const confirmMessage = reservation.status === "WAITING"
+      ? "예약 대기를 취소하시겠습니까?"
+      : "예약을 취소하시겠습니까?";
+  const confirmed = confirm(confirmMessage);
   if (!confirmed) {
     return;
   }
 
   const response = await authFetch(
-      `/member/reservations/${reservationId}/cancel`, {
+      `/member/reservations/${reservation.id}/cancel`, {
         method: "PATCH"
       });
 
