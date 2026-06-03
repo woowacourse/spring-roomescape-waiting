@@ -157,21 +157,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         return count != null && count > 0;
     }
 
-    @Override
-    public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE name = ?
-                  AND date = ?
-                  AND time_id = ?
-                  AND theme_id = ?
-                """;
-
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
-        return count != null && count > 0;
-    }
-
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
