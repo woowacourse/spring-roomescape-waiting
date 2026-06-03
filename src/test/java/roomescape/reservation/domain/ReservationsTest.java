@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 
 class ReservationsTest {
@@ -26,12 +27,13 @@ class ReservationsTest {
     private ReservationDate date = ReservationDateFixture.activeOneWeekLater();
     private ReservationTime time = ReservationTimeFixture.activeTime15();
     private Theme theme = ThemeFixture.theme("테마1");
+    private ReservationSlot slot = ReservationSlot.of(date, time, theme);
 
     @Test
     @DisplayName("슬롯 예약 목록에 요청자의 예약이 있으면 예외가 발생한다.")
     void validateNotAlreadyBookedBy_fail_whenRequesterAlreadyBooked() { // 특정 슬롯의 예약+대기목록
         // given
-        Reservations reservations = new Reservations(List.of(ReservationFixture.reservation(name, date, time, theme)));
+        Reservations reservations = new Reservations(List.of(ReservationFixture.reservation(name, slot)));
 
         // when & then
         Assertions.assertThatThrownBy(() -> reservations.validateNotAlreadyBookedBy(name))
@@ -44,7 +46,7 @@ class ReservationsTest {
     void validateNotAlreadyBookedBy_success_whenRequesterHasNoReservation() {
         // given
         Reservations reservations = new Reservations(
-                List.of(ReservationFixture.reservation(anotherName, date, time, theme))
+                List.of(ReservationFixture.reservation(anotherName, slot))
         );
 
         // when & then
@@ -56,7 +58,7 @@ class ReservationsTest {
     @DisplayName("슬롯 예약 목록에 다른 사람의 확정 예약이 있으면 true를 반환한다.")
     void hasReservedByOthers_returnTrue_whenAnotherUserReserved() {
         // given
-        Reservations reservations = new Reservations(List.of(ReservationFixture.reservation(anotherName, date, time, theme)));
+        Reservations reservations = new Reservations(List.of(ReservationFixture.reservation(anotherName, slot)));
 
         // when
         boolean result = reservations.hasReservedByOthers(name);
@@ -85,8 +87,7 @@ class ReservationsTest {
     void reserve_adds_new_reservation() {
         // given
         Reservations reservations = new Reservations(new ArrayList<>());
-        Reservation newReservation = ReservationFixture.reservation(name, date, time, theme);
-        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+        Reservation newReservation = ReservationFixture.reservation(name, slot);
 
         // when
         reservations.reserve(name, slot, LocalDateTime.now());
@@ -102,10 +103,9 @@ class ReservationsTest {
     void reserve_adds_waiting_reservation() {
         // given
         Reservations reservations = new Reservations(
-                List.of(ReservationFixture.reservation(name, date, time, theme))
+                List.of(ReservationFixture.reservation(name, slot))
         );
-        ReservationSlot slot = ReservationSlot.of(date, time, theme);
-        Reservation waitReservation = ReservationFixture.waitReservation(anotherName, date, time, theme);
+        Reservation waitReservation = ReservationFixture.waitReservation(anotherName, slot);
 
         // when
         reservations.reserve(anotherName, slot, LocalDateTime.now());
@@ -114,6 +114,40 @@ class ReservationsTest {
         Assertions.assertThat(reservations.values())
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("reservedAt")
                 .contains(waitReservation);
+    }
+
+    @Test
+    @DisplayName("예약+대기 목록에서 승격자는 가장 빨리 예약요청을 보낸 자이다.")
+    void findPromoteWaiting() {
+        // given
+        Reservation firstWait = Reservation.wait("test1", slot, LocalDateTime.now());
+        Reservation secondWait = Reservation.wait("test1", slot, LocalDateTime.now().plusDays(1));
+
+        Reservations reservations = new Reservations(List.of(firstWait, secondWait));
+
+        // when
+        Reservation actual = reservations.findPromoteWaiting().get();
+
+        // then
+        Assertions.assertThat(actual)
+                .isEqualTo(firstWait);
+    }
+
+    @Test
+    @DisplayName("예약+대기 목록에서 예약요청이 같을 경우, 승격자는 ID가 낮은(빠른) 사람이다.")
+    void findPromoteWaiting_same_reservedAt() {
+        LocalDateTime sameReservedAt = LocalDateTime.now();
+        Reservation laterCreatedWaiting = Reservation.load(2L, "test1", slot, WAITING, sameReservedAt);
+        Reservation earlierCreatedWaiting = Reservation.load(1L, "test1", slot, WAITING, sameReservedAt);
+
+        Reservations reservations = new Reservations(List.of(laterCreatedWaiting, earlierCreatedWaiting));
+
+        // when
+        Reservation actual = reservations.findPromoteWaiting().get();
+
+        // then
+        Assertions.assertThat(actual)
+                .isEqualTo(earlierCreatedWaiting);
     }
 
 }

@@ -5,7 +5,9 @@ import roomescape.slot.domain.ReservationSlot;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 
@@ -33,6 +35,12 @@ public record Reservations(
         if (alreadyBookedByMyself) {
             throw new ReservationException(RESERVATION_ALREADY_BOOKED);
         }
+    }
+
+    public Optional<Reservation> findPromoteWaiting() {
+        return values.stream()
+                .filter(Reservation::isWaiting)
+                .min(Comparator.comparing(Reservation::getReservedAt).thenComparing(Reservation::getId));
     }
 
     public boolean hasReservedByOthers(String name) {
