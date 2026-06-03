@@ -55,26 +55,24 @@ public record ReservationSlot(LocalDate date, Long themeId, Long timeId, LocalTi
     }
 
     public void validateReservable(LocalDateTime now) {
-        if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
-        }
+        validateNotPast(now, "현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
     }
 
     public void validateDeletable(LocalDateTime now) {
-        if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("이미 지나간 예약은 삭제할 수 없습니다.");
-        }
+        validateNotPast(now, "이미 지나간 예약은 삭제할 수 없습니다.");
     }
 
     public void validatePostponable(LocalDateTime now) {
-        if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("이미 지나간 예약은 미룰 수 없습니다.");
-        }
+        validateNotPast(now, "이미 지나간 예약은 미룰 수 없습니다.");
     }
 
     public void validateUpdatable(LocalDateTime now) {
+        validateNotPast(now, "이미 지나간 예약은 변경할 수 없습니다.");
+    }
+
+    private void validateNotPast(LocalDateTime now, String errorMessage) {
         if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("이미 지나간 예약은 변경할 수 없습니다.");
+            throw new RoomEscapeException(errorMessage);
         }
     }
 }
