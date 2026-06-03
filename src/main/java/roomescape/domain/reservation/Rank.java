@@ -4,7 +4,7 @@ import common.exception.ErrorCode;
 import common.exception.RoomEscapeException;
 
 public class Rank {
-    private static final int MIN_RANK_VALUE = 1;
+    private static final int MIN_RANK_VALUE = 0;
 
     private final int value;
 

@@ -55,11 +55,12 @@ public class ThemeRepository {
                 SELECT t.id, t.name, t.description, t.thumbnail_url
                 FROM THEME AS t
                 INNER JOIN (
-                    SELECT theme_id, count(theme_id) AS cnt
-                    FROM RESERVATION
-                    WHERE date BETWEEN ? AND ?
-                    GROUP BY theme_id
-                    ORDER BY count(theme_id) DESC, theme_id DESC
+                    SELECT s.theme_id, count(s.theme_id) AS cnt
+                    FROM reservation r
+                    INNER JOIN slot s ON r.slot_id = s.id
+                    WHERE s.date BETWEEN ? AND ?
+                    GROUP BY s.theme_id
+                    ORDER BY count(s.theme_id) DESC, s.theme_id DESC
                     LIMIT ?
                 ) AS topN ON t.id = topN.theme_id
                 ORDER BY topN.cnt DESC, topN.theme_id DESC

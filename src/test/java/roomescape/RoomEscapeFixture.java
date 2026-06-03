@@ -15,6 +15,7 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -30,6 +31,7 @@ public class RoomEscapeFixture {
     private static final ReservationDate PAST_DATE = new ReservationDate(LocalDate.of(2000, 11, 11));
     private static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
     private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
+    private static final Slot SLOT = Slot.create(FUTURE_DATE, TIME, THEME);
     private static final Rank APPROVE_RANK = new Rank(1);
     private static final Rank WAITING_RANK = new Rank(2);
 
@@ -49,12 +51,16 @@ public class RoomEscapeFixture {
         return TIME;
     }
 
+    public static Slot slot() {
+        return SLOT;
+    }
+
     public static Reservation reservationWithApproved() {
-        return Reservation.load(1L, NAME, FUTURE_DATE, TIME, THEME, Status.APPROVED, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, LocalDateTime.now(FIXED_CLOCK));
     }
 
     public static Reservation reservationWithWaiting() {
-        return Reservation.load(2L, NAME, FUTURE_DATE, TIME, THEME, Status.WAITING, LocalDateTime.now(FIXED_CLOCK));
+        return Reservation.load(2L, NAME, SLOT, Status.WAITING, LocalDateTime.now(FIXED_CLOCK));
     }
 
     public static ReservationResult reservationResultWithApproved() {
@@ -71,6 +77,10 @@ public class RoomEscapeFixture {
 
     public static ReservationCreateRequest reservationCreateRequest() {
         return new ReservationCreateRequest(NAME.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
+    }
+
+    public static ReservationCreateRequest reservationCreateRequestWithName(ReservationName name) {
+        return new ReservationCreateRequest(name.getValue(), FUTURE_DATE.getValue(), 1L, 1L);
     }
 
     public static ReservationCreateRequest reservationCreateRequestWithNullName() {

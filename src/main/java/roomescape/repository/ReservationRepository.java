@@ -10,48 +10,35 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThumbnailUrl;
 
 @Repository
 public class ReservationRepository {
-    public static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (resultSet, rowNum) -> Reservation.load(
-            resultSet.getLong("reservation_id"),
-            new ReservationName(resultSet.getString("name")),
-            new ReservationDate(resultSet.getDate("date").toLocalDate()),
-            ReservationTime.of(resultSet.getLong("time_id"), resultSet.getTime("start_at").toLocalTime()),
-            Theme.load(resultSet.getLong("theme_id"), new ThemeName(resultSet.getString("theme_name")),
-                    resultSet.getString("description"), new ThumbnailUrl(resultSet.getString("thumbnail_url"))),
-            Status.valueOf(resultSet.getString("status")),
-            resultSet.getTimestamp("created_at").toLocalDateTime());
+    public static final RowMapper<Reservation> RESERVATION_ROW_MAPPER =
+            (rs, rowNum) -> RepositoryRowMapper.reservationRowMapper(rs);
     private static final String SELECT_ALL = """
-            SELECT r.id   AS reservation_id,
+            SELECT r.id         AS reservation_id,
                    r.name,
-                   r.date,
                    r.status,
                    r.created_at,
-                   rt.id  AS time_id,
+                   s.id         AS slot_id,
+                   s.date       AS slot_date,
+                   rt.id        AS time_id,
                    rt.start_at,
-                   t.id   AS theme_id,
-                   t.name AS theme_name,
+                   t.id         AS theme_id,
+                   t.name       AS theme_name,
                    t.description,
                    t.thumbnail_url
             FROM reservation r
-            INNER JOIN reservation_time rt ON r.time_id  = rt.id
-            INNER JOIN theme             t  ON r.theme_id = t.id
+            INNER JOIN slot             s  ON r.slot_id  = s.id
+            INNER JOIN reservation_time rt ON s.time_id  = rt.id
+            INNER JOIN theme             t  ON s.theme_id = t.id
             """;
     private static final String UPDATE = """
             UPDATE reservation
-                SET
-                    name = ?,
-                    date = ?,
-                    time_id = ?,
-                    theme_id = ?,
-                    created_at = ?
+                SET name = ?, slot_id = ?, created_at = ?
             WHERE id = ?
             """;
     private static final String SELECT_BY_ID = SELECT_ALL + "WHERE r.id = ?";
@@ -59,19 +46,21 @@ public class ReservationRepository {
     private static final String EXISTS_BY_DATE_AND_TIME_AND_THEME_ID = """
             SELECT EXISTS (
                 SELECT 1
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?
+                FROM reservation r
+                INNER JOIN slot s ON r.slot_id = s.id
+                WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ? AND r.name = ?
             )
             """;
     private static final String EXISTS_APPROVED_BY_SLOT = """
             SELECT EXISTS (
                 SELECT 1
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'APPROVED'
+                FROM reservation r
+                INNER JOIN slot s ON r.slot_id = s.id
+                WHERE s.date = ? AND s.time_id = ? AND s.theme_id = ? AND r.status = 'APPROVED'
             )
             """;
     private static final String SELECT_FIRST_WAITING_BY_SLOT = SELECT_ALL + """
-            WHERE r.date = ? AND rt.id = ? AND t.id = ? AND r.status = 'WAITING'
+            WHERE s.date = ? AND rt.id = ? AND t.id = ? AND r.status = 'WAITING'
             ORDER BY r.created_at, r.id
             LIMIT 1
             """;
@@ -79,16 +68,18 @@ public class ReservationRepository {
     private static final String EXISTS_BY_TIME_ID = """
             SELECT EXISTS (
                 SELECT 1
-                    FROM reservation
-                    WHERE time_id = ?
-                    )
+                FROM reservation r
+                INNER JOIN slot s ON r.slot_id = s.id
+                WHERE s.time_id = ?
+            )
             """;
     private static final String EXISTS_BY_THEME_ID = """
             SELECT EXISTS (
                 SELECT 1
-                    FROM reservation
-                    WHERE theme_id = ?
-                    )
+                FROM reservation r
+                INNER JOIN slot s ON r.slot_id = s.id
+                WHERE s.theme_id = ?
+            )
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -117,32 +108,27 @@ public class ReservationRepository {
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = Map.of(
                 "name", reservation.getName().getValue(),
-                "date", reservation.getDate().getValue(),
-                "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId(),
+                "slot_id", reservation.getSlot().getId(),
                 "status", reservation.getStatus().name(),
                 "created_at", reservation.getCreatedAt()
         );
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return Reservation.load(generatedKey,
-                reservation.getName(),
-                reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus(), reservation.getCreatedAt());
+        return Reservation.load(generatedKey, reservation.getName(), reservation.getSlot(),
+                reservation.getStatus(), reservation.getCreatedAt());
     }
 
     public Reservation update(long id, Reservation target) {
-        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getValue(), target.getTime().getId(),
-                target.getTheme().getId(), target.getCreatedAt(), id);
+        jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getSlot().getId(),
+                target.getCreatedAt(), id);
 
-        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(),
+        return Reservation.load(id, target.getName(), target.getSlot(),
                 target.getStatus(), target.getCreatedAt());
     }
 
     public void deleteById(Long id) {
-        String sql = "delete from reservation where id = ?";
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
 
     public boolean existsByTimeId(long reservationTimeId) {
@@ -157,8 +143,8 @@ public class ReservationRepository {
 
     public boolean existsByTimeAndThemeAndDateAndName(Long timeId, Long themeId, LocalDate date, String name) {
         return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId,
-                        themeId, name));
+                jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class,
+                        date, timeId, themeId, name));
     }
 
     public boolean existsApprovedByTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date) {
@@ -177,7 +163,7 @@ public class ReservationRepository {
     }
 
     public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
-        String sql = SELECT_ALL + "WHERE r.date = ? AND t.id = ? AND rt.id = ?";
+        String sql = SELECT_ALL + "WHERE s.date = ? AND t.id = ? AND rt.id = ?";
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getValue(), theme.getId(), time.getId());
     }
 }

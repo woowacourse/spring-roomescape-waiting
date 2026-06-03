@@ -13,7 +13,7 @@ public class Reservations {
         long earlierCount = reservations.stream()
                 .filter(r -> isEarlierThan(r, target))
                 .count();
-        return new Rank((int) earlierCount + 1);
+        return new Rank((int) earlierCount);
     }
 
     private boolean isEarlierThan(Reservation source, Reservation target) {

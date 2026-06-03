@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +27,14 @@ import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,12 +42,14 @@ class ReservationServiceTest {
     private static final String URL = "https://zeze.com/thumb.jpg";
     private static final String NAME = "제제";
     private static final LocalDateTime TODAY = LocalDateTime.of(2026, 5, 10, 10, 0, 0);
+    private static final ReservationTime DUMMY_TIME = ReservationTime.of(1L, LocalTime.of(10, 0));
+    private static final Theme DUMMY_THEME = Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL));
+    private static final Slot DUMMY_SLOT = Slot.load(1L, new ReservationDate(LocalDate.of(2099, 1, 1)),
+            DUMMY_TIME, DUMMY_THEME);
     private static final Reservation DUMMY = Reservation.load(
             1L,
             new ReservationName(NAME),
-            new ReservationDate(LocalDate.of(2099, 1, 1)),
-            ReservationTime.of(1L, LocalTime.of(10, 0)),
-            Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
+            DUMMY_SLOT,
             Status.APPROVED,
             TODAY
     );
@@ -61,6 +64,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private SlotRepository slotRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -79,15 +85,8 @@ class ReservationServiceTest {
 
     @Test
     void APPROVED_예약_취소_시_첫번째_WAITING_예약이_승격된다() {
-        Reservation waiting = Reservation.load(
-                2L,
-                new ReservationName("대기자"),
-                new ReservationDate(LocalDate.of(2099, 1, 1)),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
-                Status.WAITING,
-                TODAY
-        );
+        Reservation waiting = Reservation.load(2L, new ReservationName("대기자"), DUMMY_SLOT,
+                Status.WAITING, TODAY);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
         given(reservationRepository.findFirstWaitingByTimeAndThemeAndDate(anyLong(), anyLong(), any()))
                 .willReturn(Optional.of(waiting));
@@ -99,15 +98,8 @@ class ReservationServiceTest {
 
     @Test
     void WAITING_예약_취소_시_승격이_발생하지_않는다() {
-        Reservation waiting = Reservation.load(
-                2L,
-                new ReservationName("대기자"),
-                new ReservationDate(LocalDate.of(2099, 1, 1)),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
-                Status.WAITING,
-                TODAY
-        );
+        Reservation waiting = Reservation.load(2L, new ReservationName("대기자"), DUMMY_SLOT,
+                Status.WAITING, TODAY);
         given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
 
         reservationService.cancel(2L, LocalDateTime.MIN);
@@ -144,6 +136,8 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(slotRepository.findByDateAndTimeAndTheme(any(), anyLong(), anyLong())).willReturn(
+                Optional.of(DUMMY_SLOT));
 
         Assertions.assertThatThrownBy(() -> reservationService.reserve(request, LocalDateTime.MAX));
     }
@@ -157,6 +151,8 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(slotRepository.findByDateAndTimeAndTheme(any(), anyLong(), anyLong())).willReturn(
+                Optional.of(DUMMY_SLOT));
         given(reservationRepository.save(any())).willReturn(DUMMY);
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
@@ -173,6 +169,8 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(slotRepository.findByDateAndTimeAndTheme(any(), anyLong(), anyLong())).willReturn(
+                Optional.of(DUMMY_SLOT));
 
         Assertions.assertThatThrownBy(
                 () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 11, 0, 1)));
@@ -187,6 +185,8 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(false);
+        given(slotRepository.findByDateAndTimeAndTheme(any(), anyLong(), anyLong())).willReturn(
+                Optional.of(DUMMY_SLOT));
         given(reservationRepository.save(any())).willReturn(DUMMY);
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
@@ -198,14 +198,16 @@ class ReservationServiceTest {
     void APPROVED가_이미_있으면_WAITING으로_예약된다() {
         ReservationTime reservationTime = ReservationTime.of(LocalTime.parse("11:00"));
         Theme theme = Theme.load(1L, new ThemeName("테마1"), "설명", new ThumbnailUrl(URL));
-        Reservation waitingSaved = Reservation.load(2L,
-                new ReservationName("zeze"), new ReservationDate(LocalDate.parse("2026-04-05")),
-                reservationTime, theme, Status.WAITING, TODAY);
+        Slot waitingSlot = Slot.load(2L, new ReservationDate(LocalDate.parse("2026-04-05")), reservationTime, theme);
+        Reservation waitingSaved = Reservation.load(2L, new ReservationName("zeze"), waitingSlot,
+                Status.WAITING, TODAY);
 
         ReservationCreateRequest request = new ReservationCreateRequest("zeze", LocalDate.parse("2026-04-05"), 1L, 1L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.existsApprovedByTimeAndThemeAndDate(anyLong(), anyLong(), any())).willReturn(true);
+        given(slotRepository.findByDateAndTimeAndTheme(any(), anyLong(), anyLong())).willReturn(
+                Optional.of(waitingSlot));
         given(reservationRepository.save(any())).willReturn(waitingSaved);
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(
                 List.of(DUMMY, waitingSaved));
@@ -337,15 +339,8 @@ class ReservationServiceTest {
 
     @Test
     void 두번째_이후_예약은_대기_상태이다() {
-        Reservation waiting = Reservation.load(
-                2L,
-                new ReservationName("대기자"),
-                new ReservationDate(LocalDate.of(2099, 1, 1)),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
-                Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL)),
-                Status.WAITING,
-                TODAY
-        );
+        Reservation waiting = Reservation.load(2L, new ReservationName("대기자"), DUMMY_SLOT,
+                Status.WAITING, TODAY);
         given(reservationRepository.findById(2L)).willReturn(Optional.of(waiting));
         given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any()))
                 .willReturn(List.of(DUMMY, waiting));

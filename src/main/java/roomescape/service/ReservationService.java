@@ -17,10 +17,12 @@ import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Reservations;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.SlotRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -28,12 +30,15 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final SlotRepository slotRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              SlotRepository slotRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.slotRepository = slotRepository;
     }
 
     @Transactional
@@ -43,10 +48,11 @@ public class ReservationService {
 
         Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
 
-        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()),
-                new ReservationDate(request.getDate()), reservationTime, theme, status, now);
+        Slot slot = findOrCreateSlot(new ReservationDate(request.getDate()), reservationTime, theme);
+        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()), slot, status, now);
 
-        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
+        validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
+                request.getName());
         Reservation saved = reservationRepository.save(reservation);
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
@@ -100,10 +106,11 @@ public class ReservationService {
         ReservationDate reservationDate = new ReservationDate(request.getDate());
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
 
-        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
+        validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
+                request.getName());
 
-        Reservation target = Reservation.reserve(reservation.getName(), reservationDate, reservationTime,
-                reservation.getTheme(), reservation.getStatus(), now);
+        Slot slot = findOrCreateSlot(reservationDate, reservationTime, reservation.getTheme());
+        Reservation target = Reservation.reserve(reservation.getName(), slot, reservation.getStatus(), now);
         Reservation updated = reservationRepository.update(id, target);
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
@@ -131,6 +138,11 @@ public class ReservationService {
         }
     }
 
+    private Slot findOrCreateSlot(ReservationDate date, ReservationTime time, Theme theme) {
+        return slotRepository.findByDateAndTimeAndTheme(date.getValue(), time.getId(), theme.getId())
+                .orElseGet(() -> slotRepository.save(Slot.create(date, time, theme)));
+    }
+
     private Status determineStatus(long timeId, long themeId, LocalDate date) {
         if (reservationRepository.existsApprovedByTimeAndThemeAndDate(timeId, themeId, date)) {
             return Status.WAITING;
@@ -148,7 +160,7 @@ public class ReservationService {
                 () -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
     }
 
-    private void validateIsDuplicateReservation(long timeId, long themeId, LocalDate date, String name) {
+    private void validateIsDuplicateNameReservation(long timeId, long themeId, LocalDate date, String name) {
         if (reservationRepository.existsByTimeAndThemeAndDateAndName(timeId, themeId, date, name)) {
             throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }

@@ -22,17 +22,13 @@ class RoomescapeApplicationTest {
     private static final String AVAILABLE_DATE = "2099-06-01";
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
+
     @LocalServerPort
     int port;
 
     @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
-
-    @BeforeEach
     void init() {
+        RestAssured.port = port;
         jdbcTemplate.update("insert into reservation_time(start_at) values ('10:00')");
         jdbcTemplate.update(
                 "insert into theme(name, description, thumbnail_url) values ('공포', '무서워요', 'https://zeze.com')");

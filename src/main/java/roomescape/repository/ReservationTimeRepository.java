@@ -58,9 +58,10 @@ public class ReservationTimeRepository {
                 SELECT rt.id, rt.start_at
                 FROM reservation_time AS rt
                 WHERE rt.id NOT IN (
-                    SELECT r.time_id
-                    FROM reservation AS r
-                    WHERE r.date = ? AND r.theme_id = ?
+                    SELECT s.time_id
+                    FROM slot s
+                    INNER JOIN reservation r ON r.slot_id = s.id
+                    WHERE s.date = ? AND s.theme_id = ?
                 )
                 """;
         return jdbcTemplate.query(sql, RESERVATION_TIME_ROW_MAPPER, date, themeId);

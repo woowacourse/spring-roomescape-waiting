@@ -19,6 +19,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
+import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -29,7 +30,8 @@ import roomescape.domain.theme.ThumbnailUrl;
 @Import(value = {
         ReservationRepository.class,
         ReservationTimeRepository.class,
-        ThemeRepository.class
+        ThemeRepository.class,
+        SlotRepository.class
 })
 class ReservationRepositoryTest {
     private final static Clock FIXED_CLOCK = Clock.fixed(
@@ -49,6 +51,9 @@ class ReservationRepositoryTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private SlotRepository slotRepository;
+
     private ReservationTime giveTime(int hour) {
         return timeRepository.save(ReservationTime.of(LocalTime.of(hour, 0)));
     }
@@ -58,14 +63,19 @@ class ReservationRepositoryTest {
                 Theme.create(new ThemeName(name), name + "테마에 관한 설명 입니다.", new ThumbnailUrl("https://test-theme.com")));
     }
 
+    private Slot giveSlot(LocalDate date, ReservationTime time, Theme theme) {
+        return slotRepository.findByDateAndTimeAndTheme(date, time.getId(), theme.getId())
+                .orElseGet(() -> slotRepository.save(Slot.create(new ReservationDate(date), time, theme)));
+    }
+
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservation(name, date, time, theme, Status.APPROVED);
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time, Theme theme,
                                     Status status) {
-        return Reservation.reserve(new ReservationName(name), new ReservationDate(date), time, theme,
-                status, LocalDateTime.now(FIXED_CLOCK));
+        Slot slot = giveSlot(date, time, theme);
+        return Reservation.reserve(new ReservationName(name), slot, status, LocalDateTime.now(FIXED_CLOCK));
     }
 
     @Nested

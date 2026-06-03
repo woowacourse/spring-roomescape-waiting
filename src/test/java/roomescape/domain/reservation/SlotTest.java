@@ -1,0 +1,31 @@
+package roomescape.domain.reservation;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import roomescape.RoomEscapeFixture;
+import roomescape.domain.theme.Theme;
+
+public class SlotTest {
+    @ParameterizedTest
+    @MethodSource("nullCases")
+    void 매개변수에_NULL이_포함되면_예외가_발생한다(ReservationDate date, ReservationTime time, Theme theme) {
+        assertThatThrownBy(() -> Slot.create(date, time, theme))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    static Stream<Arguments> nullCases() {
+        ReservationDate date = RoomEscapeFixture.reservationDate();
+        ReservationTime time = RoomEscapeFixture.reservationTime();
+        Theme theme = RoomEscapeFixture.theme();
+
+        return Stream.of(
+                Arguments.of(null, time, theme),
+                Arguments.of(date, null, theme),
+                Arguments.of(date, time, null)
+        );
+    }
+}
