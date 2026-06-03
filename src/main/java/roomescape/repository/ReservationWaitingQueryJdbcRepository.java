@@ -15,16 +15,13 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
 
     private static final String SELECT_WAITING_WITH_ORDER = """
             SELECT
-                ow.waiting_id, ow.waiting_name, ow.waiting_order,
-                r.date,
+                ow.waiting_id, ow.waiting_name, ow.waiting_order, ow.date,
                 t.id as time_id, t.start_at as time_value,
                 th.id as theme_id, th.name as theme_name,
-                th.description as theme_description,
-                th.thumbnail_image_url as theme_thumbnail
+                th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
             FROM ordered_waiting ow
-            INNER JOIN reservation r ON ow.reservation_id = r.id
-            INNER JOIN reservation_time t ON r.time_id = t.id
-            INNER JOIN theme th ON r.theme_id = th.id
+            INNER JOIN reservation_time t ON ow.time_id = t.id
+            INNER JOIN theme th ON ow.theme_id = th.id
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -58,7 +55,7 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
     public Optional<ReservationWaitingWithOrder> findById(Long id) {
         String sql = """
                 WITH target_waiting AS (
-                    SELECT id, reservation_id
+                    SELECT id, date, time_id, theme_id
                     FROM reservation_waiting
                     WHERE id = ?
                 ),
@@ -66,10 +63,18 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
                     SELECT 
                         rw.id as waiting_id,
                         rw.name as waiting_name,
-                        rw.reservation_id,
-                        ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
+                        rw.date,
+                        rw.time_id,
+                        rw.theme_id,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY rw.date, rw.time_id, rw.theme_id
+                            ORDER BY rw.id ASC
+                        ) as waiting_order
                     FROM reservation_waiting rw
-                    INNER JOIN target_waiting tw ON rw.reservation_id = tw.reservation_id
+                    INNER JOIN target_waiting tw
+                        ON rw.date = tw.date
+                        AND rw.time_id = tw.time_id
+                        AND rw.theme_id = tw.theme_id
                 )
                 """
                 + SELECT_WAITING_WITH_ORDER
@@ -84,7 +89,7 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
     public List<ReservationWaitingWithOrder> findByMember(Member member) {
         String sql = """
                 WITH my_waiting AS (
-                    SELECT id, reservation_id
+                    SELECT id, date, time_id, theme_id
                     FROM reservation_waiting
                     WHERE name = ?
                 ),
@@ -92,16 +97,24 @@ public class ReservationWaitingQueryJdbcRepository implements ReservationWaiting
                     SELECT 
                         rw.id as waiting_id,
                         rw.name as waiting_name,
-                        rw.reservation_id,
-                        ROW_NUMBER() OVER (PARTITION BY rw.reservation_id ORDER BY rw.id) as waiting_order
+                        rw.date,
+                        rw.time_id,
+                        rw.theme_id,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY rw.date, rw.time_id, rw.theme_id
+                            ORDER BY rw.id ASC
+                        ) as waiting_order
                     FROM reservation_waiting rw
-                    INNER JOIN my_waiting mw ON rw.reservation_id = mw.reservation_id
+                    INNER JOIN my_waiting mw
+                        ON rw.date = mw.date
+                        AND rw.time_id = mw.time_id
+                        AND rw.theme_id = mw.theme_id
                 )
                 """
                 + SELECT_WAITING_WITH_ORDER
                 + """ 
                 INNER JOIN my_waiting mw ON ow.waiting_id = mw.id
-                ORDER BY r.date DESC, t.start_at ASC, ow.waiting_order ASC
+                ORDER BY ow.date DESC, t.start_at ASC, ow.waiting_order ASC
                 """;
         return jdbcTemplate.query(sql, waitingWithOrderRowMapper, member.name());
     }

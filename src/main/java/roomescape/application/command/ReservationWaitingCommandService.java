@@ -32,10 +32,12 @@ public class ReservationWaitingCommandService {
                 LocalDateTime.now(clock)
         );
 
-        return reservationWaitingRepository.save(
-                reservationWaiting,
-                reservation.getId()
-        );
+        return reservationWaitingRepository.save(reservationWaiting);
+    }
+
+    @Transactional
+    public void delete(ReservationWaiting reservationWaiting) {
+        reservationWaitingRepository.deleteById(reservationWaiting.getId());
     }
 
     @Transactional

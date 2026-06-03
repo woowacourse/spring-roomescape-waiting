@@ -14,6 +14,8 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
+    Reservation updateReserver(Reservation reservation);
+
     boolean existsByTimeId(Long timeId);
 
     boolean existsBySlot(Slot slot);

@@ -115,7 +115,7 @@ class ReservationWaitingUseCaseMockTest {
         given(themeQueryService.getById(THEME.getId())).willReturn(THEME);
         given(reservationQueryService.findBySlot(SLOT))
                 .willReturn(Optional.of(reservation));
-        given(reservationWaitingRepository.save(any(ReservationWaiting.class), anyLong())).willReturn(saved);
+        given(reservationWaitingRepository.save(any(ReservationWaiting.class))).willReturn(saved);
         given(reservationWaitingQueryRepository.findById(saved.getId())).willReturn(Optional.of(savedWithOrder));
 
         assertThat(reservationWaitingApplicationService.save(request)).isEqualTo(savedWithOrder);
@@ -136,7 +136,7 @@ class ReservationWaitingUseCaseMockTest {
 
         assertThatThrownBy(() -> reservationWaitingApplicationService.save(request))
                 .isInstanceOf(ConflictException.class);
-        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class), anyLong());
+        verify(reservationWaitingRepository, never()).save(any(ReservationWaiting.class));
     }
 
     @Test

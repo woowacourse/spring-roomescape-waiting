@@ -67,6 +67,7 @@ public class ReservationWaiting {
         return id;
     }
 
+    // TODO: 테스트에서만 사용되는 코드
     public String getName() {
         return waiter.name();
     }

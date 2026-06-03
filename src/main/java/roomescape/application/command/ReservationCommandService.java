@@ -60,6 +60,20 @@ public class ReservationCommandService {
         reservationRepository.deleteById(reservation.getId());
     }
 
+    @Transactional
+    public Reservation changeReserver(Reservation reservation, Member requester, Member newReserver) {
+        reservation.cancelBy(
+                requester,
+                now()
+        );
+
+        Reservation changed = reservation.changeReserverTo(
+                newReserver
+        );
+
+        return reservationRepository.updateReserver(changed);
+    }
+
     private LocalDateTime now() {
         return LocalDateTime.now(clock);
     }

@@ -29,7 +29,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.BusinessRuleViolationException;
-import roomescape.domain.exception.ForbiddenException;
 import roomescape.domain.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 
@@ -45,7 +44,6 @@ class ReservationUseCaseMockTest {
     );
     private static final LocalDate TODAY = LocalDate.now(FIXED_CLOCK);
     private static final LocalDate FUTURE = TODAY.plusDays(1);
-    private static final LocalDate PAST = TODAY.minusDays(1);
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -123,34 +121,6 @@ class ReservationUseCaseMockTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThat(reservationQueryService.getById(1L)).isEqualTo(reservation);
-    }
-
-    @Test
-    void deleteMine은_본인_예약이_아니면_ForbiddenException을_던진다() {
-        Reservation reservation = reservation(1L, "티뉴", FUTURE, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
-                .isInstanceOf(ForbiddenException.class);
-    }
-
-    @Test
-    void deleteMine은_지난_예약이면_BusinessRuleViolationException을_던진다() {
-        Reservation reservation = reservation(1L, "민욱", PAST, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        assertThatThrownBy(() -> reservationApplicationService.deleteMine(1L, "민욱"))
-                .isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void deleteMine은_미래_예약이면_삭제를_위임한다() {
-        Reservation reservation = reservation(1L, "민욱", FUTURE, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        reservationApplicationService.deleteMine(1L, "민욱");
-
-        verify(reservationRepository).deleteById(1L);
     }
 
     @Test

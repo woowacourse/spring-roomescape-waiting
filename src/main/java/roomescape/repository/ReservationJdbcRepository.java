@@ -138,8 +138,30 @@ public class ReservationJdbcRepository implements ReservationRepository {
         return reservation;
     }
 
+    public Reservation updateReserver(Reservation reservation) {
+        String sql = "UPDATE reservation SET name = ? WHERE id = ?";
+        jdbcTemplate.update(
+                sql,
+                reservation.getReserver().name(),
+                reservation.getId()
+        );
+        return reservation;
+    }
+
     public void deleteById(Long id) {
+        String deleteWaitingSql = """
+                DELETE FROM reservation_waiting
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    WHERE r.id = ?
+                        AND reservation_waiting.date = r.date
+                        AND reservation_waiting.time_id = r.time_id
+                        AND reservation_waiting.theme_id = r.theme_id
+                )
+                """;
         String sql = "DELETE FROM reservation WHERE id = ?";
+        jdbcTemplate.update(deleteWaitingSql, id);
         jdbcTemplate.update(sql, id);
     }
 

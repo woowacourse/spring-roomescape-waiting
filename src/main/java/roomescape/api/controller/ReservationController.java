@@ -17,6 +17,7 @@ import roomescape.api.dto.ReservationResponse;
 import roomescape.api.dto.ReservationResponses;
 import roomescape.api.dto.ReservationUpdateRequest;
 import roomescape.application.ReservationApplicationService;
+import roomescape.application.ReservationCancellationUseCase;
 import roomescape.domain.Reservation;
 
 @RestController
@@ -24,11 +25,14 @@ import roomescape.domain.Reservation;
 public class ReservationController {
 
     private final ReservationApplicationService reservationApplicationService;
+    private final ReservationCancellationUseCase reservationCancellationUseCase;
 
     public ReservationController(
-            ReservationApplicationService reservationApplicationService
+            ReservationApplicationService reservationApplicationService,
+            ReservationCancellationUseCase reservationCancellationUseCase
     ) {
         this.reservationApplicationService = reservationApplicationService;
+        this.reservationCancellationUseCase = reservationCancellationUseCase;
     }
 
     @PostMapping
@@ -75,7 +79,7 @@ public class ReservationController {
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        reservationApplicationService.delete(id);
+        reservationCancellationUseCase.delete(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -85,7 +89,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationApplicationService.deleteMine(id, name);
+        reservationCancellationUseCase.deleteMine(id, name);
 
         return ResponseEntity.noContent().build();
     }

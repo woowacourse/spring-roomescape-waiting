@@ -76,19 +76,4 @@ public class ReservationApplicationService {
     public ReservationResponses findMine(String name) {
         return reservationQueryService.findMine(new Member(name));
     }
-
-    @Transactional
-    public void delete(Long id) {
-        reservationCommandService.delete(id);
-    }
-
-    @Transactional
-    public void deleteMine(Long id, String name) {
-        Reservation reservation = reservationQueryService.getById(id);
-
-        reservationCommandService.deleteMine(
-                reservation,
-                new Member(name)
-        );
-    }
 }
