@@ -1,16 +1,14 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import roomescape.AcceptanceTest;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.*;
 
 public class ReservationControllerTest extends AcceptanceTest {
 
