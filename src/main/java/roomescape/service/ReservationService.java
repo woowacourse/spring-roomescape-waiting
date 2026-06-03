@@ -76,6 +76,7 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
 
         reservationDao.delete(id);
+        processNextWaiting(reservation);
 
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
@@ -96,12 +97,14 @@ public class ReservationService {
 
     @Transactional
     public void delete(Long id) {
-
         Reservation reservation = getReservation(id);
         reservationDao.delete(id);
+        processNextWaiting(reservation);
+    }
 
+    private void processNextWaiting(Reservation reservation) {
         Optional<ReservationRank> nextWaiting = reservationDao.findFirstRank(reservation.getDate(),
-                        reservation.getTheme().getId(), reservation.getTime().getId());
+                reservation.getTheme().getId(), reservation.getTime().getId());
 
         if (nextWaiting.isPresent()){
             reservationDao.update(nextWaiting.get().getId(), ReservationStatus.CONFIRMED);
