@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 
@@ -192,15 +194,21 @@ class ReservationJdbcRepositoryTest {
         Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeA, "2026-06-01", time1);
         Long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
 
-        int affected = repository.update(
-                Fixtures.reservationOf(userId, themeB, time2, storeId, LocalDate.of(2026, 6, 2))
-                        .withId(reservationId));
+        int affected = repository.update(Fixtures.reservation(
+                Fixtures.memberWithId(userId, "브라운"),
+                new Theme(themeB, "B", "설명", "https://thumbnail.url"),
+                LocalDate.of(2026, 6, 2),
+                new ReservationTime(time2, LocalTime.of(11, 0)),
+                Fixtures.storeWithId(storeId, "매장"),
+                ReservationStatus.WAITING
+        ).withId(reservationId));
 
         assertThat(affected).isEqualTo(1);
         Reservation found = repository.findById(reservationId).orElseThrow();
         assertThat(found.getDate()).isEqualTo(LocalDate.of(2026, 6, 2));
         assertThat(found.getTheme().getId()).isEqualTo(themeB);
         assertThat(found.getTime().getId()).isEqualTo(time2);
+        assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
