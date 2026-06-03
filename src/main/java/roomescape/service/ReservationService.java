@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -74,6 +75,7 @@ public class ReservationService {
         validateOwned(reservation, username);
         reservation.validateCancellable(LocalDateTime.now(clock));
         reservationDao.delete(reservation.getId());
+        convertFirstWaitingToReservation(reservation);
     }
 
     @Transactional
@@ -81,6 +83,7 @@ public class ReservationService {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
         reservationDao.delete(reservation.getId());
+        convertFirstWaitingToReservation(reservation);
     }
 
     public List<Reservation> findAllByName(String username) {
@@ -140,6 +143,23 @@ public class ReservationService {
                         .thenComparing(r -> r.reservation().getTime().getStartAt())
                         .thenComparing(MyReservation::reservationType))
                 .toList();
+    }
+
+    private void convertFirstWaitingToReservation(Reservation canceledReservation) {
+        reservationDao.findFirstWaitingBySlot(
+                canceledReservation.getDate(),
+                canceledReservation.getTime().getId(),
+                canceledReservation.getTheme().getId()
+        ).ifPresent(this::convertWaitingToReservation);
+    }
+
+    private void convertWaitingToReservation(ReservationWaiting waiting) {
+        try {
+            reservationDao.save(waiting.reservation());
+        } catch (DataConflictException e) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+        reservationDao.deleteWaiting(waiting.reservation().getId());
     }
 
     private void validateOwned(Reservation reservation, String username) {
