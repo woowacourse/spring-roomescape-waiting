@@ -110,6 +110,34 @@ class JdbcWaitlistRepositoryTest {
         assertThat(waitlistRepository.findById(saveId)).isEmpty();
     }
 
+    @Test
+    void 해당_예약_슬롯_속한_첫번째_예약_대기를_찾는다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+        String fistName = "브라운";
+        String secondName = "브리";
+        Reservation reservation = new Reservation(fistName, FUTURE_SECOND_DATE, reservationTime, theme);
+
+        Long saveFirstId = waitlistRepository.save(reservation);
+        waitlistRepository.save(new Reservation(
+                secondName, FUTURE_SECOND_DATE, reservationTime, theme));
+
+        Optional<Waitlist> firstWaitlist = waitlistRepository.findFirstWaitlistByReservationSlot(
+                reservation);
+
+        assertThat(firstWaitlist)
+                .isPresent()
+                .get()
+                .satisfies(result -> {
+                    assertThat(result.getId()).isEqualTo(saveFirstId);
+                    assertThat(result.getName()).isEqualTo(fistName);
+                    assertThat(result.getDate()).isEqualTo(FUTURE_SECOND_DATE);
+                    assertThat(result.getCreatedAt()).isNotNull();
+                    assertThat(result.getTime().getId()).isEqualTo(reservationTime.getId());
+                    assertThat(result.getTheme().getId()).isEqualTo(theme.getId());
+                });
+    }
+
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
         Long id = timeRepository.save(reservationTime);

@@ -7,6 +7,7 @@ import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.domain.exception.DomainErrorCode.THEME_NOT_FOUND;
+import static roomescape.domain.exception.DomainErrorCode.WAITLIST_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -208,25 +209,48 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 내_예약을_취소한다() {
+    void 사용자_예약을_취소하면_첫번째_대기가_예약으로_승격되고_대기에서_삭제된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
-        String name = "브라운";
+        String canceledReservationName = "브라운";
+        String waitingFirstName = "브리";
+        String waitingSecondName = "워니";
 
-        ReservationRequest request = new ReservationRequest(
-                name,
+        ReservationWithStatus reservation = reservationService.applyReservation(createReservationRequest(
+                canceledReservationName,
                 FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
-        );
-        ReservationWithStatus reservation = reservationService.applyReservation(request);
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingFirst = reservationService.applyReservation(createReservationRequest(
+                waitingFirstName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingSecond = reservationService.applyReservation(createReservationRequest(
+                waitingSecondName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
 
-        reservationService.cancelMyReservation(reservation.getId(), name);
+        reservationService.cancelMyReservation(reservation.getId(), canceledReservationName);
 
         assertThatRoomEscapeExceptionCode(
                 () -> reservationService.getReservation(reservation.getId()),
                 RESERVATION_NOT_FOUND
         );
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getWaitlist(waitingFirst.getId()),
+                WAITLIST_NOT_FOUND
+        );
+        assertThat(reservationService.getWaitlist(waitingSecond.getId()).getName())
+                .isEqualTo(waitingSecondName);
+        assertThat(reservationService.getReservations())
+                .extracting(Reservation::getName)
+                .contains(waitingFirstName)
+                .doesNotContain(canceledReservationName);
     }
 
     @Test
