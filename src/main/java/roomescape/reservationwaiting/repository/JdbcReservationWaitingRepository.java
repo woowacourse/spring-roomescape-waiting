@@ -89,8 +89,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 SELECT * FROM (
                 SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY rw.date, rw.time_id, rw.theme_id ORDER BY rw.created_at) as turn
                 FROM reservation_waiting rw) sub
-                WHERE sub.name = ?
-                ORDER BY sub.turn;
+                WHERE sub.name = ?;
                 """;
         return jdbcTemplate.query(query, turnExtractor, name);
     }
@@ -119,11 +118,5 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public boolean existsByNameAndSlot(String name, LocalDate date, Long timeId, Long themeId) {
         String query = "select count(*) from reservation_waiting where name = ? and date = ? and time_id = ? and theme_id = ?";
         return jdbcTemplate.queryForObject(query, Integer.class, name, date, timeId, themeId) >= 1;
-    }
-
-    @Override
-    public boolean existsById(Long id) {
-        String query = "select count(*) from reservation_waiting where id = ?";
-        return jdbcTemplate.queryForObject(query, Integer.class, id) >= 1;
     }
 }
