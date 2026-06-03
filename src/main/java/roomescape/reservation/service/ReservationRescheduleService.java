@@ -16,7 +16,7 @@ public class ReservationRescheduleService {
 
     @Transactional
     public void rescheduleWaitingOrder(ReservationSlot slot) {
-        Reservations slotOfReservations = findReservationsWithSlotLocked(slot);
+        Reservations slotOfReservations = findReservationsOfSlot(slot);
         slotOfReservations.findPromoteWaiting()
                 .ifPresent(this::promote);
     }
@@ -26,7 +26,7 @@ public class ReservationRescheduleService {
         reservationRepository.updateStatus(reservation);
     }
 
-    private Reservations findReservationsWithSlotLocked(ReservationSlot slot) {
+    private Reservations findReservationsOfSlot(ReservationSlot slot) {
         return new Reservations(reservationRepository.findReservedAndWaitingBySlot(slot));
     }
 
