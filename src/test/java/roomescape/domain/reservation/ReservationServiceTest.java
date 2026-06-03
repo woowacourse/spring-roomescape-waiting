@@ -765,7 +765,6 @@ class ReservationServiceTest {
 
     private ReservationService createReservationService(Clock clock) {
         return new ReservationService(
-            reservationSlotRepository,
             reservationRepository,
             new UserService(userRepository),
             new ReservationSlotService(
