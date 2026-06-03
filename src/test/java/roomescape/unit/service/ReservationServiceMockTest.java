@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
@@ -30,7 +29,6 @@ class ReservationServiceMockTest {
     private static final ReservationTime TIME = new ReservationTime(1L, LocalTime.of(10, 0));
     private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
     private static final LocalDate FUTURE = LocalDate.of(2999, 1, 1);
-    private static final LocalDate PAST = LocalDate.of(2020, 1, 1);
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -61,25 +59,6 @@ class ReservationServiceMockTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThat(reservationService.findMyReservation(1L, "민욱")).isEqualTo(reservation);
-    }
-
-    @Test
-    void cancelMyReservation은_지난_예약이면_BusinessRuleViolationException을_던진다() {
-        Reservation reservation = new Reservation(1L, "민욱", PAST, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        assertThatThrownBy(() -> reservationService.cancelMyReservation(1L, "민욱"))
-                .isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    void cancelMyReservation은_미래_예약이면_삭제를_위임한다() {
-        Reservation reservation = new Reservation(1L, "민욱", FUTURE, TIME, THEME);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        reservationService.cancelMyReservation(1L, "민욱");
-
-        verify(reservationRepository).deleteById(1L);
     }
 
     @Test

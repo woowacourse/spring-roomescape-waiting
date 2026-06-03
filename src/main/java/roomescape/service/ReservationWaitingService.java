@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
@@ -48,6 +49,15 @@ public class ReservationWaitingService {
     public ReservationWaiting findById(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> NotFoundException.reservationWaiting(id));
+    }
+
+    public Optional<ReservationWaiting> findEarliestByReservationId(Long reservationId) {
+        return reservationWaitingRepository.findEarliestByReservationId(reservationId);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        reservationWaitingRepository.deleteById(id);
     }
 
     public List<WaitingWithOrder> getMyReservationWaitings(String name) {

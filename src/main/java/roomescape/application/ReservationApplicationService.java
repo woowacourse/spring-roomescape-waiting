@@ -22,6 +22,7 @@ import roomescape.service.ThemeService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,6 +35,7 @@ public class ReservationApplicationService {
     private static final String PAST_RESERVATION_UPDATE_REJECTED = "지난 시각으로 예약을 변경할 수 없습니다.";
     private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
+    private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
@@ -124,6 +126,31 @@ public class ReservationApplicationService {
         }
 
         return reservationService.updateReservation(updated);
+    }
+
+    @Transactional
+    public void cancelMyReservation(Long id, String name) {
+        Reservation reservation = reservationService.findMyReservation(id, name);
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
+        }
+        promoteOrDelete(id);
+    }
+
+    @Transactional
+    public void deleteReservation(Long id) {
+        promoteOrDelete(id);
+    }
+
+    private void promoteOrDelete(Long reservationId) {
+        Optional<ReservationWaiting> earliest = reservationWaitingService.findEarliestByReservationId(reservationId);
+        if (earliest.isEmpty()) {
+            reservationService.deleteReservation(reservationId);
+            return;
+        }
+        ReservationWaiting promoted = earliest.get();
+        reservationService.changeOwner(reservationId, promoted.getName());
+        reservationWaitingService.deleteById(promoted.getId());
     }
 
     @Transactional

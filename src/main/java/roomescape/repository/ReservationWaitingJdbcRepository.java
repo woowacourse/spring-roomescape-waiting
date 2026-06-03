@@ -118,6 +118,13 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findEarliestByReservationId(Long reservationId) {
+        String sql = SELECT_BASE + " WHERE rw.reservation_id = ? ORDER BY rw.created_at ASC, rw.id ASC LIMIT 1";
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, waitingRowMapper, reservationId);
+        return results.stream().findFirst();
+    }
+
+    @Override
     public List<WaitingWithOrder> findByName(String name) {
         String sql = SELECT_BASE + " WHERE rw.name = ? ORDER BY rw.created_at ASC, rw.id ASC";
         return jdbcTemplate.query(sql, waitingWithOrderRowMapper, name);

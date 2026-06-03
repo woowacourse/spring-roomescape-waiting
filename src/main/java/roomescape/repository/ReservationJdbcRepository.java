@@ -120,6 +120,11 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
+    public void changeOwner(Long id, String name) {
+        jdbcTemplate.update("UPDATE reservation SET name = ? WHERE id = ?", name, id);
+    }
+
+    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }

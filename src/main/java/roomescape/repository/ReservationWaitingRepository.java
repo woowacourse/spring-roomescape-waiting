@@ -13,6 +13,8 @@ public interface ReservationWaitingRepository {
 
     Optional<ReservationWaiting> findById(Long id);
 
+    Optional<ReservationWaiting> findEarliestByReservationId(Long reservationId);
+
     List<WaitingWithOrder> findByName(String name);
 
     void deleteById(Long id);

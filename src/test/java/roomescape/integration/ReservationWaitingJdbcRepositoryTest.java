@@ -152,4 +152,22 @@ class ReservationWaitingJdbcRepositoryTest {
 
         assertThat(repository.findById(saved.getWaiting().getId())).isEmpty();
     }
+
+    @Test
+    void findEarliestByReservationId는_가장_먼저_신청한_대기를_반환한다() {
+        repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+        repository.save(new ReservationWaiting(
+                "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
+
+        Optional<ReservationWaiting> earliest = repository.findEarliestByReservationId(reservation.getId());
+
+        assertThat(earliest).isPresent();
+        assertThat(earliest.get().getName()).isEqualTo("민욱");
+    }
+
+    @Test
+    void findEarliestByReservationId는_대기가_없으면_빈_Optional을_반환한다() {
+        assertThat(repository.findEarliestByReservationId(reservation.getId())).isEmpty();
+    }
 }
