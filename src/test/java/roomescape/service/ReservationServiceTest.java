@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
@@ -16,7 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.domain.Reservation;
+import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -209,5 +212,59 @@ class ReservationServiceTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().name()).isEqualTo(name);
         assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.RESERVATION);
+    }
+
+    @Test
+    void 동시_요청으로_유니크_제약조건_위반시_예외발생() {
+        // given
+        ReservationCreateCommand request = new ReservationCreateCommand("오리", futureDate, 1L, 1L);
+
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+        given(reservationRepository.save(any(Reservation.class))).willThrow(new DataIntegrityViolationException("unique constraint"));
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
+    }
+
+    @Test
+    void 관리자_예약_삭제() {
+        // given
+        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(futureDate, time, theme))
+                .willReturn(Optional.empty());
+
+        // when
+        reservationService.deleteAsAdmin(1L);
+
+        // then
+        verify(reservationRepository).deleteById(1L);
+    }
+
+    @Test
+    void 관리자_삭제시_존재하지_않는_예약이면_예외발생() {
+        // given
+        given(reservationRepository.findById(1L)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteAsAdmin(1L))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.RESERVATION_NOT_FOUND);
+        verify(reservationRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void 예약_가능_날짜_목록_조회() {
+        // when
+        AvailableDateResult result = reservationService.getReservationOptions();
+
+        // then
+        assertThat(result.dates()).hasSize(14);
+        assertThat(result.dates().getFirst()).isEqualTo(LocalDate.now());
+        assertThat(result.dates().getLast()).isEqualTo(LocalDate.now().plusDays(13));
     }
 }

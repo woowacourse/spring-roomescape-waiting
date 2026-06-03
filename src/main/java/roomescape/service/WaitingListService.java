@@ -1,7 +1,7 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -41,7 +41,7 @@ public class WaitingListService {
             final WaitingList savedWaitingList = waitingListRepository.save(waitingList);
             final int waitingOrder = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
-        } catch (DataAccessException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
     }
