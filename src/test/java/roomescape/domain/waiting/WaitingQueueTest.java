@@ -98,4 +98,52 @@ class WaitingQueueTest {
             assertThat(result).isNull();
         }
     }
+
+    @Nested
+    @DisplayName("evictExpiredResults 테스트")
+    class EvictExpiredResults {
+
+        @Test
+        void 기준일_이전_날짜의_결과는_제거된다() {
+            WaitingRequest pastRequest = new WaitingRequest("유저1", LocalDate.of(2000, 1, 1), 1L, 1L);
+            String pastJobId = waitingQueue.enqueue(pastRequest);
+
+            waitingQueue.evictExpiredResults();
+
+            assertThat(waitingQueue.getResult(pastJobId)).isNull();
+        }
+
+        @Test
+        void 오늘_날짜의_결과는_제거되지_않는다() {
+            WaitingRequest todayRequest = new WaitingRequest("유저1", LocalDate.now(), 1L, 1L);
+            String todayJobId = waitingQueue.enqueue(todayRequest);
+
+            waitingQueue.evictExpiredResults();
+
+            assertThat(waitingQueue.getResult(todayJobId)).isNotNull();
+        }
+
+        @Test
+        void 미래_날짜의_결과는_제거되지_않는다() {
+            String futureJobId = waitingQueue.enqueue(request);
+
+            waitingQueue.evictExpiredResults();
+
+            assertThat(waitingQueue.getResult(futureJobId)).isNotNull();
+        }
+
+        @Test
+        void 과거와_미래_결과가_섞여있으면_과거만_제거된다() {
+            WaitingRequest pastRequest = new WaitingRequest("유저1", LocalDate.of(2000, 1, 1), 1L, 1L);
+            String pastJobId = waitingQueue.enqueue(pastRequest);
+            String futureJobId = waitingQueue.enqueue(request);
+
+            waitingQueue.evictExpiredResults();
+
+            assertAll(
+                    () -> assertThat(waitingQueue.getResult(pastJobId)).isNull(),
+                    () -> assertThat(waitingQueue.getResult(futureJobId)).isNotNull()
+            );
+        }
+    }
 }
