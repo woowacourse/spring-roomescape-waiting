@@ -35,8 +35,8 @@ public class ReservationDao {
     private Reservation insert(Long slotId, Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = """
-                INSERT INTO reservation (name, slot_id, status, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         RepositoryExceptionTranslator.execute(() ->
@@ -45,7 +45,8 @@ public class ReservationDao {
                     ps.setString(1, reservation.getName());
                     ps.setLong(2, slotId);
                     ps.setString(3, reservation.getStatus().name());
-                    ps.setTimestamp(4, Timestamp.valueOf(reservation.getCreatedAt()));
+                    ps.setString(4, reservation.getActiveStatus().name());
+                    ps.setTimestamp(5, Timestamp.valueOf(reservation.getCreatedAt()));
                     return ps;
                 }, keyHolder), "이미 예약 또는 대기가 존재합니다.");
 
@@ -53,6 +54,7 @@ public class ReservationDao {
                 keyHolder.getKey().longValue(),
                 reservation.getName(),
                 reservation.getStatus(),
+                reservation.getActiveStatus(),
                 reservation.getCreatedAt()
         );
     }
@@ -60,7 +62,7 @@ public class ReservationDao {
     private void update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET name = ?, status = ?, created_at = ?
+                SET name = ?, status = ?, active_status = ?, created_at = ?
                 WHERE id = ?
                 """;
 
@@ -68,6 +70,7 @@ public class ReservationDao {
                 sql,
                 reservation.getName(),
                 reservation.getStatus().name(),
+                reservation.getActiveStatus().name(),
                 Timestamp.valueOf(reservation.getCreatedAt()),
                 reservation.getId()
         );
@@ -75,7 +78,10 @@ public class ReservationDao {
 
     public List<Reservation> findBySlotId(Long slotId) {
         String sql = """
-                SELECT id AS reservation_id, name AS reservation_name, status AS reservation_status, created_at AS reservation_created_at
+                SELECT id AS reservation_id, name AS reservation_name,
+                       status AS reservation_status,
+                       active_status AS reservation_active_status,
+                       created_at AS reservation_created_at
                 FROM reservation
                 WHERE slot_id = ?
                 ORDER BY created_at

@@ -31,6 +31,7 @@ public class JdbcThemeTimesQuery implements ThemeTimesQuery {
                           AND r.theme_id = ?
                           AND r.date = ?
                           AND re.status = 'RESERVED'
+                          AND re.active_status = 'ACTIVE'
                     ) AS is_reservable
                 FROM reservation_time rt
                 WHERE rt.status = 'ACTIVE'

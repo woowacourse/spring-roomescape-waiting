@@ -189,11 +189,11 @@ class ReservationSlotTest {
 
         // then
         assertThat(slot.getReservations())
-                .extracting(Reservation::getId, Reservation::getStatus)
+                .extracting(Reservation::getId, Reservation::getStatus, Reservation::getActiveStatus)
                 .containsExactly(
-                        tuple(1L, ReservationStatus.DELETED),
-                        tuple(2L, ReservationStatus.RESERVED),
-                        tuple(3L, ReservationStatus.WAITING)
+                        tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple(2L, ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE),
+                        tuple(3L, ReservationStatus.WAITING, ReservationActiveStatus.ACTIVE)
                 );
     }
 
@@ -231,8 +231,8 @@ class ReservationSlotTest {
         // then
         assertThat(slot.getReservations())
                 .singleElement()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.DELETED);
+                .extracting(Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(ReservationStatus.WAITING, ReservationActiveStatus.CANCELED);
     }
 
     @Test

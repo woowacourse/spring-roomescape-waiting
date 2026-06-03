@@ -2,6 +2,7 @@ package roomescape.persistence.jdbc.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationActiveStatus;
 import roomescape.domain.ReservationStatus;
 
 public final class ReservationRowMapper {
@@ -11,6 +12,7 @@ public final class ReservationRowMapper {
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
                     ReservationStatus.valueOf(rs.getString("reservation_status")),
+                    ReservationActiveStatus.valueOf(rs.getString("reservation_active_status")),
                     rs.getTimestamp("reservation_created_at").toLocalDateTime()
             );
 

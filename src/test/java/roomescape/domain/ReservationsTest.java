@@ -56,7 +56,7 @@ class ReservationsTest {
         // given
         Reservations reservations = new Reservations(List.of(
                 reservation(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now()),
-                reservation(2L, "라텔", ReservationStatus.DELETED, LocalDateTime.now())
+                canceledReservation(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -92,7 +92,7 @@ class ReservationsTest {
         // given
         Reservations reservations = new Reservations(List.of(
                 reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                reservation(2L, "라텔", ReservationStatus.DELETED, LocalDateTime.now())
+                canceledReservation(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -137,7 +137,7 @@ class ReservationsTest {
         // given
         Reservations reservations = new Reservations(List.of(
                 reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                reservation(2L, "라텔", ReservationStatus.DELETED, LocalDateTime.now())
+                canceledReservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now())
         ));
 
         // when
@@ -145,14 +145,18 @@ class ReservationsTest {
 
         // then
         assertThat(reservations.getReservations())
-                .extracting(Reservation::getId, Reservation::getStatus)
+                .extracting(Reservation::getId, Reservation::getStatus, Reservation::getActiveStatus)
                 .containsExactly(
-                        tuple(1L, ReservationStatus.RESERVED),
-                        tuple(2L, ReservationStatus.DELETED)
+                        tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE),
+                        tuple(2L, ReservationStatus.WAITING, ReservationActiveStatus.CANCELED)
                 );
     }
 
     private Reservation reservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
         return new Reservation(id, name, status, createdAt);
+    }
+
+    private Reservation canceledReservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return new Reservation(id, name, status, ReservationActiveStatus.CANCELED, createdAt);
     }
 }

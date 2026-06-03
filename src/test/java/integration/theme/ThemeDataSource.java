@@ -60,8 +60,8 @@ public class ThemeDataSource {
 
     private void insertReservation(String name, Long reservationId) {
         jdbcTemplate.update("""
-                        INSERT INTO reservation (name, slot_id, status, created_at)
-                        VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
+                        INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                        VALUES (?, ?, 'RESERVED', 'ACTIVE', CURRENT_TIMESTAMP)
                         """,
                 name, reservationId);
     }

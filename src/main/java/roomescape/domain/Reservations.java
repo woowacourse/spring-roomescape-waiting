@@ -27,6 +27,7 @@ public class Reservations {
 
     public void promoteFirstWaiting() {
         reservations.stream()
+                .filter(Reservation::isActive)
                 .filter(Reservation::isWaiting)
                 .min(Comparator.comparing(Reservation::getCreatedAt))
                 .ifPresent(Reservation::promote);
@@ -44,6 +45,7 @@ public class Reservations {
 
     public boolean hasReservedReservation() {
         return reservations.stream()
+                .filter(Reservation::isActive)
                 .anyMatch(Reservation::isReserved);
     }
 

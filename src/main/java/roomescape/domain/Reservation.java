@@ -10,11 +10,23 @@ public class Reservation {
     private final String name;
     private final LocalDateTime createdAt;
     private ReservationStatus status;
+    private ReservationActiveStatus activeStatus;
 
     public Reservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        this(id, name, status, ReservationActiveStatus.ACTIVE, createdAt);
+    }
+
+    public Reservation(
+            Long id,
+            String name,
+            ReservationStatus status,
+            ReservationActiveStatus activeStatus,
+            LocalDateTime createdAt
+    ) {
         this.id = id;
         this.name = name;
         this.status = status;
+        this.activeStatus = activeStatus;
         this.createdAt = createdAt;
     }
 
@@ -27,7 +39,7 @@ public class Reservation {
     }
 
     public void cancel() {
-        this.status = ReservationStatus.DELETED;
+        this.activeStatus = ReservationActiveStatus.CANCELED;
     }
 
     public void promote() {
@@ -47,7 +59,7 @@ public class Reservation {
     }
 
     public boolean isActive() {
-        return this.status != ReservationStatus.DELETED;
+        return this.activeStatus == ReservationActiveStatus.ACTIVE;
     }
 
     public boolean hasSameName(String name) {

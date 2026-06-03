@@ -103,12 +103,12 @@ class ReservationQueryTest extends BaseIntegrationTest {
         // given
         LocalDateTime now = LocalDateTime.now();
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, slot_id, status, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                VALUES (?, ?, ?, 'ACTIVE', ?)
                 """, "라텔", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(2)));
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, slot_id, status, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                VALUES (?, ?, ?, 'ACTIVE', ?)
                 """, "찰리", 2L, "WAITING", Timestamp.valueOf(now.minusMinutes(1)));
 
         // when

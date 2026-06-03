@@ -71,7 +71,13 @@ class ReservationTest {
     @Test
     void 취소_상태이면_활성_상태가_아니다() {
         // given
-        Reservation reservation = reservation(1L, ReservationStatus.DELETED);
+        Reservation reservation = new Reservation(
+                1L,
+                "이프",
+                ReservationStatus.RESERVED,
+                ReservationActiveStatus.CANCELED,
+                LocalDateTime.now()
+        );
 
         // when & then
         assertThat(reservation.isActive()).isFalse();
@@ -104,7 +110,8 @@ class ReservationTest {
         reservation.cancel();
 
         // then
-        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.DELETED);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservation.getActiveStatus()).isEqualTo(ReservationActiveStatus.CANCELED);
     }
 
     @Test

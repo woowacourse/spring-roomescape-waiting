@@ -42,8 +42,8 @@ public class ReservationDataSource {
                 date, themeId, timeId);
         Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_slot", Long.class);
         jdbcTemplate.update("""
-                        INSERT INTO reservation (name, slot_id, status, created_at)
-                        VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
+                        INSERT INTO reservation (name, slot_id, status, active_status, created_at)
+                        VALUES (?, ?, 'RESERVED', 'ACTIVE', CURRENT_TIMESTAMP)
                         """,
                 name, reservationId);
     }
@@ -65,13 +65,17 @@ public class ReservationDataSource {
 
     public List<String> findReservationStatusesBySlotId(long slotId) {
         String sql = """
-                SELECT name, status
+                SELECT name, status, active_status
                 FROM reservation
                 WHERE slot_id = ?
                 """;
         return jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> "%s:%s".formatted(rs.getString("name"), rs.getString("status")),
+                (rs, rowNum) -> "%s:%s:%s".formatted(
+                        rs.getString("name"),
+                        rs.getString("status"),
+                        rs.getString("active_status")
+                ),
                 slotId
         );
     }

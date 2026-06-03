@@ -9,8 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationSlot;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationActiveStatus;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -259,8 +260,8 @@ class ReservationServiceTest {
         assertThat(reservationRepository.findByReservationIdForUpdate(reservationId).orElseThrow()
                 .getReservations())
                 .singleElement()
-                .extracting(Reservation::getStatus)
-                .isEqualTo(ReservationStatus.DELETED);
+                .extracting(Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED);
     }
 
     private long reservedReservationId(ReservationSlot slot) {

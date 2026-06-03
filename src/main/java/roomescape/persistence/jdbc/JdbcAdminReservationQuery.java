@@ -37,6 +37,7 @@ public class JdbcAdminReservationQuery implements AdminReservationQuery {
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN reservation re ON re.slot_id = r.id
                 WHERE re.status = 'RESERVED'
+                  AND re.active_status = 'ACTIVE'
                 ORDER BY r.date DESC, rt.start_at DESC, re.id DESC
                 """;
         return jdbcTemplate.query(sql, AdminReservationSlotResponseRowMapper.ADMIN_RESERVATION_SLOT_RESPONSE_ROW_MAPPER);

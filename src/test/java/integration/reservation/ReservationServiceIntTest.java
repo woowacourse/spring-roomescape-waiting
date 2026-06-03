@@ -76,8 +76,8 @@ class ReservationServiceIntTest extends BaseIntegrationTest {
         List<String> statuses = reservationDataSource.findReservationStatusesBySlotId(reservation.slotId());
         assertThat(statuses)
                 .containsExactlyInAnyOrder(
-                        "이프:DELETED",
-                        "라텔:RESERVED"
+                        "이프:RESERVED:CANCELED",
+                        "라텔:RESERVED:ACTIVE"
                 );
     }
 }
