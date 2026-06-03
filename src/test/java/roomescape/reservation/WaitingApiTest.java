@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalTime;
 import java.util.Map;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.support.ApiTest;
 import roomescape.support.TestDataHelper;
 
@@ -304,5 +306,144 @@ class WaitingApiTest {
                 .then().log().all()
                 .statusCode(422)
                 .body("errorMessage", equalTo("이미 지나간 예약은 삭제할 수 없습니다."));
+    }
+
+    @DisplayName("대기를 지정한 순번 만큼 미루는 API를 테스트합니다.")
+    @Test
+    void postpone_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "이안",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        RestAssured.given()
+                .queryParam("steps", 2)
+                .when().post("/waitings/{id}/postpone", waitingId)
+                .then().log().all()
+                .statusCode(200)
+                .body("id", equalTo(waitingId.intValue()))
+                .body("rank", equalTo(3));
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer pkRank = testHelper.findWaitingRank("피케이", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+        Integer ianRank = testHelper.findWaitingRank("이안", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(starkRank).isEqualTo(3);
+            softly.assertThat(pkRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+            softly.assertThat(ianRank).isEqualTo(4);
+        });
+    }
+
+    @DisplayName("대기를 남은 순번보다 많이 미루면 마지막 순번으로 이동하는 것을 테스트합니다.")
+    @Test
+    void postpone_waiting_reservation_to_last_rank() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        RestAssured.given()
+                .queryParam("steps", 99)
+                .when().post("/waitings/{id}/postpone", waitingId)
+                .then().log().all()
+                .statusCode(200)
+                .body("id", equalTo(waitingId.intValue()))
+                .body("rank", equalTo(3));
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer pkRank = testHelper.findWaitingRank("피케이", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(starkRank).isEqualTo(3);
+            softly.assertThat(pkRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+        });
+    }
+
+    @DisplayName("대기를 양수가 아닌 순번 만큼 미룰 시 400 응답 반환을 테스트합니다.")
+    @Test
+    void postpone_waiting_reservation_with_invalid_steps() {
+        RestAssured.given()
+                .queryParam("steps", 0)
+                .when().post("/waitings/{id}/postpone", 1L)
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo("미룰 순번은 양수여야 합니다."));
+    }
+
+    @DisplayName("이미 지나간 시간의 대기 예약을 미룰 시 422 응답 반환을 테스트합니다.")
+    @Test
+    void postpone_past_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
+
+        RestAssured.given()
+                .queryParam("steps", 1)
+                .when().post("/waitings/{id}/postpone", waitingId)
+                .then().log().all()
+                .statusCode(422)
+                .body("errorMessage", equalTo("이미 지나간 예약은 미룰 수 없습니다."));
     }
 }

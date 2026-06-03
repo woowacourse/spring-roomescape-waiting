@@ -2,6 +2,7 @@ package roomescape.reservation.presentation.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.application.dto.WaitingPostponeResult;
 import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservation.presentation.dto.WaitingCreateRequest;
+import roomescape.reservation.presentation.dto.WaitingPostponeResponse;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @RequiredArgsConstructor
@@ -62,5 +65,16 @@ public class WaitingController {
     ) {
         waitingCommandService.delete(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/postpone")
+    public ResponseEntity<WaitingPostponeResponse> postpone(
+            @PathVariable Long id,
+            @Positive(message = "미룰 순번은 양수여야 합니다.")
+            @RequestParam int steps
+    ) {
+        WaitingPostponeResult result = waitingCommandService.postpone(id, steps, LocalDateTime.now());
+
+        return ResponseEntity.ok(WaitingPostponeResponse.from(result));
     }
 }
