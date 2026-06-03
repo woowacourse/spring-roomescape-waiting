@@ -12,7 +12,7 @@ public class ConcurrentUtils {
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch doneLatch  = new CountDownLatch(threadCount);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
                     startLatch.await();
