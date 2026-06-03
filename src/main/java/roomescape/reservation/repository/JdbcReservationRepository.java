@@ -169,7 +169,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                            r.request_order,
                            ROW_NUMBER() OVER (
                                PARTITION BY r.theme_id, r.date, r.time_id
-                               ORDER BY r.request_order ASC
+                               ORDER BY r.request_order ASC, r.id ASC
                            ) AS queue_position
                     FROM reservation r
                     %s
@@ -212,6 +212,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY result.date ASC,
                          result.start_at ASC,
                          result.request_order ASC,
+                         result.reservation_id ASC,
                          result.source_order ASC
                 """.formatted(
                 targetSlotClause,
