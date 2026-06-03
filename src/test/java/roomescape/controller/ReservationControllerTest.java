@@ -34,6 +34,7 @@ import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
+import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
@@ -186,6 +187,14 @@ class ReservationControllerTest {
     }
 
     @Test
+    void DELETE_reservations_waiting_id_204를_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
+        mockMvc.perform(delete("/reservations/waiting/3"))
+                .andExpect(status().isNoContent());
+
+        verify(reservationService).cancelOwnWaitingReservation(Fixtures.cancelCommand(3L, 1L));
+    }
+
+    @Test
     void DELETE_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         willThrow(new roomescape.exception.ResourceNotFoundException("예약", 9999L))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(9999L, 1L));
@@ -203,6 +212,16 @@ class ReservationControllerTest {
         mockMvc.perform(delete("/reservations/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("본인의 예약만 취소 혹은 변경 가능합니다."));
+    }
+
+    @Test
+    void DELETE_reservations_waiting_id_예약_확정이면_409과_메시지를_반환한다() throws Exception {
+        willThrow(new ReservationNotWaitingException("RESERVED"))
+                .given(reservationService).cancelOwnWaitingReservation(Fixtures.cancelCommand(1L, 1L));
+
+        mockMvc.perform(delete("/reservations/waiting/1"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("해당 예약은 예약 대기 상태가 아닙니다. 현재 예약 상태 값: RESERVED"));
     }
 
     @Test

@@ -83,4 +83,12 @@ public class ReservationController {
         reservationService.cancelOwnReservation(new CancelReservationCommand(id, userId));
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> cancelWaitingReservation(
+            @PathVariable Long id,
+            @LoginUserId Long userId) {
+        reservationService.cancelOwnWaitingReservation(new CancelReservationCommand(id, userId));
+        return ResponseEntity.noContent().build();
+    }
 }

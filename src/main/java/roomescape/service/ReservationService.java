@@ -20,6 +20,7 @@ import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
 import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationNotReservedException;
+import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationRepository;
@@ -122,6 +123,18 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
         validateReservationOwner(command.userId(), reservation);
+        validateIsReserved(reservation);
+        validateExistingNotInPast(reservation);
+
+        reservationRepository.deleteById(command.reservationId());
+    }
+
+    @Transactional
+    public void cancelOwnWaitingReservation(CancelReservationCommand command) {
+        Reservation reservation = reservationRepository.findById(command.reservationId())
+                .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
+        validateReservationOwner(command.userId(), reservation);
+        validateIsWaiting(reservation);
         validateExistingNotInPast(reservation);
 
         reservationRepository.deleteById(command.reservationId());
@@ -147,6 +160,12 @@ public class ReservationService {
     private void validateIsReserved(Reservation existing) {
         if (!existing.isReserved()) {
             throw new ReservationNotReservedException(existing.getStatus().toString());
+        }
+    }
+
+    private void validateIsWaiting(Reservation existing) {
+        if (!existing.isWaiting()) {
+            throw new ReservationNotWaitingException(existing.getStatus().toString());
         }
     }
 

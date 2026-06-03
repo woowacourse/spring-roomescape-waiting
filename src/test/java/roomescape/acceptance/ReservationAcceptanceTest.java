@@ -110,7 +110,7 @@ class ReservationAcceptanceTest {
         //재키 삭제
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, waitingReservation2.bearer())
-                .when().delete("/reservations/" + waitingReservation2.reservationId())
+                .when().delete("/reservations/waiting/" + waitingReservation2.reservationId())
                 .then().log().all()
                 .statusCode(204);
 
@@ -434,6 +434,41 @@ class ReservationAcceptanceTest {
                 .when().delete("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void DELETE_reservations_id_예약_대기이면_409과_메시지를_반환한다() {
+        Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate).member("브라운").save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, waiting.bearer())
+                .when().delete("/reservations/" + waiting.reservationId())
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: WAITING"));
+    }
+
+    @Test
+    void DELETE_reservations_waiting_id_본인의_예약_대기를_취소한다() {
+        Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate).member("브라운").save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, waiting.bearer())
+                .when().delete("/reservations/waiting/" + waiting.reservationId())
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void DELETE_reservations_waiting_id_예약_확정이면_409과_메시지를_반환한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, reserved.bearer())
+                .when().delete("/reservations/waiting/" + reserved.reservationId())
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("해당 예약은 예약 대기 상태가 아닙니다. 현재 예약 상태 값: RESERVED"));
     }
 
     @Test
