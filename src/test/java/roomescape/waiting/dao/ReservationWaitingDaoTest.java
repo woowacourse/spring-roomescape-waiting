@@ -71,12 +71,9 @@ class ReservationWaitingDaoTest {
     void 이름으로_예약_대기_목록_조회_성공() {
         LocalDate date = LocalDate.now();
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
-        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime);
-        ReservationWaiting second = new ReservationWaiting("티버", 2L, date, reservationTime);
-        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime);
-        reservationWaitingDao.insert(first);
-        reservationWaitingDao.insert(second);
-        reservationWaitingDao.insert(other);
+        reservationWaitingDao.insert(new ReservationWaiting("로치", 1L, date, reservationTime));
+        reservationWaitingDao.insert(new ReservationWaiting("티버", 1L, date, reservationTime));
+        reservationWaitingDao.insert(new ReservationWaiting("티버", 2L, date, reservationTime));
 
         List<ReservationWaiting> actual = reservationWaitingDao.selectByName("티버");
 
@@ -85,7 +82,7 @@ class ReservationWaitingDaoTest {
                 .containsOnly("티버");
         assertThat(actual)
                 .extracting(ReservationWaiting::getWaitingNumber)
-                .containsExactly(1L, 1L);
+                .containsExactlyInAnyOrder(2L, 1L);
     }
 
     @Test
@@ -113,12 +110,12 @@ class ReservationWaitingDaoTest {
         reservationWaitingDao.insert(new ReservationWaiting("로치", 1L, date, reservationTime));
         reservationWaitingDao.insert(new ReservationWaiting("워넬", 1L, date, reservationTime));
 
-        // 1번 대기자 취소
         reservationWaitingDao.deleteById(first.getId());
 
-        List<ReservationWaiting> actual = reservationWaitingDao.selectByName("로치");
+        List<ReservationWaiting> roach = reservationWaitingDao.selectByName("로치");
+        assertThat(roach.get(0).getWaitingNumber()).isEqualTo(1L);
 
-        // 로치가 자동으로 1번이 되는지 검증
-        assertThat(actual.get(0).getWaitingNumber()).isEqualTo(1L);
+        List<ReservationWaiting> wonel = reservationWaitingDao.selectByName("워넬");
+        assertThat(wonel.get(0).getWaitingNumber()).isEqualTo(2L);
     }
 }

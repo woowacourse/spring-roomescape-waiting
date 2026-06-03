@@ -36,12 +36,15 @@ public class ReservationWaitingDao {
 
     public Optional<ReservationWaiting> selectById(Long id) {
         String sql = """
-                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
-                    ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
-                from reservation_waiting w
-                join reservation_time t
-                on w.time_id = t.id
-                where w.id = ?
+                select id, name, theme_id, date, time_id, start_at, waiting_number
+                from (
+                    select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
+                        ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
+                    from reservation_waiting w
+                    join reservation_time t
+                    on w.time_id = t.id
+                ) ranked
+                where id = ?
                 """;
 
         List<ReservationWaiting> results = jdbcTemplate.query(sql, rowMapper, id);
@@ -50,12 +53,15 @@ public class ReservationWaitingDao {
 
     public List<ReservationWaiting> selectByName(String name) {
         String sql = """
-                select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
-                    ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
-                from reservation_waiting w
-                join reservation_time t
-                on w.time_id = t.id
-                where w.name = ?
+                select id, name, theme_id, date, time_id, start_at, waiting_number
+                from (
+                    select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
+                        ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
+                    from reservation_waiting w
+                    join reservation_time t
+                    on w.time_id = t.id
+                ) ranked
+                where name = ?
                 """;
 
         return jdbcTemplate.query(sql, rowMapper, name);
