@@ -14,34 +14,34 @@ import java.util.List;
 @Service
 public class ThemeService {
 
-    private final ThemeQueryDao themeQueryingDao;
-    private final ThemeUpdateDao themeUpdatingDao;
+    private final ThemeQueryDao themeQueryDao;
+    private final ThemeUpdateDao themeUpdateDao;
 
-    public ThemeService(ThemeQueryDao themeQueryingDao, ThemeUpdateDao themeUpdatingDao) {
-        this.themeQueryingDao = themeQueryingDao;
-        this.themeUpdatingDao = themeUpdatingDao;
+    public ThemeService(ThemeQueryDao themeQueryDao, ThemeUpdateDao themeUpdateDao) {
+        this.themeQueryDao = themeQueryDao;
+        this.themeUpdateDao = themeUpdateDao;
     }
 
     public ThemeResponse create(ThemeRequest themeRequest) {
-        Long id = themeUpdatingDao.insert(themeRequest);
+        Long id = themeUpdateDao.insert(themeRequest);
         return ThemeResponse.from(new Theme(id, themeRequest.name(), themeRequest.description(), themeRequest.url()));
     }
 
     public List<ThemeResponse> findAll() {
-        return themeQueryingDao.findAllTheme().stream()
+        return themeQueryDao.findAllTheme().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> findPopularTheme() {
-        return themeQueryingDao.findAllByTopTheme().stream()
+        return themeQueryDao.findAllByTopTheme().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     public void delete(Long id) {
         try {
-            themeUpdatingDao.delete(id);
+            themeUpdateDao.delete(id);
         } catch (DataIntegrityViolationException e) {
             throw new ReferencedDataException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }

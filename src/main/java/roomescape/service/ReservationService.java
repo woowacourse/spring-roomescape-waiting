@@ -29,18 +29,18 @@ import java.util.stream.Stream;
 @Service
 public class ReservationService {
 
-    private final ReservationQueryDao reservationQueryingDao;
-    private final ReservationUpdateDao reservationUpdatingDao;
-    private final ReservationTimeQueryDao reservationTimeQueryingDao;
-    private final ThemeQueryDao themeQueryingDao;
+    private final ReservationQueryDao reservationQueryDao;
+    private final ReservationUpdateDao reservationUpdateDao;
+    private final ReservationTimeQueryDao reservationTimeQueryDao;
+    private final ThemeQueryDao themeQueryDao;
     private final ReservationWaitingQueryDao reservationWaitingQueryDao;
     private final ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
-    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingQueryDao reservationWaitingQueryDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
-        this.reservationQueryingDao = reservationQueryingDao;
-        this.reservationUpdatingDao = reservationUpdatingDao;
-        this.reservationTimeQueryingDao = reservationTimeQueryingDao;
-        this.themeQueryingDao = themeQueryingDao;
+    public ReservationService(ReservationQueryDao reservationQueryDao, ReservationUpdateDao reservationUpdateDao, ReservationTimeQueryDao reservationTimeQueryDao, ThemeQueryDao themeQueryDao, ReservationWaitingQueryDao reservationWaitingQueryDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
+        this.reservationQueryDao = reservationQueryDao;
+        this.reservationUpdateDao = reservationUpdateDao;
+        this.reservationTimeQueryDao = reservationTimeQueryDao;
+        this.themeQueryDao = themeQueryDao;
         this.reservationWaitingQueryDao = reservationWaitingQueryDao;
         this.reservationWaitingUpdateDao = reservationWaitingUpdateDao;
     }
@@ -51,14 +51,14 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> readAll() {
-        List<Reservation> reservations = reservationQueryingDao.findAllReservations();
+        List<Reservation> reservations = reservationQueryDao.findAllReservations();
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<MyReservationResponse> readMineByName(String name) {
-        List<MyReservationResponse> reservations = reservationQueryingDao.findAllByName(name)
+        List<MyReservationResponse> reservations = reservationQueryDao.findAllByName(name)
                 .stream()
                 .map(MyReservationResponse::fromReservation)
                 .toList();
@@ -75,9 +75,9 @@ public class ReservationService {
     }
 
     public ReservationResponse create(ReservationRequest reservationRequest) {
-        ReservationTime reservationTimeById = reservationTimeQueryingDao.findReservationTimeById(reservationRequest.timeId())
+        ReservationTime reservationTimeById = reservationTimeQueryDao.findReservationTimeById(reservationRequest.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationRequest.timeId()));
-        Theme themeById = themeQueryingDao.findThemeById(reservationRequest.themeId())
+        Theme themeById = themeQueryDao.findThemeById(reservationRequest.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationRequest.themeId()));
 
         validateDuplicatedReservation(new ReservationSlot(reservationRequest.date(), reservationTimeById, themeById));
@@ -85,7 +85,7 @@ public class ReservationService {
         Reservation reservation = reservationRequest.toReservation(reservationTimeById, themeById);
         reservation.validatePastDateTime();
 
-        Long generatedId = reservationUpdatingDao.insert(reservation);
+        Long generatedId = reservationUpdateDao.insert(reservation);
         return ReservationResponse.from(reservation.withReservationId(generatedId));
     }
 
@@ -93,7 +93,7 @@ public class ReservationService {
         Reservation existedReservation = getReservation(id);
         existedReservation.validatePastDateTime();
 
-        ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationRequest.timeId())
+        ReservationTime newTime = reservationTimeQueryDao.findReservationTimeById(reservationRequest.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationRequest.timeId()));
 
         ReservationSlot newSlot = new ReservationSlot(reservationRequest.date(), newTime, existedReservation.getTheme());
@@ -102,7 +102,7 @@ public class ReservationService {
 
         Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationRequest.date(), newTime);
 
-        reservationUpdatingDao.update(id, updatedReservation);
+        reservationUpdateDao.update(id, updatedReservation);
         return ReservationResponse.from(updatedReservation);
     }
 
@@ -110,22 +110,22 @@ public class ReservationService {
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
         reservation.validatePastDateTime();
-        reservationUpdatingDao.delete(id);
+        reservationUpdateDao.delete(id);
 
         reservationWaitingQueryDao.findFirstWaitingBySlot(reservation.getSlot())
                 .ifPresent(waiting -> {
-                    reservationUpdatingDao.insert(waiting.toReservation());
+                    reservationUpdateDao.insert(waiting.toReservation());
                     reservationWaitingUpdateDao.delete(waiting.getId());
                         });
     }
 
     private Reservation getReservation(Long id) {
-        return reservationQueryingDao.findReservationById(id)
+        return reservationQueryDao.findReservationById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약이 존재하지 않습니다."));
     }
 
     private void validateDuplicatedReservation(ReservationSlot reservationSlot) {
-        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationBySlot(reservationSlot);
+        Optional<Reservation> duplicateReservation = reservationQueryDao.findReservationBySlot(reservationSlot);
         if (duplicateReservation.isPresent()) {
             throw new ReservationAlreadyExistException();
         }
