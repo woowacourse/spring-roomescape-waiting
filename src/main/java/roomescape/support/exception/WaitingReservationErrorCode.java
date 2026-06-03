@@ -12,7 +12,7 @@ public enum WaitingReservationErrorCode implements ErrorCode {
     AVAILABLE_SLOT_NOT_WAITABLE(HttpStatus.CONFLICT,
         "예약 가능한 시간에는 대기를 신청할 수 없습니다.", "예약된 날짜, 시간, 테마에만 대기를 신청하십시오."),
     WAITING_RESERVATION_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
-        "예약일이 오늘 이전이거나 당일인 예약에는 대기를 신청할 수 없습니다.", "예약일이 내일 이후인 예약에만 대기를 신청하십시오."),
+        "예약 시작 10분 전부터는 예약 대기를 신청할 수 없습니다.", "예약 시작 10분 전보다 이전에만 대기를 신청하십시오."),
     WAITING_RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND,
         "해당하는 예약 대기를 찾을 수 없습니다.", "요청한 예약 대기 ID의 유효성 및 DB 존재 여부를 확인하십시오."),
     DUPLICATE_WAITING_RESERVATION(HttpStatus.CONFLICT,

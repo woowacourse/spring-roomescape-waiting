@@ -76,7 +76,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 불가능 날짜로 예약 생성 시 예외가 발생한다.")
+    @DisplayName("마감된 일시로 예약 생성 시 예외가 발생한다.")
     void createReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().minusDays(1)));
@@ -189,15 +189,16 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 불가능 날짜의 예약 삭제 시 예외가 발생한다.")
-    void cancelTodayReservation() {
+    @DisplayName("마감된 예약 삭제 시 예외가 발생한다.")
+    void cancelClosedReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
-        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(23, 59)));
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.now().plusMinutes(9)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
 
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId("당일예약테스터", date, time, theme));
+                Reservation.createWithoutId("마감예약테스터", date, time, theme));
 
         assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId()))
                 .isInstanceOf(RoomescapeException.class)
@@ -246,7 +247,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 불가능 날짜로 예약 수정 시 예외가 발생한다.")
+    @DisplayName("마감된 일시로 예약 수정 시 예외가 발생한다.")
     void updateReservationWithPastTime() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now().plusDays(1)));
@@ -290,16 +291,17 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 불가능 날짜의 예약 수정 시 예외가 발생한다.")
-    void updateTodayReservation() {
+    @DisplayName("마감된 예약 수정 시 예외가 발생한다.")
+    void updateClosedReservation() {
         ReservationDate date = reservationDateRepository.save(
                 ReservationDate.createWithoutId(LocalDate.now()));
-        ReservationTime time = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(23, 59)));
+        ReservationTime time = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.now().plusMinutes(9)));
         ReservationTime newTime = reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(14, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("테마", "설명", "url"));
 
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId("당일예약테스터", date, time, theme));
+                Reservation.createWithoutId("마감예약테스터", date, time, theme));
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(date.getId(), newTime.getId());
 

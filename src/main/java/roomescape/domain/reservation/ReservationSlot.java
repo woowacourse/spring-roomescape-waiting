@@ -1,7 +1,8 @@
 package roomescape.domain.reservation;
 
 import java.time.Clock;
-import java.time.LocalDate;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -34,7 +35,10 @@ public record ReservationSlot(
                 && themeId().equals(other.themeId());
     }
 
-    public boolean isOnOrBeforeToday(Clock clock) {
-        return !date.getPlayDay().isAfter(LocalDate.now(clock));
+    public boolean isClosedForReservation(Clock clock) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date.getPlayDay(), time.getStartAt());
+        LocalDateTime deadline = reservationDateTime.minus(Duration.ofMinutes(10));
+        LocalDateTime now = LocalDateTime.now(clock);
+        return now.isEqual(deadline) || now.isAfter(deadline);
     }
 }

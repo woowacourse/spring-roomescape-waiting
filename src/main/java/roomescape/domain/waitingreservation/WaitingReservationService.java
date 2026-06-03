@@ -85,7 +85,7 @@ public class WaitingReservationService {
     }
 
     private void validateReservableDate(ReservationSlot slot) {
-        if (slot.isOnOrBeforeToday(clock)) {
+        if (slot.isClosedForReservation(clock)) {
             throw new RoomescapeException(WaitingReservationErrorCode.WAITING_RESERVATION_DATE_NOT_ALLOWED);
         }
     }
