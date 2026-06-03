@@ -136,6 +136,7 @@ public class ReservationService {
         reservationResponses.sort(
                 Comparator.comparing(MyReservationResponse::date)
                         .thenComparing(reservation -> reservation.time().startAt())
+                        .thenComparing(reservation -> reservation.theme().name())
         );
         return reservationResponses;
     }

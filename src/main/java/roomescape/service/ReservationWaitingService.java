@@ -39,7 +39,7 @@ public class ReservationWaitingService {
         Theme theme = getTheme(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
 
-        validateReservationExists(slot);
+        validateReservationNotExists(slot);
         validateUniqueReservationWaiting(command.name(), slot);
         validatePastDatetime(slot, now);
 
@@ -68,7 +68,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateReservationExists(ReservationSlot slot) {
+    private void validateReservationNotExists(ReservationSlot slot) {
         boolean exists = reservationDao.existsBySlot(slot);
         if (!exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND);
