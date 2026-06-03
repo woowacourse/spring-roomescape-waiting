@@ -19,9 +19,13 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
-import roomescape.reservationtime.application.service.ReservationTimeService;
+import roomescape.reservationtime.application.exception.ReservationTimeErrorCode;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.application.dto.ThemeQueryResult;
-import roomescape.theme.application.service.ThemeService;
+import roomescape.theme.application.exception.ThemeErrorCode;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
 
 @RequiredArgsConstructor
 @Transactional
@@ -30,8 +34,8 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final ThemeService themeService;
-    private final ReservationTimeService timeService;
+    private final ThemeRepository themeRepository;
+    private final ReservationTimeRepository timeRepository;
 
     @Transactional(readOnly = true)
     public List<ReservationQueryResult> findAll() {
@@ -49,10 +53,10 @@ public class ReservationService {
     }
 
     public ReservationQueryResult save(ReservationCreateCommand request, LocalDateTime currentDateTime) {
-        ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
+        ReservationTimeQueryResult timeQueryResult = findTimeById(request.timeId());
         validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
 
-        ThemeQueryResult themeQueryResult = themeService.findById(request.themeId());
+        ThemeQueryResult themeQueryResult = findThemeById(request.themeId());
 
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
@@ -75,7 +79,7 @@ public class ReservationService {
         validateOwner(request.name(), reservation);
         validateReservationNotPast(reservationDetail, currentDateTime);
 
-        ReservationTimeQueryResult timeQueryResult = timeService.findById(request.timeId());
+        ReservationTimeQueryResult timeQueryResult = findTimeById(request.timeId());
         validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
         validateDuplicateReservation(request, reservation);
 
@@ -101,6 +105,18 @@ public class ReservationService {
         }
 
         return reservationRepository.delete(id);
+    }
+
+    private ThemeQueryResult findThemeById(Long id) {
+        Theme theme = themeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
+        return ThemeQueryResult.from(theme);
+    }
+
+    private ReservationTimeQueryResult findTimeById(Long id) {
+        ReservationTime time = timeRepository.findById(id)
+                .orElseThrow(() -> new RoomEscapeException(ReservationTimeErrorCode.TIME_NOT_FOUND));
+        return ReservationTimeQueryResult.from(time);
     }
 
     private ReservationDetail getReservationDetail(Long id) {
@@ -143,8 +159,8 @@ public class ReservationService {
     }
 
     private ReservationQueryResult toQueryResult(Reservation reservation) {
-        ThemeQueryResult themeQueryResult = themeService.findById(reservation.getThemeId());
-        ReservationTimeQueryResult timeQueryResult = timeService.findById(reservation.getTimeId());
+        ThemeQueryResult themeQueryResult = findThemeById(reservation.getThemeId());
+        ReservationTimeQueryResult timeQueryResult = findTimeById(reservation.getTimeId());
         return ReservationQueryResult.from(reservation, themeQueryResult, timeQueryResult);
     }
 
