@@ -320,6 +320,20 @@ class ReservationServiceTest {
         assertThat(reservation3Response.waitingReservationResponses().get(1).waitingOrder()).isEqualTo(1);
     }
 
+    @Test
+    @DisplayName("앞 순번 대기를 취소하면 다음 대기의 순번이 1로 재정렬된다.")
+    void reorderWaitingOrderWhenFirstWaitingReservationIsCancelled() {
+        reservationService.saveReservation("확정자", savedThemeSlot1.getId());
+        Reservation firstWaitingReservation = reservationService.saveReservation("첫대기", savedThemeSlot1.getId());
+        reservationService.saveReservation("둘대기", savedThemeSlot1.getId());
+
+        reservationService.cancelReservation(firstWaitingReservation.getId(), "첫대기");
+
+        MyReservationResponse response = reservationService.findReservationBy("둘대기");
+        assertThat(response.waitingReservationResponses()).hasSize(1);
+        assertThat(response.waitingReservationResponses().get(0).waitingOrder()).isEqualTo(1);
+    }
+
     private Reservation findReservation(Long reservationId) {
         return fakeReservationDao.findById(reservationId).orElseThrow();
     }

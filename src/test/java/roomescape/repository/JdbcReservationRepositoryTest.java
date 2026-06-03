@@ -103,7 +103,7 @@ class JdbcReservationRepositoryTest {
         jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
         jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
 
-        Optional<Reservation> reservation = jdbcReservationRepository.findRecentReservationByThemeSlot(
+        Optional<Reservation> reservation = jdbcReservationRepository.findFirstPendingByThemeSlotId(
                 themeSlot.getId());
         assertThat(reservation).isNotEmpty();
         assertThat(reservation.get().getName()).isEqualTo("브라운1");
