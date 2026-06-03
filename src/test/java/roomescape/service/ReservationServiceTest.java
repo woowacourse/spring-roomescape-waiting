@@ -91,7 +91,6 @@ class ReservationServiceTest {
 
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(pastDate, 1L, 1L)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(request))

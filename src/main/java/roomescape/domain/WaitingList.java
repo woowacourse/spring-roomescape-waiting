@@ -50,6 +50,12 @@ public class WaitingList {
         }
     }
 
+    public void validateOwner(final String name) {
+        if (!this.name.getName().equals(name)) {
+            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
+        }
+    }
+
     public String getName() {
         return name.getName();
     }

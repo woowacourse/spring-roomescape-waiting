@@ -88,6 +88,18 @@ public class Reservation {
         }
     }
 
+    public boolean isSameSlot(final Reservation other) {
+        return this.reservationDate.getDate().equals(other.reservationDate.getDate())
+                && this.time.getId().equals(other.time.getId())
+                && this.theme.getId().equals(other.theme.getId());
+    }
+
+    public void validateOwner(final String name) {
+        if (!this.name.getName().equals(name)) {
+            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
+        }
+    }
+
     public String getName() {
         return this.name.getName();
     }

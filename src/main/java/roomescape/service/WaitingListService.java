@@ -19,7 +19,6 @@ import roomescape.repository.WaitingListRepository;
 
 import java.util.List;
 
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
@@ -57,11 +56,8 @@ public class WaitingListService {
     public void delete(final WaitingListDeleteCommand deleteCommand) {
         final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
-        
-        if (!findWaitingList.getName().equals(deleteCommand.name())) {
-            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
-        }
 
+        findWaitingList.validateOwner(deleteCommand.name());
         findWaitingList.validateNotPast();
         
         waitingListRepository.deleteById(deleteCommand.waitingListId());
