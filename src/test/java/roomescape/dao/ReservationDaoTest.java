@@ -150,7 +150,7 @@ class ReservationDaoTest {
 
         // when
         boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
-                new ReservationSlot(date, time.getId(), theme.getId())
+                new ReservationSlot(date, time, theme)
         );
 
         // then
@@ -166,7 +166,7 @@ class ReservationDaoTest {
 
         // when
         boolean result = reservationDao.existsByDateAndTimeIdAndThemeId(
-                new ReservationSlot(date, time.getId(), theme.getId())
+                new ReservationSlot(date, time, theme)
         );
 
         // then

@@ -74,7 +74,7 @@ class ReservationWaitingDaoTest {
         // when
         boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
                 reservationWaiting.getName(),
-                new ReservationSlot(reservationWaiting.getReservationDate(), savedTime.getId(), savedTheme.getId())
+                new ReservationSlot(reservationWaiting.getReservationDate(), savedTime, savedTheme)
         );
 
         // then
@@ -83,10 +83,13 @@ class ReservationWaitingDaoTest {
 
     @Test
     void 특정_날짜_테마_시간_사용자_이름에_예약_대기가_존재하지_않으면_false를_반환한다() {
+        ReservationTime notSavedTime = new ReservationTime(999L, LocalTime.of(10, 0));
+        Theme notSavedTheme = new Theme(999L, "존재하지 않는 테마", "설명", "https://thumb.com");
+
         // when
         boolean result = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(
                 "맥스",
-                new ReservationSlot(LocalDate.of(2026, 6, 10), 999L, 999L)
+                new ReservationSlot(LocalDate.of(2026, 6, 10), notSavedTime, notSavedTheme)
         );
 
         // then
@@ -106,7 +109,7 @@ class ReservationWaitingDaoTest {
 
         // when
         int countOrder = reservationWaitingDao.countOrder(
-                new ReservationSlot(LocalDate.of(2026, 6, 10), savedTime.getId(), savedTheme.getId()),
+                new ReservationSlot(LocalDate.of(2026, 6, 10), savedTime, savedTheme),
                 savedReservationWaiting2.getId()
         );
 
