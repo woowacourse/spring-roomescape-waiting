@@ -4,10 +4,13 @@ import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 
 import jakarta.annotation.Nonnull;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -136,15 +139,41 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        getReservation(id);
-        reservationRepository.deleteById(id);
+        Reservation reservation = getReservation(id);
+        cancelAndPromoteNextWaitlist(reservation);
     }
 
     @Transactional
     public void cancelMyReservation(Long id, String name) {
         Reservation reservation = getReservation(id);
         reservation.verifyCancelableBy(name, LocalDateTime.now(clock));
-        reservationRepository.deleteById(id);
+        cancelAndPromoteNextWaitlist(reservation);
+    }
+
+    private void cancelAndPromoteNextWaitlist(Reservation reservation) {
+        LocalDate date = reservation.getDate();
+        Long timeId = reservation.getTime().getId();
+        Long themeId = reservation.getTheme().getId();
+
+        Optional<Waitlist> firstWaitlist = waitlistRepository.findBySlot(date, timeId, themeId).stream().findFirst();
+
+        reservationRepository.deleteById(reservation.getId());
+
+        if (firstWaitlist.isEmpty()) {
+            return;
+        }
+
+        Waitlist promotedReservation = firstWaitlist.get();
+
+        Reservation updated = new Reservation(
+                promotedReservation.getName(),
+                promotedReservation.getDate(),
+                promotedReservation.getTime(),
+                promotedReservation.getTheme()
+        );
+
+        reservationRepository.save(updated);
+        waitlistRepository.deleteById(promotedReservation.getId());
     }
 
     @Transactional

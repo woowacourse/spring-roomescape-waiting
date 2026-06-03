@@ -480,6 +480,118 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomEscapeException.class);
     }
 
+    @Test
+    void 예약_취소_시_첫_번째_대기가_예약으로_승격된다() {
+        ReservationTime tenClock = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest brownRequest = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest neoRequest = new ReservationRequest(
+                "네오",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest pobiRequest = new ReservationRequest(
+                "포비",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
+        reservationService.reserveOrWait(neoRequest);
+        reservationService.reserveOrWait(pobiRequest);
+        reservationService.cancelMyReservation(savedReservation.getId(), "브라운");
+
+        List<Reservation> reservations = reservationService.getReservations();
+        assertThat(reservations)
+                .extracting(Reservation::getName)
+                .contains("네오");
+
+        List<Waitlist> waitlists = waitlistRepository.findBySlot(
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+        assertThat(waitlists)
+                .extracting(Waitlist::getName)
+                .doesNotContain("네오");
+    }
+
+    @Test
+    void 관리자_예약_삭제_시_첫_번째_대기가_예약으로_승격된다() {
+        ReservationTime tenClock = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest brownRequest = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest neoRequest = new ReservationRequest(
+                "네오",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationRequest pobiRequest = new ReservationRequest(
+                "포비",
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
+        reservationService.reserveOrWait(neoRequest);
+        reservationService.reserveOrWait(pobiRequest);
+        reservationService.deleteReservation(savedReservation.getId());
+
+        List<Reservation> reservations = reservationService.getReservations();
+        assertThat(reservations)
+                .extracting(Reservation::getName)
+                .contains("네오");
+
+        List<Waitlist> waitlists = waitlistRepository.findBySlot(
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+        assertThat(waitlists)
+                .extracting(Waitlist::getName)
+                .doesNotContain("네오");
+    }
+
+    @Test
+    void 대기가_없으면_예약만_삭제된다() {
+        ReservationTime tenClock = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        String name = "브라운";
+        ReservationRequest request = new ReservationRequest(
+                name,
+                FUTURE_SECOND_DATE,
+                tenClock.getId(),
+                theme.getId()
+        );
+
+        ReservationWithStatus saved = reservationService.reserveOrWait(request);
+        reservationService.deleteReservation(saved.getId());
+
+        assertThatThrownBy(() -> reservationService.getReservation(saved.getId()))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
     private ReservationTime createReservationTime(LocalTime time) {
         ReservationTime reservationTime = new ReservationTime(time);
         Long id = timeRepository.save(reservationTime);
