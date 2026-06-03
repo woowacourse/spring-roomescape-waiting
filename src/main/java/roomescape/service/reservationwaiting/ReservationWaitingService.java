@@ -30,7 +30,7 @@ public class ReservationWaitingService {
         this.reservationAvailabilityPolicy = reservationAvailabilityPolicy;
     }
 
-    public ReservationWaiting save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
+    public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
         String waitingName = validateName(name);
         Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(

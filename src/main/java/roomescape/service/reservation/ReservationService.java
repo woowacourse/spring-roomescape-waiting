@@ -44,9 +44,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
-        validateCreateReferenceIds(themeId, timeId);
-
+    public Reservation save(final String name, final LocalDate date, final long themeId, final long timeId) {
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         Reservation nonIdReservation = createNewReservation(name, date, theme, reservationTime);
@@ -91,10 +89,9 @@ public class ReservationService {
             final long id,
             final String name,
             final LocalDate date,
-            final Long timeId
+            final long timeId
     ) {
         String lookupName = validateName(name);
-        validateUpdateReferenceIds(timeId);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, lookupName)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -124,22 +121,6 @@ public class ReservationService {
             return ReservationName.from(name).value();
         } catch (IllegalArgumentException exception) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
-        }
-    }
-
-    private void validateCreateReferenceIds(final Long themeId, final Long timeId) {
-        if (themeId == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "themeId는 필수입니다.");
-        }
-
-        if (timeId == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
-        }
-    }
-
-    private void validateUpdateReferenceIds(final Long timeId) {
-        if (timeId == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
         }
     }
 

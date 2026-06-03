@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import roomescape.exception.ApiException;
 import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
 import roomescape.service.reservation.ReservationService;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.service.reservationwaiting.ReservationWaitingService;
@@ -78,7 +79,12 @@ public class ReservationPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.save(name, date, themeId, timeId);
+            reservationService.save(
+                    name,
+                    date,
+                    requireId(themeId, "themeId는 필수입니다."),
+                    requireId(timeId, "timeId는 필수입니다.")
+            );
             addReservationNameAttribute(redirectAttributes, name);
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
@@ -119,7 +125,12 @@ public class ReservationPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationWaitingService.save(name, date, themeId, timeId);
+            reservationWaitingService.save(
+                    name,
+                    date,
+                    requireId(themeId, "themeId는 필수입니다."),
+                    requireId(timeId, "timeId는 필수입니다.")
+            );
             addReservationNameAttribute(redirectAttributes, name);
             addThemeIdAttribute(redirectAttributes, themeId);
             addDateAttribute(redirectAttributes, date);
@@ -243,7 +254,12 @@ public class ReservationPageController {
             final RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.updateByIdAndName(id, reservationName, date, timeId);
+            reservationService.updateByIdAndName(
+                    id,
+                    reservationName,
+                    date,
+                    requireId(timeId, "timeId는 필수입니다.")
+            );
         } catch (ApiException exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
@@ -272,6 +288,14 @@ public class ReservationPageController {
 
         addReservationNameAttribute(redirectAttributes, reservationName);
         return "redirect:/pages/user/reservations";
+    }
+
+    private long requireId(final Long id, final String message) {
+        if (id == null) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, message);
+        }
+
+        return id;
     }
 
     private String redirectReservationPageWithError(
