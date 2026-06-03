@@ -105,7 +105,6 @@ public class ReservationService {
         if (reservation.isExpired()) {
             throw new ExpiredDateTimeException();
         }
-
         reservationUpdatingDao.delete(reservation.getId());
         promoteOrCleanupSlot(reservation.getSlot().getId());
     }
@@ -113,7 +112,7 @@ public class ReservationService {
     private void promoteOrCleanupSlot(Long slotId) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstBySlotId(slotId);
         if (firstWaiting.isEmpty()) {
-            deleteSlot(slotId);
+            slotDao.delete(slotId);
             return;
         }
 
@@ -153,13 +152,6 @@ public class ReservationService {
 
         Long slotId = slotDao.insert(slot);
         return slot.withId(slotId);
-    }
-
-    private void deleteSlot(long slotId) {
-        long slotDeleted = slotDao.deleteIfNoWaiting(slotId);
-        if (slotDeleted == 0) {
-            throw new DataIntegrityViolationException("대기열이 변경되었습니다. 다시 시도해주세요.");
-        }
     }
 
     private Reservation getReservation(Long id) {

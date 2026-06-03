@@ -45,7 +45,7 @@ public class FakeSlotDao extends SlotDao {
     }
 
     @Override
-    public long deleteIfNoWaiting(Long id) {
+    public long delete(Long id) {
         return store.removeIf(s -> s.getId().equals(id)) ? 1 : 0;
     }
 }

@@ -78,8 +78,8 @@ public class SlotDao {
         return keyHolder.getKey().longValue();
     }
 
-    public long deleteIfNoWaiting(Long id) {
-        String sql = "delete from slot where id = ? and not exists (select 1 from waiting where slot_id = ?)";
-        return jdbcTemplate.update(sql, id, id);
+    public long delete(Long id) {
+        String sql = "delete from slot where id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }

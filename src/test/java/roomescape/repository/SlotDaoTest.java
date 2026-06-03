@@ -99,20 +99,19 @@ public class SlotDaoTest {
     }
 
     @Test
-    void 대기가_없으면_슬롯이_삭제된다() {
-        long deleted = slotDao.deleteIfNoWaiting(1L);
+    void 참조하는_대기가_없으면_슬롯이_삭제된다() {
+        long deleted = slotDao.delete(1L);
 
         assertThat(deleted).isEqualTo(1L);
         assertThat(slotDao.findById(1L)).isEmpty();
     }
 
     @Test
-    void 대기가_있으면_슬롯이_삭제되지_않는다() {
+    void 대기가_참조하는_슬롯_삭제시_FK_제약으로_예외가_발생한다() {
         jdbcTemplate.update("insert into waiting (slot_id, name, created_at) values (1, '테스트', '2026-05-15 10:30:00')");
 
-        long deleted = slotDao.deleteIfNoWaiting(1L);
-
-        assertThat(deleted).isEqualTo(0L);
+        assertThatThrownBy(() -> slotDao.delete(1L))
+                .isInstanceOf(DataIntegrityViolationException.class);
         assertThat(slotDao.findById(1L)).isPresent();
     }
 }
