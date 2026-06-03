@@ -21,7 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 public class DbTest {
 
     public static final String FUTURE_FIRST_DATE = LocalDate.now().plusDays(1).toString();
-    
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -43,20 +43,20 @@ public class DbTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "15:40");
         Long timeId = jdbcTemplate.queryForObject("SELECT id from reservation_time limit 1", Long.class);
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
-                "공포", "무서운 테마", "https://example.com/horror.jpg"
+            "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
+            "공포", "무서운 테마", "https://example.com/horror.jpg"
         );
         Long themeId = jdbcTemplate.queryForObject("SELECT id from theme limit 1", Long.class);
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "브라운", FUTURE_FIRST_DATE, timeId, themeId
+            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            "브라운", FUTURE_FIRST_DATE, timeId, themeId
         );
 
         List<Map> reservations = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200).extract()
-                .jsonPath().getList(".", Map.class);
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200).extract()
+            .jsonPath().getList(".", Map.class);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
@@ -68,8 +68,8 @@ public class DbTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         Long timeId = jdbcTemplate.queryForObject("SELECT id from reservation_time limit 1", Long.class);
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
-                "공포", "무서운 테마", "https://example.com/horror.jpg"
+            "INSERT INTO theme (name, description, thumbnail_image_url) VALUES (?, ?, ?)",
+            "공포", "무서운 테마", "https://example.com/horror.jpg"
         );
         Long themeId = jdbcTemplate.queryForObject("SELECT id from theme limit 1", Long.class);
 
@@ -80,19 +80,19 @@ public class DbTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/reservations/1")
+            .then().log().all()
+            .statusCode(204);
 
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);

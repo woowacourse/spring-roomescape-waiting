@@ -40,9 +40,9 @@ class ThemeServiceTest {
     @Test
     void 테마를_추가한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
 
         Theme theme = themeService.addTheme(request);
@@ -56,9 +56,9 @@ class ThemeServiceTest {
     @Test
     void 모든_테마를_조회한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         themeService.addTheme(request);
 
@@ -76,9 +76,9 @@ class ThemeServiceTest {
     @Test
     void id에_맞는_테마를_조회한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         Long saveId = themeService.addTheme(request).getId();
 
@@ -93,22 +93,22 @@ class ThemeServiceTest {
     @Test
     void 테마를_삭제한다() {
         ThemeRequest request = new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         );
         Long saveId = themeService.addTheme(request).getId();
 
         themeService.deleteTheme(saveId);
 
         assertThatThrownBy(() -> themeService.getTheme(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 없는_테마를_삭제할_수_없다() {
         assertThatThrownBy(() -> themeService.deleteTheme(1L))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -116,20 +116,20 @@ class ThemeServiceTest {
         Long timeSaveId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(timeSaveId);
         Theme theme = themeService.addTheme(new ThemeRequest(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL
         ));
 
         reservationRepository.save(new Reservation(
-                "브라운",
-                LocalDate.now().plusDays(1),
-                reservationTime.orElseThrow(),
-                theme
+            "브라운",
+            LocalDate.now().plusDays(1),
+            reservationTime.orElseThrow(),
+            theme
         ));
 
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -138,19 +138,19 @@ class ThemeServiceTest {
         List<Theme> popularTop10Themes = themeService.getPopularTop10Themes(LocalDate.now(), 7);
 
         assertThat(popularTop10Themes)
-                .hasSize(10)
-                .extracting(Theme::getName)
-                .containsExactly(
-                        "미스터리 저택",
-                        "해적선의 보물",
-                        "마법사의 탑",
-                        "좀비 아포칼립스",
-                        "고대 이집트",
-                        "우주 정거장",
-                        "시간 여행자의 실험실",
-                        "폐쇄 병동",
-                        "침몰하는 잠수함",
-                        "은행 금고"
-                );
+            .hasSize(10)
+            .extracting(Theme::getName)
+            .containsExactly(
+                "미스터리 저택",
+                "해적선의 보물",
+                "마법사의 탑",
+                "좀비 아포칼립스",
+                "고대 이집트",
+                "우주 정거장",
+                "시간 여행자의 실험실",
+                "폐쇄 병동",
+                "침몰하는 잠수함",
+                "은행 금고"
+            );
     }
 }

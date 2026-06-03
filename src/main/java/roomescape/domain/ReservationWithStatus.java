@@ -13,13 +13,13 @@ public class ReservationWithStatus {
     private final Integer waitingOrder;
 
     public ReservationWithStatus(
-            Long id,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme,
-            ReservationStatus status,
-            Integer waitingOrder
+        Long id,
+        String name,
+        LocalDate date,
+        ReservationTime time,
+        Theme theme,
+        ReservationStatus status,
+        Integer waitingOrder
     ) {
         this.id = id;
         this.name = name;
@@ -32,27 +32,40 @@ public class ReservationWithStatus {
 
     public static ReservationWithStatus reserved(Reservation reservation) {
         return new ReservationWithStatus(
-                reservation.getId(),
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                ReservationStatus.RESERVED,
-                null
+            reservation.getId(),
+            reservation.getName(),
+            reservation.getDate(),
+            reservation.getTime(),
+            reservation.getTheme(),
+            ReservationStatus.RESERVED,
+            null
         );
     }
 
-    public static ReservationWithStatus waiting(Waitlist waitlist, int waitingOrder) {
+    public static ReservationWithStatus waitingWithOrder(Waitlist waitlist, int waitingOrder) {
         return new ReservationWithStatus(
-                waitlist.getId(),
-                waitlist.getName(),
-                waitlist.getDate(),
-                waitlist.getTime(),
-                waitlist.getTheme(),
-                ReservationStatus.WAITING,
-                waitingOrder
+            waitlist.getId(),
+            waitlist.getName(),
+            waitlist.getDate(),
+            waitlist.getTime(),
+            waitlist.getTheme(),
+            ReservationStatus.WAITING,
+            waitingOrder
         );
     }
+
+    public static ReservationWithStatus waiting(Waitlist waitlist) {
+        return new ReservationWithStatus(
+            waitlist.getId(),
+            waitlist.getName(),
+            waitlist.getDate(),
+            waitlist.getTime(),
+            waitlist.getTheme(),
+            ReservationStatus.WAITING,
+            null
+        );
+    }
+
 
     public Long getId() {
         return id;

@@ -28,36 +28,36 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
-                rs.getLong("time_id"),
-                rs.getTime("time_value").toLocalTime()
+            rs.getLong("time_id"),
+            rs.getTime("time_value").toLocalTime()
         );
         Theme theme = new Theme(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("theme_description"),
-                rs.getString("theme_thumbnail")
+            rs.getLong("theme_id"),
+            rs.getString("theme_name"),
+            rs.getString("theme_description"),
+            rs.getString("theme_thumbnail")
         );
         return new Reservation(
-                rs.getLong("reservation_id"),
-                rs.getString("name"),
-                rs.getDate("date").toLocalDate(),
-                time,
-                theme
+            rs.getLong("reservation_id"),
+            rs.getString("name"),
+            rs.getDate("date").toLocalDate(),
+            time,
+            theme
         );
     };
 
     @Override
     public List<Reservation> findAll() {
         String sql = """
-                SELECT r.id as reservation_id, r.name, r.date,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as t ON r.time_id = t.id
-                INNER JOIN theme as th ON r.theme_id = th.id
-                ORDER BY r.date DESC, time_value ASC;
-                """;
+            SELECT r.id as reservation_id, r.name, r.date,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM reservation as r
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            ORDER BY r.date DESC, time_value ASC;
+            """;
 
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
@@ -65,16 +65,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByName(String name) {
         String sql = """
-                SELECT r.id as reservation_id, r.name, r.date,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as t ON r.time_id = t.id
-                INNER JOIN theme as th ON r.theme_id = th.id
-                WHERE r.name = ?
-                ORDER BY r.date DESC, time_value ASC;
-                """;
+            SELECT r.id as reservation_id, r.name, r.date,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM reservation as r
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            WHERE r.name = ?
+            ORDER BY r.date DESC, time_value ASC;
+            """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
@@ -82,15 +82,15 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = """
-                SELECT r.id as reservation_id, r.name, r.date,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as t ON r.time_id = t.id
-                INNER JOIN theme as th ON r.theme_id = th.id
-                WHERE r.id = ?;
-                """;
+            SELECT r.id as reservation_id, r.name, r.date,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM reservation as r
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            WHERE r.id = ?;
+            """;
 
         List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, id);
         return results.stream().findFirst();
@@ -99,10 +99,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Set<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, Long themeId) {
         String sql = """
-                SELECT time_id
-                FROM reservation
-                WHERE date = ? AND theme_id = ?;
-                """;
+            SELECT time_id
+            FROM reservation
+            WHERE date = ? AND theme_id = ?;
+            """;
         return new HashSet<>(jdbcTemplate.queryForList(sql, Long.class, date, themeId));
     }
 
@@ -123,16 +123,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean existsBy(Reservation reservation) {
         String sql = """
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?;
-                """;
+            SELECT COUNT(*)
+            FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ?;
+            """;
         Integer count = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
+            sql,
+            Integer.class,
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
         );
         return count != null && count > 0;
     }
@@ -140,17 +140,17 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean existsBySameUser(Reservation reservation) {
         String sql = """
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?;
-                """;
+            SELECT COUNT(*)
+            FROM reservation
+            WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?;
+            """;
         Integer count = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
+            sql,
+            Integer.class,
+            reservation.getName(),
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
         );
         return count != null && count > 0;
     }
@@ -180,10 +180,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateDateTime(Reservation updated) {
         String sql = """
-                UPDATE reservation
-                SET date = ?, time_id = ?
-                WHERE id = ?;
-                """;
+            UPDATE reservation
+            SET date = ?, time_id = ?
+            WHERE id = ?;
+            """;
 
         jdbcTemplate.update(sql, updated.getDate(), updated.getTime().getId(), updated.getId());
     }

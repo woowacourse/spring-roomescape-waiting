@@ -24,8 +24,8 @@ import roomescape.repository.ThemeRepository;
 
 @SpringBootTest
 @Import({
-        TestClockConfig.class,
-        FailureInjectionConfig.class
+    TestClockConfig.class,
+    FailureInjectionConfig.class
 })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationPromotionRollbackTest {
@@ -55,30 +55,30 @@ class ReservationPromotionRollbackTest {
         Theme theme = createTheme();
 
         ReservationRequest brownRequest = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
         ReservationRequest neoRequest = new ReservationRequest(
-                "네오",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "네오",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
         reservationService.reserveOrWait(neoRequest);
         Waitlist promotedWaitlist = waitlistRepository.findBySlot(
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         ).getFirst();
 
         waitlistRepository.failOnDelete(promotedWaitlist.getId());
 
         assertThatThrownBy(() -> reservationService.cancelMyReservation(savedReservation.getId(), "브라운"))
-                .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(RuntimeException.class);
 
         assertThat(reservationRepository.findById(savedReservation.getId())).isPresent();
         assertThat(waitlistRepository.findById(promotedWaitlist.getId())).isPresent();
@@ -95,10 +95,10 @@ class ReservationPromotionRollbackTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
 }

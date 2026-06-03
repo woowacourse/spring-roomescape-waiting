@@ -43,13 +43,13 @@ public class ReservationService {
     private final WaitlistOrderPolicy waitlistOrderPolicy;
 
     public ReservationService(
-            ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
-            ReservationTimeRepository timeRepository,
-            ThemeRepository themeRepository,
-            Clock clock,
-            ReservationWriter reservationWriter,
-            WaitlistWriter waitlistWriter,
-            WaitlistOrderPolicy waitlistOrderPolicy
+        ReservationRepository reservationRepository, WaitlistRepository waitlistRepository,
+        ReservationTimeRepository timeRepository,
+        ThemeRepository themeRepository,
+        Clock clock,
+        ReservationWriter reservationWriter,
+        WaitlistWriter waitlistWriter,
+        WaitlistOrderPolicy waitlistOrderPolicy
     ) {
         this.reservationRepository = reservationRepository;
         this.waitlistRepository = waitlistRepository;
@@ -74,20 +74,20 @@ public class ReservationService {
         }
 
         for (Waitlist waitlist : waitlistRepository.findByName(name)) {
-            results.add(ReservationWithStatus.waiting(waitlist, calculateWaitingOrder(waitlist)));
+            results.add(ReservationWithStatus.waitingWithOrder(waitlist, calculateWaitingOrder(waitlist)));
         }
 
         results.sort(Comparator.comparing(ReservationWithStatus::getDate).reversed()
-                .thenComparing(reservation -> reservation.getTime().getStartAt()));
+            .thenComparing(reservation -> reservation.getTime().getStartAt()));
 
         return results;
     }
 
     private int calculateWaitingOrder(Waitlist waitlist) {
         List<Waitlist> sameSlotWaitlists = waitlistRepository.findBySlot(
-                waitlist.getDate(),
-                waitlist.getTime().getId(),
-                waitlist.getTheme().getId()
+            waitlist.getDate(),
+            waitlist.getTime().getId(),
+            waitlist.getTheme().getId()
         );
 
         return waitlistOrderPolicy.calculateOrder(waitlist, sameSlotWaitlists);
@@ -97,16 +97,12 @@ public class ReservationService {
         return reservationRepository.getById(id, "존재하지 않는 예약입니다.");
     }
 
-    public Waitlist getWaitlist(Long id) {
-        return waitlistRepository.getById(id, "존재하지 않는 예약 대기입니다.");
-    }
-
     @Transactional
     public ReservationWithStatus reserveOrWait(ReservationRequest request) {
         Reservation reservation = createReservation(
-                request,
-                getReservationTime(request.timeId()),
-                getTheme(request.themeId()));
+            request,
+            getReservationTime(request.timeId()),
+            getTheme(request.themeId()));
 
         LocalDateTime now = LocalDateTime.now(clock);
         reservation.verifyReservable(now);
@@ -128,13 +124,12 @@ public class ReservationService {
     }
 
     @Nonnull
-    private Reservation createReservation(ReservationRequest request, ReservationTime reservationTime,
-                                          Theme theme) {
+    private Reservation createReservation(ReservationRequest request, ReservationTime reservationTime, Theme theme) {
         return new Reservation(
-                request.name(),
-                request.date(),
-                reservationTime,
-                theme
+            request.name(),
+            request.date(),
+            reservationTime,
+            theme
         );
     }
 
@@ -167,10 +162,10 @@ public class ReservationService {
         Waitlist promotedReservation = firstWaitlist.get();
 
         Reservation updated = new Reservation(
-                promotedReservation.getName(),
-                promotedReservation.getDate(),
-                promotedReservation.getTime(),
-                promotedReservation.getTheme()
+            promotedReservation.getName(),
+            promotedReservation.getDate(),
+            promotedReservation.getTime(),
+            promotedReservation.getTheme()
         );
 
         reservationRepository.save(updated);
@@ -181,10 +176,10 @@ public class ReservationService {
     public Reservation updateReservation(Long id, String name, ReservationUpdateRequest request) {
         Reservation original = getReservation(id);
         Reservation updated = original.changeBy(
-                name,
-                LocalDateTime.now(clock),
-                request.date(),
-                getReservationTime(request.timeId())
+            name,
+            LocalDateTime.now(clock),
+            request.date(),
+            getReservationTime(request.timeId())
         );
         verifyNoConflict(updated);
         reservationRepository.updateDateTime(updated);

@@ -8,6 +8,7 @@ import roomescape.repository.WaitlistRepository;
 @Service
 @Transactional(readOnly = true)
 public class WaitlistService {
+
     private final WaitlistRepository waitlistRepository;
 
     public WaitlistService(WaitlistRepository waitlistRepository) {

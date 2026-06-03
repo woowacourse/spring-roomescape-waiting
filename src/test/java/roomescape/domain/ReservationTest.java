@@ -40,7 +40,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(NAME, now, new ReservationTime(pastTime), THEME);
 
         assertThatThrownBy(() -> reservation.verifyReservable(LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -49,7 +49,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(NAME, past, TIME, THEME);
 
         assertThatThrownBy(() -> reservation.verifyReservable(LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -59,7 +59,7 @@ class ReservationTest {
         String other = "브라운";
 
         assertThatThrownBy(() -> reservation.verifyCancelableBy(other, NOW))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -69,7 +69,7 @@ class ReservationTest {
         Reservation reservation = new Reservation(NAME, past, TIME, THEME);
 
         assertThatThrownBy(() -> reservation.verifyCancelableBy(NAME, NOW))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -93,7 +93,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> reservation.changeBy(other, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -105,7 +105,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> reservation.changeBy(NAME, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -115,7 +115,7 @@ class ReservationTest {
         ReservationTime newTime = new ReservationTime(LocalTime.of(11, 0));
 
         assertThatThrownBy(() -> reservation.changeBy(NAME, NOW, newDate, newTime))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
 }

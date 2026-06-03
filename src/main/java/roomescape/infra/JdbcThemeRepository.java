@@ -22,16 +22,16 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     private final RowMapper<Theme> themeRowMapper = (rs, rowNum) -> new Theme(
-            rs.getLong("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getString("thumbnail_image_url")
+        rs.getLong("id"),
+        rs.getString("name"),
+        rs.getString("description"),
+        rs.getString("thumbnail_image_url")
     );
 
     @Override
     public List<Theme> findAll() {
         String sql = "SELECT id, name, description, thumbnail_image_url " +
-                "FROM theme ORDER BY id DESC";
+            "FROM theme ORDER BY id DESC";
         return jdbcTemplate.query(sql, themeRowMapper);
     }
 
@@ -45,21 +45,21 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> getPopularTop10Themes(LocalDate start, LocalDate end) {
         String sql = """
-                SELECT
-                t.id, t.name, t.description, t.thumbnail_image_url
-                FROM theme as t
-                JOIN reservation as r
-                ON r.theme_id = t.id
-                WHERE r.date BETWEEN ? AND ?
-                GROUP BY t.id, t.name, t.description, t.thumbnail_image_url
-                ORDER BY COUNT(*) DESC
-                LIMIT 10;
-                """;
+            SELECT
+            t.id, t.name, t.description, t.thumbnail_image_url
+            FROM theme as t
+            JOIN reservation as r
+            ON r.theme_id = t.id
+            WHERE r.date BETWEEN ? AND ?
+            GROUP BY t.id, t.name, t.description, t.thumbnail_image_url
+            ORDER BY COUNT(*) DESC
+            LIMIT 10;
+            """;
         return jdbcTemplate.query(
-                sql,
-                themeRowMapper,
-                start,
-                end
+            sql,
+            themeRowMapper,
+            start,
+            end
         );
 
     }

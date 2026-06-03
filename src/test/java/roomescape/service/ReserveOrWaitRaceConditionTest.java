@@ -32,6 +32,7 @@ import roomescape.repository.WaitlistRepository;
 
 @SpringBootTest
 public class ReserveOrWaitRaceConditionTest {
+
     private static final LocalDate FUTURE_FIRST_DATE = LocalDate.now().plusDays(1);
     private static final LocalDateTime WAITLIST_CREATED_AT = LocalDateTime.of(2026, 1, 1, 10, 0);
     private static final LocalTime TEN = LocalTime.of(10, 0);
@@ -53,8 +54,8 @@ public class ReserveOrWaitRaceConditionTest {
     void 동시에_같은_빈_슬롯을_예약하면_하나는_예약되고_나머지는_대기된다() throws InterruptedException {
         int requestCount = 5;
         List<ReservationRequest> requests = createSameSlotReservationRequests(
-                requestCount,
-                "브리", "네오", "포비", "검프", "준"
+            requestCount,
+            "브리", "네오", "포비", "검프", "준"
         );
 
         ExecutorService executor = Executors.newFixedThreadPool(requestCount);
@@ -90,12 +91,12 @@ public class ReserveOrWaitRaceConditionTest {
         executor.shutdown();
 
         long reservedCount = results.stream()
-                .filter(result -> result.getStatus() == ReservationStatus.RESERVED)
-                .count();
+            .filter(result -> result.getStatus() == ReservationStatus.RESERVED)
+            .count();
 
         long waitingCount = results.stream()
-                .filter(result -> result.getStatus() == ReservationStatus.WAITING)
-                .count();
+            .filter(result -> result.getStatus() == ReservationStatus.WAITING)
+            .count();
 
         assertThat(exceptions).isEmpty();
         assertThat(results).hasSize(requestCount);
@@ -113,11 +114,11 @@ public class ReserveOrWaitRaceConditionTest {
         reservationRepository.save(firstReservation);
 
         assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(
-                status -> reservationRepository.save(duplicateReservation)
+            status -> reservationRepository.save(duplicateReservation)
         )).isInstanceOf(DataIntegrityViolationException.class);
 
         Long waitlistId = transactionTemplate.execute(
-                status -> waitlistRepository.save(duplicateReservation, WAITLIST_CREATED_AT)
+            status -> waitlistRepository.save(duplicateReservation, WAITLIST_CREATED_AT)
         );
 
         Waitlist savedWaitlist = waitlistRepository.findById(waitlistId).orElseThrow();
@@ -164,19 +165,19 @@ public class ReserveOrWaitRaceConditionTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
 
     private Reservation createReservation(String name, ReservationTime reservationTime, Theme theme) {
         return new Reservation(
-                name,
-                FUTURE_FIRST_DATE,
-                reservationTime,
-                theme
+            name,
+            FUTURE_FIRST_DATE,
+            reservationTime,
+            theme
         );
     }
 
@@ -187,10 +188,10 @@ public class ReserveOrWaitRaceConditionTest {
 
         for (int i = 0; i < requestSize; i++) {
             reservationRequests.add(new ReservationRequest(
-                    names[i],
-                    FUTURE_FIRST_DATE,
-                    reservationTime.getId(),
-                    theme.getId()
+                names[i],
+                FUTURE_FIRST_DATE,
+                reservationTime.getId(),
+                theme.getId()
             ));
         }
 

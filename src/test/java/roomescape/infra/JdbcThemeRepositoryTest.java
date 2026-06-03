@@ -15,7 +15,7 @@ import roomescape.repository.ThemeRepository;
 
 @JdbcTest
 @Import({
-        JdbcThemeRepository.class,
+    JdbcThemeRepository.class,
 })
 class JdbcThemeRepositoryTest {
 
@@ -29,9 +29,9 @@ class JdbcThemeRepositoryTest {
     @Test
     void 테마를_저장한다() {
         Long saveId = themeRepository.save(new Theme(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL)
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL)
         );
 
         Optional<Theme> theme = themeRepository.findById(saveId);
@@ -47,9 +47,9 @@ class JdbcThemeRepositoryTest {
     @Test
     void 모든_테마를_조회한다() {
         Long saveId = themeRepository.save(new Theme(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL)
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL)
         );
 
         List<Theme> themes = themeRepository.findAll();
@@ -66,9 +66,9 @@ class JdbcThemeRepositoryTest {
     @Test
     void 예약시간을_삭제한다() {
         Long saveId = themeRepository.save(new Theme(
-                THEME_NAME,
-                THEME_DESCRIPTION,
-                THEME_THUMBNAIL)
+            THEME_NAME,
+            THEME_DESCRIPTION,
+            THEME_THUMBNAIL)
         );
 
         themeRepository.deleteById(saveId);
@@ -84,19 +84,19 @@ class JdbcThemeRepositoryTest {
         List<Theme> popularTop10Themes = themeRepository.getPopularTop10Themes(start, end);
 
         assertThat(popularTop10Themes)
-                .hasSize(10)
-                .extracting(Theme::getName)
-                .containsExactly(
-                        "미스터리 저택",
-                        "해적선의 보물",
-                        "마법사의 탑",
-                        "좀비 아포칼립스",
-                        "고대 이집트",
-                        "우주 정거장",
-                        "시간 여행자의 실험실",
-                        "폐쇄 병동",
-                        "침몰하는 잠수함",
-                        "은행 금고"
-                );
+            .hasSize(10)
+            .extracting(Theme::getName)
+            .containsExactly(
+                "미스터리 저택",
+                "해적선의 보물",
+                "마법사의 탑",
+                "좀비 아포칼립스",
+                "고대 이집트",
+                "우주 정거장",
+                "시간 여행자의 실험실",
+                "폐쇄 병동",
+                "침몰하는 잠수함",
+                "은행 금고"
+            );
     }
 }

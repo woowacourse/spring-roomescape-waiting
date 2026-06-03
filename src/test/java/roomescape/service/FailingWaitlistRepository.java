@@ -10,6 +10,7 @@ import roomescape.domain.Waitlist;
 import roomescape.repository.WaitlistRepository;
 
 public class FailingWaitlistRepository implements WaitlistRepository {
+
     private final WaitlistRepository delegate;
     private Long failureDeleteId;
 

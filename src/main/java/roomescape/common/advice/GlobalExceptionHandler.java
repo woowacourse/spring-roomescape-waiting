@@ -26,9 +26,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RoomEscapeException.class)
     public ProblemDetail handleDomain(
-            RoomEscapeException e,
-            Locale locale,
-            HttpServletRequest request
+        RoomEscapeException e,
+        Locale locale,
+        HttpServletRequest request
     ) {
         HttpStatus status = httpMapper.statusOf(e.code());
         String detail = messageSource.getMessage(e.code().messageKey(), e.args(), locale);
@@ -48,9 +48,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleHttpMessageNotReadable(
-            HttpMessageNotReadableException e,
-            Locale locale,
-            HttpServletRequest request
+        HttpMessageNotReadableException e,
+        Locale locale,
+        HttpServletRequest request
     ) {
         String message = "요청 본문의 형식이 올바르지 않습니다. 날짜는 uuuu-MM-dd, 시간은 HH:mm 형식으로 입력해 주세요.";
         return invalidInputProblemDetail(message, locale, request);
@@ -58,36 +58,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleMethodArgumentNotValid(
-            MethodArgumentNotValidException e,
-            Locale locale,
-            HttpServletRequest request
+        MethodArgumentNotValidException e,
+        Locale locale,
+        HttpServletRequest request
     ) {
         String message = e
-                .getAllErrors()
-                .getFirst()
-                .getDefaultMessage();
+            .getAllErrors()
+            .getFirst()
+            .getDefaultMessage();
 
         return invalidInputProblemDetail(message, locale, request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleMethodArgumentTypeMismatch(
-            MethodArgumentTypeMismatchException e,
-            Locale locale,
-            HttpServletRequest request
+        MethodArgumentTypeMismatchException e,
+        Locale locale,
+        HttpServletRequest request
     ) {
         String message = String.format(
-                "'%s' 값의 형식이 올바르지 않습니다.",
-                e.getName()
+            "'%s' 값의 형식이 올바르지 않습니다.",
+            e.getName()
         );
 
         return invalidInputProblemDetail(message, locale, request);
     }
 
     private ProblemDetail invalidInputProblemDetail(
-            String message,
-            Locale locale,
-            HttpServletRequest request
+        String message,
+        Locale locale,
+        HttpServletRequest request
     ) {
         DomainErrorCode code = DomainErrorCode.INVALID_INPUT;
         HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -103,9 +103,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnExcepted(
-            Exception e,
-            Locale locale,
-            HttpServletRequest request
+        Exception e,
+        Locale locale,
+        HttpServletRequest request
     ) {
         log.error("Unexpected error at {}", request.getRequestURI(), e);
         String detail = messageSource.getMessage("error.unexpected", null, locale);

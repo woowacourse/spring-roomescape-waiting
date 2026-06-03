@@ -10,8 +10,8 @@ public class WaitlistOrderPolicy {
 
     public int calculateOrder(Waitlist target, List<Waitlist> sameSlotWaitlists) {
         List<Waitlist> sortedWaitlists = sameSlotWaitlists.stream()
-                .sorted(Comparator.comparing(Waitlist::getCreatedAt).thenComparing(Waitlist::getId))
-                .toList();
+            .sorted(Comparator.comparing(Waitlist::getCreatedAt).thenComparing(Waitlist::getId))
+            .toList();
 
         for (int i = 0; i < sortedWaitlists.size(); i++) {
             Waitlist waitlist = sortedWaitlists.get(i);

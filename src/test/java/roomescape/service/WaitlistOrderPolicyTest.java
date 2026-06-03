@@ -31,12 +31,12 @@ class WaitlistOrderPolicyTest {
 
     private Waitlist createWaitlist(Long id, String name, LocalDateTime createdAt) {
         return new Waitlist(
-                id,
-                name,
-                LocalDate.now().plusDays(1),
-                createdAt,
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "방탈출 제목", "방탈출 설명", "thumbnail.png")
+            id,
+            name,
+            LocalDate.now().plusDays(1),
+            createdAt,
+            new ReservationTime(1L, LocalTime.of(10, 0)),
+            new Theme(1L, "방탈출 제목", "방탈출 설명", "thumbnail.png")
         );
     }
 }

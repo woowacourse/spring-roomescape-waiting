@@ -74,7 +74,7 @@ class ReservationTimeServiceTest {
         reservationTimeService.deleteReservationTime(saveId);
 
         assertThatThrownBy(() -> reservationTimeService.getReservationTime(saveId))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -86,19 +86,19 @@ class ReservationTimeServiceTest {
         Optional<Theme> theme = themeRepository.findById(themeId);
 
         reservationRepository.save(new Reservation(
-                "브라운",
-                LocalDate.now().plusDays(1),
-                reservationTime,
-                theme.get()
+            "브라운",
+            LocalDate.now().plusDays(1),
+            reservationTime,
+            theme.get()
         ));
 
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(reservationTime.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 없는_예약시간을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 }

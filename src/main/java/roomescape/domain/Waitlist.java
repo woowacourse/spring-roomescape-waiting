@@ -16,12 +16,12 @@ public class Waitlist {
     private final Theme theme;
 
     public Waitlist(
-            Long id,
-            String name,
-            LocalDate date,
-            LocalDateTime createdAt,
-            ReservationTime time,
-            Theme theme
+        Long id,
+        String name,
+        LocalDate date,
+        LocalDateTime createdAt,
+        ReservationTime time,
+        Theme theme
     ) {
         this.id = id;
         this.name = name;
@@ -32,11 +32,11 @@ public class Waitlist {
     }
 
     public Waitlist(
-            String name,
-            LocalDate date,
-            LocalDateTime createdAt,
-            ReservationTime time,
-            Theme theme
+        String name,
+        LocalDate date,
+        LocalDateTime createdAt,
+        ReservationTime time,
+        Theme theme
     ) {
         this(null, name, date, createdAt, time, theme);
     }

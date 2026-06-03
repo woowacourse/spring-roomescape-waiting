@@ -20,10 +20,10 @@ import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
-        JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class,
-        JdbcWaitlistRepository.class
+    JdbcReservationRepository.class,
+    JdbcReservationTimeRepository.class,
+    JdbcThemeRepository.class,
+    JdbcWaitlistRepository.class
 })
 class JdbcWaitlistRepositoryTest {
 
@@ -46,21 +46,21 @@ class JdbcWaitlistRepositoryTest {
         Theme theme = createTheme();
 
         Long brieId = waitlistRepository.save(new Reservation("브리", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
+            CREATED_AT);
         Long pobiId = waitlistRepository.save(new Reservation("포비", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
+            CREATED_AT);
         Long neoId = waitlistRepository.save(new Reservation("네오", FUTURE_SECOND_DATE, reservationTime, theme),
-                CREATED_AT);
+            CREATED_AT);
 
         List<Waitlist> waitlists = waitlistRepository.findBySlot(
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         assertThat(waitlists)
-                .extracting(Waitlist::getId)
-                .containsExactly(brieId, pobiId, neoId);
+            .extracting(Waitlist::getId)
+            .containsExactly(brieId, pobiId, neoId);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
@@ -73,10 +73,10 @@ class JdbcWaitlistRepositoryTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
 }

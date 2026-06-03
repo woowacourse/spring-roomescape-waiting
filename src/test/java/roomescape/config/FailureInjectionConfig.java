@@ -8,6 +8,7 @@ import roomescape.service.FailingWaitlistRepository;
 
 @TestConfiguration
 public class FailureInjectionConfig {
+
     @Bean
     @Primary
     public FailingWaitlistRepository failingWaitlistRepository(JdbcWaitlistRepository delegate) {

@@ -30,28 +30,28 @@ public class ReservationTimeController {
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> findAll() {
         List<ReservationTimeResponse> responses = reservationTimeService.getReservationTimes()
-                .stream()
-                .map(time -> ReservationTimeResponse.from(time, false))
-                .toList();
+            .stream()
+            .map(time -> ReservationTimeResponse.from(time, false))
+            .toList();
 
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping(params = {"date", "themeId"})
     public ResponseEntity<List<ReservationTimeResponse>> searchTimeSlotsByDateAndTheme(@RequestParam LocalDate date,
-                                                                                       @RequestParam Long themeId) {
+        @RequestParam Long themeId) {
         List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.getTimeSlotsWithReservationStatus(
-                        date, themeId)
-                .stream()
-                .map(ReservationTimeResponse::of)
-                .toList();
+                date, themeId)
+            .stream()
+            .map(ReservationTimeResponse::of)
+            .toList();
         return ResponseEntity.ok().body(reservationTimeResponses);
     }
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> add(@Valid @RequestBody ReservationTimeRequest request) {
         ReservationTimeResponse response = ReservationTimeResponse.from(
-                reservationTimeService.addReservationTime(request), false);
+            reservationTimeService.addReservationTime(request), false);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

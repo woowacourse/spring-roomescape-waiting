@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import roomescape.domain.exception.RoomEscapeException;
 
 public class Reservation {
+
     private final Long id;
     private final String name;
     private final LocalDate date;
@@ -15,11 +16,11 @@ public class Reservation {
     private final Theme theme;
 
     public Reservation(
-            Long id,
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
+        Long id,
+        String name,
+        LocalDate date,
+        ReservationTime time,
+        Theme theme
     ) {
         this.id = id;
         this.name = name;
@@ -29,10 +30,10 @@ public class Reservation {
     }
 
     public Reservation(
-            String name,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
+        String name,
+        LocalDate date,
+        ReservationTime time,
+        Theme theme
     ) {
         this(null, name, date, time, theme);
     }

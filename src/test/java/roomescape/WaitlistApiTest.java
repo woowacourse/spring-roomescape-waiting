@@ -26,17 +26,17 @@ public class WaitlistApiTest {
         params.put("themeId", 8);
 
         Integer waitlistId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201)
+            .extract().jsonPath().get("id");
 
         RestAssured.given().log().all()
-                .queryParam("name", "브라운")
-                .when().delete("/waitlists/" + waitlistId)
-                .then().log().all()
-                .statusCode(204);
+            .queryParam("name", "브라운")
+            .when().delete("/waitlists/" + waitlistId)
+            .then().log().all()
+            .statusCode(204);
     }
 }

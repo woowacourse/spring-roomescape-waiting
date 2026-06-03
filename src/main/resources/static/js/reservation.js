@@ -144,7 +144,7 @@
 
             localStorage.setItem(LAST_SEARCH_NAME_KEY, name);
             setCreationMessage(response);
-            refreshLookup(name);
+            fillLookupName(name);
         } catch (error) {
             console.error('예약 신청 실패:', error);
             setMessage(error.message, true);
@@ -154,22 +154,17 @@
 
     function setCreationMessage(response) {
         if (response && response.status === 'WAITING') {
-            setMessage(`${response.name}님은 대기 ${response.waitingOrder}번으로 등록되었습니다.`, false);
+            setMessage(`${response.name}님은 대기로 등록되었습니다. 내 예약 조회에서 현재 순번을 확인해주세요.`, false);
             return;
         }
 
-        setMessage(`${response.name}님의 예약이 확정되었습니다.`, false);
+        setMessage(`${response.name}님의 예약이 확정되었습니다. 내 예약 조회에서 확인할 수 있습니다.`, false);
     }
 
-    function refreshLookup(name) {
+    function fillLookupName(name) {
         const lookupInput = document.getElementById('my-reservation-name-input');
         if (lookupInput) {
             lookupInput.value = name;
-        }
-
-        const lookupButton = document.getElementById('my-reservation-search-button');
-        if (lookupButton) {
-            lookupButton.click();
         }
     }
 

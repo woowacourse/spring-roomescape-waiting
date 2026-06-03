@@ -14,7 +14,7 @@ import roomescape.repository.ReservationTimeRepository;
 
 @JdbcTest
 @Import({
-        JdbcReservationTimeRepository.class,
+    JdbcReservationTimeRepository.class,
 })
 class JdbcReservationTimeRepositoryTest {
 

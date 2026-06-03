@@ -61,10 +61,10 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(request);
@@ -84,10 +84,10 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FIXED_TODAY,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FIXED_TODAY,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(request);
@@ -102,14 +102,14 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                1L,
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            1L,
+            theme.getId()
         );
 
         assertThatThrownBy(() -> reservationService.reserveOrWait(request))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -117,14 +117,14 @@ class ReservationServiceTest {
         ReservationTime reservationTime = createReservationTime(TEN);
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                1L
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            1L
         );
 
         assertThatThrownBy(() -> reservationService.reserveOrWait(request))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -133,28 +133,28 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         reservationService.reserveOrWait(request);
 
         ReservationRequest waitlistFirstRequest = new ReservationRequest(
-                "워니",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "워니",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         reservationService.reserveOrWait(waitlistFirstRequest);
 
         String other = "브리";
         ReservationRequest waitlistSecondRequest = new ReservationRequest(
-                other,
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            other,
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(waitlistSecondRequest);
 
@@ -167,8 +167,8 @@ class ReservationServiceTest {
         assertThat(reservationWithStatus.getWaitingOrder()).isEqualTo(2);
 
         Waitlist waitlist = waitlistRepository.getById(
-                reservationWithStatus.getId(),
-                "존재하지 않는 예약 대기입니다."
+            reservationWithStatus.getId(),
+            "존재하지 않는 예약 대기입니다."
         );
 
         assertThat(waitlist.getCreatedAt()).isEqualTo(TestClockConfig.FIXED_NOW);
@@ -180,16 +180,16 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         reservationService.reserveOrWait(request);
 
         assertThatThrownBy(() -> reservationService.reserveOrWait(request))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -198,24 +198,24 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         reservationService.reserveOrWait(request);
 
         ReservationRequest waitlistRequest = new ReservationRequest(
-                "브리",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브리",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         reservationService.reserveOrWait(waitlistRequest);
 
         assertThatThrownBy(() -> reservationService.reserveOrWait(waitlistRequest))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -224,10 +224,10 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         reservationService.reserveOrWait(request);
@@ -251,22 +251,22 @@ class ReservationServiceTest {
         String name = "브라운";
         String anotherName = "브리";
         ReservationRequest existingReservationRequest = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                twelveClock.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            twelveClock.getId(),
+            theme.getId()
         );
         ReservationRequest myWaitingRequest = new ReservationRequest(
-                anotherName,
-                FUTURE_SECOND_DATE,
-                twelveClock.getId(),
-                theme.getId()
+            anotherName,
+            FUTURE_SECOND_DATE,
+            twelveClock.getId(),
+            theme.getId()
         );
         ReservationRequest myReservedRequest = new ReservationRequest(
-                anotherName,
-                FUTURE_FIRST_DATE,
-                twelveClock.getId(),
-                theme.getId()
+            anotherName,
+            FUTURE_FIRST_DATE,
+            twelveClock.getId(),
+            theme.getId()
         );
 
         reservationService.reserveOrWait(existingReservationRequest);
@@ -277,20 +277,20 @@ class ReservationServiceTest {
 
         assertThat(myReservations).hasSize(2);
         assertThat(myReservations)
-                .extracting(
-                        ReservationWithStatus::getName,
-                        ReservationWithStatus::getDate,
-                        reservation -> reservation.getTime().getId(),
-                        reservation -> reservation.getTheme().getId(),
-                        reservation -> reservation.getStatus(),
-                        ReservationWithStatus::getWaitingOrder
-                )
-                .containsExactly(
-                        tuple(anotherName, FUTURE_SECOND_DATE, twelveClock.getId(), theme.getId(),
-                                ReservationStatus.WAITING, 1),
-                        tuple(anotherName, FUTURE_FIRST_DATE, twelveClock.getId(), theme.getId(),
-                                ReservationStatus.RESERVED, null)
-                );
+            .extracting(
+                ReservationWithStatus::getName,
+                ReservationWithStatus::getDate,
+                reservation -> reservation.getTime().getId(),
+                reservation -> reservation.getTheme().getId(),
+                reservation -> reservation.getStatus(),
+                ReservationWithStatus::getWaitingOrder
+            )
+            .containsExactly(
+                tuple(anotherName, FUTURE_SECOND_DATE, twelveClock.getId(), theme.getId(),
+                    ReservationStatus.WAITING, 1),
+                tuple(anotherName, FUTURE_FIRST_DATE, twelveClock.getId(), theme.getId(),
+                    ReservationStatus.RESERVED, null)
+            );
     }
 
     @Test
@@ -299,10 +299,10 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
@@ -322,10 +322,10 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest request = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
@@ -333,13 +333,13 @@ class ReservationServiceTest {
         reservationService.deleteReservation(savedReservation.getId());
 
         assertThatThrownBy(() -> reservationService.getReservation(savedReservation.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 없는_예약을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -349,23 +349,23 @@ class ReservationServiceTest {
         String name = "브라운";
 
         ReservationRequest request = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         reservationService.cancelMyReservation(reservation.getId(), name);
 
         assertThatThrownBy(() -> reservationService.getReservation(reservation.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
     void 사용자_예약을_취소할_때_존재하지_않는_예약이면_예외() {
         assertThatThrownBy(() -> reservationService.cancelMyReservation(1L, "브라운"))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -374,14 +374,14 @@ class ReservationServiceTest {
         Theme theme = createTheme();
         String name = "브라운";
         Long reservationId = reservationRepository.save(new Reservation(
-                name,
-                FIXED_TODAY,
-                pastTime,
-                theme
+            name,
+            FIXED_TODAY,
+            pastTime,
+            theme
         ));
 
         assertThatThrownBy(() -> reservationService.cancelMyReservation(reservationId, name))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -390,18 +390,18 @@ class ReservationServiceTest {
         Theme theme = createTheme();
         String name = "브라운";
         ReservationRequest request = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
         LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
-                updateDate,
-                updateTime.getId()
+            updateDate,
+            updateTime.getId()
         );
 
         Reservation updatedReservation = reservationService.updateReservation(reservation.getId(), name, updateRequest);
@@ -419,12 +419,12 @@ class ReservationServiceTest {
     void 예약을_수정할_때_존재하지_않는_예약이면_예외() {
         ReservationTime updateTime = createReservationTime(TEN);
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
-                FUTURE_SECOND_DATE,
-                updateTime.getId()
+            FUTURE_SECOND_DATE,
+            updateTime.getId()
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(1L, "브라운", updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -433,20 +433,20 @@ class ReservationServiceTest {
         Theme theme = createTheme();
         String name = "브라운";
         ReservationRequest request = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            reservationTime.getId(),
+            theme.getId()
         );
         ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
-                FUTURE_SECOND_DATE.plusDays(1),
-                999L
+            FUTURE_SECOND_DATE.plusDays(1),
+            999L
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), name, updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -457,28 +457,28 @@ class ReservationServiceTest {
 
         String name = "브라운";
         ReservationRequest request = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
         ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationRequest anotherRequest = new ReservationRequest(
-                "브리",
-                FUTURE_SECOND_DATE.plusDays(1),
-                twelveClock.getId(),
-                theme.getId()
+            "브리",
+            FUTURE_SECOND_DATE.plusDays(1),
+            twelveClock.getId(),
+            theme.getId()
         );
         reservationService.reserveOrWait(anotherRequest);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
-                FUTURE_SECOND_DATE.plusDays(1),
-                twelveClock.getId()
+            FUTURE_SECOND_DATE.plusDays(1),
+            twelveClock.getId()
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), name, updateRequest))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
@@ -487,24 +487,24 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest brownRequest = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationRequest neoRequest = new ReservationRequest(
-                "네오",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "네오",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationRequest pobiRequest = new ReservationRequest(
-                "포비",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "포비",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
@@ -514,17 +514,17 @@ class ReservationServiceTest {
 
         List<Reservation> reservations = reservationService.getReservations();
         assertThat(reservations)
-                .extracting(Reservation::getName)
-                .contains("네오");
+            .extracting(Reservation::getName)
+            .contains("네오");
 
         List<Waitlist> waitlists = waitlistRepository.findBySlot(
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
         assertThat(waitlists)
-                .extracting(Waitlist::getName)
-                .doesNotContain("네오");
+            .extracting(Waitlist::getName)
+            .doesNotContain("네오");
     }
 
     @Test
@@ -533,24 +533,24 @@ class ReservationServiceTest {
         Theme theme = createTheme();
 
         ReservationRequest brownRequest = new ReservationRequest(
-                "브라운",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "브라운",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationRequest neoRequest = new ReservationRequest(
-                "네오",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "네오",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationRequest pobiRequest = new ReservationRequest(
-                "포비",
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            "포비",
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus savedReservation = reservationService.reserveOrWait(brownRequest);
@@ -560,17 +560,17 @@ class ReservationServiceTest {
 
         List<Reservation> reservations = reservationService.getReservations();
         assertThat(reservations)
-                .extracting(Reservation::getName)
-                .contains("네오");
+            .extracting(Reservation::getName)
+            .contains("네오");
 
         List<Waitlist> waitlists = waitlistRepository.findBySlot(
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
         assertThat(waitlists)
-                .extracting(Waitlist::getName)
-                .doesNotContain("네오");
+            .extracting(Waitlist::getName)
+            .doesNotContain("네오");
     }
 
     @Test
@@ -580,17 +580,17 @@ class ReservationServiceTest {
 
         String name = "브라운";
         ReservationRequest request = new ReservationRequest(
-                name,
-                FUTURE_SECOND_DATE,
-                tenClock.getId(),
-                theme.getId()
+            name,
+            FUTURE_SECOND_DATE,
+            tenClock.getId(),
+            theme.getId()
         );
 
         ReservationWithStatus saved = reservationService.reserveOrWait(request);
         reservationService.deleteReservation(saved.getId());
 
         assertThatThrownBy(() -> reservationService.getReservation(saved.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+            .isInstanceOf(RoomEscapeException.class);
     }
 
     private ReservationTime createReservationTime(LocalTime time) {
@@ -603,10 +603,10 @@ class ReservationServiceTest {
         Theme theme = new Theme("방탈출 제목", "방탈출 설명", "thumbnail.png");
         Long id = themeRepository.save(theme);
         return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailImageUrl()
+            id,
+            theme.getName(),
+            theme.getDescription(),
+            theme.getThumbnailImageUrl()
         );
     }
 }

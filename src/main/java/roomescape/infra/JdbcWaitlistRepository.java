@@ -29,37 +29,37 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
 
     private final RowMapper<Waitlist> wailtListRowMapper = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
-                rs.getLong("time_id"),
-                rs.getTime("time_value").toLocalTime()
+            rs.getLong("time_id"),
+            rs.getTime("time_value").toLocalTime()
         );
         Theme theme = new Theme(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("theme_description"),
-                rs.getString("theme_thumbnail")
+            rs.getLong("theme_id"),
+            rs.getString("theme_name"),
+            rs.getString("theme_description"),
+            rs.getString("theme_thumbnail")
         );
         return new Waitlist(
-                rs.getLong("waitlist_id"),
-                rs.getString("name"),
-                rs.getDate("date").toLocalDate(),
-                rs.getTimestamp("created_at").toLocalDateTime(),
-                time,
-                theme
+            rs.getLong("waitlist_id"),
+            rs.getString("name"),
+            rs.getDate("date").toLocalDate(),
+            rs.getTimestamp("created_at").toLocalDateTime(),
+            time,
+            theme
         );
     };
 
     @Override
     public Optional<Waitlist> findById(Long id) {
         String sql = """
-                SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM waitlist as w
-                INNER JOIN reservation_time as t ON w.time_id = t.id
-                INNER JOIN theme as th ON w.theme_id = th.id
-                WHERE w.id = ?;
-                """;
+            SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM waitlist as w
+            INNER JOIN reservation_time as t ON w.time_id = t.id
+            INNER JOIN theme as th ON w.theme_id = th.id
+            WHERE w.id = ?;
+            """;
 
         List<Waitlist> results = jdbcTemplate.query(sql, wailtListRowMapper, id);
         return results.stream().findFirst();
@@ -68,17 +68,17 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public boolean existsBySameUser(Reservation reservation) {
         String sql = """
-                SELECT COUNT(*)
-                FROM waitlist
-                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?;
-                """;
+            SELECT COUNT(*)
+            FROM waitlist
+            WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?;
+            """;
         Integer count = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
+            sql,
+            Integer.class,
+            reservation.getName(),
+            reservation.getDate(),
+            reservation.getTime().getId(),
+            reservation.getTheme().getId()
         );
         return count != null && count > 0;
     }
@@ -109,16 +109,16 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public List<Waitlist> findByName(String name) {
         String sql = """
-                SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM waitlist as w
-                INNER JOIN reservation_time as t ON w.time_id = t.id
-                INNER JOIN theme as th ON w.theme_id = th.id
-                WHERE w.name = ?
-                ORDER BY w.date DESC, t.start_at ASC;
-                """;
+            SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM waitlist as w
+            INNER JOIN reservation_time as t ON w.time_id = t.id
+            INNER JOIN theme as th ON w.theme_id = th.id
+            WHERE w.name = ?
+            ORDER BY w.date DESC, t.start_at ASC;
+            """;
 
         return jdbcTemplate.query(sql, wailtListRowMapper, name);
     }
@@ -126,16 +126,16 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
     @Override
     public List<Waitlist> findBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM waitlist as w
-                INNER JOIN reservation_time as t ON w.time_id = t.id
-                INNER JOIN theme as th ON w.theme_id = th.id
-                WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
-                ORDER BY w.created_at ASC, w.id ASC;
-                """;
+            SELECT w.id as waitlist_id, w.name, w.date, w.created_at,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
+            FROM waitlist as w
+            INNER JOIN reservation_time as t ON w.time_id = t.id
+            INNER JOIN theme as th ON w.theme_id = th.id
+            WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
+            ORDER BY w.created_at ASC, w.id ASC;
+            """;
 
         return jdbcTemplate.query(sql, wailtListRowMapper, date, timeId, themeId);
     }

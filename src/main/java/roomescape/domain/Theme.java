@@ -8,10 +8,10 @@ public class Theme {
     private final String thumbnailImageUrl;
 
     public Theme(
-            Long id,
-            String name,
-            String description,
-            String thumbnailImageUrl
+        Long id,
+        String name,
+        String description,
+        String thumbnailImageUrl
     ) {
         this.id = id;
         this.name = name;
@@ -20,9 +20,9 @@ public class Theme {
     }
 
     public Theme(
-            String name,
-            String description,
-            String thumbnailImageUrl
+        String name,
+        String description,
+        String thumbnailImageUrl
     ) {
         this(null, name, description, thumbnailImageUrl);
     }

@@ -33,8 +33,8 @@ public class ThemeController {
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
         List<ThemeResponse> responses = themeService.getThemes().stream()
-                .map(ThemeResponse::from)
-                .toList();
+            .map(ThemeResponse::from)
+            .toList();
 
         return ResponseEntity.ok().body(responses);
     }
@@ -56,8 +56,8 @@ public class ThemeController {
     @GetMapping(params = {"days"})
     public ResponseEntity<List<ThemeResponse>> searchPopularTop10(@RequestParam(defaultValue = "7") Integer days) {
         List<ThemeResponse> responses = themeService.getPopularTop10Themes(LocalDate.now(clock), days).stream()
-                .map(ThemeResponse::from)
-                .toList();
+            .map(ThemeResponse::from)
+            .toList();
 
         return ResponseEntity.ok().body(responses);
     }
