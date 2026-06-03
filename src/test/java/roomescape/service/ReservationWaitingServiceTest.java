@@ -79,6 +79,20 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
+    void 동일한_슬롯에_동일한_사용자의_예약이_존재하면_예외가_발생한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        reservationDao.insert(Reservation.createWithoutId("로지",
+                new ReservationSlot(LocalDate.of(2026, 6, 10), time, theme)));
+        CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
+                "로지", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
+        );
+
+        assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
     void 동일한_슬롯에_중복_대기를_신청하면_예외가_발생한다() {
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
