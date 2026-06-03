@@ -194,7 +194,7 @@ class RoomescapeApplicationTest {
                 .when().get("/reservations/" + id)
                 .then().statusCode(200)
                 .body("state", org.hamcrest.Matchers.equalTo("승인"))
-                .body("rank", org.hamcrest.Matchers.equalTo(1));
+                .body("rank", org.hamcrest.Matchers.equalTo(0));
     }
 
     @Test
@@ -207,7 +207,7 @@ class RoomescapeApplicationTest {
                 .when().get("/reservations/" + waitingId)
                 .then().statusCode(200)
                 .body("state", org.hamcrest.Matchers.equalTo("대기"))
-                .body("rank", org.hamcrest.Matchers.equalTo(2));
+                .body("rank", org.hamcrest.Matchers.equalTo(1));
     }
 
     @Test

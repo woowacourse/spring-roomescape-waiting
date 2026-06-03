@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
@@ -46,13 +47,23 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
         Theme theme = findThemeByThemeId(request.getThemeId());
 
-        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
-
-        Slot slot = findOrCreateSlot(new ReservationDate(request.getDate()), reservationTime, theme);
-        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()), slot, status, now);
-
         validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
                 request.getName());
+        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
+
+        Slot slot = null;
+        try {
+            slot = slotRepository.findByDateAndTimeAndTheme(request.getDate(), reservationTime.getId(),
+                    theme.getId()).orElseGet(() -> slotRepository.save(
+                    Slot.create(new ReservationDate(request.getDate()), reservationTime, theme)));
+
+        } catch (DataIntegrityViolationException e) {
+            slot = slotRepository.findByDateAndTimeAndTheme(request.getDate(), reservationTime.getId(), theme.getId())
+                    .get();
+            status = Status.WAITING;
+        }
+
+        Reservation reservation = Reservation.reserve(new ReservationName(request.getName()), slot, status, now);
         Reservation saved = reservationRepository.save(reservation);
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
@@ -100,18 +111,28 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult update(ReservationUpdateRequest request, long id, LocalDateTime now) {
-        Reservation reservation = findReservationById(id);
-        reservation.ensureNotPast(now);
+        Reservation originReservation = findReservationById(id);
+        originReservation.ensureNotPast(now);
 
-        ReservationDate reservationDate = new ReservationDate(request.getDate());
-        ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
+        ReservationDate reservationDateToUpdate = new ReservationDate(request.getDate());
+        ReservationTime reservationTimeToUpdate = findReservationTimeByTimeId(request.getTimeId());
 
         validateIsDuplicateNameReservation(request.getTimeId(), request.getThemeId(), request.getDate(),
                 request.getName());
 
-        Slot slot = findOrCreateSlot(reservationDate, reservationTime, reservation.getTheme());
-        Reservation target = Reservation.reserve(reservation.getName(), slot, reservation.getStatus(), now);
+        Slot slotToUpdate = findOrCreateSlot(reservationDateToUpdate, reservationTimeToUpdate,
+                originReservation.getTheme());
+
+        Status status = determineStatus(request.getTimeId(), request.getThemeId(), request.getDate());
+        Reservation target = Reservation.reserve(originReservation.getName(), slotToUpdate, status, now);
+
         Reservation updated = reservationRepository.update(id, target);
+
+        reservationRepository.findFirstWaitingByTimeAndThemeAndDate(
+                originReservation.getTime().getId(),
+                originReservation.getTheme().getId(),
+                originReservation.getDate().getValue()
+        ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
 
         Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
                 updated.getTime(), updated.getTheme(), updated.getDate()));

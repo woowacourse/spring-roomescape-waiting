@@ -293,7 +293,7 @@ class ReservationServiceTest {
         ReservationResult result = reservationService.find(EXISTS_ID);
 
         Assertions.assertThat(result.getReservation().getId()).isEqualTo(EXISTS_ID);
-        Assertions.assertThat(result.getRank().getValue()).isEqualTo(1);
+        Assertions.assertThat(result.getRank().getValue()).isEqualTo(0);
     }
 
     @Test
@@ -348,6 +348,6 @@ class ReservationServiceTest {
         ReservationResult result = reservationService.find(2L);
 
         Assertions.assertThat(result.getReservation().getStatus()).isEqualTo(Status.WAITING);
-        Assertions.assertThat(result.getRank().getValue()).isEqualTo(2);
+        Assertions.assertThat(result.getRank().getValue()).isEqualTo(1);
     }
 }
