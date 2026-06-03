@@ -25,12 +25,13 @@ public class ReservationService {
     }
 
     public ReservationCreateResponse create(ReservationRequest request, ReservationTime time, Theme theme) {
-        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
         boolean isAlreadyExist = reservationDao.findByNameAndDateAndTimeAndTheme(request.name(), request.date(), time.getId(), theme.getId());
         if (isAlreadyExist) {
             throw new IllegalStateException("[ERROR] 이미 예약된 예약을 중복 예약할 수 없습니다.");
         }
+
+        boolean isExistSlot = reservationDao.findByDateTimeTheme(request.date(), time.getId(), theme.getId());
 
         ReservationStatus status = ReservationStatus.RESERVED;
         if (isExistSlot) {
