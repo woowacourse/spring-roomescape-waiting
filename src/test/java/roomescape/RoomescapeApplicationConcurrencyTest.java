@@ -38,6 +38,7 @@ public class RoomescapeApplicationConcurrencyTest {
 
     private final LocalDate date = LocalDate.now().plusDays(1);
 
+
     @BeforeEach
     public void setUp() {
         RestAssured.port = port;
