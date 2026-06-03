@@ -11,10 +11,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
 
@@ -52,7 +49,8 @@ public class ReservationWaitingService {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
         }
 
-        int order = reservationWaitingDao.countOrder(slot, savedReservationWaiting.getId());
+        ReservationWaitingQueue waitings = new ReservationWaitingQueue(reservationWaitingDao.selectBySlot(slot));
+        int order = waitings.orderOf(savedReservationWaiting);
         return ReservationWaitingResponse.from(savedReservationWaiting, order);
     }
 
