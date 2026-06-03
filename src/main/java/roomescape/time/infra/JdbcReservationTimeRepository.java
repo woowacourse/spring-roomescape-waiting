@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -75,17 +74,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
-        try {
-            String sql = """
-                    SELECT id, start_at, is_active
-                    FROM reservation_time
-                    WHERE id = :id
-                    """;
-            ReservationTime time = jdbcTemplate.queryForObject(sql, Map.of("id", id), rowMapper);
-            return Optional.ofNullable(time);
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+        String sql = """
+                SELECT id, start_at, is_active
+                FROM reservation_time
+                WHERE id = :id
+                """;
+        return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
     }
 
     @Override
