@@ -86,4 +86,15 @@ public class ReservationQueryingDao {
         String sql = SELECT_RESERVATION_SQL + " WHERE r.name = ?";
         return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
+
+    public boolean isExistBySlot(long slotId) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1
+                    FROM reservation
+                    WHERE slot_id = ?
+            )
+            """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, slotId);
+    }
 }

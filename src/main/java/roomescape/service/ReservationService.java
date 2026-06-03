@@ -67,7 +67,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(ReservationRequest reservationReq) {
         try {
-            Slot slot = createSlot(reservationReq);
+            Slot slot = findOrCreateSlot(reservationReq);
             Reservation reservation = Reservation.create(reservationReq.name(), slot);
             Long reservationId = reservationUpdatingDao.insert(reservation);
             return ReservationResponse.from(reservation.withId(reservationId));
@@ -129,9 +129,13 @@ public class ReservationService {
     }
 
     private Reservation updateSlot(Reservation existed, ReservationRequest request) {
-        Slot newSlot = createSlot(request);
-        Reservation moved = existed.update(request.name(), newSlot);
+        Slot newSlot = findOrCreateSlot(request);
 
+        if(reservationQueryingDao.isExistBySlot(newSlot.getId())) {
+            throw new InvalidInputException("해당 날짜, 시간, 테마로 이미 다른 예약이 존재합니다.");
+        }
+
+        Reservation moved = existed.update(request.name(), newSlot);
         long updated = reservationUpdatingDao.update(moved.getId(), moved.getName(), newSlot.getId(), moved.getCreatedAt());
         if (updated == 0) {
             throw new DataIntegrityViolationException("해당 예약이 존재하지 않습니다.");
@@ -139,24 +143,20 @@ public class ReservationService {
         return moved;
     }
 
-    private Slot createSlot(ReservationRequest request) {
+
+    private Slot findOrCreateSlot(ReservationRequest request) {
         ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(request.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
         Theme theme = themeQueryingDao.findThemeById(request.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
 
         Slot slot = Slot.create(request.date(), time, theme);
-
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
         }
 
-        if(slotDao.isExistSlot(request.date(), request.timeId(), request.themeId())) {
-            throw new InvalidInputException("해당 날짜, 시간, 테마로 예약이 이미 존재합니다.");
-        }
-
-        Long slotId = slotDao.insert(slot);
-        return slot.withId(slotId);
+        return slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
+                .orElseGet(() -> slot.withId(slotDao.insert(slot)));
     }
 
     private Reservation getReservation(Long id) {

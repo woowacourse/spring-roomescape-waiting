@@ -83,16 +83,4 @@ public class SlotDao {
         return jdbcTemplate.update(sql, id);
     }
 
-    public boolean isExistSlot(LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-            SELECT EXISTS (
-                SELECT 1
-                    FROM slot
-                    WHERE date = ?
-                    AND time_id = ?
-                    AND theme_id = ?
-            )
-            """;
-        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
-    }
 }
