@@ -15,6 +15,8 @@ import roomescape.exception.RoomEscapeException;
 @ToString
 public class ReservationSlot {
 
+    private static final int CANCELLABLE_DAYS_BEFORE = 1;
+
     private final Long id;
     private final Theme theme;
     private final LocalDate date;
@@ -125,8 +127,12 @@ public class ReservationSlot {
     }
 
     private void validateCancelable(Reservation reservation) {
-        if (reservation.isReserved() && !date.isAfter(LocalDate.now().plusDays(1))) {
+        if (reservation.isReserved() && isCancelableDate()) {
             throw new RoomEscapeException("예약 하루 전에는 취소할 수 없습니다.");
         }
+    }
+
+    private boolean isCancelableDate() {
+        return !date.isAfter(LocalDate.now().plusDays(CANCELLABLE_DAYS_BEFORE));
     }
 }
