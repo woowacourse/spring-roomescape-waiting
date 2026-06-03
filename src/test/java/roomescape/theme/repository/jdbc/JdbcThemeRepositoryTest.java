@@ -1,6 +1,7 @@
 package roomescape.theme.repository.jdbc;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -31,7 +32,8 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 테마를_저장하고_조회한다() {
+    @DisplayName("테마를 저장하고 조회한다")
+    void saveAndFindTheme() {
         Theme theme = Theme.create("링", "공포 테마", "http:~");
 
         Theme savedTheme = themeRepository.save(theme);
@@ -44,14 +46,16 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_테마를_조회하면_빈_Optional을_반환한다() {
+    @DisplayName("존재하지 않는 테마를 조회하면 빈 Optional을 반환한다")
+    void returnEmptyOptionalWhenThemeDoesNotExist() {
         Optional<Theme> foundTheme = themeRepository.findById(1L);
 
         assertThat(foundTheme).isEmpty();
     }
 
     @Test
-    void 테마를_삭제한다() {
+    @DisplayName("테마를 삭제한다")
+    void deleteTheme() {
         Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~"));
 
         boolean deleted = themeRepository.deleteById(savedTheme.getId());
@@ -61,14 +65,16 @@ class JdbcThemeRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_테마를_삭제하면_false를_반환한다() {
+    @DisplayName("존재하지 않는 테마를 삭제하면 false를 반환한다")
+    void returnFalseWhenDeletingNonExistingTheme() {
         boolean deleted = themeRepository.deleteById(1L);
 
         assertThat(deleted).isFalse();
     }
 
     @Test
-    void 해당_테마에_예약이_있으면_테마를_삭제할_수_없다() {
+    @DisplayName("해당 테마에 예약이 있으면 테마를 삭제할 수 없다")
+    void cannotDeleteThemeInUse() {
         Theme savedTheme = themeRepository.save(Theme.create("링", "공포 테마", "http:~"));
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update(
@@ -92,7 +98,8 @@ class JdbcThemeRepositoryTest {
             "/clear.sql",
             "/popular-themes-test-data.sql"
     })
-    void 최근_예약이_많은_상위_10개_테마를_조회한다() {
+    @DisplayName("최근 예약이 많은 상위 10개 테마를 조회한다")
+    void findTopTenPopularThemesByRecentReservations() {
         List<Theme> popularThemes = themeRepository.findPopularThemes(
                 LocalDate.of(2026, 5, 1),
                 LocalDate.of(2026, 5, 8)

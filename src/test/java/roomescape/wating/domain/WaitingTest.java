@@ -1,6 +1,7 @@
 package roomescape.wating.domain;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -9,8 +10,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class WaitingTest {
 
@@ -23,7 +22,8 @@ class WaitingTest {
     ));
 
     @Test
-    void 현재_시간_이전으로_대기를_등록할_수_없다() {
+    @DisplayName("현재 시간 이전으로 대기를 등록할 수 없다")
+    void cannotRegisterWaitingBeforeNow() {
         Assertions.assertThatThrownBy(() -> Waiting.create(
                 "코로구",
                 NOW.toLocalDate(),

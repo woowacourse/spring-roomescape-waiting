@@ -1,6 +1,7 @@
 package roomescape.reservation.repository.jdbc;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -44,7 +45,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약을_저장하고_조회한다() {
+    @DisplayName("예약을 저장하고 조회한다")
+    void saveAndFindReservation() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
@@ -71,7 +73,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_예약_슬롯으로_예약을_저장하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 예약 슬롯으로 예약을 저장하면 예외가 발생한다")
+    void throwExceptionWhenSavingReservationWithNonExistingReservationSlot() {
         insertTheme("링", "공포 테마", "http:~");
         Reservation reservation = Reservation.create(
                 "브라운",
@@ -89,7 +92,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약을_id로_조회한다() {
+    @DisplayName("예약을 id로 조회한다")
+    void findReservationById() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -101,7 +105,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약을_수정한다() {
+    @DisplayName("예약을 수정한다")
+    void updateReservation() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
         insertTheme("링", "공포 테마", "http:~");
@@ -127,7 +132,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_예약을_수정하면_false를_반환한다() {
+    @DisplayName("존재하지 않는 예약을 수정하면 false를 반환한다")
+    void returnFalseWhenUpdatingNonExistingReservation() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
 
@@ -146,7 +152,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 이미_존재하는_예약으로_수정하면_예외가_발생한다() {
+    @DisplayName("이미 존재하는 예약으로 수정하면 예외가 발생한다")
+    void throwExceptionWhenUpdatingToExistingReservation() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
         insertTheme("링", "공포 테마", "http:~");
@@ -167,7 +174,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_예약_슬롯으로_수정하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 예약 슬롯으로 수정하면 예외가 발생한다")
+    void throwExceptionWhenUpdatingToNonExistingReservationSlot() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -185,7 +193,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 예약자_이름으로_예약_목록을_조회한다() {
+    @DisplayName("예약자 이름으로 예약 목록을 조회한다")
+    void findReservationsByCustomerName() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
         insertTheme("링", "공포 테마", "http:~");
@@ -199,7 +208,8 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    void 날짜와_테마에_따른_예약_시간_상태를_조회한다() {
+    @DisplayName("날짜와 테마에 따른 예약 시간 상태를 조회한다")
+    void findReservationTimeStatusesByDateAndTheme() {
         insertReservationTime("10:00");
         insertReservationTime("11:00");
         insertTheme("링", "공포 테마", "http:~");

@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,7 +60,8 @@ class ReservationControllerTest {
             "/clear.sql",
             "/popular-themes-test-data.sql"
     })
-    void 전체_날짜와_테마_조회() {
+    @DisplayName("전체 날짜와 테마 조회")
+    void findAllDatesAndThemes() {
         ReservationOptionResponse responses = RestAssured.given().log().all()
                 .when().get("/reservations/date-and-theme")
                 .then().log().all()
@@ -86,7 +88,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 날짜와_테마를_선택해_예약가능한_시간_조회() {
+    @DisplayName("날짜와 테마를 선택해 예약가능한 시간 조회")
+    void findAvailableTimesByDateAndTheme() {
         // 시간 추가
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
@@ -113,7 +116,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_가능한_시간_조회시_날짜_형식이_잘못되면_400을_응답한다() {
+    @DisplayName("예약 가능한 시간 조회시 날짜 형식이 잘못되면 400을 응답한다")
+    void respondBadRequestWhenDateFormatIsInvalidForAvailableTimes() {
         RestAssured.given().log().all()
                 .when().get("/reservations/available-times?date=invalid-date&themeId=1")
                 .then().log().all()
@@ -123,7 +127,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_가능한_시간_조회시_테마_id가_없으면_400을_응답한다() {
+    @DisplayName("예약 가능한 시간 조회시 테마 id가 없으면 400을 응답한다")
+    void respondBadRequestWhenThemeIdIsMissingForAvailableTimes() {
         RestAssured.given().log().all()
                 .when().get("/reservations/available-times?date=2026-05-05")
                 .then().log().all()
@@ -133,7 +138,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약자_이름으로_예약_및_대기_목록을_조회한다() {
+    @DisplayName("예약자 이름으로 예약 및 대기 목록을 조회한다")
+    void findReservationsAndWaitingsByCustomerName() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -157,7 +163,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약을_추가하고_삭제한다() {
+    @DisplayName("예약을 추가하고 삭제한다")
+    void createAndDeleteReservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
@@ -187,7 +194,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_일정을_수정한다() {
+    @DisplayName("예약 일정을 수정한다")
+    void updateReservationSchedule() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -223,7 +231,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_예약을_수정하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 예약을 수정하면 404를 응답한다")
+    void respondNotFoundWhenUpdatingNonExistingReservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
 
         RestAssured.given().log().all()
@@ -240,7 +249,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_예약_시간으로_수정하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 예약 시간으로 수정하면 404를 응답한다")
+    void respondNotFoundWhenUpdatingWithNonExistingReservationTime() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -259,7 +269,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_수정시_예약일을_입력하지_않으면_400을_응답한다() {
+    @DisplayName("예약 수정시 예약일을 입력하지 않으면 400을 응답한다")
+    void respondBadRequestWhenReservationDateIsMissingOnUpdate() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -273,7 +284,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 과거_시간으로_예약을_수정하면_400을_응답한다() {
+    @DisplayName("과거 시간으로 예약을 수정하면 400을 응답한다")
+    void respondBadRequestWhenUpdatingReservationToPastTime() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -293,7 +305,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 이미_예약된_시간으로_수정하면_409를_응답한다() {
+    @DisplayName("이미 예약된 시간으로 수정하면 409를 응답한다")
+    void respondConflictWhenUpdatingToAlreadyReservedTime() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -314,7 +327,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약일_당일에는_예약_시작_전이어도_사용자가_예약을_수정할_수_없다() {
+    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 수정할 수 없다")
+    void customerCannotUpdateReservationOnReservationDateBeforeStartTime() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -334,7 +348,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약일_당일에는_예약_시작_전이어도_사용자가_예약을_취소할_수_없다() {
+    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 취소할 수 없다")
+    void customerCannotCancelReservationOnReservationDateBeforeStartTime() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-05-01", 1L, 1L);
@@ -348,7 +363,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_예약_시간으로_예약하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 예약 시간으로 예약하면 404를 응답한다")
+    void respondNotFoundWhenCreatingReservationWithNonExistingReservationTime() {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
         RestAssured.given().log().all()
@@ -366,7 +382,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_시간을_선택하지_않으면_400을_응답한다() {
+    @DisplayName("예약 시간을 선택하지 않으면 400을 응답한다")
+    void respondBadRequestWhenReservationTimeIsMissing() {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
         RestAssured.given().log().all()
@@ -384,7 +401,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_요청_본문이_null이면_400을_응답한다() {
+    @DisplayName("예약 요청 본문이 null이면 400을 응답한다")
+    void respondBadRequestWhenReservationRequestBodyIsNull() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body("null")
@@ -396,7 +414,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_테마로_예약하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 테마로 예약하면 404를 응답한다")
+    void respondNotFoundWhenCreatingReservationWithNonExistingTheme() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
 
         RestAssured.given().log().all()
@@ -414,7 +433,8 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약자_이름이_비어있으면_400을_응답한다() {
+    @DisplayName("예약자 이름이 비어있으면 400을 응답한다")
+    void respondBadRequestWhenCustomerNameIsBlank() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 

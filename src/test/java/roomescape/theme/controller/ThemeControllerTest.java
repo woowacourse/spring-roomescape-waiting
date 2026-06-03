@@ -3,6 +3,7 @@ package roomescape.theme.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,7 +55,8 @@ class ThemeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 테마_추가_및_삭제() {
+    @DisplayName("테마 추가 및 삭제")
+    void createAndDeleteTheme() {
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "링");
@@ -82,7 +84,8 @@ class ThemeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 테마_설명이_비어있으면_400을_응답한다() {
+    @DisplayName("테마 설명이 비어있으면 400을 응답한다")
+    void respondBadRequestWhenThemeDescriptionIsBlank() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -101,7 +104,8 @@ class ThemeControllerTest {
             "/clear.sql",
             "/popular-themes-test-data.sql"
     })
-    void 최근_일주일간_예약이_많은_상위_10개_테마_조회() {
+    @DisplayName("최근 일주일간 예약이 많은 상위 10개 테마 조회")
+    void findTopTenPopularThemesByReservationsInLastWeek() {
         List<ThemeResponse> popularThemes = RestAssured.given().log().all()
                 .when().get("/themes/popular")
                 .then().log().all()
@@ -117,7 +121,8 @@ class ThemeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_테마를_삭제하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 테마를 삭제하면 404를 응답한다")
+    void respondNotFoundWhenDeletingNonExistingTheme() {
         RestAssured.given().log().all()
                 .when().delete("/themes/999")
                 .then().log().all()
@@ -126,7 +131,8 @@ class ThemeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 해당_테마에_예약이_있으면_테마_삭제시_409를_응답한다() {
+    @DisplayName("해당 테마에 예약이 있으면 테마 삭제시 409를 응답한다")
+    void respondConflictWhenDeletingThemeInUse() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)", "2026-08-05", "1", "1");

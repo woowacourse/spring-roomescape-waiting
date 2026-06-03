@@ -1,6 +1,7 @@
 package roomescape.theme.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
@@ -36,7 +37,8 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 테마를_생성한다() {
+    @DisplayName("테마를 생성한다")
+    void createTheme() {
         // when
         ThemeResponse response = themeService.create(
                 new ThemeCreateRequest("링", "공포 테마", "http:~")
@@ -49,7 +51,8 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 최근_예약이_많은_테마_조회_기간을_계산한다() {
+    @DisplayName("최근 예약이 많은 테마 조회 기간을 계산한다")
+    void calculatePopularThemeSearchPeriod() {
         // given
         themeRepository.setPopularThemes(List.of(
                 Theme.of(1L, "링", "공포 테마", "http:~")
@@ -67,7 +70,8 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 존재하지_않는_테마를_삭제하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 테마를 삭제하면 예외가 발생한다")
+    void throwExceptionWhenDeletingNonExistingTheme() {
         // given
         themeRepository.failToDelete();
 
@@ -77,7 +81,8 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 해당_테마에_예약이_있으면_테마_삭제시_예외가_발생한다() {
+    @DisplayName("해당 테마에 예약이 있으면 테마 삭제시 예외가 발생한다")
+    void throwExceptionWhenDeletingThemeInUse() {
         // given
         themeRepository.failToDeleteByInUse();
 

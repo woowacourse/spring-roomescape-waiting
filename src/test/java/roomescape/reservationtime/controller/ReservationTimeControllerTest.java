@@ -3,6 +3,7 @@ package roomescape.reservationtime.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +31,8 @@ class ReservationTimeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_예약_시간을_삭제하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 예약 시간을 삭제하면 404를 응답한다")
+    void respondNotFoundWhenDeletingNonExistingReservationTime() {
         RestAssured.given().log().all()
                 .when().delete("/times/0")
                 .then().log().all()
@@ -39,7 +41,8 @@ class ReservationTimeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_시간을_추가하고_조회하고_삭제한다() {
+    @DisplayName("예약 시간을 추가하고 조회하고 삭제한다")
+    void createFindAndDeleteReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
@@ -65,7 +68,8 @@ class ReservationTimeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_시작_시간을_입력하지_않으면_400을_응답한다() {
+    @DisplayName("예약 시작 시간을 입력하지 않으면 400을 응답한다")
+    void respondBadRequestWhenReservationStartAtIsMissing() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(Map.of())
@@ -77,7 +81,8 @@ class ReservationTimeControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 해당_시간에_예약이_있으면_예약_시간_삭제시_409를_응답한다() {
+    @DisplayName("해당 시간에 예약이 있으면 예약 시간 삭제시 409를 응답한다")
+    void respondConflictWhenDeletingReservationTimeInUse() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation_slot (reservation_date, time_id, theme_id) VALUES (?, ?, ?)", "2026-08-05", "1", "1");

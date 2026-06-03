@@ -1,6 +1,7 @@
 package roomescape.reservationslot.repository.jdbc;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -34,7 +35,8 @@ class JdbcReservationSlotRepositoryTest {
     }
 
     @Test
-    void 예약을_삭제하고_첫_번째_대기를_예약으로_승격한다() {
+    @DisplayName("예약을 삭제하고 첫 번째 대기를 예약으로 승격한다")
+    void deleteReservationAndPromoteFirstWaiting() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
@@ -60,7 +62,8 @@ class JdbcReservationSlotRepositoryTest {
     }
 
     @Test
-    void 예약과_대기가_모두_없어지면_빈_슬롯을_삭제한다() {
+    @DisplayName("예약과 대기가 모두 없어지면 빈 슬롯을 삭제한다")
+    void deleteEmptySlotWhenReservationAndWaitingDoNotExist() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);
@@ -78,7 +81,8 @@ class JdbcReservationSlotRepositoryTest {
     }
 
     @Test
-    void 이미_삭제된_예약으로_다시_삭제하면_승격된_예약은_삭제하지_않는다() {
+    @DisplayName("이미 삭제된 예약으로 다시 삭제하면 승격된 예약은 삭제하지 않는다")
+    void doNotDeletePromotedReservationWhenDeletingAlreadyDeletedReservationAgain() {
         insertReservationTime("10:00");
         insertTheme("링", "공포 테마", "http:~");
         Long slotId = insertReservationSlot("2026-08-05", 1L, 1L);

@@ -1,6 +1,7 @@
 package roomescape.reservationtime.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservationtime.domain.exception.ReservationTimeInUseException;
@@ -25,7 +26,8 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 예약_시간을_생성한다() {
+    @DisplayName("예약 시간을 생성한다")
+    void createReservationTime() {
         // when
         ReservationTimeResponse response = reservationTimeService.create(
                 new ReservationTimeCreateRequest(
@@ -40,7 +42,8 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 존재하지_않는_예약_시간을_삭제하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 예약 시간을 삭제하면 예외가 발생한다")
+    void throwExceptionWhenDeletingNonExistingReservationTime() {
         // given
         reservationTimeRepository.failToDelete();
 
@@ -50,7 +53,8 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 해당_시간에_예약이_있으면_예약_시간_삭제시_예외가_발생한다() {
+    @DisplayName("해당 시간에 예약이 있으면 예약 시간 삭제시 예외가 발생한다")
+    void throwExceptionWhenDeletingReservationTimeInUse() {
         // given
         reservationTimeRepository.failToDeleteByInUse();
 

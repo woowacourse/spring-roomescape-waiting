@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -71,7 +72,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 테마_날짜_시간_예약자명으로_대기를_등록할_수_있다() {
+    @DisplayName("테마 날짜 시간 예약자명으로 대기를 등록할 수 있다")
+    void registerWaitingWithThemeDateTimeAndCustomerName() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -96,7 +98,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 존재하지_않는_시간으로_대기를_등록하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 시간으로 대기를 등록하면 예외가 발생한다")
+    void throwExceptionWhenRegisteringWaitingWithNonExistingTime() {
         //given
         ReservationTime unSavedTime = ReservationTime.of(999L, LocalTime.of(12, 00));
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -121,7 +124,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 존재하지_않는_테마로_대기를_등록하면_예외가_발생한다() {
+    @DisplayName("존재하지 않는 테마로 대기를 등록하면 예외가 발생한다")
+    void throwExceptionWhenRegisteringWaitingWithNonExistingTheme() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme unSavedTheme = Theme.of(999L, "name", "des", "url");
@@ -146,7 +150,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 같은_사용자가_같은_슬롯에_중복으로_대기를_등록하면_예외가_발생한다() {
+    @DisplayName("같은 사용자가 같은 슬롯에 중복으로 대기를 등록하면 예외가 발생한다")
+    void throwExceptionWhenSameCustomerRegistersDuplicateWaitingInSameSlot() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -177,7 +182,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 대기_아이디와_본인의_이름으로_대기를_삭제할_수_있다() {
+    @DisplayName("대기 아이디와 본인의 이름으로 대기를 삭제할 수 있다")
+    void deleteWaitingByIdAndOwnName() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -197,7 +203,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 본인_이름으로_등록되지_않은_대기를_삭제하려_하면_404를_반환한다() {
+    @DisplayName("본인 이름으로 등록되지 않은 대기를 삭제하려 하면 404를 반환한다")
+    void respondNotFoundWhenDeletingWaitingNotOwnedByName() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -220,7 +227,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 존재하지_않는_대기를_삭제하려_하면_404를_반환한다() {
+    @DisplayName("존재하지 않는 대기를 삭제하려 하면 404를 반환한다")
+    void respondNotFoundWhenDeletingNonExistingWaiting() {
         //given
         final String customerName = "코로구";
         final long unsavedWaitingId = 999L;
@@ -238,7 +246,8 @@ class WaitingControllerTest {
     }
 
     @Test
-    void 과거_날짜의_대기를_삭제하는_경우_422를_반환한다() {
+    @DisplayName("과거 날짜의 대기를 삭제하는 경우 422를 반환한다")
+    void respondUnprocessableEntityWhenDeletingPastWaiting() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");

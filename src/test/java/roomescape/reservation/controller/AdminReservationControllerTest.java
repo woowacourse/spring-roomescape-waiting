@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,7 +56,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_목록이_없으면_빈_배열을_응답한다() {
+    @DisplayName("예약 목록이 없으면 빈 배열을 응답한다")
+    void respondEmptyArrayWhenReservationsDoNotExist() {
         RestAssured.given().log().all()
                 .when().get("/admin/reservations")
                 .then().log().all()
@@ -65,7 +67,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약_목록을_조회한다() {
+    @DisplayName("예약 목록을 조회한다")
+    void findReservations() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -82,7 +85,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 생성한_예약을_관리자_목록에서_조회한다() {
+    @DisplayName("생성한 예약을 관리자 목록에서 조회한다")
+    void findCreatedReservationInAdminList() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
@@ -107,7 +111,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 관리자는_예약일_당일에도_예약_일정을_수정할_수_있다() {
+    @DisplayName("관리자는 예약일 당일에도 예약 일정을 수정할 수 있다")
+    void adminCanUpdateReservationScheduleOnReservationDate() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -141,7 +146,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 관리자는_예약을_삭제할_수_있다() {
+    @DisplayName("관리자는 예약을 삭제할 수 있다")
+    void adminCanDeleteReservation() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         insertReservation("브라운", "2026-08-05", 1L, 1L);
@@ -157,7 +163,8 @@ class AdminReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 존재하지_않는_예약을_관리자가_삭제하면_404를_응답한다() {
+    @DisplayName("존재하지 않는 예약을 관리자가 삭제하면 404를 응답한다")
+    void respondNotFoundWhenAdminDeletesNonExistingReservation() {
         RestAssured.given().log().all()
                 .when().delete("/admin/reservations/999")
                 .then().log().all()

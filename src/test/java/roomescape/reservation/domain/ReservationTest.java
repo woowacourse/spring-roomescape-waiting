@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.domain.exception.ReservationCancellationException;
 import roomescape.reservation.domain.exception.ReservationModificationException;
@@ -22,7 +23,8 @@ class ReservationTest {
     private static final Theme THEME = Theme.of(1L, "링", "공포 테마", "http:~");
 
     @Test
-    void 현재_이전_시간으로_예약을_생성할_수_없다() {
+    @DisplayName("현재 이전 시간으로 예약을 생성할 수 없다")
+    void cannotCreateReservationBeforeNow() {
         assertThatThrownBy(() -> Reservation.create(
                 "브라운",
                 LocalDate.of(2026, 5, 8),
@@ -33,7 +35,8 @@ class ReservationTest {
     }
 
     @Test
-    void 현재_이후_시간으로_예약을_생성한다() {
+    @DisplayName("현재 이후 시간으로 예약을 생성한다")
+    void createReservationAfterNow() {
         Reservation reservation = Reservation.create(
                 "브라운",
                 LocalDate.of(2026, 5, 8),
@@ -46,7 +49,8 @@ class ReservationTest {
     }
 
     @Test
-    void 과거_예약도_복원할_수_있다() {
+    @DisplayName("과거 예약도 복원할 수 있다")
+    void restorePastReservation() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -59,7 +63,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약_일정을_변경한다() {
+    @DisplayName("예약 일정을 변경한다")
+    void changeReservationSchedule() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -83,7 +88,8 @@ class ReservationTest {
     }
 
     @Test
-    void 과거_시간으로_예약_일정을_변경할_수_없다() {
+    @DisplayName("과거 시간으로 예약 일정을 변경할 수 없다")
+    void cannotChangeReservationScheduleToPastTime() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -100,7 +106,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약일_당일에는_예약_시작_전이어도_사용자가_예약을_취소할_수_없다() {
+    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 취소할 수 없다")
+    void customerCannotCancelReservationOnReservationDateBeforeStartTime() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -114,7 +121,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약일_하루_전에는_사용자가_예약을_취소할_수_있다() {
+    @DisplayName("예약일 하루 전에는 사용자가 예약을 취소할 수 있다")
+    void customerCanCancelReservationOneDayBeforeReservationDate() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -128,7 +136,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약일_당일에는_예약_시작_전이어도_사용자가_예약을_변경할_수_없다() {
+    @DisplayName("예약일 당일에는 예약 시작 전이어도 사용자가 예약을 변경할 수 없다")
+    void customerCannotChangeReservationOnReservationDateBeforeStartTime() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",
@@ -142,7 +151,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약일_하루_전에는_사용자가_예약을_변경할_수_있다() {
+    @DisplayName("예약일 하루 전에는 사용자가 예약을 변경할 수 있다")
+    void customerCanChangeReservationOneDayBeforeReservationDate() {
         Reservation reservation = Reservation.of(
                 1L,
                 "브라운",

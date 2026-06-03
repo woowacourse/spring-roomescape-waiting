@@ -54,7 +54,8 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 예약이_있는_슬롯에_대기를_등록할_수_있다() {
+    @DisplayName("예약이 있는 슬롯에 대기를 등록할 수 있다")
+    void registerWaitingInSlotWithReservation() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -74,7 +75,8 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 예약이_없는_슬롯에_대기를_등록하면_예외가_발생한다() {
+    @DisplayName("예약이 없는 슬롯에 대기를 등록하면 예외가 발생한다")
+    void throwExceptionWhenRegisteringWaitingInSlotWithoutReservation() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -91,7 +93,8 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void id로_대기를_삭제할_수_있다() {
+    @DisplayName("id로 대기를 삭제할 수 있다")
+    void deleteWaitingById() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -109,7 +112,8 @@ class JdbcWaitingRepositoryTest {
     class FindById {
 
         @Test
-        void 존재하지_않는_대기를_조회하면_empty가_반환된다() {
+        @DisplayName("존재하지 않는 대기를 조회하면 empty가 반환된다")
+        void returnEmptyWhenWaitingDoesNotExist() {
             //given
             final long unsavedId = 99L;
 
@@ -121,7 +125,8 @@ class JdbcWaitingRepositoryTest {
         }
 
         @Test
-        void 존재하는_대기를_조회하면_해당_대기가_반환된다() {
+        @DisplayName("존재하는 대기를 조회하면 해당 대기가 반환된다")
+        void returnWaitingWhenWaitingExists() {
             //given
             ReservationTime time = insertReservationTime("11:00:00");
             Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -137,7 +142,8 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @Sql("/find_own_waitings_after_today_test_data.sql")
-    void 본인의_현재_이후의_전체_대기_목록을_조회한다() {
+    @DisplayName("본인의 현재 이후의 전체 대기 목록을 조회한다")
+    void findOwnWaitingsAfterNow() {
         //given
         final String customerName = "재키";
 
@@ -159,7 +165,8 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 같은_생성_시각이면_id가_작은_대기를_먼저_조회한다() {
+    @DisplayName("같은 생성 시각이면 id가 작은 대기를 먼저 조회한다")
+    void findWaitingWithSmallerIdFirstWhenCreatedAtIsSame() {
         // given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -180,7 +187,8 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 같은_생성_시각이면_id가_작은_대기를_앞선_대기로_계산한다() {
+    @DisplayName("같은 생성 시각이면 id가 작은 대기를 앞선 대기로 계산한다")
+    void calculateWaitingWithSmallerIdAsEarlierWhenCreatedAtIsSame() {
         // given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");

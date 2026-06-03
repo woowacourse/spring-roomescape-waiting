@@ -1,6 +1,7 @@
 package roomescape.reservationtime.repository.jdbc;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -31,7 +32,8 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void 예약_시간을_저장하고_조회한다() {
+    @DisplayName("예약 시간을 저장하고 조회한다")
+    void saveAndFindReservationTime() {
         ReservationTime reservationTime = ReservationTime.create(LocalTime.of(10, 0));
 
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
@@ -42,7 +44,8 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void 예약_시간_목록을_id_순서로_조회한다() {
+    @DisplayName("예약 시간 목록을 id 순서로 조회한다")
+    void findReservationTimesOrderById() {
         ReservationTime firstTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         ReservationTime secondTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
 
@@ -54,14 +57,16 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_예약_시간을_조회하면_빈_Optional을_반환한다() {
+    @DisplayName("존재하지 않는 예약 시간을 조회하면 빈 Optional을 반환한다")
+    void returnEmptyOptionalWhenReservationTimeDoesNotExist() {
         Optional<ReservationTime> foundTime = reservationTimeRepository.findById(1L);
 
         assertThat(foundTime).isEmpty();
     }
 
     @Test
-    void 예약_시간을_삭제한다() {
+    @DisplayName("예약 시간을 삭제한다")
+    void deleteReservationTime() {
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
         boolean deleted = reservationTimeRepository.delete(savedTime.getId());
@@ -71,14 +76,16 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    void 존재하지_않는_예약_시간을_삭제하면_false를_반환한다() {
+    @DisplayName("존재하지 않는 예약 시간을 삭제하면 false를 반환한다")
+    void returnFalseWhenDeletingNonExistingReservationTime() {
         boolean deleted = reservationTimeRepository.delete(1L);
 
         assertThat(deleted).isFalse();
     }
 
     @Test
-    void 해당_시간에_예약이_있으면_예약_시간을_삭제할_수_없다() {
+    @DisplayName("해당 시간에 예약이 있으면 예약 시간을 삭제할 수 없다")
+    void cannotDeleteReservationTimeInUse() {
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         jdbcTemplate.update(
                 "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
