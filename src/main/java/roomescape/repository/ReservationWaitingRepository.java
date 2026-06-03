@@ -28,19 +28,19 @@ public class ReservationWaitingRepository {
                 resultSet.getString("theme_name"),
                 resultSet.getString("description"),
                 resultSet.getString("thumbnail"));
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class), time, theme
+        );
 
         return new ReservationWaiting(
                 resultSet.getLong("reservation_waiting_id"),
                 resultSet.getString("username"),
-                resultSet.getObject("date", LocalDate.class),
-                time,
-                theme
+                slot
         );
     };
 
     private final RowMapper<WaitingWithTurn> waitingWithTurnRowMapper = (resultSet, rowNum) -> {
         ReservationWaiting waiting = waitingRowMapper.mapRow(resultSet, rowNum);
-
         return new WaitingWithTurn(
                 waiting,
                 resultSet.getLong("turn")
@@ -89,6 +89,7 @@ public class ReservationWaitingRepository {
     }
 
     public ReservationWaiting insert(ReservationWaiting waiting) {
+        ReservationSlot slot = waiting.getSlot();
         String sql = "INSERT INTO reservation_waiting(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -96,9 +97,9 @@ public class ReservationWaitingRepository {
                     sql,
                     new String[]{"id"});
             pstmt.setString(1, waiting.getName());
-            pstmt.setObject(2, waiting.getDate());
-            pstmt.setLong(3, waiting.getTime().getId());
-            pstmt.setLong(4, waiting.getTheme().getId());
+            pstmt.setObject(2, slot.getDate());
+            pstmt.setLong(3, slot.getTime().getId());
+            pstmt.setLong(4, slot.getTheme().getId());
             return pstmt;
         }, keyHolder);
 

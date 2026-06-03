@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReservationSlot {
 
@@ -16,6 +17,14 @@ public class ReservationSlot {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+    }
+
+    public boolean hasSameSchedule(ReservationSlot other) {
+        return date.equals(other.date) && time.equals(other.time);
     }
 
     public LocalDate getDate() {

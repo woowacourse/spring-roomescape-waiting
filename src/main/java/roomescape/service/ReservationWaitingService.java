@@ -3,10 +3,7 @@ package roomescape.service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
-import roomescape.domain.WaitingWithTurn;
+import roomescape.domain.*;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
@@ -43,10 +40,8 @@ public class ReservationWaitingService {
 
     @Transactional
     public WaitingWithTurn create(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
-        ReservationTime time = findReservationTime(timeId);
-        Theme theme = findTheme(themeId);
-
-        ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
+        ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
+        ReservationWaiting waiting = new ReservationWaiting(null, name, slot);
         reservationWaitingValidator.validateWaiting(waiting, now);
 
         return insertReservationWaiting(waiting);

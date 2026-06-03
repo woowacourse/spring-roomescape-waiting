@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
@@ -141,6 +142,6 @@ class AdminReservationControllerTest {
     private Reservation reservation() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
-        return new Reservation(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme);
+        return new Reservation(1L, "브라운", new ReservationSlot(LocalDate.of(2099, 1, 1), time, theme));
     }
 }

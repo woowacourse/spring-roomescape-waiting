@@ -1,35 +1,28 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ReservationWaiting {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final ReservationSlot slot;
 
-    public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateSlot(slot);
 
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
     }
 
     public ReservationWaiting withId(Long id) {
-        return new ReservationWaiting(id, name, date, time, theme);
+        return new ReservationWaiting(id, name, slot);
     }
 
     public boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+        return slot.isPast(now);
     }
 
     public boolean isOwnedBy(String name) {
@@ -37,7 +30,7 @@ public class ReservationWaiting {
     }
 
     public ReservationSlot getSlot() {
-        return new ReservationSlot(date, time, theme);
+        return slot;
     }
 
     public Long getId() {
@@ -46,18 +39,6 @@ public class ReservationWaiting {
 
     public String getName() {
         return name;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
     }
 
     private void validateName(String name) {
@@ -69,21 +50,9 @@ public class ReservationWaiting {
         }
     }
 
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("date는 비어 있을 수 없습니다.");
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("time은 비어있을 수 없습니다.");
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("theme는 비어있을 수 없습니다.");
+    private void validateSlot(ReservationSlot slot) {
+        if (slot == null) {
+            throw new IllegalArgumentException("slot은 비어 있을 수 없습니다.");
         }
     }
 }

@@ -30,13 +30,14 @@ public class ReservationRepository {
                 resultSet.getString("theme_name"),
                 resultSet.getString("description"),
                 resultSet.getString("thumbnail"));
+        ReservationSlot slot = new ReservationSlot(
+                resultSet.getObject("date", LocalDate.class), time, theme
+        );
 
         return new Reservation(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("username"),
-                resultSet.getObject("date", LocalDate.class),
-                time,
-                theme
+                slot
         );
     };
 
@@ -112,6 +113,7 @@ public class ReservationRepository {
     }
 
     public Reservation insert(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         String sql = "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -120,9 +122,9 @@ public class ReservationRepository {
                     new String[]{"id"}
             );
             pstmt.setString(1, reservation.getName());
-            pstmt.setObject(2, reservation.getDate());
-            pstmt.setLong(3, reservation.getTime().getId());
-            pstmt.setLong(4, reservation.getTheme().getId());
+            pstmt.setObject(2, slot.getDate());
+            pstmt.setLong(3, slot.getTime().getId());
+            pstmt.setLong(4, slot.getTheme().getId());
             return pstmt;
         }, keyHolder);
         Long id = keyHolder.getKey().longValue();
@@ -135,24 +137,25 @@ public class ReservationRepository {
     }
 
     public int update(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?;";
         return jdbcTemplate.update(
                 sql,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId(),
                 reservation.getId());
     }
 
-    public boolean existsBySlot(Reservation reservation) {
+    public boolean existsBySlot(ReservationSlot slot) {
         String sql = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(
                 sql,
                 Integer.class,
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId());
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId());
         return count != null && count > 0;
     }
 

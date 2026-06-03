@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -34,9 +35,9 @@ class ReservationLookupServiceTest {
     void 이름으로_예약과_예약_대기를_함께_조회한다() {
         // given
         String name = "브라운";
-        Reservation reservation = new Reservation(1L, name, date, time, theme);
+        Reservation reservation = new Reservation(1L, name, new ReservationSlot(date, time, theme));
         WaitingWithTurn waiting = new WaitingWithTurn(
-                new ReservationWaiting(2L, name, date.plusDays(1), time, theme),
+                new ReservationWaiting(2L, name, new ReservationSlot(date.plusDays(1), time, theme)),
                 1L);
 
         when(reservationService.findByName(name))
@@ -65,10 +66,10 @@ class ReservationLookupServiceTest {
         ReservationTime earlyTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         ReservationTime lateTime = new ReservationTime(2L, LocalTime.parse("12:00"));
 
-        Reservation earlyReservation = new Reservation(1L, name, date, earlyTime, theme);
-        Reservation lateReservation = new Reservation(2L, name, date, lateTime, theme);
+        Reservation earlyReservation = new Reservation(1L, name, new ReservationSlot(date, earlyTime, theme));
+        Reservation lateReservation = new Reservation(2L, name, new ReservationSlot(date, lateTime, theme));
         WaitingWithTurn futureWaiting = new WaitingWithTurn(
-                new ReservationWaiting(3L, name, date.plusDays(1), earlyTime, theme),
+                new ReservationWaiting(3L, name, new ReservationSlot(date.plusDays(1), earlyTime, theme)),
                 1L);
 
         when(reservationService.findByName(name))

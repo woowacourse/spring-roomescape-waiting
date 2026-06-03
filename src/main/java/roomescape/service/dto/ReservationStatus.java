@@ -14,12 +14,13 @@ public record ReservationStatus(
         Long turn
 ) {
     public static ReservationStatus reserved(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return new ReservationStatus(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                slot.getDate(),
+                slot.getTime(),
+                slot.getTheme(),
                 Status.RESERVED,
                 null
         );
@@ -27,12 +28,13 @@ public record ReservationStatus(
 
     public static ReservationStatus waiting(WaitingWithTurn waitingWithTurn) {
         ReservationWaiting waiting = waitingWithTurn.waiting();
+        ReservationSlot slot = waiting.getSlot();
         return new ReservationStatus(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getTheme(),
+                slot.getDate(),
+                slot.getTime(),
+                slot.getTheme(),
                 Status.WAITING,
                 waitingWithTurn.turn()
         );

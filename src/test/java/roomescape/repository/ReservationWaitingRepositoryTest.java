@@ -43,7 +43,7 @@ class ReservationWaitingRepositoryTest {
         // given
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름", "테마 설명", "썸네일");
-        ReservationWaiting waiting = new ReservationWaiting(null, "브라운", date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(null, "브라운", new ReservationSlot(date, time, theme));
 
         // when
         ReservationWaiting saved = waitingRepository.insert(waiting);
@@ -53,8 +53,8 @@ class ReservationWaitingRepositoryTest {
         assertAll(
                 () -> assertThat(saved.getId()).isNotNull(),
                 () -> assertThat(savedWaiting.getName()).isEqualTo(waiting.getName()),
-                () -> assertThat(savedWaiting.getDate()).isEqualTo(waiting.getDate()),
-                () -> assertThat(savedWaiting.getTime().getStartAt()).isEqualTo(waiting.getTime().getStartAt()));
+                () -> assertThat(savedWaiting.getSlot().getDate()).isEqualTo(waiting.getSlot().getDate()),
+                () -> assertThat(savedWaiting.getSlot().getTime().getStartAt()).isEqualTo(waiting.getSlot().getTime().getStartAt()));
     }
 
     @Test
@@ -64,8 +64,8 @@ class ReservationWaitingRepositoryTest {
         Theme theme1 = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         ReservationTime time2 = findTimeByStartAt("12:00");
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
-        ReservationWaiting waiting1 = new ReservationWaiting(null, "브라운", date, time1, theme1);
-        ReservationWaiting waiting2 = new ReservationWaiting(null, "구구", date, time2, theme2);
+        ReservationWaiting waiting1 = new ReservationWaiting(null, "브라운", new ReservationSlot(date, time1, theme1));
+        ReservationWaiting waiting2 = new ReservationWaiting(null, "구구", new ReservationSlot(date, time2, theme2));
         Long id1 = waitingRepository.insert(waiting1).getId();
         waitingRepository.insert(waiting2);
 
@@ -83,9 +83,9 @@ class ReservationWaitingRepositoryTest {
         ReservationTime time2 = findTimeByStartAt("12:00");
         Theme theme1 = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
-        waitingRepository.insert(new ReservationWaiting(null, "구구", date, time1, theme1));
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time1, theme1));
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date.plusDays(1), time2, theme2));
+        waitingRepository.insert(new ReservationWaiting(null, "구구", new ReservationSlot(date, time1, theme1)));
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", new ReservationSlot(date, time1, theme1)));
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", new ReservationSlot(date.plusDays(1), time2, theme2)));
 
         // when
         List<WaitingWithTurn> result = waitingRepository.findByNameWithTurn("브라운");
@@ -95,7 +95,7 @@ class ReservationWaitingRepositoryTest {
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getName())
                         .containsExactly("브라운", "브라운"),
-                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getDate())
+                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getSlot().getDate())
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingWithTurn::turn)
                         .containsExactly(2L, 1L));
@@ -107,7 +107,7 @@ class ReservationWaitingRepositoryTest {
         String name = "브라운";
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        waitingRepository.insert(new ReservationWaiting(null, name, date, time, theme));
+        waitingRepository.insert(new ReservationWaiting(null, name, new ReservationSlot(date, time, theme)));
 
         // when
         boolean result = waitingRepository.existsByNameAndSlot(name, new ReservationSlot(date, time, theme));
@@ -122,7 +122,7 @@ class ReservationWaitingRepositoryTest {
         String name = "브라운";
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(null, name, new ReservationSlot(date, time, theme));
         waitingRepository.insert(waiting);
 
         // when & then
@@ -135,8 +135,8 @@ class ReservationWaitingRepositoryTest {
         // given
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
-        waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
-        Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme)).getId();
+        waitingRepository.insert(new ReservationWaiting(null, "브라운", new ReservationSlot(date, time, theme)));
+        Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", new ReservationSlot(date, time, theme))).getId();
 
         // when
         WaitingWithTurn result = waitingRepository.findByIdWithTurn(id2).get();

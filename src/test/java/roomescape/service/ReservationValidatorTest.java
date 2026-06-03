@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
@@ -29,13 +30,13 @@ class ReservationValidatorTest {
     void 사용자가_미래_예약_가능한_슬롯이면_생성할_수_있다() {
         // given
         Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
-        when(reservationRepository.existsBySlot(reservation))
+        when(reservationRepository.existsBySlot(reservation.getSlot()))
                 .thenReturn(false);
 
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateCreatableByUser(reservation, now));
-        verify(reservationRepository, times(1)).existsBySlot(reservation);
+        verify(reservationRepository, times(1)).existsBySlot(reservation.getSlot());
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -56,7 +57,7 @@ class ReservationValidatorTest {
     void 이미_예약된_슬롯이면_예약_생성시_예외가_발생한다() {
         // given
         Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
-        when(reservationRepository.existsBySlot(reservation))
+        when(reservationRepository.existsBySlot(reservation.getSlot()))
                 .thenReturn(true);
 
         // when & then
@@ -64,7 +65,7 @@ class ReservationValidatorTest {
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
                 .hasMessage("이미 예약된 시간입니다.");
-        verify(reservationRepository, times(1)).existsBySlot(reservation);
+        verify(reservationRepository, times(1)).existsBySlot(reservation.getSlot());
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -72,13 +73,13 @@ class ReservationValidatorTest {
     void 관리자는_지난_시간이어도_예약_가능한_슬롯이면_생성할_수_있다() {
         // given
         Reservation reservation = reservation("브라운", now.toLocalDate().minusDays(1), time);
-        when(reservationRepository.existsBySlot(reservation))
+        when(reservationRepository.existsBySlot(reservation.getSlot()))
                 .thenReturn(false);
 
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateCreatableByAdmin(reservation));
-        verify(reservationRepository, times(1)).existsBySlot(reservation);
+        verify(reservationRepository, times(1)).existsBySlot(reservation.getSlot());
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -125,13 +126,13 @@ class ReservationValidatorTest {
         Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
         Reservation updatedReservation = reservation("브라운", now.toLocalDate().plusDays(1),
                 new ReservationTime(2L, LocalTime.parse("09:00")));
-        when(reservationRepository.existsBySlot(updatedReservation))
+        when(reservationRepository.existsBySlot(updatedReservation.getSlot()))
                 .thenReturn(false);
 
         // when & then
         assertThatNoException()
                 .isThrownBy(() -> validator.validateUpdatedReservation(reservation, updatedReservation, now));
-        verify(reservationRepository, times(1)).existsBySlot(updatedReservation);
+        verify(reservationRepository, times(1)).existsBySlot(updatedReservation.getSlot());
         verifyNoMoreInteractions(reservationRepository);
     }
 
@@ -169,7 +170,7 @@ class ReservationValidatorTest {
         Reservation reservation = reservation("브라운", now.toLocalDate().plusDays(1), time);
         Reservation updatedReservation = reservation("브라운", now.toLocalDate().plusDays(1),
                 new ReservationTime(2L, LocalTime.parse("09:00")));
-        when(reservationRepository.existsBySlot(updatedReservation))
+        when(reservationRepository.existsBySlot(updatedReservation.getSlot()))
                 .thenReturn(true);
 
         // when & then
@@ -177,11 +178,11 @@ class ReservationValidatorTest {
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
                 .hasMessage("이미 예약된 시간입니다.");
-        verify(reservationRepository, times(1)).existsBySlot(updatedReservation);
+        verify(reservationRepository, times(1)).existsBySlot(updatedReservation.getSlot());
         verifyNoMoreInteractions(reservationRepository);
     }
 
     private Reservation reservation(String name, LocalDate date, ReservationTime time) {
-        return new Reservation(1L, name, date, time, theme);
+        return new Reservation(1L, name, new ReservationSlot(date, time, theme));
     }
 }

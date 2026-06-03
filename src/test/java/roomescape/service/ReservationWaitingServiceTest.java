@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DuplicateKeyException;
 
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -48,8 +49,8 @@ class ReservationWaitingServiceTest {
         // given
         String name = "브라운";
         List<WaitingWithTurn> waitingWithTurns = List.of(
-                new WaitingWithTurn(new ReservationWaiting(1L, name, date, time, theme), 1L),
-                new WaitingWithTurn(new ReservationWaiting(2L, name, date.plusDays(1), time, theme), 2L));
+                new WaitingWithTurn(new ReservationWaiting(1L, name, new ReservationSlot(date, time, theme)), 1L),
+                new WaitingWithTurn(new ReservationWaiting(2L, name, new ReservationSlot(date.plusDays(1), time, theme)), 2L));
 
         when(reservationWaitingRepository.findByNameWithTurn(name))
                 .thenReturn(waitingWithTurns);
@@ -64,7 +65,7 @@ class ReservationWaitingServiceTest {
                         .containsExactly(1L, 2L),
                 () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getName())
                         .containsExactly(name, name),
-                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getDate())
+                () -> assertThat(result).extracting(waitingWithTurn -> waitingWithTurn.waiting().getSlot().getDate())
                         .containsExactly(date, date.plusDays(1)),
                 () -> assertThat(result).extracting(WaitingWithTurn::turn)
                         .containsExactly(1L, 2L));
@@ -75,7 +76,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting savedWaiting = new ReservationWaiting(id, name, date, time, theme);
+        ReservationWaiting savedWaiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
 
         when(reservationTimeRepository.findById(time.getId()))
                 .thenReturn(Optional.of(time));
@@ -98,15 +99,15 @@ class ReservationWaitingServiceTest {
         assertAll(
                 () -> assertThat(result.waiting().getId()).isEqualTo(id),
                 () -> assertThat(result.waiting().getName()).isEqualTo(name),
-                () -> assertThat(result.waiting().getDate()).isEqualTo(date),
-                () -> assertThat(result.waiting().getTime()).isEqualTo(time),
-                () -> assertThat(result.waiting().getTheme()).isEqualTo(theme),
+                () -> assertThat(result.waiting().getSlot().getDate()).isEqualTo(date),
+                () -> assertThat(result.waiting().getSlot().getTime()).isEqualTo(time),
+                () -> assertThat(result.waiting().getSlot().getTheme()).isEqualTo(theme),
                 () -> assertThat(result.turn()).isEqualTo(1L),
                 () -> assertThat(captured.getId()).isNull(),
                 () -> assertThat(captured.getName()).isEqualTo(name),
-                () -> assertThat(captured.getDate()).isEqualTo(date),
-                () -> assertThat(captured.getTime()).isEqualTo(time),
-                () -> assertThat(captured.getTheme()).isEqualTo(theme));
+                () -> assertThat(captured.getSlot().getDate()).isEqualTo(date),
+                () -> assertThat(captured.getSlot().getTime()).isEqualTo(time),
+                () -> assertThat(captured.getSlot().getTheme()).isEqualTo(theme));
     }
 
     @Test
@@ -186,7 +187,7 @@ class ReservationWaitingServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        ReservationWaiting waiting = new ReservationWaiting(id, name, date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(id, name, new ReservationSlot(date, time, theme));
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
 
@@ -202,7 +203,7 @@ class ReservationWaitingServiceTest {
     void 다른_사용자의_예약_대기_삭제시_예외_발생() {
         // given
         Long id = 1L;
-        ReservationWaiting waiting = new ReservationWaiting(id, "브라운", date, time, theme);
+        ReservationWaiting waiting = new ReservationWaiting(id, "브라운", new ReservationSlot(date, time, theme));
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         doThrow(new RoomescapeException(ErrorCode.FORBIDDEN_RESOURCE, "본인의 예약 대기만 취소할 수 있습니다."))
@@ -225,9 +226,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(
                 id,
                 name,
-                LocalDate.now().minusDays(1),
-                time,
-                theme);
+                new ReservationSlot(LocalDate.now().minusDays(1), time, theme));
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
         doThrow(new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다."))

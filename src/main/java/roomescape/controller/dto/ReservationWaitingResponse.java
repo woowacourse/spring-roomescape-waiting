@@ -1,5 +1,6 @@
 package roomescape.controller.dto;
 
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.WaitingWithTurn;
 
@@ -16,12 +17,13 @@ public record ReservationWaitingResponse(
 
     public static ReservationWaitingResponse from(WaitingWithTurn waitingWithTurn) {
         ReservationWaiting waiting = waitingWithTurn.waiting();
+        ReservationSlot slot = waiting.getSlot();
         return new ReservationWaitingResponse(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getDate(),
-                ReservationTimeResponse.from(waiting.getTime()),
-                ReservationThemeResponse.from(waiting.getTheme()),
+                slot.getDate(),
+                ReservationTimeResponse.from(slot.getTime()),
+                ReservationThemeResponse.from(slot.getTheme()),
                 waitingWithTurn.turn()
         );
     }

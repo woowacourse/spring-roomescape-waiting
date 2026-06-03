@@ -44,7 +44,7 @@ public class ReservationValidator {
     }
 
     private void validateAvailableSlot(Reservation reservation) {
-        if (reservationRepository.existsBySlot(reservation)) {
+        if (reservationRepository.existsBySlot(reservation.getSlot())) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약된 시간입니다.");
         }
     }

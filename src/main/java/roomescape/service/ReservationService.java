@@ -4,6 +4,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
@@ -46,10 +47,8 @@ public class ReservationService {
 
     @Transactional
     public Reservation createByUser(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
-        ReservationTime time = findReservationTime(timeId);
-        Theme theme = findTheme(themeId);
-
-        Reservation reservation = new Reservation(null, name, date, time, theme);
+        ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
+        Reservation reservation = new Reservation(null, name, slot);
         reservationValidator.validateCreatableByUser(reservation, now);
 
         return insertReservation(reservation);
@@ -57,10 +56,8 @@ public class ReservationService {
 
     @Transactional
     public Reservation createByAdmin(String name, LocalDate date, Long timeId, Long themeId) {
-        ReservationTime time = findReservationTime(timeId);
-        Theme theme = findTheme(themeId);
-
-        Reservation reservation = new Reservation(null, name, date, time, theme);
+        ReservationSlot slot = new ReservationSlot(date, findReservationTime(timeId), findTheme(themeId));
+        Reservation reservation = new Reservation(null, name, slot);
         reservationValidator.validateCreatableByAdmin(reservation);
 
         return insertReservation(reservation);
@@ -79,11 +76,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation updateByUser(Long id, String name, LocalDate date, Long timeId, LocalDateTime now) {
+    public Reservation updateByUser(Long id, String name, LocalDate updateDate, Long updateTimeId, LocalDateTime now) {
         Reservation reservation = findReservation(id);
         reservationValidator.validateModifiableByUser(reservation, name, now);
 
-        Reservation updatedReservation = createUpdatedReservation(reservation, date, timeId);
+        Reservation updatedReservation = createUpdatedReservation(reservation, updateDate, updateTimeId);
         reservationValidator.validateUpdatedReservation(reservation, updatedReservation, now);
 
         updateReservation(updatedReservation);
@@ -113,30 +110,33 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약입니다."));
     }
 
-    private Reservation createUpdatedReservation(Reservation reservation, LocalDate date, Long timeId) {
-        if (date == null && timeId == null) {
+    private Reservation createUpdatedReservation(Reservation reservation, LocalDate updateDate, Long updateTimeId) {
+        if (updateDate == null && updateTimeId == null) {
             throw new RoomescapeException(ErrorCode.INVALID_INPUT, "변경할 날짜 또는 시간이 필요합니다.");
         }
+        ReservationSlot originalSlot = reservation.getSlot();
         return new Reservation(
                 reservation.getId(),
                 reservation.getName(),
-                resolveUpdateDate(reservation, date),
-                resolveUpdateTime(reservation, timeId),
-                reservation.getTheme());
+                new ReservationSlot(
+                        resolveUpdateDate(originalSlot.getDate(), updateDate),
+                        resolveUpdateTime(originalSlot.getTime(), updateTimeId),
+                        originalSlot.getTheme()
+                ));
     }
 
-    private LocalDate resolveUpdateDate(Reservation reservation, LocalDate date) {
-        if (date != null) {
-            return date;
+    private LocalDate resolveUpdateDate(LocalDate originalDate, LocalDate updateDate) {
+        if (updateDate != null) {
+            return updateDate;
         }
-        return reservation.getDate();
+        return originalDate;
     }
 
-    private ReservationTime resolveUpdateTime(Reservation reservation, Long timeId) {
-        if (timeId != null) {
-            return findReservationTime(timeId);
+    private ReservationTime resolveUpdateTime(ReservationTime originalTime, Long updateTimeId) {
+        if (updateTimeId != null) {
+            return findReservationTime(updateTimeId);
         }
-        return reservation.getTime();
+        return originalTime;
     }
 
     private void updateReservation(Reservation updatedReservation) {

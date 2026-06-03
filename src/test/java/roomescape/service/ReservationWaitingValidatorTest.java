@@ -147,6 +147,6 @@ class ReservationWaitingValidatorTest {
     }
 
     private ReservationWaiting waiting(String name, LocalDate date) {
-        return new ReservationWaiting(1L, name, date, time, theme);
+        return new ReservationWaiting(1L, name, new ReservationSlot(date, time, theme));
     }
 }

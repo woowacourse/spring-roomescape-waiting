@@ -1,6 +1,7 @@
 package roomescape.controller.dto;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 
 import java.time.LocalDate;
 
@@ -13,12 +14,13 @@ public record ReservationResponse(
 ) {
 
     public static ReservationResponse from(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ReservationThemeResponse.from(reservation.getTheme())
+                slot.getDate(),
+                ReservationTimeResponse.from(slot.getTime()),
+                ReservationThemeResponse.from(slot.getTheme())
         );
     }
 }
