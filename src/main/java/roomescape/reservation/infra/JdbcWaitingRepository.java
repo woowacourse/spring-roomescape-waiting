@@ -124,6 +124,58 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 rank.value());
     }
 
+    @Override
+    public int countBySlot(ReservationSlot slot) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT COUNT(*)
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        """,
+                Integer.class,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
+    }
+
+    @Override
+    public Integer postpone(Waiting waiting, Waiting postponedWaiting) {
+        decreaseRanksBetween(waiting, postponedWaiting);
+        return updateRank(waiting.getId(), postponedWaiting.getRank());
+    }
+
+    private void decreaseRanksBetween(Waiting waiting, Waiting postponedWaiting) {
+        ReservationSlot slot = waiting.getSlot();
+        Rank currentRank = waiting.getRank();
+        Rank targetRank = postponedWaiting.getRank();
+        int rankAfterCurrent = currentRank.value() + 1;
+
+        jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = rank - 1
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                          AND rank BETWEEN ? AND ?
+                        """,
+                slot.date(),
+                slot.themeId(),
+                slot.timeId(),
+                rankAfterCurrent,
+                targetRank.value());
+    }
+
+    private Integer updateRank(Long id, Rank rank) {
+        return jdbcTemplate.update("""
+                        UPDATE waiting
+                        SET rank = ?
+                        WHERE id = ?
+                        """,
+                rank.value(),
+                id);
+    }
+
     private Waiting toWaiting(Long id, String name, int rankValue, ReservationSlot slot) {
         User user = User.builder()
                 .name(name)

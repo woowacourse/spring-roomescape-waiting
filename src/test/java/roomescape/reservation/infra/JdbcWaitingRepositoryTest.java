@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.exception.UniqueConstraintViolationException;
+import roomescape.reservation.domain.Rank;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.User;
 import roomescape.reservation.domain.Waiting;
@@ -214,6 +215,77 @@ class JdbcWaitingRepositoryTest {
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         assertThat(savedWaiting.getRank().value()).isEqualTo(4);
+    }
+
+    @DisplayName("슬롯의 예약 대기 개수 조회를 테스트합니다.")
+    @Test
+    void count_by_slot() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        testHelper.insertWaiting("스타크", date, themeId, timeId);
+        testHelper.insertWaiting("피노", date, themeId, timeId);
+        testHelper.insertWaiting("피케이", date.plusDays(1), themeId, timeId);
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        int totalRankCount = waitingRepository.countBySlot(slot);
+
+        assertThat(totalRankCount).isEqualTo(2);
+    }
+
+    @DisplayName("대기 순번 미루기 저장 시 대상 순번을 변경하고 사이 순번을 당기는 것을 테스트합니다.")
+    @Test
+    void postpone() {
+        Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long waitingId = testHelper.insertWaiting("스타크", date, themeId, timeId);
+        testHelper.insertWaiting("피노", date, themeId, timeId);
+        testHelper.insertWaiting("네오", date, themeId, timeId);
+        testHelper.insertWaiting("피케이", date.plusDays(1), themeId, timeId);
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(date)
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        User stark = ReservationFixture.userNameStark();
+        Waiting waiting = Waiting.builder()
+                .id(waitingId)
+                .user(stark)
+                .slot(slot)
+                .rank(Rank.builder()
+                        .value(1)
+                        .build())
+                .build();
+        Waiting postponedWaiting = waiting.withRank(Rank.builder()
+                .value(3)
+                .build());
+
+        Integer updatedCount = waitingRepository.postpone(waiting, postponedWaiting);
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer pinoRank = testHelper.findWaitingRank("피노", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+        ReservationSlot otherSlot = ReservationSlot.builder()
+                .date(date.plusDays(1))
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        Integer kayaRank = testHelper.findWaitingRank("피케이", otherSlot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(updatedCount).isEqualTo(1);
+            softly.assertThat(starkRank).isEqualTo(3);
+            softly.assertThat(pinoRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+            softly.assertThat(kayaRank).isEqualTo(1);
+        });
     }
 
     @DisplayName("대기가 여러개 있을 때 첫번째 대기만 조회해오는 것을 테스트합니다.")

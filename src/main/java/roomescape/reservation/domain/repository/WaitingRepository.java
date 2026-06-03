@@ -15,4 +15,8 @@ public interface WaitingRepository {
     Integer delete(Long id);
 
     void rebalanceRank(ReservationSlot slot, Rank rank);
+
+    int countBySlot(ReservationSlot slot);
+
+    Integer postpone(Waiting waiting, Waiting postponedWaiting);
 }
