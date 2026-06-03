@@ -20,7 +20,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Waiting> waitingRowMapper = (resultSet, rowNum) -> new Waiting(
+    private final RowMapper<Waiting> waitingRowMapper = (resultSet, rowNum) -> Waiting.of(
             resultSet.getLong("id"),
             resultSet.getLong("member_id"),
             resultSet.getLong("slot_id")
@@ -56,7 +56,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
             throw new IllegalStateException("waiting 저장 후 생성된 ID를 반환받지 못했습니다.");
         }
 
-        return new Waiting(id.longValue(), waiting.getMemberId(), waiting.getSlotId());
+        return Waiting.of(id.longValue(), waiting.getMemberId(), waiting.getSlotId());
     }
 
     @Override
@@ -118,21 +118,17 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public long countBySlotIdAndIdLessThanEqual(long slotId, long waitingId) {
+    public List<Waiting> findAllBySlotIdOrderById(long slotId) {
         String sql = """
-                SELECT COUNT(*) FROM waiting
+                SELECT id, member_id, slot_id
+                FROM waiting
                 WHERE slot_id = :slotId
-                AND id <= :waitingId
+                ORDER BY id
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("slotId", slotId)
-                .addValue("waitingId", waitingId);
+                .addValue("slotId", slotId);
 
-        Long count = jdbcTemplate.queryForObject(sql, params, Long.class);
-        if (count == null) {
-            return 0L;
-        }
-        return count;
+        return jdbcTemplate.query(sql, params, waitingRowMapper);
     }
 
     @Override

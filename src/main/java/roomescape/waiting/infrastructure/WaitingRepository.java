@@ -19,7 +19,7 @@ public interface WaitingRepository {
 
     boolean existsBySlotId(long slotId);
 
-    long countBySlotIdAndIdLessThanEqual(long slotId, long waitingId);
+    List<Waiting> findAllBySlotIdOrderById(long slotId);
 
     List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);
 

@@ -16,6 +16,7 @@ import roomescape.waiting.dto.response.WaitingResponse;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +49,9 @@ class WaitingServiceTest {
     void save_테스트_1() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
-        Waiting savedWaiting = new Waiting(10L, MEMBER_ID, slotId);
+        Waiting firstWaiting = Waiting.of(8L, 3L, slotId);
+        Waiting secondWaiting = Waiting.of(9L, 2L, slotId);
+        Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
 
         when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slotId);
@@ -62,8 +65,8 @@ class WaitingServiceTest {
                 .thenReturn(true);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
-        when(waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, savedWaiting.getId()))
-                .thenReturn(3L);
+        when(waitingRepository.findAllBySlotIdOrderById(slotId))
+                .thenReturn(List.of(firstWaiting, secondWaiting, savedWaiting));
 
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
@@ -141,7 +144,7 @@ class WaitingServiceTest {
     void save_테스트_5() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long slotId = 1L;
-        Waiting savedWaiting = new Waiting(10L, MEMBER_ID, slotId);
+        Waiting savedWaiting = Waiting.of(10L, MEMBER_ID, slotId);
 
         when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(slotId);
@@ -153,8 +156,8 @@ class WaitingServiceTest {
                 .thenReturn(true);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
-        when(waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, savedWaiting.getId()))
-                .thenReturn(1L);
+        when(waitingRepository.findAllBySlotIdOrderById(slotId))
+                .thenReturn(List.of(savedWaiting));
 
         WaitingResponse response = waitingService.save(request, MEMBER_ID);
 
@@ -169,7 +172,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
     void deleteByIdForUser_테스트_1() {
-        Waiting waiting = new Waiting(1L, 1L, 1L);
+        Waiting waiting = Waiting.of(1L, 1L, 1L);
         when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatCode(() -> waitingService.deleteByIdForUser(1L, 1L))
@@ -181,7 +184,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("본인의 예약 대기가 아닌데 취소를 시도하면 예외가 발생한다.")
     void deleteByIdForUser_테스트_2() {
-        Waiting waiting = new Waiting(1L, 1L, 1L);
+        Waiting waiting = Waiting.of(1L, 1L, 1L);
         when(waitingRepository.findById(waiting.getId())).thenReturn(Optional.of(waiting));
 
         assertThatThrownBy(() -> waitingService.deleteByIdForUser(1L, 2L))

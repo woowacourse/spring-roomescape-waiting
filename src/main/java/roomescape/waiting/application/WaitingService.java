@@ -9,6 +9,7 @@ import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.slot.SlotOccupancy;
 import roomescape.slot.application.SlotService;
 import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingLine;
 import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
@@ -31,7 +32,8 @@ public class WaitingService {
         validateWaitingTargetExists(slotId);
 
         Waiting waiting = waitingRepository.save(Waiting.create(memberId, slotId));
-        long waitingOrder = waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, waiting.getId());
+        WaitingLine waitingLine = WaitingLine.of(waitingRepository.findAllBySlotIdOrderById(slotId));
+        long waitingOrder = waitingLine.orderOf(waiting);
 
         return WaitingResponse.of(waiting, waitingOrder);
     }

@@ -12,7 +12,7 @@ Proposed
 
 하지만 사이클2에서는 예약 취소 시 대기 1번을 예약으로 전환하고, 전환 또는 취소 후 남은 대기 순번이 재정렬되어야 한다. 이때 "대기열의 첫 번째 대기자", "특정 대기의 순번", "전환 대상"은 단순 조회 값이 아니라 대기열 정책에 가까워진다.
 
-따라서 SQL 조회는 유지하되, 대기열 정책을 도메인 언어로 표현할 객체가 필요하다.
+따라서 저장소는 대기 목록을 정렬해서 제공하고, 대기 순번과 첫 번째 대기자 판단은 도메인 언어로 표현할 객체가 필요하다.
 
 ## 결정
 
@@ -27,7 +27,9 @@ Proposed
 
 `WaitingLine`은 Repository를 직접 알지 않는다. 저장소 조회와 트랜잭션은 애플리케이션 서비스가 담당하고, `WaitingLine`은 전달받은 대기 목록만으로 정책을 판단한다.
 
-화면 응답용 `waitingOrder` 계산은 SQL projection으로 유지할 수 있다. `WaitingLine`은 조회 최적화를 대체하기 위한 객체가 아니라, 명령 유스케이스에서 대기열 정책을 표현하기 위한 객체다.
+대기 저장 응답의 `waitingOrder`는 `WaitingLine.orderOf(...)`로 계산한다. Repository는 같은 슬롯의 대기를 `id` 오름차순으로 조회하는 역할만 맡는다.
+
+다만 `findMyReservations()`처럼 예약 상세와 대기 상세를 합쳐 내려주는 복합 조회 projection은 영향 범위가 크므로 별도 단계에서 정리한다.
 
 ## 대안
 
@@ -58,11 +60,11 @@ Proposed
 - 중간 실패 시 순번 불일치가 생길 수 있어 트랜잭션과 정합성 테스트 부담이 커진다.
 - 현재 요구사항에서는 조회 시 계산으로 충분한 정보를 별도 상태로 저장하게 된다.
 
-### 대안 3: 조회는 SQL, 정책 판단은 WaitingLine으로 분리한다
+### 대안 3: 정렬 조회는 SQL, 순번 정책 판단은 WaitingLine으로 분리한다
 
 장점:
 
-- SQL의 장점인 조회와 집계 능력을 유지한다.
+- SQL의 장점인 필터링과 정렬 능력을 유지한다.
 - 대기열 정책은 `WaitingLine.first()`, `WaitingLine.orderOf(...)` 같은 도메인 언어로 표현할 수 있다.
 - 사이클2의 예약 취소 후 대기 전환 흐름에서 전환 대상 선택을 도메인 객체에 위임할 수 있다.
 - 도메인 테스트로 대기열 정책을 Spring과 DB 없이 빠르게 검증할 수 있다.
@@ -71,15 +73,15 @@ Proposed
 
 - 단순 조회만 놓고 보면 객체가 하나 늘어난다.
 - DB에서 이미 계산 가능한 값을 애플리케이션으로 가져오는 것처럼 보일 수 있다.
-- 조회용 projection과 명령용 도메인 정책이 공존하므로 사용 기준을 명확히 해야 한다.
+- 복합 조회 projection에 남은 SQL 순번 계산을 언제 제거할지 별도로 결정해야 한다.
 
 ## 근거
 
 리뷰 관점에서 "SQL 쿼리로 한 번에 알 수 있는 정보를 왜 비즈니스 로직으로 가져오는가"라는 질문이 나올 수 있다.
 
-이에 대한 판단은 조회와 정책을 분리하는 것이다.
+이에 대한 판단은 정렬 조회와 정책 판단을 분리하는 것이다.
 
-화면에 표시할 순번 계산은 SQL이 적합하다. 현재처럼 projection에서 `waitingOrder`를 계산하는 방식은 유지할 수 있다.
+SQL은 같은 슬롯의 대기 목록을 정확한 순서로 가져오는 데 사용한다. 하지만 순서가 곧 대기열 정책이므로, 저장 응답에서 특정 대기의 순번을 결정하는 책임은 `WaitingLine.orderOf(...)`로 옮긴다.
 
 반면 예약 취소 시 누가 예약으로 전환되는지, 대기 취소 후 남은 대기열을 어떻게 해석하는지는 명령 유스케이스의 정책이다. 이 정책이 서비스 조건문과 SQL 메서드 조합에 흩어지면 변경에 취약해질 수 있다.
 
@@ -91,23 +93,25 @@ Proposed
 
 - 대기열의 첫 번째 대기자와 순번 계산 정책을 도메인 테스트로 검증할 수 있다.
 - 사이클2의 예약 취소 후 대기 자동 전환 흐름에서 사용할 도메인 기반이 생긴다.
-- 조회 최적화와 도메인 정책 판단을 분리할 수 있다.
+- `WaitingService.save()`의 저장 응답 순번 계산이 SQL count 쿼리에서 도메인 정책으로 이동한다.
 
 감수해야 하는 점:
 
 - 현재 `WaitingLine`은 `id` 오름차순을 대기 순서로 해석한다.
 - `WaitingLine.orderOf(...)`는 전달된 대기가 대기열에 없으면 예외를 던진다.
-- 같은 슬롯의 대기 목록인지 검증하는 책임은 아직 없다.
+- `findMyReservations()`의 복합 조회 projection에는 아직 SQL 기반 `waitingOrder` 계산이 남아 있다.
 
 후속 제약:
 
-- `WaitingLine`은 명령 유스케이스에서 대기열 정책 판단이 필요할 때 사용한다.
-- 단순 조회 API의 `waitingOrder` 계산을 무조건 `WaitingLine`으로 바꾸지 않는다.
-- 사이클2 구현 전 `WaitingRepository`에 같은 슬롯의 대기 목록을 순서대로 조회하는 포트가 필요할 수 있다.
+- `WaitingLine`은 대기 순번 또는 전환 대상 판단이 필요한 유스케이스에서 사용한다.
+- 복합 조회 API의 `waitingOrder` 계산도 추후 `WaitingLine` 기반으로 옮길지 별도 검토한다.
+- Repository는 순번을 계산하지 않고 같은 슬롯의 대기 목록을 순서대로 조회하는 포트를 제공한다.
 
 ## 검증 방법
 
-- `WaitingLineTest`에서 첫 번째 대기 반환, 순번 계산, 빈 대기열 동작을 검증한다.
+- `WaitingLineTest`에서 첫 번째 대기 반환, 순번 계산, 빈 대기열, 다른 슬롯 대기열 생성 실패를 검증한다.
+- `JdbcWaitingRepositoryTest`에서 같은 슬롯의 대기 목록을 `id` 오름차순으로 조회하는지 검증한다.
+- `WaitingServiceTest`에서 저장 응답의 `waitingOrder`가 `WaitingLine` 기반으로 계산되는지 검증한다.
 - 전체 테스트를 실행한다.
 
 ```bash
@@ -116,15 +120,18 @@ Proposed
 
 ## 열린 질문
 
-- `WaitingLine`이 같은 슬롯의 대기만 포함하는지 생성 시 검증해야 하는가?
 - `WaitingLine.orderOf(...)`에서 대기가 없을 때 도메인 예외를 던질지, `OptionalLong` 또는 `0`을 반환할지 결정해야 한다.
 - 대기 순서가 `id`가 아니라 별도 우선순위로 바뀔 가능성을 어떻게 다룰지 결정해야 한다.
 - 사이클2 자동 전환에서 전환 불가능한 대기자가 생길 경우 다음 대기자로 넘어갈지 결정해야 한다.
+- `findMyReservations()`의 복합 조회 projection에 남은 SQL 순번 계산을 언제 도메인 기반으로 이동할지 결정해야 한다.
 
 ## 관련
 
 - `src/main/java/roomescape/waiting/WaitingLine.java`
 - `src/main/java/roomescape/waiting/Waiting.java`
+- `src/main/java/roomescape/waiting/application/WaitingService.java`
+- `src/main/java/roomescape/waiting/infrastructure/WaitingRepository.java`
+- `src/main/java/roomescape/waiting/infrastructure/JdbcWaitingRepository.java`
 - `src/test/java/roomescape/waiting/WaitingLineTest.java`
+- `src/test/java/roomescape/waiting/JdbcWaitingRepositoryTest.java`
 - `docs/adr/ADR-0003-domain-centered-hexagonal-architecture.md`
-
