@@ -2,13 +2,14 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationAndWaiting;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.domain.UserReservations;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingLine;
 import roomescape.exception.DuplicateException;
@@ -18,8 +19,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.ReservationAndWaiting;
-import roomescape.service.dto.WaitingWithNumber;
+import roomescape.domain.WaitingWithNumber;
 
 @Service
 @Transactional(readOnly = true)
@@ -53,18 +53,13 @@ public class ReservationService {
     }
 
     public List<ReservationAndWaiting> findReservationAndWaitingByName(String name) {
-        List<ReservationAndWaiting> reservationAndWaitings = new ArrayList<>();
-
-        reservationRepository.findByName(name).stream()
-                .map(ReservationAndWaiting::fromReservation)
-                .forEach(reservationAndWaitings::add);
-
-        waitingRepository.findByName(name).stream()
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        List<WaitingWithNumber> waitings = waitingRepository.findByName(name).stream()
                 .map(this::createWaitingWithNumber)
-                .map(ReservationAndWaiting::fromWaiting)
-                .forEach(reservationAndWaitings::add);
+                .toList();
 
-        return reservationAndWaitings;
+        UserReservations userReservations = new UserReservations(name, reservations, waitings);
+        return userReservations.getReservationAndWaitings();
     }
 
     @Transactional

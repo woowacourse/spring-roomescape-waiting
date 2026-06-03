@@ -1,7 +1,7 @@
 package roomescape.controller.dto;
 
 import java.util.List;
-import roomescape.service.dto.ReservationAndWaiting;
+import roomescape.domain.ReservationAndWaiting;
 
 public record ReservationAndWaitingResponses(
         List<ReservationAndWaitingResponse> reservationAndWaitingResponses

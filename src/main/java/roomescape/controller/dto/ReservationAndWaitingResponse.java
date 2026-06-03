@@ -1,7 +1,7 @@
 package roomescape.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.service.dto.ReservationAndWaiting;
+import roomescape.domain.ReservationAndWaiting;
 
 public record ReservationAndWaitingResponse(
         long id,

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.controller.dto.WaitingResponse;
-import roomescape.service.dto.WaitingWithNumber;
+import roomescape.domain.WaitingWithNumber;
 import roomescape.service.WaitingService;
 
 @Validated

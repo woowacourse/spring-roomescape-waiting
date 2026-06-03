@@ -1,10 +1,6 @@
-package roomescape.service.dto;
+package roomescape.domain;
 
 import java.time.LocalDate;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.Waiting;
 
 public record ReservationAndWaiting(
         long id,
@@ -24,6 +20,6 @@ public record ReservationAndWaiting(
     public static ReservationAndWaiting fromWaiting(WaitingWithNumber waitingWithNumber) {
         Waiting waiting = waitingWithNumber.waiting();
         return new ReservationAndWaiting(waiting.getId(), waiting.getName(), waiting.getDate(), waiting.getTimeSlot(),
-                waiting.getTheme(), false, waitingWithNumber.waitingNumber());
+                waiting.getTheme(), false, waitingWithNumber.number());
     }
 }

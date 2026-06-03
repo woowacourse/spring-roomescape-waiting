@@ -3,7 +3,7 @@ package roomescape.controller.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.Waiting;
-import roomescape.service.dto.WaitingWithNumber;
+import roomescape.domain.WaitingWithNumber;
 
 public record WaitingResponse(
         long id,
@@ -19,7 +19,7 @@ public record WaitingResponse(
         Waiting waiting = waitingWithNumber.waiting();
         return new WaitingResponse(waiting.getId(), waiting.getName(), waiting.getDate(),
                 TimeResponse.from(waiting.getTimeSlot()),
-                ThemeResponse.from(waiting.getTheme()), waiting.getCreatedAt(), waitingWithNumber.waitingNumber());
+                ThemeResponse.from(waiting.getTheme()), waiting.getCreatedAt(), waitingWithNumber.number());
     }
 }
 

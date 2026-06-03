@@ -15,7 +15,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.WaitingWithNumber;
+import roomescape.domain.WaitingWithNumber;
 
 @Service
 @Transactional(readOnly = true)
