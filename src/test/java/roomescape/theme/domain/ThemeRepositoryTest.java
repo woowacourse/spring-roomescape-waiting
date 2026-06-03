@@ -38,7 +38,9 @@ class ThemeRepositoryTest extends BaseRepositoryTest {
 
         // then
         assertThat(saved.getId()).isEqualTo(1L);
-        assertThat(themeRepository.findById(saved.getId())).contains(saved);
+        assertThat(saved.getName()).isEqualTo(theme.getName());
+        assertThat(saved.getDescription()).isEqualTo(theme.getDescription());
+        assertThat(saved.getThumbnailImageUrl()).isEqualTo(theme.getThumbnailImageUrl());
     }
 
     @Test

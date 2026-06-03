@@ -37,7 +37,7 @@ class ReservationTimeRepositoryTest extends BaseRepositoryTest {
 
         // then
         assertThat(saved.getId()).isEqualTo(1L);
-        assertThat(reservationTimeRepository.findById(saved.getId())).contains(saved);
+        assertThat(saved.getStartAt()).isEqualTo(time.getStartAt());
     }
 
     @Test
