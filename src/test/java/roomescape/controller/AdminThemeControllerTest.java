@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -69,7 +71,7 @@ class AdminThemeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("name은(는) 필수 입력값입니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -82,11 +84,11 @@ class AdminThemeControllerTest {
 
     @Test
     void DELETE_admin_themes_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
-        org.mockito.BDDMockito.willThrow(new roomescape.exception.ResourceNotFoundException("테마", 9999L))
+        org.mockito.BDDMockito.willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", 9999L))
                 .given(themeService).deleteTheme(9999L);
 
         mockMvc.perform(delete("/admin/themes/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("테마을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 }

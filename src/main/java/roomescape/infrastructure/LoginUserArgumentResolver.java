@@ -1,5 +1,7 @@
 package roomescape.infrastructure;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -8,7 +10,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.User;
-import roomescape.exception.UnauthenticatedException;
 import roomescape.repository.UserRepository;
 
 @Component
@@ -36,6 +37,6 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Long userId = (Long) request.getAttribute(AuthContext.LOGIN_USER_ID);
         return userRepository.findById(userId)
-                .orElseThrow(UnauthenticatedException::new);
+                .orElseThrow(() -> new RoomescapeException(ErrorType.UNAUTHENTICATED));
     }
 }

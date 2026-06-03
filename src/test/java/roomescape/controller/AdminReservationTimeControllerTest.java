@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -23,7 +25,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
-import roomescape.exception.ReservationTimeInUseException;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
 import roomescape.infrastructure.WebConfig;
@@ -75,8 +76,7 @@ class AdminReservationTimeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'startAt' 값 'abc'은(는) HH:mm 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -87,26 +87,26 @@ class AdminReservationTimeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("startAt은(는) 필수 입력값입니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void DELETE_admin_times_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
-        willThrow(new roomescape.exception.ResourceNotFoundException("예약 시간", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", 9999L))
                 .given(reservationTimeService).deleteReservationTime(9999L);
 
         mockMvc.perform(delete("/admin/times/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약 시간을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
     void DELETE_admin_times_서비스가_ReservationTimeInUseException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationTimeInUseException())
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE))
                 .given(reservationTimeService).deleteReservationTime(3L);
 
         mockMvc.perform(delete("/admin/times/3"))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("예약이 존재하는 시간은 삭제할 수 없습니다."));
+                .andExpect(jsonPath("$.code").value("RESERVATION_TIME_IN_USE"));
     }
 }

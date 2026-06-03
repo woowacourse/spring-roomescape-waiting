@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -30,12 +32,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.dto.reservation.command.CreateReservationCommand;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
 import roomescape.dto.reservation.command.UpdateReservationCommand;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingReservationException;
-import roomescape.exception.PastDateTimeReservationException;
-import roomescape.exception.ReservationNotFoundForWaitingException;
-import roomescape.exception.ReservationNotReservedException;
-import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
@@ -120,7 +116,7 @@ class ReservationControllerTest {
 
     @Test
     void POST_reservations_서비스가_DuplicateReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new DuplicateReservationException())
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
@@ -133,12 +129,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."));
+                .andExpect(jsonPath("$.code").value("DUPLICATE_RESERVATION"));
     }
 
     @Test
     void POST_reservations_서비스가_PastDateTimeReservationException을_던지면_422_와_메시지를_반환한다() throws Exception {
-        willThrow(new PastDateTimeReservationException())
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
         Map<String, Object> body = Map.of(
@@ -151,17 +147,17 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .andExpect(jsonPath("$.code").value("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
     void GET_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         given(reservationService.getReservation(9999L))
-                .willThrow(new roomescape.exception.ResourceNotFoundException("예약", 9999L));
+                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L));
 
         mockMvc.perform(get("/reservations/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -171,8 +167,7 @@ class ReservationControllerTest {
 
         mockMvc.perform(get("/reservations/1"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message")
-                        .value("알 수 없는 서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요."));
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
     }
 
     @Test
@@ -185,22 +180,22 @@ class ReservationControllerTest {
 
     @Test
     void POST_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
-        willThrow(new roomescape.exception.ResourceNotFoundException("예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(9999L, 1L));
 
         mockMvc.perform(post("/reservations/9999/cancel"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
     void POST_reservations_id_cancel_소유자_불일치면_403과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationOwnerMismatchException())
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
 
         mockMvc.perform(post("/reservations/1/cancel"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("본인의 예약만 취소 혹은 변경 가능합니다."));
+                .andExpect(jsonPath("$.code").value("RESERVATION_OWNER_MISMATCH"));
     }
 
     @Test
@@ -224,7 +219,7 @@ class ReservationControllerTest {
 
     @Test
     void PUT_reservations_id_서비스가_ReservationOwnerMismatchException을_던지면_403과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationOwnerMismatchException())
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -236,12 +231,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("본인의 예약만 취소 혹은 변경 가능합니다."));
+                .andExpect(jsonPath("$.code").value("RESERVATION_OWNER_MISMATCH"));
     }
 
     @Test
     void PUT_reservations_id_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
-        willThrow(new PastDateTimeReservationException())
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -253,12 +248,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .andExpect(jsonPath("$.code").value("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
     void PUT_reservations_id_서비스가_DuplicateReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new DuplicateReservationException())
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -270,12 +265,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."));
+                .andExpect(jsonPath("$.code").value("DUPLICATE_RESERVATION"));
     }
 
     @Test
     void PUT_reservations_id_서비스가_ReservationNotReservedException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationNotReservedException("WAITING"))
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED, "WAITING"))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
         Map<String, Object> body = Map.of(
@@ -287,7 +282,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: WAITING"));
+                .andExpect(jsonPath("$.code").value("RESERVATION_NOT_RESERVED"));
     }
 
     @Test
@@ -300,16 +295,14 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'date' 값 'abc'은(는) yyyy-MM-dd 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void GET_reservations_id가_숫자가_아니면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/reservations/abc"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'id' 값 'abc'은(는) 숫자 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -322,8 +315,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'date' 값 '2026-13-40'은(는) yyyy-MM-dd 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -336,8 +328,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'timeId' 값 'abc'은(는) 숫자 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -351,7 +342,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("themeId은(는) 필수 입력값입니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -365,7 +356,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("storeId은(는) 필수 입력값입니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -376,7 +367,7 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(brokenBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("요청 본문 형식이 올바르지 않습니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -400,7 +391,7 @@ class ReservationControllerTest {
 
     @Test
     void POST_reservations_waiting_서비스가_ReservationNotFoundForWaitingException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new ReservationNotFoundForWaitingException())
+        willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
@@ -413,12 +404,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("확정 예약이 없으므로 대기 예약 생성이 불가능합니다."));
+                .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND_FOR_WAITING"));
     }
 
     @Test
     void POST_reservations_waiting_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
-        willThrow(new PastDateTimeReservationException())
+        willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
@@ -431,12 +422,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .andExpect(jsonPath("$.code").value("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
     void POST_reservations_waiting_서비스가_DuplicateWaitingReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
-        willThrow(new DuplicateWaitingReservationException())
+        willThrow(new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
         Map<String, Object> body = Map.of(
@@ -449,6 +440,6 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("이미 해당 슬롯에 예약 대기 중입니다."));
+                .andExpect(jsonPath("$.code").value("DUPLICATE_WAITING_RESERVATION"));
     }
 }

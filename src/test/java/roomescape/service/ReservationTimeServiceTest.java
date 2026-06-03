@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -9,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
 import roomescape.dto.reservationtime.response.ReservationTimeResponses;
-import roomescape.exception.ReservationTimeInUseException;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.fixture.DbFixtures;
 
 class ReservationTimeServiceTest extends ServiceIntegrationTest {
@@ -41,9 +41,9 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     @Test
     void getReservationTime_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.getReservationTime(9999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("예약 시간")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -72,9 +72,9 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     @Test
     void deleteReservationTime_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.deleteReservationTime(9999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("예약 시간")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -93,8 +93,9 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
         saveReservationWithTime(timeId);
 
         assertThatThrownBy(() -> service.deleteReservationTime(timeId))
-                .isInstanceOf(ReservationTimeInUseException.class)
-                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESERVATION_TIME_IN_USE);
     }
 
     @Test

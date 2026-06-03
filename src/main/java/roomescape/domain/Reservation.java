@@ -1,8 +1,9 @@
 package roomescape.domain;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.exception.InvalidDomainException;
 
 public class Reservation {
 
@@ -29,22 +30,22 @@ public class Reservation {
     private void validate(User user, Theme theme, LocalDate date, ReservationTime time, Store store,
                           ReservationStatus status) {
         if (user == null) {
-            throw new InvalidDomainException("예약자는 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약자는 필수입니다.");
         }
         if (theme == null) {
-            throw new InvalidDomainException("테마는 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마는 필수입니다.");
         }
         if (date == null) {
-            throw new InvalidDomainException("예약 날짜는 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 날짜는 필수입니다.");
         }
         if (time == null) {
-            throw new InvalidDomainException("예약 시간은 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 시간은 필수입니다.");
         }
         if (store == null) {
-            throw new InvalidDomainException("매장은 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "매장은 필수입니다.");
         }
         if (status == null) {
-            throw new InvalidDomainException("예약 상태는 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 상태는 필수입니다.");
         }
     }
 

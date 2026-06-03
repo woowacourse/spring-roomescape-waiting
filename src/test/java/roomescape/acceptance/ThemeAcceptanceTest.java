@@ -58,7 +58,7 @@ class ThemeAcceptanceTest {
                 .when().get("/themes/9999")
                 .then().log().all()
                 .statusCode(404)
-                .body("message", equalTo("테마을(를) 찾을 수 없습니다. id=9999"));
+                .body("code", equalTo("RESOURCE_NOT_FOUND"));
     }
 
     @Test

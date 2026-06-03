@@ -63,7 +63,7 @@ class AdminReservationTimeAcceptanceTest {
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("startAt은(는) 필수 입력값입니다."));
+                .body("code", equalTo("INVALID_REQUEST"));
     }
 
     @Test
@@ -84,7 +84,7 @@ class AdminReservationTimeAcceptanceTest {
                 .when().delete("/admin/times/9999")
                 .then().log().all()
                 .statusCode(404)
-                .body("message", equalTo("예약 시간을(를) 찾을 수 없습니다. id=9999"));
+                .body("code", equalTo("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -96,6 +96,6 @@ class AdminReservationTimeAcceptanceTest {
                 .when().delete("/admin/times/" + timeId)
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("예약이 존재하는 시간은 삭제할 수 없습니다."));
+                .body("code", equalTo("RESERVATION_TIME_IN_USE"));
     }
 }

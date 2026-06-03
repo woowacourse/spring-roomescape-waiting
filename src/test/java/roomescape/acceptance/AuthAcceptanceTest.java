@@ -53,7 +53,7 @@ class AuthAcceptanceTest {
                 .when().post("/login")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("로그인 정보가 올바르지 않습니다. 아이디와 비밀번호를 확인해주세요."));
+                .body("code", equalTo("INVALID_LOGIN"));
     }
 
     @Test
@@ -62,7 +62,7 @@ class AuthAcceptanceTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));
+                .body("code", equalTo("UNAUTHENTICATED"));
     }
 
     @Test
@@ -89,7 +89,7 @@ class AuthAcceptanceTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("접근 권한이 없습니다. 관리자만 이용할 수 있습니다."));
+                .body("code", equalTo("UNAUTHORIZED"));
 
         RestAssured.given().log().all()
                 .header("Authorization", DbFixtures.managerBearer(jdbcTemplate, "관리자"))

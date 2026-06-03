@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,7 +14,6 @@ import roomescape.domain.Theme;
 import roomescape.dto.theme.command.CreateThemeCommand;
 import roomescape.dto.theme.response.ThemeReservationTimeResponse;
 import roomescape.dto.theme.response.ThemeResponses;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.fixture.DbFixtures;
 
 class ThemeServiceTest extends ServiceIntegrationTest {
@@ -68,17 +69,17 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     @Test
     void getTheme_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.getTheme(9999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("테마")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
     void deleteTheme_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.deleteTheme(9999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("테마")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test

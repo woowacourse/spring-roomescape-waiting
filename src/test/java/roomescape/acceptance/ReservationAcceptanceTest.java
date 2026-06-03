@@ -169,7 +169,7 @@ class ReservationAcceptanceTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));
+                .body("code", equalTo("UNAUTHENTICATED"));
     }
 
     @Test
@@ -216,7 +216,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));
+                .body("code", equalTo("UNAUTHENTICATED"));
     }
 
     @Test
@@ -236,7 +236,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."));
+                .body("code", equalTo("DUPLICATE_RESERVATION"));
     }
 
     @Test
@@ -255,7 +255,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .body("code", equalTo("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
@@ -271,7 +271,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("'date' 값 'abc'은(는) yyyy-MM-dd 형식이어야 합니다."));
+                .body("code", equalTo("INVALID_REQUEST"));
     }
 
     @Test
@@ -285,7 +285,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 올바르지 않습니다."));
+                .body("code", equalTo("INVALID_REQUEST"));
     }
 
     @Test
@@ -295,7 +295,7 @@ class ReservationAcceptanceTest {
                 .when().get("/reservations/9999")
                 .then().log().all()
                 .statusCode(404)
-                .body("message", equalTo("예약을(를) 찾을 수 없습니다. id=9999"));
+                .body("code", equalTo("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -335,7 +335,7 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("본인의 예약만 취소 혹은 변경 가능합니다."));
+                .body("code", equalTo("RESERVATION_OWNER_MISMATCH"));
     }
 
     @Test
@@ -354,7 +354,7 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("이미 지난 예약은 수정할 수 없습니다."));
+                .body("code", equalTo("PAST_RESERVATION_MODIFICATION"));
     }
 
     @Test
@@ -373,7 +373,7 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .body("code", equalTo("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
@@ -396,7 +396,7 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요."));
+                .body("code", equalTo("DUPLICATE_RESERVATION"));
     }
 
     @Test
@@ -421,7 +421,7 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: WAITING"));
+                .body("code", equalTo("RESERVATION_NOT_RESERVED"));
     }
 
     @Test
@@ -444,7 +444,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("본인의 예약만 취소 혹은 변경 가능합니다."));
+                .body("code", equalTo("RESERVATION_OWNER_MISMATCH"));
     }
 
     @Test
@@ -454,7 +454,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/9999/cancel")
                 .then().log().all()
                 .statusCode(404)
-                .body("message", equalTo("예약을(를) 찾을 수 없습니다. id=9999"));
+                .body("code", equalTo("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -465,7 +465,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));
+                .body("code", equalTo("UNAUTHENTICATED"));
     }
 
     /**
@@ -523,7 +523,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+                .body("code", equalTo("PAST_DATE_TIME_RESERVATION"));
     }
 
     @Test
@@ -543,7 +543,7 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("확정 예약이 없으므로 대기 예약 생성이 불가능합니다."));
+                .body("code", equalTo("RESERVATION_NOT_FOUND_FOR_WAITING"));
     }
 
     @Test
@@ -576,6 +576,6 @@ class ReservationAcceptanceTest {
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("이미 해당 슬롯에 예약 대기 중입니다."));
+                .body("code", equalTo("DUPLICATE_WAITING_RESERVATION"));
     }
 }

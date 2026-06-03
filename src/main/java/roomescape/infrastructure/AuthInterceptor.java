@@ -1,5 +1,7 @@
 package roomescape.infrastructure;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -8,8 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Role;
-import roomescape.exception.UnauthenticatedException;
-import roomescape.exception.UnauthorizedException;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
@@ -37,7 +37,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         String token = authorizationExtractor.extract(request);
         if (token == null) {
-            throw new UnauthenticatedException();
+            throw new RoomescapeException(ErrorType.UNAUTHENTICATED);
         }
         Long userId = jwtProvider.getUserId(token);
         Role role = jwtProvider.getRole(token);
@@ -50,8 +50,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     private AuthRequired findAuthRequired(HandlerMethod handlerMethod) {
-        // 메타 어노테이션(@LoginRequired, @AdminOnly)까지 해석하려면
-        // 기본 리플렉션이 아닌 AnnotatedElementUtils 를 사용해야 한다.
         AuthRequired onMethod = AnnotatedElementUtils.findMergedAnnotation(
                 handlerMethod.getMethod(), AuthRequired.class);
         if (onMethod != null) {
@@ -66,7 +64,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return;
         }
         if (Arrays.stream(requiredRoles).noneMatch(required -> required == role)) {
-            throw new UnauthorizedException();
+            throw new RoomescapeException(ErrorType.UNAUTHORIZED);
         }
     }
 }

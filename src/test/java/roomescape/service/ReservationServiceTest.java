@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,15 +14,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.User;
 import roomescape.dto.reservation.response.ReservationResponses;
 import roomescape.dto.reservation.response.ReservationWithStatusResponses;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingReservationException;
-import roomescape.exception.NonPastReservationDeletionException;
-import roomescape.exception.PastDateTimeReservationException;
-import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationNotFoundForWaitingException;
-import roomescape.exception.ReservationOwnerMismatchException;
-import roomescape.exception.ResourceNotFoundException;
-import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 import roomescape.repository.ReservationRepository;
@@ -68,8 +61,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 5), timeId), ReservationStatus.RESERVED))
-                .isInstanceOf(PastDateTimeReservationException.class)
-                .hasMessage("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
     }
 
     @Test
@@ -83,8 +77,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(other, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
-                .isInstanceOf(DuplicateReservationException.class)
-                .hasMessage("해당 날짜·시간·테마에 이미 예약이 존재합니다. 다른 날짜·시간·테마를 선택해주세요.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.DUPLICATE_RESERVATION);
     }
 
     @Test
@@ -94,9 +89,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(brown, 9999L, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("테마")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -106,9 +101,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), 9999L), ReservationStatus.RESERVED))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("예약 시간")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -264,17 +259,17 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     @Test
     void getReservation_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.getReservation(9999L))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("예약")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
     void cancelReservation_없는_id이면_ResourceNotFoundException() {
         assertThatThrownBy(() -> service.cancelReservation(9999L, manager))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("예약")
-                .hasMessageContaining("9999");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -299,7 +294,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 8), OTHER_STORE_ID);
 
         assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
-                .isInstanceOf(StoreManagementForbiddenException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.STORE_MANAGEMENT_FORBIDDEN);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -311,7 +308,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6));
 
         assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
-                .isInstanceOf(PastReservationModificationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -335,7 +334,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 8));
 
         assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
-                .isInstanceOf(NonPastReservationDeletionException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.NON_PAST_RESERVATION_DELETION);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -348,7 +349,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 6), OTHER_STORE_ID);
 
         assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
-                .isInstanceOf(StoreManagementForbiddenException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.STORE_MANAGEMENT_FORBIDDEN);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -389,7 +392,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8));
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other)))
-                .isInstanceOf(ReservationOwnerMismatchException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESERVATION_OWNER_MISMATCH);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -398,7 +403,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown)))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -409,7 +416,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown)))
-                .isInstanceOf(PastReservationModificationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
         assertThat(reservationRepository.findById(reservationId)).isPresent();
     }
 
@@ -440,7 +449,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, other, themeId, LocalDate.of(2026, 6, 2), timeId)))
-                .isInstanceOf(ReservationOwnerMismatchException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESERVATION_OWNER_MISMATCH);
     }
 
     @Test
@@ -452,7 +463,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
-                .isInstanceOf(PastReservationModificationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
     }
 
     @Test
@@ -464,7 +477,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 5, 1), timeId)))
-                .isInstanceOf(PastDateTimeReservationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
     }
 
     @Test
@@ -479,7 +494,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.updateOwnReservation(
                 Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId2)))
-                .isInstanceOf(DuplicateReservationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.DUPLICATE_RESERVATION);
     }
 
     @Test
@@ -503,7 +520,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.updateOwnReservation(
                 Fixtures.updateCommand(9999L, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
-                .isInstanceOf(ResourceNotFoundException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
     }
 
     @Test
@@ -532,7 +551,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
-                .isInstanceOf(ReservationNotFoundForWaitingException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING);
     }
 
     @Test
@@ -545,7 +566,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(charles, themeId, LocalDate.of(1, 5, 1), timeId), ReservationStatus.WAITING))
-                .isInstanceOf(PastDateTimeReservationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
     }
 
     @Test
@@ -559,7 +582,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
 
         assertThatThrownBy(() -> service.create(
                 Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
-                .isInstanceOf(DuplicateWaitingReservationException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.DUPLICATE_WAITING_RESERVATION);
     }
 
     private User member(String name) {

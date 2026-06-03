@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -9,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.dto.auth.command.LoginCommand;
-import roomescape.exception.InvalidLoginException;
 import roomescape.infrastructure.JwtTokenProvider;
 
 class AuthServiceTest extends ServiceIntegrationTest {
@@ -38,12 +39,16 @@ class AuthServiceTest extends ServiceIntegrationTest {
     @Test
     void 비밀번호가_틀리면_InvalidLoginException() {
         assertThatThrownBy(() -> authService.login(new LoginCommand("brown@test.com", "wrong")))
-                .isInstanceOf(InvalidLoginException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_LOGIN);
     }
 
     @Test
     void 존재하지_않는_사용자면_InvalidLoginException() {
         assertThatThrownBy(() -> authService.login(new LoginCommand("none@test.com", "pw")))
-                .isInstanceOf(InvalidLoginException.class);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_LOGIN);
     }
 }

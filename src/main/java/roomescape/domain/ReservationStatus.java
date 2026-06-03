@@ -1,6 +1,8 @@
 package roomescape.domain;
 
-import roomescape.exception.InvalidDomainException;
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
+
 
 public enum ReservationStatus {
     RESERVED,
@@ -10,7 +12,7 @@ public enum ReservationStatus {
         return switch (status) {
             case "RESERVED" -> RESERVED;
             case "WAITING" -> WAITING;
-            default -> throw new InvalidDomainException("올바르지 않은 예약 상태 이름입니다. 변환 희망 상태 값: " + status);
+            default -> throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "올바르지 않은 예약 상태 이름입니다. 변환 희망 상태 값: " + status);
         };
     }
 }

@@ -1,13 +1,13 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
 import roomescape.dto.reservationtime.response.ReservationTimeResponses;
-import roomescape.exception.ReservationTimeInUseException;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("예약 시간", id));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", id));
     }
 
     @Transactional
@@ -48,13 +48,13 @@ public class ReservationTimeService {
         validateNotReferencedByReservation(id);
         int affected = reservationTimeRepository.deleteById(id);
         if (affected == 0) {
-            throw new ResourceNotFoundException("예약 시간", id);
+            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", id);
         }
     }
 
     private void validateNotReferencedByReservation(Long id) {
         if (reservationRepository.existsByReservationTimeId(id)) {
-            throw new ReservationTimeInUseException();
+            throw new RoomescapeException(ErrorType.RESERVATION_TIME_IN_USE);
         }
     }
 }

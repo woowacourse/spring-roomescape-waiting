@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
@@ -26,7 +28,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.domain.User;
 import roomescape.dto.reservation.response.ReservationResponses;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AuthInterceptor;
 import roomescape.infrastructure.LoginUser;
@@ -107,28 +108,28 @@ class AdminReservationControllerTest {
     void GET_admin_reservations_name이_빈_문자열이면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/admin/reservations?name="))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("name은(는) 최소 1자 이상이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void GET_admin_reservations_page가_음수면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/admin/reservations?page=-1"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("page은(는) 0 이상이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void GET_admin_reservations_size가_0이면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/admin/reservations?size=0"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("size은(는) 1 이상이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void GET_admin_reservations_size가_상한_초과면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/admin/reservations?size=101"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("size은(는) 100 이하여야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
@@ -141,12 +142,12 @@ class AdminReservationControllerTest {
 
     @Test
     void POST_admin_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
-        willThrow(new ResourceNotFoundException("예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).cancelReservation(9999L, MANAGER);
 
         mockMvc.perform(post("/admin/reservations/9999/cancel"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -159,11 +160,11 @@ class AdminReservationControllerTest {
 
     @Test
     void DELETE_admin_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
-        willThrow(new ResourceNotFoundException("예약", 9999L))
+        willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).deletePastReservation(9999L, MANAGER);
 
         mockMvc.perform(delete("/admin/reservations/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 }

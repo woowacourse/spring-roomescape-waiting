@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,11 +63,11 @@ class ThemeControllerTest {
     @Test
     void GET_themes_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         given(themeService.getTheme(9999L))
-                .willThrow(new roomescape.exception.ResourceNotFoundException("테마", 9999L));
+                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", 9999L));
 
         mockMvc.perform(get("/themes/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("테마을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
     @Test
@@ -100,15 +102,13 @@ class ThemeControllerTest {
     void GET_themes_id_times_date_쿼리_파라미터가_날짜가_아니면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/themes/1/times?date=abc"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'date' 값 'abc'은(는) yyyy-MM-dd 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
     void GET_themes_popular_limit이_숫자가_아니면_400과_메시지를_반환한다() throws Exception {
         mockMvc.perform(get("/themes/popular?limit=abc"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value("'limit' 값 'abc'은(는) 숫자 형식이어야 합니다."));
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 }

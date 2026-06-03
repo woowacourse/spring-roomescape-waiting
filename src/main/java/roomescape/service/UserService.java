@@ -1,11 +1,12 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.domain.User;
 import roomescape.dto.user.command.CreateUserCommand;
-import roomescape.exception.DuplicateUsernameException;
 import roomescape.repository.UserRepository;
 
 @Service
@@ -34,7 +35,7 @@ public class UserService {
 
     private void validatePossibleUsername(String username) {
         if (userRepository.existsByUsername(username)) {
-            throw new DuplicateUsernameException();
+            throw new RoomescapeException(ErrorType.DUPLICATE_USERNAME);
         }
     }
 }

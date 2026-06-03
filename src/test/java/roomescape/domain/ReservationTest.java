@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -7,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.InvalidDomainException;
 import roomescape.domain.ReservationStatus;
 
 class ReservationTest {
@@ -23,43 +24,49 @@ class ReservationTest {
     @Test
     void 예약자가_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, null, THEME, DATE, TIME, STORE, ReservationStatus.RESERVED))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("예약자는 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 테마가_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, USER, null, DATE, TIME, STORE, ReservationStatus.RESERVED))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("테마는 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 예약_날짜가_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, null, TIME, STORE, ReservationStatus.RESERVED))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("예약 날짜는 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 예약_시간이_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, null, STORE, ReservationStatus.RESERVED))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("예약 시간은 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 매장이_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, TIME, null, ReservationStatus.RESERVED))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("매장은 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 상태가_null이면_예외() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, TIME, STORE, null))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("예약 상태는 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test

@@ -1,5 +1,7 @@
 package roomescape.infrastructure;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -11,8 +13,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 import roomescape.domain.Role;
-import roomescape.exception.UnauthenticatedException;
-import roomescape.exception.UnauthorizedException;
 
 class AuthInterceptorTest {
 
@@ -81,7 +81,9 @@ class AuthInterceptorTest {
         @Test
         void 토큰이_없으면_UnauthenticatedException() {
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("loginRequired")))
-                    .isInstanceOf(UnauthenticatedException.class);
+                    .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.UNAUTHENTICATED);
         }
 
         @Test
@@ -89,7 +91,9 @@ class AuthInterceptorTest {
             request.addHeader("Authorization", "Bearer bad-token");
 
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("loginRequired")))
-                    .isInstanceOf(UnauthenticatedException.class);
+                    .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.UNAUTHENTICATED);
         }
     }
 
@@ -111,13 +115,17 @@ class AuthInterceptorTest {
             authenticateAs(2L, Role.MEMBER);
 
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("adminOnly")))
-                    .isInstanceOf(UnauthorizedException.class);
+                    .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.UNAUTHORIZED);
         }
 
         @Test
         void 토큰이_없으면_UnauthenticatedException() {
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("adminOnly")))
-                    .isInstanceOf(UnauthenticatedException.class);
+                    .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.UNAUTHENTICATED);
         }
     }
 
@@ -150,7 +158,9 @@ class AuthInterceptorTest {
             HandlerMethod handler = new HandlerMethod(new AdminController(), method);
 
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handler))
-                    .isInstanceOf(UnauthorizedException.class);
+                    .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.UNAUTHORIZED);
         }
     }
 

@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -10,7 +12,6 @@ import roomescape.domain.Theme;
 import roomescape.dto.theme.command.CreateThemeCommand;
 import roomescape.dto.theme.response.ThemeReservationTimeResponse;
 import roomescape.dto.theme.response.ThemeResponses;
-import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -44,7 +45,7 @@ public class ThemeService {
 
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("테마", id));
+                .orElseThrow(() -> new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", id));
     }
 
     @Transactional
@@ -57,7 +58,7 @@ public class ThemeService {
     public void deleteTheme(Long id) {
         int affected = themeRepository.deleteById(id);
         if (affected == 0) {
-            throw new ResourceNotFoundException("테마", id);
+            throw new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", id);
         }
     }
 

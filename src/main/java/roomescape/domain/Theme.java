@@ -1,6 +1,8 @@
 package roomescape.domain;
 
-import roomescape.exception.InvalidDomainException;
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
+
 
 public class Theme {
 
@@ -19,13 +21,13 @@ public class Theme {
 
     private void validate(String name, String description, String thumbnailImageUrl) {
         if (name == null || name.isBlank()) {
-            throw new InvalidDomainException("테마 이름은 비어있을 수 없습니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마 이름은 비어있을 수 없습니다.");
         }
         if (description == null || description.isBlank()) {
-            throw new InvalidDomainException("테마 설명은 비어있을 수 없습니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마 설명은 비어있을 수 없습니다.");
         }
         if (thumbnailImageUrl == null || thumbnailImageUrl.isBlank()) {
-            throw new InvalidDomainException("테마 썸네일 이미지 URL은 비어있을 수 없습니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마 썸네일 이미지 URL은 비어있을 수 없습니다.");
         }
     }
 

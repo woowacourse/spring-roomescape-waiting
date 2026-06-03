@@ -1,9 +1,10 @@
 package roomescape.service;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.User;
 import roomescape.dto.auth.command.LoginCommand;
-import roomescape.exception.InvalidLoginException;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.repository.UserRepository;
 
@@ -23,10 +24,10 @@ public class AuthService {
         String password = command.password();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(InvalidLoginException::new);
+                .orElseThrow(() -> new RoomescapeException(ErrorType.INVALID_LOGIN));
 
         if (!user.getPassword().matches(password)) {
-            throw new InvalidLoginException();
+            throw new RoomescapeException(ErrorType.INVALID_LOGIN);
         }
 
         return jwtProvider.createToken(user.getId(), user.getUsername(), user.getRole());

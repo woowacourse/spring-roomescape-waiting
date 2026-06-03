@@ -72,7 +72,7 @@ class AdminReservationAcceptanceTest {
                 .when().get("/admin/reservations?name=")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("name은(는) 최소 1자 이상이어야 합니다."));
+                .body("code", equalTo("INVALID_REQUEST"));
     }
 
     @Test
@@ -82,7 +82,7 @@ class AdminReservationAcceptanceTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("접근 권한이 없습니다. 관리자만 이용할 수 있습니다."));
+                .body("code", equalTo("UNAUTHORIZED"));
     }
 
     @Test
@@ -91,7 +91,7 @@ class AdminReservationAcceptanceTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(401)
-                .body("message", equalTo("인증이 필요합니다. 로그인 후 이용해주세요."));
+                .body("code", equalTo("UNAUTHENTICATED"));
     }
 
     @Test
@@ -116,7 +116,7 @@ class AdminReservationAcceptanceTest {
                 .when().post("/admin/reservations/" + reserved.reservationId() + "/cancel")
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("이미 지난 예약은 수정할 수 없습니다."));
+                .body("code", equalTo("PAST_RESERVATION_MODIFICATION"));
     }
 
     @Test
@@ -141,7 +141,7 @@ class AdminReservationAcceptanceTest {
                 .when().delete("/admin/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("아직 지나지 않은 예약은 삭제할 수 없습니다."));
+                .body("code", equalTo("NON_PAST_RESERVATION_DELETION"));
     }
 
     @Test
@@ -167,7 +167,7 @@ class AdminReservationAcceptanceTest {
                 .when().post("/admin/reservations/" + reservationId + "/cancel")
                 .then().log().all()
                 .statusCode(403)
-                .body("message", equalTo("본인이 관리하는 매장의 예약만 관리할 수 있습니다."));
+                .body("code", equalTo("STORE_MANAGEMENT_FORBIDDEN"));
     }
 
     @Test
@@ -177,7 +177,7 @@ class AdminReservationAcceptanceTest {
                 .when().delete("/admin/reservations/9999")
                 .then().log().all()
                 .statusCode(404)
-                .body("message", equalTo("예약을(를) 찾을 수 없습니다. id=9999"));
+                .body("code", equalTo("RESOURCE_NOT_FOUND"));
     }
 
     private long insertReservationInOtherStore(String date) {

@@ -1,9 +1,10 @@
 package roomescape.domain;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.InvalidDomainException;
 
 class PopularThemeTest {
 
@@ -12,14 +13,16 @@ class PopularThemeTest {
     @Test
     void 테마가_null이면_예외() {
         assertThatThrownBy(() -> new PopularTheme(null, 1L))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("테마는 필수입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 
     @Test
     void 예약_수가_음수면_예외() {
         assertThatThrownBy(() -> new PopularTheme(THEME, -1L))
-                .isInstanceOf(InvalidDomainException.class)
-                .hasMessage("예약 수는 음수일 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .extracting(ex -> ((RoomescapeException) ex).getErrorType())
+                .isEqualTo(ErrorType.INVALID_DOMAIN);
     }
 }

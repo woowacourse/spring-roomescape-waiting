@@ -1,6 +1,8 @@
 package roomescape.domain;
 
-import roomescape.exception.InvalidDomainException;
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
+
 
 public class PopularTheme {
 
@@ -15,10 +17,10 @@ public class PopularTheme {
 
     private void validate(Theme theme, long reservationCount) {
         if (theme == null) {
-            throw new InvalidDomainException("테마는 필수입니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "테마는 필수입니다.");
         }
         if (reservationCount < 0) {
-            throw new InvalidDomainException("예약 수는 음수일 수 없습니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "예약 수는 음수일 수 없습니다.");
         }
     }
 

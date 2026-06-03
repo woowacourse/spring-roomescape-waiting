@@ -6,7 +6,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -20,12 +19,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final RoomescapeExceptionStatusMapper statusMapper = new RoomescapeExceptionStatusMapper();
+    private final ErrorTypeHttpStatusMapper statusMapper = new ErrorTypeHttpStatusMapper();
 
-    @ExceptionHandler(RoomescapeBaseException.class)
-    public ResponseEntity<ErrorResponse> handleRoomescapeException(RoomescapeBaseException e) {
-        return ResponseEntity.status(statusMapper.statusOf(e))
-                .body(new ErrorResponse(e.getMessage()));
+    @ExceptionHandler(RoomescapeException.class)
+    public ResponseEntity<ErrorResponse> handleRoomescapeException(RoomescapeException e) {
+        return response(e.getErrorType(), e.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -55,8 +53,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("요청한 경로를 찾을 수 없습니다."));
+        return response(ErrorType.ENDPOINT_NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
@@ -86,12 +83,20 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ErrorResponse> internalServerErrorResponse() {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("알 수 없는 서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요."));
+        return response(ErrorType.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ErrorResponse> badRequest(String message) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(message));
+        return response(ErrorType.INVALID_REQUEST, message);
+    }
+
+    private ResponseEntity<ErrorResponse> response(ErrorType errorType) {
+        return response(errorType, errorType.format());
+    }
+
+    private ResponseEntity<ErrorResponse> response(ErrorType errorType, String message) {
+        return ResponseEntity.status(statusMapper.statusOf(errorType))
+                .body(new ErrorResponse(errorType.name(), message));
     }
 
     private ResponseEntity<ErrorResponse> malformed(String field, Object value, Class<?> type) {

@@ -1,5 +1,7 @@
 package roomescape.controller;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,10 +61,10 @@ class ReservationTimeControllerTest {
     @Test
     void GET_times_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
         given(reservationTimeService.getReservationTime(9999L))
-                .willThrow(new roomescape.exception.ResourceNotFoundException("예약 시간", 9999L));
+                .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", 9999L));
 
         mockMvc.perform(get("/times/9999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("예약 시간을(를) 찾을 수 없습니다. id=9999"));
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 }

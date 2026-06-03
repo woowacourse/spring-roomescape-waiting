@@ -1,5 +1,7 @@
 package roomescape.infrastructure;
 
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,7 +12,6 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Role;
-import roomescape.exception.UnauthenticatedException;
 
 @Component
 public class JwtTokenProvider {
@@ -66,7 +67,7 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthenticatedException();
+            throw new RoomescapeException(ErrorType.UNAUTHENTICATED);
         }
     }
 }

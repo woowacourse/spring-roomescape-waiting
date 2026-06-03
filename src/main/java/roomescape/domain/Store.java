@@ -1,6 +1,8 @@
 package roomescape.domain;
 
-import roomescape.exception.InvalidDomainException;
+import roomescape.exception.ErrorType;
+import roomescape.exception.RoomescapeException;
+
 
 public class Store {
 
@@ -15,7 +17,7 @@ public class Store {
 
     private void validate(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidDomainException("매장 이름은 비어있을 수 없습니다.");
+            throw new RoomescapeException(ErrorType.INVALID_DOMAIN, "매장 이름은 비어있을 수 없습니다.");
         }
     }
 
