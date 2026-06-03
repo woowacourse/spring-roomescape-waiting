@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS r_id, 
                     r.name, 
                     r.date, 
+                    r.created_at,
                     t.id AS t_id, 
                     t.start_at,
                     theme.id AS theme_id,
@@ -50,6 +52,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS r_id,
                     r.name,
                     r.date,
+                    r.created_at,
                     ts.id AS t_id,
                     ts.start_at,
                     th.id AS theme_id,
@@ -72,6 +75,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS r_id,
                     r.name,
                     r.date,
+                    r.created_at,
                     t.id AS t_id,
                     t.start_at,
                     th.id AS theme_id,
@@ -96,7 +100,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTimeSlot(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                reservation.getCreatedAt()
         );
     }
 
@@ -113,6 +118,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.id AS r_id,
                     r.name,
                     r.date,
+                    r.created_at,
                     ts.id AS t_id,
                     ts.start_at,
                     th.id AS theme_id,
@@ -177,7 +183,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 "name", reservation.getName(),
                 "date", reservation.getDate(),
                 "time_id", reservation.getTimeSlot().getId(),
-                "theme_id", reservation.getTheme().getId()
+                "theme_id", reservation.getTheme().getId(),
+                "created_at", reservation.getCreatedAt()
         );
     }
 
@@ -194,7 +201,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                         rs.getString("theme_name"),
                         rs.getString("theme_description"),
                         rs.getString("theme_thumbnail_url")
-                )
+                ),
+                rs.getObject("created_at", LocalDateTime.class)
         );
     }
 }

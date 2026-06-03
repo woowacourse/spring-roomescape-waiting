@@ -11,20 +11,23 @@ public class Reservation {
     private final LocalDate date;
     private final TimeSlot timeSlot;
     private final Theme theme;
+    private final LocalDateTime createdAt;
 
-    public Reservation(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        validateNullOrBlank(name, date, timeSlot, theme);
+    public Reservation(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme,
+                       LocalDateTime createdAt) {
+        validateNullOrBlank(name, date, timeSlot, theme, createdAt);
         this.id = id;
         this.name = name;
         this.date = date;
         this.timeSlot = timeSlot;
         this.theme = theme;
+        this.createdAt = createdAt;
+        validateCreatable();
     }
 
     public Reservation(String name, LocalDate date, TimeSlot timeSlot, Theme theme,
-                                     LocalDateTime now) {
-        this(null, name, date, timeSlot, theme);
-        validateCreatable(date, timeSlot, now);
+                       LocalDateTime createdAt) {
+        this(null, name, date, timeSlot, theme, createdAt);
     }
 
     public Long getId() {
@@ -47,6 +50,10 @@ public class Reservation {
         return theme;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public Reservation updateDateAndTime(LocalDate updateDate, TimeSlot updateTime,
                                          LocalDateTime now) {
 
@@ -56,7 +63,7 @@ public class Reservation {
         if (isSameDateAndTime(updateDate, updateTime)) {
             return this;
         }
-        return new Reservation(this.id, this.name, updateDate, updateTime, this.theme);
+        return new Reservation(this.id, this.name, updateDate, updateTime, this.theme, this.createdAt);
     }
 
     public void validateCancelable(LocalDateTime now) {
@@ -75,26 +82,28 @@ public class Reservation {
         return this.date.equals(updateDate) && this.timeSlot.equals(updateTime);
     }
 
-    private void validateCreatable(LocalDate date, TimeSlot time, LocalDateTime now) {
-        validateNotPast(date, time, now, "지난 날짜/시간으로 예약하실 수 없습니다.");
+    private void validateCreatable() {
+        validateNotPast(this.date, this.timeSlot, this.createdAt, "지난 날짜/시간으로 예약하실 수 없습니다.");
     }
 
-    private void validateNotPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now, String errorMessage) {
-        if (isPast(date, timeSlot, now)) {
+    private void validateNotPast(LocalDate date, TimeSlot timeSlot, LocalDateTime baseTime, String errorMessage) {
+        if (isPast(date, timeSlot, baseTime)) {
             throw new PastTimeException(errorMessage);
         }
     }
 
-    private boolean isPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now) {
+    private boolean isPast(LocalDate date, TimeSlot timeSlot, LocalDateTime baseTime) {
         LocalDateTime targetDateTime = LocalDateTime.of(date, timeSlot.getStartAt());
-        return targetDateTime.isBefore(now);
+        return targetDateTime.isBefore(baseTime);
     }
 
-    private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validateNullOrBlank(String name, LocalDate date, TimeSlot timeSlot, Theme theme,
+                                     LocalDateTime createdAt) {
         validateName(name);
         validateDate(date);
         validateTimeSlot(timeSlot);
         validateTheme(theme);
+        validateCreatedAt(createdAt);
     }
 
     private void validateName(String name) {
@@ -118,6 +127,12 @@ public class Reservation {
     private void validateTheme(Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("테마는 필수입니다.");
+        }
+    }
+
+    private void validateCreatedAt(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            throw new IllegalArgumentException("예약 생성 시각은 필수입니다.");
         }
     }
 }
