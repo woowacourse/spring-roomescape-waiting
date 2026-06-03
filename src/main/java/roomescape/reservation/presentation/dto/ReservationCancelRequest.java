@@ -1,16 +1,15 @@
 package roomescape.reservation.presentation.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
-import roomescape.reservation.domain.Status;
 
 public record ReservationCancelRequest(
-        String username,
-        Status status
+        @NotBlank(message = "이름은 필수입니다.")
+        String username
 ) {
     public ReservationCancelCommand toCommand() {
         return ReservationCancelCommand.builder()
                 .name(username)
-                .status(status)
                 .build();
     }
 }

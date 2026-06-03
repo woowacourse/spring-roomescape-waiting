@@ -15,6 +15,7 @@ public interface ActiveReservationRepository {
     boolean existsByTheme(Long id);
     boolean existsByActiveSlotId(Long slotId);
     boolean existsByActiveSlotIdNotId(Long slotId, Long id);
+    boolean existsById(Long id);
     void update(ActiveReservation changedReservation);
     void cancel(ActiveReservation reservation);
 

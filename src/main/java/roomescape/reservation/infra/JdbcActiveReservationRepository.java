@@ -191,6 +191,15 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
+    public boolean existsById(Long id) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id = :id AND is_deleted = 0)";
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql,
+                        Map.of("id", id),
+                        Boolean.class));
+    }
+
+    @Override
     public void cancel(final ActiveReservation reservation) {
         String sql = "UPDATE reservation SET is_deleted=:id WHERE id = :id ";
         jdbcTemplate.update(sql, Map.of("id", reservation.getId()));

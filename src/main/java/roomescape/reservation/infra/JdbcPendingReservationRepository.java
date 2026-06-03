@@ -94,6 +94,15 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
     }
 
     @Override
+    public boolean existsById(Long id) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM pending WHERE id = :id AND is_deleted = 0)";
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql,
+                        Map.of("id", id),
+                        Boolean.class));
+    }
+
+    @Override
     public void cancel(PendingReservation reservation) {
         String sql = "UPDATE pending SET is_deleted=:id WHERE id = :id ";
         jdbcTemplate.update(sql, Map.of("id", reservation.getId()));

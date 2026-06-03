@@ -2,15 +2,13 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import lombok.Builder;
-import roomescape.reservation.domain.Status;
 
 @Builder
 public record ReservationChangeCommand(
         String name,
         LocalDate date,
         Long timeId,
-        Long themeId,
-        Status status
+        Long themeId
 ) {
     public ReservationCreateCommand toCreateCommand() {
         return ReservationCreateCommand.builder()

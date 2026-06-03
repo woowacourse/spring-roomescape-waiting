@@ -10,6 +10,7 @@ public interface PendingReservationRepository {
     Optional<PendingReservation> findNextPendingReservation(Long slotId);
     Optional<PendingReservation> findById(Long id);
     boolean existsReservationByName(Long slotId, String name);
+    boolean existsById(Long id);
     void cancel(PendingReservation reservation);
     void update(PendingReservation reservation);
     List<PendingReservation> findAll();

@@ -70,6 +70,10 @@ public class ActiveReservationService {
         return reservationRepository.existsByActiveSlotId(slotId);
     }
 
+    public boolean existsById(Long id) {
+        return reservationRepository.existsById(id);
+    }
+
     @Transactional(readOnly = true)
     public Long getSlotId(final Long id) {
         return reservationRepository.getById(id)

@@ -11,7 +11,7 @@ import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
 import roomescape.reservation.application.exception.ReservationInUseException;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.domain.Theme;
@@ -57,13 +57,17 @@ public class ReservationFacade {
 
     @Transactional
     public void cancelReservation(final Long id, final ReservationCancelCommand command) {
-        if (command.status().equals(Status.PENDING)) {
+        if (pendingReservationService.existsById(id)) {
             pendingReservationService.cancel(id, command.name());
             return;
         }
-        Long slotId = activeReservationService.cancel(id, command.name());
-        pendingReservationService.popNextPendingAndPromote(slotId)
-                .ifPresent(activeReservationService::savePromoted);
+        if (activeReservationService.existsById(id)) {
+            Long slotId = activeReservationService.cancel(id, command.name());
+            pendingReservationService.popNextPendingAndPromote(slotId)
+                    .ifPresent(activeReservationService::savePromoted);
+            return;
+        }
+        throw new ReservationNotFoundException("해당 예약을 찾을 수 없습니다.");
     }
 
     @Transactional
@@ -72,13 +76,15 @@ public class ReservationFacade {
         Theme theme = themeService.getThemeById(command.themeId());
         TimeSlot slot = timeSlotService.getTimeSlot(command.date(), time, theme);
 
-        boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId(), id);
-
-        if (command.status().equals(Status.PENDING)) {
-            isSlotFull = activeReservationService.existsBySlotId(slot.getId());
+        if (pendingReservationService.existsById(id)) {
+            boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId());
             return changePendingReservation(id, command, slot, isSlotFull);
         }
-        return changeActiveReservation(id, command, slot, isSlotFull);
+        if (activeReservationService.existsById(id)) {
+            boolean isSlotFull = activeReservationService.existsBySlotId(slot.getId(), id);
+            return changeActiveReservation(id, command, slot, isSlotFull);
+        }
+        throw new ReservationNotFoundException("해당 예약을 찾을 수 없습니다.");
     }
 
     private ReservationInfo changePendingReservation(final Long id, final ReservationChangeCommand command,

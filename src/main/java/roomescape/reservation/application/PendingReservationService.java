@@ -63,6 +63,10 @@ public class PendingReservationService {
         return ReservationInfo.from(changedReservation);
     }
 
+    public boolean existsById(Long id) {
+        return reservationRepository.existsById(id);
+    }
+
     public List<ReservationInfo> getReservations() {
         return reservationRepository.findAll()
                 .stream()
