@@ -36,7 +36,7 @@ import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 @JdbcTest
-@Import({ReservationService.class, SlotDao.class,
+@Import({ReservationService.class, SlotService.class, SlotDao.class,
         ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
         ThemeQueryingDao.class, ThemeUpdatingDao.class,

@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
 @Import({ThemeService.class, ThemeQueryingDao.class, ThemeUpdatingDao.class,
-        ReservationService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
+        ReservationService.class, SlotService.class, SlotDao.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
         ReservationWaitingDao.class})
 class ThemeServiceTest {

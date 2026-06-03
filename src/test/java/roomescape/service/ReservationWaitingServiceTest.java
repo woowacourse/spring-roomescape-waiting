@@ -41,7 +41,8 @@ class ReservationWaitingServiceTest {
         slotDao = new FakeSlotDao();
         reservationQueryingDao = new FakeReservationQueryingDao();
 
-        service = new ReservationWaitingService(waitingDao, slotDao, reservationQueryingDao);
+        SlotService slotService = new SlotService(slotDao, null, null);
+        service = new ReservationWaitingService(waitingDao, slotService, reservationQueryingDao);
     }
 
     private Slot reservedSlot(Long slotId, LocalDate date, String ownerName) {
