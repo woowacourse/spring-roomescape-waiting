@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,16 +34,16 @@ class WaitingControllerTest {
     void find_waitings_by_name() throws Exception {
         given(waitingService.findAllByName("카야"))
                 .willReturn(List.of(
-                        new WaitingResponse(
+                        WaitingResponse.from(new WaitingOrderDetail(
                                 1L, "카야", LocalDate.of(2026, 5, 27),
                                 1L, "공포테마", "무서운 테마", "thumbnail1.jpg",
                                 1L, LocalTime.of(10, 0), 1L
-                        ),
-                        new WaitingResponse(
+                        )),
+                        WaitingResponse.from(new WaitingOrderDetail(
                                 2L, "카야", LocalDate.of(2026, 5, 28),
                                 2L, "추리테마", "재미있는 추리 테마", "thumbnail2.jpg",
                                 2L, LocalTime.of(14, 0), 2L
-                        )
+                        ))
                 ));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/waitings")

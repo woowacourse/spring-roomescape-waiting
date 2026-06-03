@@ -607,7 +607,7 @@ input:focus-visible {
     position: relative;
     min-height: 50px;
     display: grid;
-    grid-template-columns: 26px minmax(0, 1fr) auto;
+    grid-template-columns: 26px minmax(0, 1fr);
     align-items: center;
     gap: 10px;
     overflow: hidden;
@@ -658,11 +658,6 @@ input:focus-visible {
     background: transparent;
 }
 
-.popular-item.is-active .popular-count,
-.popular-item:hover .popular-count {
-    color: #fff;
-}
-
 .popular-rank {
     width: auto;
     height: auto;
@@ -679,12 +674,6 @@ input:focus-visible {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-weight: 800;
-}
-
-.popular-count {
-    color: var(--accent);
-    font-size: 0.78rem;
     font-weight: 800;
 }
 
@@ -1342,6 +1331,11 @@ input:focus-visible {
     align-items: center;
     min-height: 52px;
     padding: 0 14px;
+}
+
+.waiting-table .table-head,
+.waiting-table .table-row {
+    grid-template-columns: 1fr 1.4fr 1.2fr 80px 88px;
 }
 
 .table-head {

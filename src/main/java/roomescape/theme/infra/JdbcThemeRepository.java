@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.PopularTheme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @Repository
@@ -51,25 +50,25 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<PopularTheme> findTop10PopularThemesBetween(LocalDate from, LocalDate to) {
+    public List<Theme> findSortedPopularThemes(LocalDate from, LocalDate to, int limit) {
         String sql = """
-                SELECT t.id, t.name, t.description, t.thumbnail_img_url, COUNT(*) as reserved_count
+                SELECT t.id, t.name, t.description, t.thumbnail_img_url
                 FROM theme t
                 JOIN reservation r ON t.id = r.theme_id
                 WHERE r.date BETWEEN ? AND ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail_img_url
-                ORDER BY reserved_count DESC
-                LIMIT 10
+                ORDER BY COUNT(r.id) DESC
+                LIMIT ?
                 """;
 
         return jdbcTemplate.query(sql,
-                (rs, rowNum) -> new PopularTheme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("thumbnail_img_url"),
-                        rs.getInt("reserved_count")
-                ), from, to);
+                (rs, rowNum) -> Theme.builder()
+                        .id(rs.getLong("id"))
+                        .name(rs.getString("name"))
+                        .description(rs.getString("description"))
+                        .thumbnailImgUrl(rs.getString("thumbnail_img_url"))
+                        .build(),
+                from, to, limit);
     }
 
     @Override

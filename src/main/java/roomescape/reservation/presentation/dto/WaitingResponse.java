@@ -9,19 +9,25 @@ public record WaitingResponse(
         Long id,
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-        Long themeId,
-        String themeName,
-        String themeDescription,
-        String thumbnailImgUrl,
-        Long timeId,
-        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
+        WaitingTheme theme,
+        WaitingTimeSlot time,
         Long order
 ) {
     public static WaitingResponse from(WaitingOrderDetail detail) {
         return new WaitingResponse(
                 detail.waitingId(), detail.username(), detail.date(),
-                detail.themeId(), detail.themeName(), detail.themeDescription(), detail.thumbnailImgUrl(),
-                detail.timeId(), detail.startAt(), detail.order()
+                new WaitingTheme(detail.themeId(), detail.themeName()),
+                new WaitingTimeSlot(detail.timeId(), detail.startAt()),
+                detail.order()
         );
+    }
+
+    private record WaitingTheme(Long id, String name) {
+    }
+
+    private record WaitingTimeSlot(
+            Long id,
+            @JsonFormat(pattern = "HH:mm") LocalTime startAt
+    ) {
     }
 }

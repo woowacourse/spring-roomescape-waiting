@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,9 +22,7 @@ import roomescape.global.RoomEscapeException;
 import roomescape.theme.application.dto.ThemeCreateCommand;
 import roomescape.theme.application.service.ThemeService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.PopularTheme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.theme.presentation.dto.PopularThemeResponse;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,19 +125,21 @@ class ThemeServiceTest {
         ArgumentCaptor<LocalDate> fromCaptor = ArgumentCaptor.forClass(LocalDate.class);
         ArgumentCaptor<LocalDate> toCaptor = ArgumentCaptor.forClass(LocalDate.class);
 
-        when(themeRepository.findTop10PopularThemesBetween(any(), any())).thenReturn(List.of(
-                new PopularTheme(1L, "theme name", "theme description", "theme img url", 10)
+        when(themeRepository.findSortedPopularThemes(any(), any(), anyInt())).thenReturn(List.of(
+                Theme.builder().id(1L).name("theme name").description("theme description").thumbnailImgUrl("theme img url").build()
         ));
 
-        List<PopularThemeResponse> result = themeService.findPopularThemes(LocalDate.of(2026, 5, 6));
+        LocalDate from = LocalDate.of(2026, 4, 29);
+        LocalDate to = LocalDate.of(2026, 5, 5);
+        List<ThemeResponse> result = themeService.findPopularThemes(from, to, 10);
 
-        verify(themeRepository).findTop10PopularThemesBetween(fromCaptor.capture(), toCaptor.capture());
+        verify(themeRepository).findSortedPopularThemes(fromCaptor.capture(), toCaptor.capture(), anyInt());
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(fromCaptor.getValue()).isEqualTo(LocalDate.of(2026, 4, 29));
             softly.assertThat(toCaptor.getValue()).isEqualTo(LocalDate.of(2026, 5, 5));
             softly.assertThat(result).containsExactly(
-                    new PopularThemeResponse(1L, "theme name", "theme description", "theme img url", 10)
+                    new ThemeResponse(1L, "theme name", "theme description", "theme img url")
             );
         });
     }

@@ -257,9 +257,16 @@ async function refreshEverything() {
 }
 
 async function loadAllData() {
+    const today = new Date();
+    const endAt = new Date(today);
+    endAt.setDate(today.getDate() - 1);
+    const startAt = new Date(today);
+    startAt.setDate(today.getDate() - 7);
+    const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
     const [themes, popularThemes, adminTimes] = await Promise.all([
         api("/themes"),
-        api("/themes/popular-top-10"),
+        api(`/themes/popular?startAt=${fmt(startAt)}&endAt=${fmt(endAt)}&limit=10`),
         api("/admin/times")
     ]);
 

@@ -230,7 +230,6 @@ function renderPopularThemes(popular) {
           <button class="popular-item ${isSelected(theme) ? "is-active" : ""}" type="button" data-theme-id="${theme.id}">
             <span class="popular-rank">${index + 1}</span>
             <span class="popular-name">${escapeHtml(theme.name)}</span>
-            <span class="popular-count">${theme.reservedCount}건</span>
           </button>
         `).join("")}
       </div>
@@ -354,7 +353,7 @@ function renderBookingSummary(theme) {
       </div>
       <div>
         <dt>모드</dt>
-        <dd>${state.editingReservationId ? "예약 변경" : "새 예약"}</dd>
+        <dd>${state.editingReservationId ? "예약 변경" : selectedTime()?.available === false ? "대기 신청" : "새 예약"}</dd>
       </div>
     </dl>
   `;
@@ -455,7 +454,7 @@ function renderMyWaitingsContent(hasName) {
     }
 
     return `
-    <div class="reservation-table" role="table" aria-label="내 대기 목록">
+    <div class="reservation-table waiting-table" role="table" aria-label="내 대기 목록">
       <div class="table-head" role="row">
         <span>예약자</span>
         <span>테마</span>

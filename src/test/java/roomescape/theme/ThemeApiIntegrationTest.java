@@ -106,15 +106,16 @@ public class ThemeApiIntegrationTest {
         testHelper.insertReservation("스타크", yesterday, theme1Id, secondTimeId);
 
         RestAssured.given().log().all()
-                .when().get("/themes/popular-top-10")
+                .queryParam("startAt", yesterday.minusWeeks(1).toString())
+                .queryParam("endAt", yesterday.toString())
+                .queryParam("limit", 10)
+                .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
                 .body("[0].id", equalTo(theme1Id.intValue()))
                 .body("[0].name", equalTo("theme name 1"))
-                .body("[0].reservedCount", equalTo(2))
                 .body("[1].id", equalTo(theme2Id.intValue()))
-                .body("[1].name", equalTo("theme name 2"))
-                .body("[1].reservedCount", equalTo(1));
+                .body("[1].name", equalTo("theme name 2"));
     }
 }

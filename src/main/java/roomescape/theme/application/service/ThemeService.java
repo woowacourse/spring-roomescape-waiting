@@ -10,7 +10,6 @@ import roomescape.theme.application.dto.ThemeCreateCommand;
 import roomescape.theme.application.exception.ThemeErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.theme.presentation.dto.PopularThemeResponse;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @RequiredArgsConstructor
@@ -34,10 +33,10 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<PopularThemeResponse> findPopularThemes(LocalDate today) {
-        return themeRepository.findTop10PopularThemesBetween(today.minusWeeks(1), today.minusDays(1))
+    public List<ThemeResponse> findPopularThemes(LocalDate startAt, LocalDate endAt, int limit) {
+        return themeRepository.findSortedPopularThemes(startAt, endAt, limit)
                 .stream()
-                .map(PopularThemeResponse::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 

@@ -81,10 +81,6 @@ class ReservationServiceTest {
             softly.assertThat(result.id()).isEqualTo(1L);
             softly.assertThat(result.name()).isEqualTo("스타크");
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-            softly.assertThat(result.timeId()).isEqualTo(1L);
-            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(10, 0));
-            softly.assertThat(result.themeId()).isEqualTo(1L);
-            softly.assertThat(result.themeName()).isEqualTo("theme name");
         });
     }
 
@@ -138,8 +134,6 @@ class ReservationServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 7));
-            softly.assertThat(result.timeId()).isEqualTo(2L);
-            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(11, 0));
         });
     }
 
@@ -173,10 +167,6 @@ class ReservationServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.name()).isEqualTo("카야");
             softly.assertThat(result.date()).isEqualTo(LocalDate.of(2026, 5, 6));
-            softly.assertThat(result.timeId()).isEqualTo(1L);
-            softly.assertThat(result.startAt()).isEqualTo(LocalTime.of(10, 0));
-            softly.assertThat(result.themeId()).isEqualTo(1L);
-            softly.assertThat(result.themeName()).isEqualTo("theme name");
         });
     }
 

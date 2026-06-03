@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,13 +32,11 @@ public class ReservationControllerTest {
     @Test
     void save_reservation() throws Exception {
         given(reservationService.save(any(), any()))
-                .willReturn(new ReservationResponse(
-                        1L,
-                        "카야",
-                        LocalDate.of(2028, 5, 6),
+                .willReturn(ReservationResponse.from(new ReservationDetail(
+                        1L, "카야", LocalDate.of(2028, 5, 6),
                         1L, "theme", "desc", "img",
                         1L, LocalTime.of(9, 0)
-                ));
+                )));
 
         mockMvc.perform(post("/reservations")
                         .contentType(MediaType.APPLICATION_JSON)

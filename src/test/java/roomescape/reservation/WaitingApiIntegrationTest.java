@@ -48,15 +48,15 @@ class WaitingApiIntegrationTest {
                 .body("size()", is(2))
                 .body("[0].name", equalTo("스타크"))
                 .body("[0].date", equalTo("2028-05-06"))
-                .body("[0].themeId", equalTo(themeId.intValue()))
-                .body("[0].themeName", equalTo("theme name"))
-                .body("[0].timeId", equalTo(firstTimeId.intValue()))
-                .body("[0].startAt", equalTo("09:00"))
+                .body("[0].theme.id", equalTo(themeId.intValue()))
+                .body("[0].theme.name", equalTo("theme name"))
+                .body("[0].time.id", equalTo(firstTimeId.intValue()))
+                .body("[0].time.startAt", equalTo("09:00"))
                 .body("[0].order", equalTo(2))
                 .body("[1].name", equalTo("스타크"))
                 .body("[1].date", equalTo("2028-05-07"))
-                .body("[1].timeId", equalTo(secondTimeId.intValue()))
-                .body("[1].startAt", equalTo("10:00"))
+                .body("[1].time.id", equalTo(secondTimeId.intValue()))
+                .body("[1].time.startAt", equalTo("10:00"))
                 .body("[1].order", equalTo(1));
     }
 

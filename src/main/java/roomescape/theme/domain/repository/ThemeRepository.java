@@ -10,7 +10,7 @@ public interface ThemeRepository {
 
     List<Theme> findAll();
 
-    List<PopularTheme> findTop10PopularThemesBetween(LocalDate from, LocalDate to);
+    List<Theme> findSortedPopularThemes(LocalDate from, LocalDate to, int limit);
 
     Theme save(Theme theme);
 
