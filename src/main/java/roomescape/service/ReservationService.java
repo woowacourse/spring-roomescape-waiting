@@ -86,7 +86,9 @@ public class ReservationService {
         Reservation updatedReservation = createUpdatedReservation(reservation, updateDate, updateTimeId);
         reservationValidator.validateUpdatedReservation(reservation, updatedReservation, now);
 
+        Optional<ReservationWaiting> firstWaiting = waitingRepository.findFirstBySlotForUpdate(reservation.getSlot());
         updateReservation(updatedReservation);
+        firstWaiting.ifPresent(this::promoteWaiting);
         return updatedReservation;
     }
 

@@ -361,6 +361,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(updateTime));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.empty());
         when(reservationRepository.update(any(Reservation.class)))
                 .thenReturn(1);
 
@@ -378,7 +380,10 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationTimeRepository, times(1)).findById(timeId);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
         verify(reservationRepository, times(1)).update(captor.capture());
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
         Reservation captured = captor.getValue();
         assertAll(
                 () -> assertThat(captured.getId()).isEqualTo(id),
@@ -386,7 +391,60 @@ class ReservationServiceTest {
                 () -> assertThat(captured.getSlot().getDate()).isEqualTo(updateDate),
                 () -> assertThat(captured.getSlot().getTime()).isEqualTo(updateTime),
                 () -> assertThat(captured.getSlot().getTheme()).isEqualTo(reservation.getSlot().getTheme()));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 사용자_본인_예약_변경시_기존_슬롯의_첫번째_대기를_예약으로_자동_승격한다() {
+        // given
+        Long id = 1L;
+        Long waitingId = 2L;
+        String name = "브라운";
+        Long timeId = 2L;
+        LocalDate updateDate = date.plusDays(1);
+        ReservationTime originalTime = new ReservationTime(1L, LocalTime.parse("08:00"));
+        ReservationTime updateTime = new ReservationTime(timeId, LocalTime.parse("10:00"));
+        Reservation reservation = createByUserReservation(id, name, date, originalTime);
+        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationTimeRepository.findById(timeId))
+                .thenReturn(Optional.of(updateTime));
+        when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
+                .thenReturn(false);
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.update(any(Reservation.class)))
+                .thenReturn(1);
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.<Reservation>getArgument(0).withId(3L));
+
+        // when
+        Reservation result = service.updateByUser(id, name, updateDate, timeId, now);
+
+        // then
+        ArgumentCaptor<Reservation> updateCaptor = ArgumentCaptor.forClass(Reservation.class);
+        ArgumentCaptor<Reservation> insertCaptor = ArgumentCaptor.forClass(Reservation.class);
+        InOrder inOrder = inOrder(reservationRepository, waitingRepository);
+        inOrder.verify(reservationRepository).findByIdForUpdate(id);
+        inOrder.verify(reservationRepository).existsBySlot(any(ReservationSlot.class));
+        inOrder.verify(waitingRepository).findFirstBySlotForUpdate(reservation.getSlot());
+        inOrder.verify(reservationRepository).update(updateCaptor.capture());
+        inOrder.verify(reservationRepository).insert(insertCaptor.capture());
+        inOrder.verify(waitingRepository).delete(waitingId);
+
+        Reservation updatedReservation = updateCaptor.getValue();
+        Reservation promotedReservation = insertCaptor.getValue();
+        assertAll(
+                () -> assertThat(result).isEqualTo(updatedReservation),
+                () -> assertThat(updatedReservation.getId()).isEqualTo(id),
+                () -> assertThat(updatedReservation.getSlot().getDate()).isEqualTo(updateDate),
+                () -> assertThat(updatedReservation.getSlot().getTime()).isEqualTo(updateTime),
+                () -> assertThat(promotedReservation.getId()).isNull(),
+                () -> assertThat(promotedReservation.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()));
+        verify(reservationTimeRepository, times(1)).findById(timeId);
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -401,6 +459,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.empty());
         when(reservationRepository.update(any(Reservation.class)))
                 .thenReturn(1);
 
@@ -413,8 +473,11 @@ class ReservationServiceTest {
                 () -> assertThat(result.getSlot().getTime()).isEqualTo(time));
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
         verify(reservationRepository, times(1)).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -429,6 +492,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservation));
         when(reservationRepository.existsBySlot(any(ReservationSlot.class)))
                 .thenReturn(false);
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.of(new ReservationWaiting(2L, "구구", reservation.getSlot())));
         when(reservationRepository.update(any(Reservation.class)))
                 .thenReturn(0);
 
@@ -440,8 +505,11 @@ class ReservationServiceTest {
 
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationRepository, times(1)).existsBySlot(any(ReservationSlot.class));
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
         verify(reservationRepository, times(1)).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -460,8 +528,9 @@ class ReservationServiceTest {
                 .hasMessage("변경할 날짜 또는 시간이 필요합니다.");
 
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
         verify(reservationRepository, never()).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -478,8 +547,9 @@ class ReservationServiceTest {
                 .hasMessage("존재하지 않는 예약입니다.");
 
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
         verify(reservationRepository, never()).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test
@@ -502,8 +572,9 @@ class ReservationServiceTest {
 
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
         verify(reservationTimeRepository, times(1)).findById(timeId);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
         verify(reservationRepository, never()).update(any(Reservation.class));
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     private Reservation createByUserReservation(Long id, String name, LocalDate date, ReservationTime time) {
