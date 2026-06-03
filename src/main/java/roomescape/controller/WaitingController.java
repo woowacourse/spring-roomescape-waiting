@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.Waiting;
-import roomescape.dto.request.MemberNameRequest;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.request.WaitingCancelRequest;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.service.WaitingCommandService;
 
@@ -43,7 +43,7 @@ public class WaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelWaiting(@PathVariable long id, @Valid @ModelAttribute MemberNameRequest member) {
+    public ResponseEntity<Void> cancelWaiting(@PathVariable long id, @Valid @ModelAttribute WaitingCancelRequest member) {
         waitingCommandService.cancel(id, member.name());
         return ResponseEntity.noContent().build();
     }

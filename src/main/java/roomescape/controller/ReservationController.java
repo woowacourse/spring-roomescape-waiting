@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.dto.request.MemberNameRequest;
+import roomescape.dto.request.MyReservationRequest;
+import roomescape.dto.request.ReservationCancelRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
+import roomescape.dto.request.ReservationUpdateMemberRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.MyReservationQueryService;
 import roomescape.service.ReservationCommandService;
@@ -31,7 +33,7 @@ public class ReservationController {
     private final MyReservationQueryService myReservationQueryService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getMyReservations(@Valid @ModelAttribute MemberNameRequest request) {
+    public ResponseEntity<List<ReservationResponse>> getMyReservations(@Valid @ModelAttribute MyReservationRequest request) {
         return ResponseEntity.ok(myReservationQueryService.getMyReservations(request.name()));
     }
 
@@ -50,7 +52,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelReservation(@PathVariable long id, @Valid @ModelAttribute MemberNameRequest member) {
+    public ResponseEntity<Void> cancelReservation(@PathVariable long id, @Valid @ModelAttribute ReservationCancelRequest member) {
         reservationCommandService.cancel(id, member.name());
         return ResponseEntity.noContent().build();
     }
@@ -58,7 +60,7 @@ public class ReservationController {
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable long id,
-            @Valid @ModelAttribute MemberNameRequest member,
+            @Valid @ModelAttribute ReservationUpdateMemberRequest member,
             @Valid @RequestBody ReservationUpdateRequest request) {
         ReservationResponse response = ReservationResponse.from(
                 reservationCommandService.update(id, member.name(), request.date(), request.timeId()));
