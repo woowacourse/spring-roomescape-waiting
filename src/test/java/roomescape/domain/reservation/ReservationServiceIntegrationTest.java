@@ -2,7 +2,9 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,7 +31,7 @@ class ReservationServiceIntegrationTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
+    @MockitoSpyBean
     private ReservationRepository reservationRepository;
 
     @MockitoSpyBean
@@ -203,6 +205,7 @@ class ReservationServiceIntegrationTest {
         assertThatThrownBy(() -> reservationService.cancelReservation(cancelledReservation.getId()))
             .isInstanceOf(IllegalStateException.class);
 
+        verify(reservationRepository).save(argThat(reservation -> isPromotedReservation(reservation, cancelledSlot)));
         assertThat(reservationRepository.findById(cancelledReservation.getId())).isPresent();
         assertThat(reservationRepository.findByName("이산")).isEmpty();
         assertThat(waitingReservationRepository.findById(firstWaiting.getId())).isPresent();
@@ -238,6 +241,7 @@ class ReservationServiceIntegrationTest {
             )
         )).isInstanceOf(IllegalStateException.class);
 
+        verify(reservationRepository).save(argThat(reservation -> isPromotedReservation(reservation, cancelledSlot)));
         Reservation rollbackedReservation = reservationRepository.findById(updatedReservation.getId()).orElseThrow();
         assertThat(rollbackedReservation.getDate().getId()).isEqualTo(cancelledSlot.date().getId());
         assertThat(rollbackedReservation.getTime().getId()).isEqualTo(cancelledSlot.time().getId());
@@ -247,6 +251,13 @@ class ReservationServiceIntegrationTest {
 
     private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
         return WaitingReservation.createWithoutId(name, slot.date(), slot.time(), slot.theme(), createdAt);
+    }
+
+    private boolean isPromotedReservation(Reservation reservation, Slot slot) {
+        return reservation.getName().equals("이산")
+            && reservation.getDate().getId().equals(slot.date().getId())
+            && reservation.getTime().getId().equals(slot.time().getId())
+            && reservation.getTheme().getId().equals(slot.theme().getId());
     }
 
     private Slot insertSlot(long dateId, LocalDate playDay, long timeId, LocalTime startAt, long themeId,
