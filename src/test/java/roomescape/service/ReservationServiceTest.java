@@ -253,7 +253,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        service.deleteByAdmin(id);
+        service.deleteByAdmin(id, now);
 
         // then
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
@@ -279,7 +279,7 @@ class ReservationServiceTest {
                 .thenAnswer(invocation -> invocation.<Reservation>getArgument(0).withId(3L));
 
         // when
-        service.deleteByAdmin(id);
+        service.deleteByAdmin(id, now);
 
         // then
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
@@ -299,6 +299,30 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 관리자가_지난_예약을_삭제하면_대기를_자동_승격하지_않는다() {
+        // given
+        Long id = 1L;
+        Reservation reservation = createByUserReservation(
+                id,
+                "브라운",
+                now.toLocalDate().minusDays(1),
+                new ReservationTime(1L, LocalTime.parse("08:00")));
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+
+        // when
+        service.deleteByAdmin(id, now);
+
+        // then
+        verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(reservationRepository, times(1)).delete(id);
+        verify(waitingRepository, never()).findFirstBySlotForUpdate(any(ReservationSlot.class));
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
     void 존재하지_않는_예약을_관리자가_삭제하면_아무것도_하지_않는다() {
         // given
         Long id = 999L;
@@ -306,7 +330,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        service.deleteByAdmin(id);
+        service.deleteByAdmin(id, now);
 
         // then
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
@@ -332,7 +356,7 @@ class ReservationServiceTest {
                 .thenThrow(new DuplicateKeyException("duplicate"));
 
         // when & then
-        assertThatThrownBy(() -> service.deleteByAdmin(id))
+        assertThatThrownBy(() -> service.deleteByAdmin(id, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
                 .hasMessage("이미 예약된 시간입니다.");

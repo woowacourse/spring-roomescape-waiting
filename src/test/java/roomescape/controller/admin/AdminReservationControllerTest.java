@@ -16,9 +16,11 @@ import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -113,7 +115,7 @@ class AdminReservationControllerTest {
         mockMvc.perform(delete("/admin/reservations/1"))
                 .andExpect(status().isNoContent());
 
-        verify(reservationService, times(1)).deleteByAdmin(1L);
+        verify(reservationService, times(1)).deleteByAdmin(eq(1L), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationService);
     }
 

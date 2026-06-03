@@ -73,9 +73,19 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteByAdmin(Long id) {
-        reservationRepository.findByIdForUpdate(id)
-                        .ifPresent(this::deleteAndPromoteWaiting);
+    public void deleteByAdmin(Long id, LocalDateTime now) {
+        Optional<Reservation> foundReservation = reservationRepository.findByIdForUpdate(id);
+        if (foundReservation.isEmpty()) {
+            return;
+        }
+
+        Reservation reservation = foundReservation.get();
+        if (reservation.isPast(now)) {
+            reservationRepository.delete(reservation.getId());
+            return;
+        }
+
+        deleteAndPromoteWaiting(reservation);
     }
 
     @Transactional

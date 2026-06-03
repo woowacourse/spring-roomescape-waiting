@@ -11,6 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Validated
@@ -45,7 +46,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id) {
-        service.deleteByAdmin(id);
+        service.deleteByAdmin(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }
