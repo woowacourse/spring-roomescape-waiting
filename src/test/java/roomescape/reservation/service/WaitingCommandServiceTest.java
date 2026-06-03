@@ -17,6 +17,7 @@ import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.reservation.application.dto.WaitingCreateCommand;
+import roomescape.reservation.application.dto.WaitingPostponeResult;
 import roomescape.reservation.application.dto.WaitingResult;
 import roomescape.reservation.application.dto.WaitingResult.Status;
 import roomescape.reservation.application.service.WaitingCommandService;
@@ -228,5 +229,102 @@ class WaitingCommandServiceTest {
         assertThatThrownBy(() -> waitingCommandService.delete(waitingId, NOW))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
+    }
+
+    @DisplayName("예약 대기 순번 미루기를 테스트합니다.")
+    @Test
+    void postpone_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        WaitingPostponeResult result = waitingCommandService.postpone(waitingId, 2, NOW);
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer pkRank = testHelper.findWaitingRank("피케이", slot);
+        Integer neoRank = testHelper.findWaitingRank("네오", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.id()).isEqualTo(waitingId);
+            softly.assertThat(result.rank()).isEqualTo(3);
+            softly.assertThat(starkRank).isEqualTo(3);
+            softly.assertThat(pkRank).isEqualTo(1);
+            softly.assertThat(neoRank).isEqualTo(2);
+        });
+    }
+
+    @DisplayName("예약 대기를 남은 순번보다 많이 미루면 마지막 순번으로 이동하는 것을 테스트합니다.")
+    @Test
+    void postpone_waiting_reservation_to_last_rank() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피케이",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+
+        WaitingPostponeResult result = waitingCommandService.postpone(waitingId, 99, NOW);
+        Integer starkRank = testHelper.findWaitingRank("스타크", slot);
+        Integer pkRank = testHelper.findWaitingRank("피케이", slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result.id()).isEqualTo(waitingId);
+            softly.assertThat(result.rank()).isEqualTo(2);
+            softly.assertThat(starkRank).isEqualTo(2);
+            softly.assertThat(pkRank).isEqualTo(1);
+        });
+    }
+
+    @DisplayName("이미 지나간 시간의 예약 대기 순번 미루기 시 예외 발생을 테스트합니다.")
+    @Test
+    void postpone_past_waiting_exception() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
+
+        assertThatThrownBy(() -> waitingCommandService.postpone(waitingId, 1, NOW))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("이미 지나간 예약은 미룰 수 없습니다.");
     }
 }
