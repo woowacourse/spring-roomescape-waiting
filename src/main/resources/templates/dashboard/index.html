@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape Dashboard</title>
+    <style>
+        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f6f7fb; color: #1f2937; }
+        .page { width: min(980px, calc(100% - 32px)); margin: 40px auto; }
+        .hero, .card { background: #fff; border: 1px solid #dde3f0; border-radius: 18px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); }
+        .hero { padding: 32px; margin-bottom: 20px; }
+        .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .card { padding: 20px; text-decoration: none; color: inherit; display: block; }
+        h1, h2, p { margin-top: 0; }
+        .muted { color: #667085; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <h1>방탈출 운영 화면</h1>
+        <p class="muted">기능별 페이지로 분리했습니다. 필요한 화면만 따로 열어 확인하면 됩니다.</p>
+    </section>
+    <section class="grid">
+        <a class="card" href="/page/dashboard/reservations"><h2>예약 관리</h2><p>예약 생성, 목록 조회, 취소</p></a>
+        <a class="card" href="/page/dashboard/availability"><h2>예약 가능 시간 조회</h2><p>테마별 가능 시간 확인</p></a>
+        <a class="card" href="/page/dashboard/themes"><h2>테마 관리</h2><p>테마 추가, 삭제, 인기 테마</p></a>
+        <a class="card" href="/page/dashboard/times"><h2>시간 관리</h2><p>시간 슬롯 추가, 삭제</p></a>
+        <a class="card" href="/page/dashboard/holidays"><h2>휴일 관리</h2><p>휴일 추가, 삭제</p></a>
+        <a class="card" href="/page/reservations"><h2>내 예약 조회</h2><p>이름으로 예약·대기 순번 확인 및 취소</p></a>
+    </section>
+</div>
+</body>
+</html>

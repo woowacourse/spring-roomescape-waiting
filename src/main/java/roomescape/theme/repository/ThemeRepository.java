@@ -1,0 +1,21 @@
+package roomescape.theme.repository;
+
+import roomescape.theme.domain.Theme;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+public interface ThemeRepository {
+    List<Theme> findAll();
+
+    Optional<Theme> findById(Long id);
+
+    Theme save(Theme theme);
+
+    boolean existsById(Long id);
+
+    boolean deleteById(Long id);
+
+    List<Theme> findBestThemesByDate(LocalDate startDate, LocalDate endDate, int limit);
+}
