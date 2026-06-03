@@ -71,10 +71,14 @@ public class ReservationService {
 
     @Transactional
     public void removeReservation(long id, String requestName) {
-        Reservation reservation = findReservationById(id);
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> deleteReservation(reservation, requestName));
+    }
+
+    private void deleteReservation(Reservation reservation, String requestName) {
         validateReservationOwner(reservation, requestName);
         reservation.validateCancelable(LocalDateTime.now());
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservation.getId());
     }
 
     @Transactional

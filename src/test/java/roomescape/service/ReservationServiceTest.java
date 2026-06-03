@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -79,6 +80,13 @@ class ReservationServiceTest {
                 savedTheme.getId());
         reservationService.removeReservation(reservation.getId(), "브라운");
         assertThat(reservationService.findAllReservations()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약을 삭제해도 예외가 발생하지 않는다.")
+    void 존재하지_않는_예약_삭제() {
+        assertThatCode(() -> reservationService.removeReservation(999L, "브라운"))
+                .doesNotThrowAnyException();
     }
 
     @Test
