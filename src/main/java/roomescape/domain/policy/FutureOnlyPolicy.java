@@ -1,10 +1,9 @@
 package roomescape.domain.policy;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import org.springframework.stereotype.Component;
+import roomescape.domain.ReservationDateTime;
 import roomescape.exception.client.BusinessRuleViolationException;
 
 @Component
@@ -17,34 +16,28 @@ public class FutureOnlyPolicy implements ReservationPolicy {
     }
 
     @Override
-    public void validateCreatable(LocalDate date, LocalTime time) {
-        if (isPast(date.atTime(time))) {
-            throw new BusinessRuleViolationException("지나간 날짜, 시간으로는 예약할 수 없습니다.");
-        }
+    public void validateCreatable(ReservationDateTime when) {
+        rejectIfNotFuture(when, "지나간 날짜, 시간으로는 예약할 수 없습니다.");
     }
 
     @Override
-    public void validateCancellable(LocalDate date, LocalTime time) {
-        if (isPast(date.atTime(time))) {
-            throw new BusinessRuleViolationException("이미 지난 예약은 취소할 수 없습니다.");
-        }
+    public void validateCancellable(ReservationDateTime when) {
+        rejectIfNotFuture(when, "이미 지난 예약은 취소할 수 없습니다.");
     }
 
     @Override
-    public void validateUpdatable(LocalDate date, LocalTime time) {
-        if (isPast(date.atTime(time))) {
-            throw new BusinessRuleViolationException("이미 지난 예약은 변경할 수 없습니다.");
-        }
+    public void validateUpdatable(ReservationDateTime when) {
+        rejectIfNotFuture(when, "이미 지난 예약은 변경할 수 없습니다.");
     }
 
     @Override
-    public void validateUpdateTarget(LocalDate date, LocalTime time) {
-        if (isPast(date.atTime(time))) {
-            throw new BusinessRuleViolationException("지나간 날짜, 시간으로는 변경할 수 없습니다.");
-        }
+    public void validateUpdateTarget(ReservationDateTime when) {
+        rejectIfNotFuture(when, "지나간 날짜, 시간으로는 변경할 수 없습니다.");
     }
 
-    private boolean isPast(LocalDateTime dateTime) {
-        return !dateTime.isAfter(LocalDateTime.now(clock));
+    private void rejectIfNotFuture(ReservationDateTime when, String message) {
+        if (!when.startsAfter(LocalDateTime.now(clock))) {
+            throw new BusinessRuleViolationException(message);
+        }
     }
 }

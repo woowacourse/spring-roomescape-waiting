@@ -37,6 +37,7 @@ import roomescape.support.ServiceIntegrationTest;
  * 서비스 흐름에 연결됐는지만 본다.)
  *
  * <p>자동 승격의 "원자성"(중간 실패 시 전체 롤백)은 이 사이클에서 검증하지 않는다.
+ *
  * @Transactional이 코드에 들어오는 사이클 2의 검증 대상이다. 여기서는 정상 흐름의 "결과"만 본다.
  */
 @Import(FixedClockConfig.class)
@@ -322,7 +323,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
             assertThatThrownBy(() -> reservationService.updateByOwner(
                     new ReservationUpdateCommand(reservationId, "브라운", past, timeId)))
                     .isInstanceOf(BusinessRuleViolationException.class)
-                    .hasMessage("지나간 날짜·시간으로는 변경할 수 없습니다.");
+                    .hasMessage("지나간 날짜, 시간으로는 변경할 수 없습니다.");
         }
     }
 }

@@ -5,23 +5,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.application.dto.command.ReservationCreateCommand;
+import roomescape.application.dto.command.ReservationUpdateCommand;
+import roomescape.application.dto.result.MyReservationResult;
+import roomescape.application.dto.result.ReservationResult;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationDateTime;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.Waitings;
 import roomescape.domain.policy.ReservationPolicy;
-import roomescape.exception.client.BusinessRuleViolationException;
-import roomescape.exception.client.ResourceNotFoundException;
-import roomescape.exception.server.DataInconsistencyException;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.domain.repository.WaitingRepository;
-import roomescape.application.dto.result.MyReservationResult;
-import roomescape.application.dto.command.ReservationCreateCommand;
-import roomescape.application.dto.result.ReservationResult;
-import roomescape.application.dto.command.ReservationUpdateCommand;
+import roomescape.exception.client.BusinessRuleViolationException;
+import roomescape.exception.client.ResourceNotFoundException;
+import roomescape.exception.server.DataInconsistencyException;
 
 @Service
 public class ReservationService {
@@ -95,10 +96,7 @@ public class ReservationService {
 
     public void deleteByOwner(Long id, String name) {
         Reservation reservation = findByIdAndName(id, name);
-        reservationPolicy.validateCancellable(
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
-        );
+        reservationPolicy.validateCancellable(reservation.scheduledAt());
 
         reservationRepository.deleteById(id);
         promoteFirstWaitingIfExists(reservation);
@@ -125,13 +123,11 @@ public class ReservationService {
 
     public ReservationResult updateByOwner(ReservationUpdateCommand command) {
         Reservation reservation = findByIdAndName(command.getId(), command.getName());
-        reservationPolicy.validateUpdatable(
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
-        );
+        reservationPolicy.validateUpdatable(reservation.scheduledAt());
 
         ReservationTime newTime = findTimeOrThrow(command.getTimeId());
-        reservationPolicy.validateUpdateTarget(command.getDate(), newTime.getStartAt());
+        reservationPolicy.validateUpdateTarget(
+                ReservationDateTime.of(command.getDate(), newTime.getStartAt()));
         validateNotDuplicatedExcludingSelf(command, reservation.getTheme().getId());
 
         reservationRepository.updateDateAndTime(command.getId(), command.getDate(), command.getTimeId());
