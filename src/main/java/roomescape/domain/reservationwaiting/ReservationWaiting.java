@@ -11,7 +11,7 @@ public class ReservationWaiting {
     private final Long id;
     private final Reservation reservation;
     private final ReservationName name;
-    private final LocalDateTime requestedAt;
+    private final LocalDateTime requestAt;
 
     private ReservationWaiting(
             final Long id,
@@ -22,8 +22,7 @@ public class ReservationWaiting {
         this.id = id;
         this.reservation = reservation;
         this.name = ReservationName.from(name);
-        this.requestedAt = requestedAt;
-        validateWaitable();
+        this.requestAt = requestAt;
     }
 
     public static ReservationWaiting createNew(
@@ -44,7 +43,7 @@ public class ReservationWaiting {
     }
 
     public ReservationWaiting withId(final Long id) {
-        return ReservationWaiting.of(id, this.reservation, this.name.value(), this.requestedAt);
+        return ReservationWaiting.of(id, this.reservation, this.name.value(), this.requestAt);
     }
 
     public Long getId() {
