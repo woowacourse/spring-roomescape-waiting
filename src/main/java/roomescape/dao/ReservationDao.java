@@ -110,6 +110,15 @@ public class ReservationDao {
                 slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
     }
 
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+        String sql = """
+                SELECT COUNT(*) > 0
+                FROM reservation
+                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?""";
+        return jdbcTemplate.queryForObject(sql, Boolean.class,
+                name, slot.getDate(), slot.getTime().getId(), slot.getTheme().getId());
+    }
+
     public boolean existsDuplicateExcluding(ReservationSlot slot, long reservationId) {
         String sql = """
                 SELECT COUNT(*) > 0

@@ -41,6 +41,7 @@ public class ReservationWaitingService {
 
         validateReservationNotExists(slot);
         validateUniqueReservationWaiting(command.name(), slot);
+        validateNotDuplicateWithReservation(command.name(), slot);
         validatePastDatetime(slot, now);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot);
@@ -79,6 +80,13 @@ public class ReservationWaitingService {
         boolean exists = reservationWaitingDao.existsByNameAndSlot(name, slot);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
+        }
+    }
+
+    private void validateNotDuplicateWithReservation(String name, ReservationSlot slot) {
+        boolean exists = reservationDao.existsByNameAndSlot(name, slot);
+        if (exists) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
