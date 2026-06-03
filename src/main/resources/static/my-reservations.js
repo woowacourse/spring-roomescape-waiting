@@ -341,7 +341,8 @@ async function submitModifyBooking() {
       reservationId: state.modifyingReservationId,
       name: state.currentName,
       date: state.selectedDate,
-      timeId: state.selectedTimeId
+      timeId: state.selectedTimeId,
+      themeId: state.modifyingThemeId
     };
     await api.patch(`/reservations/${state.modifyingReservationId}`, requestBody);
     closeModifyModal();

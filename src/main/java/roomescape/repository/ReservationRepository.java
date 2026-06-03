@@ -195,16 +195,17 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
-    public void updateDateAndTime(final Reservation reservation) {
+    public void update(final Reservation reservation) {
         final String sql = """
                 UPDATE reservation
-                SET date = :date, time_id = :timeId
+                SET date = :date, time_id = :timeId, theme_id = :themeId
                 WHERE id = :id
                 """;
 
         final MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("date", reservation.getReservationDate().getDate())
                 .addValue("timeId", reservation.getTime().getId())
+                .addValue("themeId", reservation.getTheme().getId())
                 .addValue("id", reservation.getId());
 
         jdbcTemplate.update(sql, param);

@@ -232,7 +232,7 @@ class ReservationRepositoryTest {
             Reservation modified = saved.modify(newDate, newTime, theme);
 
             // when
-            reservationRepository.updateDateAndTime(modified);
+            reservationRepository.update(modified);
 
             // then
             Reservation found = reservationRepository.findById(saved.getId()).get();

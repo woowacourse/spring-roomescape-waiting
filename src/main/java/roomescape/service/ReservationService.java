@@ -92,7 +92,7 @@ public class ReservationService {
         modifiedReservation.validateNotPast();
         validateNotDuplicated(modifiedReservation);
 
-        reservationRepository.updateDateAndTime(modifiedReservation);
+        reservationRepository.update(modifiedReservation);
 
         if (!originalReservation.isSameSlot(modifiedReservation)) {
             promoteFirstWaitingList(originalReservation);

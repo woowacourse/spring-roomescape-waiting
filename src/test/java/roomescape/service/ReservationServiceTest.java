@@ -180,7 +180,7 @@ class ReservationServiceTest {
             // then
             assertThat(response.date()).isEqualTo(request.date());
             assertThat(response.time().id()).isEqualTo(2L);
-            verify(reservationRepository).updateDateAndTime(any(Reservation.class));
+            verify(reservationRepository).update(any(Reservation.class));
         }
 
         @Test
