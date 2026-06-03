@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -78,6 +77,26 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .build();
     };
 
+    private static final String BASE_SELECT = """
+            SELECT
+                r.id AS r_id,
+                r.name AS r_name,
+                r.date AS r_date,
+                r.status AS r_status,
+                r.created_at AS r_created_at,
+                t.id AS t_id,
+                t.name AS t_name,
+                t.thumbnail_image_url AS t_thumbnail_image_url,
+                t.description AS t_description,
+                t.is_active AS t_is_active,
+                rt.id AS rt_id,
+                rt.start_at AS rt_start_at,
+                rt.is_active AS rt_is_active
+            FROM reservation r
+            INNER JOIN theme t ON r.theme_id = t.id
+            INNER JOIN reservation_time rt ON r.time_id = rt.id
+            """;
+
     @Override
     public Reservation save(Reservation reservation) {
         String sql = """
@@ -132,24 +151,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name AS r_name,
-                    r.date AS r_date,
-                    r.status AS r_status,
-                    r.created_at AS r_created_at,
-                    t.id AS t_id,
-                    t.name AS t_name,
-                    t.thumbnail_image_url AS t_thumbnail_image_url,
-                    t.description AS t_description,
-                    t.is_active AS t_is_active,
-                    rt.id AS rt_id,
-                    rt.start_at AS rt_start_at,
-                    rt.is_active AS rt_is_active
-                FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
+        String sql = BASE_SELECT + """
                 WHERE r.id = :id
                     AND r.status IN ('RESERVED', 'WAITING')
                 """;
@@ -158,24 +160,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAll(int page, int size) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name AS r_name,
-                    r.date AS r_date,
-                    r.status AS r_status,
-                    r.created_at AS r_created_at,
-                    t.id AS t_id,
-                    t.name AS t_name,
-                    t.thumbnail_image_url AS t_thumbnail_image_url,
-                    t.description AS t_description,
-                    t.is_active AS t_is_active,
-                    rt.id AS rt_id,
-                    rt.start_at AS rt_start_at,
-                    rt.is_active AS rt_is_active
-                FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
+        String sql = BASE_SELECT + """
                 WHERE r.status = 'RESERVED'
                 ORDER BY r.date ASC, rt.start_at ASC
                 LIMIT :size OFFSET :offset
@@ -190,24 +175,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByThemeAndDate(Long themeId, LocalDate date) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name AS r_name,
-                    r.date AS r_date,
-                    r.status AS r_status,
-                    r.created_at AS r_created_at,
-                    t.id AS t_id,
-                    t.name AS t_name,
-                    t.thumbnail_image_url AS t_thumbnail_image_url,
-                    t.description AS t_description,
-                    t.is_active AS t_is_active,
-                    rt.id AS rt_id,
-                    rt.start_at AS rt_start_at,
-                    rt.is_active AS rt_is_active
-                FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
+        String sql = BASE_SELECT + """
                 WHERE r.theme_id = :themeId
                     AND r.date = :date
                     AND r.status = 'RESERVED'
@@ -323,24 +291,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name AS r_name,
-                    r.date AS r_date,
-                    r.status AS r_status,
-                    r.created_at AS r_created_at,
-                    t.id AS t_id,
-                    t.name AS t_name,
-                    t.thumbnail_image_url AS t_thumbnail_image_url,
-                    t.description AS t_description,
-                    t.is_active AS t_is_active,
-                    rt.id AS rt_id,
-                    rt.start_at AS rt_start_at,
-                    rt.is_active AS rt_is_active
-                FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
+        String sql = BASE_SELECT + """
                 WHERE r.date = :date
                     AND r.time_id = :timeId
                     AND r.theme_id = :themeId
