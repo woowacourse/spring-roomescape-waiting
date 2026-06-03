@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.CreateThemeRequest;
+import roomescape.dto.request.CreateThemeRequest;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;

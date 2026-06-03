@@ -22,7 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.reservationtime.CreateReservationTimeRequest;
+import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.exception.ReservationTimeInUseException;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
