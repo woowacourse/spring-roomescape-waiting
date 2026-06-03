@@ -64,32 +64,32 @@ class ReservationTimeQueryServiceTest {
 
     @Test
     @DisplayName("예약 가능한 시간 목록을 성공적으로 조회한다.")
-    void findAvailableTimes_success() {
+    void queryAvailableTimes_success() {
         // given
         Theme theme = new Theme(1L, "테마", "설명", "url");
         given(themeService.findById(1L)).willReturn(theme);
 
         AvailableTimeQueryResult queryResult = new AvailableTimeQueryResult(1L, LocalTime.of(10, 0), false);
-        given(reservationTimeRepository.findAvailableTimes(1L, LocalDate.of(2026, 5, 5)))
+        given(reservationTimeRepository.queryAvailableTimes(1L, LocalDate.of(2026, 5, 5)))
                 .willReturn(List.of(queryResult));
 
         // when
-        reservationTimeQueryService.findAvailableTimes(1L, LocalDate.of(2026, 5, 5));
+        reservationTimeQueryService.queryAvailableTimes(1L, LocalDate.of(2026, 5, 5));
 
         // then
         then(themeService).should().findById(1L);
-        then(reservationTimeRepository).should().findAvailableTimes(1L, LocalDate.of(2026, 5, 5));
+        then(reservationTimeRepository).should().queryAvailableTimes(1L, LocalDate.of(2026, 5, 5));
     }
 
     @Test
     @DisplayName("예약 가능 시간 조회 시, 테마가 존재하지 않으면 예외가 발생한다.")
-    void findAvailableTimes_themeNotFound() {
+    void queryAvailableTimes_themeNotFound() {
         // given
         given(themeService.findById(1L))
                 .willThrow(new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeQueryService.findAvailableTimes(1L, LocalDate.of(2026, 5, 5)))
+        assertThatThrownBy(() -> reservationTimeQueryService.queryAvailableTimes(1L, LocalDate.of(2026, 5, 5)))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
     }

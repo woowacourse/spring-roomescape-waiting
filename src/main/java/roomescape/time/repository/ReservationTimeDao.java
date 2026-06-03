@@ -1,11 +1,13 @@
-package roomescape.time.domain;
+package roomescape.time.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
-public interface ReservationTimeRepository {
+public interface ReservationTimeDao {
 
     ReservationTime save(ReservationTime reservationTime);
 
@@ -13,7 +15,7 @@ public interface ReservationTimeRepository {
 
     Optional<ReservationTime> findByIdForUpdate(Long id);
 
-    boolean existsByStartAt(ReservationTime reservationTime);
+    boolean existsByStartAt(LocalTime localTime);
 
     List<ReservationTime> findAll();
 

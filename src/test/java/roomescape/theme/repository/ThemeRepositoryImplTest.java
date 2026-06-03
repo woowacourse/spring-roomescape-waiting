@@ -15,18 +15,19 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
 
 @JdbcTest
-class JdbcThemeRepositoryTest {
+class ThemeRepositoryImplTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    JdbcThemeRepository themeRepository;
+    ThemeRepository themeRepository;
 
     @Autowired
-    public JdbcThemeRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.themeRepository = new JdbcThemeRepository(jdbcTemplate);
+    public ThemeRepositoryImplTest(JdbcTemplate jdbcTemplate) {
+        this.themeRepository = new ThemeRepositoryImpl(new JdbcThemeDao(jdbcTemplate));
     }
 
     @Test
@@ -79,10 +80,10 @@ class JdbcThemeRepositoryTest {
         );
 
         //when & then
-        assertThat(themeRepository.existsByName("테마"))
+        assertThat(themeRepository.existsByName(Theme.of("테마", "테마 설명", "썸네일_url")))
                 .isTrue();
 
-        assertThat(themeRepository.existsByName("없는_것"))
+        assertThat(themeRepository.existsByName(Theme.of("없는_것", "설명", "썸네일_url")))
                 .isFalse();
     }
 

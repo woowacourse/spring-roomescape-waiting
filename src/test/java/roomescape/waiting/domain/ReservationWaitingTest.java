@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,26 +41,42 @@ class ReservationWaitingTest {
     @DisplayName("예약 대기 시간이 현재보다 미래인 경우 유효성 검증을 통과한다.")
     void validateExpiry_Future_Success() {
         // given
-        LocalDate futureDate = LocalDate.now().plusDays(1);
+        LocalDate futureDate = LocalDate.of(2026, 5, 5);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         ReservationWaiting waiting = ReservationWaiting.of("브라운", futureDate, time, theme);
 
         // when & then
-        assertThatCode(waiting::validateExpiry).doesNotThrowAnyException();
+        assertThatCode(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 4, 10, 0)))
+                .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("예약 대기 시간이 현재보다 과거인 경우 예외를 발생시킨다.")
-    void validateExpiry_Past_ThrowsException() {
+    @DisplayName("예약 대기 날짜가 현재보다 과거인 경우 예외를 발생시킨다.")
+    void validateExpiry_PastDate_ThrowsException() {
         // given
-        LocalDate pastDate = LocalDate.now().minusDays(1);
+        LocalDate pastDate = LocalDate.of(2026, 5, 5);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         ReservationWaiting waiting = ReservationWaiting.of("브라운", pastDate, time, theme);
 
         // when & then
-        assertThatThrownBy(waiting::validateExpiry)
+        assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 6, 10, 0)))
+                .isInstanceOf(InvalidBusinessStateException.class)
+                .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약 대기 날짜는 오늘이나 시간이 현재보다 과거인 경우 예외를 발생시킨다.")
+    void validateExpiry_PastTime_ThrowsException() {
+        // given
+        LocalDate today = LocalDate.of(2026, 5, 5);
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "테마", "설명", "url");
+        ReservationWaiting waiting = ReservationWaiting.of("브라운", today, time, theme);
+
+        // when & then
+        assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 5, 11, 0)))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
     }

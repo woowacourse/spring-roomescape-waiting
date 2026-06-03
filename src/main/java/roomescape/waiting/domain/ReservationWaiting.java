@@ -25,8 +25,12 @@ public class ReservationWaiting {
         return new ReservationWaiting(null, name, new ReservationSlot(date, time, theme));
     }
 
-    public void validateExpiry() {
-        LocalDateTime current = LocalDateTime.now();
+    public void validateExpiry(LocalDateTime current) {
+        LocalDate currentDate = current.toLocalDate();
+        if (getDate().isBefore(currentDate)) {
+            throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_DATE);
+        }
+
         LocalDateTime targetTime = LocalDateTime.of(getDate(), getTime().getStartAt());
 
         if (current.isAfter(targetTime)) {

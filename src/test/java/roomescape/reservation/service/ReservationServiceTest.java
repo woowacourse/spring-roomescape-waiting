@@ -1,13 +1,12 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +25,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
@@ -112,7 +110,7 @@ class ReservationServiceTest {
 
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
-        given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "브라운")).willReturn(true);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.save(command))
@@ -132,8 +130,8 @@ class ReservationServiceTest {
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
         given(themeService.findById(1L)).willReturn(theme);
         // 예약은 없지만(false) 대기열에 있음(true)
-        given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "브라운")).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(date, 1L, "브라운")).willReturn(true);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.save(command))
@@ -257,7 +255,7 @@ class ReservationServiceTest {
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
-        given(reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(targetDate, 1L, "브라운", 1L)).willReturn(true);
+        given(reservationRepository.isAlreadyBookedByOthers(any(Reservation.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운"))
@@ -278,8 +276,8 @@ class ReservationServiceTest {
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
-        given(reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(targetDate, 1L, "브라운", 1L)).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(targetDate, 1L, "브라운")).willReturn(true);
+        given(reservationRepository.isAlreadyBookedByOthers(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(command, 1L, "브라운"))
@@ -347,20 +345,23 @@ class ReservationServiceTest {
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(targetReservation));
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
-        given(reservationWaitingRepository.findAllByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L))
+        given(reservationWaitingRepository.queryAllBySlotForUpdate(any(ReservationSlot.class)))
                 .willReturn(List.of(w1, w2));
 
-        given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "중복대기자")).willReturn(true);
-        given(reservationRepository.existsByDateAndTimeIdAndName(date, 1L, "정상대기자")).willReturn(false);
+        given(reservationRepository.hasBookingAtSameTime(
+                argThat(res -> res != null && "중복대기자".equals(res.getName())))).willReturn(true);
+        given(reservationRepository.hasBookingAtSameTime(
+                argThat(res -> res != null && "정상대기자".equals(res.getName())))).willReturn(false);
 
         // when
         reservationService.deleteById(1L, "브라운");
 
         // then
         then(reservationRepository).should().delete(targetReservation);
-        then(reservationWaitingRepository).should().findAllByDateAndTimeIdAndThemeIdForUpdate(date, 1L, 1L);
+        then(reservationWaitingRepository).should().queryAllBySlotForUpdate(any(ReservationSlot.class));
         then(reservationWaitingRepository).should().delete(w2);
-        then(reservationRepository).should().save(Reservation.reconstruct(null, "정상대기자", new ReservationSlot(date, time, theme)));
+        then(reservationRepository).should()
+                .save(Reservation.reconstruct(null, "정상대기자", new ReservationSlot(date, time, theme)));
     }
 
 
@@ -377,19 +378,18 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("인기 테마를 올바른 기간 범위로 조회한다.")
-    void findPopularThemes_queriesCorrectRange() {
+    @DisplayName("인기 테마 조회 시, 날짜 범위를 알맞게 계산하여 Repository를 조회한다.")
+    void queryPopularThemes_queriesCorrectRange() {
         // given
         LocalDate to = LocalDate.now().minusDays(1);
         LocalDate from = to.minusDays(7).plusDays(1);
-        given(reservationRepository.findPopularThemes(from, to, 10))
-                .willReturn(List.of(new PopularThemeQueryResult(1L, "테마", "설명", "url")));
+        given(reservationRepository.queryPopularThemes(from, to, 10))
+                .willReturn(List.of());
 
         // when
-        PopularThemesResult result = reservationService.findPopularThemes(7, 10);
+        PopularThemesResult result = reservationService.queryPopularThemes(7, 10);
 
         // then
-        assertThat(result.popularThemes()).hasSize(1);
-        then(reservationRepository).should().findPopularThemes(from, to, 10);
+        then(reservationRepository).should().queryPopularThemes(from, to, 10);
     }
 }

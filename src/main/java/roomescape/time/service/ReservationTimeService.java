@@ -36,7 +36,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeUniqueness(LocalTime startAt) {
-        if (reservationTimeRepository.existsByStartAt(startAt)) {
+        if (reservationTimeRepository.existsByStartAt(ReservationTime.of(startAt))) {
             throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
         }
     }

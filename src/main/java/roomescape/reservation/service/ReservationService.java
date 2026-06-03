@@ -11,6 +11,7 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -57,7 +58,7 @@ public class ReservationService {
     public void update(ReservationUpdateCommand command, Long id, String name) {
         Reservation updated = buildUpdatedReservation(command, id, name);
         try {
-            reservationRepository.update(updated);
+            reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
@@ -73,10 +74,8 @@ public class ReservationService {
 
         reservationTimeService.getByIdForUpdate(reservation.getTimeId());
 
-        List<ReservationWaiting> waitings = reservationWaitingRepository.findAllByDateAndTimeIdAndThemeIdForUpdate(
-                reservation.getDate(),
-                reservation.getTimeId(),
-                reservation.getThemeId()
+        List<ReservationWaiting> waitings = reservationWaitingRepository.queryAllBySlotForUpdate(
+                new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
         );
 
         reservationRepository.delete(reservation);
@@ -90,15 +89,15 @@ public class ReservationService {
     }
 
     public List<ReservationWithStatusResult> findAllByName(String name) {
-        return reservationRepository.findAllByNameWithStatus(name);
+        return reservationRepository.queryAllByNameWithStatus(name);
     }
 
-    public PopularThemesResult findPopularThemes(int period, int limit) {
+    public PopularThemesResult queryPopularThemes(int period, int limit) {
         int oneDayDifference = 1;
         LocalDate to = LocalDate.now().minusDays(oneDayDifference);
         LocalDate from = to.minusDays(period).plusDays(oneDayDifference);
         return new PopularThemesResult(
-                reservationRepository.findPopularThemes(from, to, limit)
+                reservationRepository.queryPopularThemes(from, to, limit)
         );
     }
 
@@ -113,25 +112,31 @@ public class ReservationService {
         Theme theme = themeService.findById(command.themeId());
 
         Reservation newReservation = Reservation.construct(command.name(), command.date(), time, theme, LocalDateTime.now());
-        validateNoDoubleBooking(command.date(), time, command.name());
+        validateNoDoubleBooking(newReservation);
 
         return newReservation;
     }
 
-    private void validateNoDoubleBooking(LocalDate date, ReservationTime time, String name) {
-        validateNoSameTimeBooking(date, time, name);
-        validateNoSameTimeWaiting(date, time.getId(), name);
+    private void validateNoDoubleBooking(Reservation newReservation) {
+        validateNoSameTimeBooking(newReservation);
+        validateNoSameTimeWaiting(newReservation);
     }
 
-    private void validateNoSameTimeBooking(LocalDate date, ReservationTime time, String name) {
-        if (reservationRepository.existsByDateAndTimeIdAndName(date, time.getId(), name)) {
+    private void validateNoSameTimeBooking(Reservation newReservation) {
+        if (reservationRepository.hasBookingAtSameTime(newReservation)) {
             throw new InvalidBusinessStateException(
                     ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
     }
 
-    private void validateNoSameTimeWaiting(LocalDate date, Long timeId, String name) {
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
+    private void validateNoSameTimeWaiting(Reservation newReservation) {
+        ReservationWaiting dummy = ReservationWaiting.of(
+                newReservation.getName(),
+                newReservation.getDate(),
+                newReservation.getTime(),
+                newReservation.getTheme()
+        );
+        if (reservationWaitingRepository.hasWaitingAtSameTime(dummy)) {
             throw new InvalidBusinessStateException(
                     ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
@@ -141,7 +146,7 @@ public class ReservationService {
         Reservation reservation = getById(id);
         ReservationTime newTime = getReservationTime(command.timeId());
         Reservation updated = reservation.update(command.date(), newTime, name, LocalDateTime.now());
-        validateNoDoubleBookingForUpdate(updated.getDate(), updated.getTime(), name, id);
+        validateNoDoubleBookingForUpdate(updated);
         return updated;
     }
 
@@ -152,22 +157,18 @@ public class ReservationService {
         return reservationTimeService.getByIdForUpdate(timeId);
     }
 
-    private void validateNoDoubleBookingForUpdate(LocalDate date, ReservationTime time, String name,
-                                                  Long excludeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndNameAndIdNot(date, time.getId(), name, excludeId)) {
+    private void validateNoDoubleBookingForUpdate(Reservation updated) {
+        if (reservationRepository.isAlreadyBookedByOthers(updated)) {
             throw new InvalidBusinessStateException(
                     ReservationErrorCode.ALREADY_RESERVED_OR_WAITING_AT_SAME_TIME);
         }
-        validateNoSameTimeWaiting(date, time.getId(), name);
+        validateNoSameTimeWaiting(updated);
     }
 
     private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings) {
         for (ReservationWaiting waiting : lockedWaitings) {
-            if (!reservationRepository.existsByDateAndTimeIdAndName(
-                    waiting.getDate(),
-                    waiting.getTime().getId(),
-                    waiting.getName())
-            ) {
+            Reservation candidate = Reservation.reconstruct(null, waiting.getName(), waiting.getSlot());
+            if (!reservationRepository.hasBookingAtSameTime(candidate)) {
                 createReservationFromWaiting(waiting);
                 return;
             }

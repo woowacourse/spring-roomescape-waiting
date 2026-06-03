@@ -49,7 +49,7 @@ public class ThemeServiceTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        boolean exists = themeRepository.existsByName("테스트 테마");
+        boolean exists = themeRepository.existsByName(Theme.of("테스트 테마", "설명", "http://thumbnail.url"));
         Assertions.assertFalse(exists);
     }
 

@@ -55,7 +55,7 @@ class ReservationTimeControllerTest {
         AvailableTimesResult result = new AvailableTimesResult(List.of(
                 new AvailableTimeQueryResult(1L, LocalTime.of(10, 0), false)
         ));
-        given(reservationTimeQueryService.findAvailableTimes(any(), any())).willReturn(result);
+        given(reservationTimeQueryService.queryAvailableTimes(any(), any())).willReturn(result);
 
         // when & then
         mockMvc.perform(get("/times/available-times")
@@ -80,7 +80,7 @@ class ReservationTimeControllerTest {
     @DisplayName("예약 가능 시간 조회 시 테마가 존재하지 않으면 404 에러를 반환한다.")
     void readAvailable_ThemeNotFound_NotFound() throws Exception {
         // given
-        given(reservationTimeQueryService.findAvailableTimes(any(), any()))
+        given(reservationTimeQueryService.queryAvailableTimes(any(), any()))
                 .willThrow(new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
 
         // when & then

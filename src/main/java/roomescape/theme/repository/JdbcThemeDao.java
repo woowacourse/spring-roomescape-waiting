@@ -10,11 +10,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.exception.ThemeErrorCode;
 
 @Repository
-public class JdbcThemeRepository implements ThemeRepository {
+public class JdbcThemeDao implements ThemeDao {
 
     private static final RowMapper<Theme> THEME_ROW_MAPPER = (resultSet, rowNum) -> new Theme(
             resultSet.getLong("id"),
@@ -25,7 +24,7 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

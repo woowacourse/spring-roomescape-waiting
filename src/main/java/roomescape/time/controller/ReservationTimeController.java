@@ -36,7 +36,7 @@ public class ReservationTimeController {
             @RequestParam("themeId") Long themeId,
             @RequestParam("date") LocalDate date
     ) {
-        List<AvailableTimeResponse> responses = reservationTimeQueryService.findAvailableTimes(themeId, date)
+        List<AvailableTimeResponse> responses = reservationTimeQueryService.queryAvailableTimes(themeId, date)
                 .availableTimeQueryResults()
                 .stream()
                 .map(AvailableTimeResponse::from)

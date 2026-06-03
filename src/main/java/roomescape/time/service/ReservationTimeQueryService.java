@@ -37,8 +37,8 @@ public class ReservationTimeQueryService {
         return ReservationTimeResult.from(reservationTime);
     }
 
-    public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
+    public AvailableTimesResult queryAvailableTimes(Long themeId, LocalDate date) {
         themeService.findById(themeId);
-        return new AvailableTimesResult(reservationTimeRepository.findAvailableTimes(themeId, date));
+        return new AvailableTimesResult(reservationTimeRepository.queryAvailableTimes(themeId, date));
     }
 }

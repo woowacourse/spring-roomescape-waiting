@@ -40,14 +40,14 @@ class ReservationTimeServiceTest {
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
         ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).willReturn(false);
+        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(false);
         given(reservationTimeRepository.save(any(ReservationTime.class))).willReturn(savedTime);
 
         // when
         reservationTimeService.save(command);
 
         // then
-        then(reservationTimeRepository).should().existsByStartAt(LocalTime.of(10, 0));
+        then(reservationTimeRepository).should().existsByStartAt(any(ReservationTime.class));
         then(reservationTimeRepository).should().save(any(ReservationTime.class));
     }
 
@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).willReturn(true);
+        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.save(command))
@@ -71,7 +71,7 @@ class ReservationTimeServiceTest {
         // given
         ReservationTimeCommand command = new ReservationTimeCommand(LocalTime.of(10, 0));
 
-        given(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).willReturn(false);
+        given(reservationTimeRepository.existsByStartAt(any(ReservationTime.class))).willReturn(false);
         given(reservationTimeRepository.save(any(ReservationTime.class)))
                 .willThrow(new DataIntegrityViolationException("duplicate"));
 

@@ -1,9 +1,9 @@
 package roomescape.waiting.domain;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.global.exception.NotFoundException;
+import roomescape.reservation.domain.ReservationSlot;
 
 public interface ReservationWaitingRepository {
 
@@ -13,9 +13,9 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findAllByName(String name);
 
-    boolean existsByDateAndTimeIdAndName(LocalDate date, Long timeId, String name);
-
     void delete(ReservationWaiting reservationWaiting) throws NotFoundException;
 
-    List<ReservationWaiting> findAllByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
+    boolean hasWaitingAtSameTime(ReservationWaiting reservationWaiting);
+
+    List<ReservationWaiting> queryAllBySlotForUpdate(ReservationSlot slot);
 }

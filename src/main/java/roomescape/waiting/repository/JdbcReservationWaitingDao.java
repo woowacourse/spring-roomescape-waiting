@@ -15,11 +15,10 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
 
 @Repository
-public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
+public class JdbcReservationWaitingDao implements ReservationWaitingDao {
 
     private static final RowMapper<ReservationWaiting> RESERVATION_WAITING_ROW_MAPPER = (resultSet, rowNum) -> {
         ReservationTime time = new ReservationTime(
@@ -49,7 +48,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationWaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

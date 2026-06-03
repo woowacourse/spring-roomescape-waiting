@@ -58,7 +58,7 @@ class ThemeControllerTest {
         PopularThemesResult result = new PopularThemesResult(List.of(
                 new PopularThemeQueryResult(1L, "인기테마", "설명", "url")
         ));
-        given(reservationService.findPopularThemes(anyInt(), anyInt())).willReturn(result);
+        given(reservationService.queryPopularThemes(anyInt(), anyInt())).willReturn(result);
 
         // when & then
         mockMvc.perform(get("/themes")

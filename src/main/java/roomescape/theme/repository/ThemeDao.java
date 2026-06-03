@@ -1,15 +1,16 @@
-package roomescape.theme.domain;
+package roomescape.theme.repository;
 
 import java.util.List;
 import java.util.Optional;
+import roomescape.theme.domain.Theme;
 
-public interface ThemeRepository {
+public interface ThemeDao {
 
     Theme save(Theme theme);
 
     Optional<Theme> findById(Long id);
 
-    boolean existsByName(Theme theme);
+    boolean existsByName(String name);
 
     List<Theme> findAll();
 

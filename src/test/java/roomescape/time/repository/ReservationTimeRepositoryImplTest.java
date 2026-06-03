@@ -20,7 +20,7 @@ import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @JdbcTest
-class JdbcReservationTimeRepositoryTest {
+class ReservationTimeRepositoryImplTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -28,8 +28,8 @@ class JdbcReservationTimeRepositoryTest {
     ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    public JdbcReservationTimeRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.reservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
+    public ReservationTimeRepositoryImplTest(JdbcTemplate jdbcTemplate) {
+        this.reservationTimeRepository = new ReservationTimeRepositoryImpl(new JdbcReservationTimeDao(jdbcTemplate));
     }
 
     @Nested
@@ -86,10 +86,10 @@ class JdbcReservationTimeRepositoryTest {
         createTime(LocalTime.of(11, 0));
 
         //when & then
-        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0)))
+        assertThat(reservationTimeRepository.existsByStartAt(ReservationTime.of(LocalTime.of(11, 0))))
                 .isTrue();
 
-        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(12, 0)))
+        assertThat(reservationTimeRepository.existsByStartAt(ReservationTime.of(LocalTime.of(12, 0))))
                 .isFalse();
     }
 
@@ -109,7 +109,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("모든 시간을 조회하고, 예약된 시간은 alreadyBooked=true 로 반환한다")
-    void findAvailableTimes() {
+    void queryAvailableTimes() {
         // given
         ReservationTime time1 = createTime(LocalTime.of(10, 0));
         ReservationTime time2 = createTime(LocalTime.of(11, 0));
@@ -121,7 +121,7 @@ class JdbcReservationTimeRepositoryTest {
         createReservation(time1, date, themeId);
 
         // when
-        List<AvailableTimeQueryResult> result = reservationTimeRepository.findAvailableTimes(themeId, date);
+        List<AvailableTimeQueryResult> result = reservationTimeRepository.queryAvailableTimes(themeId, date);
 
         // then
         assertThat(result).hasSize(3);

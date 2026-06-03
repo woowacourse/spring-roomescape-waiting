@@ -24,6 +24,8 @@ import roomescape.theme.service.dto.ThemeResult;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.dto.ReservationTimeResult;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
@@ -81,8 +83,10 @@ public class ReservationWaitingServiceTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        boolean exists = reservationWaitingRepository.existsByDateAndTimeIdAndName(
-                command.date(), command.timeId(), "임꺽정"
+        boolean exists = reservationWaitingRepository.hasWaitingAtSameTime(
+                ReservationWaiting.of("임꺽정", command.date(),
+                        new ReservationTime(command.timeId(), null),
+                        new Theme(command.themeId(), null, null, null))
         );
         Assertions.assertFalse(exists);
     }

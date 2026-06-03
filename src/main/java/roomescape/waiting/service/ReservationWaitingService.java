@@ -1,6 +1,6 @@
 package roomescape.waiting.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,12 +9,16 @@ import roomescape.global.exception.InvalidBusinessStateException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 import roomescape.waiting.service.dto.ReservationWaitingResult;
-import roomescape.time.service.ReservationTimeService;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,15 +27,18 @@ public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
 
     public ReservationWaitingService(
             ReservationWaitingRepository reservationWaitingRepository,
             ReservationRepository reservationRepository,
-            ReservationTimeService reservationTimeService
+            ReservationTimeService reservationTimeService,
+            ThemeService themeService
     ) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
     }
 
     @Transactional
@@ -49,7 +56,7 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteById(Long id, String name) {
         ReservationWaiting reservationWaiting = getById(id);
-        reservationWaiting.validateExpiry();
+        reservationWaiting.validateExpiry(LocalDateTime.now());
         reservationWaiting.validateOwner(name);
 
         reservationWaitingRepository.delete(reservationWaiting);
@@ -63,10 +70,13 @@ public class ReservationWaitingService {
     }
 
     private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command) {
-        reservationTimeService.getByIdForUpdate(command.timeId());
-        Reservation targetReservation = getReservationByDateAndTimeIdAndThemeId(command);
+        ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
+        Theme theme = themeService.findById(command.themeId());
+        ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
 
-        validateNoDoubleBooking(command.date(), command.timeId(), command.name());
+        Reservation targetReservation = getReservationBySlot(slot);
+
+        validateNoDoubleBooking(slot, command.name());
 
         ReservationWaiting reservationWaiting = ReservationWaiting.of(
                 command.name(),
@@ -74,31 +84,32 @@ public class ReservationWaitingService {
                 targetReservation.getTime(),
                 targetReservation.getTheme()
         );
-        reservationWaiting.validateExpiry();
+        reservationWaiting.validateExpiry(LocalDateTime.now());
         return reservationWaiting;
     }
 
-    private Reservation getReservationByDateAndTimeIdAndThemeId(ReservationWaitingCommand command) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(
-                command.date(), command.timeId(), command.themeId()
-        ).orElseThrow(
-                () -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND)
-        );
+    private Reservation getReservationBySlot(ReservationSlot slot) {
+        return reservationRepository.findBySlot(slot)
+                .orElseThrow(
+                        () -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND)
+                );
     }
 
-    private void validateNoDoubleBooking(LocalDate date, Long timeId, String name) {
-        validateNoSameTimeBooking(date, timeId, name);
-        validateNoSameTimeWaiting(date, timeId, name);
+    private void validateNoDoubleBooking(ReservationSlot slot, String name) {
+        validateNoSameTimeBooking(slot, name);
+        validateNoSameTimeWaiting(slot, name);
     }
 
-    private void validateNoSameTimeBooking(LocalDate date, Long timeId, String name) {
-        if (reservationRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
+    private void validateNoSameTimeBooking(ReservationSlot slot, String name) {
+        Reservation candidate = Reservation.reconstruct(null, name, slot);
+        if (reservationRepository.hasBookingAtSameTime(candidate)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }
 
-    private void validateNoSameTimeWaiting(LocalDate date, Long timeId, String name) {
-        if (reservationWaitingRepository.existsByDateAndTimeIdAndName(date, timeId, name)) {
+    private void validateNoSameTimeWaiting(ReservationSlot slot, String name) {
+        ReservationWaiting candidate = ReservationWaiting.of(name, slot.date(), slot.time(), slot.theme());
+        if (reservationWaitingRepository.hasWaitingAtSameTime(candidate)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }
     }

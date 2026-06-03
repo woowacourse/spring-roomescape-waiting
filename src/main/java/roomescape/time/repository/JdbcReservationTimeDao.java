@@ -13,12 +13,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @Repository
-public class JdbcReservationTimeRepository implements ReservationTimeRepository {
+public class JdbcReservationTimeDao implements ReservationTimeDao {
 
     private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) -> new ReservationTime(
             resultSet.getLong("id"),
@@ -27,7 +26,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     private final JdbcTemplate jdbcTemplate;
 
-    public JdbcReservationTimeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationTimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -107,7 +106,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<AvailableTimeQueryResult> findAvailableTimes(Long themeId, LocalDate date) {
+    public List<AvailableTimeQueryResult> queryAvailableTimes(Long themeId, LocalDate date) {
         String sql = """
                 SELECT t.id, t.start_at,
                        CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked

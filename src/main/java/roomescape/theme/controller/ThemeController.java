@@ -39,7 +39,7 @@ public class ThemeController {
             @RequestParam("period") int period, @RequestParam("limit") int limit
     ) {
         validatePeriodAndLimit(period, limit);
-        List<ThemeResponse> responses = reservationService.findPopularThemes(period, limit).popularThemes()
+        List<ThemeResponse> responses = reservationService.queryPopularThemes(period, limit).popularThemes()
                 .stream()
                 .map(ThemeResponse::from)
                 .collect(Collectors.toList());

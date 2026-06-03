@@ -50,7 +50,7 @@ public class ReservationTimeServiceTransactionTest {
                 .isInstanceOf(RuntimeException.class);
 
         // then
-        boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
+        boolean exists = reservationTimeRepository.existsByStartAt(ReservationTime.of(LocalTime.of(10, 0)));
         Assertions.assertFalse(exists);
     }
 

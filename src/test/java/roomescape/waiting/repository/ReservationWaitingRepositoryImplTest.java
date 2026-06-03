@@ -15,22 +15,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 
 @JdbcTest
-class JdbcReservationWaitingRepositoryTest {
+class ReservationWaitingRepositoryImplTest {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
+    private final JdbcTemplate jdbcTemplate;
     private final ReservationWaitingRepository reservationWaitingRepository;
 
     @Autowired
-    public JdbcReservationWaitingRepositoryTest(JdbcTemplate jdbcTemplate) {
-        this.reservationWaitingRepository = new JdbcReservationWaitingRepository(jdbcTemplate);
+    public ReservationWaitingRepositoryImplTest(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.reservationWaitingRepository = new ReservationWaitingRepositoryImpl(
+                new JdbcReservationWaitingDao(jdbcTemplate)
+        );
     }
 
     @Test
@@ -124,25 +126,21 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("동일 날짜, 시간, 예약자 이름에 해당하는 예약 대기가 존재하는지 여부를 확인한다.")
-    void existsByDateAndTimeIdAndName() {
+    @DisplayName("이름을 기반으로 해당 사용자의 예약 대기 내역을 모두 조회한다.")
+    void findAllByName() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
 
-        // when & then
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                "브라운"
-        )).isTrue();
+        ReservationWaiting saved1 = saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
+        saveReservationWaiting("검프", LocalDate.of(2026, 5, 1), time, theme);
 
-        assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                "포비"
-        )).isFalse();
+        // when
+        List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("브라운");
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(saved1.getId());
     }
 
     @Test
@@ -162,26 +160,24 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("이름을 기반으로 해당 사용자의 예약 대기 내역을 모두 조회한다.")
-    void findAllByName() {
+    @DisplayName("동일 날짜, 시간, 예약자 이름에 해당하는 예약 대기가 존재하는지 여부를 확인한다.")
+    void hasWaitingAtSameTime() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+        saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
 
-        ReservationWaiting saved1 = saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
-        saveReservationWaiting("검프", LocalDate.of(2026, 5, 1), time, theme);
+        ReservationWaiting target1 = ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, theme);
+        ReservationWaiting target2 = ReservationWaiting.of("포비", LocalDate.of(2026, 5, 1), time, theme);
 
-        // when
-        List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("브라운");
-
-        // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(saved1.getId());
+        // when & then
+        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target1)).isTrue();
+        assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target2)).isFalse();
     }
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마의 모든 대기 리스트를 ID 순으로 정렬하여 조회한다.")
-    void findAllByDateAndTimeIdAndThemeIdForUpdate() {
+    void queryAllBySlotForUpdate() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -189,10 +185,10 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved1 = saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
         ReservationWaiting saved2 = saveReservationWaiting("포비", LocalDate.of(2026, 5, 1), time, theme);
 
+        ReservationSlot slot = new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme);
+
         // when
-        List<ReservationWaiting> result = reservationWaitingRepository.findAllByDateAndTimeIdAndThemeIdForUpdate(
-                LocalDate.of(2026, 5, 1), time.getId(), theme.getId()
-        );
+        List<ReservationWaiting> result = reservationWaitingRepository.queryAllBySlotForUpdate(slot);
 
         // then
         assertThat(result).hasSize(2);
@@ -200,6 +196,7 @@ class JdbcReservationWaitingRepositoryTest {
         assertThat(result.get(1).getId()).isEqualTo(saved2.getId());
     }
 
+    // Helper Methods
     private ReservationTime createTime(LocalTime time) {
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_at) VALUES (?)",

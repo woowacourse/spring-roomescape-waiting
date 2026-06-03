@@ -20,13 +20,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.global.config.WebMvcConfig;
-import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeResult;
-import roomescape.theme.exception.ThemeErrorCode;
 
 @WebMvcTest(ThemeAdminController.class)
 @Import(WebMvcConfig.class)

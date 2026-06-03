@@ -172,7 +172,7 @@ public class ReservationServiceTransactionTest {
 
         doThrow(new RuntimeException("수정 중 에러 발생"))
                 .when(reservationRepository)
-                .update(any(Reservation.class));
+                .save(any(Reservation.class));
 
         // when
         assertThatThrownBy(() -> reservationService.update(updateCommand, testTargetId, testTargetOwnerName))

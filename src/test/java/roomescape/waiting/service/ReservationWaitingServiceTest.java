@@ -26,6 +26,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.ReservationWaiting;
@@ -46,6 +47,9 @@ class ReservationWaitingServiceTest {
     @Mock
     private ReservationTimeService reservationTimeService;
 
+    @Mock
+    private ThemeService themeService;
+
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
@@ -53,6 +57,8 @@ class ReservationWaitingServiceTest {
     void setUp() {
         org.mockito.Mockito.lenient().when(reservationTimeService.getByIdForUpdate(any()))
                 .thenReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
+        org.mockito.Mockito.lenient().when(themeService.findById(any()))
+                .thenReturn(new Theme(1L, "테마", "설명", "url"));
     }
 
     @Test
@@ -62,7 +68,7 @@ class ReservationWaitingServiceTest {
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", LocalDate.now().plusDays(1), 1L, 1L
         );
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(Optional.empty());
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command))
@@ -83,9 +89,9 @@ class ReservationWaitingServiceTest {
                 "브라운", futureDate, 1L, 1L
         );
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(true);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command))
@@ -106,10 +112,10 @@ class ReservationWaitingServiceTest {
                 "브라운", futureDate, 1L, 1L
         );
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(true);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command))
@@ -130,15 +136,15 @@ class ReservationWaitingServiceTest {
                 "브라운", pastDate, 1L, 1L
         );
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
+                .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
@@ -153,10 +159,10 @@ class ReservationWaitingServiceTest {
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", today, 1L, 1L);
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command))
@@ -177,10 +183,10 @@ class ReservationWaitingServiceTest {
                 "브라운", futureDate, 1L, 1L
         );
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
         given(reservationWaitingRepository.save(any())).willThrow(
                 new DataIntegrityViolationException("Duplicate key error"));
 
@@ -234,7 +240,7 @@ class ReservationWaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운"))
                 .isInstanceOf(InvalidBusinessStateException.class)
-                .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
+                .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
 
     @Test
@@ -286,10 +292,10 @@ class ReservationWaitingServiceTest {
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", futureDate, 1L, 1L);
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));
 
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any())).willReturn(
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
-        given(reservationWaitingRepository.existsByDateAndTimeIdAndName(any(), any(), any())).willReturn(false);
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
         given(reservationWaitingRepository.save(any())).willReturn(waiting);
 
         // when
