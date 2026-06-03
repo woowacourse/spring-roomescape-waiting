@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="siteHeader" class="site-header">
+    <a class="brand" th:href="@{/}">방탈출 예약</a>
+    <nav>
+        <a th:href="@{/}">웰컴</a>
+        <a th:href="@{/admin}">관리자</a>
+        <a th:href="@{/user}">사용자</a>
+    </nav>
+</header>
+</body>
+</html>
