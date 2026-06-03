@@ -1,6 +1,5 @@
 package roomescape.waiting.application;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +38,11 @@ public class WaitingService {
     public void deleteByIdForUser(long waitingId, long memberId) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElse(null);
-        if(waiting == null) {
+        if (waiting == null) {
             return;
         }
 
-        if (!Objects.equals(waiting.getMemberId(), memberId)) {
+        if (!waiting.isOwnedBy(memberId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, waitingId);
         }
 

@@ -137,6 +137,36 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("예약된 슬롯에는 첫 번째 대기를 신청할 수 있다.")
+    void save_테스트_5() {
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+        long slotId = 1L;
+        Waiting savedWaiting = new Waiting(10L, MEMBER_ID, slotId);
+
+        when(slotService.resolveSlotId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(slotId);
+        when(reservationRepository.existsByMemberIdAndSlotId(MEMBER_ID, slotId))
+                .thenReturn(false);
+        when(waitingRepository.existsBySlotIdAndMemberId(MEMBER_ID, slotId))
+                .thenReturn(false);
+        when(reservationRepository.existsBySlotId(slotId))
+                .thenReturn(true);
+        when(waitingRepository.save(any(Waiting.class)))
+                .thenReturn(savedWaiting);
+        when(waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, savedWaiting.getId()))
+                .thenReturn(1L);
+
+        WaitingResponse response = waitingService.save(request, MEMBER_ID);
+
+        assertThat(response.id()).isEqualTo(savedWaiting.getId());
+        assertThat(response.memberId()).isEqualTo(MEMBER_ID);
+        assertThat(response.slotId()).isEqualTo(slotId);
+        assertThat(response.waitingOrder()).isEqualTo(1L);
+
+        verify(waitingRepository).save(any(Waiting.class));
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소할 수 있다.")
     void deleteByIdForUser_테스트_1() {
         Waiting waiting = new Waiting(1L, 1L, 1L);
