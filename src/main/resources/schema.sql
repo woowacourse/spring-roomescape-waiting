@@ -28,9 +28,11 @@ CREATE TABLE time_slot
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
+CREATE SEQUENCE reservation_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE reservation
 (
-    id               BIGINT       NOT NULL AUTO_INCREMENT,
+    id               BIGINT DEFAULT NEXT VALUE FOR reservation_seq PRIMARY KEY,
     name             VARCHAR(255) NOT NULL,
     slot_id          BIGINT,
     is_deleted       BIGINT                DEFAULT 0,
@@ -41,7 +43,7 @@ CREATE TABLE reservation
 
 CREATE TABLE pending
 (
-    id               BIGINT       NOT NULL AUTO_INCREMENT,
+    id               BIGINT DEFAULT NEXT VALUE FOR reservation_seq PRIMARY KEY,
     name             VARCHAR(255) NOT NULL,
     slot_id          BIGINT,
     is_deleted       BIGINT                DEFAULT 0,
