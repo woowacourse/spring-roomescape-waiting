@@ -67,7 +67,7 @@ class WaitingE2ETest {
     }
 
     @Test
-    @DisplayName("GET /reservations?name=... - 내 예약과 예약대기 목록을 함께 조회한다")
+    @DisplayName("GET /reservations?name=... - 내 예약만 조회한다")
     void getMyReservations() {
         String futureDate = LocalDate.now().plusDays(1).toString();
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
@@ -82,10 +82,30 @@ class WaitingE2ETest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("userReservations.size()", is(2))
-                .body("userReservations[0].status", is("RESERVED"))
-                .body("userReservations[1].status", is("WAITING"))
-                .body("userReservations[1].rank", is(2));
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("레서"))
+                .body("reservations[0].date", equalTo(futureDate));
+    }
+
+    @Test
+    @DisplayName("GET /waitings?name=... - 내 예약대기 목록을 순번과 함께 조회한다")
+    void getMyWaitings() {
+        String futureDate = LocalDate.now().plusDays(1).toString();
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "예약자", futureDate, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "밍구", futureDate, 1L, 1L);
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "레서", futureDate, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "레서")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingList.size()", is(1))
+                .body("waitingList[0].name", is("레서"))
+                .body("waitingList[0].order", is(2));
     }
 
     @Test

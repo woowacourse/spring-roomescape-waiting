@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.repository.ReservationRepository;
@@ -17,6 +18,7 @@ import roomescape.service.exception.ResourceNotFoundException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -36,6 +38,13 @@ public class WaitingService {
         this.clock = clock;
     }
 
+    public List<WaitingResult> findUserWaitList(String name, int page, int size) {
+        return waitingRepository.findUserWaitingList(name, page, size).stream()
+                .map(waiting -> WaitingResult.of(
+                        waiting, waitingRepository.findWaitingOrder(waiting)))
+                .toList();
+    }
+
     @Transactional
     public WaitingResult createWaiting(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
@@ -44,13 +53,13 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
-        Waiting waiting = Waiting.create(name, date, time, theme, LocalDateTime.now(clock));
+        Waiting waiting = Waiting.create(name, new Schedule(date, time, theme), LocalDateTime.now(clock));
 
         checkDuplicatedWaiting(waiting);
         checkWaitable(waiting);
 
         waiting = waitingRepository.save(waiting);
-        Long order = waitingRepository.findWaitingOrder(waiting.getId(), waiting.getTheme(), waiting.getDate(), waiting.getTime());
+        Long order = waitingRepository.findWaitingOrder(waiting);
 
         return WaitingResult.of(waiting, order);
     }
@@ -73,10 +82,7 @@ public class WaitingService {
     }
 
     private void checkWaitable(Waiting waiting) {
-        String reserverName = reservationRepository.findReserverNameByScheduleForUpdate(
-                        waiting.getDate(),
-                        waiting.getTime().getId(),
-                        waiting.getTheme().getId())
+        String reserverName = reservationRepository.findReserverNameByScheduleForUpdate(waiting.getSchedule())
                 .orElseThrow(() -> new BusinessConflictException(ErrorCode.WAITING_WITHOUT_RESERVATION));
 
         if (waiting.isSameName(reserverName)) {

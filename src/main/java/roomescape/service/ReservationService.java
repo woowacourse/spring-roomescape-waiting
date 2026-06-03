@@ -3,14 +3,12 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -27,20 +25,17 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final WaitingRepository waitingRepository;
     private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            WaitingRepository waitingRepository,
             Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
         this.clock = clock;
     }
 
@@ -48,10 +43,8 @@ public class ReservationService {
         return reservationRepository.findAll(page, size);
     }
 
-    public List<UserReservation> findUserReservations(String name, int page, int size) {
-        return reservationRepository.findUserReservations(name, page, size).stream()
-                .map(this::assignWaitingRank)
-                .toList();
+    public List<Reservation> findUserReservations(String name, int page, int size) {
+         return reservationRepository.findUserReservations(name, page, size);
     }
 
     @Transactional
@@ -62,7 +55,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.THEME_NOT_FOUND));
 
-        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now(clock));
+        Reservation reservation = Reservation.create(name, new Schedule(date, time, theme), LocalDateTime.now(clock));
         checkDuplicated(reservation);
         return reservationRepository.save(reservation);
     }
@@ -90,21 +83,9 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
-    private UserReservation assignWaitingRank(UserReservation entry) {
-        if (entry.status() != ReservationStatus.WAITING) {
-            return entry;
-        }
-        long rank = waitingRepository.findWaitingOrder(
-                entry.id(), entry.theme(), entry.date(), entry.time());
-        return UserReservation.from(entry.id(), entry.name(), entry.date(), entry.time(), entry.theme(), rank);
-    }
-
     private void checkDuplicated(Reservation reservation) {
-        boolean duplicated = reservationRepository.findBySchedule(
-                        reservation.getDate(),
-                        reservation.getTime().getId(),
-                        reservation.getTheme().getId()
-                )
+        Schedule schedule = reservation.getSchedule();
+        boolean duplicated = reservationRepository.findBySchedule(schedule)
                 .filter(found -> !reservation.isSameReservation(found))
                 .isPresent();
 

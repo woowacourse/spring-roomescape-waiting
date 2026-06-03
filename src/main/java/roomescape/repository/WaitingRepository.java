@@ -1,21 +1,21 @@
 package roomescape.repository;
 
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface WaitingRepository {
 
-    Waiting save(Waiting waiting);
+    Optional<Waiting> findById(long id);
+
+    List<Waiting> findUserWaitingList(String name, int page, int size);
 
     Optional<Waiting> findByScheduleAndName(Waiting waiting);
 
-    Optional<Waiting> findById(long id);
+    Long findWaitingOrder(Waiting waiting);
 
-    Long findWaitingOrder(Long id, Theme theme, LocalDate date, ReservationTime time);
+    Waiting save(Waiting waiting);
 
     void delete(Waiting waiting);
 }

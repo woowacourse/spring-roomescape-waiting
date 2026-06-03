@@ -1,10 +1,9 @@
 package roomescape.service.fake;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.Schedule;
 import roomescape.repository.ReservationRepository;
-import roomescape.service.dto.UserReservation;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,25 +19,21 @@ public class FakeReservationRepository implements ReservationRepository {
         Reservation saved = new Reservation(
                 sequence.incrementAndGet(),
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
+                reservation.getSchedule());
         reservations.add(saved);
         return saved;
     }
 
     @Override
-    public Optional<Reservation> findBySchedule(LocalDate date, long timeId, long themeId) {
+    public Optional<Reservation> findBySchedule(Schedule schedule) {
         return reservations.stream()
-                .filter(r -> r.getDate().equals(date)
-                        && r.getTime().getId() == timeId
-                        && r.getTheme().getId() == themeId)
+                .filter(r -> r.getSchedule().equals(schedule))
                 .findFirst();
     }
 
     @Override
-    public Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId) {
-        return findBySchedule(date, timeId, themeId)
+    public Optional<String> findReserverNameByScheduleForUpdate(Schedule schedule) {
+        return findBySchedule(schedule)
                 .map(Reservation::getName);
     }
 
@@ -57,12 +52,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name, int page, int size) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<UserReservation> findUserReservations(String name, int page, int size) {
+    public List<Reservation> findUserReservations(String name, int page, int size) {
         throw new UnsupportedOperationException();
     }
 

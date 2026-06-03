@@ -6,25 +6,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.DomainConflictException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.BusinessException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
 
 import java.time.*;
-import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -42,16 +38,13 @@ class ReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
-    @Mock
-    private WaitingRepository waitingRepository;
-
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
         Clock fixedClock = Clock.fixed(Instant.parse("2026-05-01T00:00:00Z"), ZoneOffset.UTC);
         reservationService = new ReservationService(
-                reservationRepository, reservationTimeRepository, themeRepository, waitingRepository, fixedClock
+                reservationRepository, reservationTimeRepository, themeRepository, fixedClock
         );
     }
 
@@ -75,9 +68,9 @@ class ReservationServiceTest {
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
         when(reservationTimeRepository.findById(anyLong())).thenReturn(Optional.of(newTime));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(reservationRepository.findBySchedule(any(LocalDate.class), anyLong(), anyLong()))
+        when(reservationRepository.findBySchedule(any(Schedule.class)))
                 .thenReturn(Optional.of(new Reservation(
-                        1L, "브라운", LocalDate.of(2026, 5, 13), newTime, theme)));
+                        1L, "브라운", new Schedule(LocalDate.of(2026, 5, 13), newTime, theme))));
 
         assertThatThrownBy(() -> reservationService.createReservation("레서", LocalDate.of(2026, 5, 13), 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class)
@@ -132,7 +125,7 @@ class ReservationServiceTest {
         ReservationTime originalTime = new ReservationTime(1L, LocalTime.of(10, 0));
         ReservationTime newTime = new ReservationTime(2L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
-        Reservation reservation = new Reservation(7L, "브라운", LocalDate.of(2026, 5, 10), originalTime, theme);
+        Reservation reservation = new Reservation(7L, "브라운", new Schedule(LocalDate.of(2026, 5, 10), originalTime, theme));
 
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(newTime));
@@ -148,9 +141,10 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(
                 7L,
                 "브라운",
-                LocalDate.of(2026, 5, 10),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Schedule(
+                        LocalDate.of(2026, 5, 10),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(999L)).thenReturn(Optional.empty());
@@ -169,19 +163,21 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(
                 7L,
                 "브라운",
-                LocalDate.of(2026, 5, 10),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Schedule(
+                        LocalDate.of(2026, 5, 10),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
         when(reservationTimeRepository.findById(2L)).thenReturn(Optional.of(newTime));
-        when(reservationRepository.findBySchedule(any(LocalDate.class), anyLong(), anyLong()))
+        when(reservationRepository.findBySchedule(any(Schedule.class)))
                 .thenReturn(Optional.of(new Reservation(
                         8L,
                         "어셔",
-                        LocalDate.of(2026, 5, 11),
-                        newTime,
-                        reservation.getTheme()
+                        new Schedule(
+                                LocalDate.of(2026, 5, 11),
+                                newTime,
+                                reservation.getSchedule().getTheme())
                 )));
 
         assertThatThrownBy(() -> reservationService.updateReservation(7L, "브라운", LocalDate.of(2026, 5, 11), 2L))
@@ -190,27 +186,6 @@ class ReservationServiceTest {
                 .isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
 
         verify(reservationRepository, never()).update(any(Reservation.class));
-    }
-
-    @Test
-    void 예약대기_항목의_대기순번은_서비스에서_계산한다() {
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "공포방", "무서운방입니다.", "image-url");
-        LocalDate date = LocalDate.of(2026, 5, 10);
-        UserReservation reserved = UserReservation.from(1L, "레서", date, time, theme);
-        UserReservation waiting = UserReservation.waiting(2L, "레서", date, time, theme);
-
-        when(reservationRepository.findUserReservations("레서", 0, 10))
-                .thenReturn(List.of(reserved, waiting));
-        when(waitingRepository.findWaitingOrder(2L, theme, date, time))
-                .thenReturn(2L);
-
-        List<UserReservation> result = reservationService.findUserReservations("레서", 0, 10);
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).status()).isEqualTo(ReservationStatus.RESERVED);
-        assertThat(result.get(1).status()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(result.get(1).rank()).isEqualTo(2L);
     }
 
     @Test
@@ -230,9 +205,10 @@ class ReservationServiceTest {
         Reservation reservation = new Reservation(
                 7L,
                 "브라운",
-                LocalDate.of(2026, 5, 10),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url")
+                new Schedule(
+                        LocalDate.of(2026, 5, 10),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))
         );
         when(reservationRepository.findById(7L)).thenReturn(Optional.of(reservation));
 

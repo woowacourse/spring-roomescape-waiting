@@ -7,10 +7,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
-import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -58,30 +57,31 @@ class ReservationRepositoryTest {
     @Test
     void 예약_전체를_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
 
         List<Reservation> result = reservationRepository.findAll(0, 10);
 
         assertThat(result).hasSize(1);
         Reservation reservation = result.get(0);
+        Schedule schedule = reservation.getSchedule();
         assertThat(reservation.getName()).isEqualTo("브라운");
-        assertThat(reservation.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
-        assertThat(reservation.getTime().getId()).isEqualTo(time.getId());
-        assertThat(reservation.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(reservation.getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(reservation.getTheme().getName()).isEqualTo("공포방");
-        assertThat(reservation.getTheme().getDescription()).isEqualTo("무서운방입니다.");
-        assertThat(reservation.getTheme().getThumbnail()).isEqualTo("image-url");
+        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
+        assertThat(schedule.getTime().getId()).isEqualTo(time.getId());
+        assertThat(schedule.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(schedule.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(schedule.getTheme().getName()).isEqualTo("공포방");
+        assertThat(schedule.getTheme().getDescription()).isEqualTo("무서운방입니다.");
+        assertThat(schedule.getTheme().getThumbnail()).isEqualTo("image-url");
     }
 
     @Test
     void 예약_목록을_페이지_단위로_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "어셔", LocalDate.of(2026, 5, 11), time, theme));
+                null, "어셔", new Schedule(LocalDate.of(2026, 5, 11), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "레서", LocalDate.of(2026, 5, 12), time, theme));
+                null, "레서", new Schedule(LocalDate.of(2026, 5, 12), time, theme)));
 
         List<Reservation> result = reservationRepository.findAll(1, 2);
 
@@ -92,41 +92,41 @@ class ReservationRepositoryTest {
     @Test
     void 이름으로_사용자_예약_목록을_페이지_단위로_조회한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "어셔", LocalDate.of(2026, 5, 11), time, theme));
+                null, "어셔", new Schedule(LocalDate.of(2026, 5, 11), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 12), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 12), time, theme)));
 
-        List<Reservation> result = reservationRepository.findByName("브라운", 0, 10);
+        List<Reservation> result = reservationRepository.findUserReservations("브라운", 0, 10);
 
         assertThat(result).hasSize(2);
         assertThat(result)
                 .extracting(Reservation::getName)
                 .containsExactly("브라운", "브라운");
         assertThat(result)
-                .extracting(Reservation::getDate)
+                .extracting(reservation -> reservation.getSchedule().getDate())
                 .containsExactly(LocalDate.of(2026, 5, 10), LocalDate.of(2026, 5, 12));
     }
 
     @Test
     void 이름으로_사용자_예약_목록을_조회할_때_페이지를_적용한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 11), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 11), time, theme)));
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 12), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 12), time, theme)));
 
-        List<Reservation> result = reservationRepository.findByName("브라운", 1, 2);
+        List<Reservation> result = reservationRepository.findUserReservations("브라운", 1, 2);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getDate()).isEqualTo(LocalDate.of(2026, 5, 12));
+        assertThat(result.get(0).getSchedule().getDate()).isEqualTo(LocalDate.of(2026, 5, 12));
     }
 
     @Test
     void 예약을_저장한다() {
-        Reservation saved = reservationRepository.save(new Reservation(null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+        Reservation saved = reservationRepository.save(new Reservation(null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM reservation WHERE id = ?", Integer.class, saved.getId());
@@ -136,15 +136,16 @@ class ReservationRepositoryTest {
     @Test
     void id로_예약을_조회한다() {
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
 
         Reservation result = reservationRepository.findById(savedReservation.getId()).get();
 
+        Schedule schedule = result.getSchedule();
         assertThat(result.getId()).isEqualTo(savedReservation.getId());
         assertThat(result.getName()).isEqualTo("브라운");
-        assertThat(result.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
-        assertThat(result.getTime().getId()).isEqualTo(time.getId());
-        assertThat(result.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
+        assertThat(schedule.getTime().getId()).isEqualTo(time.getId());
+        assertThat(schedule.getTheme().getId()).isEqualTo(theme.getId());
     }
 
     @Test
@@ -163,25 +164,25 @@ class ReservationRepositoryTest {
                 "12:00"
         );
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
         Reservation updated = new Reservation(
-                savedReservation.getId(), "브라운", LocalDate.of(2026, 5, 11), newTime, theme);
+                savedReservation.getId(), "브라운", new Schedule(LocalDate.of(2026, 5, 11), newTime, theme));
 
         reservationRepository.update(updated);
 
         Reservation result = reservationRepository.findById(savedReservation.getId()).get();
-        assertThat(result.getDate()).isEqualTo(LocalDate.of(2026, 5, 11));
-        assertThat(result.getTime().getId()).isEqualTo(newTime.getId());
-        assertThat(result.getTime().getStartAt()).isEqualTo(LocalTime.of(12, 0));
+        Schedule schedule = result.getSchedule();
+        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2026, 5, 11));
+        assertThat(schedule.getTime().getId()).isEqualTo(newTime.getId());
+        assertThat(schedule.getTime().getStartAt()).isEqualTo(LocalTime.of(12, 0));
     }
 
     @Test
     void 같은_날짜_시간_테마의_예약을_조회한다() {
         Reservation first = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
 
-        Optional<Reservation> result = reservationRepository.findBySchedule(
-                first.getDate(), first.getTime().getId(), first.getTheme().getId());
+        Optional<Reservation> result = reservationRepository.findBySchedule(first.getSchedule());
 
         assertThat(result).isPresent();
         assertThat(result.get().getId()).isEqualTo(first.getId());
@@ -190,42 +191,32 @@ class ReservationRepositoryTest {
     @Test
     void 같은_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
         Reservation reservation = new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme);
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme));
 
-        Optional<Reservation> result = reservationRepository.findBySchedule(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        Optional<Reservation> result = reservationRepository.findBySchedule(reservation.getSchedule());
 
         assertThat(result).isEmpty();
     }
 
 
     @Test
-    void 예약과_예약_대기_목록을_함께_조회한다() {
+    void 사용자의_예약만_조회하고_예약대기는_제외한다() {
         reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
-        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                "어셔", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
         jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "브라운", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
 
-        List<UserReservation> result = reservationRepository.findUserReservations("브라운", 0, 10);
+        List<Reservation> result = reservationRepository.findUserReservations("브라운", 0, 10);
 
-        assertThat(result).hasSize(2);
-        assertThat(result)
-                .extracting(UserReservation::status)
-                .containsExactlyInAnyOrder(ReservationStatus.RESERVED, ReservationStatus.WAITING);
-        UserReservation waiting = result.stream()
-                .filter(it -> it.status() == ReservationStatus.WAITING)
-                .findFirst()
-                .orElseThrow();
-        assertThat(waiting.name()).isEqualTo("브라운");
-        assertThat(waiting.rank()).isNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("브라운");
+        assertThat(result.get(0).getSchedule().getDate()).isEqualTo(LocalDate.of(2026, 5, 10));
     }
 
     @Test
     void 예약을_삭제한다() {
         Reservation savedReservation = reservationRepository.save(new Reservation(
-                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+                null, "브라운", new Schedule(LocalDate.of(2026, 5, 10), time, theme)));
 
         reservationRepository.delete(savedReservation);
 

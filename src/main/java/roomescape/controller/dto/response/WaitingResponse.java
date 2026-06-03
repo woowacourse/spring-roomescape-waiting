@@ -1,5 +1,6 @@
 package roomescape.controller.dto.response;
 
+import roomescape.domain.Schedule;
 import roomescape.domain.Waiting;
 import roomescape.service.dto.WaitingResult;
 
@@ -16,12 +17,13 @@ public record WaitingResponse(
 
     public static WaitingResponse from(WaitingResult waitingResult) {
         Waiting waiting = waitingResult.waiting();
+        Schedule schedule = waiting.getSchedule();
         return new WaitingResponse(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getDate(),
-                ReservationTimeResponse.from(waiting.getTime()),
-                ThemeResponse.from(waiting.getTheme()),
+                schedule.getDate(),
+                ReservationTimeResponse.from(schedule.getTime()),
+                ThemeResponse.from(schedule.getTheme()),
                 waitingResult.order()
                 );
     }

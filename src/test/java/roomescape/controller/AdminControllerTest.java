@@ -8,6 +8,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
@@ -42,12 +43,12 @@ class AdminControllerTest {
     @Test
     void 전체_예약_목록_조회_요청을_Service에_전달하고_결과를_반환한다() throws Exception {
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "레서", LocalDate.of(2026, 5, 6),
+                new Reservation(1L, "레서", new Schedule(LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
-                        new Theme(1L, "공포방", "무서운방입니다.", "image-url")),
-                new Reservation(2L, "어셔", LocalDate.of(2026, 5, 7),
+                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))),
+                new Reservation(2L, "어셔", new Schedule(LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
-                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"))
+                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2")))
         );
         when(reservationService.findReservations(1, 5)).thenReturn(reservations);
 

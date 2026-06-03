@@ -5,9 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.request.WaitingRequest;
+import roomescape.controller.dto.response.WaitingListResponse;
 import roomescape.controller.dto.response.WaitingResponse;
 import roomescape.service.WaitingService;
 import roomescape.service.dto.WaitingResult;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/waitings")
@@ -17,6 +20,17 @@ public class WaitingController {
 
     public WaitingController(WaitingService waitingService) {
         this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<WaitingListResponse> findMyWaitList(
+            @RequestParam String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<WaitingResult> userWaitList = waitingService.findUserWaitList(name, page, size);
+        WaitingListResponse response = WaitingListResponse.from(userWaitList);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping

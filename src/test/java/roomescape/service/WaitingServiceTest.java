@@ -2,10 +2,7 @@ package roomescape.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
+import roomescape.domain.*;
 import roomescape.domain.exception.DomainConflictException;
 import roomescape.service.dto.WaitingResult;
 import roomescape.service.exception.BusinessConflictException;
@@ -51,8 +48,8 @@ class WaitingServiceTest {
 
     @Test
     void 예약_대기를_생성하고_대기_순번을_반환한다() {
-        reservationRepository.save(new Reservation(null, "예약자", futureDate, time, theme));
-        waitingRepository.save(new Waiting(null, "선행자", futureDate, time, theme));
+        reservationRepository.save(new Reservation(null, "예약자", new Schedule(futureDate, time, theme)));
+        waitingRepository.save(new Waiting(null, "선행자", new Schedule(futureDate, time, theme)));
 
         WaitingResult result = waitingService.createWaiting("레서", futureDate, 1L, 1L);
 
@@ -88,7 +85,7 @@ class WaitingServiceTest {
 
     @Test
     void 동일한_일정에_이미_대기_중이면_예외가_발생한다() {
-        waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
+        waitingRepository.save(new Waiting(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);
@@ -104,7 +101,7 @@ class WaitingServiceTest {
 
     @Test
     void 동일한_일정에_본인의_예약이_이미_있으면_예외가_발생한다() {
-        reservationRepository.save(new Reservation(null, "레서", futureDate, time, theme));
+        reservationRepository.save(new Reservation(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.createWaiting("레서", futureDate, 1L, 1L))
                 .isInstanceOf(BusinessConflictException.class);
@@ -119,7 +116,7 @@ class WaitingServiceTest {
 
     @Test
     void 예약_대기의_소유자가_아닌_경우_예외가_발생하고_삭제되지_않는다() {
-        Waiting saved = waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(futureDate, time, theme)));
 
         assertThatThrownBy(() -> waitingService.deleteWaiting(saved.getId(), "밍구"))
                 .isInstanceOf(DomainConflictException.class);
@@ -128,7 +125,7 @@ class WaitingServiceTest {
 
     @Test
     void 예약_대기의_소유자인_경우_삭제한다() {
-        Waiting saved = waitingRepository.save(new Waiting(null, "레서", futureDate, time, theme));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(futureDate, time, theme)));
 
         waitingService.deleteWaiting(saved.getId(), "레서");
 

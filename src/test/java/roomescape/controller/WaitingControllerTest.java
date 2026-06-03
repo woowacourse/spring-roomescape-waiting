@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.service.WaitingService;
@@ -34,9 +35,9 @@ class WaitingControllerTest {
 
     @Test
     void 예약_대기_생성_요청을_받으면_DTO의_정보를_Service에_전달하고_결과를_반환한다() throws Exception {
-        Waiting waiting = new Waiting(1L, "레서", LocalDate.of(2026, 5, 6),
+        Waiting waiting = new Waiting(1L, "레서", new Schedule(LocalDate.of(2026, 5, 6),
                 new ReservationTime(1L, LocalTime.of(18, 0)),
-                new Theme(1L, "공포방", "무서운방입니다.", "image-url"));
+                new Theme(1L, "공포방", "무서운방입니다.", "image-url")));
         when(waitingService.createWaiting(any(), any(), anyLong(), anyLong()))
                 .thenReturn(WaitingResult.of(waiting, 2L));
 

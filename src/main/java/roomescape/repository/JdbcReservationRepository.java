@@ -8,8 +8,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
-import roomescape.service.dto.UserReservation;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -74,22 +74,22 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name, int page, int size) {
+    public List<Reservation> findUserReservations(String name, int page, int size) {
         String sql = """
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
                        r.date        AS reservation_date,
                        t.id          AS time_id,
                        t.start_at    AS time_start_at,
-                       th.id    AS theme_id,
-                       th.name    AS theme_name,
-                       th.description    AS theme_description,
-                       th.thumbnail    AS theme_thumbnail
+                       th.id         AS theme_id,
+                       th.name       AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail  AS theme_thumbnail
                 FROM reservation r
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme th ON r.theme_id = th.id
                 WHERE r.name = ?
-                ORDER BY r.id
+                ORDER BY r.date, t.start_at, r.id
                 LIMIT ? OFFSET ?
                 """;
         int offset = Math.max(page, 0) * size;
@@ -97,40 +97,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<UserReservation> findUserReservations(String name, int page, int size) {
-        String sql = """
-                SELECT entry.id        AS entry_id,
-                       entry.name      AS entry_name,
-                       entry.date      AS entry_date,
-                       entry.status    AS entry_status,
-                       t.id            AS time_id,
-                       t.start_at      AS time_start_at,
-                       th.id           AS theme_id,
-                       th.name         AS theme_name,
-                       th.description  AS theme_description,
-                       th.thumbnail    AS theme_thumbnail
-                FROM (
-                    SELECT r.id, r.name, r.date, r.time_id, r.theme_id,
-                           'RESERVED' AS status
-                    FROM reservation r
-                    WHERE r.name = ?
-                    UNION ALL
-                    SELECT w.id, w.name, w.date, w.time_id, w.theme_id,
-                           'WAITING'  AS status
-                    FROM waiting w
-                    WHERE w.name = ?
-                ) entry
-                JOIN reservation_time t ON entry.time_id = t.id
-                JOIN theme th           ON entry.theme_id = th.id
-                ORDER BY entry.date, t.start_at, entry.status, entry.id
-                LIMIT ? OFFSET ?
-                """;
-        int offset = Math.max(page, 0) * size;
-        return jdbcTemplate.query(sql, userReservationRowMapper(), name, name, size, offset);
-    }
-
-    @Override
-    public Optional<Reservation> findBySchedule(LocalDate date, long timeId, long themeId) {
+    public Optional<Reservation> findBySchedule(Schedule schedule) {
         String sql = """
                 SELECT r.id          AS reservation_id,
                        r.name        AS reservation_name,
@@ -150,9 +117,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 """;
         try {
             Reservation found = jdbcTemplate.queryForObject(sql, reservationRowsMapper(),
-                    date,
-                    timeId,
-                    themeId);
+                    schedule.getDate(),
+                    schedule.getTime().getId(),
+                    schedule.getTheme().getId());
             return Optional.ofNullable(found);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -160,7 +127,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId) {
+    public Optional<String> findReserverNameByScheduleForUpdate(Schedule schedule) {
         String sql = """
                 SELECT name
                 FROM reservation
@@ -168,7 +135,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FOR UPDATE
                 """;
         try {
-            String reserverName = jdbcTemplate.queryForObject(sql, String.class, date, timeId, themeId);
+            String reserverName = jdbcTemplate.queryForObject(sql, String.class,
+                    schedule.getDate(),
+                    schedule.getTime().getId(),
+                    schedule.getTheme().getId());
             return Optional.ofNullable(reserverName);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -183,18 +153,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, reservation.getName());
-            ps.setObject(2, reservation.getDate());
-            ps.setObject(3, reservation.getTime().getId());
-            ps.setObject(4, reservation.getTheme().getId());
+            ps.setObject(2, reservation.getSchedule().getDate());
+            ps.setObject(3, reservation.getSchedule().getTime().getId());
+            ps.setObject(4, reservation.getSchedule().getTheme().getId());
             return ps;
         }, keyHolder);
         long id = keyHolder.getKey().longValue();
         return new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
+                reservation.getSchedule());
     }
 
     @Override
@@ -208,8 +176,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void update(Reservation reservation) {
         String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
         jdbcTemplate.update(sql,
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                reservation.getSchedule().getDate(),
+                reservation.getSchedule().getTime().getId(),
                 reservation.getId());
     }
 
@@ -217,31 +185,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void delete(Reservation reservation) {
         String sql = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(sql, reservation.getId());
-    }
-
-    private RowMapper<UserReservation> userReservationRowMapper() {
-        return (rs, rowNum) -> {
-            ReservationTime time = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getObject("time_start_at", LocalTime.class)
-            );
-
-            Theme theme = new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
-            );
-
-            Long id = rs.getLong("entry_id");
-            String name = rs.getString("entry_name");
-            LocalDate date = LocalDate.parse(rs.getString("entry_date"));
-
-            if ("WAITING".equals(rs.getString("entry_status"))) {
-                return UserReservation.waiting(id, name, date, time, theme);
-            }
-            return UserReservation.from(id, name, date, time, theme);
-        };
     }
 
     private RowMapper<Reservation> reservationRowsMapper() {
@@ -261,9 +204,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             return new Reservation(
                     rs.getLong("reservation_id"),
                     rs.getString("reservation_name"),
-                    LocalDate.parse(rs.getString("reservation_date")),
-                    time,
-                    theme
+                    new Schedule(LocalDate.parse(rs.getString("reservation_date")), time, theme)
             );
         };
     }

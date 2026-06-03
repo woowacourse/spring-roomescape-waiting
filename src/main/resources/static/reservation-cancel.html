@@ -438,23 +438,31 @@
         container.innerHTML = '<p class="state-msg">불러오는 중...</p>';
 
         try {
-            const res = await fetch(`/reservations?name=${encodeURIComponent(name)}`);
+            const [resvRes, waitRes] = await Promise.all([
+                fetch(`/reservations?name=${encodeURIComponent(name)}`),
+                fetch(`/waitings?name=${encodeURIComponent(name)}`)
+            ]);
 
-            if (!res.ok) {
-                const msg = await readErrorMessage(res, '예약을 불러오지 못했습니다.');
+            if (!resvRes.ok || !waitRes.ok) {
+                const failed = !resvRes.ok ? resvRes : waitRes;
+                const msg = await readErrorMessage(failed, '예약을 불러오지 못했습니다.');
                 showToast('error', msg);
                 container.innerHTML = '<p class="state-msg">예약 내역이 없습니다.</p>';
                 return;
             }
 
-            const body = await res.json();
-            const reservations = body.userReservations;
-            if (!reservations.length) {
+            const reservations = (await resvRes.json()).reservations
+                .map(r => ({ ...r, status: 'RESERVED' }));
+            const waitings = (await waitRes.json()).waitingList
+                .map(w => ({ ...w, status: 'WAITING', rank: w.order }));
+            const items = [...reservations, ...waitings];
+
+            if (!items.length) {
                 container.innerHTML = '<p class="state-msg">예약 내역이 없습니다.</p>';
                 return;
             }
             container.innerHTML = '';
-            reservations.forEach(r => container.appendChild(createCard(r)));
+            items.forEach(r => container.appendChild(createCard(r)));
         } catch {
             container.innerHTML = '<p class="state-msg">네트워크 오류로 불러오기에 실패했습니다.</p>';
         }

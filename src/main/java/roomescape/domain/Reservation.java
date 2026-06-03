@@ -10,39 +10,26 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Schedule schedule;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, Schedule schedule) {
         if (name == null || name.isBlank()) {
             throw new DomainRuleViolationException("예약자 이름은 비어 있을 수 없습니다.");
         }
-        if (date == null) {
-            throw new DomainRuleViolationException("예약 날짜는 비어 있을 수 없습니다.");
-        }
-        if (time == null) {
-            throw new DomainRuleViolationException("예약 시간은 비어 있을 수 없습니다.");
-        }
-        if (theme == null) {
-            throw new DomainRuleViolationException("예약 테마는 비어 있을 수 없습니다.");
-        }
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.schedule = schedule;
     }
 
-    private Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, date, time, theme);
+    private Reservation(String name, Schedule schedule) {
+        this(null, name, schedule);
     }
 
-    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime now) {
-        if (time.isPast(date, now)) {
+    public static Reservation create(String name, Schedule schedule, LocalDateTime now) {
+        if(schedule.isPast(now)) {
             throw new DomainConflictException("지난 시간으로는 예약할 수 없습니다.");
         }
-        return new Reservation(name, date, time, theme);
+        return new Reservation(name, schedule);
     }
 
     public Reservation changeSchedule(LocalDate newDate, ReservationTime newTime, String requester, LocalDateTime now) {
@@ -53,7 +40,7 @@ public class Reservation {
         if (newTime.isPast(newDate, now)) {
             throw new DomainConflictException("과거로는 변경할 수 없습니다.");
         }
-        return new Reservation(id, name, newDate, newTime, theme);
+        return new Reservation(id, name, new Schedule(newDate, newTime, schedule.getTheme()));
     }
 
     public void checkCancellable(String requester, LocalDateTime now) {
@@ -69,9 +56,8 @@ public class Reservation {
         }
     }
 
-
     private boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+        return schedule.isPast(now);
     }
 
     public boolean isSameReservation(Reservation other) {
@@ -86,15 +72,7 @@ public class Reservation {
         return name;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
+    public Schedule getSchedule() {
+        return schedule;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 
@@ -54,7 +55,7 @@ class WaitingRepositoryTest {
 
     @Test
     void 예약_대기를_저장한다() {
-        Waiting saved = waitingRepository.save(new Waiting(null, "레서", date, time, theme));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM waiting WHERE id = ?", Integer.class, saved.getId());
@@ -64,17 +65,18 @@ class WaitingRepositoryTest {
 
     @Test
     void id로_예약_대기를_조회한다() {
-        Waiting saved = waitingRepository.save(new Waiting(null, "레서", date, time, theme));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         Waiting result = waitingRepository.findById(saved.getId()).get();
 
+        Schedule schedule = result.getSchedule();
         assertThat(result.getId()).isEqualTo(saved.getId());
         assertThat(result.getName()).isEqualTo("레서");
-        assertThat(result.getDate()).isEqualTo(date);
-        assertThat(result.getTime().getId()).isEqualTo(time.getId());
-        assertThat(result.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(result.getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(result.getTheme().getName()).isEqualTo("공포방");
+        assertThat(schedule.getDate()).isEqualTo(date);
+        assertThat(schedule.getTime().getId()).isEqualTo(time.getId());
+        assertThat(schedule.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(schedule.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(schedule.getTheme().getName()).isEqualTo("공포방");
     }
 
     @Test
@@ -84,10 +86,10 @@ class WaitingRepositoryTest {
 
     @Test
     void 동일한_일정과_이름의_예약_대기를_조회한다() {
-        waitingRepository.save(new Waiting(null, "레서", date, time, theme));
+        waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         Optional<Waiting> result = waitingRepository.findByScheduleAndName(
-                new Waiting(null, "레서", date, time, theme));
+                new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         assertThat(result).isPresent();
         assertThat(result.get().getName()).isEqualTo("레서");
@@ -95,24 +97,23 @@ class WaitingRepositoryTest {
 
     @Test
     void 동일한_일정과_이름의_예약_대기가_없으면_빈_Optional을_반환한다() {
-        waitingRepository.save(new Waiting(null, "레서", date, time, theme));
+        waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         Optional<Waiting> result = waitingRepository.findByScheduleAndName(
-                new Waiting(null, "밍구", date, time, theme));
+                new Waiting(null, "밍구", new Schedule(date, time, theme)));
 
         assertThat(result).isEmpty();
     }
 
     @Test
     void 같은_일정에서_예약_대기_순번을_구한다() {
-        Waiting first = waitingRepository.save(new Waiting(null, "레서", date, time, theme));
-        waitingRepository.save(new Waiting(null, "밍구", date, time, theme));
-        Waiting third = waitingRepository.save(new Waiting(null, "브라운", date, time, theme));
+        Waiting first = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
+        waitingRepository.save(new Waiting(null, "밍구", new Schedule(date, time, theme)));
+        Waiting third = waitingRepository.save(new Waiting(null, "브라운", new Schedule(date, time, theme)));
 
-        Long firstOrder = waitingRepository.findWaitingOrder(
-                first.getId(), theme, date, time);
-        Long thirdOrder = waitingRepository.findWaitingOrder(
-                third.getId(), theme, date, time);
+        Schedule schedule = new Schedule(date, time, theme);
+        Long firstOrder = waitingRepository.findWaitingOrder(first);
+        Long thirdOrder = waitingRepository.findWaitingOrder(third);
 
         assertThat(firstOrder).isEqualTo(1L);
         assertThat(thirdOrder).isEqualTo(3L);
@@ -120,7 +121,7 @@ class WaitingRepositoryTest {
 
     @Test
     void 예약_대기를_삭제한다() {
-        Waiting saved = waitingRepository.save(new Waiting(null, "레서", date, time, theme));
+        Waiting saved = waitingRepository.save(new Waiting(null, "레서", new Schedule(date, time, theme)));
 
         waitingRepository.delete(saved);
 

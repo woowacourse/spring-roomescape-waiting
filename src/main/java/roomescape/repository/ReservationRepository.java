@@ -1,9 +1,8 @@
 package roomescape.repository;
 
 import roomescape.domain.Reservation;
-import roomescape.service.dto.UserReservation;
+import roomescape.domain.Schedule;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +12,11 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long id);
 
-    List<Reservation> findByName(String name, int page, int size);
+    List<Reservation> findUserReservations(String name, int page, int size);
 
-    List<UserReservation> findUserReservations(String name, int page, int size);
+    Optional<Reservation> findBySchedule(Schedule schedule);
 
-    Optional<Reservation> findBySchedule(LocalDate date, long timeId, long themeId);
-
-    Optional<String> findReserverNameByScheduleForUpdate(LocalDate date, long timeId, long themeId);
+    Optional<String> findReserverNameByScheduleForUpdate(Schedule schedule);
 
     Reservation save(Reservation reservation);
 

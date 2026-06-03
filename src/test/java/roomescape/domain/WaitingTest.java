@@ -18,60 +18,60 @@ class WaitingTest {
 
     @Test
     void 유효한_값으로_예약대기을_생성하면_필드가_저장된다() {
-        Waiting waiting = new Waiting(1L, "브라운", LocalDate.of(2026, 5, 1), TIME, THEME);
+        Waiting waiting = new Waiting(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME));
 
         assertThat(waiting.getName()).isEqualTo("브라운");
-        assertThat(waiting.getDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-        assertThat(waiting.getTime()).isEqualTo(TIME);
+        assertThat(waiting.getSchedule().getDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(waiting.getSchedule().getTime()).isEqualTo(TIME);
     }
 
     @Test
     void 예약대기자_이름이_빈_문자열이면_예외가_발생한다() {
-        assertThatThrownBy(() -> new Waiting(1L, "", LocalDate.of(2026, 5, 1), TIME, THEME))
+        assertThatThrownBy(() -> new Waiting(1L, "", new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME)))
                 .isInstanceOf(DomainRuleViolationException.class);
     }
 
     @Test
     void 예약대기자_이름이_null이면_예외가_발생한다() {
-        assertThatThrownBy(() -> new Waiting(1L, null, LocalDate.of(2026, 5, 1), TIME, THEME))
+        assertThatThrownBy(() -> new Waiting(1L, null, new Schedule(LocalDate.of(2026, 5, 1), TIME, THEME)))
                 .isInstanceOf(DomainRuleViolationException.class);
     }
 
     @Test
     void 예약대기_날짜가_null이면_예외가_발생한다() {
-        assertThatThrownBy(() -> new Waiting(1L, "브라운", null, TIME, THEME))
+        assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(null, TIME, THEME)))
                 .isInstanceOf(DomainRuleViolationException.class);
     }
 
     @Test
     void 예약대기_시간이_null이면_예외가_발생한다() {
-        assertThatThrownBy(() -> new Waiting(1L, "브라운", LocalDate.of(2026, 5, 1), null, THEME))
+        assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), null, THEME)))
                 .isInstanceOf(DomainRuleViolationException.class);
     }
 
     @Test
     void 예약대기_테마가_null이면_예외가_발생한다() {
-        assertThatThrownBy(() -> new Waiting(1L, "브라운", LocalDate.of(2026, 5, 1), TIME, null))
+        assertThatThrownBy(() -> new Waiting(1L, "브라운", new Schedule(LocalDate.of(2026, 5, 1), TIME, null)))
                 .isInstanceOf(DomainRuleViolationException.class);
     }
 
     @Test
     void 미래_시간으로_예약대기를_생성할_수_있다() {
         assertThatNoException().isThrownBy(
-                () -> Waiting.create("브라운", LocalDate.of(2026, 5, 10), TIME, THEME, NOW));
+                () -> Waiting.create("브라운", new Schedule(LocalDate.of(2026, 5, 10), TIME, THEME), NOW));
     }
 
     @Test
     void 과거_시간으로_예약대기를_생성하면_도메인_충돌_예외가_발생한다() {
         assertThatThrownBy(
-                () -> Waiting.create("브라운", LocalDate.of(2026, 4, 1), TIME, THEME, NOW))
+                () -> Waiting.create("브라운", new Schedule(LocalDate.of(2026, 4, 1), TIME, THEME), NOW))
                 .isInstanceOf(DomainConflictException.class);
     }
 
     @Test
     void 본인의_예약_대기가_아니면_취소할_수_없다() {
         Waiting waiting = new Waiting(
-                7L, "브라운", LocalDate.of(2026, 5, 10), TIME, THEME);
+                7L, "브라운", new Schedule(LocalDate.of(2026, 5, 10), TIME, THEME));
 
         assertThatThrownBy(() -> waiting.validateCancelableBy("어셔"))
                 .isInstanceOf(DomainConflictException.class);
