@@ -29,7 +29,7 @@ public class OwnerOnlyArgumentResolver implements HandlerMethodArgumentResolver 
         String loginName = (String) request.getAttribute("loginName");
 
         if (loginName == null) {
-            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
+            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER);
         }
 
         return loginName;

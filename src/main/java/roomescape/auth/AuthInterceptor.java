@@ -24,7 +24,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         String name = request.getHeader("Authorization");
 
         if (name == null || name.isBlank()) {
-            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
+            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER);
         }
 
         request.setAttribute("loginName", name);
