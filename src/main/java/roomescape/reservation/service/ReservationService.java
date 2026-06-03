@@ -27,6 +27,7 @@ import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT
     @RequiredArgsConstructor
 public class ReservationService {
 
+    private final ReservationRescheduleService rescheduleService;
     private final ReservationRepository reservationRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
@@ -49,16 +50,26 @@ public class ReservationService {
     @Transactional
     public Reservation cancelByManager(Long id) {
         Reservation reservation = getReservation(id);
-        reservation.updateStatus(CANCELED);
-        reservationRepository.updateStatus(reservation);
+        if (reservation.isReserved()) {
+            cancelByManger(reservation);
+            rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
+            return reservation;
+        }
+
+        cancelByManger(reservation);
         return reservation;
     }
 
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
         Reservation reservation = getReservation(id);
-        reservation.cancel(requesterName, LocalDateTime.now());
-        reservationRepository.updateStatus(reservation);
+        if (reservation.isReserved()) {
+            cancel(reservation, requesterName);
+            rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
+            return reservation;
+        }
+
+        cancel(reservation, requesterName);
         return reservation;
     }
 
@@ -82,6 +93,16 @@ public class ReservationService {
         reservation.changeScheduleByManager(newSlot, LocalDateTime.now());
         reservationRepository.updateSchedule(reservation);
         return reservation;
+    }
+
+    private void cancelByManger(Reservation cancelTarget) {
+        cancelTarget.updateStatus(CANCELED);
+        reservationRepository.updateStatus(cancelTarget);
+    }
+
+    private void cancel(Reservation cancelTarget, String requesterName) {
+        cancelTarget.cancel(requesterName, LocalDateTime.now());
+        reservationRepository.updateStatus(cancelTarget);
     }
 
     private Reservation getReservation(Long id) {

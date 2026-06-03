@@ -53,6 +53,7 @@ class ReservationServiceTest {
     private FakeThemeRepository themeRepository;
     private FakeReservationSlotRepository reservationSlotRepository;
 
+    private ReservationRescheduleService rescheduleService;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -63,7 +64,8 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository();
         reservationSlotRepository = new FakeReservationSlotRepository();
 
-        this.reservationService = new ReservationService(reservationRepository, reservationSlotRepository);
+        rescheduleService = new ReservationRescheduleService(reservationRepository);
+        reservationService = new ReservationService(rescheduleService, reservationRepository, reservationSlotRepository);
 
         reservationTime1 = reservationTimeRepository.save(ReservationTimeFixture.time15());
         reservationTime2 = reservationTimeRepository.save(ReservationTimeFixture.time16());

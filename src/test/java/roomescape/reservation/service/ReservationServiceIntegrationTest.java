@@ -278,10 +278,33 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             String name2 = "피온";
 
             Reservation reservation1 = saveReservation(name1, slot1);
-            Reservation reservation2 = saveReservation(name1, slot2);
+            Reservation reservation2 = saveReservation(name2, slot2);
 
             // when
             reservationService.cancel(reservation1.getId(), name1);
+            Reservation canceledReservation = reservationRepository.findById(reservation1.getId()).get();
+            Reservation currentReservedReservation = reservationRepository.findById(reservation2.getId()).get();
+
+            // then
+            Assertions.assertThat(canceledReservation.getStatus())
+                    .isEqualTo(CANCELED);
+
+            Assertions.assertThat(currentReservedReservation.getStatus())
+                    .isEqualTo(RESERVED);
+        }
+
+        @Test
+        @DisplayName("관리자가 예약취소 시, 타겟은 CANCELED 대기 1순위가 RESERVED가 된다.")
+        void cancelByManager_with_reschedule() {
+            // then
+            String name1 = "송송";
+            String name2 = "피온";
+
+            Reservation reservation1 = saveReservation(name1, slot1);
+            Reservation reservation2 = saveReservation(name2, slot2);
+
+            // when
+            reservationService.cancelByManager(reservation1.getId());
             Reservation canceledReservation = reservationRepository.findById(reservation1.getId()).get();
             Reservation currentReservedReservation = reservationRepository.findById(reservation2.getId()).get();
 

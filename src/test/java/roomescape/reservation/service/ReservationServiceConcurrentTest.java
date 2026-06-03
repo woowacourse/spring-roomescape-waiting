@@ -27,7 +27,7 @@ import static roomescape.ConcurrentUtils.doConcurrent;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import(ReservationService.class)
+@Import({ReservationService.class, ReservationRescheduleService.class})
 class ReservationServiceConcurrentTest extends ServiceSupport {
 
     private final String name = "송송";
@@ -40,6 +40,7 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     private ReservationSlot slot1;
     private ReservationSlot slot2;
     private Theme theme;
+
     @Autowired
     private ReservationService reservationService;
 
