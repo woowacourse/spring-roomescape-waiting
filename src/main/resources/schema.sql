@@ -34,8 +34,11 @@ CREATE TABLE reservation (
     slot_id BIGINT       NOT NULL,
     status         VARCHAR(20)  NOT NULL,
     active_status  VARCHAR(20)  NOT NULL,
+    active_name    VARCHAR(20) GENERATED ALWAYS AS (
+        CASE WHEN active_status = 'ACTIVE' THEN name ELSE NULL END
+    ),
     created_at     TIMESTAMP    NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (slot_id) REFERENCES reservation_slot (id),
-    CONSTRAINT uk_reservation_slot_name_active_status UNIQUE (slot_id, name, active_status)
+    CONSTRAINT uk_reservation_slot_active_name UNIQUE (slot_id, active_name)
 );

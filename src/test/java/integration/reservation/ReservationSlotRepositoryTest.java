@@ -2,6 +2,7 @@ package integration.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import integration.BaseIntegrationTest;
 import java.time.LocalDate;
@@ -72,7 +73,35 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    void 같은_슬롯에_같은_이름의_예약_엔트리를_저장하면_DB_제약조건_에러가_발생한다() {
+    void 같은_슬롯에_같은_이름의_취소_이력을_여러_번_저장할_수_있다() {
+        // given
+        Reservation firstCanceled = new Reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        Reservation secondCanceled = new Reservation(null, "이프", ReservationStatus.WAITING, LocalDateTime.now());
+        firstCanceled.cancel();
+        secondCanceled.cancel();
+
+        ReservationSlot slot = new ReservationSlot(
+                null,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(firstCanceled, secondCanceled)
+        );
+
+        // when
+        ReservationSlot saved = reservationRepository.save(slot);
+
+        // then
+        assertThat(saved.getReservations())
+                .extracting(Reservation::getName, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactlyInAnyOrder(
+                        tuple("이프", ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple("이프", ReservationStatus.WAITING, ReservationActiveStatus.CANCELED)
+                );
+    }
+
+    @Test
+    void 같은_슬롯에_같은_이름의_활성_엔트리를_저장하면_DB_제약조건_에러가_발생한다() {
         // given
         ReservationSlot slot = new ReservationSlot(
                 null,
