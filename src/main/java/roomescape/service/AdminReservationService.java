@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.response.ReservationResponses;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.repository.ReservationRepository;

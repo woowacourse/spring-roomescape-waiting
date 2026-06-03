@@ -10,9 +10,9 @@ import roomescape.domain.Role;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.reservation.CancelReservationCommand;
-import roomescape.dto.reservation.CreateReservationCommand;
-import roomescape.dto.reservation.UpdateReservationCommand;
+import roomescape.dto.command.CancelReservationCommand;
+import roomescape.dto.command.CreateReservationCommand;
+import roomescape.dto.command.UpdateReservationCommand;
 
 public final class Fixtures {
 

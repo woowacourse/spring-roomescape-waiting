@@ -1,4 +1,4 @@
-package roomescape.dto.theme;
+package roomescape.dto.response;
 
 public record ThemeReservationTimeResponse(
         Long id,

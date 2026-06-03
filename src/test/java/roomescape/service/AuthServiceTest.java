@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.request.LoginRequest;
 import roomescape.exception.InvalidLoginException;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.repository.fake.FakeUserRepository;

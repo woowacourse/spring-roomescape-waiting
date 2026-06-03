@@ -12,7 +12,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.response.ReservationResponses;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.fixture.Fixtures;
