@@ -1,0 +1,13 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    url: jdbc:h2:mem:database
+
+security:
+  jwt:
+    token:
+      secret-key: "/BWxvVt/eMsTVSq+RI9kRCrZKK38KNGIWi7ilxCg9So="
+      expire-length: 3600000
