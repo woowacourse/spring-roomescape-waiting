@@ -1,12 +1,15 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +21,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithNumber;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.PastTimeException;
@@ -38,6 +42,30 @@ class WaitingServiceTest {
     @BeforeEach
     void setUp() {
         waitingService = new WaitingService(waitingRepository, reservationRepository);
+    }
+
+    @Test
+    @DisplayName("존재하는 예약에 대기를 추가하면 대기 순번을 반환한다.")
+    void 대기_저장() {
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = createReservation("네오", date, LocalTime.of(10, 0));
+        Waiting waiting = new Waiting(
+                1L,
+                "브라운",
+                date,
+                reservation.getTimeSlot(),
+                reservation.getTheme(),
+                LocalDateTime.now()
+        );
+
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L))
+                .willReturn(Optional.of(reservation));
+        given(waitingRepository.save(any(Waiting.class))).willReturn(waiting);
+        given(waitingRepository.findByDateAndTimeAndTheme(date, 1L, 1L))
+                .willReturn(List.of(waiting));
+
+        WaitingWithNumber waitingWithNumber = waitingService.saveWaiting("브라운", date, 1L, 1L);
+        assertThat(waitingWithNumber.number()).isEqualTo(1);
     }
 
     @Test
@@ -88,7 +116,8 @@ class WaitingServiceTest {
     @DisplayName("예약이 없는 슬롯에 대기를 추가하면, 예외가 발생한다.")
     void 예약_없는_슬롯_대기_예외_발생() {
         LocalDate date = LocalDate.now().plusDays(1);
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(Optional.empty());
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L))
+                .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> waitingService.saveWaiting("브라운", date, 1L, 1L))
                 .isInstanceOf(NotFoundException.class)
