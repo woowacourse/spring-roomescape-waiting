@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -58,10 +59,10 @@ public class WaitingService {
         checkDuplicatedWaiting(waiting);
         checkWaitable(waiting);
 
-        waiting = waitingRepository.save(waiting);
-        Long order = waitingRepository.findWaitingOrder(waiting);
+        Waiting saved = save(waiting);
+        Long order = waitingRepository.findWaitingOrder(saved);
 
-        return WaitingResult.of(waiting, order);
+        return WaitingResult.of(saved, order);
     }
 
     @Transactional
@@ -77,6 +78,14 @@ public class WaitingService {
         boolean duplicated = waitingRepository.findByScheduleAndName(waiting).isPresent();
 
         if (duplicated) {
+            throw new BusinessConflictException(ErrorCode.DUPLICATE_WAITING);
+        }
+    }
+
+    private Waiting save(Waiting waiting) {
+        try {
+            return waitingRepository.save(waiting);
+        } catch (DuplicateKeyException e) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_WAITING);
         }
     }

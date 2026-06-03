@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -57,7 +58,7 @@ public class ReservationService {
 
         Reservation reservation = Reservation.create(name, new Schedule(date, time, theme), LocalDateTime.now(clock));
         checkDuplicated(reservation);
-        return reservationRepository.save(reservation);
+        return save(reservation);
     }
 
     @Transactional
@@ -70,7 +71,7 @@ public class ReservationService {
 
         Reservation updated = reservation.changeSchedule(date, time, name, LocalDateTime.now(clock));
         checkDuplicated(updated);
-        reservationRepository.update(updated);
+        update(updated);
         return updated;
     }
 
@@ -90,6 +91,22 @@ public class ReservationService {
                 .isPresent();
 
         if (duplicated) {
+            throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private Reservation save(Reservation reservation) {
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+    }
+
+    private void update(Reservation reservation) {
+        try {
+            reservationRepository.update(reservation);
+        } catch (DuplicateKeyException e) {
             throw new BusinessConflictException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
