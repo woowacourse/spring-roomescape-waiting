@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -21,8 +22,6 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,17 +33,11 @@ class WaitingServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
-    @Mock
-    private TimeSlotRepository timeSlotRepository;
-
-    @Mock
-    private ThemeRepository themeRepository;
-
     private WaitingService waitingService;
 
     @BeforeEach
     void setUp() {
-        waitingService = new WaitingService(waitingRepository, reservationRepository, timeSlotRepository, themeRepository);
+        waitingService = new WaitingService(waitingRepository, reservationRepository);
     }
 
     @Test
@@ -69,35 +62,45 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void 중복_대기_예외_발생() {
-        Waiting waiting = createTransientWaiting();
-        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(waiting.getTimeSlot()));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(waiting.getTheme()));
-        given(reservationRepository.existsByNameAndDateAndTimeAndTheme("브라운", waiting.getDate(), 1L, 1L)).willReturn(false);
-        given(waitingRepository.exists("브라운", waiting.getDate(), 1L, 1L)).willReturn(true);
+        Reservation reservation = createReservation("네오", LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), 1L, 1L))
+                .willReturn(Optional.of(reservation));
+        given(waitingRepository.exists("브라운", reservation.getDate(), 1L, 1L)).willReturn(true);
 
-        assertThatThrownBy(() -> waitingService.saveWaiting("브라운", waiting.getDate(), 1L, 1L))
+        assertThatThrownBy(() -> waitingService.saveWaiting("브라운", reservation.getDate(), 1L, 1L))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("해당 날짜의 시간과 테마는 이미 예약 대기되어 있습니다.");
     }
 
     @Test
-    @DisplayName("존재하는 예약에 대기를 추가하면, 예외가 발생한다.")
+    @DisplayName("이미 본인이 예약한 슬롯에 대기를 추가하면, 예외가 발생한다.")
     void 예약된_시간_대기_예외_발생() {
-        Waiting waiting = createTransientWaiting();
-        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(waiting.getTimeSlot()));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(waiting.getTheme()));
-        given(reservationRepository.existsByNameAndDateAndTimeAndTheme("브라운", waiting.getDate(), 1L, 1L)).willReturn(true);
+        Reservation reservation = createReservation("브라운", LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), 1L, 1L))
+                .willReturn(Optional.of(reservation));
 
-        assertThatThrownBy(() -> waitingService.saveWaiting("브라운", waiting.getDate(), 1L, 1L))
+        assertThatThrownBy(() -> waitingService.saveWaiting("브라운", reservation.getDate(), 1L, 1L))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
     }
 
     @Test
+    @DisplayName("예약이 없는 슬롯에 대기를 추가하면, 예외가 발생한다.")
+    void 예약_없는_슬롯_대기_예외_발생() {
+        LocalDate date = LocalDate.now().plusDays(1);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> waitingService.saveWaiting("브라운", date, 1L, 1L))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("예약되지 않은 슬롯입니다.");
+    }
+
+    @Test
     @DisplayName("이미 지난 시간으로 대기를 추가하면, 예외가 발생한다.")
     void 지난_시간_대기_예외_발생() {
-        given(timeSlotRepository.findById(1L)).willReturn(Optional.of(new TimeSlot(1L, LocalTime.of(0, 0))));
-        given(themeRepository.findById(1L)).willReturn(Optional.of(createTheme()));
+        Reservation reservation = createReservation("네오", LocalDate.now(), LocalTime.of(0, 0));
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(reservation.getDate(), 1L, 1L))
+                .willReturn(Optional.of(reservation));
 
         assertThatThrownBy(() -> waitingService.saveWaiting("브라운", LocalDate.now(), 1L, 1L))
                 .isInstanceOf(PastTimeException.class);
@@ -108,8 +111,8 @@ class WaitingServiceTest {
                 LocalDateTime.now());
     }
 
-    private Waiting createTransientWaiting() {
-        return new Waiting("브라운", LocalDate.now().plusDays(1), createTimeSlot(), createTheme(), LocalDateTime.now());
+    private Reservation createReservation(String name, LocalDate date, LocalTime time) {
+        return new Reservation(1L, name, date, new TimeSlot(1L, time), createTheme(), date.minusDays(1).atStartOfDay());
     }
 
     private TimeSlot createTimeSlot() {
