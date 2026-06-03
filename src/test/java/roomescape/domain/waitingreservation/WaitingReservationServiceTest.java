@@ -8,12 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,11 +28,6 @@ import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankRespon
 import roomescape.support.exception.RoomescapeException;
 
 class WaitingReservationServiceTest {
-
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-        Instant.parse("2026-05-05T05:00:00Z"),
-        ZoneId.of("Asia/Seoul")
-    );
 
     private ReservationRepository reservationRepository;
     private WaitingReservationRepository waitingReservationRepository;
@@ -56,14 +48,13 @@ class WaitingReservationServiceTest {
             reservationRepository,
             reservationDateService,
             reservationTimeService,
-            themeService,
-            FIXED_CLOCK
+            themeService
         );
     }
 
     @Test
     void 이미_다른_사용자에_의해_예약된_슬롯에_대기를_신청할_수_있다() {
-        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 10));
+        ReservationDate date = ReservationDate.of(1L, LocalDate.now().plusDays(5));
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
@@ -93,7 +84,7 @@ class WaitingReservationServiceTest {
 
     @Test
     void 비어있는_슬롯에_대기를_신청하면_예외가_발생한다() {
-        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 10));
+        ReservationDate date = ReservationDate.of(1L, LocalDate.now().plusDays(5));
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
         Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
@@ -110,8 +101,15 @@ class WaitingReservationServiceTest {
 
     @Test
     void 같은_사용자가_같은_슬롯에_중복_대기할_수_없다() {
+        ReservationDate date = ReservationDate.of(1L, LocalDate.now().plusDays(5));
+        ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
+        when(reservationDateService.findById(1L)).thenReturn(date);
+        when(reservationTimeService.findById(2L)).thenReturn(time);
+        when(themeService.findById(3L)).thenReturn(theme);
+        when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId("고래", 1L, 2L, 3L)).thenReturn(true);
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
@@ -132,7 +130,7 @@ class WaitingReservationServiceTest {
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessageContaining("과거 시간에는 예약 대기를 신청할 수 없습니다.");
+            .hasMessageContaining("과거 시점의 데이터를 등록할 수 없습니다.");
     }
 
     @Test

@@ -1,6 +1,5 @@
 package roomescape.domain.waitingreservation;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import roomescape.domain.theme.ThemeService;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
+import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.WaitingReservationErrorCode;
 
@@ -29,7 +29,6 @@ public class WaitingReservationService {
     private final ReservationDateService reservationDateService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final Clock clock;
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
         ReservationDate date = reservationDateService.findById(request.dateId());
@@ -39,9 +38,15 @@ public class WaitingReservationService {
         validateSlotIsReserved(request);
         validateDuplicationOfWaitingReservation(request);
 
-        WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
+        WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now());
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
+    }
+
+    private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
+        if(reservationDate.isPast(reservationTime)) {
+            throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
+        }
     }
 
     private void validateDuplicationOfWaitingReservation(WaitingReservationCreationRequest request) {
@@ -62,13 +67,6 @@ public class WaitingReservationService {
         );
         if (!reserved) {
             throw new RoomescapeException(WaitingReservationErrorCode.AVAILABLE_SLOT_NOT_WAITABLE);
-        }
-    }
-
-    private void validateNotPast(ReservationDate date, ReservationTime time) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date.getPlayDay(), time.getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now(clock))) {
-            throw new RoomescapeException(WaitingReservationErrorCode.PAST_TIME_NOT_ALLOWED);
         }
     }
 

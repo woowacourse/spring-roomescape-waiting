@@ -15,6 +15,8 @@ public enum ReservationDateErrorCode implements ErrorCode {
         "동일한 날짜 값을 가진 엔티티가 이미 존재합니다.", "데이터베이스의 중복 데이터 여부를 확인하십시오."),
     TODAY_NOT_MODIFIED(HttpStatus.BAD_REQUEST,
         "당일 예약은 수정 및 취소가 불가능합니다.", "예약일이 오늘 이후인 예약만 변경할 수 있습니다."),
+    PAST_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
+        "과거 시점의 데이터를 등록할 수 없습니다.", "현재 시스템 날짜 및 시각과 요청 날짜 및 시각 데이터를 확인하십시오."),
     ;
 
     private final HttpStatus httpStatus;

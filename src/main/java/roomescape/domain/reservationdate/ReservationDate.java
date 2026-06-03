@@ -1,7 +1,9 @@
 package roomescape.domain.reservationdate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
@@ -37,5 +39,14 @@ public class ReservationDate {
 
     public boolean isAvailable(LocalDate targetDate) {
         return !playDay.isBefore(targetDate);
+    }
+
+    public boolean isPast(ReservationTime reservationTime) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(playDay, reservationTime.getStartAt());
+        return reservationDateTime.isBefore(LocalDateTime.now());
+    }
+
+    public boolean isToday() {
+        return playDay.isEqual(LocalDate.now());
     }
 }

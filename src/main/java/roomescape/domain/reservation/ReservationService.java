@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ import roomescape.domain.waitingreservation.WaitingReservation;
 import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
 @Slf4j
@@ -40,6 +38,7 @@ public class ReservationService {
         ReservationDate reservationDate = reservationDateService.findById(request.dateId());
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         validateNotPast(reservationDate, reservationTime);
+
         Theme theme = themeService.findById(request.themeId());
         validateNotDuplicated(request.dateId(), request.timeId(), request.themeId());
         Reservation savedReservation = reservationRepository.save(
@@ -68,7 +67,7 @@ public class ReservationService {
 
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
-        validateModifiable(reservation);
+        validateNotToday(reservation.getDate());
 
         Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
                 reservation.getDate().getId(),
@@ -90,10 +89,11 @@ public class ReservationService {
 
     public ReservationResponse updateReservation(Long id, @Valid ReservationUpdateRequest request) {
         Reservation reservation = findById(id);
-        validateModifiable(reservation);
+        validateNotToday(reservation.getDate());
 
         ReservationDate newReservationDate = reservationDateService.findById(request.dateId());
         ReservationTime newReservationTime = reservationTimeService.findById(request.timeId());
+
         validateNotPast(newReservationDate, newReservationTime);
         validateNotDuplicated(request.dateId(), request.timeId(), reservation.getTheme().getId());
 
@@ -115,21 +115,14 @@ public class ReservationService {
         }
     }
 
-    private void validateModifiable(Reservation reservation) {
-        validateNotPast(reservation.getDate(), reservation.getTime());
-        validateNotToday(reservation.getDate());
-    }
-
     private void validateNotPast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        LocalDateTime dateTime = LocalDateTime.of(reservationDate.getPlayDay(), reservationTime.getStartAt());
-        if (dateTime.isBefore(LocalDateTime.now())) {
-            throw new RoomescapeException(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED);
+        if(reservationDate.isPast(reservationTime)) {
+            throw new RoomescapeException(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED);
         }
     }
 
     private void validateNotToday(ReservationDate reservationDate) {
-        LocalDate playDay = reservationDate.getPlayDay();
-        if (playDay.isEqual(LocalDate.now())) {
+        if (reservationDate.isToday()) {
             throw new RoomescapeException(ReservationDateErrorCode.TODAY_NOT_MODIFIED);
         }
     }

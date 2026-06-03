@@ -23,7 +23,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
 
 @SpringBootTest
@@ -68,7 +67,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.createReservation(
                 new ReservationCreationRequest("테스터", date.getId(), time.getId(), theme.getId())))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -194,7 +193,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateReservation(
                 created.id(), new ReservationUpdateRequest(pastDate.getId(), time.getId())))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining(ReservationTimeErrorCode.PAST_TIME_NOT_ALLOWED.getMessage());
+                .hasMessageContaining(ReservationDateErrorCode.PAST_DATE_NOT_ALLOWED.getMessage());
     }
 
     @Test
