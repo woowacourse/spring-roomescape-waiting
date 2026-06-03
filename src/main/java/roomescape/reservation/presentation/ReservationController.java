@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.ReservationFacade;
+import roomescape.reservation.application.ReservationManager;
 import roomescape.reservation.presentation.dto.ReservationCancelRequest;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
 import roomescape.reservation.presentation.dto.ReservationPendingResponse;
@@ -27,11 +27,11 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationFacade reservationFacade;
+    private final ReservationManager reservationManager;
 
     @GetMapping
     public ResponseEntity<List<ReservationPendingResponse>> getReservationsByName(@RequestParam final String username) {
-        List<ReservationPendingResponse> responses = reservationFacade.getReservationsByName(username)
+        List<ReservationPendingResponse> responses = reservationManager.getReservationsByName(username)
                 .stream()
                 .map(ReservationPendingResponse::from)
                 .toList();
@@ -40,19 +40,19 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody final ReservationRequest request) {
-        ReservationResponse response = ReservationResponse.from(reservationFacade.addReservation(request.toCommand()));
+        ReservationResponse response = ReservationResponse.from(reservationManager.addReservation(request.toCommand()));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final Long id, @ModelAttribute final ReservationCancelRequest request) {
-        reservationFacade.cancelReservation(id, request.toCommand());
+        reservationManager.cancelReservation(id, request.toCommand());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> changeReservation(@PathVariable final Long id, @Valid @RequestBody final ReservationChangeRequest request) {
-        ReservationResponse response = ReservationResponse.from(reservationFacade.changeReservation(id, request.toCommand()));
+        ReservationResponse response = ReservationResponse.from(reservationManager.changeReservation(id, request.toCommand()));
         return ResponseEntity.ok(response);
     }
 }

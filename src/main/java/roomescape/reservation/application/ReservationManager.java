@@ -21,7 +21,7 @@ import roomescape.time.domain.ReservationTime;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReservationFacade {
+public class ReservationManager {
 
     private final ActiveReservationService activeReservationService;
     private final PendingReservationService pendingReservationService;

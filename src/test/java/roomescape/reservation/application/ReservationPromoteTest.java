@@ -34,7 +34,7 @@ public class ReservationPromoteTest {
     private Clock clock;
 
     @Autowired
-    private ReservationFacade reservationFacade;
+    private ReservationManager reservationManager;
 
     @Autowired
     private ReservationTimeService reservationTimeService;
@@ -85,17 +85,17 @@ public class ReservationPromoteTest {
     @DisplayName("대기자를 확정으로 승격할 때 삽입이 실패하면, 삭제되었던 대기자 데이터는 롤백되어 유지되어야 한다.")
     void promotionFailRollbackTest() {
         ReservationCreateCommand activeCommand = createCommand("확정자", time.getId());
-        ReservationInfo activeReservation = reservationFacade.addReservation(activeCommand);
+        ReservationInfo activeReservation = reservationManager.addReservation(activeCommand);
 
         ReservationCreateCommand pendingCommand = createCommand("대기자", time.getId());
-        reservationFacade.addReservation(pendingCommand);
+        reservationManager.addReservation(pendingCommand);
 
         doThrow(new RuntimeException("DB 삽입 중 알 수 없는 에러 발생!"))
                 .when(activeReservationService).savePromoted(any());
 
         ReservationCancelCommand cancelCommand = new ReservationCancelCommand(activeCommand.name());
 
-        assertThatThrownBy(() -> reservationFacade.cancelReservation(activeReservation.id(), cancelCommand))
+        assertThatThrownBy(() -> reservationManager.cancelReservation(activeReservation.id(), cancelCommand))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB 삽입 중 알 수 없는 에러 발생!");
 

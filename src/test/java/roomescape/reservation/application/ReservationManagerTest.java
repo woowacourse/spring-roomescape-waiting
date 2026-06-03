@@ -31,7 +31,7 @@ import roomescape.time.application.dto.ReservationTimeInfo;
 import roomescape.time.domain.ReservationTime;
 
 @SpringBootTest(properties = {"spring.datasource.hikari.maximum-pool-size=30"})
-class ReservationFacadeTest {
+class ReservationManagerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -40,7 +40,7 @@ class ReservationFacadeTest {
     private Clock clock;
 
     @Autowired
-    private ReservationFacade facade;
+    private ReservationManager manager;
 
     @Autowired
     private ReservationTimeService reservationTimeService;
@@ -94,23 +94,23 @@ class ReservationFacadeTest {
     @Test
     @DisplayName("예약이 없으면 확정 예약으로 등록된다.")
     void addActiveReservationTest() {
-        ReservationInfo reservationInfo = facade.addReservation(createCommand("포비", time.getId()));
+        ReservationInfo reservationInfo = manager.addReservation(createCommand("포비", time.getId()));
         Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.ACTIVE);
     }
 
     @Test
     @DisplayName("예약이 있으면 대기 예약으로 등록된다.")
     void addPendingReservationTest() {
-        facade.addReservation(createCommand("포비", time.getId()));
-        ReservationInfo reservationInfo = facade.addReservation(createCommand("리사", time.getId()));
+        manager.addReservation(createCommand("포비", time.getId()));
+        ReservationInfo reservationInfo = manager.addReservation(createCommand("리사", time.getId()));
         Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.PENDING);
     }
 
     @Test
     @DisplayName("대기 중인 예약을 빈 시간대로 변경하면 확정 예약으로 승격된다.")
     void changePendingToEmptySlotTest() {
-        facade.addReservation(createCommand("포비", time.getId()));
-        ReservationInfo lisaInfo = facade.addReservation(createCommand("리사", time.getId()));
+        manager.addReservation(createCommand("포비", time.getId()));
+        ReservationInfo lisaInfo = manager.addReservation(createCommand("리사", time.getId()));
 
         ReservationTime newTime = createNewTime();
 
@@ -120,7 +120,7 @@ class ReservationFacadeTest {
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
                 .build();
-        ReservationInfo changedInfo = facade.changeReservation(lisaInfo.id(), changeCommand);
+        ReservationInfo changedInfo = manager.changeReservation(lisaInfo.id(), changeCommand);
 
         Assertions.assertThat(changedInfo.status()).isEqualTo(Status.ACTIVE);
     }
@@ -128,11 +128,11 @@ class ReservationFacadeTest {
     @Test
     @DisplayName("대기 중인 예약을 꽉 찬 시간대로 변경하면 여전히 대기 예약으로 남는다.")
     void changePendingToFullSlotTest() {
-        facade.addReservation(createCommand("포비", time.getId()));
-        ReservationInfo lisaInfo = facade.addReservation(createCommand("리사", time.getId()));
+        manager.addReservation(createCommand("포비", time.getId()));
+        ReservationInfo lisaInfo = manager.addReservation(createCommand("리사", time.getId()));
 
         ReservationTime newTime = createNewTime();
-        facade.addReservation(createCommand("브라운", newTime.getId()));
+        manager.addReservation(createCommand("브라운", newTime.getId()));
 
         ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
                 .name("리사")
@@ -140,7 +140,7 @@ class ReservationFacadeTest {
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
                 .build();
-        ReservationInfo changedInfo = facade.changeReservation(lisaInfo.id(), changeCommand);
+        ReservationInfo changedInfo = manager.changeReservation(lisaInfo.id(), changeCommand);
 
         Assertions.assertThat(changedInfo.status()).isEqualTo(Status.PENDING);
     }
@@ -148,8 +148,8 @@ class ReservationFacadeTest {
     @Test
     @DisplayName("확정 예약을 다른 빈 시간대로 변경하면, 원래 자리의 대기자가 확정으로 승격된다.")
     void changeActiveAndPromotePendingTest() {
-        ReservationInfo pobiInfo = facade.addReservation(createCommand("포비", time.getId()));
-        facade.addReservation(createCommand("리사", time.getId()));
+        ReservationInfo pobiInfo = manager.addReservation(createCommand("포비", time.getId()));
+        manager.addReservation(createCommand("리사", time.getId()));
 
         ReservationTime newTime = createNewTime();
 
@@ -159,26 +159,26 @@ class ReservationFacadeTest {
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
                 .build();
-        ReservationInfo changedInfo = facade.changeReservation(pobiInfo.id(), changeCommand);
+        ReservationInfo changedInfo = manager.changeReservation(pobiInfo.id(), changeCommand);
 
         Assertions.assertThat(changedInfo.status()).isEqualTo(Status.ACTIVE);
 
-        List<ReservationPendingInfo> lisaReservations = facade.getReservationsByName("리사");
+        List<ReservationPendingInfo> lisaReservations = manager.getReservationsByName("리사");
         Assertions.assertThat(lisaReservations.get(0).status()).isEqualTo(Status.ACTIVE);
     }
 
     @Test
     @DisplayName("확정 예약을 취소하면 대기자가 확정 예약으로 승격된다.")
     void cancelActiveAndPromotePendingTest() {
-        ReservationInfo pobiInfo = facade.addReservation(createCommand("포비", time.getId()));
-        facade.addReservation(createCommand("리사", time.getId()));
+        ReservationInfo pobiInfo = manager.addReservation(createCommand("포비", time.getId()));
+        manager.addReservation(createCommand("리사", time.getId()));
 
         ReservationCancelCommand cancelCommand = ReservationCancelCommand.builder()
                 .name("포비")
                 .build();
-        facade.cancelReservation(pobiInfo.id(), cancelCommand);
+        manager.cancelReservation(pobiInfo.id(), cancelCommand);
 
-        List<ReservationPendingInfo> lisaReservations = facade.getReservationsByName("리사");
+        List<ReservationPendingInfo> lisaReservations = manager.getReservationsByName("리사");
         Assertions.assertThat(lisaReservations.get(0).status()).isEqualTo(Status.ACTIVE);
     }
 
@@ -199,7 +199,7 @@ class ReservationFacadeTest {
                     readyLatch.countDown();
                     startLatch.await();
                     ReservationCreateCommand command = createCommand(username, time.getId());
-                    facade.addReservation(command);
+                    manager.addReservation(command);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } catch (Exception e) {
@@ -213,7 +213,7 @@ class ReservationFacadeTest {
         startLatch.countDown();
         doneLatch.await();
 
-        List<ReservationInfo> allReservations = facade.getReservations();
+        List<ReservationInfo> allReservations = manager.getReservations();
 
         long activeCount = allReservations.stream()
                 .filter(res -> res.status() == Status.ACTIVE)
