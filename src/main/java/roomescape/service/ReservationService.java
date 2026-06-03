@@ -139,6 +139,8 @@ public class ReservationService {
         );
         verifyNoConflict(updated);
         reservationRepository.updateDateTime(updated);
+
+        promoteFirstWaitlistToReservation(original);
         return getReservation(id);
     }
 
