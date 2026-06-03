@@ -3,7 +3,6 @@ package roomescape.reservationWaiting.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -230,7 +230,7 @@ class ReservationWaitingServiceTest {
 
     @Test
     @DisplayName("아이디를 기반으로 예약 대기를 삭제한다.")
-    void deleteReservationWaiting_ById_success() {
+    void deleteReservationWaitingByIdTest_success() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
@@ -247,29 +247,26 @@ class ReservationWaitingServiceTest {
         );
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-        // when, then
-        assertThatCode(() -> reservationWaitingService.deleteReservationWaitingById(1L))
+        // when & then
+        assertThatCode(() -> reservationWaitingService.deleteReservationWaitingById(1L, "brown"))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("예약 대기 삭제 대상이 없는 경우 예외가 발생한다")
-    void deleteReservationWaiting_ById_fail_not_exist() {
+    @DisplayName("예약 대기 삭제 시, 대기가 없는 경우 예외가 발생한다.")
+    void deleteReservationWaitingByIdTest_no_waiting() {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
-
         when(reservationWaitingRepository.findById(any())).thenReturn(
                 Optional.empty());
 
-        // when, then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L)).isInstanceOf(
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "brown")).isInstanceOf(
                 ReservationWaitingNotFoundException.class);
     }
 
     @Test
-    @DisplayName("예약 대기가 유효한 지 검증한다-과거이면 오류 발생")
-    void deleteReservationWaiting_ById_past() {
+    @DisplayName("예약 대기 삭제 시, 대기 날짜가 유효하지 않으면 예외가 발생한다.")
+    void deleteReservationWaitingByIdTest_invalid_date() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
@@ -285,33 +282,25 @@ class ReservationWaitingServiceTest {
         );
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-        // when,then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L)).isInstanceOf(
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "brown")).isInstanceOf(
                 InvalidReservationDateValueException.class);
     }
 
     @Test
-    @DisplayName("예약 대기가 유효한 지 검증한다- 미래 오류 발생 X")
-    void deleteReservationWaiting_ById_future() {
+    @DisplayName("예약 대기 삭제 시, 인가에 실패하면 예외가 발생한다.")
+    void deleteReservationWaitingByIdTest_unauthorized() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+
         when(reservationWaitingRepository.findById(any())).thenReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "brown", LocalDate.of(2026, 5, 14), time, theme
+                        1L, "brown", LocalDate.of(2026, 5, 1), time, theme
                 )));
 
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 1)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-        when(reservationWaitingRepository.deleteById(any())).thenReturn(1);
-
-        // when,then
-        assertDoesNotThrow(
-                () -> reservationWaitingService.deleteReservationWaitingById(1L)
-        );
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "other")).isInstanceOf(
+                AuthorizationException.class);
     }
 }

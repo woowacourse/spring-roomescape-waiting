@@ -400,7 +400,7 @@ class ConcurrencyE2ETest extends E2ETest {
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteReservationWaitingById(1L),
+                () -> reservationWaitingService.deleteReservationWaitingById(1L, "pobi"),
                 100,
                 ReservationWaitingNotFoundException.class
         );

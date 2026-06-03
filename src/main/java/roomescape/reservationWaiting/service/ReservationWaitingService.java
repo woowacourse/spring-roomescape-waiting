@@ -97,8 +97,12 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void deleteReservationWaitingById(Long id) {
+    public void deleteReservationWaitingById(Long id, String name) {
         ReservationWaiting reservationWaiting = getReservationWaiting(id);
+
+        if (!reservationWaiting.hasSameName(name)) {
+            throw new AuthorizationException();
+        }
 
         validateExpiry(
                 reservationWaiting.getDate(),
@@ -116,13 +120,5 @@ public class ReservationWaitingService {
     private ReservationWaiting getReservationWaiting(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(ReservationWaitingNotFoundException::new);
-    }
-
-    public void validateReservationWaitingOwnership(Long reservationWaitingId, String name) {
-        ReservationWaiting waiting = getReservationWaiting(reservationWaitingId);
-
-        if (!waiting.hasSameName(name)) {
-            throw new AuthorizationException();
-        }
     }
 }

@@ -192,7 +192,7 @@ class ReservationWaitingControllerTest {
         ).andExpect(status().isBadRequest());
     }
 
-    @DisplayName("id를 받아 예약 대기를 삭제하고 200을 반환한다.")
+    @DisplayName("id를 받아 예약 대기를 삭제하고 204를 반환한다.")
     @Test
     void deleteTime_success() throws Exception {
         mockMvc.perform(
