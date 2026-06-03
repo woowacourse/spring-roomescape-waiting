@@ -84,7 +84,11 @@ public class Reservation {
         );
     }
 
+    public boolean isOwner(final String name) {
+        return this.name.isSameName(name);
+    }
+
     public String getName() {
-        return this.name.getName();
+        return this.name.name();
     }
 }

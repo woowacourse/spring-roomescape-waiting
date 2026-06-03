@@ -80,6 +80,6 @@ public class Theme {
     }
 
     public String getName() {
-        return this.name.getName();
+        return this.name.name();
     }
 }

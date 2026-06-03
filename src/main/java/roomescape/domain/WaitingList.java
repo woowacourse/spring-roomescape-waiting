@@ -32,11 +32,15 @@ public class WaitingList {
         return new WaitingList(id, new PersonName(name), new ReservationDate(date), reservationTime, theme, createdAt);
     }
 
-    public String getName() {
-        return name.getName();
-    }
-
     public WaitingList withId(final Long waitingListId) {
         return new WaitingList(waitingListId, name, reservationDate, reservationTime, theme, createdAt);
+    }
+
+    public boolean isOwner(final String name) {
+        return this.name.isSameName(name);
+    }
+
+    public String getName() {
+        return name.name();
     }
 }

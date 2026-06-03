@@ -169,8 +169,7 @@ public class ReservationService {
     }
 
     private void validateReservationOwner(final Reservation reservation, final String name) {
-        final String reservationOwnerName = reservation.getName();
-        final boolean isUserNameMatched = reservationOwnerName.equals(name);
+        final boolean isUserNameMatched = reservation.isOwner(name);
 
         if (!isUserNameMatched) {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);

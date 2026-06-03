@@ -64,7 +64,7 @@ public class WaitingListService {
         final WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
 
-        if (!findWaitingList.getName().equals(deleteCommand.name())) {
+        if (!findWaitingList.isOwner(deleteCommand.name())) {
             throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
 

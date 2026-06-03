@@ -1,17 +1,14 @@
 package roomescape.domain;
 
-import lombok.Getter;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
-@Getter
-public class ThemeName {
+public record ThemeName(
+        String name
+) {
 
-    private final String name;
-
-    public ThemeName(final String value) {
-        validate(value);
-        this.name = value;
+    public ThemeName {
+        validate(name);
     }
 
     private void validate(final String value) {
