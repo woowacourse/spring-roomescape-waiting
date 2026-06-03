@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
@@ -49,7 +50,7 @@ public class ReservationController {
 
     @PutMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> update(@PathVariable("reservationId") long reservationId,
-                                                      @Valid @RequestBody ReservationRequest request) {
+                                                      @Valid @RequestBody UpdateReservationRequest request) {
         ReservationResponse response = reservationService.update(reservationId, request, LocalDateTime.now());
         return ResponseEntity.ok(response);
 

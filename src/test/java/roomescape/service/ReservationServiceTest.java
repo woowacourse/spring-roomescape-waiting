@@ -14,6 +14,7 @@ import roomescape.ServiceTest;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
@@ -111,28 +112,24 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 예약을_수정할_수_있다() {
         // given
+        Theme theme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
         ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
         ReservationTime changedTime = fixtureGenerator.saveReservationTime(LocalTime.of(20, 0));
 
-        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        Theme changedTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
-
         LocalDate reservationDate = LocalDate.of(2026, 5, 10);
+        LocalDate changedDate = LocalDate.of(2026, 5, 12);
+
         ReservationRequest createRequest = new ReservationRequest(
                 "예약1",
                 reservationDate,
                 originalTime.getId(),
-                originalTheme.getId()
+                theme.getId()
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
-        ReservationRequest updateRequest = new ReservationRequest(
-                "브라운",
-                LocalDate.of(2026, 5, 12),
-                changedTime.getId(),
-                changedTheme.getId()
-        );
+        UpdateReservationRequest updateRequest = new UpdateReservationRequest(changedDate, changedTime.getId());
 
         // when
         ReservationResponse response = reservationService.update(savedReservation.id(), updateRequest, currentDateTime);
@@ -145,68 +142,35 @@ class ReservationServiceTest extends ServiceTest {
                                 ReservationResponse::name,
                                 ReservationResponse::date
                         )
-                        .containsExactly(
-                                savedReservation.id(),
-                                "브라운",
-                                LocalDate.of(2026, 5, 12)
-                        ),
+                        .containsExactly(savedReservation.id(), "예약1", changedDate),
                 () -> assertThat(response.time())
-                        .extracting(
-                                ReservationTimeResponse::id,
-                                ReservationTimeResponse::startAt
-                        )
-                        .containsExactly(
-                                changedTime.getId(),
-                                changedTime.getStartAt()
-                        ),
+                        .extracting(ReservationTimeResponse::id, ReservationTimeResponse::startAt)
+                        .containsExactly(changedTime.getId(), changedTime.getStartAt()),
                 () -> assertThat(response.theme())
-                        .extracting(
-                                ThemeResponse::id,
-                                ThemeResponse::name,
-                                ThemeResponse::description,
-                                ThemeResponse::thumbnail
-                        )
-                        .containsExactly(
-                                changedTheme.getId(),
-                                changedTheme.getName(),
-                                changedTheme.getDescription(),
-                                changedTheme.getThumbnail()
-                        )
+                        .extracting(ThemeResponse::id, ThemeResponse::name)
+                        .containsExactly(theme.getId(), theme.getName())
         );
     }
 
     @Test
     void 이미_예약된_날짜_시간_테마로는_예약을_수정할_수_없다() {
         // given
+        Theme theme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+
         LocalDate alreadyReservedDate = LocalDate.of(2026, 5, 12);
         ReservationTime alreadyReservedTime = fixtureGenerator.saveReservationTime(LocalTime.of(20, 0));
-        Theme alreadyReservedTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
-        ReservationRequest alreadyReservedRequest = new ReservationRequest(
-                "로지",
-                alreadyReservedDate,
-                alreadyReservedTime.getId(),
-                alreadyReservedTheme.getId()
-        );
 
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
-        reservationService.create(alreadyReservedRequest, currentDateTime);
+        reservationService.create(
+                new ReservationRequest("로지", alreadyReservedDate, alreadyReservedTime.getId(), theme.getId()),
+                currentDateTime);
 
         ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
-        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
-        ReservationRequest createRequest = new ReservationRequest(
-                "예약1",
-                LocalDate.of(2026, 5, 10),
-                originalTime.getId(),
-                originalTheme.getId()
-        );
-        ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
+        ReservationResponse savedReservation = reservationService.create(
+                new ReservationRequest("러키", LocalDate.of(2026, 5, 10), originalTime.getId(), theme.getId()),
+                currentDateTime);
 
-        ReservationRequest updateRequest = new ReservationRequest(
-                "브라운",
-                alreadyReservedDate,
-                alreadyReservedTime.getId(),
-                alreadyReservedTheme.getId()
-        );
+        UpdateReservationRequest updateRequest = new UpdateReservationRequest(alreadyReservedDate, alreadyReservedTime.getId());
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(savedReservation.id(), updateRequest, currentDateTime))
@@ -217,25 +181,21 @@ class ReservationServiceTest extends ServiceTest {
     @Test
     void 현재_시간보다_이전_날짜로_예약을_수정하면_예외가_발생한다() {
         ReservationTime originalTime = fixtureGenerator.saveReservationTime(LocalTime.of(11, 0));
-        Theme originalTheme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
+        Theme theme = fixtureGenerator.saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         ReservationRequest createRequest = new ReservationRequest(
                 "러키",
                 LocalDate.of(2026, 5, 25),
                 originalTime.getId(),
-                originalTheme.getId()
+                theme.getId()
         );
         LocalDateTime currentDateTime = LocalDateTime.of(2026, 5, 7, 10, 0);
         ReservationResponse savedReservation = reservationService.create(createRequest, currentDateTime);
 
         ReservationTime pastTime = fixtureGenerator.saveReservationTime(LocalTime.of(10, 0));
-        Theme updateTheme = fixtureGenerator.saveTheme("방탈출2", "밤밤과 러로의 방탈출", "https:fsof/sdafjifdsmmff");
-
-        ReservationRequest updateRequest = new ReservationRequest(
-                "러키",
+        UpdateReservationRequest updateRequest = new UpdateReservationRequest(
                 currentDateTime.minusDays(1).toLocalDate(),
-                pastTime.getId(),
-                updateTheme.getId()
+                pastTime.getId()
         );
 
         // when & then

@@ -14,6 +14,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.UpdateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.code.ReservationErrorCode;
 import roomescape.exception.code.ReservationTimeErrorCode;
@@ -85,18 +86,19 @@ public class ReservationService {
                 .toList();
     }
 
+    //    - [] 수정 후 예약에 대기가 존재하면 해당 사용자를 대기열 마지막 순번으로 등록한다.
+    //    - [] 수정 전 예약에 대기가 존재하면 대기 1순위 사용자를 예약으로 승격한다.
     @Transactional
-    public ReservationResponse update(long reservationId, ReservationRequest request, LocalDateTime currentDateTime) {
+    public ReservationResponse update(long reservationId, UpdateReservationRequest request, LocalDateTime currentDateTime) {
         Reservation reservation = getReservation(reservationId);
         validateModifiable(reservation, currentDateTime);
 
         ReservationTime reservationTime = getTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
         validateNotPastDateTime(request.date(), reservationTime, currentDateTime);
-        validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
+        validateUniqueReservationForUpdate(reservation, request.date(), reservationTime);
 
-        Slot slot = createSlot(request.date(), reservationTime, theme);
-        Reservation updatedReservation = new Reservation(reservationId, slot, request.name());
+        Slot slot = createSlot(request.date(), reservationTime, reservation.getTheme());
+        Reservation updatedReservation = reservation.updateReservation(slot);
         reservationDao.update(updatedReservation);
         return ReservationResponse.from(updatedReservation);
     }
@@ -114,11 +116,11 @@ public class ReservationService {
         }
     }
 
-    private void validateUniqueReservationForUpdate(long reservationId, Theme theme,
+    private void validateUniqueReservationForUpdate(Reservation reservation,
                                                     LocalDate date, ReservationTime reservationTime) {
         boolean exists = reservationDao.existsByThemeAndDateAndTimeAndIdNot(
-                theme.getId(), date,
-                reservationTime.getId(), reservationId);
+                reservation.getTheme().getId(), date,
+                reservationTime.getId(), reservation.getId());
         if (exists) {
             throw new ReservationException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
