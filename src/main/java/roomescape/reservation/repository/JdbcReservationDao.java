@@ -1,5 +1,7 @@
 package roomescape.reservation.repository;
 
+import static java.sql.Timestamp.valueOf;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -41,10 +43,11 @@ public class JdbcReservationDao implements ReservationDao {
                 theme
         );
 
-        return Reservation.reconstruct(
+        return new Reservation(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
-                slot
+                slot,
+                resultSet.getTimestamp("updated_at").toLocalDateTime()
         );
     };
 
@@ -57,8 +60,8 @@ public class JdbcReservationDao implements ReservationDao {
     @Override
     public Reservation save(Reservation reservation) {
         String sql = """
-                INSERT INTO reservation (name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, reservation_date, time_id, theme_id, updated_at)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -69,15 +72,17 @@ public class JdbcReservationDao implements ReservationDao {
             ps.setDate(2, Date.valueOf(reservation.getDate()));
             ps.setLong(3, reservation.getTime().getId());
             ps.setLong(4, reservation.getTheme().getId());
+            ps.setTimestamp(5, valueOf(reservation.getUpdatedAt()));
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
 
-        return Reservation.reconstruct(
+        return new Reservation(
                 id,
                 reservation.getName(),
-                new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
+                new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme()),
+                reservation.getUpdatedAt()
         );
     }
 
@@ -92,7 +97,8 @@ public class JdbcReservationDao implements ReservationDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -114,7 +120,8 @@ public class JdbcReservationDao implements ReservationDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -137,7 +144,8 @@ public class JdbcReservationDao implements ReservationDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -161,7 +169,8 @@ public class JdbcReservationDao implements ReservationDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at
                 FROM reservation r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -291,7 +300,7 @@ public class JdbcReservationDao implements ReservationDao {
     public void update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET name = ?, reservation_date = ?, time_id = ?, theme_id = ?
+                SET name = ?, reservation_date = ?, time_id = ?, theme_id = ?, updated_at = ?
                 WHERE id = ?
                 """;
 
@@ -301,6 +310,7 @@ public class JdbcReservationDao implements ReservationDao {
                 Date.valueOf(reservation.getDate()),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
+                valueOf(reservation.getUpdatedAt()),
                 reservation.getId()
         );
         if (affected == 0) {

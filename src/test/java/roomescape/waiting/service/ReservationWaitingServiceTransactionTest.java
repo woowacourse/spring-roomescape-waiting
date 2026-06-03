@@ -27,11 +27,13 @@ import roomescape.time.service.dto.ReservationTimeResult;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.domain.ReservationWaitingRepository;
 import roomescape.waiting.service.dto.ReservationWaitingCommand;
 import roomescape.waiting.service.dto.ReservationWaitingResult;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = NONE)
 public class ReservationWaitingServiceTransactionTest {
 
@@ -80,16 +82,20 @@ public class ReservationWaitingServiceTransactionTest {
                 .save(any(ReservationWaiting.class));
 
         // when
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
         boolean exists = reservationWaitingRepository.hasWaitingAtSameTime(
-                ReservationWaiting.reconstruct(null, "임꺽정", new ReservationSlot(
+                new ReservationWaiting(null, "임꺽정", new ReservationSlot(
                         command.date(),
                         new ReservationTime(command.timeId(), null),
                         new Theme(command.themeId(), null, null, null)
-                ))
+                ), new ReservationSlot(
+                        command.date(),
+                        new ReservationTime(command.timeId(), null),
+                        new Theme(command.themeId(), null, null, null)
+                ).date().atStartOfDay())
         );
         Assertions.assertFalse(exists);
     }
@@ -107,14 +113,14 @@ public class ReservationWaitingServiceTransactionTest {
                 reservationResult.time().id(),
                 reservationResult.theme().id()
         );
-        ReservationWaitingResult waitingResult = reservationWaitingService.save(command);
+        ReservationWaitingResult waitingResult = reservationWaitingService.save(command, java.time.LocalDateTime.now());
 
         doThrow(new RuntimeException("대기 예약 삭제 중 에러 발생"))
                 .when(reservationWaitingRepository)
                 .delete(any(ReservationWaiting.class));
 
         // when
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(waitingResult.id(), "임꺽정"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(waitingResult.id(), "임꺽정", java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -129,7 +135,7 @@ public class ReservationWaitingServiceTransactionTest {
                 time.id(),
                 theme.id()
         );
-        return reservationService.save(command);
+        return reservationService.save(command, java.time.LocalDateTime.now());
     }
 
     private ThemeResult saveTheme() {

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -25,13 +26,12 @@ import roomescape.global.config.WebMvcConfig;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-
-import roomescape.reservation.domain.ReservationSlot;
 
 @WebMvcTest(ReservationController.class)
 @Import(WebMvcConfig.class)
@@ -53,12 +53,20 @@ class ReservationControllerTest {
     @DisplayName("예약을 성공적으로 생성한다.")
     void create_Success() throws Exception {
         // given
-        ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
+        ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), 1L, 1L);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = Reservation.reconstruct(1L, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 5), time, theme));
+        Reservation reservation = new Reservation(
+                1L,
+                "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1),
+                        time,
+                        theme
+                ),
+                java.time.LocalDateTime.now()
+        );
 
-        given(reservationService.save(any())).willReturn(ReservationResult.from(reservation));
+        given(reservationService.save(any(), any())).willReturn(ReservationResult.from(reservation));
 
         // when & then
         mockMvc.perform(post("/reservations")

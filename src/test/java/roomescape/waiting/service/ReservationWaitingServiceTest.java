@@ -7,10 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.lenient;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,10 @@ import roomescape.waiting.service.dto.ReservationWaitingResult;
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingServiceTest {
 
+    private Reservation buildReservation(Long id, String name, ReservationSlot slot) {
+        return new Reservation(id, name, slot, slot.date().atStartOfDay());
+    }
+
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
 
@@ -53,11 +59,11 @@ class ReservationWaitingServiceTest {
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setUp() {
-        org.mockito.Mockito.lenient().when(reservationTimeService.getByIdForUpdate(any()))
+        lenient().when(reservationTimeService.getByIdForUpdate(any()))
                 .thenReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
-        org.mockito.Mockito.lenient().when(themeService.findById(any()))
+        lenient().when(themeService.findById(any()))
                 .thenReturn(new Theme(1L, "테마", "설명", "url"));
     }
 
@@ -71,7 +77,7 @@ class ReservationWaitingServiceTest {
         given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND.getMessage());
     }
@@ -83,7 +89,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -94,7 +100,7 @@ class ReservationWaitingServiceTest {
         given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
@@ -106,7 +112,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -118,7 +124,7 @@ class ReservationWaitingServiceTest {
         given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
@@ -130,19 +136,20 @@ class ReservationWaitingServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(pastDate, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(pastDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", pastDate, 1L, 1L
         );
 
-        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
+        lenient().when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
-        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
+        lenient().when(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).thenReturn(false);
+        lenient().when(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class)))
+                .thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
@@ -155,17 +162,18 @@ class ReservationWaitingServiceTest {
         LocalTime pastTime = LocalTime.now().minusHours(1);
         ReservationTime time = new ReservationTime(1L, pastTime);
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(today, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(today, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", today, 1L, 1L);
 
-        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
+        lenient().when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(
                 Optional.of(targetReservation));
-        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
-        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
+        lenient().when(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).thenReturn(false);
+        lenient().when(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class)))
+                .thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
     }
@@ -177,7 +185,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", futureDate, 1L, 1L
@@ -191,7 +199,7 @@ class ReservationWaitingServiceTest {
                 new DataIntegrityViolationException("Duplicate key error"));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.save(command))
+        assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
     }
@@ -204,7 +212,7 @@ class ReservationWaitingServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
@@ -216,12 +224,13 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
+                futureDate.atStartOfDay());
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "포비"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "포비", java.time.LocalDateTime.now()))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage(ReservationWaitingErrorCode.AUTHORIZATION_FAIL.getMessage());
     }
@@ -233,12 +242,13 @@ class ReservationWaitingServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(pastDate, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(pastDate, time, theme),
+                pastDate.atStartOfDay());
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_DATE.getMessage());
     }
@@ -251,12 +261,13 @@ class ReservationWaitingServiceTest {
         LocalTime pastTime = LocalTime.now().minusHours(1);
         ReservationTime time = new ReservationTime(1L, pastTime);
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(today, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(today, time, theme),
+                today.atStartOfDay());
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(InvalidBusinessStateException.class)
                 .hasMessage(ReservationWaitingErrorCode.INVALID_TIME.getMessage());
     }
@@ -268,14 +279,15 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
+                futureDate.atStartOfDay());
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
         willThrow(new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage()))
                 .given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운"))
+        assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
     }
@@ -287,10 +299,11 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
+        Reservation targetReservation = buildReservation(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", futureDate, 1L, 1L);
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
+                futureDate.atStartOfDay());
 
         given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
@@ -299,7 +312,7 @@ class ReservationWaitingServiceTest {
         given(reservationWaitingRepository.save(any())).willReturn(waiting);
 
         // when
-        ReservationWaitingResult result = reservationWaitingService.save(command);
+        ReservationWaitingResult result = reservationWaitingService.save(command, java.time.LocalDateTime.now());
 
         // then
         assertThat(result.id()).isEqualTo(1L);
@@ -313,12 +326,13 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
+                futureDate.atStartOfDay());
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
         willDoNothing().given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
         // when & then
-        assertDoesNotThrow(() -> reservationWaitingService.deleteById(1L, "브라운"));
+        assertDoesNotThrow(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()));
     }
 }

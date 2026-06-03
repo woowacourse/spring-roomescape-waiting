@@ -3,6 +3,7 @@ package roomescape.waiting.repository;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,10 +40,11 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                 theme
         );
 
-        return ReservationWaiting.reconstruct(
+        return new ReservationWaiting(
                 resultSet.getLong("reservation_waiting_id"),
                 resultSet.getString("reservation_waiting_name"),
-                slot
+                slot,
+                resultSet.getTimestamp("reservation_waiting_updated_at").toLocalDateTime()
         );
     };
 
@@ -55,8 +57,8 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         String sql = """
-                INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id, updated_at)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -67,15 +69,17 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
             ps.setDate(2, Date.valueOf(reservationWaiting.getDate()));
             ps.setLong(3, reservationWaiting.getTime().getId());
             ps.setLong(4, reservationWaiting.getTheme().getId());
+            ps.setTimestamp(5, java.sql.Timestamp.valueOf(reservationWaiting.getUpdatedAt()));
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
 
-        return ReservationWaiting.reconstruct(
+        return new ReservationWaiting(
                 id,
                 reservationWaiting.getName(),
-                reservationWaiting.getSlot()
+                reservationWaiting.getSlot(),
+                reservationWaiting.getUpdatedAt()
         );
     }
 
@@ -90,7 +94,8 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at AS reservation_waiting_updated_at
                 FROM reservation_waiting r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -114,7 +119,8 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at AS reservation_waiting_updated_at
                 FROM reservation_waiting r
                 INNER JOIN reservation_time t
                   ON r.time_id = t.id
@@ -165,7 +171,8 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                        h.id AS theme_id,
                        h.name AS theme_name,
                        h.description AS theme_description,
-                       h.thumbnail_url AS theme_thumbnail_url
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at AS reservation_waiting_updated_at
                 FROM reservation_waiting r
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme h ON r.theme_id = h.id
@@ -175,5 +182,42 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId);
+    }
+
+    @Override
+    public List<ReservationWaiting> findAllBySlots(List<ReservationSlot> slots) {
+        if (slots.isEmpty()) {
+            return List.of();
+        }
+        StringBuilder sql = new StringBuilder("""
+                SELECT r.id AS reservation_waiting_id,
+                       r.name AS reservation_waiting_name,
+                       r.reservation_date AS reservation_waiting_date,
+                       r.time_id,
+                       t.start_at AS time_start_at,
+                       h.id AS theme_id,
+                       h.name AS theme_name,
+                       h.description AS theme_description,
+                       h.thumbnail_url AS theme_thumbnail_url,
+                       r.updated_at AS reservation_waiting_updated_at
+                FROM reservation_waiting r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme h ON r.theme_id = h.id
+                WHERE 
+                """);
+
+        List<Object> params = new ArrayList<>();
+        for (int i = 0; i < slots.size(); i++) {
+            if (i > 0) {
+                sql.append(" OR ");
+            }
+            sql.append("(r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?)");
+            ReservationSlot slot = slots.get(i);
+            params.add(slot.date());
+            params.add(slot.time().getId());
+            params.add(slot.theme().getId());
+        }
+
+        return jdbcTemplate.query(sql.toString(), RESERVATION_WAITING_ROW_MAPPER, params.toArray());
     }
 }

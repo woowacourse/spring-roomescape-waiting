@@ -16,7 +16,7 @@ class ReservationTimeTest {
         LocalTime time = LocalTime.of(10, 0);
 
         // when
-        ReservationTime reservationTime = ReservationTime.of(time);
+        ReservationTime reservationTime = new ReservationTime(time);
 
         // then
         assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(10, 0));

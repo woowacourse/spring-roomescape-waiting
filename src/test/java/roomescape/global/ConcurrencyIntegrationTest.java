@@ -109,8 +109,7 @@ class ConcurrencyIntegrationTest {
                                 LocalDate.now().plusDays(7),
                                 1L,
                                 1L
-                        )
-                ),
+                        ), java.time.LocalDateTime.now()),
                 100,
                 ConflictException.class
         );
@@ -168,7 +167,7 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteById(1L, "브라운"),
+                () -> reservationService.deleteById(1L, "브라운", java.time.LocalDateTime.now()),
                 100,
                 NotFoundException.class
         );
@@ -240,16 +239,12 @@ class ConcurrencyIntegrationTest {
 
         //when
         List<Runnable> tasks = List.of(
-                () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
+                () -> reservationService.update(new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
                         reservationId1,
-                        "브라운"
-                ),
-                () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
+                        "브라운", java.time.LocalDateTime.now()),
+                () -> reservationService.update(new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
                         reservationId2,
-                        "코니"
-                )
+                        "코니", java.time.LocalDateTime.now())
         );
 
         for (Runnable task : tasks) {
@@ -295,8 +290,7 @@ class ConcurrencyIntegrationTest {
                                 LocalDate.now().plusDays(7),
                                 1L,
                                 1L
-                        )
-                ),
+                        ), java.time.LocalDateTime.now()),
                 100,
                 BusinessException.class
         );
@@ -319,11 +313,11 @@ class ConcurrencyIntegrationTest {
                 LocalDate.now().plusDays(7),
                 1L,
                 1L
-        ));
+        ), java.time.LocalDateTime.now());
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteById(1L, "포비"),
+                () -> reservationWaitingService.deleteById(1L, "포비", java.time.LocalDateTime.now()),
                 100,
                 NotFoundException.class
         );
@@ -357,13 +351,13 @@ class ConcurrencyIntegrationTest {
                         LocalDate.now().plusDays(7),
                         1L,
                         1L
-                )),
+                ), java.time.LocalDateTime.now()),
                 () -> reservationService.save(new ReservationCommand(
                         "브라운",
                         LocalDate.now().plusDays(7),
                         1L,
                         2L
-                ))
+                ), java.time.LocalDateTime.now())
         );
 
         for (Runnable task : tasks) {
@@ -418,13 +412,13 @@ class ConcurrencyIntegrationTest {
                         LocalDate.now().plusDays(7),
                         1L,
                         2L
-                )),
+                ), java.time.LocalDateTime.now()),
                 () -> reservationWaitingService.save(new ReservationWaitingCommand(
                         "브라운",
                         LocalDate.now().plusDays(7),
                         1L,
                         1L
-                ))
+                ), java.time.LocalDateTime.now())
         );
 
         for (Runnable task : tasks) {

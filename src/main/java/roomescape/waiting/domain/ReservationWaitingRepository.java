@@ -18,4 +18,6 @@ public interface ReservationWaitingRepository {
     boolean hasWaitingAtSameTime(ReservationWaiting reservationWaiting);
 
     List<ReservationWaiting> queryAllBySlotForUpdate(ReservationSlot slot);
+
+    List<ReservationWaiting> findAllBySlots(List<ReservationSlot> slots);
 }

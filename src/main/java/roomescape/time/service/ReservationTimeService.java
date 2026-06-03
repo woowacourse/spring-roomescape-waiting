@@ -25,7 +25,7 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTimeResult save(ReservationTimeCommand command) {
         validateReservationTimeUniqueness(command.startAt());
-        ReservationTime reservationTime = ReservationTime.of(command.startAt());
+        ReservationTime reservationTime = new ReservationTime(command.startAt());
 
         try {
             ReservationTime saved = reservationTimeRepository.save(reservationTime);
@@ -36,7 +36,7 @@ public class ReservationTimeService {
     }
 
     private void validateReservationTimeUniqueness(LocalTime startAt) {
-        if (reservationTimeRepository.existsByStartAt(ReservationTime.of(startAt))) {
+        if (reservationTimeRepository.existsByStartAt(new ReservationTime(startAt))) {
             throw new ConflictException(TimeErrorCode.DUPLICATE_TIME);
         }
     }

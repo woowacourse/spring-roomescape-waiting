@@ -47,11 +47,7 @@ class ReservationRepositoryImplTest {
 
         // when
         Reservation saved = reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme), LocalDate.of(2024, 5, 1).atStartOfDay())
         );
 
         // then
@@ -67,20 +63,12 @@ class ReservationRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme), LocalDate.of(2024, 5, 1).atStartOfDay())
         );
 
         // when & then
         assertThatThrownBy(() -> reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme), LocalDate.of(2024, 5, 1).atStartOfDay())
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -92,11 +80,7 @@ class ReservationRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         Reservation saved = reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay())
         );
 
         Reservation updated = saved.update(LocalDate.now().plusDays(5), null, "브라운", LocalDateTime.now());
@@ -119,11 +103,7 @@ class ReservationRepositoryImplTest {
         // when & then
         assertThatThrownBy(
                 () -> reservationRepository.save(
-                        Reservation.reconstruct(
-                                999L,
-                                "브라운",
-                                new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme)
-                        )
+                        new Reservation(999L, "브라운", new ReservationSlot(LocalDate.of(2024, 5, 1), time, theme), LocalDate.of(2024, 5, 1).atStartOfDay())
                 )
         ).isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
@@ -137,19 +117,11 @@ class ReservationRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.now().plusDays(5), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.now().plusDays(5), time, theme), LocalDate.now().plusDays(5).atStartOfDay())
         );
 
         Reservation saved = reservationRepository.save(
-                Reservation.reconstruct(
-                        null,
-                        "브라운",
-                        new ReservationSlot(LocalDate.now().plusDays(1), time, theme)
-                )
+                new Reservation(null, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay())
         );
 
         Reservation updated = saved.update(LocalDate.now().plusDays(5), time, "브라운", LocalDateTime.now());
@@ -381,8 +353,8 @@ class ReservationRepositoryImplTest {
 
         saveReservation("브라운", date, time, theme);
 
-        Reservation target1 = Reservation.reconstruct(null, "브라운", new ReservationSlot(date, time, theme));
-        Reservation target2 = Reservation.reconstruct(null, "코니", new ReservationSlot(date, time, theme));
+        Reservation target1 = new Reservation(null, "브라운", new ReservationSlot(date, time, theme), date.atStartOfDay());
+        Reservation target2 = new Reservation(null, "코니", new ReservationSlot(date, time, theme), date.atStartOfDay());
 
         //when & then
         assertThat(reservationRepository.hasBookingAtSameTime(target1)).isTrue();
@@ -403,7 +375,7 @@ class ReservationRepositoryImplTest {
         //when & then
         assertThat(reservationRepository.isAlreadyBookedByOthers(saved)).isFalse();
 
-        Reservation conflicting = Reservation.reconstruct(999L, "브라운", new ReservationSlot(date, time, theme));
+        Reservation conflicting = new Reservation(999L, "브라운", new ReservationSlot(date, time, theme), date.atStartOfDay());
         assertThat(reservationRepository.isAlreadyBookedByOthers(conflicting)).isTrue();
     }
 
@@ -440,7 +412,7 @@ class ReservationRepositoryImplTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(
-                Reservation.reconstruct(null, name, new ReservationSlot(date, time, theme))
+                new Reservation(null, name, new ReservationSlot(date, time, theme), date.atStartOfDay())
         );
     }
 

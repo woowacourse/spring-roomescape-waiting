@@ -2,7 +2,11 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,9 +49,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult save(ReservationCommand command) {
+    public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
-            Reservation saved = reservationRepository.save(buildNewReservation(command));
+            Reservation saved = reservationRepository.save(buildNewReservation(command, requestTime));
             return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
@@ -55,8 +59,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void update(ReservationUpdateCommand command, Long id, String name) {
-        Reservation updated = buildUpdatedReservation(command, id, name);
+    public void update(ReservationUpdateCommand command, Long id, String name, LocalDateTime requestTime) {
+        Reservation updated = buildUpdatedReservation(command, id, name, requestTime);
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
@@ -65,12 +69,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id, String name) {
+    public void deleteById(Long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         if (name != null) {
             reservation.validateOwner(name);
         }
-        reservation.validateExpiry(LocalDateTime.now());
+        reservation.validateExpiry(requestTime);
 
         reservationTimeService.getByIdForUpdate(reservation.getTimeId());
 
@@ -79,7 +83,7 @@ public class ReservationService {
         );
 
         reservationRepository.delete(reservation);
-        promoteNextWaiting(waitings);
+        promoteNextWaiting(waitings, requestTime);
     }
 
     public List<ReservationResult> findAll() {
@@ -89,7 +93,80 @@ public class ReservationService {
     }
 
     public List<ReservationWithStatusResult> findAllByName(String name) {
-        return reservationRepository.queryAllByNameWithStatus(name);
+        // 1. 유저의 예약 내역 조회
+        List<Reservation> reservations = reservationRepository.findAllByName(name);
+        List<ReservationWithStatusResult> reservationResults = reservations.stream()
+                .map(r -> new ReservationWithStatusResult(
+                        r.getId(),
+                        r.getName(),
+                        r.getDate(),
+                        r.getTime(),
+                        r.getTheme(),
+                        "reserved",
+                        0L
+                ))
+                .toList();
+
+        // 2. 유저의 대기 내역 조회
+        List<ReservationWaiting> userWaitings = reservationWaitingRepository.findAllByName(name);
+        if (userWaitings.isEmpty()) {
+            return reservationResults;
+        }
+
+        // 3. 유저가 대기 중인 슬롯들의 전체 대기자 목록 일괄 조회 (Batch Query)
+        List<ReservationSlot> slots = userWaitings.stream()
+                .map(ReservationWaiting::getSlot)
+                .toList();
+        List<ReservationWaiting> allWaitingsForSlots = reservationWaitingRepository.findAllBySlots(slots);
+
+        // 4. 슬롯별로 전체 대기자 목록 그룹화
+        Map<ReservationSlot, List<ReservationWaiting>> waitingsBySlot = allWaitingsForSlots.stream()
+                .collect(Collectors.groupingBy(ReservationWaiting::getSlot));
+
+        // 5. 각 슬롯의 대기자 목록을 정렬 정책에 따라 정렬하고 사용자의 순번 계산
+        List<ReservationWithStatusResult> waitingResults = new ArrayList<>();
+        for (ReservationWaiting waiting : userWaitings) {
+            List<ReservationWaiting> slotQueue = new ArrayList<>(waitingsBySlot.getOrDefault(waiting.getSlot(), List.of()));
+            
+            // ID 기준으로 정렬 (FIFO 정책)
+            slotQueue.sort(Comparator.comparing(ReservationWaiting::getId));
+
+            // 유저의 대기 순번 계산 (index + 1)
+            long rank = slotQueue.indexOf(waiting) + 1;
+
+            waitingResults.add(new ReservationWithStatusResult(
+                    waiting.getId(),
+                    waiting.getName(),
+                    waiting.getDate(),
+                    waiting.getTime(),
+                    waiting.getTheme(),
+                    "waiting",
+                    rank
+            ));
+        }
+
+        // 6. 예약과 대기 내역을 합쳐서 정렬 반환
+        List<ReservationWithStatusResult> combined = new ArrayList<>();
+        combined.addAll(reservationResults);
+        combined.addAll(waitingResults);
+        
+        combined.sort((r1, r2) -> {
+            int dateCompare = r1.date().compareTo(r2.date());
+            if (dateCompare != 0) {
+                return dateCompare;
+            }
+            int timeCompare = r1.time().getStartAt().compareTo(r2.time().getStartAt());
+            if (timeCompare != 0) {
+                return timeCompare;
+            }
+            int themeCompare = r1.theme().getId().compareTo(r2.theme().getId());
+            if (themeCompare != 0) {
+                return themeCompare;
+            }
+            return r1.status().compareTo(r2.status());
+        });
+
+        return combined;
     }
 
     public PopularThemesResult queryPopularThemes(int period, int limit) {
@@ -107,11 +184,11 @@ public class ReservationService {
         );
     }
 
-    private Reservation buildNewReservation(ReservationCommand command) {
+    private Reservation buildNewReservation(ReservationCommand command, LocalDateTime requestTime) {
         ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
-        Reservation newReservation = Reservation.construct(command.name(), command.date(), time, theme, LocalDateTime.now());
+        Reservation newReservation = new Reservation(command.name(), command.date(), time, theme, requestTime);
         validateNoDoubleBooking(newReservation);
 
         return newReservation;
@@ -130,10 +207,11 @@ public class ReservationService {
     }
 
     private void validateNoSameTimeWaiting(Reservation newReservation) {
-        ReservationWaiting dummy = ReservationWaiting.reconstruct(
+        ReservationWaiting dummy = new ReservationWaiting(
                 null,
                 newReservation.getName(),
-                newReservation.getSlot()
+                newReservation.getSlot(),
+                newReservation.getUpdatedAt()
         );
         if (reservationWaitingRepository.hasWaitingAtSameTime(dummy)) {
             throw new InvalidBusinessStateException(
@@ -141,10 +219,10 @@ public class ReservationService {
         }
     }
 
-    private Reservation buildUpdatedReservation(ReservationUpdateCommand command, Long id, String name) {
+    private Reservation buildUpdatedReservation(ReservationUpdateCommand command, Long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         ReservationTime newTime = getReservationTime(command.timeId());
-        Reservation updated = reservation.update(command.date(), newTime, name, LocalDateTime.now());
+        Reservation updated = reservation.update(command.date(), newTime, name, requestTime);
         validateNoDoubleBookingForUpdate(updated);
         return updated;
     }
@@ -164,26 +242,26 @@ public class ReservationService {
         validateNoSameTimeWaiting(updated);
     }
 
-    private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings) {
+    private void promoteNextWaiting(List<ReservationWaiting> lockedWaitings, LocalDateTime requestTime) {
         for (ReservationWaiting waiting : lockedWaitings) {
-            Reservation candidate = Reservation.reconstruct(null, waiting.getName(), waiting.getSlot());
+            Reservation candidate = new Reservation(null, waiting.getName(), waiting.getSlot(), waiting.getSlot().date().atStartOfDay());
             if (!reservationRepository.hasBookingAtSameTime(candidate)) {
-                createReservationFromWaiting(waiting);
+                createReservationFromWaiting(waiting, requestTime);
                 return;
             }
         }
     }
 
-    private void createReservationFromWaiting(ReservationWaiting waiting) {
+    private void createReservationFromWaiting(ReservationWaiting waiting, LocalDateTime requestTime) {
         reservationWaitingRepository.delete(waiting);
 
 
-        Reservation newReservation = Reservation.construct(
+        Reservation newReservation = new Reservation(
                 waiting.getName(),
                 waiting.getDate(),
                 waiting.getTime(),
                 waiting.getTheme(),
-                LocalDateTime.now()
+                requestTime
         );
         reservationRepository.save(newReservation);
     }

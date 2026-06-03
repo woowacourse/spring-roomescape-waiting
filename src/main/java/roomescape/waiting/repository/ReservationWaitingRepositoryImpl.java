@@ -54,4 +54,9 @@ public class ReservationWaitingRepositoryImpl implements ReservationWaitingRepos
                 slot.theme().getId()
         );
     }
+
+    @Override
+    public List<ReservationWaiting> findAllBySlots(List<ReservationSlot> slots) {
+        return reservationWaitingDao.findAllBySlots(slots);
+    }
 }

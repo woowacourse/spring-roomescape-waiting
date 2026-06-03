@@ -3,6 +3,7 @@ package roomescape.waiting.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.waiting.domain.ReservationWaiting;
 
 public interface ReservationWaitingDao {
@@ -18,4 +19,6 @@ public interface ReservationWaitingDao {
     void delete(ReservationWaiting reservationWaiting);
 
     List<ReservationWaiting> findAllByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId);
+
+    List<ReservationWaiting> findAllBySlots(List<ReservationSlot> slots);
 }

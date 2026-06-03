@@ -13,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.theme.service.dto.ThemeResult;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = NONE)
 public class ThemeServiceTransactionTest {
 

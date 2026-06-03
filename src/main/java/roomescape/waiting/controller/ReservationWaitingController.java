@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDateTime;
 import roomescape.auth.Authorized;
 import roomescape.auth.OwnerOnly;
 import roomescape.waiting.controller.dto.ReservationWaitingRequest;
@@ -32,7 +33,7 @@ public class ReservationWaitingController {
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
             @RequestBody @Valid ReservationWaitingRequest request
     ) {
-        ReservationWaitingResult reservationWaiting = reservationWaitingService.save(request.toCommand());
+        ReservationWaitingResult reservationWaiting = reservationWaitingService.save(request.toCommand(), LocalDateTime.now());
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
         return ResponseEntity
@@ -44,7 +45,7 @@ public class ReservationWaitingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteMyReservationWaiting(@OwnerOnly String userName, @PathVariable Long id) {
-        reservationWaitingService.deleteById(id, userName);
+        reservationWaitingService.deleteById(id, userName, LocalDateTime.now());
     }
 }
 

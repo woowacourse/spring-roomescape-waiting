@@ -39,7 +39,7 @@ class ReservationTimeRepositoryImplTest {
         void save_validTime_returnsWithId() {
             // given
             LocalTime startTime = LocalTime.of(10, 0);
-            ReservationTime time = ReservationTime.of(startTime);
+            ReservationTime time = new ReservationTime(startTime);
 
             // when
             ReservationTime savedTime = reservationTimeRepository.save(time);
@@ -54,7 +54,7 @@ class ReservationTimeRepositoryImplTest {
         void save_duplicateTime_throwsDataIntegrityViolation() {
             // given
             LocalTime startTime = LocalTime.of(10, 0);
-            ReservationTime time = ReservationTime.of(startTime);
+            ReservationTime time = new ReservationTime(startTime);
 
             reservationTimeRepository.save(time);
 
@@ -86,10 +86,10 @@ class ReservationTimeRepositoryImplTest {
         createTime(LocalTime.of(11, 0));
 
         //when & then
-        assertThat(reservationTimeRepository.existsByStartAt(ReservationTime.of(LocalTime.of(11, 0))))
+        assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(11, 0))))
                 .isTrue();
 
-        assertThat(reservationTimeRepository.existsByStartAt(ReservationTime.of(LocalTime.of(12, 0))))
+        assertThat(reservationTimeRepository.existsByStartAt(new ReservationTime(LocalTime.of(12, 0))))
                 .isFalse();
     }
 
@@ -166,7 +166,7 @@ class ReservationTimeRepositoryImplTest {
 
     private ReservationTime createTime(LocalTime time) {
         return reservationTimeRepository.save(
-                ReservationTime.of(time)
+                new ReservationTime(time)
         );
     }
 

@@ -12,8 +12,8 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public static ReservationTime of(LocalTime startAt) {
-        return new ReservationTime(null, startAt);
+    public ReservationTime(LocalTime startAt) {
+        this(null, startAt);
     }
 
     public Long getId() {

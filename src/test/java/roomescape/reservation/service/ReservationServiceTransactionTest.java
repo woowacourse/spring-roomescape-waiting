@@ -70,7 +70,7 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult reservationTimeResult = saveReservationTime();
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand);
+        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
         saveReservationWaiting(reservationResult);
 
         Long testTargetId = reservationResult.id();
@@ -81,7 +81,7 @@ public class ReservationServiceTransactionTest {
                 .save(any(Reservation.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName))
+        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -97,7 +97,7 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult reservationTimeResult = saveReservationTime();
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand);
+        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
         saveReservationWaiting(reservationResult);
 
         Long testTargetId = reservationResult.id();
@@ -108,7 +108,7 @@ public class ReservationServiceTransactionTest {
                 .delete(any(ReservationWaiting.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName))
+        assertThatThrownBy(() -> reservationService.deleteById(testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -125,7 +125,7 @@ public class ReservationServiceTransactionTest {
                 reservationResult.time().id(),
                 reservationResult.theme().id()
         );
-        reservationWaitingService.save(reservationWaitingCommand);
+        reservationWaitingService.save(reservationWaitingCommand, java.time.LocalDateTime.now());
     }
 
     @Test
@@ -145,7 +145,7 @@ public class ReservationServiceTransactionTest {
                 .save(any(Reservation.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -163,7 +163,7 @@ public class ReservationServiceTransactionTest {
         ReservationTimeResult time2 = reservationTimeService.save(command2);
 
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
-        ReservationResult reservationResult = reservationService.save(reservationCommand);
+        ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
 
         Long testTargetId = reservationResult.id();
         String testTargetOwnerName = reservationResult.name();
@@ -175,7 +175,7 @@ public class ReservationServiceTransactionTest {
                 .save(any(Reservation.class));
 
         // when
-        assertThatThrownBy(() -> reservationService.update(updateCommand, testTargetId, testTargetOwnerName))
+        assertThatThrownBy(() -> reservationService.update(updateCommand, testTargetId, testTargetOwnerName, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
         // then

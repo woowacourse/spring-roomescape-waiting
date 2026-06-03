@@ -13,22 +13,20 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final LocalDateTime updatedAt;
 
-    private Reservation(Long id, String name, ReservationSlot slot) {
+    public Reservation(Long id, String name, ReservationSlot slot, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.updatedAt = updatedAt;
+        if (this.updatedAt != null && this.slot.time() != null && this.slot.time().getStartAt() != null) {
+            validateExpiry(this.updatedAt);
+        }
     }
 
-    public static Reservation construct(String name, LocalDate date, ReservationTime time, Theme theme,
-                                        LocalDateTime requestTime) {
-        Reservation reservation = new Reservation(null, name, new ReservationSlot(date, time, theme));
-        reservation.validateExpiry(requestTime);
-        return reservation;
-    }
-
-    public static Reservation reconstruct(Long id, String name, ReservationSlot slot) {
-        return new Reservation(id, name, slot);
+    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
+        this(null, name, new ReservationSlot(date, time, theme), requestTime);
     }
 
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
@@ -38,14 +36,12 @@ public class Reservation {
         LocalDate targetDate = getNewDateValue(newDate);
         ReservationTime targetTime = getNewReservationTimeValue(newTime);
 
-        Reservation updated = new Reservation(
+        return new Reservation(
                 this.id,
                 this.name,
-                new ReservationSlot(targetDate, targetTime, this.slot.theme())
+                new ReservationSlot(targetDate, targetTime, this.slot.theme()),
+                requestTime
         );
-        updated.validateExpiry(requestTime);
-
-        return updated;
     }
 
     private LocalDate getNewDateValue(LocalDate newDate) {
@@ -108,6 +104,10 @@ public class Reservation {
 
     public Long getThemeId() {
         return slot.theme().getId();
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
     @Override

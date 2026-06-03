@@ -14,21 +14,21 @@ public class ReservationWaiting {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
+    private final LocalDateTime updatedAt;
 
-    private ReservationWaiting(Long id, String name, ReservationSlot slot) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.slot = slot;
+        this.updatedAt = updatedAt;
+        if (this.updatedAt != null && this.slot.time() != null && this.slot.time().getStartAt() != null) {
+            validateExpiry(this.updatedAt);
+        }
     }
 
-    public static ReservationWaiting construct(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
-        ReservationWaiting waiting = new ReservationWaiting(null, name, new ReservationSlot(date, time, theme));
-        waiting.validateExpiry(requestTime);
-        return waiting;
-    }
-
-    public static ReservationWaiting reconstruct(Long id, String name, ReservationSlot slot) {
-        return new ReservationWaiting(id, name, slot);
+    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
+                              LocalDateTime requestTime) {
+        this(null, name, new ReservationSlot(date, time, theme), requestTime);
     }
 
     public void validateExpiry(LocalDateTime current) {
@@ -69,6 +69,10 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return slot.theme();
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
     @Override

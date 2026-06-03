@@ -64,7 +64,7 @@ class ReservationWaitingControllerTest {
                 1L, "브라운", LocalDate.of(2026, 5, 5), ReservationTimeResult.from(time), ThemeResult.from(theme)
         );
 
-        given(reservationWaitingService.save(any())).willReturn(result);
+        given(reservationWaitingService.save(any(), any())).willReturn(result);
 
         // when & then
         mockMvc.perform(post("/reservations-waitings")
@@ -161,7 +161,7 @@ class ReservationWaitingControllerTest {
     @DisplayName("예약 대기를 성공적으로 삭제한다.")
     void delete_Success() throws Exception {
         // given
-        willDoNothing().given(reservationWaitingService).deleteById(1L, "브라운");
+        willDoNothing().given(reservationWaitingService).deleteById(any(), any(), any());
 
         // when & then
         mockMvc.perform(delete("/reservations-waitings/1")
