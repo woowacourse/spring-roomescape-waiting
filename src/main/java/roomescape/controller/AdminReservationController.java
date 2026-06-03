@@ -7,10 +7,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import roomescape.controller.dto.ReservationRequest;
+import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
+import roomescape.global.AdminOnly;
 import roomescape.service.ReservationService;
 
+@AdminOnly
 @RequestMapping("/admin/reservations")
 @RestController
 public class AdminReservationController {
@@ -27,7 +29,7 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<Void> create(@Valid @RequestBody AdminReservationRequest request) {
         Long reservationId = reservationService.saveReservation(request);
         URI location = URI.create("/reservations/" + reservationId);
         return ResponseEntity
@@ -36,11 +38,8 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancel(
-            @PathVariable Long id,
-            @RequestParam String name
-    ) {
-        reservationService.cancelReservation(id, name);
+    public ResponseEntity<Void> cancel(@PathVariable Long id) {
+        reservationService.cancelReservationByAdmin(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -20,16 +20,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.controller.dto.ReservationTimeResponse;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
+import roomescape.global.AdminAuthorizationInterceptor;
 import roomescape.global.DomainErrorHttpMapper;
+import roomescape.global.WebConfig;
+import roomescape.service.AuthService;
 import roomescape.service.ReservationTimeService;
 
 @WebMvcTest(AdminReservationTimeController.class)
-@Import(DomainErrorHttpMapper.class)
+@Import({DomainErrorHttpMapper.class, AdminAuthorizationInterceptor.class, WebConfig.class})
 class ReservationTimeControllerTest {
 
     @Autowired
@@ -38,14 +44,18 @@ class ReservationTimeControllerTest {
     @MockitoBean
     private ReservationTimeService reservationTimeService;
 
+    @MockitoBean
+    private AuthService authService;
+
     @DisplayName("관리자는 예약 시간을 조회한다.")
     @Test
     void findAll() throws Exception {
+        given(authService.getLoginMember(7L)).willReturn(admin());
         given(reservationTimeService.findAll()).willReturn(List.of(
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0))
         ));
 
-        mockMvc.perform(get("/admin/times"))
+        mockMvc.perform(get("/admin/times").session(adminSession()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].startAt").value("10:00"));
@@ -54,9 +64,11 @@ class ReservationTimeControllerTest {
     @DisplayName("관리자는 예약 시간을 생성한다.")
     @Test
     void create() throws Exception {
+        given(authService.getLoginMember(7L)).willReturn(admin());
         given(reservationTimeService.saveReservationTime(any())).willReturn(1L);
 
         mockMvc.perform(post("/admin/times")
+                        .session(adminSession())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -70,7 +82,10 @@ class ReservationTimeControllerTest {
     @DisplayName("예약 시간 생성 요청 값이 올바르지 않으면 400을 반환한다.")
     @Test
     void createInvalidRequest() throws Exception {
+        given(authService.getLoginMember(7L)).willReturn(admin());
+
         mockMvc.perform(post("/admin/times")
+                        .session(adminSession())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -84,7 +99,9 @@ class ReservationTimeControllerTest {
     @DisplayName("관리자는 예약 시간을 삭제한다.")
     @Test
     void deleteReservationTime() throws Exception {
-        mockMvc.perform(delete("/admin/times/1"))
+        given(authService.getLoginMember(7L)).willReturn(admin());
+
+        mockMvc.perform(delete("/admin/times/1").session(adminSession()))
                 .andExpect(status().isNoContent());
 
         verify(reservationTimeService).deleteReservationTime(1L);
@@ -93,6 +110,7 @@ class ReservationTimeControllerTest {
     @DisplayName("참조 중인 예약 시간 삭제는 422를 반환한다.")
     @Test
     void deleteReferencedReservationTime() throws Exception {
+        given(authService.getLoginMember(7L)).willReturn(admin());
         org.mockito.Mockito.doThrow(new RoomescapeException(
                         DomainErrorCode.REFERENTIAL_INTEGRITY,
                         "이 시간을 참조하는 예약이 있어 삭제할 수 없습니다."
@@ -100,8 +118,18 @@ class ReservationTimeControllerTest {
                 .when(reservationTimeService)
                 .deleteReservationTime(1L);
 
-        mockMvc.perform(delete("/admin/times/1"))
+        mockMvc.perform(delete("/admin/times/1").session(adminSession()))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.code").value("REFERENTIAL_INTEGRITY"));
+    }
+
+    private MockHttpSession adminSession() {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(AuthService.LOGIN_MEMBER_ID, 7L);
+        return session;
+    }
+
+    private Member admin() {
+        return new Member(7L, "admin", "관리자", "password", Role.ADMIN);
     }
 }
