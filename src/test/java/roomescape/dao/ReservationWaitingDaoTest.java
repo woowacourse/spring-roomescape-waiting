@@ -97,27 +97,6 @@ class ReservationWaitingDaoTest {
     }
 
     @Test
-    void 대기_순번을_계산한다() {
-        // given
-        ReservationTime savedTime = saveTime(10, 0);
-        Theme savedTheme = saveTheme("방탈출1", "설명", "https://asdfsdf.sdfs");
-
-        ReservationWaiting reservationWaiting1 = ReservationWaiting.createWithoutId("맥스", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting reservationWaiting2 = ReservationWaiting.createWithoutId("로지", LocalDateTime.now(), LocalDate.of(2026, 6, 10), savedTime, savedTheme);
-        ReservationWaiting savedReservationWaiting1 = reservationWaitingDao.insert(reservationWaiting1);
-        ReservationWaiting savedReservationWaiting2 = reservationWaitingDao.insert(reservationWaiting2);
-
-        // when
-        int countOrder = reservationWaitingDao.countOrder(
-                new ReservationSlot(LocalDate.of(2026, 6, 10), savedTime, savedTheme),
-                savedReservationWaiting2.getId()
-        );
-
-        // then
-        assertThat(countOrder).isEqualTo(2);
-    }
-
-    @Test
     void 전체_대기_목록을_조회한다() {
         // given
         ReservationTime savedTime = saveTime(10, 0);

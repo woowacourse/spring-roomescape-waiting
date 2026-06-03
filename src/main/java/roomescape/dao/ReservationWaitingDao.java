@@ -129,18 +129,6 @@ public class ReservationWaitingDao {
         );
     }
 
-    public int countOrder(ReservationSlot slot, long waitingId) {
-        String sql = """
-                SELECT COUNT(*) 
-                FROM reservation_waiting 
-                WHERE reservation_date = ?
-                AND time_id = ?
-                AND theme_id = ?
-                AND id <= ?
-                """;
-        return jdbcTemplate.queryForObject(sql, Integer.class, slot.getDate(), slot.getTimeId(), slot.getThemeId(), waitingId);
-    }
-
     public List<ReservationWaiting> select() {
         return jdbcTemplate.query(baseSelectSql(), ROW_MAPPER);
     }
