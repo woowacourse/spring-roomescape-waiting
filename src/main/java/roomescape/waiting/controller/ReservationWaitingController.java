@@ -1,5 +1,6 @@
 package roomescape.waiting.controller;
 
+import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class ReservationWaitingController {
 
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
-            @RequestBody ReservationWaitingRequest request
+            @RequestBody @Valid ReservationWaitingRequest request
     ) {
         ReservationWaitingResult reservationWaiting = reservationWaitingService.save(request.toCommand());
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);

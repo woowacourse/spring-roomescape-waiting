@@ -44,7 +44,7 @@ class ReservationTimeIntegrationTest {
     @DisplayName("예약 가능한 시간을 성공적으로 조회한다.")
     void readAvailable_Success() {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "url");
+        createTheme("테마", "설명", "https://example.com/url.png");
 
         RestAssured.given().log().all()
                 .queryParam("themeId", "1")

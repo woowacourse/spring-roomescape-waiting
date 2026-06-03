@@ -48,9 +48,9 @@ class ThemeAdminControllerTest {
         Map<String, Object> request = Map.of(
                 "name", "테마",
                 "description", "설명",
-                "thumbnailUrl", "url"
+                "thumbnailUrl", "https://example.com/url"
         );
-        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Theme theme = new Theme(1L, "테마", "설명", "https://example.com/url");
 
         given(themeService.save(any())).willReturn(ThemeResult.from(theme));
 
@@ -65,13 +65,13 @@ class ThemeAdminControllerTest {
     }
 
     @Test
-    @DisplayName("테마 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void create_MissingFields_BadRequest() throws Exception {
+    @DisplayName("테마 생성 시 테마 이름이 누락되면 400 에러를 반환한다.")
+    void create_MissingName_BadRequest() throws Exception {
         // given
         Map<String, Object> request = Map.of(
                 "name", "",
                 "description", "설명",
-                "thumbnailUrl", "url"
+                "thumbnailUrl", "https://example.com/url"
         );
 
         // when & then
@@ -79,7 +79,61 @@ class ThemeAdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
+                .andExpect(jsonPath("$.message").value("테마 이름은 필수입니다."));
+    }
+
+    @Test
+    @DisplayName("테마 생성 시 테마 설명이 누락되면 400 에러를 반환한다.")
+    void create_MissingDescription_BadRequest() throws Exception {
+        // given
+        Map<String, Object> request = Map.of(
+                "name", "테마",
+                "description", "",
+                "thumbnailUrl", "https://example.com/url"
+        );
+
+        // when & then
+        mockMvc.perform(post("/admin/themes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("테마 설명은 필수입니다."));
+    }
+
+    @Test
+    @DisplayName("테마 생성 시 테마 썸네일 URL이 누락되면 400 에러를 반환한다.")
+    void create_MissingThumbnailUrl_BadRequest() throws Exception {
+        // given
+        Map<String, Object> request = Map.of(
+                "name", "테마",
+                "description", "설명",
+                "thumbnailUrl", ""
+        );
+
+        // when & then
+        mockMvc.perform(post("/admin/themes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("테마 썸네일 URL은 필수입니다."));
+    }
+
+    @Test
+    @DisplayName("테마 생성 시 테마 썸네일 URL 형식이 올바르지 않으면 400 에러를 반환한다.")
+    void create_InvalidThumbnailUrl_BadRequest() throws Exception {
+        // given
+        Map<String, Object> request = Map.of(
+                "name", "테마",
+                "description", "설명",
+                "thumbnailUrl", "not-a-valid-url"
+        );
+
+        // when & then
+        mockMvc.perform(post("/admin/themes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("올바른 썸네일 URL 형식이 아닙니다."));
     }
 
     @Test
@@ -89,7 +143,7 @@ class ThemeAdminControllerTest {
         Map<String, Object> request = Map.of(
                 "name", "테마",
                 "description", "설명",
-                "thumbnailUrl", "url"
+                "thumbnailUrl", "https://example.com/url"
         );
         given(themeService.save(any()))
                 .willThrow(new ConflictException(ThemeErrorCode.DUPLICATE_THEME.getMessage()));

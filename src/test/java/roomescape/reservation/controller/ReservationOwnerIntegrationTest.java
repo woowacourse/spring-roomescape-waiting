@@ -32,7 +32,7 @@ class ReservationOwnerIntegrationTest {
 
     private Long setupDefaultReservation(String name, LocalDate date) {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",

@@ -100,7 +100,7 @@ class ConcurrencyIntegrationTest {
     void saveReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -162,7 +162,7 @@ class ConcurrencyIntegrationTest {
     void deleteReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
@@ -183,7 +183,7 @@ class ConcurrencyIntegrationTest {
     @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void deleteTheme() throws InterruptedException {
         //given
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -224,7 +224,7 @@ class ConcurrencyIntegrationTest {
         createReservationTime("10:00");
         createReservationTime("11:00");
         createReservationTime("12:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
 
         Long reservationId1 = createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
         Long reservationId2 = createReservation("코니", LocalDate.now().plusDays(7), 2L, 1L);
@@ -285,7 +285,7 @@ class ConcurrencyIntegrationTest {
     void saveReservationWaiting() throws InterruptedException {
         //given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when
@@ -312,7 +312,7 @@ class ConcurrencyIntegrationTest {
     void delete() throws InterruptedException {
         // given
         createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
+        createTheme("테마", "설명", "https://example.com/thumbnailUrl.png");
         createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
         reservationWaitingService.save(new ReservationWaitingCommand(
                 "포비",
@@ -339,8 +339,8 @@ class ConcurrencyIntegrationTest {
     void saveSameTimeDifferentThemeReservation() throws InterruptedException {
         // given
         createReservationTime("10:00");
-        createTheme("테마1", "설명1", "url1");
-        createTheme("테마2", "설명2", "url2");
+        createTheme("테마1", "설명1", "https://example.com/url1.png");
+        createTheme("테마2", "설명2", "https://example.com/url2.png");
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         CountDownLatch readyLatch = new CountDownLatch(2);
@@ -399,8 +399,8 @@ class ConcurrencyIntegrationTest {
     void saveSameTimeReservationAndWaiting() throws InterruptedException {
         // given
         createReservationTime("10:00");
-        createTheme("테마1", "설명1", "url1");
-        createTheme("테마2", "설명2", "url2");
+        createTheme("테마1", "설명1", "https://example.com/url1.png");
+        createTheme("테마2", "설명2", "https://example.com/url2.png");
         createReservation("다른사람", LocalDate.now().plusDays(7), 1L, 1L);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);

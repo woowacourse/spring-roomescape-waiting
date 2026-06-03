@@ -25,9 +25,9 @@ import roomescape.global.config.WebMvcConfig;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeResult;
-import roomescape.time.exception.TimeErrorCode;
 
 @WebMvcTest(ReservationTimeAdminController.class)
 @Import(WebMvcConfig.class)
@@ -72,7 +72,7 @@ class ReservationTimeAdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("시간 형식이 올바르지 않습니다. 'HH:mm' 포맷에 맞춰 다시 입력하십시오."));
+                .andExpect(jsonPath("$.message").value("시간을 비운 채로 요청할 수 없습니다."));
     }
 
     @Test

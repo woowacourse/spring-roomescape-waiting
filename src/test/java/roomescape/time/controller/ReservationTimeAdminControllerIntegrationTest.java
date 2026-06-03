@@ -58,7 +58,7 @@ public class ReservationTimeAdminControllerIntegrationTest {
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", is("시간 형식이 올바르지 않습니다. 'HH:mm' 포맷에 맞춰 다시 입력하십시오."));
+                .body("message", is("시간을 비운 채로 요청할 수 없습니다."));
     }
 
     @Test

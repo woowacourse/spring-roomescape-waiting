@@ -29,7 +29,7 @@ class ReservationWaitingControllerIntegrationTest {
 
     private void setupDefaultReservation(LocalDate date) {
         createReservationTime("10:00");
-        createTheme("테마", "설명", "url");
+        createTheme("테마", "설명", "https://example.com/url.png");
         createReservation("brown", date, 1L, 1L);
     }
 
@@ -58,8 +58,8 @@ class ReservationWaitingControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("예약 대기 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void create_MissingFields_BadRequest() {
+    @DisplayName("예약 대기 생성 시 이름이 누락되면 400 에러를 반환한다.")
+    void create_EmptyName_BadRequest() {
         LocalDate date = LocalDate.now().plusDays(1);
         setupDefaultReservation(date);
 
@@ -76,7 +76,65 @@ class ReservationWaitingControllerIntegrationTest {
                 .when().post("/reservations-waitings")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", is("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
+                .body("message", is("예약자 이름을 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 대기 생성 시 날짜가 누락되면 400 에러를 반환한다.")
+    void create_NullDate_BadRequest() {
+        Map<String, Object> requestBody = Map.of(
+                "name", "브라운",
+                "timeId", 1L,
+                "themeId", 1L
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("예약 날짜를 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 대기 생성 시 시간이 누락되면 400 에러를 반환한다.")
+    void create_NullTimeId_BadRequest() {
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        Map<String, Object> requestBody = Map.of(
+                "name", "브라운",
+                "date", date.toString(),
+                "themeId", 1L
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("예약 시간을 선택해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 대기 생성 시 테마가 누락되면 400 에러를 반환한다.")
+    void create_NullThemeId_BadRequest() {
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        Map<String, Object> requestBody = Map.of(
+                "name", "브라운",
+                "date", date.toString(),
+                "timeId", 1L
+        );
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("테마를 선택해주세요."));
     }
 
     @Test

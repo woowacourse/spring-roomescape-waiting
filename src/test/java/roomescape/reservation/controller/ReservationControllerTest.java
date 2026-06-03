@@ -71,8 +71,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void create_MissingFields_BadRequest() throws Exception {
+    @DisplayName("예약 생성 시 이름이 누락되면 400 에러를 반환한다.")
+    void create_EmptyName_BadRequest() throws Exception {
         // given
         String requestBody = "{\"name\":\"\", \"date\":\"2026-05-05\", \"timeId\":1, \"themeId\":1}";
 
@@ -81,7 +81,49 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
+                .andExpect(jsonPath("$.message").value("예약자 이름을 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 날짜가 누락되면 400 에러를 반환한다.")
+    void create_NullDate_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":null, \"timeId\":1, \"themeId\":1}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("예약 날짜를 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 시간이 누락되면 400 에러를 반환한다.")
+    void create_NullTimeId_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":\"2026-05-05\", \"timeId\":null, \"themeId\":1}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("예약 시간을 선택해주세요."));
+    }
+
+    @Test
+    @DisplayName("예약 생성 시 테마가 누락되면 400 에러를 반환한다.")
+    void create_NullThemeId_BadRequest() throws Exception {
+        // given
+        String requestBody = "{\"name\":\"브라운\", \"date\":\"2026-05-05\", \"timeId\":1, \"themeId\":null}";
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("테마를 선택해주세요."));
     }
 
     @Test

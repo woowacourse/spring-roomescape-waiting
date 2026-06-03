@@ -89,7 +89,7 @@ public class ThemeAdminControllerIntegrationTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", is("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
+                .body("message", is("테마 이름은 필수입니다."));
     }
 
     @Test
