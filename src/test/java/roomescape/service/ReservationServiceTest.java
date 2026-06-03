@@ -2,6 +2,7 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static roomescape.domain.exception.DomainErrorCode.DUPLICATE_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.PAST_RESERVATION;
 import static roomescape.domain.exception.DomainErrorCode.RESERVATION_NOT_FOUND;
@@ -280,17 +281,31 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 선택한_예약에_내_이름이_일치하면_예약의_날짜와_시간을_수정할_수_있다() {
+    void 사용자가_예약의_날짜와_시간을_수정하면_기존_자리의_첫번째_대기가_예약으로_승격된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
-        String name = "브라운";
-        ReservationRequest request = new ReservationRequest(
-                name,
+        String originalReservationName = "브라운";
+        String waitingFirstName = "브리";
+        String waitingSecondName = "워니";
+
+        ReservationWithStatus originalReservation = reservationService.applyReservation(createReservationRequest(
+                originalReservationName,
                 FUTURE_SECOND_DATE,
-                reservationTime.getId(),
-                theme.getId()
-        );
-        ReservationWithStatus reservation = reservationService.applyReservation(request);
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingFirst = reservationService.applyReservation(createReservationRequest(
+                waitingFirstName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
+        ReservationWithStatus waitingSecond = reservationService.applyReservation(createReservationRequest(
+                waitingSecondName,
+                FUTURE_SECOND_DATE,
+                reservationTime,
+                theme
+        ));
 
         ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
         LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
@@ -299,15 +314,28 @@ class ReservationServiceTest {
                 updateTime.getId()
         );
 
-        Reservation updatedReservation = reservationService.updateReservation(reservation.getId(), name, updateRequest);
+        reservationService.updateReservation(originalReservation.getId(), originalReservationName, updateRequest);
 
-        assertThat(updatedReservation.getId()).isNotNull();
-        assertThat(updatedReservation.getName()).isEqualTo(name);
-        assertThat(updatedReservation.getDate()).isEqualTo(updateDate);
-        assertThat(updatedReservation.getTime().getId()).isEqualTo(updateTime.getId());
-        assertThat(updatedReservation.getTime().getStartAt()).isEqualTo(updateTime.getStartAt());
-        assertThat(updatedReservation.getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(updatedReservation.getTheme().getName()).isEqualTo(theme.getName());
+        assertThat(reservationService.getReservations())
+                .extracting(
+                        Reservation::getName,
+                        Reservation::getDate,
+                        reservation -> reservation.getTime().getId(),
+                        reservation -> reservation.getTheme().getId()
+                )
+                .contains(
+                        tuple(originalReservationName, updateDate, updateTime.getId(), theme.getId()),
+                        tuple(waitingFirstName, FUTURE_SECOND_DATE, reservationTime.getId(), theme.getId())
+                )
+                .doesNotContain(
+                        tuple(originalReservationName, FUTURE_SECOND_DATE, reservationTime.getId(), theme.getId())
+                );
+        assertThat(reservationService.getWaitlist(waitingSecond.getId()).getName())
+                .isEqualTo(waitingSecondName);
+        assertThatRoomEscapeExceptionCode(
+                () -> reservationService.getWaitlist(waitingFirst.getId()),
+                WAITLIST_NOT_FOUND
+        );
     }
 
     @Test

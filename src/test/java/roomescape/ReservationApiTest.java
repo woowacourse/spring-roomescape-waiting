@@ -74,19 +74,7 @@ class ReservationApiTest {
         Integer timeId = createTime("18:00");
         Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", FUTURE_FIRST_DATE);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
-
-        Integer reservationId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
+        Integer reservationId = createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + reservationId)
@@ -132,9 +120,11 @@ class ReservationApiTest {
     void 내_예약을_취소한다() {
         Integer timeId = createTime("10:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
-
         String name = "브라운";
+        String waitlistName = "브리";
+
         Integer reservationId = createReservation(name, FUTURE_FIRST_DATE, timeId, themeId);
+        Integer waitlistId = createReservation(waitlistName, FUTURE_FIRST_DATE, timeId, themeId);
 
         RestAssured.given().log().all()
                 .queryParam("name", name)
@@ -147,6 +137,18 @@ class ReservationApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=" + waitlistName)
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+
+        RestAssured.given().log().all()
+                .queryParam("name", waitlistName)
+                .when().delete("/waitlists/" + waitlistId)
+                .then().log().all()
+                .statusCode(404);
     }
 
     @Test
@@ -243,11 +245,13 @@ class ReservationApiTest {
 
     @Test
     void 예약을_수정한다() {
-        Integer reservationTimeId = createTime("10:00");
+        Integer timeId = createTime("10:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
         String name = "브라운";
-        Integer reservationId = createReservation(name, FUTURE_FIRST_DATE, reservationTimeId, themeId);
+        String waitlistName = "브리";
+        Integer reservationId = createReservation(name, FUTURE_FIRST_DATE, timeId, themeId);
+        Integer waitlistId = createReservation(waitlistName, FUTURE_FIRST_DATE, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
         Integer updateTimeId = createTime("12:00");
@@ -267,15 +271,31 @@ class ReservationApiTest {
                 .body("time.id", is(updateTimeId))
                 .body("time.startAt", is("12:00"))
                 .body("theme.id", is(themeId));
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=" + waitlistName)
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is(waitlistName))
+                .body("[0].date", is(FUTURE_FIRST_DATE))
+                .body("[0].time.id", is(timeId))
+                .body("[0].theme.id", is(themeId));
+
+        RestAssured.given().log().all()
+                .queryParam("name", waitlistName)
+                .when().delete("/waitlists/" + waitlistId)
+                .then().log().all()
+                .statusCode(404);
     }
 
     @Test
     void 예약을_수정할_때_사용자_이름이_일치하지_않으면_403() {
-        Integer reservationTimeId = createTime("10:00");
+        Integer timeId = createTime("10:00");
         Integer updateTimeId = createTime("12:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
-        Integer reservationId = createReservation("브라운", FUTURE_FIRST_DATE, reservationTimeId, themeId);
+        Integer reservationId = createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", FUTURE_SECOND_DATE);
@@ -308,17 +328,17 @@ class ReservationApiTest {
 
     @Test
     void 예약을_수정할_때_변경하려는_날짜와_시간이_과거이면_400() {
-        Integer reservationTimeId = createTime("10:00");
+        Integer timeId = createTime("10:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
         String name = "브라운";
-        Integer reservationId = createReservation(name, FUTURE_FIRST_DATE, reservationTimeId, themeId);
+        Integer reservationId = createReservation(name, FUTURE_FIRST_DATE, timeId, themeId);
 
         String pastDate = LocalDate.now().minusDays(1).toString();
 
         Map<String, Object> params = new HashMap<>();
         params.put("date", pastDate);
-        params.put("timeId", reservationTimeId);
+        params.put("timeId", timeId);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
