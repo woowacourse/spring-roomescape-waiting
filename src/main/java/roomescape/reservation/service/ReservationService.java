@@ -15,6 +15,7 @@ import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.exception.ReservationConflictException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservation.service.policy.ReservationPolicy;
@@ -123,7 +124,7 @@ public class ReservationService {
     private Reservation saveReservation(Reservation reservation) {
         try {
             return reservationRepository.save(reservation);
-        } catch (DuplicateKeyException exception) {
+        } catch (ReservationConflictException exception) {
             Reservation waiting = Reservation.create(reservation.getGuestName(), reservation.getSlot(), Status.WAITING);
             return reservationRepository.save(waiting);
         }
@@ -132,7 +133,7 @@ public class ReservationService {
     private void updateReservation(Reservation reservation) {
         try {
             updateSlot(reservation);
-        } catch (DuplicateKeyException exception) {
+        } catch (ReservationConflictException exception) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
         }
     }

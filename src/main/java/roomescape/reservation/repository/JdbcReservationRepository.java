@@ -5,14 +5,18 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.exception.ReservationConflictException;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -215,6 +219,14 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
+        try {
+            return insert(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new ReservationConflictException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
+    }
+
+    private Reservation insert(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -229,7 +241,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setDate(2, Date.valueOf(reservation.getSlot().date()));
             preparedStatement.setLong(3, reservation.getSlot().timeId());
             preparedStatement.setLong(4, reservation.getSlot().themeId());
-            preparedStatement.setString(5, reservation.getStatus().toString());
+            preparedStatement.setString(5, reservation.getStatus().name());
             preparedStatement.setObject(6, toConfirmedToken(reservation.getStatus()));
             return preparedStatement;
         }, keyHolder);
@@ -239,20 +251,28 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean updateSlot(Long id, ReservationSlot slot, Status status) {
-        String sql = """
+        try {
+            String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?, status = ?, confirmed_token = ?
                 WHERE id = ?
                 """;
 
-        int count = jdbcTemplate.update(sql,
-                slot.date(),
-                slot.timeId(),
-                status.toString(),
-                toConfirmedToken(status),
-                id);
+            int count = jdbcTemplate.update(
+                    sql,
+                    slot.date(),
+                    slot.timeId(),
+                    status.name(),
+                    toConfirmedToken(status),
+                    id
+            );
 
-        return count == 1;
+            return count == 1;
+        } catch (DuplicateKeyException exception) {
+            throw new ReservationConflictException(
+                    ReservationErrorCode.RESERVATION_ALREADY_EXISTS
+            );
+        }
     }
 
     @Override
