@@ -99,7 +99,7 @@ public class Reservation {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약자 이름은 필수이며 비어있을 수 없습니다.");
+            throw new IllegalArgumentException("예약자 이름은 필수입니다.");
         }
     }
 
@@ -111,13 +111,13 @@ public class Reservation {
 
     private void validateTimeSlot(TimeSlot timeSlot) {
         if (timeSlot == null) {
-            throw new IllegalArgumentException("존재하지 않는 예약 시간대입니다.");
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
         }
     }
 
     private void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new IllegalArgumentException("존재하지 않는 테마입니다.");
+            throw new IllegalArgumentException("테마는 필수입니다.");
         }
     }
 }
