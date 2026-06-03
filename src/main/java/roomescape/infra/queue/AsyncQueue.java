@@ -1,5 +1,6 @@
 package roomescape.infra.queue;
 
+import java.time.LocalDate;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -29,5 +30,15 @@ public abstract class AsyncQueue<T, R> {
 
     public JobResult<R> getResult(String jobId) {
         return results.get(jobId);
+    }
+
+    protected void evictResultsBefore(LocalDate date) {
+        results.keySet().removeIf(key -> {
+            try {
+                return LocalDate.parse(key.split(":")[0]).isBefore(date);
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 }
