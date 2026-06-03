@@ -302,6 +302,8 @@ class ReservationServiceTest {
 
     @Test
     public void 관리자_예약_삭제_정상_테스트() {
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         reservationService.removeReservation(reservationId);
 
         verify(reservationDao).delete(reservationId);
@@ -338,6 +340,41 @@ class ReservationServiceTest {
         reservationService.cancelReservation(reservationId, userName);
 
         verify(reservationDao).delete(reservationId);
+        verify(reservationDao, never()).save(any());
+        verify(waitingDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 관리자_강제_삭제_시_미래_슬롯이면_1번_대기자가_예약으로_승격된다() {
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Long waitingId = 99L;
+        Waiting firstWaiting = new Waiting(
+                waitingId,
+                UserName.parse("대기자"),
+                futureDate, time, theme,
+                LocalDateTime.of(2026, 5, 9, 12, 0)
+        );
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.of(firstWaiting));
+
+        reservationService.removeReservation(reservationId);
+
+        verify(reservationDao).delete(reservationId);
+        verify(reservationDao).save(any(Reservation.class));
+        verify(waitingDao).delete(waitingId);
+    }
+
+    @Test
+    public void 관리자_강제_삭제_시_과거_슬롯이면_승격이_일어나지_않는다() {
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+
+        reservationService.removeReservation(reservationId);
+
+        verify(reservationDao).delete(reservationId);
+        verify(waitingDao, never()).findFirstBySlot(any(), anyLong(), anyLong());
         verify(reservationDao, never()).save(any());
         verify(waitingDao, never()).delete(anyLong());
     }

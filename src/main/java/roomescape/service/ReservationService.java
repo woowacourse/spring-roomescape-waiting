@@ -92,8 +92,14 @@ public class ReservationService {
         return ReservationResult.from(modified);
     }
 
+    @Transactional
     public void removeReservation(Long id) {
+        Reservation origin = getReservationOrThrow(id);
         reservationDao.delete(id);
+        if (isPast(origin.getDate(), origin.getTime())) {
+            return;
+        }
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
     }
 
     @Transactional
@@ -133,14 +139,18 @@ public class ReservationService {
         validateDuplicate(date, time, theme);
     }
 
-    private void validatePastTime(LocalDate date, ReservationTime time) {
+    private boolean isPast(LocalDate date, ReservationTime time) {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime requestDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (requestDateTime.isBefore(now)) {
+        return requestDateTime.isBefore(now);
+    }
+
+    private void validatePastTime(LocalDate date, ReservationTime time) {
+        if (isPast(date, time)) {
             throw new UnprocessableEntityException("이미 지난 시간입니다.");
         }
     }
-
+    
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
         if (reservationDao.existsBy(date, theme, time)) {
             throw new ConflictException("이미 존재하는 예약 건입니다.");
