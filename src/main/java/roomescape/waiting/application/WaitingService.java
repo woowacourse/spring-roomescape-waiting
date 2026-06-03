@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.slot.SlotOccupancy;
 import roomescape.slot.application.SlotService;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.infrastructure.WaitingRepository;
@@ -62,8 +63,12 @@ public class WaitingService {
     }
 
     private void validateWaitingTargetExists(long slotId) {
-        if (!reservationRepository.existsBySlotId(slotId)
-                && !waitingRepository.existsBySlotId(slotId)) {
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(
+                reservationRepository.existsBySlotId(slotId),
+                waitingRepository.existsBySlotId(slotId)
+        );
+
+        if (!slotOccupancy.isWaitable()) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
     }
