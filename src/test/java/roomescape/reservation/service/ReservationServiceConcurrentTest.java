@@ -22,11 +22,8 @@ import roomescape.time.fixture.ReservationTimeFixture;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
+import static roomescape.ConcurrentUtils.doConcurrent;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -61,33 +58,15 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @DisplayName("동시 예약요청시 하나는 예약, 나머지는 대기로 들어간다.")
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent() throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch  = new CountDownLatch(5);
+        // given
         ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
 
-        for (int i = 0; i < 5; i++) {
-            executorService.submit(() -> {
-                try {
-                    startLatch.await();
-                    reservationService.reserve(UUID.randomUUID().toString(), command);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    doneLatch.countDown();
-                }
-            });
-        }
-
-        startLatch.countDown();
-        doneLatch.await(10, TimeUnit.SECONDS);
-
-        executorService.shutdown();
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        doConcurrent(5, () -> {
+            reservationService.reserve(UUID.randomUUID().toString(), command);
+        });
 
         // then
-        List<Reservation> reservations =
-                reservationRepository.findReservedAndWaitingBySlot(slot1);
+        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlot(slot1);
 
         // when
         Assertions.assertThat(reservations)
@@ -106,39 +85,22 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
     @DisplayName("내가 동시 예약요청시 하나는 예약, 나머지는 실패가 된다.")
     @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent_myself() throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch doneLatch  = new CountDownLatch(5);
+        // given
         ReservationSaveCommand command = new ReservationSaveCommand(date1.getId(), time1.getId(), theme.getId());
 
-        for (int i = 0; i < 5; i++) {
-            executorService.submit(() -> {
-                try {
-                    startLatch.await();
-                    reservationService.reserve(name, command);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    doneLatch.countDown();
-                }
-            });
-        }
-
-        startLatch.countDown();
-        doneLatch.await(10, TimeUnit.SECONDS);
-
-        executorService.shutdown();
-        executorService.awaitTermination(10, TimeUnit.SECONDS);
+        doConcurrent(5, ()->{
+            reservationService.reserve(name, command);
+        });
 
         // then
-        List<Reservation> reservations =
-                reservationRepository.findReservedAndWaitingBySlot(slot1);
+        List<Reservation> reservations = reservationRepository.findReservedAndWaitingBySlot(slot1);
 
         // when
         Assertions.assertThat(reservations)
                 .hasSize(1);
 
         Reservation myReservation = reservations.getFirst();
+
         Assertions.assertThat(myReservation.getName())
                 .isEqualTo(name);
         Assertions.assertThat(myReservation.getStatus())
