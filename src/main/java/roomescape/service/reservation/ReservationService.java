@@ -92,7 +92,7 @@ public class ReservationService {
             final LocalDate date,
             final long timeId
     ) {
-        ReservationName lookupName = ReservationName.from(name);
+        String lookupName = validateName(name);
 
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -118,7 +118,15 @@ public class ReservationService {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
-        return reservationRepository.save(updatedReservation);
+        return reservationRepository.update(updatedReservation);
+    }
+
+    private String validateName(final String name) {
+        try {
+            return ReservationName.from(name).value();
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
+        }
     }
 
     private void validateCancelable(final Reservation reservation) {

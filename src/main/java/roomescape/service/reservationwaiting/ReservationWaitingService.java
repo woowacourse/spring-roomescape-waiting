@@ -37,13 +37,8 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
-        ReservationName waitingName = ReservationName.from(name);
-        ReservationSlot slot = new ReservationSlot(
-                date,
-                themeService.getById(themeId),
-                reservationTimeService.getById(timeId)
-        );
-        Reservation reservation = reservationRepository.findBySlot(slot)
+        String waitingName = validateName(name);
+        Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
