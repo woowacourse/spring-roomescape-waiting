@@ -31,9 +31,9 @@ public class ReservationUpdatingDao {
         return keyHolder.getKey().longValue();
     }
 
-    public long updateName(Long id, String name) {
+    public void updateName(Long id, String name) {
         String sql = "update reservation set name = ? where id = ?";
-        return jdbcTemplate.update(sql, name, id);
+        jdbcTemplate.update(sql, name, id);
     }
 
     public long update(Long id, String name, Long slotId, LocalDateTime createdAt) {

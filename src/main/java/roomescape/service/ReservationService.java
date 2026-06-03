@@ -106,10 +106,7 @@ public class ReservationService {
             throw new ExpiredDateTimeException();
         }
 
-        long deleted = reservationUpdatingDao.delete(reservation.getId());
-        if (deleted == 0) {
-            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
-        }
+        reservationUpdatingDao.delete(reservation.getId());
         promoteOrCleanupSlot(reservation.getSlot().getId());
     }
 
