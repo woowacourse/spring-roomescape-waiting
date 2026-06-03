@@ -231,6 +231,38 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 예약_삭제_시_대기자가_있으면_첫번째_대기자가_예약으로_승격된다() {
+        Long themeId = insertTheme("테마1");
+        Long timeId = insertTime("10:00", "11:00");
+        Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
+        insertWaiting("대기자1", "2099-12-31", timeId, themeId);
+        insertWaiting("대기자2", "2099-12-31", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservation/" + reservationId)
+                .then().log().all()
+                .statusCode(204);
+
+        Integer reservationCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE name = ? AND date = ?",
+                Integer.class, "대기자1", "2099-12-31"
+        );
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE name = ? AND date = ?",
+                Integer.class, "대기자1", "2099-12-31"
+        );
+        Integer remainingWaitingCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE date = ?",
+                Integer.class, "2099-12-31"
+        );
+        assertAll(
+                () -> assertEquals(1, reservationCount),
+                () -> assertEquals(0, waitingCount),
+                () -> assertEquals(1, remainingWaitingCount)
+        );
+    }
+
+    @Test
     void deleteReservation_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
                 .when().delete("/reservation/999")
@@ -375,6 +407,16 @@ class ReservationControllerTest {
         );
         return jdbcTemplate.queryForObject(
                 "SELECT MAX(id) FROM reservation", Long.class
+        );
+    }
+
+    private Long insertWaiting(String name, String date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT MAX(id) FROM waiting", Long.class
         );
     }
 }
