@@ -123,4 +123,48 @@ public class WaitingDaoTest {
     void existsByTimeIdResultFalse() {
         assertThat(waitingDao.existsByTimeId(1L)).isFalse();
     }
+
+    @Test
+    void 슬롯에_대기가_없으면_findFirstBySlot은_빈_Optional을_반환한다() {
+        assertThat(waitingDao.findFirstBySlot(LocalDate.parse(TODAY), 1L, 1L))
+                .isEmpty();
+    }
+
+    @Test
+    void 슬롯에_대기자가_한_명이면_해당_대기를_반환한다() {
+        Waiting first = waitingDao.findFirstBySlot(LocalDate.parse("2026-05-12"), 5L, 1L)
+                .orElseThrow();
+
+        assertThat(first.getName().value()).isEqualTo("토리");
+    }
+
+    @Test
+    void 같은_슬롯에_대기가_여러_명이면_created_at이_빠른_사람을_반환한다() {
+        LocalDate slotDate = LocalDate.parse("2026-05-04");
+        ReservationTime slotTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme slotTheme = new Theme(
+                2L,
+                ThemeName.parse("미래 도시"),
+                Description.parse("2050년 서울의 이야기"),
+                ThumbnailUrl.parse("/images/future-city")
+        );
+
+        Waiting earlier = new Waiting(
+                UserName.parse("먼저"),
+                slotDate, slotTime, slotTheme,
+                LocalDateTime.of(2026, 5, 1, 9, 0)
+        );
+        Waiting later = new Waiting(
+                UserName.parse("나중"),
+                slotDate, slotTime, slotTheme,
+                LocalDateTime.of(2026, 5, 1, 10, 0)
+        );
+        waitingDao.save(earlier);
+        waitingDao.save(later);
+
+        Waiting first = waitingDao.findFirstBySlot(slotDate, slotTime.getId(), slotTheme.getId())
+                .orElseThrow();
+
+        assertThat(first.getName().value()).isEqualTo("먼저");
+    }
 }
