@@ -3,6 +3,7 @@ package roomescape.domain.reservatinWaiting;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -28,11 +29,6 @@ public class ReservationWaiting {
         this.slot = slot;
         this.sequence = sequence;
         this.createdAt = createdAt;
-    }
-
-    public ReservationWaiting withReservationWaitingId(Long id) {
-        ReservationSlot reservationSlot = new ReservationSlot(slot.getDate(), slot.getTime(), slot.getTheme());
-        return new ReservationWaiting(id, this.name, reservationSlot, this.sequence, this.createdAt);
     }
 
     public Long getId() {
@@ -71,5 +67,9 @@ public class ReservationWaiting {
         if (!this.name.equals(name)) {
             throw new InvalidInputException("본인의 대기만 취소할 수 있습니다.");
         }
+    }
+
+    public Reservation toReservation() {
+        return new Reservation(this.name, this.slot);
     }
 }
