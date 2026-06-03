@@ -9,7 +9,7 @@ import roomescape.common.exception.ErrorInformation;
 @AllArgsConstructor
 public enum ReservationSlotErrorInformation implements ErrorInformation {
 
-    SLOT_NOT_FOUND(HttpStatus.BAD_REQUEST, "SLOT_001", "존재하지 않는 슬롯입니다."),
+    SLOT_NOT_FOUND(HttpStatus.BAD_REQUEST, "SLOT_001", "유효한 슬롯이 아닙니다."),
     ;
 
     private final HttpStatus httpStatus;

@@ -55,16 +55,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(String name, ReservationSaveCommand command) {
-        ReservationTime time = getReservationTime(command.timeId());
-        time.validateIsInactive();
-
-        ReservationDate date = getReservationDate(command.dateId());
-        date.validateIsInactive();
-
-        Theme theme = getTheme(command.themeId());
-        theme.validateIsInactive();
-
-        ReservationSlot slot = findSlot(date, time, theme);
+        ReservationSlot slot = getSlot(command.dateId(), command.timeId(), command.themeId());
         Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
         Reservation reservation = reservationsOfTimeSlot.reserve(name, slot, LocalDateTime.now());
         return reservationRepository.save(reservation);
@@ -140,8 +131,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
+    private ReservationSlot getSlot(Long dateId, Long timeId, Long themeId) {
+        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(dateId, timeId, themeId)
+                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+    }
+
     private ReservationSlot findSlot(ReservationDate date, ReservationTime time, Theme theme) {
-        return reservationSlotRepository.findByDateIdTimeIdThemeId(date.getId(), time.getId(), theme.getId())
+        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(date.getId(), time.getId(), theme.getId())
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 

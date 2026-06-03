@@ -1,17 +1,15 @@
 package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.date.exception.ReservationDateErrorInformation.INACTIVE_DATE_NOT_ALLOWED;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationApiFixture.cancelReservationWithToken;
 import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
+import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 import static roomescape.slot.fixture.SlotApiFixture.createSlot;
-import static roomescape.theme.exception.ThemeErrorInformation.INACTIVE_THEME_NOT_ALLOWED;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.theme.fixture.ThemeApiFixture.updateThemeStatus;
-import static roomescape.time.exception.ReservationTimeErrorInformation.INACTIVE_TIME_NOT_ALLOWED;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 import static roomescape.time.fixture.ReservationTimeApiFixture.updateTimeStatus;
 
@@ -437,8 +435,8 @@ class ReservationControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().post("/member/reservations")
                 .then().log().all()
-                .statusCode(INACTIVE_DATE_NOT_ALLOWED.getHttpStatus().value())
-                .body("message", is(INACTIVE_DATE_NOT_ALLOWED.getMessage()));
+                .statusCode(SLOT_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(SLOT_NOT_FOUND.getMessage()));
     }
 
     @Test
@@ -460,8 +458,8 @@ class ReservationControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().post("/member/reservations")
                 .then().log().all()
-                .statusCode(INACTIVE_TIME_NOT_ALLOWED.getHttpStatus().value())
-                .body("message", is(INACTIVE_TIME_NOT_ALLOWED.getMessage()));
+                .statusCode(SLOT_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(SLOT_NOT_FOUND.getMessage()));
     }
 
     @Test
@@ -483,8 +481,8 @@ class ReservationControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().post("/member/reservations")
                 .then().log().all()
-                .statusCode(INACTIVE_THEME_NOT_ALLOWED.getHttpStatus().value())
-                .body("message", is(INACTIVE_THEME_NOT_ALLOWED.getMessage()));
+                .statusCode(SLOT_NOT_FOUND.getHttpStatus().value())
+                .body("message", is(SLOT_NOT_FOUND.getMessage()));
     }
 
 }

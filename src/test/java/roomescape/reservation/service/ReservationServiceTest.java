@@ -5,8 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
-import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
-import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
+import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,13 +26,12 @@ import roomescape.reservation.fixture.FakeReservationRepository;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
+import roomescape.slot.exception.ReservationSlotException;
 import roomescape.slot.fixture.FakeReservationSlotRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeException;
 import roomescape.theme.fixture.FakeThemeRepository;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.fixture.FakeReservationTimeRepository;
 import roomescape.time.fixture.ReservationTimeFixture;
 
@@ -110,7 +108,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약시, 등록되지 않은 예약 시간이면 예외를 발생한다.")
+    @DisplayName("예약시, 슬롯에 등록되지 않은 예약 시간이면 예외를 발생한다.")
     void reserve_does_not_exist_reservation_time() {
         // given
         Long wrongTimeId = Long.MIN_VALUE;
@@ -118,12 +116,12 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.reserve(name, command))
-                .isInstanceOf(ReservationTimeException.class)
-                .hasMessage(TIME_NOT_FOUND.getMessage());
+                .isInstanceOf(ReservationSlotException.class)
+                .hasMessage(SLOT_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("예약시, 등록되지 않은 테마이면 예외를 발생한다.")
+    @DisplayName("예약시, 슬롯에 등록되지 않은 테마이면 예외를 발생한다.")
     void reserve_does_not_exist_theme() {
         // given
         Long wrongThemeId = Long.MIN_VALUE;
@@ -131,8 +129,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.reserve(name, command))
-                .isInstanceOf(ThemeException.class)
-                .hasMessage(THEME_NOT_FOUND.getMessage());
+                .isInstanceOf(ReservationSlotException.class)
+                .hasMessage(SLOT_NOT_FOUND.getMessage());
     }
 
     @Test
