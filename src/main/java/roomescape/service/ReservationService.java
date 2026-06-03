@@ -119,7 +119,7 @@ public class ReservationService {
 
         reservationRepository.deleteById(findReservation.getId());
 
-        Optional<WaitingList> findFirstWaitingList = waitingListRepository.findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(findReservation.getTheme(), findReservation.getReservationDate().getDate(), findReservation.getTime());
+        Optional<WaitingList> findFirstWaitingList = waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(findReservation.getReservationDate().getDate(), findReservation.getTime(), findReservation.getTheme());
         if (findFirstWaitingList.isEmpty()) {
             return;
         }

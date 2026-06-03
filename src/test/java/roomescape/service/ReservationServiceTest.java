@@ -120,7 +120,7 @@ class ReservationServiceTest {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(waitingListRepository.findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(theme, futureDate, time))
+        given(waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(futureDate, time, theme))
                 .willReturn(Optional.empty());
 
         // when

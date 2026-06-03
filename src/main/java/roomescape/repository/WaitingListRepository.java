@@ -27,8 +27,8 @@ public class WaitingListRepository {
 
     public WaitingList save(final WaitingList waitingListWithoutId) {
         final String sql = """
-                INSERT INTO waiting_list (name, date, theme_id, time_id, created_at)
-                VALUES (:name, :date, :themeId, :timeId, :createdAt)
+                INSERT INTO waiting_list (name, date, time_id, theme_id, created_at)
+                VALUES (:name, :date, :timeId, :themeId, :createdAt)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -36,8 +36,8 @@ public class WaitingListRepository {
         MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", waitingListWithoutId.getName())
                 .addValue("date", Date.valueOf(waitingListWithoutId.getReservationDate().getDate()))
-                .addValue("themeId", waitingListWithoutId.getTheme().getId())
                 .addValue("timeId", waitingListWithoutId.getReservationTime().getId())
+                .addValue("themeId", waitingListWithoutId.getTheme().getId())
                 .addValue("createdAt", Timestamp.valueOf(waitingListWithoutId.getCreatedAt()));
 
         jdbcTemplate.update(sql, param, keyHolder);
@@ -115,24 +115,24 @@ public class WaitingListRepository {
         return jdbcTemplate.query(sql, param, waitingListRowRowMapper()).stream().toList();
     }
 
-    public int findWaitingOrderByIdAndThemeAndDateAndTime(final WaitingList waitingList) {
+    public int findWaitingOrderByDateAndTimeIdAndThemeId(final WaitingList waitingList) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
-                WHERE theme_id = :themeId AND date = :date AND time_id = :timeId AND created_at <= :createdAt;
+                WHERE date = :date AND time_id = :timeId AND theme_id = :themeId AND created_at <= :createdAt;
                 """;
 
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("themeId", waitingList.getTheme().getId())
                 .addValue("date", waitingList.getReservationDate().getDate())
                 .addValue("timeId", waitingList.getReservationTime().getId())
+                .addValue("themeId", waitingList.getTheme().getId())
                 .addValue("createdAt", Timestamp.valueOf(waitingList.getCreatedAt()));
 
         Integer waitingOrder = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return waitingOrder != null ? waitingOrder : 0;
     }
 
-    public Optional<WaitingList> findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(final Theme theme, final LocalDate date, final ReservationTime time) {
+    public Optional<WaitingList> findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(final LocalDate date, final ReservationTime time, final Theme theme) {
         final String sql = """
                 SELECT
                     w.id AS waiting_list_id,
@@ -168,18 +168,18 @@ public class WaitingListRepository {
         }
     }
 
-    public boolean existsByNameAndThemeAndDateAndTime(final String name, final Long themeId, final LocalDate date, final Long timeId) {
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(final String name, final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list
-                WHERE name = :name AND theme_id = :themeId AND date = :date AND time_id = :timeId
+                WHERE name = :name AND date = :date AND time_id = :timeId AND theme_id = :themeId
                 """;
 
         MapSqlParameterSource param = new MapSqlParameterSource()
                 .addValue("name", name)
-                .addValue("themeId", themeId)
                 .addValue("date", date)
-                .addValue("timeId", timeId);
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
 
         Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
         return count != null && count > 0;

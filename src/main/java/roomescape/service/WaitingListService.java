@@ -40,7 +40,7 @@ public class WaitingListService {
 
         try {
             WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
+            int waitingOrder = waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(savedWaitingList);
             return WaitingListResult.from(savedWaitingList, waitingOrder);
         } catch (DataAccessException e) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
@@ -92,8 +92,8 @@ public class WaitingListService {
     }
 
     private void validateNotDuplicated(WaitingList waitingList, Theme findTheme, ReservationTime findReservationTime) {
-        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
-                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId())) {
+        if (waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                waitingList.getName(), waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId())) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
     }

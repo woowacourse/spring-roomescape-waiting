@@ -67,7 +67,7 @@ class WaitingListServiceTest {
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
             given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, date, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(any(WaitingList.class))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(date));
@@ -91,7 +91,7 @@ class WaitingListServiceTest {
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(today, TIME_ID, THEME_ID)).willReturn(true);
             given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, today, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(any(WaitingList.class))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(today));
@@ -185,7 +185,7 @@ class WaitingListServiceTest {
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.existsByNameAndThemeAndDateAndTime(NAME, THEME_ID, date, TIME_ID)).willReturn(true);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(true);
 
             // when & then
             assertThatThrownBy(() -> waitingListService.create(createCommand(date)))
@@ -220,7 +220,7 @@ class WaitingListServiceTest {
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.existsByNameAndThemeAndDateAndTime(NAME, THEME_ID, date, TIME_ID)).willReturn(false);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(waitingListRepository.save(any(WaitingList.class))).willThrow(new DataIntegrityViolationException("unique constraint"));
 
             // when & then
