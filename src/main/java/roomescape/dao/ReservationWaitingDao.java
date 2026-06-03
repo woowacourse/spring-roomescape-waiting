@@ -10,7 +10,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.query.ReservationWaitingWithOrder;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,6 +111,22 @@ public class ReservationWaitingDao {
     public int delete(Long reservationWaitingId) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ?";
         return jdbcTemplate.update(sql, reservationWaitingId);
+    }
+
+    public List<ReservationWaiting> selectBySlot(ReservationSlot slot) {
+        String sql = baseSelectSql() + """
+                WHERE rw.reservation_date = ?
+                AND rw.time_id = ?
+                AND rw.theme_id = ?
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                ROW_MAPPER,
+                slot.getDate(),
+                slot.getTimeId(),
+                slot.getThemeId()
+        );
     }
 
     public int countOrder(ReservationSlot slot, long waitingId) {
