@@ -33,7 +33,7 @@ function formatStatus(reservation) {
         return "예약 확정";
     }
     if (reservation.status === "WAITING") {
-        return reservation.pendingOrder ? `예약 대기 ${reservation.pendingOrder}순위` : "예약 대기";
+        return reservation.waitingOrder ? `예약 대기 ${reservation.waitingOrder}순위` : "예약 대기";
     }
     if (reservation.status === "CANCELED") {
         return "예약 취소";
