@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
-import roomescape.domain.waiting.dto.WaitingResult;
+import roomescape.domain.waiting.dto.WaitingResponse;
+import roomescape.infra.queue.JobResult;
 
 @RestController
 public class WaitingController {
@@ -34,8 +35,8 @@ public class WaitingController {
     }
 
     @GetMapping("/reservations/waiting/status/{jobId}")
-    public ResponseEntity<WaitingResult> getJobStatus(@PathVariable String jobId) {
-        WaitingResult result = waitingQueue.getResult(jobId);
+    public ResponseEntity<JobResult<WaitingResponse>> getJobStatus(@PathVariable String jobId) {
+        JobResult<WaitingResponse> result = waitingQueue.getResult(jobId);
         if (result == null) {
             return ResponseEntity.notFound().build();
         }

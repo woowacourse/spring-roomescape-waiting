@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
-import roomescape.domain.waiting.dto.WaitingResult;
+import roomescape.infra.queue.JobResult;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -57,10 +57,10 @@ class WaitingConsumerTest {
 
             await().atMost(1, SECONDS).until(() -> !"PENDING".equals(waitingQueue.getResult(jobId).status()));
 
-            WaitingResult result = waitingQueue.getResult(jobId);
+            JobResult result = waitingQueue.getResult(jobId);
             assertAll(
                     () -> assertThat(result.status()).isEqualTo("SUCCESS"),
-                    () -> assertThat(result.waiting()).isEqualTo(response),
+                    () -> assertThat(result.data()).isEqualTo(response),
                     () -> assertThat(result.errorMessage()).isNull()
             );
         }
@@ -80,11 +80,11 @@ class WaitingConsumerTest {
 
             await().atMost(1, SECONDS).until(() -> !"PENDING".equals(waitingQueue.getResult(jobId).status()));
 
-            WaitingResult result = waitingQueue.getResult(jobId);
+            JobResult result = waitingQueue.getResult(jobId);
             assertAll(
                     () -> assertThat(result.status()).isEqualTo("FAILED"),
                     () -> assertThat(result.errorMessage()).isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME.getMessage()),
-                    () -> assertThat(result.waiting()).isNull()
+                    () -> assertThat(result.data()).isNull()
             );
         }
 

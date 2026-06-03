@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
-import roomescape.domain.waiting.dto.WaitingResult;
+import roomescape.infra.queue.AsyncMessage;
+import roomescape.infra.queue.JobResult;
 
 class WaitingQueueTest {
 
@@ -31,12 +32,12 @@ class WaitingQueueTest {
         void enqueue_하면_PENDING_상태로_등록된다() {
             String jobId = waitingQueue.enqueue(request);
 
-            WaitingResult result = waitingQueue.getResult(jobId);
+            JobResult result = waitingQueue.getResult(jobId);
 
             assertAll(
                     () -> assertThat(jobId).isNotNull(),
                     () -> assertThat(result.status()).isEqualTo("PENDING"),
-                    () -> assertThat(result.waiting()).isNull(),
+                    () -> assertThat(result.data()).isNull(),
                     () -> assertThat(result.errorMessage()).isNull()
             );
         }
@@ -45,7 +46,7 @@ class WaitingQueueTest {
         void enqueue_하면_큐에서_take로_꺼낼_수_있다() throws InterruptedException {
             waitingQueue.enqueue(request);
 
-            WaitingMessage message = waitingQueue.take();
+            AsyncMessage message = waitingQueue.take();
 
             assertAll(
                     () -> assertThat(message.request()).isEqualTo(request),
@@ -63,12 +64,12 @@ class WaitingQueueTest {
             String jobId = waitingQueue.enqueue(request);
             WaitingResponse response = new WaitingResponse(1L, "유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
 
-            waitingQueue.storeResult(jobId, WaitingResult.success(response));
+            waitingQueue.storeResult(jobId, JobResult.success(response));
 
-            WaitingResult result = waitingQueue.getResult(jobId);
+            JobResult result = waitingQueue.getResult(jobId);
             assertAll(
                     () -> assertThat(result.status()).isEqualTo("SUCCESS"),
-                    () -> assertThat(result.waiting()).isEqualTo(response)
+                    () -> assertThat(result.data()).isEqualTo(response)
             );
         }
 
@@ -76,9 +77,9 @@ class WaitingQueueTest {
         void storeResult_실패_결과를_저장하면_FAILED_상태와_에러_메시지를_반환한다() {
             String jobId = waitingQueue.enqueue(request);
 
-            waitingQueue.storeResult(jobId, WaitingResult.failed("에러 발생"));
+            waitingQueue.storeResult(jobId, JobResult.failed("에러 발생"));
 
-            WaitingResult result = waitingQueue.getResult(jobId);
+            JobResult result = waitingQueue.getResult(jobId);
             assertAll(
                     () -> assertThat(result.status()).isEqualTo("FAILED"),
                     () -> assertThat(result.errorMessage()).isEqualTo("에러 발생")
@@ -92,7 +93,7 @@ class WaitingQueueTest {
 
         @Test
         void 등록되지_않은_jobId면_null을_반환한다() {
-            WaitingResult result = waitingQueue.getResult("없는-job-id");
+            JobResult result = waitingQueue.getResult("없는-job-id");
 
             assertThat(result).isNull();
         }
