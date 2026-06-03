@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테마 관리 · 관리자</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #0f766e;
+            --primary-dark: #0d6b64;
+            --primary-light: #f0fdfa;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* ── Admin Topbar ── */
+        .topbar { background: #0f172a; color: white; position: sticky; top: 0; z-index: 100; }
+        .topbar-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 58px; display: flex; align-items: center; gap: 20px; }
+        .logo { font-weight: 800; font-size: 17px; color: #7dd3fc; text-decoration: none; letter-spacing: -0.4px; flex-shrink: 0; }
+        .logo span { color: white; }
+        .admin-badge { font-size: 10px; font-weight: 800; background: #1e40af; color: #bfdbfe; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.08em; }
+        .topbar-nav { display: flex; gap: 2px; align-items: center; flex: 1; }
+        .topbar-nav a { text-decoration: none; color: #94a3b8; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 6px; transition: background 0.12s, color 0.12s; }
+        .topbar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .topbar-nav a.active { background: rgba(255,255,255,0.12); color: white; font-weight: 700; }
+        .topbar-user { margin-left: auto; text-decoration: none; color: #34d399; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(52,211,153,0.3); flex-shrink: 0; }
+        .topbar-user:hover { background: rgba(52,211,153,0.08); }
+
+        /* ── Page ── */
+        .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+        .page-header { margin-bottom: 24px; }
+        .page-eyebrow { display: inline-block; font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase; background: var(--primary-light); padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(15,118,110,0.2); margin-bottom: 10px; }
+        .page-title { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 4px; }
+        .page-desc { font-size: 14px; color: var(--text-muted); }
+
+        /* ── Feedback ── */
+        .feedback { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--radius); background: var(--danger-light); border: 1px solid rgba(220,38,38,0.18); margin-bottom: 20px; }
+        .feedback.hidden { display: none; }
+        .feedback-icon { font-size: 18px; flex-shrink: 0; }
+        .feedback-body { display: grid; gap: 2px; }
+        .feedback-title { font-weight: 700; font-size: 14px; color: var(--danger); }
+        .feedback-msg { font-size: 13px; color: #7f1d1d; }
+        .feedback-hint { font-size: 12px; color: #991b1b; opacity: 0.8; }
+
+        /* ── Layout ── */
+        .layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+        @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+        /* ── Card ── */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 17px; font-weight: 700; }
+        .count-badge { font-size: 12px; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(15,118,110,0.18); }
+
+        /* ── Form ── */
+        .form { display: grid; gap: 14px; }
+        .field { display: grid; gap: 5px; }
+        .field label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        input[type="text"],
+        input[type="url"],
+        textarea {
+            font: inherit;
+            font-size: 14px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: white;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,118,110,0.1); }
+        textarea { min-height: 100px; resize: vertical; }
+
+        /* ── Buttons ── */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 10px 16px; border-radius: var(--radius-sm); border: none; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.12s; text-decoration: none; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; padding: 8px 14px; font-size: 13px; }
+        .btn-secondary { background: var(--primary-light); color: var(--primary); border: 1.5px solid rgba(15,118,110,0.2); font-size: 13px; padding: 8px 14px; }
+        .btn-block { width: 100%; }
+
+        /* ── Theme list ── */
+        .theme-list { display: grid; gap: 12px; }
+        .theme-item {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: white;
+            transition: border-color 0.12s;
+        }
+        .theme-item:hover { border-color: #cbd5e1; }
+        .theme-thumbnail {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+            background: #f1f5f9;
+        }
+        .theme-thumbnail-placeholder {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .theme-body { padding: 14px 16px; }
+        .theme-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+        .theme-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+        .theme-url { font-size: 11px; color: #94a3b8; margin-bottom: 12px; word-break: break-all; }
+        .theme-actions { display: flex; gap: 8px; }
+
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); font-size: 14px; border: 1.5px dashed var(--border); border-radius: var(--radius-sm); }
+        .empty-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<!-- ── Admin Topbar ── -->
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="/pages/admin/themes" class="logo">🗝 Room<span>Escape</span></a>
+        <span class="admin-badge">ADMIN</span>
+        <nav class="topbar-nav">
+            <a th:href="@{/pages/admin/themes}" class="active">테마 관리</a>
+            <a th:href="@{/pages/admin/reservation-times}">시간 관리</a>
+            <a th:href="@{/pages/admin/reservations}">예약 관리</a>
+        </nav>
+        <a th:href="@{/pages/user/reservations}" class="topbar-user">← 사용자 페이지</a>
+    </div>
+</header>
+
+<!-- ── Page ── -->
+<main class="page">
+
+    <div class="page-header">
+        <div class="page-eyebrow">ADMIN · THEMES</div>
+        <h1 class="page-title">테마 관리</h1>
+        <p class="page-desc">방탈출 테마를 추가하고 관리합니다.</p>
+    </div>
+
+    <!-- Error Feedback -->
+    <div id="page-feedback"
+         class="feedback hidden"
+         th:attr="data-error-code=${errorCode}">
+        <div class="feedback-icon">⚠️</div>
+        <div class="feedback-body">
+            <div id="feedback-title" class="feedback-title"></div>
+            <div id="feedback-message" class="feedback-msg"></div>
+            <div id="feedback-hint" class="feedback-hint"></div>
+        </div>
+    </div>
+
+    <div class="layout">
+
+        <!-- Add Theme Form -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">새 테마 추가</h2>
+            </div>
+            <form id="theme-create-form" class="form" method="post" th:action="@{/pages/admin/themes}">
+                <div class="field">
+                    <label for="theme-name">테마 이름</label>
+                    <input type="text" id="theme-name" name="name" maxlength="255" placeholder="테마 이름을 입력하세요" required>
+                </div>
+                <div class="field">
+                    <label for="theme-description">설명</label>
+                    <textarea id="theme-description" name="description" placeholder="테마에 대한 간단한 설명을 입력하세요" required></textarea>
+                </div>
+                <div class="field">
+                    <label for="theme-thumbnail-url">썸네일 URL</label>
+                    <input type="url" id="theme-thumbnail-url" name="thumbnailUrl" placeholder="https://example.com/image.png" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">+ 테마 저장</button>
+            </form>
+        </div>
+
+        <!-- Theme List -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">테마 목록</h2>
+                <span class="count-badge"
+                      th:text="${#lists.size(themes) + '개'}">0개</span>
+            </div>
+
+            <div class="theme-list" th:if="${!#lists.isEmpty(themes)}">
+                <div class="theme-item" th:each="theme : ${themes}">
+                    <img class="theme-thumbnail"
+                         th:src="${theme.thumbnailUrl}"
+                         th:alt="${theme.name}"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                    <div class="theme-thumbnail-placeholder" style="display:none;">🎭</div>
+                    <div class="theme-body">
+                        <div class="theme-name" th:text="${theme.name}">테마명</div>
+                        <div class="theme-desc" th:text="${theme.description}">설명</div>
+                        <div class="theme-url" th:text="${theme.thumbnailUrl}">URL</div>
+                        <div class="theme-actions">
+                            <a th:href="@{/pages/admin/reservation-times}" class="btn btn-secondary">⏰ 시간 관리</a>
+                            <form method="post" th:action="@{/pages/admin/themes/{id}/delete(id=${theme.id})}">
+                                <button type="submit" class="btn btn-danger">삭제</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(themes)}">
+                <span class="empty-icon">🎭</span>
+                등록된 테마가 없습니다.<br>왼쪽 폼으로 테마를 추가해 보세요.
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    const THEME_MESSAGES = {
+        THEME_NAME_DUPLICATED: {
+            title: "같은 이름의 테마가 이미 있어요",
+            message: "동일한 이름의 테마는 추가할 수 없습니다.",
+            hint: "다른 이름으로 테마를 생성해 주세요."
+        },
+        THEME_IN_USE: {
+            title: "예약에서 사용 중인 테마에요",
+            message: "이미 예약이 연결된 테마는 삭제할 수 없습니다.",
+            hint: "해당 테마의 예약을 먼저 정리한 뒤 삭제해 주세요."
+        },
+        INTERNAL_SERVER_ERROR: {
+            title: "서버 오류가 발생했어요",
+            message: "테마 관리 작업 중 오류가 발생했습니다.",
+            hint: "잠시 후 다시 시도해 주세요."
+        },
+        INVALID_INPUT: {
+            title: "요청을 처리하지 못했어요",
+            message: "입력값이 올바르지 않습니다.",
+            hint: "입력값을 확인하고 다시 시도해 주세요."
+        }
+    };
+
+    function showFeedback(title, message, hint) {
+        const el = document.getElementById("page-feedback");
+        document.getElementById("feedback-title").textContent = title;
+        document.getElementById("feedback-message").textContent = message;
+        document.getElementById("feedback-hint").textContent = hint;
+        el.classList.remove("hidden");
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function applyFeedback() {
+        const el = document.getElementById("page-feedback");
+        const code = el.dataset.errorCode;
+        if (!code) return;
+        const msg = THEME_MESSAGES[code] || THEME_MESSAGES.INVALID_INPUT;
+        showFeedback(msg.title, msg.message, msg.hint);
+    }
+
+    document.getElementById("theme-create-form").addEventListener("submit", function(e) {
+        const name = document.getElementById("theme-name").value.trim();
+        const desc = document.getElementById("theme-description").value.trim();
+        const url = document.getElementById("theme-thumbnail-url").value.trim();
+
+        if (!name) { e.preventDefault(); showFeedback("테마 이름을 입력해 주세요", "이름이 비어 있습니다.", "테마 이름을 입력해 주세요."); return; }
+        if (!desc) { e.preventDefault(); showFeedback("테마 설명을 입력해 주세요", "설명이 비어 있습니다.", "설명을 입력해 주세요."); return; }
+        if (!url) { e.preventDefault(); showFeedback("썸네일 URL을 입력해 주세요", "URL이 비어 있습니다.", "이미지 URL을 입력해 주세요."); return; }
+        try {
+            new URL(url);
+        } catch {
+            e.preventDefault();
+            showFeedback("올바른 URL 형식이 아니에요", "유효한 URL 형식으로 입력해 주세요.", "예: https://example.com/image.png");
+        }
+    });
+
+    applyFeedback();
+</script>
+</body>
+</html>
