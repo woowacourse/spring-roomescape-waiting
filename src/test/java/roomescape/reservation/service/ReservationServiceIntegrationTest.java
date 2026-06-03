@@ -2,6 +2,8 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
 import static roomescape.slot.exception.ReservationSlotErrorInformation.SLOT_NOT_FOUND;
@@ -150,7 +152,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
 
             // then
             Assertions.assertThat(actual.getStatus())
-                    .isEqualTo(ReservationStatus.RESERVED);
+                    .isEqualTo(RESERVED);
         }
 
         @Test
@@ -168,7 +170,7 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
 
             // then
             Assertions.assertThat(actual.getStatus())
-                    .isEqualTo(ReservationStatus.RESERVED);
+                    .isEqualTo(RESERVED);
         }
 
         @Test
@@ -263,6 +265,29 @@ class ReservationServiceIntegrationTest extends ServiceSupport {
             Assertions.assertThatThrownBy(() -> reservationService.cancel(savedId, sqlName))
                     .isInstanceOf(ReservationException.class)
                     .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
+        }
+
+        @Test
+        @DisplayName("예약취소 시, 타겟은 CANCELED 대기 1순위가 RESERVED가 된다.")
+        void cancel_with_reschedule() {
+            // then
+            String name1 = "송송";
+            String name2 = "피온";
+
+            Reservation reservation1 = saveReservation(name1, slot1);
+            Reservation reservation2 = saveReservation(name1, slot2);
+
+            // when
+            reservationService.cancel(reservation1.getId(), name1);
+            Reservation canceledReservation = reservationRepository.findById(reservation1.getId()).get();
+            Reservation currentReservedReservation = reservationRepository.findById(reservation2.getId()).get();
+
+            // then
+            Assertions.assertThat(canceledReservation.getStatus())
+                    .isEqualTo(CANCELED);
+
+            Assertions.assertThat(currentReservedReservation.getStatus())
+                    .isEqualTo(RESERVED);
         }
 
     }
