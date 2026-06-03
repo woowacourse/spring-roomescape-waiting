@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
@@ -56,10 +57,9 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
         slot2 = saveSlot(ReservationSlot.of(date2, time2, theme));
     }
 
-    // TODO Clear 추가
-
     @Test
     @DisplayName("동시 예약요청시 하나는 예약, 나머지는 대기로 들어간다.")
+    @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         CountDownLatch startLatch = new CountDownLatch(1);
@@ -104,6 +104,7 @@ class ReservationServiceConcurrentTest extends ServiceSupport {
 
     @Test
     @DisplayName("내가 동시 예약요청시 하나는 예약, 나머지는 실패가 된다.")
+    @Sql(scripts = "classpath:truncate.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void reserve_concurrent_myself() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         CountDownLatch startLatch = new CountDownLatch(1);

@@ -13,4 +13,5 @@ public interface ReservationSlotRepository {
 
     Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId);
 
+    Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeIdForUpdate(Long dateId, Long timeId, Long themeId);
 }

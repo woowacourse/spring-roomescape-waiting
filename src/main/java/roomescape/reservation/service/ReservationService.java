@@ -40,7 +40,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(String name, ReservationSaveCommand command) {
-        ReservationSlot slot = getSlot(command.dateId(), command.timeId(), command.themeId());
+        ReservationSlot slot = getSlotWithLock(command.dateId(), command.timeId(), command.themeId());
         Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
         Reservation reservation = reservationsOfTimeSlot.reserve(name, slot, LocalDateTime.now());
         return reservationRepository.save(reservation);
@@ -91,6 +91,11 @@ public class ReservationService {
 
     private ReservationSlot getSlot(Long dateId, Long timeId, Long themeId) {
         return reservationSlotRepository.findAvailableByDateIdTimeIdThemeId(dateId, timeId, themeId)
+                .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
+    }
+
+    private ReservationSlot getSlotWithLock(Long dateId, Long timeId, Long themeId) {
+        return reservationSlotRepository.findAvailableByDateIdTimeIdThemeIdForUpdate(dateId, timeId, themeId)
                 .orElseThrow(() -> new ReservationSlotException(SLOT_NOT_FOUND));
     }
 

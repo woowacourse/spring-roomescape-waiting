@@ -35,4 +35,13 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
                 .findFirst();
     }
 
+    @Override
+    public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeIdForUpdate(Long dateId, Long timeId, Long themeId) {
+        return store.stream()
+                .filter(slot -> slot.getDateId().equals(dateId)
+                        && slot.getTimeId().equals(timeId)
+                        && slot.getThemeId().equals(themeId))
+                .findFirst();
+    }
+
 }
