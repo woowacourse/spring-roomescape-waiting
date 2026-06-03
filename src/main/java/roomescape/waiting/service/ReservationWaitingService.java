@@ -78,14 +78,13 @@ public class ReservationWaitingService {
 
         validateNoDoubleBooking(slot, command.name());
 
-        ReservationWaiting reservationWaiting = ReservationWaiting.of(
+        return ReservationWaiting.construct(
                 command.name(),
                 command.date(),
                 targetReservation.getTime(),
-                targetReservation.getTheme()
+                targetReservation.getTheme(),
+                LocalDateTime.now()
         );
-        reservationWaiting.validateExpiry(LocalDateTime.now());
-        return reservationWaiting;
     }
 
     private Reservation getReservationBySlot(ReservationSlot slot) {
@@ -108,7 +107,7 @@ public class ReservationWaitingService {
     }
 
     private void validateNoSameTimeWaiting(ReservationSlot slot, String name) {
-        ReservationWaiting candidate = ReservationWaiting.of(name, slot.date(), slot.time(), slot.theme());
+        ReservationWaiting candidate = ReservationWaiting.reconstruct(null, name, slot);
         if (reservationWaitingRepository.hasWaitingAtSameTime(candidate)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.ALREADY_RESERVED);
         }

@@ -340,8 +340,8 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Reservation targetReservation = Reservation.reconstruct(1L, "브라운", new ReservationSlot(date, time, theme));
 
-        ReservationWaiting w1 = new ReservationWaiting(10L, "중복대기자", new ReservationSlot(date, time, theme));
-        ReservationWaiting w2 = new ReservationWaiting(20L, "정상대기자", new ReservationSlot(date, time, theme));
+        ReservationWaiting w1 = ReservationWaiting.reconstruct(10L, "중복대기자", new ReservationSlot(date, time, theme));
+        ReservationWaiting w2 = ReservationWaiting.reconstruct(20L, "정상대기자", new ReservationSlot(date, time, theme));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(targetReservation));
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);

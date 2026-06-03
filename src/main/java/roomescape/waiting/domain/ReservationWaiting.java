@@ -15,25 +15,28 @@ public class ReservationWaiting {
     private final String name;
     private final ReservationSlot slot;
 
-    public ReservationWaiting(Long id, String name, ReservationSlot slot) {
+    private ReservationWaiting(Long id, String name, ReservationSlot slot) {
         this.id = id;
         this.name = name;
         this.slot = slot;
     }
 
-    public static ReservationWaiting of(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new ReservationWaiting(null, name, new ReservationSlot(date, time, theme));
+    public static ReservationWaiting construct(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
+        ReservationWaiting waiting = new ReservationWaiting(null, name, new ReservationSlot(date, time, theme));
+        waiting.validateExpiry(requestTime);
+        return waiting;
+    }
+
+    public static ReservationWaiting reconstruct(Long id, String name, ReservationSlot slot) {
+        return new ReservationWaiting(id, name, slot);
     }
 
     public void validateExpiry(LocalDateTime current) {
-        LocalDate currentDate = current.toLocalDate();
-        if (getDate().isBefore(currentDate)) {
+        if (this.slot.isDateBefore(current.toLocalDate())) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_DATE);
         }
 
-        LocalDateTime targetTime = LocalDateTime.of(getDate(), getTime().getStartAt());
-
-        if (current.isAfter(targetTime)) {
+        if (this.slot.isExpired(current)) {
             throw new InvalidBusinessStateException(ReservationWaitingErrorCode.INVALID_TIME);
         }
     }

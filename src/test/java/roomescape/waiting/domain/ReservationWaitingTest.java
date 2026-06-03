@@ -27,7 +27,7 @@ class ReservationWaitingTest {
         Theme theme = new Theme(1L, "테마", "설명", "url");
 
         // when
-        ReservationWaiting waiting = ReservationWaiting.of(name, date, time, theme);
+        ReservationWaiting waiting = ReservationWaiting.construct(name, date, time, theme, LocalDateTime.of(2026, 5, 4, 10, 0));
 
         // then
         assertThat(waiting.getId()).isNull();
@@ -44,7 +44,7 @@ class ReservationWaitingTest {
         LocalDate futureDate = LocalDate.of(2026, 5, 5);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.of("브라운", futureDate, time, theme);
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(null, "브라운", new roomescape.reservation.domain.ReservationSlot(futureDate, time, theme));
 
         // when & then
         assertThatCode(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 4, 10, 0)))
@@ -58,7 +58,7 @@ class ReservationWaitingTest {
         LocalDate pastDate = LocalDate.of(2026, 5, 5);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.of("브라운", pastDate, time, theme);
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(null, "브라운", new roomescape.reservation.domain.ReservationSlot(pastDate, time, theme));
 
         // when & then
         assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 6, 10, 0)))
@@ -73,7 +73,7 @@ class ReservationWaitingTest {
         LocalDate today = LocalDate.of(2026, 5, 5);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = ReservationWaiting.of("브라운", today, time, theme);
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(null, "브라운", new roomescape.reservation.domain.ReservationSlot(today, time, theme));
 
         // when & then
         assertThatThrownBy(() -> waiting.validateExpiry(LocalDateTime.of(2026, 5, 5, 11, 0)))
@@ -90,7 +90,7 @@ class ReservationWaitingTest {
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "테마", "설명", "url")
         );
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot);
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", slot);
 
         // when & then
         assertThatCode(() -> waiting.validateOwner("브라운")).doesNotThrowAnyException();
@@ -105,7 +105,7 @@ class ReservationWaitingTest {
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "테마", "설명", "url")
         );
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", slot);
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", slot);
 
         // when & then
         assertThatThrownBy(() -> waiting.validateOwner("네오"))
@@ -122,8 +122,8 @@ class ReservationWaitingTest {
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "테마", "설명", "url")
         );
-        ReservationWaiting waiting1 = new ReservationWaiting(1L, "브라운", slot);
-        ReservationWaiting waiting2 = new ReservationWaiting(1L, "네오", slot);
+        ReservationWaiting waiting1 = ReservationWaiting.reconstruct(1L, "브라운", slot);
+        ReservationWaiting waiting2 = ReservationWaiting.reconstruct(1L, "네오", slot);
 
         // when & then
         assertThat(waiting1).isEqualTo(waiting2);

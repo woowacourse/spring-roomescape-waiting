@@ -216,7 +216,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
@@ -233,7 +233,7 @@ class ReservationWaitingServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(pastDate, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(pastDate, time, theme));
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
@@ -251,7 +251,7 @@ class ReservationWaitingServiceTest {
         LocalTime pastTime = LocalTime.now().minusHours(1);
         ReservationTime time = new ReservationTime(1L, pastTime);
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(today, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(today, time, theme));
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
 
@@ -268,7 +268,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
         willThrow(new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage()))
@@ -290,7 +290,7 @@ class ReservationWaitingServiceTest {
         Reservation targetReservation = Reservation.reconstruct(1L, "포비", new ReservationSlot(futureDate, time, theme));
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", futureDate, 1L, 1L);
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
 
         given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(
                 Optional.of(targetReservation));
@@ -313,7 +313,7 @@ class ReservationWaitingServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme));
+        ReservationWaiting waiting = ReservationWaiting.reconstruct(1L, "브라운", new ReservationSlot(futureDate, time, theme));
 
         given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
         willDoNothing().given(reservationWaitingRepository).delete(any(ReservationWaiting.class));

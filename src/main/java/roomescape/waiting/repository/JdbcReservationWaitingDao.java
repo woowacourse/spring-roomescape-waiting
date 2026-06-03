@@ -39,7 +39,7 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                 theme
         );
 
-        return new ReservationWaiting(
+        return ReservationWaiting.reconstruct(
                 resultSet.getLong("reservation_waiting_id"),
                 resultSet.getString("reservation_waiting_name"),
                 slot
@@ -72,11 +72,10 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
 
         long id = keyHolder.getKey().longValue();
 
-        return new ReservationWaiting(
+        return ReservationWaiting.reconstruct(
                 id,
                 reservationWaiting.getName(),
-                new ReservationSlot(reservationWaiting.getDate(), reservationWaiting.getTime(),
-                        reservationWaiting.getTheme())
+                reservationWaiting.getSlot()
         );
     }
 

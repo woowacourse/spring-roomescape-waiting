@@ -130,11 +130,10 @@ public class ReservationService {
     }
 
     private void validateNoSameTimeWaiting(Reservation newReservation) {
-        ReservationWaiting dummy = ReservationWaiting.of(
+        ReservationWaiting dummy = ReservationWaiting.reconstruct(
+                null,
                 newReservation.getName(),
-                newReservation.getDate(),
-                newReservation.getTime(),
-                newReservation.getTheme()
+                newReservation.getSlot()
         );
         if (reservationWaitingRepository.hasWaitingAtSameTime(dummy)) {
             throw new InvalidBusinessStateException(

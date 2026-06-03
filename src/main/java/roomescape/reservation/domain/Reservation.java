@@ -20,7 +20,8 @@ public class Reservation {
         this.slot = slot;
     }
 
-    public static Reservation construct(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
+    public static Reservation construct(String name, LocalDate date, ReservationTime time, Theme theme,
+                                        LocalDateTime requestTime) {
         Reservation reservation = new Reservation(null, name, new ReservationSlot(date, time, theme));
         reservation.validateExpiry(requestTime);
         return reservation;
@@ -68,13 +69,11 @@ public class Reservation {
     }
 
     public void validateExpiry(LocalDateTime requestTime) {
-        LocalDate requestDate = requestTime.toLocalDate();
-        if (this.slot.date().isBefore(requestDate)) {
+        if (this.slot.isDateBefore(requestTime.toLocalDate())) {
             throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_DATE);
         }
 
-        LocalDateTime targetTime = LocalDateTime.of(getDate(), getTime().getStartAt());
-        if (requestTime.isAfter(targetTime)) {
+        if (this.slot.isExpired(requestTime)) {
             throw new InvalidBusinessStateException(ReservationErrorCode.INVALID_TIME);
         }
     }
@@ -85,6 +84,10 @@ public class Reservation {
 
     public String getName() {
         return name;
+    }
+
+    public ReservationSlot getSlot() {
+        return slot;
     }
 
     public LocalDate getDate() {

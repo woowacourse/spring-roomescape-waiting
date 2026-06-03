@@ -44,11 +44,11 @@ class ReservationWaitingRepositoryImplTest {
 
         // when
         ReservationWaiting saved1 = reservationWaitingRepository.save(
-                ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, theme)
+                ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme))
         );
 
         ReservationWaiting saved2 = reservationWaitingRepository.save(
-                ReservationWaiting.of("포비", LocalDate.of(2026, 5, 1), time, theme)
+                ReservationWaiting.reconstruct(null, "포비", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme))
         );
 
         // then
@@ -64,12 +64,12 @@ class ReservationWaitingRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         reservationWaitingRepository.save(
-                ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, theme)
+                ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme))
         );
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, theme)
+                ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme))
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -82,7 +82,7 @@ class ReservationWaitingRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), nonExistentTime, theme)
+                ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), nonExistentTime, theme))
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -95,7 +95,7 @@ class ReservationWaitingRepositoryImplTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingRepository.save(
-                ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, nonExistentTheme)
+                ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, nonExistentTheme))
         )).isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -167,8 +167,8 @@ class ReservationWaitingRepositoryImplTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
         saveReservationWaiting("브라운", LocalDate.of(2026, 5, 1), time, theme);
 
-        ReservationWaiting target1 = ReservationWaiting.of("브라운", LocalDate.of(2026, 5, 1), time, theme);
-        ReservationWaiting target2 = ReservationWaiting.of("포비", LocalDate.of(2026, 5, 1), time, theme);
+        ReservationWaiting target1 = ReservationWaiting.reconstruct(null, "브라운", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme));
+        ReservationWaiting target2 = ReservationWaiting.reconstruct(null, "포비", new ReservationSlot(LocalDate.of(2026, 5, 1), time, theme));
 
         // when & then
         assertThat(reservationWaitingRepository.hasWaitingAtSameTime(target1)).isTrue();
@@ -229,7 +229,7 @@ class ReservationWaitingRepositoryImplTest {
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationWaitingRepository.save(
-                ReservationWaiting.of(name, date, time, theme)
+                ReservationWaiting.reconstruct(null, name, new ReservationSlot(date, time, theme))
         );
     }
 }
