@@ -136,7 +136,7 @@ public class ReservationService {
 
     private void validateNotDuplicated(final Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getReservationDate().getDate(), reservation.getTheme().getId(), reservation.getTime().getId())) {
+                reservation.getReservationDate().getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
         }
     }

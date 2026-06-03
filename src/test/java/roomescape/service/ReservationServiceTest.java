@@ -172,7 +172,7 @@ class ReservationServiceTest {
             given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
             given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
             given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-            given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), theme.getId(), 2L)).willReturn(false);
+            given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
 
             // when
             ReservationResult response = reservationService.modify(request);
@@ -220,7 +220,7 @@ class ReservationServiceTest {
             given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
             given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
             given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
-            given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 2L)).willReturn(false);
+            given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, 1L)).willReturn(false);
             given(waitingListRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(futureDate, time, theme))
                     .willReturn(Optional.of(waitingList));
 

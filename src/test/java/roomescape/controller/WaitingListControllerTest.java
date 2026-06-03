@@ -55,91 +55,166 @@ class WaitingListControllerTest {
         themeId = theme.id();
     }
 
-    @Test
-    void 예약_대기_추가() {
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", STRING_TOMORROW);
-        reservationParams.put("timeId", timeId);
-        reservationParams.put("themeId", themeId);
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().statusCode(201);
+    @Nested
+    class 예약_대기_추가 {
 
-        Map<String, Object> waitingParams = new HashMap<>();
-        waitingParams.put("name", "류시");
-        waitingParams.put("date", STRING_TOMORROW);
-        waitingParams.put("timeId", timeId);
-        waitingParams.put("themeId", themeId);
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(waitingParams)
-                .when().post("/waiting-list")
-                .then().statusCode(201);
+        @Test
+        void 성공() {
+            Map<String, Object> reservationParams = new HashMap<>();
+            reservationParams.put("name", "브라운");
+            reservationParams.put("date", STRING_TOMORROW);
+            reservationParams.put("timeId", timeId);
+            reservationParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "검프");
-        params.put("date", STRING_TOMORROW);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
+            Map<String, Object> waitingParams = new HashMap<>();
+            waitingParams.put("name", "류시");
+            waitingParams.put("date", STRING_TOMORROW);
+            waitingParams.put("timeId", timeId);
+            waitingParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waitingParams)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201);
 
-        WaitingListResult response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/waiting-list")
-                .then().log().all()
-                .statusCode(201).extract()
-                .jsonPath().getObject(".", WaitingListResult.class);
+            Map<String, Object> params = new HashMap<>();
+            params.put("name", "검프");
+            params.put("date", STRING_TOMORROW);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
 
-        assertThat(response.waitingOrder()).isEqualTo(2);
-        assertThat(response.name()).isEqualTo("검프");
-        assertThat(response.date()).isEqualTo(TOMORROW);
-        assertThat(response.timeId()).isEqualTo(timeId);
-        assertThat(response.themeId()).isEqualTo(themeId);
+            WaitingListResult response = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waiting-list")
+                    .then().log().all()
+                    .statusCode(201).extract()
+                    .jsonPath().getObject(".", WaitingListResult.class);
+
+            assertThat(response.waitingOrder()).isEqualTo(2);
+            assertThat(response.name()).isEqualTo("검프");
+            assertThat(response.date()).isEqualTo(TOMORROW);
+            assertThat(response.timeId()).isEqualTo(timeId);
+            assertThat(response.themeId()).isEqualTo(themeId);
+        }
+
+        @Test
+        void 예약이_없는_슬롯에_대기_추가_시도시_422() {
+            Map<String, Object> params = new HashMap<>();
+            params.put("name", "검프");
+            params.put("date", STRING_TOMORROW);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waiting-list")
+                    .then().log().all()
+                    .statusCode(422);
+        }
+
+        @Test
+        void 이미_대기_중인_경우_422() {
+            Map<String, Object> reservationParams = new HashMap<>();
+            reservationParams.put("name", "브라운");
+            reservationParams.put("date", STRING_TOMORROW);
+            reservationParams.put("timeId", timeId);
+            reservationParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("name", "검프");
+            params.put("date", STRING_TOMORROW);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201);
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waiting-list")
+                    .then().log().all()
+                    .statusCode(422);
+        }
     }
 
-    @Test
-    void 예약_대기_삭제() {
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "브라운");
-        reservationParams.put("date", STRING_TOMORROW);
-        reservationParams.put("timeId", timeId);
-        reservationParams.put("themeId", themeId);
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().statusCode(201);
+    @Nested
+    class 예약_대기_삭제 {
 
-        Map<String, Object> waitingParams = new HashMap<>();
-        waitingParams.put("name", "검프");
-        waitingParams.put("date", STRING_TOMORROW);
-        waitingParams.put("timeId", timeId);
-        waitingParams.put("themeId", themeId);
-        WaitingListResult created = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(waitingParams)
-                .when().post("/waiting-list")
-                .then().statusCode(201)
-                .extract().jsonPath().getObject(".", WaitingListResult.class);
+        private long waitingId;
 
-        Map<String, Object> deleteParams = new HashMap<>();
-        deleteParams.put("name", "검프");
+        @BeforeEach
+        void setUp() {
+            Map<String, Object> reservationParams = new HashMap<>();
+            reservationParams.put("name", "브라운");
+            reservationParams.put("date", STRING_TOMORROW);
+            reservationParams.put("timeId", timeId);
+            reservationParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(deleteParams)
-                .when().delete("/waiting-list/" + created.id())
-                .then().log().all()
-                .statusCode(204);
+            Map<String, Object> waitingParams = new HashMap<>();
+            waitingParams.put("name", "검프");
+            waitingParams.put("date", STRING_TOMORROW);
+            waitingParams.put("timeId", timeId);
+            waitingParams.put("themeId", themeId);
+            waitingId = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waitingParams)
+                    .when().post("/waiting-list")
+                    .then().statusCode(201)
+                    .extract().jsonPath().getObject(".", WaitingListResult.class).id();
+        }
 
-        List<WaitingListResult> remaining = RestAssured.given()
-                .when().get("/waiting-list?name=검프")
-                .then().statusCode(200)
-                .extract().jsonPath().getList(".", WaitingListResult.class);
-        assertThat(remaining).isEmpty();
+        @Test
+        void 성공() {
+            Map<String, Object> deleteParams = new HashMap<>();
+            deleteParams.put("name", "검프");
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(deleteParams)
+                    .when().delete("/waiting-list/" + waitingId)
+                    .then().log().all()
+                    .statusCode(204);
+
+            List<WaitingListResult> remaining = RestAssured.given()
+                    .when().get("/waiting-list?name=검프")
+                    .then().statusCode(200)
+                    .extract().jsonPath().getList(".", WaitingListResult.class);
+            assertThat(remaining).isEmpty();
+        }
+
+        @Test
+        void 타인_대기_삭제_시도시_403() {
+            Map<String, Object> deleteParams = new HashMap<>();
+            deleteParams.put("name", "류시");
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(deleteParams)
+                    .when().delete("/waiting-list/" + waitingId)
+                    .then().log().all()
+                    .statusCode(403);
+        }
     }
 
     @Nested
