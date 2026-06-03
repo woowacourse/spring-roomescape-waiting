@@ -250,6 +250,11 @@ async function handleSubmit(event) {
         return;
     }
 
+    if (event.target.matches("[data-waiting-postpone-form]")) {
+        await submitWaitingPostpone(event.target);
+        return;
+    }
+
     if (event.target.id === "theme-form") {
         await submitTheme(event.target);
         return;
@@ -615,6 +620,40 @@ async function deleteReservation(reservationId, successMessage = "예약을 삭�
 
 async function deleteWaiting(waitingId) {
     await mutateWithReload(() => api(`/waitings/${waitingId}`, {method: "DELETE"}), "대기 신청을 취소했습니다.");
+}
+
+async function submitWaitingPostpone(form) {
+    const waitingId = Number(form.dataset.waitingId);
+    const waiting = findWaiting(waitingId);
+    const formData = new FormData(form);
+    const steps = Number(formData.get("steps"));
+
+    if (!waiting) {
+        showToast("대기 정보를 찾을 수 없습니다.", "error");
+        return;
+    }
+
+    if (isPastReservation(waiting)) {
+        showToast("이미 지난 대기는 미룰 수 없습니다.", "error");
+        return;
+    }
+
+    const maxPostponeSteps = Number(waiting.totalRankCount) - Number(waiting.rank);
+
+    if (!Number.isInteger(steps) || steps <= 0) {
+        showToast("미룰 칸 수를 입력해 주세요.", "error");
+        return;
+    }
+
+    if (!Number.isInteger(maxPostponeSteps) || steps > maxPostponeSteps) {
+        showToast("자신보다 뒤에 있는 순번까지만 미룰 수 있습니다.", "error");
+        return;
+    }
+
+    await mutateWithReload(
+        () => api(`/waitings/${waitingId}/postpone?${new URLSearchParams({steps})}`, {method: "POST"}),
+        `${steps}칸 뒤로 미뤘습니다.`
+    );
 }
 
 async function mutateWithReload(request, successMessage) {

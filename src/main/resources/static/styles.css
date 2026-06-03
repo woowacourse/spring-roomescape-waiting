@@ -1302,6 +1302,36 @@ input:focus-visible {
     gap: 8px;
 }
 
+.waiting-postpone-form {
+    display: inline-grid;
+    grid-template-columns: auto 72px auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.waiting-postpone-form label {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.waiting-postpone-form input {
+    width: 72px;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--text);
+    background: #050505;
+    font-weight: 900;
+}
+
+.waiting-postpone-form input:disabled {
+    color: var(--subtle);
+    background: #161616;
+}
+
 .reservation-edit-form {
     grid-column: 1 / -1;
     display: grid;
@@ -1952,6 +1982,19 @@ input:focus-visible {
     .reservation-card-actions,
     .reservation-edit-actions {
         justify-content: stretch;
+    }
+
+    .reservation-card-actions {
+        flex-wrap: wrap;
+    }
+
+    .waiting-postpone-form {
+        flex: 1 1 100%;
+        grid-template-columns: auto minmax(72px, 1fr) minmax(92px, auto);
+    }
+
+    .waiting-postpone-form input {
+        width: 100%;
     }
 
     .reservation-card-actions .secondary-button,
