@@ -1,8 +1,11 @@
 package roomescape.exception;
 
-public class BusinessException extends RoomEscapeException {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    public BusinessException(final ErrorCode errorCode) {
-        super(errorCode);
-    }
+@RequiredArgsConstructor
+@Getter
+public class BusinessException extends RuntimeException {
+
+    private final ErrorCode errorCode;
 }

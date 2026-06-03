@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -10,7 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationTimesWithStatus;
-import roomescape.exception.DatabaseException;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
 import java.sql.Date;
@@ -29,9 +30,12 @@ public class ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public Reservation save(final Reservation newReservation) {
-        final long newReservationId = insertReservation(newReservation);
-
-        return newReservation.withId(newReservationId);
+        try {
+            final long newReservationId = insertReservation(newReservation);
+            return newReservation.withId(newReservationId);
+        } catch (final DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
+        }
     }
 
     public void updateDateAndTime(final Reservation reservation) {
@@ -223,17 +227,7 @@ public class ReservationRepository {
             return preparedStatement;
         }, keyHolder);
 
-        return generatedIdFrom(keyHolder);
-    }
-
-    private static long generatedIdFrom(final KeyHolder keyHolder) {
-        final Number generatedKey = keyHolder.getKey();
-
-        if (generatedKey == null) {
-            throw new DatabaseException(ErrorCode.DATA_CREATION_FAILURE);
-        }
-
-        return generatedKey.longValue();
+        return JdbcUtil.extractGeneratedKey(keyHolder);
     }
 
     /**

@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.exception.DatabaseException;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
 import java.sql.Date;
@@ -29,9 +30,12 @@ public class WaitingListRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public WaitingList save(final WaitingList waitingListWithoutId) {
-        final long waitingListId = insertWaitingList(waitingListWithoutId);
-
-        return waitingListWithoutId.withId(waitingListId);
+        try {
+            final long waitingListId = insertWaitingList(waitingListWithoutId);
+            return waitingListWithoutId.withId(waitingListId);
+        } catch (final DuplicateKeyException e) {
+            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
     }
 
     public boolean deleteById(Long id) {
@@ -151,17 +155,7 @@ public class WaitingListRepository {
             return preparedStatement;
         }, keyHolder);
 
-        return generatedIdFrom(keyHolder);
-    }
-
-    private static long generatedIdFrom(final KeyHolder keyHolder) {
-        final Number generatedKey = keyHolder.getKey();
-
-        if (generatedKey == null) {
-            throw new DatabaseException(ErrorCode.DATA_CREATION_FAILURE);
-        }
-
-        return generatedKey.longValue();
+        return JdbcUtil.extractGeneratedKey(keyHolder);
     }
 
     /**

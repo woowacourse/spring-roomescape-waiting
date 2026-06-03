@@ -7,8 +7,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.DatabaseException;
-import roomescape.exception.ErrorCode;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,17 +89,7 @@ public class ReservationTimeRepository {
             return preparedStatement;
         }, keyHolder);
 
-        return generatedIdFrom(keyHolder);
-    }
-
-    private static long generatedIdFrom(final KeyHolder keyHolder) {
-        final Number generatedKey = keyHolder.getKey();
-
-        if (generatedKey == null) {
-            throw new DatabaseException(ErrorCode.DATA_CREATION_FAILURE);
-        }
-
-        return generatedKey.longValue();
+        return JdbcUtil.extractGeneratedKey(keyHolder);
     }
 
     /**
