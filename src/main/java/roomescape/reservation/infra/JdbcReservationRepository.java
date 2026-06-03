@@ -352,10 +352,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId);
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, rowMapper));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
+
+        return jdbcTemplate.query(sql, params, rowMapper).stream().findFirst();
     }
 }
