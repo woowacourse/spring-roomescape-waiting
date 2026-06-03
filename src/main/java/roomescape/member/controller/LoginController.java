@@ -32,8 +32,7 @@ public class LoginController {
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signup(@Valid @RequestBody SignupRequest request) {
-        MemberResponse response = memberService.signup(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(MemberResponse.from(memberService.signup(request)));
     }
 
     @PostMapping("/login")
