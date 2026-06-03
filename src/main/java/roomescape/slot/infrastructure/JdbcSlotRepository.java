@@ -20,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcSlotRepository implements SlotRepository {
     private final NamedParameterJdbcTemplate template;
-    private final RowMapper<Slot> slotRowMapper = (resultSet, rowNum) -> new Slot(
+    private final RowMapper<Slot> slotRowMapper = (resultSet, rowNum) -> Slot.of(
             resultSet.getLong("id"),
             resultSet.getDate("date").toLocalDate(),
             resultSet.getLong("time_id"),
@@ -44,7 +44,7 @@ public class JdbcSlotRepository implements SlotRepository {
             throw new IllegalStateException("slot 저장 후 생성된 ID를 반환받지 못했습니다.");
         }
 
-        return new Slot(
+        return Slot.of(
                 id.longValue(),
                 slot.getDate(),
                 slot.getTimeId(),

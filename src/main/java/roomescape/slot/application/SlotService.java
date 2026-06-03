@@ -43,7 +43,8 @@ public class SlotService {
     public SlotSaveResponse save(SlotSaveRequest body) {
         validateSlot(body.date(), body.timeId(), body.themeId());
         throwIfSlotAlreadyExists(body.date(), body.themeId(), body.timeId());
-        return SlotSaveResponse.from(slotRepository.save(body.toDomain()));
+        Slot slot = Slot.create(body.date(), body.timeId(), body.themeId());
+        return SlotSaveResponse.from(slotRepository.save(slot));
     }
 
     public void deleteById(long slotId) {

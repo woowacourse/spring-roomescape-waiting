@@ -2,6 +2,7 @@ package roomescape.waiting;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class WaitingLine {
@@ -13,9 +14,21 @@ public class WaitingLine {
     }
 
     private WaitingLine(List<Waiting> waitings) {
+        validateSameSlot(waitings);
         this.waitings = waitings.stream()
                 .sorted(Comparator.comparing(Waiting::getId))
                 .toList();
+    }
+
+    private void validateSameSlot(List<Waiting> waitings) {
+        long slotCount = waitings.stream()
+                .map(Waiting::getSlotId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+        if (slotCount > 1) {
+            throw new IllegalArgumentException("같은 슬롯의 대기만 대기열이 될 수 있습니다.");
+        }
     }
 
     public long orderOf(Waiting waiting) {
