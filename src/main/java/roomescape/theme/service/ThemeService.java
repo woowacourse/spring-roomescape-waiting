@@ -47,7 +47,7 @@ public class ThemeService {
             throw new DomainException(THEME_HAS_RESERVATION);
         }
 
-        if (!themeRepository.cancelById(id, timeManager.now())) {
+        if (!themeRepository.deleteById(id)) {
             throw new DomainException(THEME_NOT_FOUND);
         }
     }

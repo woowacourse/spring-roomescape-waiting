@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
@@ -11,10 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
-import roomescape.reservation.service.validator.ReservationValidator;
+import roomescape.reservation.service.policy.ReservationPolicy;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -28,18 +30,16 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    private final ReservationValidator reservationValidator;
+    private final ReservationPolicy reservationPolicy;
 
     @Transactional
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
-        ReservationTime time = getReservationTime(timeId);
+        ReservationTime reservationTime = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
+        ReservationSlot reservationSlot = ReservationSlot.of(date, reservationTime, theme);
+        Reservation reservation = Reservation.create(guestName, reservationSlot, determineState(reservationSlot));
 
-        Status status = determineState(date, timeId, themeId);
-
-        Reservation reservation = Reservation.create(guestName, date, time, theme, status);
-
-        reservationValidator.validateCreate(reservation);
+        reservationPolicy.validateCreate(reservation);
 
         Reservation saved = reservationRepository.save(reservation);
 
@@ -47,29 +47,18 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
     }
 
-    public List<Reservation> findAllReservations(int page, int size) {
-        return reservationRepository.findAll(page, size);
-    }
-
-    public List<ReservationWaitingResult> findByGuestName(String guestName) {
-        return reservationRepository.findAllByGuestName(guestName);
-    }
-
-    public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
-        return reservationRepository.findAllByGuestNameExceptCanceled(guestName);
-    }
-
     @Transactional
     public ReservationWaitingResult editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
 
-        Status status = determineState(date, timeId, reservation.themeId());
-        Reservation changedReservation = reservation.changeDateAndTime(date, changedTime, status);
+        ReservationSlot changedSlot = ReservationSlot.of(date, changedTime, reservation.getTheme());
+        Status status = determineState(changedSlot);
+        Reservation changedReservation = reservation.changeSlot(changedSlot, status);
 
-        reservationValidator.validateEdit(reservation, changedReservation, guestName);
+        reservationPolicy.validateEdit(reservation, changedReservation, guestName);
 
-        updateReservation(changedReservation);
+        updateSlot(changedReservation);
         promoteWaitingIfNeeded(reservation, changedReservation);
 
         return reservationRepository.findWaitingById(reservationId)
@@ -84,8 +73,20 @@ public class ReservationService {
     @Transactional
     public void deleteMine(Long id, String guestName) {
         Reservation reservation = getReservation(id);
-        reservationValidator.validateDelete(reservation, guestName);
+        reservationPolicy.validateDelete(reservation, guestName);
         cancelReservation(id);
+    }
+
+    public List<Reservation> findAllReservations(int page, int size) {
+        return reservationRepository.findAll(page, size);
+    }
+
+    public List<ReservationWaitingResult> findByGuestName(String guestName) {
+        return reservationRepository.findAllByGuestName(guestName);
+    }
+
+    public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
+        return reservationRepository.findAllByGuestNameExceptCanceled(guestName);
     }
 
     private void cancelReservation(Long id) {
@@ -95,14 +96,9 @@ public class ReservationService {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
 
-        if (reservation.getStatus() == Status.CONFIRMED) {
-            promoteFirstWaiting(reservation.getDate(), reservation.timeId(), reservation.themeId());
+        if (reservation.isConfirmed()) {
+            promoteFirstWaiting(reservation.getSlot());
         }
-    }
-
-    private Theme getTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
     }
 
     private Reservation getReservation(Long reservationId) {
@@ -115,11 +111,15 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
-    private void updateReservation(Reservation reservation) {
-        if (!reservationRepository.updateDateAndTime(
+    private Theme getTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
+    }
+
+    private void updateSlot(Reservation reservation) {
+        if (!reservationRepository.updateSlot(
                 reservation.getId(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
+                reservation.getSlot(),
                 reservation.getStatus()
         )) {
             throw new DomainException(RESERVATION_NOT_FOUND);
@@ -135,11 +135,11 @@ public class ReservationService {
             return;
         }
 
-        promoteFirstWaiting(before.getDate(), before.timeId(), before.themeId());
+        promoteFirstWaiting(before.getSlot());
     }
 
-    private void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
-        reservationRepository.findFirstWaitingIdBySlot(date, timeId, themeId)
+    private void promoteFirstWaiting(ReservationSlot slot) {
+        reservationRepository.findFirstWaitingIdBySlotForUpdate(slot)
                 .ifPresent(waitingId -> updateState(waitingId, Status.CONFIRMED));
     }
 
@@ -149,8 +149,8 @@ public class ReservationService {
         }
     }
 
-    private Status determineState(LocalDate date, Long timeId, Long themeId) {
-        if (!reservationRepository.existsReservationBySlot(date, timeId, themeId)) {
+    private Status determineState(ReservationSlot slot) {
+        if (!reservationRepository.existsConfirmedReservationBySlot(slot)) {
             return Status.CONFIRMED;
         }
         return Status.WAITING;

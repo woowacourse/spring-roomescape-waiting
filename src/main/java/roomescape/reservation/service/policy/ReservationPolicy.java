@@ -1,4 +1,4 @@
-package roomescape.reservation.service.validator;
+package roomescape.reservation.service.policy;
 
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_ALREADY_STARTED_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_OTHER_GUEST_RESERVATION;
@@ -15,7 +15,7 @@ import roomescape.reservation.repository.ReservationRepository;
 
 @Component
 @RequiredArgsConstructor
-public class ReservationValidator {
+public class ReservationPolicy {
 
     private final ReservationRepository reservationRepository;
     private final TimeManager timeManager;
@@ -40,10 +40,8 @@ public class ReservationValidator {
     }
 
     private void validateNotDuplicatedExcept(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
+        if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+                reservation.getSlot(),
                 reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
@@ -51,13 +49,13 @@ public class ReservationValidator {
     }
 
     private void validateNotPast(Reservation reservation) {
-        if (reservation.isPassed(timeManager.now())) {
+        if (reservation.getSlot().isPassed(timeManager.now())) {
             throw new DomainException(PAST_RESERVATION_NOT_ALLOWED);
         }
     }
 
     private void validateAlreadyStarted(Reservation reservation) {
-        if (reservation.isPassed(timeManager.now())) {
+        if (reservation.getSlot().isPassed(timeManager.now())) {
             throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
         }
     }

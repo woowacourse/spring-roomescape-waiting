@@ -9,10 +9,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
-import roomescape.common.time.TimeManager;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -27,18 +27,13 @@ public class ReservationTimeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    private final TimeManager timeManager;
-
     @Transactional
     public ReservationTime create(LocalTime startAt) {
         ReservationTime reservationTime = ReservationTime.create(startAt);
-        validateNotDuplicated(reservationTime);
 
-        return reservationTimeRepository.save(reservationTime);
-    }
-
-    private void validateNotDuplicated(ReservationTime reservationTime) {
-        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
+        try {
+            return reservationTimeRepository.save(reservationTime);
+        } catch (DuplicateKeyException exception) {
             throw new DomainException(RESERVATION_TIME_ALREADY_EXISTS);
         }
     }
@@ -53,7 +48,7 @@ public class ReservationTimeService {
             throw new DomainException(RESERVATION_TIME_HAS_RESERVATION);
         }
 
-        if (!reservationTimeRepository.cancelById(id, timeManager.now())) {
+        if (!reservationTimeRepository.deleteById(id)) {
             throw new DomainException(RESERVATION_TIME_NOT_FOUND);
         }
     }

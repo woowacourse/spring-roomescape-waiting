@@ -1,9 +1,7 @@
 package roomescape.reservationtime.repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,14 +23,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
             ReservationTime.of(
                     resultSet.getLong("id"),
-                    LocalTime.parse(resultSet.getString("start_at")),
-                    toLocalDateTime(resultSet.getTimestamp("deleted_at"))
+                    LocalTime.parse(resultSet.getString("start_at"))
             );
     private final RowMapper<ReservationTimeAvailability> reservationTimeAvailabilityRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 resultSet.getLong("id"),
-                LocalTime.parse(resultSet.getString("start_at")),
-                toLocalDateTime(resultSet.getTimestamp("deleted_at"))
+                LocalTime.parse(resultSet.getString("start_at"))
         );
 
         if (resultSet.getBoolean("available")) {
@@ -54,18 +50,17 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query("""
-                SELECT id, start_at, deleted_at
+                SELECT id, start_at
                 FROM reservation_time
-                WHERE deleted_at IS NULL
                 """, reservationTimeRowMapper);
     }
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT id, start_at, deleted_at
+                        SELECT id, start_at
                         FROM reservation_time
-                        WHERE id = ? AND deleted_at IS NULL
+                        WHERE id = ?
                         """, reservationTimeRowMapper, id)
                 .stream()
                 .findFirst();
@@ -76,7 +71,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = """
                  SELECT rt.id AS id,
                         rt.start_at AS start_at,
-                        rt.deleted_at AS deleted_at,
                         r.id IS NULL AS available
                  FROM reservation_time rt
                  LEFT JOIN reservation r
@@ -84,7 +78,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     AND r.date = ?
                     AND r.theme_id = ?
                     AND r.status != 'CANCELED'
-                WHERE rt.deleted_at IS NULL
                 ORDER BY rt.start_at
                 """;
 
@@ -96,18 +89,17 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation_time
-                WHERE start_at = ? AND deleted_at IS NULL
+                WHERE start_at = ?
                 """, Integer.class, startAt.toString());
         return count != null && count > 0;
     }
 
     @Override
-    public boolean cancelById(Long id, LocalDateTime now) {
+    public boolean deleteById(Long id) {
         int rowCount = jdbcTemplate.update("""
-                UPDATE reservation_time
-                SET deleted_at = ?, delete_token = ?
-                WHERE id = ? AND deleted_at IS NULL
-                """, now, id, id);
+                DELETE FROM reservation_time
+                WHERE id = ?
+                """, id);
         return rowCount > 0;
     }
 
@@ -123,12 +115,5 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             preparedStatement.setString(1, reservationTime.getStartAt().toString());
             return preparedStatement;
         }, keyHolder);
-    }
-
-    private LocalDateTime toLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
     }
 }

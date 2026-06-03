@@ -2,19 +2,22 @@ package roomescape.reservation.repository;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -24,55 +27,41 @@ import roomescape.theme.domain.Theme;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
+    private final RowMapper<Reservation> reservationRowMapper =
+            (rs, rowNum) -> mapReservation(rs);
+
+    private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper =
+            (rs, rowNum) -> ReservationWaitingResult.from(
+                    mapReservation(rs),
+                    rs.getLong("wait_number")
+            );
+
+    private Reservation mapReservation(ResultSet rs) throws SQLException {
         ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime()
         );
 
         Theme theme = Theme.of(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail"),
-                toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("theme_thumbnail")
+        );
+
+        ReservationSlot reservationSlot = ReservationSlot.of(
+                rs.getDate("date").toLocalDate(),
+                reservationTime,
+                theme
         );
 
         return Reservation.of(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("guest_name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme,
-                Status.from(resultSet.getString("status"))
+                rs.getLong("reservation_id"),
+                rs.getString("guest_name"),
+                reservationSlot,
+                Status.from(rs.getString("status"))
         );
-    };
-    private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("time_id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
-        );
-
-        Theme theme = Theme.of(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("theme_description"),
-                resultSet.getString("theme_thumbnail"),
-                toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
-        );
-
-        return ReservationWaitingResult.from(Reservation.of(
-                        resultSet.getLong("reservation_id"),
-                        resultSet.getString("guest_name"),
-                        resultSet.getDate("date").toLocalDate(),
-                        reservationTime,
-                        theme,
-                        Status.from(resultSet.getString("status"))),
-                resultSet.getLong("wait_number")
-        );
-    };
+    }
 
     @Override
     public Optional<Reservation> findById(Long id) {
@@ -84,12 +73,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.status AS status,
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at
+                    th.thumbnail AS theme_thumbnail
                 FROM reservation r
                 INNER JOIN reservation_time t
                     ON r.time_id = t.id
@@ -115,13 +102,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                         
                                 t.id AS time_id,
                                 t.start_at,
-                                t.deleted_at AS time_deleted_at,
                         
                                 th.id AS theme_id,
                                 th.name AS theme_name,
                                 th.description AS theme_description,
                                 th.thumbnail AS theme_thumbnail,
-                                th.deleted_at AS theme_deleted_at,
                         
                                 ROW_NUMBER() OVER (
                                     PARTITION BY r.date, t.id, th.id, r.status
@@ -151,12 +136,10 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.status AS status,
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
-                    th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at
+                    th.thumbnail AS theme_thumbnail
                 FROM reservation r
                 INNER JOIN reservation_time t
                     ON r.time_id = t.id
@@ -178,13 +161,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                 
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
                         ORDER BY r.created_at, r.id
@@ -209,13 +190,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                 
                     t.id AS time_id,
                     t.start_at,
-                    t.deleted_at AS time_deleted_at,
                 
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
                         ORDER BY r.created_at, r.id
@@ -231,22 +210,31 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
+        try {
+            return insert(reservation);
+        } catch (DuplicateKeyException exception) {
+            throw new DomainException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
+    }
+
+    private Reservation insert(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, confirmed_token)
-                            VALUES (?, ?, ?, ?, ?, ?)
+                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, confirmed_token, waiting_token)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
             preparedStatement.setString(1, reservation.getGuestName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
-            preparedStatement.setLong(3, reservation.getTime().getId());
-            preparedStatement.setLong(4, reservation.getTheme().getId());
-            preparedStatement.setString(5, reservation.getStatus().toString());
+            preparedStatement.setDate(2, Date.valueOf(reservation.getSlot().date()));
+            preparedStatement.setLong(3, reservation.getSlot().timeId());
+            preparedStatement.setLong(4, reservation.getSlot().themeId());
+            preparedStatement.setString(5, reservation.getStatus().name());
             preparedStatement.setObject(6, toConfirmedToken(reservation.getStatus()));
+            preparedStatement.setObject(7, toWaitingToken(reservation.getStatus()));
             return preparedStatement;
         }, keyHolder);
 
@@ -254,28 +242,35 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status) {
-        String sql = """
+    public boolean updateSlot(Long id, ReservationSlot slot, Status status) {
+        try {
+            String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?, status = ?, confirmed_token = ?
+                SET date = ?, time_id = ?, status = ?, confirmed_token = ?, waiting_token = ?
                 WHERE id = ?
                 """;
 
-        int count = jdbcTemplate.update(sql,
-                date,
-                timeId,
-                status.toString(),
-                toConfirmedToken(status),
-                id);
+            int count = jdbcTemplate.update(
+                    sql,
+                    slot.date(),
+                    slot.timeId(),
+                    status.name(),
+                    toConfirmedToken(status),
+                    toWaitingToken(status),
+                    id
+            );
 
-        return count == 1;
+            return count == 1;
+        } catch (DuplicateKeyException exception) {
+            throw new DomainException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     @Override
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET status = ?, confirmed_token = NULL
+                SET status = ?, confirmed_token = NULL, waiting_token = NULL
                 WHERE id = ?
                 """, Status.CANCELED.toString(), id);
 
@@ -285,46 +280,54 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean updateStatus(Long id, Status status) {
         int rowCount = jdbcTemplate.update("""
-                UPDATE reservation
-                SET status = ?, confirmed_token = ?
-                WHERE id = ?
-                """, status.toString(), toConfirmedToken(status), id);
+            UPDATE reservation
+            SET status = ?, confirmed_token = ?, waiting_token = ?
+            WHERE id = ?
+              AND status = ?
+            """,
+                status.toString(),
+                toConfirmedToken(status),
+                toWaitingToken(status),
+                id,
+                Status.WAITING.toString()
+        );
         return rowCount == 1;
     }
 
     @Override
-    public Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Long> findFirstWaitingIdBySlotForUpdate(ReservationSlot slot) {
         return jdbcTemplate.query("""
                         SELECT id
                         FROM reservation
                         WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         ORDER BY created_at, id
                         LIMIT 1
-                        """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream()
-                .findFirst();
+                        FOR UPDATE
+                        """,
+                (rs, rowNum) -> rs.getLong("id"),
+                slot.date(),
+                slot.timeId(),
+                slot.themeId(),
+                Status.WAITING.toString()
+        ).stream().findFirst();
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-            LocalDate date, Long timeId, Long themeId, String guestName) {
+    public boolean existsBySlotAndGuestNameExceptCanceled(ReservationSlot slot, String guestName) {
         return existsReservation("""
                         date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != ?
                         """,
-                date, timeId, themeId, guestName,
+                slot.date(), slot.timeId(), slot.themeId(), guestName,
                 Status.CANCELED.toString()
         );
     }
 
     @Override
-    public boolean existsReservationBySlot(
-            LocalDate date,
-            Long timeId,
-            Long themeId
-    ) {
+    public boolean existsConfirmedReservationBySlot(ReservationSlot slot) {
         return existsReservation("""
                         date = ? AND time_id = ? AND theme_id = ? AND status = ?
                         """,
-                date, timeId, themeId,
+                slot.date(), slot.timeId(), slot.themeId(),
                 Status.CONFIRMED.toString()
         );
     }
@@ -362,16 +365,17 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Integer toConfirmedToken(Status status) {
-        if (status == Status.CONFIRMED) {
+        if (status.isConfirmed()) {
             return 1;
         }
         return null;
     }
 
-    private LocalDateTime toLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
+    private Integer toWaitingToken(Status status) {
+        if (status.isWaiting()) {
+            return 1;
         }
-        return timestamp.toLocalDateTime();
+        return null;
     }
+
 }
