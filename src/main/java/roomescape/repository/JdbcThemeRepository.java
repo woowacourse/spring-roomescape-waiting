@@ -76,15 +76,16 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findRanking(LocalDate startDate, LocalDate endDate, int limit) {
-        String sql = "SELECT th.id AS theme_id, th.name, th.description, "
-                + "th.thumbnail_url, COUNT(r.id) AS reservation_count "
-                + "FROM theme th "
-                + "LEFT JOIN reservation r "
-                + "ON r.theme_id = th.id "
-                + "AND r.date BETWEEN (?) AND (?) "
-                + "GROUP BY th.id, th.name, th.description, th.thumbnail_url "
-                + "ORDER BY reservation_count DESC, th.id ASC "
-                + "LIMIT (?)";
+        String sql = """
+                SELECT th.id AS theme_id, th.name, th.description, th.thumbnail_url, COUNT(r.id) AS reservation_count
+                FROM theme th
+                LEFT JOIN reservation r
+                ON r.theme_id = th.id
+                AND r.date BETWEEN (?) AND (?)
+                GROUP BY th.id, th.name, th.description, th.thumbnail_url
+                ORDER BY reservation_count DESC, th.id ASC
+                LIMIT (?)
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -103,9 +104,11 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public boolean existsById(Long id) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `theme` WHERE `id` = (?) "
-                + ") AS exist";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM `theme` WHERE `id` = (?)
+                ) AS exist
+                """;
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, id));
     }

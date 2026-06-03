@@ -51,8 +51,10 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAll() {
-        String sql = "SELECT * FROM `reservation_time` "
-                + "ORDER BY start_at ASC";
+        String sql = """
+                SELECT * FROM `reservation_time`
+                ORDER BY start_at ASC
+                """;
 
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             Long id = resultSet.getLong("id");
@@ -69,10 +71,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findReservedTimesByDateAndTheme(LocalDate date, Long themeId) {
-        String sql = "SELECT t.id as time_id, t.start_at as start_at "
-                + "FROM `reservation_time` t "
-                + "INNER JOIN `reservation` r ON r.time_id = t.id "
-                + "WHERE r.date = (?) AND r.theme_id = (?) ";
+        String sql = """
+                SELECT t.id as time_id, t.start_at as start_at
+                FROM `reservation_time` t
+                INNER JOIN `reservation` r ON r.time_id = t.id
+                WHERE r.date = (?) AND r.theme_id = (?)
+                """;
 
         return jdbcTemplate.query(sql, (resultSet, rowNum) -> {
             Long id = resultSet.getLong("time_id");
@@ -83,9 +87,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `reservation_time` WHERE `start_at` = (?) "
-                + ") AS exist";
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM `reservation_time` WHERE `start_at` = (?)
+                ) AS exist
+                """;
 
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, startAt));
     }

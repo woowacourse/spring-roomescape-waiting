@@ -47,12 +47,15 @@ public class JdbcWaitRepository implements WaitRepository {
 
     @Override
     public Optional<Wait> findById(Long id) {
-        String sql =
-                "SELECT w.id, w.created_at, w.name, w.reservation_date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
-                        + "FROM `wait` w "
-                        + "INNER JOIN `reservation_time` t ON w.time_id = t.id "
-                        + "INNER JOIN `theme` th ON w.theme_id = th.id "
-                        + "WHERE w.id = (?)";
+        String sql = """
+                SELECT w.id, w.created_at, w.name, w.reservation_date,\s
+                t.id as time_id, t.start_at as time_value,\s
+                th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url
+                FROM `wait` w
+                INNER JOIN `reservation_time` t ON w.time_id = t.id
+                INNER JOIN `theme` th ON w.theme_id = th.id
+                WHERE w.id = (?)
+                """;
 
         return jdbcTemplate.query(sql, waitRowMapper(), id)
                 .stream()
@@ -61,16 +64,16 @@ public class JdbcWaitRepository implements WaitRepository {
 
     @Override
     public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
-        String sql = "SELECT " +
-                "w.id, w.created_at, w.name, w.reservation_date AS date, " +
-                "rt.id AS time_id, rt.start_at AS time_value, " +
-                "t.id AS theme_id, t.name AS theme_name, " +
-                "t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url " +
-                "FROM wait w " +
-                "JOIN reservation_time rt ON w.time_id = rt.id " +
-                "JOIN theme t ON w.theme_id = t.id " +
-                "WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ? " +
-                "ORDER BY w.created_at";
+        String sql = """
+                SELECT w.id, w.created_at, w.name, w.reservation_date AS date,\s
+                rt.id AS time_id, rt.start_at AS time_value,\s
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                FROM wait w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme t ON w.theme_id = t.id
+                WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ?
+                ORDER BY w.created_at
+                """;
 
         return jdbcTemplate.query(sql, waitRowMapper(),
                 reservationDate,
@@ -80,43 +83,45 @@ public class JdbcWaitRepository implements WaitRepository {
 
     @Override
     public List<Wait> findByName(String name) {
-        String sql = "SELECT " +
-                "w.id, w.created_at, w.name, w.reservation_date AS date, " +
-                "rt.id AS time_id, rt.start_at AS time_value, " +
-                "t.id AS theme_id, t.name AS theme_name, " +
-                "t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url " +
-                "FROM wait w " +
-                "JOIN reservation_time rt ON w.time_id = rt.id " +
-                "JOIN theme t ON w.theme_id = t.id " +
-                "WHERE w.name = ? " +
-                "ORDER BY w.created_at";
+        String sql = """
+                SELECT w.id, w.created_at, w.name, w.reservation_date AS date,\s
+                rt.id AS time_id, rt.start_at AS time_value,\s
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                FROM wait w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme t ON w.theme_id = t.id
+                WHERE w.name = ?
+                ORDER BY w.created_at
+                """;
 
         return jdbcTemplate.query(sql, waitRowMapper(), name);
     }
 
     @Override
     public List<Wait> findAll() {
-        String sql = "SELECT " +
-                "w.id, w.created_at, w.name, w.reservation_date AS date, " +
-                "rt.id AS time_id, rt.start_at AS time_value, " +
-                "t.id AS theme_id, t.name AS theme_name, " +
-                "t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url " +
-                "FROM wait w " +
-                "JOIN reservation_time rt ON w.time_id = rt.id " +
-                "JOIN theme t ON w.theme_id = t.id " +
-                "ORDER BY w.created_at";
+        String sql = """
+                SELECT w.id, w.created_at, w.name, w.reservation_date AS date, \s
+                rt.id AS time_id, rt.start_at AS time_value,\s
+                t.id AS theme_id, t.name AS theme_name, t.description AS theme_description, t.thumbnail_url AS theme_thumbnail_url
+                FROM wait w
+                JOIN reservation_time rt ON w.time_id = rt.id
+                JOIN theme t ON w.theme_id = t.id
+                ORDER BY w.created_at
+                """;
 
         return jdbcTemplate.query(sql, waitRowMapper());
     }
 
     @Override
     public Long findOrderByWait(Wait wait) {
-        String sql = "WITH slot_waiting_list AS (" +
-                "SELECT `name`, ROW_NUMBER() OVER (ORDER BY created_at ASC) AS `order` " +
-                "FROM wait " +
-                "WHERE `reservation_date` = ? AND `time_id` = ? AND `theme_id` = ?" +
-                ") " +
-                "SELECT `order` FROM slot_waiting_list WHERE `name` = ?";
+        String sql = """
+                WITH slot_waiting_list AS (
+                    SELECT `name`, ROW_NUMBER() OVER (ORDER BY created_at ASC) AS `order`
+                    FROM wait
+                    WHERE `reservation_date` = ? AND `time_id` = ? AND `theme_id` = ?
+                )
+                SELECT `order` FROM slot_waiting_list WHERE `name` = ?
+                """;
 
         return jdbcTemplate.queryForObject(sql, Long.class,
                 wait.getReservationDate(),
