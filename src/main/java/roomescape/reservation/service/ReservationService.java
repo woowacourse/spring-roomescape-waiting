@@ -14,7 +14,6 @@ import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.exception.ReservationConflictException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservation.service.policy.ReservationPolicy;
@@ -59,7 +58,7 @@ public class ReservationService {
 
         reservationPolicy.validateEdit(reservation, changedReservation, guestName);
 
-        updateReservation(changedReservation);
+        updateSlot(changedReservation);
         promoteWaitingIfNeeded(reservation, changedReservation);
 
         return reservationRepository.findWaitingById(reservationId)
@@ -115,14 +114,6 @@ public class ReservationService {
     private Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new DomainException(THEME_NOT_FOUND));
-    }
-
-    private void updateReservation(Reservation reservation) {
-        try {
-            updateSlot(reservation);
-        } catch (ReservationConflictException exception) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
-        }
     }
 
     private void updateSlot(Reservation reservation) {

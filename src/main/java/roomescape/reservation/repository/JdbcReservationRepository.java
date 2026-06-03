@@ -13,10 +13,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.exception.ReservationConflictException;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -213,7 +213,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         try {
             return insert(reservation);
         } catch (DuplicateKeyException exception) {
-            throw new ReservationConflictException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+            throw new DomainException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }
 
@@ -262,9 +262,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
             return count == 1;
         } catch (DuplicateKeyException exception) {
-            throw new ReservationConflictException(
-                    ReservationErrorCode.RESERVATION_ALREADY_EXISTS
-            );
+            throw new DomainException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
         }
     }
 
