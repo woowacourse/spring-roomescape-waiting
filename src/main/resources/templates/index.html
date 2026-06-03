@@ -76,7 +76,7 @@
         <section class="panel table-panel">
             <div class="panel-heading">
                 <div>
-                    <h3>내 예약</h3>
+                    <h3>내 예약 / 대기</h3>
                     <p id="reservation-status" class="status local-status" role="status"></p>
                 </div>
                 <form id="my-reservation-form" class="inline-form">
@@ -84,12 +84,33 @@
                     <button class="ghost-button" type="submit">조회</button>
                 </form>
             </div>
+
+            <div class="section-subheading">
+                <h4>예약</h4>
+            </div>
             <div class="table-wrap">
                 <table>
                     <thead>
                     <tr>
                         <th>예약자</th>
-                        <th>상태</th>
+                        <th>테마</th>
+                        <th>날짜</th>
+                        <th>시간</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="reservation-rows"></tbody>
+                </table>
+            </div>
+
+            <div class="section-subheading">
+                <h4>대기</h4>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>예약자</th>
                         <th>테마</th>
                         <th>날짜</th>
                         <th>시간</th>
@@ -97,7 +118,7 @@
                         <th></th>
                     </tr>
                     </thead>
-                    <tbody id="reservation-rows"></tbody>
+                    <tbody id="waiting-rows"></tbody>
                 </table>
             </div>
         </section>
@@ -117,6 +138,7 @@
     const availableTimesEl = document.querySelector('#available-times');
     const themeGrid = document.querySelector('#theme-grid');
     const reservationRows = document.querySelector('#reservation-rows');
+    const waitingRows = document.querySelector('#waiting-rows');
     const trendLimitInput = document.querySelector('#trend-limit');
     const myReservationForm = document.querySelector('#my-reservation-form');
     const myReservationNameInput = document.querySelector('#my-reservation-name');
@@ -260,50 +282,65 @@
         });
     }
 
+    function createCell(text) {
+        const cell = document.createElement('td');
+        cell.textContent = text;
+        return cell;
+    }
+
+    function createCancelButton(item, isWaiting) {
+        const actionCell = document.createElement('td');
+        const actions = document.createElement('div');
+        actions.className = 'table-actions';
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'danger-button';
+        cancelButton.type = 'button';
+        cancelButton.dataset.cancelId = item.id;
+        cancelButton.dataset.cancelType = isWaiting ? 'waiting' : 'reservation';
+        cancelButton.textContent = '취소';
+        actions.append(cancelButton);
+        actionCell.append(actions);
+        return actionCell;
+    }
+
     function renderReservations(reservations) {
         reservationRows.innerHTML = '';
         if (reservations.length === 0) {
-            reservationRows.innerHTML = '<tr><td class="empty" colspan="7">예약 내역이 없습니다.</td></tr>';
+            reservationRows.innerHTML = '<tr><td class="empty" colspan="5">예약 내역이 없습니다.</td></tr>';
             return;
         }
 
         reservations.forEach((reservation) => {
-            const isWaiting = reservation.waitingNumber !== undefined && reservation.waitingNumber !== null;
             const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            nameCell.textContent = reservation.name;
-
-            const statusCell = document.createElement('td');
-            const statusBadge = document.createElement('span');
-            statusBadge.className = `status-badge ${isWaiting ? 'waiting' : 'reserved'}`;
-            statusBadge.textContent = isWaiting ? '대기' : '예약';
-            statusCell.append(statusBadge);
-
-            const themeCell = document.createElement('td');
-            themeCell.textContent = reservation.themeName ?? themeNameById(reservation.themeId);
-
-            const dateCell = document.createElement('td');
-            dateCell.textContent = reservation.date;
-
-            const timeCell = document.createElement('td');
-            timeCell.textContent = reservation.startAt ?? reservation.time?.startAt ?? '';
-
-            const waitingNumberCell = document.createElement('td');
-            waitingNumberCell.textContent = isWaiting ? reservation.waitingNumber : '-';
-
-            const actionCell = document.createElement('td');
-            const actions = document.createElement('div');
-            actions.className = 'table-actions';
-            const cancelButton = document.createElement('button');
-            cancelButton.className = 'danger-button';
-            cancelButton.type = 'button';
-            cancelButton.dataset.cancelId = reservation.id;
-            cancelButton.dataset.cancelType = isWaiting ? 'waiting' : 'reservation';
-            cancelButton.textContent = '취소';
-            actions.append(cancelButton);
-            actionCell.append(actions);
-            row.append(nameCell, statusCell, themeCell, dateCell, timeCell, waitingNumberCell, actionCell);
+            row.append(
+                createCell(reservation.name),
+                createCell(reservation.themeName ?? themeNameById(reservation.themeId)),
+                createCell(reservation.date),
+                createCell(reservation.startAt ?? reservation.time?.startAt ?? ''),
+                createCancelButton(reservation, false),
+            );
             reservationRows.append(row);
+        });
+    }
+
+    function renderWaitings(waitings) {
+        waitingRows.innerHTML = '';
+        if (waitings.length === 0) {
+            waitingRows.innerHTML = '<tr><td class="empty" colspan="6">대기 내역이 없습니다.</td></tr>';
+            return;
+        }
+
+        waitings.forEach((waiting) => {
+            const row = document.createElement('tr');
+            row.append(
+                createCell(waiting.name),
+                createCell(waiting.themeName ?? themeNameById(waiting.themeId)),
+                createCell(waiting.date),
+                createCell(waiting.startAt ?? waiting.time?.startAt ?? ''),
+                createCell(waiting.waitingNumber ?? '-'),
+                createCancelButton(waiting, true),
+            );
+            waitingRows.append(row);
         });
     }
 
@@ -344,12 +381,19 @@
 
     async function loadReservations(name = currentReservationName) {
         if (!name) {
-            reservationRows.innerHTML = '<tr><td class="empty" colspan="7">이름으로 내 예약을 조회하세요.</td></tr>';
+            reservationRows.innerHTML = '<tr><td class="empty" colspan="5">이름으로 내 예약을 조회하세요.</td></tr>';
+            waitingRows.innerHTML = '<tr><td class="empty" colspan="6">이름으로 내 대기를 조회하세요.</td></tr>';
             return;
         }
 
-        const reservations = await requestJson(`/reservations/list?name=${encodeURIComponent(name)}`);
+        const encoded = encodeURIComponent(name);
+        // 예약과 대기를 각각 별도 요청으로 조회한 뒤 프론트에서 섹션을 나눠 렌더링
+        const [reservations, waitings] = await Promise.all([
+            requestJson(`/reservations?name=${encoded}`),
+            requestJson(`/reservation-waitings?name=${encoded}`),
+        ]);
         renderReservations(reservations);
+        renderWaitings(waitings);
     }
 
     form.addEventListener('submit', async (event) => {
@@ -384,7 +428,7 @@
         }
     });
 
-    reservationRows.addEventListener('click', async (event) => {
+    async function handleCancelClick(event) {
         const button = event.target.closest('button[data-cancel-id]');
         if (!button) {
             return;
@@ -396,17 +440,21 @@
 
         button.disabled = true;
         try {
-            const cancelUrl = button.dataset.cancelType === 'waiting'
+            const isWaiting = button.dataset.cancelType === 'waiting';
+            const cancelUrl = isWaiting
                 ? `/reservation-waitings/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`
                 : `/reservations/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`;
             await requestJson(cancelUrl, {method: 'DELETE'});
-            setStatus(reservationStatusEl, button.dataset.cancelType === 'waiting' ? '대기를 취소했습니다.' : '예약을 취소했습니다.');
+            setStatus(reservationStatusEl, isWaiting ? '대기를 취소했습니다.' : '예약을 취소했습니다.');
             await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
         } catch (error) {
             button.disabled = false;
             setStatus(reservationStatusEl, error.message, true);
         }
-    });
+    }
+
+    reservationRows.addEventListener('click', handleCancelClick);
+    waitingRows.addEventListener('click', handleCancelClick);
 
     myReservationForm.addEventListener('submit', async (event) => {
         event.preventDefault();
