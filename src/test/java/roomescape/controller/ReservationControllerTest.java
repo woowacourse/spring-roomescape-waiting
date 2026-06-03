@@ -30,7 +30,7 @@ import roomescape.controller.dto.UpdateReservationRequest;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
-import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ProblemDetailsAdvice;
 import roomescape.service.ReservationService;
@@ -127,10 +127,10 @@ class ReservationControllerTest {
     @Test
     @DisplayName("권한이 없는 예약 제어 시 403 예외와 커스텀 코드를 반환한다.")
     void 예약_소유자_불일치_예외_발생() throws Exception {
-        doThrow(new InvalidOwnershipException()).when(reservationService).removeReservation(anyLong(), any());
+        doThrow(new NotOwnerException()).when(reservationService).removeReservation(anyLong(), any());
         performDelete("/reservations/1", "해커")
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("INVALID_OWNERSHIP"));
+                .andExpect(jsonPath("$.code").value("NOT_OWNER"));
     }
 
     @Test

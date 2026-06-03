@@ -15,7 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidOwnershipException;
+import roomescape.exception.NotOwnerException;
 import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeRepository;
@@ -159,7 +159,7 @@ class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.removeReservation(savedReservation.getId(), "네오"))
-                .isInstanceOf(InvalidOwnershipException.class)
+                .isInstanceOf(NotOwnerException.class)
                 .hasMessage("본인의 예약만 제어할 수 있습니다.");
     }
 
