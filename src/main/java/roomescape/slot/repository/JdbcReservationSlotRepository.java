@@ -128,7 +128,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                   AND rd.is_active  = true
                   AND rt.is_active  = true
                   AND t.is_active   = true
-                FOR UPDATE
+                FOR UPDATE OF rs
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("dateId", dateId)
