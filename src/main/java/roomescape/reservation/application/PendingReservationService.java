@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
@@ -20,12 +21,14 @@ import roomescape.time.domain.ReservationTimeRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PendingReservationService {
 
     private final Clock clock;
     private final PendingReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
 
+    @Transactional
     public ReservationInfo add(TimeSlot slot, ReservationCreateCommand command) {
         ReservationTime time = timeRepository.getById(command.timeId());
         time.validateDateTime(command.date(), clock);
@@ -41,12 +44,14 @@ public class PendingReservationService {
         }
     }
 
+    @Transactional
     public void cancel(final Long id, final String name) {
         PendingReservation reservation = reservationRepository.getById(id);
         PendingReservation cancelled = reservation.cancel(name, clock);
         reservationRepository.cancel(cancelled);
     }
 
+    @Transactional
     public Optional<ActiveReservation> popNextPendingAndPromote(final Long slotId) {
         return reservationRepository.findNextPendingReservation(slotId)
                 .map(pending -> {
@@ -56,6 +61,7 @@ public class PendingReservationService {
                 });
     }
 
+    @Transactional
     public ReservationInfo change(Long id, TimeSlot slot, String name) {
         PendingReservation reservation = reservationRepository.getById(id);
         PendingReservation changedReservation = reservation.changeTime(name, slot, clock);
@@ -63,6 +69,7 @@ public class PendingReservationService {
         return ReservationInfo.from(changedReservation);
     }
 
+    @Transactional
     public boolean existsById(Long id) {
         return reservationRepository.existsById(id);
     }

@@ -17,6 +17,7 @@ import roomescape.reservation.domain.TimeSlot;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ActiveReservationService {
 
     private final Clock clock;
@@ -35,6 +36,7 @@ public class ActiveReservationService {
         }
     }
 
+    @Transactional
     public Long cancel(final Long id, final String name) {
         ActiveReservation reservation = reservationRepository.getById(id);
         ActiveReservation cancelled = reservation.cancel(name, clock);
@@ -42,6 +44,7 @@ public class ActiveReservationService {
         return reservation.getSlot().getId();
     }
 
+    @Transactional
     public void savePromoted(final ActiveReservation promotedReservation) {
         try {
             reservationRepository.save(promotedReservation);
@@ -62,26 +65,27 @@ public class ActiveReservationService {
         }
     }
 
+    @Transactional
     public boolean existsBySlotId(Long slotId, Long id) {
         return reservationRepository.existsByActiveSlotIdNotId(slotId, id);
     }
 
+    @Transactional
     public boolean existsBySlotId(Long slotId) {
         return reservationRepository.existsByActiveSlotId(slotId);
     }
 
+    @Transactional
     public boolean existsById(Long id) {
         return reservationRepository.existsById(id);
     }
 
-    @Transactional(readOnly = true)
     public Long getSlotId(final Long id) {
         return reservationRepository.getById(id)
                 .getSlot()
                 .getId();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationInfo> getReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -89,7 +93,6 @@ public class ActiveReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationPendingInfo> getReservationsByName(final String name) {
         return reservationRepository.findAllByName(name)
                 .stream()

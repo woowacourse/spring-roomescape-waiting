@@ -19,8 +19,8 @@ import roomescape.time.application.ReservationTimeService;
 import roomescape.time.domain.ReservationTime;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationManager {
 
     private final ActiveReservationService activeReservationService;
