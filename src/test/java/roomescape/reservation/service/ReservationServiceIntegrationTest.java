@@ -7,13 +7,20 @@ import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.waitReservation;
 
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
@@ -40,9 +47,6 @@ import roomescape.time.repository.JdbcReservationTimeRepository;
 class ReservationServiceIntegrationTest {
 
     @Autowired
-    private JdbcReservationSlotRepository reservationSlotRepository;
-
-    @Autowired
     private JdbcReservationRepository reservationRepository;
 
     @Autowired
@@ -56,13 +60,8 @@ class ReservationServiceIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
-
-    @BeforeEach
-    void setUp() {
-        reservationService = new ReservationService(reservationSlotRepository,
-            reservationRepository, reservationTimeRepository, reservationDateRepository,
-            themeRepository);
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private ReservationTime saveTime() {
         return reservationTimeRepository.save(ReservationTimeFixture.activeTime15());
@@ -143,8 +142,10 @@ class ReservationServiceIntegrationTest {
             ReservationDate date = saveDate();
             Theme theme = saveTheme("theme1");
 
-            Reservation reserved = reservationRepository.save(reservation(name1, date, time, theme));
-            Reservation firstWaiting = reservationRepository.save(waitReservation(name2, date, time, theme));
+            Reservation reserved = reservationRepository.save(
+                reservation(name1, date, time, theme));
+            Reservation firstWaiting = reservationRepository.save(
+                waitReservation(name2, date, time, theme));
             reservationRepository.save(waitReservation(name3, date, time, theme));
 
             Long beforeWaitingTurn = reservationService.readAllByName(name3)
@@ -190,6 +191,78 @@ class ReservationServiceIntegrationTest {
                 .isInstanceOf(ReservationException.class)
                 .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
         }
+
+        @Test
+        @Transactional(propagation = Propagation.NOT_SUPPORTED)
+        @DisplayName("동시에 같은 슬롯을 예약해도 하나만 예약되고 나머지는 대기된다")
+        void 성공1() throws Exception {
+            // given
+            List<String> names = List.of("user1", "user2", "user3");
+            ReservationTime time = saveTime();
+            ReservationDate date = saveDate();
+            Theme theme = saveTheme("concurrency-theme");
+            ReservationSaveCommand command = new ReservationSaveCommand(date.getId(), time.getId(),
+                theme.getId());
+            CountDownLatch ready = new CountDownLatch(names.size());
+            CountDownLatch start = new CountDownLatch(1);
+            ExecutorService executorService = Executors.newFixedThreadPool(names.size());
+
+            try {
+                List<Future<Reservation>> futures = names.stream()
+                    .map(name -> executorService.submit(() -> reserveAfterStart(name, command,
+                        ready, start)))
+                    .toList();
+                assertThat(ready.await(1, TimeUnit.SECONDS)).isTrue();
+
+                // when
+                start.countDown();
+                for (Future<Reservation> future : futures) {
+                    future.get(3, TimeUnit.SECONDS);
+                }
+
+                // then
+                List<Reservation> actual = reservationRepository.findAllActiveByDateTimeAndThemeId(
+                    date.getId(), time.getId(), theme.getId());
+
+                assertAll(
+                    () -> assertThat(actual).hasSize(names.size()),
+                    () -> assertThat(actual)
+                        .filteredOn(
+                            reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
+                        .hasSize(1),
+                    () -> assertThat(actual)
+                        .filteredOn(
+                            reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+                        .hasSize(names.size() - 1)
+                );
+            } finally {
+                executorService.shutdownNow();
+                deleteCommittedTestData();
+            }
+        }
+    }
+
+    private Reservation reserveAfterStart(String name, ReservationSaveCommand command,
+        CountDownLatch ready, CountDownLatch start) {
+        ready.countDown();
+        await(start);
+        return reservationService.reserve(name, command);
+    }
+
+    private void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private void deleteCommittedTestData() {
+        List<String> tableNamesForDelete = List.of("reservation", "reservation_slot", "theme",
+            "reservation_date", "reservation_time");
+        tableNamesForDelete.forEach(
+            deletedTableName -> jdbcTemplate.update("DELETE FROM " + deletedTableName));
     }
 
 }
