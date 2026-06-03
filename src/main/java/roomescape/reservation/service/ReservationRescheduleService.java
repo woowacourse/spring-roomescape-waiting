@@ -27,7 +27,7 @@ public class ReservationRescheduleService {
     }
 
     private Reservations findReservationsWithSlotLocked(ReservationSlot slot) {
-        return new Reservations(reservationRepository.findReservedAndWaitingBySlotWithUpdate(slot));
+        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(slot));
     }
 
 }

@@ -46,20 +46,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservedAndWaitingBySlotWithUpdate(ReservationSlot slot) {
-        return store.values().stream()
-                .filter(reservation -> reservation.getDate().getId().equals(slot.getDateId()))
-                .filter(reservation -> reservation.getTime().getId().equals(slot.getTimeId()))
-                .filter(reservation -> reservation.getTheme().getId().equals(slot.getThemeId()))
-                .filter(reservation ->
-                        reservation.getStatus() == RESERVED || reservation.getStatus() == WAITING)
-                .sorted(Comparator
-                        .comparing((Reservation r) -> r.getDate().getDate(), Comparator.reverseOrder())
-                        .thenComparing(r -> r.getTime().getStartAt()))
-                .toList();
-    }
-
-    @Override
     public Reservation save(Reservation reservation) {
         Long id = idGenerator.getAndIncrement();
         Reservation saved = Reservation.load(id, reservation.getName(), reservation.getSlot(),
