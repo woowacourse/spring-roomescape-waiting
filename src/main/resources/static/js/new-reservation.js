@@ -120,7 +120,7 @@ function createInput(type) {
   return input;
 }
 
-function saveRow(event) {
+async function saveRow(event) {
   const row = event.target.parentNode.parentNode;
   const nameInput = row.querySelector('input[type="text"]');
   const dateInput = row.querySelector('input[type="date"]');
@@ -129,14 +129,19 @@ function saveRow(event) {
   const reservation = {
     name: nameInput.value,
     date: dateInput.value,
-    time: timeSelect.value
+    timeId: parseInt(timeSelect.value)
   };
 
-  requestCreate(reservation)
-      .then(data => updateRowWithReservationData(row, data))
-      .catch(error => console.error('Error:', error));
+  isEditing = false;
 
-  isEditing = false;  // isEditing 값을 false로 설정
+  try {
+    const data = await requestCreate(reservation);
+    updateRowWithReservationData(row, data);
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message || '예약 생성에 실패했습니다.');
+    row.remove();
+  }
 }
 
 function updateRowWithReservationData(row, data) {
@@ -144,21 +149,10 @@ function updateRowWithReservationData(row, data) {
   cells[0].textContent = data.id;
   cells[1].textContent = data.name;
   cells[2].textContent = data.date;
-  cells[3].textContent = data.time.time;
+  cells[3].textContent = data.timeId;
 
-  // 버튼 변경: 삭제 버튼으로 변경
   cells[4].innerHTML = '';
   cells[4].appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
-
-  isEditing = false;
-
-  // Remove the editable input fields and just show the saved data
-  for (let i = 1; i <= 3; i++) {
-    const inputElement = cells[i].querySelector('input');
-    if (inputElement) {
-      inputElement.remove();
-    }
-  }
 }
 
 function deleteRow(event) {
@@ -170,18 +164,16 @@ function deleteRow(event) {
       .catch(error => console.error('Error:', error));
 }
 
-function requestCreate(reservation) {
-  const requestOptions = {
+async function requestCreate(reservation) {
+  const { jobId } = await apiFetch(RESERVATION_API_ENDPOINT, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(reservation)
-  };
+  });
 
-  return fetch(RESERVATION_API_ENDPOINT, requestOptions)
-      .then(response => {
-        if (response.status === 201) return response.json();
-        throw new Error('Create failed');
-      });
+  const result = await pollJobUntilDone(`/reservations/status/${jobId}`);
+  if (result.status !== 'SUCCESS') throw new Error(result.errorMessage || '예약 생성에 실패했습니다.');
+  return result.data;
 }
 
 function requestRead() {
