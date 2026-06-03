@@ -76,7 +76,9 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
 
         reservationDao.delete(id);
-        processNextWaiting(reservation);
+        if(reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            processNextWaiting(reservation);
+        }
 
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
@@ -99,7 +101,10 @@ public class ReservationService {
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
         reservationDao.delete(id);
-        processNextWaiting(reservation);
+
+        if(reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            processNextWaiting(reservation);
+        }
     }
 
     private void processNextWaiting(Reservation reservation) {
