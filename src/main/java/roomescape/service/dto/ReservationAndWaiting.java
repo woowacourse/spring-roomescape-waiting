@@ -7,7 +7,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 
 public record ReservationAndWaiting(
-        Long id,
+        long id,
         String name,
         LocalDate date,
         TimeSlot timeSlot,

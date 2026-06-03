@@ -6,13 +6,13 @@ import roomescape.domain.Waiting;
 import roomescape.service.dto.WaitingWithNumber;
 
 public record WaitingResponse(
-        Long id,
+        long id,
         String name,
         LocalDate date,
         TimeResponse time,
         ThemeResponse theme,
         LocalDateTime createdAt,
-        Integer waitingNumber
+        int waitingNumber
 ) {
 
     public static WaitingResponse from(WaitingWithNumber waitingWithNumber) {

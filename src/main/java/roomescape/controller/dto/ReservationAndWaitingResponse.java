@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import roomescape.service.dto.ReservationAndWaiting;
 
 public record ReservationAndWaitingResponse(
-        Long id,
+        long id,
         String name,
         LocalDate date,
         TimeResponse time,

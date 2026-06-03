@@ -5,7 +5,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.service.dto.AvailableTimeSlot;
 
 public record TimeResponse(
-        Long id,
+        long id,
         LocalTime startAt,
         boolean isAvailable
 ) {
