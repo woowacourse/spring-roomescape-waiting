@@ -97,7 +97,6 @@ public class ReservationService {
         return reservationRepository.getById(id, "존재하지 않는 예약입니다.");
     }
 
-    @Transactional
     public ReservationWithStatus reserveOrWait(ReservationRequest request) {
         Reservation reservation = createReservation(
             request,
