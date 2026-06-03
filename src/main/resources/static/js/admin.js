@@ -23,11 +23,11 @@ const ERROR_MESSAGES = {
     "RES_012": "과거 날짜나 시간으로 일정을 변경할 수 없습니다.",
 };
 
-async function handleResponseError(response, defaultMessage) {
+async function handleResponseError(response, defaultMessage, overrides = {}) {
     try {
         const errorData = await response.json();
         const errorCode = errorData.errorCode;
-        const message = ERROR_MESSAGES[errorCode] || errorData.message || defaultMessage;
+        const message = overrides[errorCode] || ERROR_MESSAGES[errorCode] || errorData.message || defaultMessage;
         alert(message);
     } catch (e) {
         alert(defaultMessage);
@@ -509,7 +509,9 @@ async function cancelReservation(id) {
 
     const response = await authFetch(`/admin/reservations/${id}/cancel`, { method: "PATCH" });
     if (!response || !response.ok) {
-        if (response) await handleResponseError(response, "예약 취소에 실패했습니다.");
+        if (response) await handleResponseError(response, "예약 취소에 실패했습니다.", {
+            "COMMON_004": "취소 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        });
         return;
     }
     await loadReservations();
