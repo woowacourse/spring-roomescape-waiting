@@ -60,6 +60,25 @@ class WaitingListControllerTest {
     }
 
     @Test
+    void 예약이_없는_시간에_대기를_추가하면_실패한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "검프");
+        params.put("date", STRING_TOMORROW);
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waiting-list")
+                .then().log().all()
+                .statusCode(422);
+    }
+
+    @Test
     void 예약_대기_삭제() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -77,6 +96,23 @@ class WaitingListControllerTest {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
         assertThat(count).isZero();
+    }
+
+    @Test
+    void 다른_사람의_예약_대기를_삭제하면_실패한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "검프", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "다른사람");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().delete("/waiting-list/1")
+                .then().log().all()
+                .statusCode(403);
     }
 
     @Test
@@ -103,5 +139,13 @@ class WaitingListControllerTest {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
         assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    void 이름_없이_예약_대기를_조회하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().get("/waiting-list")
+                .then().log().all()
+                .statusCode(400);
     }
 }

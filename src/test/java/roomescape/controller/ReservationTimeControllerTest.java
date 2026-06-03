@@ -10,7 +10,9 @@ import roomescape.dto.ReservationTimeCreateCommand;
 import roomescape.dto.ReservationTimeResult;
 
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,6 +72,19 @@ class ReservationTimeControllerTest {
     }
 
     @Test
+    void 시작_시간이_누락되면_예약시간_생성에_실패한다() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("endAt", "12:30");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
     void 예약시간_삭제() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
 
@@ -80,5 +95,25 @@ class ReservationTimeControllerTest {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM reservation_time", Integer.class);
         assertThat(count).isZero();
+    }
+
+    @Test
+    void 존재하지_않는_예약시간을_삭제하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().delete("/times/999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
+    void 예약이_존재하는_예약시간을_삭제하면_실패한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2024-01-01", "1", "1");
+
+        RestAssured.given().log().all()
+                .when().delete("/times/1")
+                .then().log().all()
+                .statusCode(409);
     }
 }

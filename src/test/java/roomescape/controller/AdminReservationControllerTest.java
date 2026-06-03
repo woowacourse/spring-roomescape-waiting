@@ -3,6 +3,7 @@ package roomescape.controller;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
 import roomescape.dto.ReservationResult;
@@ -28,7 +29,7 @@ class AdminReservationControllerTest {
         List<ReservationResult> reservations = RestAssured.given().log().all()
                 .when().get("/admin/reservations")
                 .then().log().all()
-                .statusCode(200).extract()
+                .statusCode(HttpStatus.OK.value()).extract()
                 .jsonPath().getList(".", ReservationResult.class);
 
         assertThat(reservations).hasSize(2);
@@ -56,9 +57,17 @@ class AdminReservationControllerTest {
         RestAssured.given().log().all()
                 .when().delete("admin/reservations/1")
                 .then().log().all()
-                .statusCode(204);
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
         assertThat(count).isZero();
+    }
+
+    @Test
+    void 존재하지_않는_예약을_삭제하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/reservations/999")
+                .then().log().all()
+                .statusCode(404);
     }
 }

@@ -32,6 +32,7 @@ public enum ErrorCode {
 
     // 검증 에러
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다."),
+    INVALID_PARAMETER_VALUE(HttpStatus.BAD_REQUEST, "파라미터 값이 유효하지 않습니다."),
 
     RESERVATION_ID_NULL(HttpStatus.BAD_REQUEST, "예약 ID는 비워둘 수 없습니다."),
     PERSON_NAME_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "예약자 이름은 비워둘 수 없습니다."),
@@ -49,7 +50,7 @@ public enum ErrorCode {
     DESCRIPTION_TOO_SHORT(HttpStatus.BAD_REQUEST, "테마 설명은 최소 5자 이상이어야 합니다."),
     THUMBNAIL_URL_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "테마 썸네일 URL은 비워둘 수 없습니다."),
 
-    WAITING_LIST_ID_NULL(HttpStatus.BAD_REQUEST, "예약 대기 ID는 비워둘 수 없습니다.")
+    WAITING_LIST_ID_NULL(HttpStatus.BAD_REQUEST, "예약 대기 ID는 비워둘 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

@@ -76,6 +76,14 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 잘못된_형식의_날짜로_예약가능한_시간을_조회하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().get("/reservations/available-times?date=2024-1-1&themeId=1")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
     void 사용자가_자신의_이름으로_본인의_예약목록_조회() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -94,6 +102,14 @@ class ReservationControllerTest {
         assertThat(response.date()).isEqualTo(TOMORROW);
         assertThat(response.time().id()).isEqualTo(1);
         assertThat(response.theme().id()).isEqualTo(1);
+    }
+
+    @Test
+    void 이름_없이_예약을_조회하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @Test
@@ -126,6 +142,24 @@ class ReservationControllerTest {
     }
 
     @Test
+    void 필수값인_이름이_누락되면_예약에_실패한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", STRING_TOMORROW);
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
     void 사용자가_본인의_예약을_취소() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
@@ -138,6 +172,14 @@ class ReservationControllerTest {
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
         assertThat(count).isZero();
+    }
+
+    @Test
+    void 존재하지_않는_예약을_취소하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/999?name=브라운")
+                .then().log().all()
+                .statusCode(404);
     }
 
     @Test
@@ -165,6 +207,25 @@ class ReservationControllerTest {
         assertThat(reservation.date()).isEqualTo(TOMORROW);
         assertThat(reservation.time().id()).isEqualTo(2);
         assertThat(reservation.theme().id()).isEqualTo(1);
+    }
+
+    @Test
+    void 다른_사람의_예약을_변경하면_실패한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "재즈");
+        params.put("date", STRING_TOMORROW);
+        params.put("timeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().patch("/reservations/1")
+                .then().log().all()
+                .statusCode(403);
     }
 
     private static List<ReservationTimeStatusResult> getReservationTimeStatusResponses() {

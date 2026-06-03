@@ -92,6 +92,20 @@ class ThemeControllerTest {
     }
 
     @Test
+    void 필수값이_누락되면_테마_추가에_실패한다() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("description", "공포 테마");
+        params.put("thumbnailUrl", "https://~");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/themes")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
     void 테마_삭제() {
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
 
@@ -102,5 +116,25 @@ class ThemeControllerTest {
 
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(*) from theme", Integer.class);
         assertThat(countAfterDelete).isZero();
+    }
+
+    @Test
+    void 존재하지_않는_테마를_삭제하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().delete("/themes/999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
+    @Test
+    void 예약이_존재하는_테마를_삭제하면_실패한다() {
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", "2024-01-01", "1", "1");
+
+        RestAssured.given().log().all()
+                .when().delete("/themes/1")
+                .then().log().all()
+                .statusCode(409);
     }
 }
