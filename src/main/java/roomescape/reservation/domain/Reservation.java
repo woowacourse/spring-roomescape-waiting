@@ -133,10 +133,6 @@ public class Reservation {
         return Objects.equals(this.name, name);
     }
 
-    public boolean isCanceled() {
-        return this.status == ReservationStatus.CANCELED;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
