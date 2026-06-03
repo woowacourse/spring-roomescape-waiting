@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,7 +129,7 @@ class ReservationServiceTest {
     void 지난_예약_삭제_예외_발생() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         Reservation pastReservation = reservationRepository.save(
-                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme)
+                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme, pastDate.minusDays(1).atStartOfDay())
         );
 
         assertThatThrownBy(() -> reservationService.removeReservation(pastReservation.getId(), "브라운"))
@@ -141,7 +142,7 @@ class ReservationServiceTest {
     void 지난_예약_수정_예외_발생() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         Reservation pastReservation = reservationRepository.save(
-                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme)
+                new Reservation(null, "브라운", pastDate, savedTimeSlot, savedTheme, pastDate.minusDays(1).atStartOfDay())
         );
 
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -155,7 +156,7 @@ class ReservationServiceTest {
     void 다른_사용자_예약_삭제_예외_발생() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation savedReservation = reservationRepository.save(
-                new Reservation(null, "브라운", futureDate, savedTimeSlot, savedTheme)
+                new Reservation(null, "브라운", futureDate, savedTimeSlot, savedTheme, LocalDateTime.now())
         );
 
         assertThatThrownBy(() -> reservationService.removeReservation(savedReservation.getId(), "네오"))

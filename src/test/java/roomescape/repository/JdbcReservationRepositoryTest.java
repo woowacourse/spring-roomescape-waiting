@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -47,9 +48,14 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("예약을 저장하고 영속화된 객체를 반환한다.")
     void 예약_저장() {
-        Reservation reservation = new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme);
+        LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 0, 0);
+        Reservation reservation = new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot,
+                savedTheme, createdAt);
+
         Reservation savedReservation = jdbcReservationRepository.save(reservation);
+
         assertThat(savedReservation.getId()).isPositive();
+        assertThat(savedReservation.getCreatedAt()).isEqualTo(createdAt);
     }
 
     @Test
@@ -57,9 +63,10 @@ class JdbcReservationRepositoryTest {
     void 식별자로_예약_조회() {
         Reservation savedReservation = jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
-                LocalDate.now(),
+                LocalDate.now().plusDays(1),
                 savedTimeSlot,
-                savedTheme
+                savedTheme,
+                LocalDateTime.now()
         ));
         Optional<Reservation> foundReservation = jdbcReservationRepository.findById(savedReservation.getId());
         assertThat(foundReservation).isPresent();
@@ -71,8 +78,9 @@ class JdbcReservationRepositoryTest {
     void 전체_예약_조회() {
         jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
-                LocalDate.now(), savedTimeSlot,
-                savedTheme
+                LocalDate.now().plusDays(1), savedTimeSlot,
+                savedTheme,
+                LocalDateTime.now()
         ));
         List<Reservation> reservations = jdbcReservationRepository.findAll();
         assertThat(reservations).hasSize(1);
@@ -83,9 +91,10 @@ class JdbcReservationRepositoryTest {
     void 식별자로_예약_삭제() {
         Reservation savedReservation = jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
-                LocalDate.now(),
+                LocalDate.now().plusDays(1),
                 savedTimeSlot,
-                savedTheme
+                savedTheme,
+                LocalDateTime.now()
         ));
         jdbcReservationRepository.deleteById(savedReservation.getId());
         assertThat(jdbcReservationRepository.findAll()).isEmpty();
@@ -94,10 +103,12 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("특정 날짜, 시간, 테마에 해당하는 예약이 이미 존재하면 해당 예약을 반환한다.")
     void 날짜_시간_테마로_예약_조회() {
-        Reservation reservation = new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme);
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        Reservation reservation = new Reservation(null, "브라운", reservationDate, savedTimeSlot, savedTheme,
+                LocalDateTime.now());
         jdbcReservationRepository.save(reservation);
         Optional<Reservation> existingReservation = jdbcReservationRepository.findByDateAndTimeIdAndThemeId(
-                LocalDate.now(),
+                reservationDate,
                 savedTimeSlot.getId(),
                 savedTheme.getId()
         );
@@ -111,9 +122,10 @@ class JdbcReservationRepositoryTest {
     void 중복_날짜_시간_테마_예약_수정_예외_발생() {
         jdbcReservationRepository.save(new Reservation(null,
                 "브라운",
-                LocalDate.now(),
+                LocalDate.now().plusDays(1),
                 savedTimeSlot,
-                savedTheme
+                savedTheme,
+                LocalDateTime.now()
         ));
 
         Reservation newReservation = jdbcReservationRepository.save(
@@ -121,16 +133,18 @@ class JdbcReservationRepositoryTest {
                         "네오",
                         LocalDate.now().plusDays(7),
                         savedTimeSlot,
-                        savedTheme
+                        savedTheme,
+                        LocalDateTime.now()
                 )
         );
 
         Reservation updateReservation = new Reservation(
                 newReservation.getId(),
                 "네오",
-                LocalDate.now(),
+                LocalDate.now().plusDays(1),
                 savedTimeSlot,
-                savedTheme
+                savedTheme,
+                LocalDateTime.now()
         );
 
         assertThatThrownBy(
@@ -142,7 +156,8 @@ class JdbcReservationRepositoryTest {
     @DisplayName("존재하는 예약을 삭제한다.")
     void 존재하는_예약_삭제() {
         Reservation saved = jdbcReservationRepository.save(
-                new Reservation(null, "브라운", LocalDate.now(), savedTimeSlot, savedTheme));
+                new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme,
+                        LocalDateTime.now()));
         jdbcReservationRepository.deleteById(saved.getId());
         assertThat(jdbcReservationRepository.findAll()).isEmpty();
     }

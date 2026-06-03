@@ -83,7 +83,7 @@ class JdbcThemeRepositoryTest {
 
     private void insertReservation(long themeId) {
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
-        String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, "test", LocalDate.now(), 1L, themeId);
+        String sql = "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, "test", LocalDate.now(), LocalDate.now().atStartOfDay(), 1L, themeId);
     }
 }

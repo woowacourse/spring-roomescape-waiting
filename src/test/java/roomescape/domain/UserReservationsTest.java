@@ -69,7 +69,8 @@ class UserReservationsTest {
     }
 
     private Reservation createReservation(Long id, String name, LocalDate date, int hour) {
-        return new Reservation(id, name, date, new TimeSlot(1L, LocalTime.of(hour, 0)), THEME);
+        return new Reservation(id, name, date, new TimeSlot(1L, LocalTime.of(hour, 0)), THEME,
+                LocalDateTime.of(2026, 6, 3, 10, 0));
     }
 
     private Waiting createWaiting(Long id, String name, LocalDate date, int hour) {

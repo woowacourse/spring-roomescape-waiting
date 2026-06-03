@@ -34,7 +34,8 @@ public class FakeReservationRepository implements ReservationRepository {
         long id = sequence++;
         Reservation savedReservation = new Reservation(id, reservation.getName(), reservation.getDate(),
                 reservation.getTimeSlot(),
-                reservation.getTheme());
+                reservation.getTheme(),
+                reservation.getCreatedAt());
         storage.put(id, savedReservation);
         return savedReservation;
     }

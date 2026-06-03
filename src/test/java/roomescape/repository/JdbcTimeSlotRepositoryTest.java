@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +77,8 @@ class JdbcTimeSlotRepositoryTest {
         TimeSlot savedTimeSlot = timeRepository.save(new TimeSlot(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(new Theme("공포", "설명", "url"));
         reservationRepository.save(
-                new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
+                new Reservation(null, "브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme,
+                        LocalDateTime.now()));
 
         assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId()))
                 .isInstanceOf(DataIntegrityViolationException.class);

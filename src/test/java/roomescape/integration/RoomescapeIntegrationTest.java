@@ -103,12 +103,15 @@ public class RoomescapeIntegrationTest {
     void 인기_테마_기간_경계_검증() {
         insertTestData();
         LocalDate today = LocalDate.now();
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저1",
-                today.minusDays(8), 1L, 1L);
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저2",
-                today.minusDays(3), 1L, 2L);
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "유저3",
-                today.plusDays(2), 1L, 1L);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
+                "유저1", today.minusDays(8), today.minusDays(9).atStartOfDay(), 1L, 1L);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
+                "유저2", today.minusDays(3), today.minusDays(9).atStartOfDay(), 1L, 2L);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES (?, ?, ?, ?, ?)",
+                "유저3", today.plusDays(2), today.minusDays(9).atStartOfDay(), 1L, 1L);
 
         RestAssured.given().log().all()
                 .queryParam("limit", 10)
@@ -128,7 +131,8 @@ public class RoomescapeIntegrationTest {
                 "테마2", "설명2", "thumbnail2.png");
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "10:00:00");
         jdbcTemplate.update("INSERT INTO time_slot (start_at) VALUES (?)", "11:00:00");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', ?, 1, 1)",
-                tomorrow);
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, created_at, time_id, theme_id) VALUES ('브라운', ?, ?, 1, 1)",
+                tomorrow, LocalDate.now().atStartOfDay());
     }
 }
