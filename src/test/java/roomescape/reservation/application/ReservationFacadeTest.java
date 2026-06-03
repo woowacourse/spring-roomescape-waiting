@@ -119,7 +119,6 @@ class ReservationFacadeTest {
                 .date(LocalDate.now(clock))
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
-                .status(Status.PENDING)
                 .build();
         ReservationInfo changedInfo = facade.changeReservation(lisaInfo.id(), changeCommand);
 
@@ -140,7 +139,6 @@ class ReservationFacadeTest {
                 .date(LocalDate.now(clock))
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
-                .status(Status.PENDING)
                 .build();
         ReservationInfo changedInfo = facade.changeReservation(lisaInfo.id(), changeCommand);
 
@@ -160,7 +158,6 @@ class ReservationFacadeTest {
                 .date(LocalDate.now(clock))
                 .timeId(newTime.getId())
                 .themeId(theme.getId())
-                .status(Status.ACTIVE)
                 .build();
         ReservationInfo changedInfo = facade.changeReservation(pobiInfo.id(), changeCommand);
 
@@ -178,7 +175,6 @@ class ReservationFacadeTest {
 
         ReservationCancelCommand cancelCommand = ReservationCancelCommand.builder()
                 .name("포비")
-                .status(Status.ACTIVE)
                 .build();
         facade.cancelReservation(pobiInfo.id(), cancelCommand);
 

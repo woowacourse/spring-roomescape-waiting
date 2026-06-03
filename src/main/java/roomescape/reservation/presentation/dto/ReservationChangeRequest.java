@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
-import roomescape.reservation.domain.Status;
 
 public record ReservationChangeRequest(
         @NotBlank(message = "이름은 필수입니다.")
@@ -16,9 +15,7 @@ public record ReservationChangeRequest(
         @NotNull(message = "시간 ID는 필수입니다.")
         Long timeId,
         @NotNull(message = "테마 ID는 필수입니다.")
-        Long themeId,
-        @NotNull(message = "예약 상태는 필수입니다.")
-        Status status
+        Long themeId
 ) {
 
     public ReservationChangeCommand toCommand() {
@@ -27,7 +24,6 @@ public record ReservationChangeRequest(
                 .timeId(this.timeId)
                 .themeId(this.themeId)
                 .date(this.date)
-                .status(this.status)
                 .build();
     }
 }
