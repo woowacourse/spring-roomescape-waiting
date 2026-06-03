@@ -1,17 +1,33 @@
 package roomescape.fixture;
 
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import javax.sql.DataSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import roomescape.acceptance.AuthTestSupport;
 import roomescape.domain.Role;
 
 public final class DbFixtures {
 
     private DbFixtures() {
+    }
+
+    public static void loadSampleData(JdbcTemplate jdbc) {
+        DataSource dataSource = Objects.requireNonNull(jdbc.getDataSource());
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        try {
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
+        } finally {
+            DataSourceUtils.releaseConnection(connection, dataSource);
+        }
     }
 
     public static long insertUser(JdbcTemplate jdbc, String name, Role role) {

@@ -180,4 +180,17 @@ class ThemeServiceTest extends ServiceIntegrationTest {
 
         assertThat(popular).hasSize(2);
     }
+
+    @Test
+    void getPopularThemes_시드데이터의_랭킹을_집계하고_기간_외_예약은_제외한다() {
+        DbFixtures.loadSampleData(jdbcTemplate);
+
+        List<PopularTheme> popular = service.getPopularThemes(10);
+
+        // 기간 내(today-7~today-1) 예약 수: 테마1=10 … 테마10=3 순. 테마13~15의 기간 외 예약은 집계에서 제외된다.
+        assertThat(popular).extracting(p -> p.getTheme().getId())
+                .containsExactly(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L);
+        assertThat(popular).extracting(PopularTheme::getReservationCount)
+                .containsExactly(10L, 9L, 8L, 7L, 6L, 5L, 4L, 4L, 3L, 3L);
+    }
 }
