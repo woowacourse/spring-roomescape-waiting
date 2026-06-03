@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
@@ -24,6 +25,7 @@ import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -65,6 +67,7 @@ public class ReservationService {
         return new ReservationDetailResults(details);
     }
 
+    @Transactional
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
         validateNoWaiting(command);
@@ -72,6 +75,7 @@ public class ReservationService {
         return ReservationResult.from(reserved);
     }
 
+    @Transactional
     public ReservationResult changeReservationSlot(Long id, ReservationCommand command) {
         Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(command.name());
@@ -92,11 +96,13 @@ public class ReservationService {
         reservationDao.delete(id);
     }
 
+    @Transactional
     public void cancelReservation(Long id, String userName) {
         Reservation origin = getReservationOrThrow(id);
         origin.validateOwner(userName);
         validatePastTime(origin.getDate(), origin.getTime());
         reservationDao.delete(id);
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
@@ -110,6 +116,15 @@ public class ReservationService {
                 command.date(),
                 time,
                 theme
+        );
+    }
+
+    private void promoteFirstWaiting(LocalDate date, ReservationTime time, Theme theme) {
+        waitingDao.findFirstBySlot(date, time.getId(), theme.getId()).ifPresent(
+                waiting -> {
+                    reservationDao.save(new Reservation(waiting.getName(), date, time, theme));
+                    waitingDao.delete(waiting.getId());
+                }
         );
     }
 
