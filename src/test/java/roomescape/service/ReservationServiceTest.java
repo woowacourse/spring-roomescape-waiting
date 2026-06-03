@@ -25,6 +25,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingListRepository;
 import roomescape.dto.ReservationTimesWithStatus;
 import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationModifyCommand;
@@ -42,6 +43,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private WaitingListRepository waitingListRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -85,6 +89,10 @@ class ReservationServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationCreateCommand request = new ReservationCreateCommand("오리", pastDate, 1L, 1L);
 
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(time));
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(pastDate, 1L, 1L)).willReturn(false);
+
         // when & then
         assertThatThrownBy(() -> reservationService.create(request))
                 .isInstanceOf(BusinessException.class)
@@ -112,6 +120,8 @@ class ReservationServiceTest {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(waitingListRepository.findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(theme, futureDate, time))
+                .willReturn(Optional.empty());
 
         // when
         reservationService.deleteWithValidation(1L, "오리");
@@ -135,13 +145,14 @@ class ReservationServiceTest {
     @Test
     void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경() {
         // given
-        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L);
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L, 1L);
         Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         ReservationTime newTime = ReservationTime.createWithId(2L, LocalTime.of(13, 0), LocalTime.of(14, 0));
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(newTime));
-        given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 2L, theme.getId())).willReturn(false);
+        given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), theme.getId(), 2L)).willReturn(false);
 
         // when
         ReservationResult response = reservationService.modify(request);
@@ -155,7 +166,7 @@ class ReservationServiceTest {
     @Test
     void 변경을_시도하는_사용자명과_예약자명_불일치시_예외발생() {
         // given
-        ReservationModifyCommand request = new ReservationModifyCommand(1L, "리오", futureDate.plusDays(1), 2L);
+        ReservationModifyCommand request = new ReservationModifyCommand(1L, "리오", futureDate.plusDays(1), 2L, 1L);
         Reservation originalReservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(originalReservation));

@@ -104,7 +104,6 @@ public class ReservationService {
         Reservation reservation = findReservationOrThrow(reservationId);
 
         validateReservationOwner(reservation, name);
-        validateReservation(reservation, reservation.getTheme(), reservation.getTime());
 
         deleteInternal(reservationId);
     }

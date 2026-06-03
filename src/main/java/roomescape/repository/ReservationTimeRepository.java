@@ -2,23 +2,44 @@ package roomescape.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
-
-import java.sql.*;
-import java.util.List;
-import java.util.Optional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.KeyGenerationException;
+
+import java.sql.Time;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class ReservationTimeRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+
+    public ReservationTime save(final ReservationTime newReservationTime) {
+        final String sql = """
+                INSERT INTO reservation_time (start_at, end_at)
+                VALUES (:startAt, :endAt)
+                """;
+
+        final KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("startAt", Time.valueOf(newReservationTime.getStartAt()))
+                .addValue("endAt", Time.valueOf(newReservationTime.getEndAt()));
+
+        jdbcTemplate.update(sql, param, keyHolder);
+
+        final long newTimeId = keyHolder.getKey().longValue();
+        return newReservationTime.withId(newTimeId);
+    }
 
     public List<ReservationTime> findAll() {
         final String sql = """
@@ -27,7 +48,7 @@ public class ReservationTimeRepository {
                 ORDER BY id
                 """;
 
-        return jdbcTemplate.query(sql, this::mapToDomain)
+        return jdbcTemplate.query(sql, new MapSqlParameterSource(), rowMapper())
                 .stream()
                 .toList();
     }
@@ -36,79 +57,36 @@ public class ReservationTimeRepository {
         final String sql = """
                 SELECT id, start_at, end_at
                 FROM reservation_time
-                WHERE id = ?
+                WHERE id = :id
                 """;
 
         try {
-            ReservationTime reservationTime = jdbcTemplate.queryForObject(
-                    sql,
-                    this::mapToDomain,
-                    timeId
-            );
-
+            MapSqlParameterSource param = new MapSqlParameterSource()
+                    .addValue("id", timeId);
+            ReservationTime reservationTime = jdbcTemplate.queryForObject(sql, param, rowMapper());
             return Optional.of(reservationTime);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
     }
 
-    public ReservationTime save(final ReservationTime newReservationTime) {
-        final long newTimeId = insertReservationTime(newReservationTime);
-
-        return newReservationTime.withId(newTimeId);
-    }
-
     public boolean delete(final Long timeId) {
         final String sql = """
                 DELETE FROM reservation_time
-                WHERE id = ?
+                WHERE id = :id
                 """;
 
-        return jdbcTemplate.update(sql, timeId) > 0;
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("id", timeId);
+
+        return jdbcTemplate.update(sql, param) > 0;
     }
 
-
-    private long insertReservationTime(final ReservationTime reservationTime) {
-        final String sql = """
-                INSERT INTO reservation_time (start_at, end_at)
-                VALUES (?, ?)
-                """;
-
-        final KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    sql,
-                    Statement.RETURN_GENERATED_KEYS
-            );
-
-            preparedStatement.setTime(1, Time.valueOf(reservationTime.getStartAt()));
-            preparedStatement.setTime(2, Time.valueOf(reservationTime.getEndAt()));
-
-            return preparedStatement;
-        }, keyHolder);
-
-        return generatedIdFrom(keyHolder);
-    }
-
-    private static long generatedIdFrom(final KeyHolder keyHolder) {
-        final Number generatedKey = keyHolder.getKey();
-
-        if (generatedKey == null) {
-            throw new KeyGenerationException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
-
-        return generatedKey.longValue();
-    }
-
-    /**
-     * ResultSet - Domain 매핑 메서드
-     */
-    private ReservationTime mapToDomain(final ResultSet resultSet, final int rowNum) throws SQLException {
-        return ReservationTime.createWithId(
-                resultSet.getLong("id"),
-                resultSet.getTime("start_at").toLocalTime(),
-                resultSet.getTime("end_at").toLocalTime()
+    private RowMapper<ReservationTime> rowMapper() {
+        return (rs, rowNum) -> ReservationTime.createWithId(
+                rs.getLong("id"),
+                rs.getTime("start_at").toLocalTime(),
+                rs.getTime("end_at").toLocalTime()
         );
     }
 }
