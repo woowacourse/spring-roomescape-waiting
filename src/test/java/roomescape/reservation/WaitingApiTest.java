@@ -53,7 +53,8 @@ class WaitingApiTest {
                 .body("theme.id", equalTo(themeId.intValue()))
                 .body("theme.name", equalTo("공포 테마"))
                 .body("status", equalTo("WAITING"))
-                .body("rank", equalTo(1));
+                .body("rank", equalTo(1))
+                .body("totalRankCount", equalTo(1));
     }
 
     @DisplayName("대기 예약 순번 반환을 테스트합니다.")
@@ -90,7 +91,8 @@ class WaitingApiTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("status", equalTo("WAITING"))
-                .body("rank", equalTo(3));
+                .body("rank", equalTo(3))
+                .body("totalRankCount", equalTo(3));
     }
 
     @DisplayName("예약이 존재하지 않는 날짜와 시간으로 대기 예약 생성 시 422 응답 반환을 테스트합니다.")
@@ -228,6 +230,7 @@ class WaitingApiTest {
                 .body("[0].theme.name", equalTo("공포 테마"))
                 .body("[0].status", equalTo("WAITING"))
                 .body("[0].rank", equalTo(2))
+                .body("[0].totalRankCount", equalTo(2))
 
                 .body("[1].id", greaterThan(0))
                 .body("[1].name", equalTo("스타크"))
@@ -237,7 +240,8 @@ class WaitingApiTest {
                 .body("[1].theme.id", equalTo(themeId.intValue()))
                 .body("[1].theme.name", equalTo("공포 테마"))
                 .body("[1].status", equalTo("WAITING"))
-                .body("[1].rank", equalTo(1));
+                .body("[1].rank", equalTo(1))
+                .body("[1].totalRankCount", equalTo(1));
     }
 
     @DisplayName("사용자 이름 없이 예약 대기 목록 조회 시 400 응답 반환을 테스트합니다.")

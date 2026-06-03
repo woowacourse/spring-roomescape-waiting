@@ -12,11 +12,12 @@ public record WaitingResult(
         ThemeResult theme,
         ReservationTimeResult time,
         Status status,
-        int rank
+        int rank,
+        int totalRankCount
 ) {
 
     public static WaitingResult from(Waiting waiting, ThemeResult themeResult,
-                                     ReservationTimeResult timeResult) {
+                                     ReservationTimeResult timeResult, int totalRankCount) {
         return new WaitingResult(
                 waiting.getId(),
                 waiting.getUserName(),
@@ -24,7 +25,8 @@ public record WaitingResult(
                 themeResult,
                 timeResult,
                 Status.WAITING,
-                waiting.getRank().value()
+                waiting.getRank().value(),
+                totalRankCount
         );
     }
 
@@ -44,7 +46,8 @@ public record WaitingResult(
                         waitingDetail.startAt()
                 ),
                 Status.WAITING,
-                waitingDetail.rank()
+                waitingDetail.rank(),
+                waitingDetail.totalRankCount()
         );
     }
 

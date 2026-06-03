@@ -15,7 +15,8 @@ public record WaitingResponse(
         ThemeResponse theme,
         ReservationTimeResponse time,
         Status status,
-        int rank
+        int rank,
+        int totalRankCount
 ) {
     public static WaitingResponse from(WaitingResult result) {
         return new WaitingResponse(
@@ -25,7 +26,8 @@ public record WaitingResponse(
                 ThemeResponse.from(result.theme()),
                 ReservationTimeResponse.from(result.time()),
                 result.status(),
-                result.rank()
+                result.rank(),
+                result.totalRankCount()
         );
     }
 }

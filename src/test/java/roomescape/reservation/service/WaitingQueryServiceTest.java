@@ -68,6 +68,7 @@ class WaitingQueryServiceTest {
             softly.assertThat(first.time()).isEqualTo(new ReservationTimeResult(nineTimeId, LocalTime.of(9, 0)));
             softly.assertThat(first.status()).isEqualTo(Status.WAITING);
             softly.assertThat(first.rank()).isEqualTo(2);
+            softly.assertThat(first.totalRankCount()).isEqualTo(2);
 
             softly.assertThat(second.id()).isPositive();
             softly.assertThat(second.name()).isEqualTo("피노");
@@ -76,6 +77,7 @@ class WaitingQueryServiceTest {
             softly.assertThat(second.time()).isEqualTo(new ReservationTimeResult(tenTimeId, LocalTime.of(10, 0)));
             softly.assertThat(second.status()).isEqualTo(Status.WAITING);
             softly.assertThat(second.rank()).isEqualTo(1);
+            softly.assertThat(second.totalRankCount()).isEqualTo(1);
         });
     }
 }

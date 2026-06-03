@@ -71,8 +71,10 @@ class JdbcWaitingDaoTest {
             softly.assertThat(first.timeId()).isEqualTo(tenTimeId);
             softly.assertThat(first.startAt()).isEqualTo(LocalTime.of(10, 0));
             softly.assertThat(first.rank()).isEqualTo(1);
+            softly.assertThat(first.totalRankCount()).isEqualTo(2);
             softly.assertThat(second.timeId()).isEqualTo(elevenTimeId);
             softly.assertThat(second.rank()).isEqualTo(1);
+            softly.assertThat(second.totalRankCount()).isEqualTo(1);
         });
     }
 }

@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
@@ -61,6 +60,7 @@ class WaitingCommandServiceTest {
             softly.assertThat(savedWaiting.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
             softly.assertThat(savedWaiting.status()).isEqualTo(Status.WAITING);
             softly.assertThat(savedWaiting.rank()).isEqualTo(1);
+            softly.assertThat(savedWaiting.totalRankCount()).isEqualTo(1);
         });
     }
 
@@ -91,7 +91,10 @@ class WaitingCommandServiceTest {
         WaitingCreateCommand request = ReservationFixture.futureKayaWaitingCreateCommand(themeId, timeId, NOW);
         WaitingResult savedWaiting = waitingCommandService.save(request);
 
-        assertThat(savedWaiting.rank()).isEqualTo(3);
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(savedWaiting.rank()).isEqualTo(3);
+            softly.assertThat(savedWaiting.totalRankCount()).isEqualTo(3);
+        });
     }
 
     @DisplayName("확정된 예약이 존재하지 않을 경우, 예약 대기 생성 예외를 테스트합니다.")
