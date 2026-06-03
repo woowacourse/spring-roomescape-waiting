@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import roomescape.controller.dto.ReservationTimeRequest;
 import roomescape.controller.dto.ReservationTimeResponse;
-import roomescape.global.AdminOnly;
+import roomescape.global.auth.AdminOnly;
 import roomescape.service.ReservationTimeService;
 
 @AdminOnly

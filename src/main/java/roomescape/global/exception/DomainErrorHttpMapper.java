@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

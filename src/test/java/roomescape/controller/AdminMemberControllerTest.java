@@ -19,9 +19,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.LoginMemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.global.AdminAuthorizationInterceptor;
-import roomescape.global.DomainErrorHttpMapper;
-import roomescape.global.WebConfig;
+import roomescape.global.auth.AdminAuthorizationInterceptor;
+import roomescape.global.exception.DomainErrorHttpMapper;
+import roomescape.global.config.WebConfig;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 

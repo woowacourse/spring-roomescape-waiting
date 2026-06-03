@@ -17,7 +17,7 @@ import jakarta.validation.Valid;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
-import roomescape.global.LoginMember;
+import roomescape.global.auth.LoginMember;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")

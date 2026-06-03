@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.auth;
 
 import jakarta.servlet.http.HttpSession;
 

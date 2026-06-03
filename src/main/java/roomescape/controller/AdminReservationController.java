@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import roomescape.controller.dto.AdminReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
-import roomescape.global.AdminOnly;
+import roomescape.global.auth.AdminOnly;
 import roomescape.service.ReservationService;
 
 @AdminOnly

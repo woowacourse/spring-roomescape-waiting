@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.controller.dto.LoginMemberResponse;
-import roomescape.global.AdminOnly;
+import roomescape.global.auth.AdminOnly;
 import roomescape.service.MemberService;
 
 @AdminOnly

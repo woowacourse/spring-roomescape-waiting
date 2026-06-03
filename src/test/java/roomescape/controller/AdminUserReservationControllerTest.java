@@ -30,9 +30,9 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.global.AdminAuthorizationInterceptor;
-import roomescape.global.DomainErrorHttpMapper;
-import roomescape.global.WebConfig;
+import roomescape.global.auth.AdminAuthorizationInterceptor;
+import roomescape.global.exception.DomainErrorHttpMapper;
+import roomescape.global.config.WebConfig;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 

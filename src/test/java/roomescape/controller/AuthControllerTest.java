@@ -23,7 +23,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
-import roomescape.global.DomainErrorHttpMapper;
+import roomescape.global.exception.DomainErrorHttpMapper;
 import roomescape.service.AuthService;
 
 @WebMvcTest(AuthController.class)

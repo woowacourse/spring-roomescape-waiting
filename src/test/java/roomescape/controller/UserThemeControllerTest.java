@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.controller.dto.AvailableTimeResponse;
 import roomescape.controller.dto.ThemeResponse;
-import roomescape.global.DomainErrorHttpMapper;
+import roomescape.global.exception.DomainErrorHttpMapper;
 import roomescape.service.AuthService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
