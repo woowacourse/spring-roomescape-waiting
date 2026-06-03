@@ -15,7 +15,11 @@ public interface WaitingRepository {
 
     boolean isExists(Waiting waiting);
 
+    boolean isExistsBySlotId(long slotId);
+
     List<Waiting> findByName(String name);
 
     Optional<Waiting> findById(long id);
+
+    Waiting findFirstBySlotId(long slotId);
 }

@@ -38,7 +38,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
             """;
     private static final String FIND_BY_NAME_SQL = BASE_SQL + " WHERE w.name = ?";
     private static final String FIND_BY_ID_SQL = BASE_SQL + " WHERE w.id = ?";
+    private static final String FIND_FIRST_BY_SLOT_SQL = BASE_SQL + " WHERE s.id = ? ORDER BY w.waiting_number ASC LIMIT 1";
     private static final String EXISTS_SQL = "SELECT EXISTS (SELECT 1 FROM waiting WHERE name = ? AND slot_id = ?)";
+    private static final String EXISTS_BY_SLOT_SQL = "SELECT EXISTS (SELECT 1 FROM waiting WHERE slot_id = ?)";
     private static final String DELETE_SQL = "DELETE FROM waiting WHERE id = ?";
     private static final String CALCULATE_NUMBER_SQL = """
             SELECT COUNT(*) 
@@ -56,7 +58,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
-                .usingGeneratedKeyColumns("id");
+                .usingGeneratedKeyColumns("id")
+                .usingColumns("name", "slot_id");
         this.rowMapper = (rs, rowNum) -> new Waiting(
                 rs.getLong("waiting_id"),
                 rs.getString("name"),
@@ -92,6 +95,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public boolean isExistsBySlotId(long slotId) {
+        return jdbcTemplate.queryForObject(EXISTS_BY_SLOT_SQL, Boolean.class, slotId);
+    }
+
+    @Override
     public List<Waiting> findByName(String name) {
         return jdbcTemplate.query(FIND_BY_NAME_SQL, rowMapper, name);
     }
@@ -100,5 +108,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Optional<Waiting> findById(long waitingId) {
         List<Waiting> waitings = jdbcTemplate.query(FIND_BY_ID_SQL, rowMapper, waitingId);
         return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
+    }
+
+    @Override
+    public Waiting findFirstBySlotId(long slotId) {
+        List<Waiting> waitings = jdbcTemplate.query(FIND_FIRST_BY_SLOT_SQL, rowMapper, slotId);
+        return DataAccessUtils.singleResult(waitings);
     }
 }

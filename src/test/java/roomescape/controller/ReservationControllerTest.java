@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import roomescape.controller.dto.ReservationPatchRequest;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.InvalidOwnershipException;
@@ -100,7 +101,6 @@ class ReservationControllerTest {
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
         given(reservationService.putReservation(anyLong(), anyString(), any(ReservationRequest.class)))
                 .willReturn(createMockReservation());
-
         performPut("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 
@@ -110,7 +110,6 @@ class ReservationControllerTest {
         ReservationRequest request = new ReservationRequest("네오", LocalDate.now(), 1L, 1L);
         given(reservationService.putReservation(anyLong(), anyString(), any(ReservationRequest.class)))
                 .willThrow(new ReservationNotFoundException(999L));
-
         performPut("/reservations/999", "브라운", request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"));
@@ -122,7 +121,6 @@ class ReservationControllerTest {
         ReservationPatchRequest request = new ReservationPatchRequest("네오", null, null, null);
         given(reservationService.patchReservation(anyLong(), anyString(), any(ReservationPatchRequest.class)))
                 .willReturn(createMockReservation());
-
         performReschedule("/reservations/1", "브라운", request).andExpect(status().isOk());
     }
 
@@ -200,6 +198,7 @@ class ReservationControllerTest {
     private Reservation createMockReservation() {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        return new Reservation(1L, "브라운", LocalDate.now(), timeSlot, theme);
+        Slot slot = new Slot(1L, LocalDate.now(), timeSlot, theme);
+        return new Reservation(1L, "브라운", slot);
     }
 }

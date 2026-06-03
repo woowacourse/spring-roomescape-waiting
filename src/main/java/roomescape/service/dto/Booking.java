@@ -18,12 +18,26 @@ public record Booking(
 ) {
 
     public static Booking fromReservation(Reservation reservation) {
-        return new Booking(reservation.getId(), reservation.getName(), reservation.getDate(),
-                reservation.getTimeSlot(), reservation.getTheme(), true, null);
+        return new Booking(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getSlot().getDate(),
+                reservation.getSlot().getTimeSlot(),
+                reservation.getSlot().getTheme(),
+                true,
+                null
+        );
     }
 
     public static Booking fromWaiting(Waiting waiting) {
-        return new Booking(waiting.getId(), waiting.getName(), waiting.getDate(),
-                waiting.getTimeSlot(), waiting.getTheme(), false, waiting.getWaitingNumber());
+        return new Booking(
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getSlot().getDate(),
+                waiting.getSlot().getTimeSlot(),
+                waiting.getSlot().getTheme(),
+                false,
+                waiting.getWaitingNumber()
+        );
     }
 }

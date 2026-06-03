@@ -1,7 +1,8 @@
-DROP TABLE IF EXISTS reservation CASCADE;
 DROP TABLE IF EXISTS theme CASCADE;
-DROP TABLE IF EXISTS waiting CASCADE;
 DROP TABLE IF EXISTS time_slot CASCADE;
+DROP TABLE IF EXISTS slot CASCADE;
+DROP TABLE IF EXISTS reservation CASCADE;
+DROP TABLE IF EXISTS waiting CASCADE;
 
 CREATE TABLE theme
 (
@@ -27,6 +28,8 @@ CREATE TABLE slot
     time_id  BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES time_slot (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
     CONSTRAINT uk_slot_date_time_theme UNIQUE (date, time_id, theme_id)
 );
 

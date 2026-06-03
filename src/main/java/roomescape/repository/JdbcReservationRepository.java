@@ -72,7 +72,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(FIND_BY_NAME_SQL, rowMapper, name);
     }
 
-    // Reservation 인터페이스에 선언된 메서드로 가정 (기존 코드 호환)
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(java.time.LocalDate date, Long timeId, Long themeId) {
         return jdbcTemplate.query(FIND_BY_CONDITIONS_SQL, rowMapper, date, timeId, themeId).stream().findAny();
     }

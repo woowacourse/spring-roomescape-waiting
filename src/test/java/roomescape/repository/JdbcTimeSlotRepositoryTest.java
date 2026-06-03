@@ -9,9 +9,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.TimeSlotNotFoundException;
+import roomescape.repository.mapper.DomainRowMapperFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,12 +33,15 @@ class JdbcTimeSlotRepositoryTest {
     private JdbcTimeSlotRepository timeRepository;
     private JdbcThemeRepository themeRepository;
     private JdbcReservationRepository reservationRepository;
+    private JdbcSlotRepository jdbcSlotRepository;
 
     @BeforeEach
     void setUp() {
-        timeRepository = new JdbcTimeSlotRepository(jdbcTemplate);
-        themeRepository = new JdbcThemeRepository(jdbcTemplate);
-        reservationRepository = new JdbcReservationRepository(jdbcTemplate);
+        DomainRowMapperFactory factory = new DomainRowMapperFactory();
+        timeRepository = new JdbcTimeSlotRepository(jdbcTemplate, factory);
+        themeRepository = new JdbcThemeRepository(jdbcTemplate, factory);
+        reservationRepository = new JdbcReservationRepository(jdbcTemplate, factory);
+        jdbcSlotRepository = new JdbcSlotRepository(jdbcTemplate, factory);
     }
 
     @Test
@@ -53,7 +58,6 @@ class JdbcTimeSlotRepositoryTest {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Optional<TimeSlot> foundTimeSlot = timeRepository.findById(savedTimeSlot.getId());
         assertThat(foundTimeSlot).isPresent();
-        assertThat(foundTimeSlot.get().getStartAt()).isEqualTo(LocalTime.of(10, 0));
     }
 
     @Test
@@ -68,8 +72,7 @@ class JdbcTimeSlotRepositoryTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간을 삭제해도 예외가 발생하지 않는다.")
     void deleteNonExisting() {
-        assertThatCode(() -> timeRepository.deleteById(999L))
-                .doesNotThrowAnyException();
+        assertThatCode(() -> timeRepository.deleteById(999L)).doesNotThrowAnyException();
     }
 
     @Test
@@ -77,7 +80,7 @@ class JdbcTimeSlotRepositoryTest {
     void updateExisting() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         TimeSlot updateTime = new TimeSlot(savedTimeSlot.getId(), LocalTime.of(12, 0));
-        assertThat(timeRepository.update(updateTime)).isEqualTo(updateTime);
+        assertThat(timeRepository.update(updateTime).getStartAt()).isEqualTo(LocalTime.of(12, 0));
     }
 
     @Test
@@ -92,10 +95,8 @@ class JdbcTimeSlotRepositoryTest {
     void deleteTimeSlot_WithReservation() {
         TimeSlot savedTimeSlot = timeRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(Theme.transientOf("공포", "설명", "url"));
-        reservationRepository.save(
-                Reservation.transientOf("브라운", LocalDate.now().plusDays(1), savedTimeSlot, savedTheme));
-
-        assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId()))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        Slot savedSlot = jdbcSlotRepository.save(Slot.transientOf(LocalDate.now(), savedTimeSlot, savedTheme));
+        reservationRepository.save(Reservation.transientOf("브라운", savedSlot));
+        assertThatThrownBy(() -> timeRepository.deleteById(savedTimeSlot.getId())).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

@@ -7,10 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.controller.dto.WaitingRequest;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
-import roomescape.domain.Waiting;
+import roomescape.domain.*;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -22,6 +19,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,16 +29,20 @@ class WaitingServiceTest {
     private WaitingRepository waitingRepository;
     @Mock
     private ReservationRepository reservationRepository;
+    @Mock
+    private SlotService slotService;
 
     private WaitingService waitingService;
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
+    private Slot savedSlot;
 
     @BeforeEach
     void setUp() {
         savedTimeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         savedTheme = new Theme(1L, "이름", "설명", "test.com");
-        waitingService = new WaitingService(waitingRepository, reservationRepository);
+        savedSlot = new Slot(1L, LocalDate.now(), savedTimeSlot, savedTheme);
+        waitingService = new WaitingService(waitingRepository, reservationRepository, slotService);
     }
 
     @Test
@@ -48,7 +50,6 @@ class WaitingServiceTest {
     void deleteWaiting() {
         Waiting waiting = createWaitingEntity();
         given(waitingRepository.findById(1L)).willReturn(Optional.of(waiting));
-
         assertThatCode(() -> waitingService.removeWaiting(1L, "브라운")).doesNotThrowAnyException();
     }
 
@@ -56,7 +57,6 @@ class WaitingServiceTest {
     @DisplayName("존재하지 않는 예약 대기를 삭제하면, 예외가 발생한다.")
     void deleteNotExistsWaiting() {
         given(waitingRepository.findById(1L)).willReturn(Optional.empty());
-
         assertThatThrownBy(() -> waitingService.removeWaiting(1L, "브라운"))
                 .isInstanceOf(WaitingNotFoundException.class);
     }
@@ -64,23 +64,21 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void saveDuplicateWaiting() {
-        LocalDate today = LocalDate.now();
+        given(slotService.findSlotOrNull(any(), anyLong(), anyLong())).willReturn(savedSlot);
         given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
-                .willReturn(Optional.of(new Reservation(1L, "포비", today, savedTimeSlot, savedTheme)));
+                .willReturn(Optional.of(new Reservation(1L, "포비", savedSlot)));
         given(waitingRepository.isExists(any(Waiting.class))).willReturn(true);
-
-        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(LocalDate.now())))
                 .isInstanceOf(DuplicateWaitingException.class);
     }
 
     @Test
     @DisplayName("자신의 예약에 대기를 추가하면, 예외가 발생한다.")
     void saveReservedWaiting() {
-        LocalDate today = LocalDate.now();
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
-                .willReturn(Optional.of(createReservation(today)));
-
-        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
+        given(slotService.findSlotOrNull(any(), anyLong(), anyLong())).willReturn(savedSlot);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .willReturn(Optional.of(createReservation()));
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(LocalDate.now())))
                 .isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -89,8 +87,8 @@ class WaitingServiceTest {
     void savePassedWaiting() {
         LocalDate today = LocalDate.now();
         TimeSlot pastTime = new TimeSlot(1L, LocalTime.of(0, 0));
-        stubOtherPersonReservation(today, pastTime);
-
+        Slot pastSlot = new Slot(2L, today, pastTime, savedTheme);
+        stubOtherPersonReservation(pastSlot);
         assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
                 .isInstanceOf(PastTimeException.class);
     }
@@ -98,29 +96,29 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약에 대기를 추가하면, 예외가 발생한다.")
     void saveNotExistsReservationWaiting() {
-        LocalDate today = LocalDate.now();
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(today, 1L, 1L))
+        given(slotService.findSlotOrNull(any(), anyLong(), anyLong())).willReturn(savedSlot);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .willReturn(Optional.empty());
-
-        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(today)))
+        assertThatThrownBy(() -> waitingService.saveWaiting(createWaitingRequest(LocalDate.now())))
                 .isInstanceOf(InvalidWaitingPrerequisiteException.class);
     }
 
-    private void stubOtherPersonReservation(LocalDate date, TimeSlot timeSlot) {
-        Reservation reservation = new Reservation(2L, "포비", date, timeSlot, savedTheme);
-        given(reservationRepository.findByDateAndTimeIdAndThemeId(date, 1L, 1L))
+    private void stubOtherPersonReservation(Slot slot) {
+        given(slotService.findSlotOrNull(any(), anyLong(), anyLong())).willReturn(slot);
+        Reservation reservation = new Reservation(2L, "포비", slot);
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .willReturn(Optional.of(reservation));
     }
 
     private Waiting createWaitingEntity() {
-        return new Waiting(1L, "브라운", LocalDate.now(), savedTimeSlot, savedTheme, 1);
+        return new Waiting(1L, "브라운", savedSlot, 1);
     }
 
     private WaitingRequest createWaitingRequest(LocalDate date) {
         return new WaitingRequest("브라운", date, 1L, 1L);
     }
 
-    private Reservation createReservation(LocalDate date) {
-        return new Reservation(1L, "브라운", date, savedTimeSlot, savedTheme);
+    private Reservation createReservation() {
+        return new Reservation(1L, "브라운", savedSlot);
     }
 }

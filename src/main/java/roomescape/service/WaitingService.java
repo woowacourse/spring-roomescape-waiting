@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingRequest;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
@@ -18,43 +19,52 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
+    private final SlotService slotService;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository, SlotService slotService) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
+        this.slotService = slotService;
     }
 
     @Transactional
     public Waiting saveWaiting(WaitingRequest request) {
-        Reservation reservation = findReservationOrThrow(request.date(), request.timeId(), request.themeId());
+        Slot slot = slotService.findSlotOrNull(request.date(), request.timeId(), request.themeId());
+        validPrerequisite(slot);
+        Reservation reservation = findReservationOrThrow(slot);
         validNotReservedBySelf(reservation, request.name());
-        Waiting waiting = Waiting.transientOf(request.name(), request.date(), reservation.getTimeSlot(), reservation.getTheme());
 
+        Waiting waiting = Waiting.transientOf(request.name(), slot);
         validDuplicated(waiting);
-        validDateTime(waiting.getDate(), waiting.getTimeSlot().getStartAt());
+        validDateTime(slot.getDate(), slot.getTimeSlot().getStartAt());
 
         return waitingRepository.save(waiting);
     }
 
     @Transactional
     public void removeWaiting(Long id, String userName) {
-        Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new WaitingNotFoundException(id));
+        Waiting waiting = waitingRepository.findById(id).orElseThrow(() -> new WaitingNotFoundException(id));
         waiting.validateModifiable(userName);
         waitingRepository.deleteById(id);
     }
 
-    private Reservation findReservationOrThrow(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+    private void validPrerequisite(Slot slot) {
+        if (slot == null) {
+            throw new InvalidWaitingPrerequisiteException();
+        }
+    }
+
+    private Reservation findReservationOrThrow(Slot slot) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(), slot.getTheme().getId())
                 .orElseThrow(InvalidWaitingPrerequisiteException::new);
     }
 
     private void validNotReservedBySelf(Reservation reservation, String userName) {
         if (reservation.getName().equals(userName)) {
             throw new DuplicateReservationException(
-                    reservation.getDate().toString(),
-                    reservation.getTimeSlot().getId(),
-                    reservation.getTheme().getId()
+                    reservation.getSlot().getDate().toString(),
+                    reservation.getSlot().getTimeSlot().getId(),
+                    reservation.getSlot().getTheme().getId()
             );
         }
     }
@@ -66,11 +76,8 @@ public class WaitingService {
     }
 
     private void validDateTime(LocalDate date, LocalTime time) {
-        if (date.isBefore(LocalDate.now())) {
-            throw new PastTimeException("지난 날짜로 예약 대기를 추가하실 수 없습니다.");
-        }
-        if (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now())) {
-            throw new PastTimeException("지난 시간으로 예약 대기를 추가하실 수 없습니다.");
+        if (date.isBefore(LocalDate.now()) || (date.isEqual(LocalDate.now()) && time.isBefore(LocalTime.now()))) {
+            throw new PastTimeException("지난 시간/날짜로 예약 대기를 추가하실 수 없습니다.");
         }
     }
 }
