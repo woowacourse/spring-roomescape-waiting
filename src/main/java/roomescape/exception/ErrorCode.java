@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // 400 - BAD_REQUEST
-    PAST_RESERVATION_CANCEL(HttpStatus.BAD_REQUEST, "이미 지난 예약은 취소할 수 없습니다."),
-    PAST_RESERVATION_UPDATE(HttpStatus.BAD_REQUEST, "이미 지난 예약은 변경할 수 없습니다."),
+    PAST_RESERVATION_CANCEL(HttpStatus.BAD_REQUEST, "12시간 이내는 예약 취소가 불가능합니다."),
+    PAST_RESERVATION_UPDATE(HttpStatus.BAD_REQUEST, "12시간 이내는 예약 수정이 불가능합니다."),
     PAST_TIME_RESERVATION(HttpStatus.BAD_REQUEST, "이미 지난 시간으로 변경할 수 없습니다."),
     PAST_TIME_CREATE(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 예약할 수 없습니다."),
     PAST_TIME_WAITING(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다."),
