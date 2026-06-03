@@ -91,6 +91,16 @@ public class Waiting {
         return name.equals(requestName);
     }
 
+    public boolean hasSameSlot(Waiting other) {
+        return date.equals(other.date)
+                && timeSlot.getId().equals(other.timeSlot.getId())
+                && theme.getId().equals(other.theme.getId());
+    }
+
+    public boolean isSameWaiting(Waiting target) {
+        return id != null && id.equals(target.id);
+    }
+
     public Long getId() {
         return id;
     }

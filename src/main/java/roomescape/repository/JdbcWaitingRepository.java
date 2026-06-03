@@ -11,7 +11,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.service.dto.WaitingWithNumber;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
@@ -68,32 +67,25 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<WaitingWithNumber> findByName(String name) {
+    public List<Waiting> findByName(String name) {
         String sql = """
-                SELECT *
-                FROM (
-                    SELECT w.id,
-                           w.name,
-                           w.date,
-                           w.created_at,
-                           ts.id AS time_id,
-                           ts.start_at,
-                           th.id AS theme_id,
-                           th.name AS theme_name,
-                           th.description AS theme_description,
-                           th.thumbnail_url AS theme_thumbnail_url,
-                           ROW_NUMBER() OVER (
-                               PARTITION BY w.date, w.time_id, w.theme_id
-                               ORDER BY w.created_at ASC, w.id ASC
-                           ) AS waiting_number
-                    FROM waiting w
-                    INNER JOIN time_slot ts ON w.time_id = ts.id
-                    INNER JOIN theme th ON w.theme_id = th.id
-                ) ranked
-                WHERE ranked.name = ?
+                SELECT w.id,
+                       w.name,
+                       w.date,
+                       w.created_at,
+                       ts.id AS time_id,
+                       ts.start_at,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail_url
+                FROM waiting w
+                INNER JOIN time_slot ts ON w.time_id = ts.id
+                INNER JOIN theme th ON w.theme_id = th.id
+                WHERE w.name = ?
                 """;
 
-        return jdbcTemplate.query(sql, waitingWithNumberRowMapper(), name);
+        return jdbcTemplate.query(sql, waitingRowMapper(), name);
     }
 
     @Override
@@ -120,33 +112,28 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<WaitingWithNumber> findWaitingWithNumberById(long id) {
+    public List<Waiting> findByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT *
-                FROM (
-                    SELECT w.id,
-                           w.name,
-                           w.date,
-                           w.created_at,
-                           ts.id AS time_id,
-                           ts.start_at,
-                           th.id AS theme_id,
-                           th.name AS theme_name,
-                           th.description AS theme_description,
-                           th.thumbnail_url AS theme_thumbnail_url,
-                           ROW_NUMBER() OVER (
-                               PARTITION BY w.date, w.time_id, w.theme_id
-                               ORDER BY w.created_at ASC, w.id ASC
-                           ) AS waiting_number
-                    FROM waiting w
-                    INNER JOIN time_slot ts ON w.time_id = ts.id
-                    INNER JOIN theme th ON w.theme_id = th.id
-                ) ranked
-                WHERE ranked.id = ?
+                SELECT w.id,
+                       w.name,
+                       w.date,
+                       w.created_at,
+                       ts.id AS time_id,
+                       ts.start_at,
+                       th.id AS theme_id,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail_url
+                FROM waiting w
+                INNER JOIN time_slot ts ON w.time_id = ts.id
+                INNER JOIN theme th ON w.theme_id = th.id
+                WHERE w.date = ?
+                  AND w.time_id = ?
+                  AND w.theme_id = ?
+                ORDER BY w.created_at ASC, w.id ASC
                 """;
 
-        List<WaitingWithNumber> waitings = jdbcTemplate.query(sql, waitingWithNumberRowMapper(), id);
-        return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
+        return jdbcTemplate.query(sql, waitingRowMapper(), date, timeId, themeId);
     }
 
     private SimpleJdbcInsert createInsert() {
@@ -163,13 +150,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 "time_id", waiting.getTimeSlot().getId(),
                 "theme_id", waiting.getTheme().getId(),
                 "created_at", waiting.getCreatedAt()
-        );
-    }
-
-    private RowMapper<WaitingWithNumber> waitingWithNumberRowMapper() {
-        return (rs, rowNum) -> new WaitingWithNumber(
-                waitingRowMapper().mapRow(rs, rowNum),
-                rs.getInt("waiting_number")
         );
     }
 

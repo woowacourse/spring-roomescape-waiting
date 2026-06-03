@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingLine;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.NotOwnerException;
@@ -39,7 +40,7 @@ public class WaitingService {
         validateAlreadyReserved(name, date, timeId, themeId);
         validateDuplicatedWaiting(name, date, timeId, themeId);
         Waiting saveWaiting = waitingRepository.save(waiting);
-        return findWaitingWithNumber(saveWaiting.getId());
+        return createWaitingWithNumber(saveWaiting);
     }
 
     @Transactional
@@ -79,9 +80,13 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException("해당하는 예약 대기 정보를 찾을 수 없습니다."));
     }
 
-    private WaitingWithNumber findWaitingWithNumber(Long id) {
-        return waitingRepository.findWaitingWithNumberById(id)
-                .orElseThrow(() -> new NotFoundException("해당하는 예약 대기 정보를 찾을 수 없습니다."));
+    private WaitingWithNumber createWaitingWithNumber(Waiting waiting) {
+        WaitingLine waitingLine = new WaitingLine(waitingRepository.findByDateAndTimeAndTheme(
+                waiting.getDate(),
+                waiting.getTimeSlot().getId(),
+                waiting.getTheme().getId()
+        ));
+        return new WaitingWithNumber(waiting, waitingLine.findWaitingNumber(waiting));
     }
 
     private TimeSlot findTimeSlot(Long id) {

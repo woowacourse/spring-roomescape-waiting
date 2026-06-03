@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.domain.Waiting;
+import roomescape.domain.WaitingLine;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
@@ -17,6 +19,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.ReservationAndWaiting;
+import roomescape.service.dto.WaitingWithNumber;
 
 @Service
 @Transactional(readOnly = true)
@@ -57,6 +60,7 @@ public class ReservationService {
                 .forEach(reservationAndWaitings::add);
 
         waitingRepository.findByName(name).stream()
+                .map(this::createWaitingWithNumber)
                 .map(ReservationAndWaiting::fromWaiting)
                 .forEach(reservationAndWaitings::add);
 
@@ -108,6 +112,15 @@ public class ReservationService {
         if (!reservation.isOwner(requestName)) {
             throw new NotOwnerException();
         }
+    }
+
+    private WaitingWithNumber createWaitingWithNumber(Waiting waiting) {
+        WaitingLine waitingLine = new WaitingLine(waitingRepository.findByDateAndTimeAndTheme(
+                waiting.getDate(),
+                waiting.getTimeSlot().getId(),
+                waiting.getTheme().getId()
+        ));
+        return new WaitingWithNumber(waiting, waitingLine.findWaitingNumber(waiting));
     }
 
     private TimeSlot findTimeSlot(Long id) {
