@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,7 +45,8 @@ class AdminThemeControllerTest {
     private ThemeService themeService;
 
     @Test
-    void POST_admin_themes_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
+    @DisplayName("POST /admin/themes - 생성된 id를 Location 헤더에 담아 201을 반환한다")
+    void createThemeReturns201WithLocationHeader() throws Exception {
         given(themeService.createTheme(any(CreateThemeCommand.class)))
                 .willReturn(new Theme(7L, "공포", "무서움", "https://thumbnail.url"));
 
@@ -61,7 +63,8 @@ class AdminThemeControllerTest {
     }
 
     @Test
-    void POST_admin_themes_본문의_name이_빈_문자열이면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /admin/themes - 본문의 name이 빈 문자열이면 400과 메시지를 반환한다")
+    void createThemeReturns400WhenNameIsBlank() throws Exception {
         Map<String, Object> body = new HashMap<>();
         body.put("name", "");
         body.put("description", "무서움");
@@ -75,7 +78,8 @@ class AdminThemeControllerTest {
     }
 
     @Test
-    void DELETE_admin_themes_id_200을_반환하고_서비스에_위임한다() throws Exception {
+    @DisplayName("DELETE /admin/themes/{id} - 200을 반환하고 서비스에 위임한다")
+    void deleteThemeReturns200AndDelegates() throws Exception {
         mockMvc.perform(delete("/admin/themes/3"))
                 .andExpect(status().isOk());
 
@@ -83,7 +87,8 @@ class AdminThemeControllerTest {
     }
 
     @Test
-    void DELETE_admin_themes_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("DELETE /admin/themes - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void deleteThemeReturns404OnResourceNotFoundException() throws Exception {
         org.mockito.BDDMockito.willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", 9999L))
                 .given(themeService).deleteTheme(9999L);
 

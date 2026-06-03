@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -46,22 +47,26 @@ class AuthInterceptorTest {
     }
 
     @Test
-    void 어노테이션이_없으면_토큰_없이도_통과한다() {
+    @DisplayName("어노테이션이 없으면 토큰 없이도 통과한다")
+    void passesWithoutTokenWhenNoAnnotation() {
         boolean result = interceptor.preHandle(request, response, handlerOf("noAuth"));
 
         assertThat(result).isTrue();
     }
 
     @Test
-    void HandlerMethod가_아니면_통과한다() {
+    @DisplayName("HandlerMethod가 아니면 통과한다")
+    void passesWhenNotHandlerMethod() {
         assertThat(interceptor.preHandle(request, response, new Object())).isTrue();
     }
 
     @Nested
-    class LoginRequired_핸들러 {
+    @DisplayName("LoginRequired 핸들러")
+    class LoginRequiredHandler {
 
         @Test
-        void 유효한_토큰이면_통과하고_userId와_role을_저장한다() {
+        @DisplayName("유효한 토큰이면 통과하고 userId와 role을 저장한다")
+        void passesAndStoresUserIdAndRoleWhenTokenIsValid() {
             authenticateAs(1L, Role.MEMBER);
 
             boolean result = interceptor.preHandle(request, response, handlerOf("loginRequired"));
@@ -72,14 +77,16 @@ class AuthInterceptorTest {
         }
 
         @Test
-        void 역할은_상관없이_MANAGER도_통과한다() {
+        @DisplayName("역할은 상관없이 MANAGER도 통과한다")
+        void passesForManagerRegardlessOfRole() {
             authenticateAs(1L, Role.MANAGER);
 
             assertThat(interceptor.preHandle(request, response, handlerOf("loginRequired"))).isTrue();
         }
 
         @Test
-        void 토큰이_없으면_UnauthenticatedException() {
+        @DisplayName("토큰이 없으면 UnauthenticatedException")
+        void throwsUnauthenticatedExceptionWhenTokenIsMissing() {
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("loginRequired")))
                     .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -87,7 +94,8 @@ class AuthInterceptorTest {
         }
 
         @Test
-        void 토큰이_유효하지_않으면_UnauthenticatedException() {
+        @DisplayName("토큰이 유효하지 않으면 UnauthenticatedException")
+        void throwsUnauthenticatedExceptionWhenTokenIsInvalid() {
             request.addHeader("Authorization", "Bearer bad-token");
 
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("loginRequired")))
@@ -98,10 +106,12 @@ class AuthInterceptorTest {
     }
 
     @Nested
-    class AdminOnly_핸들러 {
+    @DisplayName("AdminOnly 핸들러")
+    class AdminOnlyHandler {
 
         @Test
-        void 메타_어노테이션이_해석되어_MANAGER는_통과한다() {
+        @DisplayName("메타 어노테이션이 해석되어 MANAGER는 통과한다")
+        void passesForManagerWhenMetaAnnotationIsResolved() {
             authenticateAs(1L, Role.MANAGER);
 
             boolean result = interceptor.preHandle(request, response, handlerOf("adminOnly"));
@@ -111,7 +121,8 @@ class AuthInterceptorTest {
         }
 
         @Test
-        void MEMBER면_UnauthorizedException() {
+        @DisplayName("MEMBER면 UnauthorizedException")
+        void throwsUnauthorizedExceptionWhenMember() {
             authenticateAs(2L, Role.MEMBER);
 
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("adminOnly")))
@@ -121,7 +132,8 @@ class AuthInterceptorTest {
         }
 
         @Test
-        void 토큰이_없으면_UnauthenticatedException() {
+        @DisplayName("토큰이 없으면 UnauthenticatedException")
+        void throwsUnauthenticatedExceptionWhenTokenIsMissing() {
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handlerOf("adminOnly")))
                     .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -130,10 +142,12 @@ class AuthInterceptorTest {
     }
 
     @Nested
-    class 클래스_레벨_어노테이션 {
+    @DisplayName("클래스 레벨 어노테이션")
+    class ClassLevelAnnotation {
 
         @Test
-        void 클래스에_붙은_AdminOnly도_해석된다() {
+        @DisplayName("클래스에 붙은 AdminOnly도 해석된다")
+        void resolvesClassLevelAdminOnly() {
             authenticateAs(1L, Role.MANAGER);
             Method method;
             try {
@@ -147,7 +161,8 @@ class AuthInterceptorTest {
         }
 
         @Test
-        void 클래스에_붙은_AdminOnly에서_MEMBER는_거부된다() {
+        @DisplayName("클래스에 붙은 AdminOnly에서 MEMBER는 거부된다")
+        void rejectsMemberOnClassLevelAdminOnly() {
             authenticateAs(2L, Role.MEMBER);
             Method method;
             try {

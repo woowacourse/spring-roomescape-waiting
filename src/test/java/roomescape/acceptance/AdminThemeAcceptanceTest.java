@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,7 +39,8 @@ class AdminThemeAcceptanceTest {
     }
 
     @Test
-    void POST_admin_themes_테마를_생성한다() {
+    @DisplayName("POST /admin/themes - 테마를 생성한다")
+    void createTheme() {
         Map<String, Object> body = Map.of(
                 "name", "공포",
                 "description", "무서움",
@@ -55,7 +57,8 @@ class AdminThemeAcceptanceTest {
     }
 
     @Test
-    void POST_admin_themes_본문의_name이_누락되면_400과_메시지를_반환한다() {
+    @DisplayName("POST /admin/themes - 본문의 name이 누락되면 400과 메시지를 반환한다")
+    void createThemeReturns400WhenNameIsMissing() {
         Map<String, Object> body = Map.of(
                 "description", "무서움",
                 "thumbnailImageUrl", "https://thumbnail.url");
@@ -71,7 +74,8 @@ class AdminThemeAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_themes_id_테마를_삭제한다() {
+    @DisplayName("DELETE /admin/themes/{id} - 테마를 삭제한다")
+    void deleteTheme() {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
 
         RestAssured.given().log().all()
@@ -82,7 +86,8 @@ class AdminThemeAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_themes_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("DELETE /admin/themes - 없는 id면 404과 메시지를 반환한다")
+    void deleteThemeReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/themes/9999")

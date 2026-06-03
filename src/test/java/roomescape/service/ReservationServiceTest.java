@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Reservation;
@@ -39,7 +40,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createReservation_id가_채워진_도메인을_반환한다() {
+    @DisplayName("createReservation - id가 채워진 도메인을 반환한다")
+    void createReservationReturnsDomainWithId() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -54,7 +56,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createReservation_과거의_날짜_시간이면_예외() {
+    @DisplayName("createReservation - 과거의 날짜 시간이면 예외")
+    void createReservationThrowsWhenDateTimeIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("11:00");
@@ -67,7 +70,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createReservation_같은_날짜시간테마_중복이면_예외() {
+    @DisplayName("createReservation - 같은 날짜/시간/테마 중복이면 예외")
+    void createReservationThrowsWhenSlotIsDuplicated() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -83,7 +87,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createReservation_존재하지_않는_themeId이면_ResourceNotFoundException() {
+    @DisplayName("createReservation - 존재하지 않는 themeId이면 ResourceNotFoundException")
+    void createReservationThrowsResourceNotFoundExceptionWhenThemeIdDoesNotExist() {
         User brown = member("브라운");
         long timeId = time("10:00");
 
@@ -95,7 +100,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createReservation_존재하지_않는_timeId이면_ResourceNotFoundException() {
+    @DisplayName("createReservation - 존재하지 않는 timeId이면 ResourceNotFoundException")
+    void createReservationThrowsResourceNotFoundExceptionWhenTimeIdDoesNotExist() {
         User brown = member("브라운");
         long themeId = theme("공포");
 
@@ -107,7 +113,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservations_다음_페이지가_있으면_hasNext가_true() {
+    @DisplayName("getReservations - 다음 페이지가 있으면 hasNext가 true")
+    void getReservationsHasNextTrueWhenNextPageExists() {
         User user = member("A");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -122,7 +129,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservations_다음_페이지가_없으면_hasNext가_false() {
+    @DisplayName("getReservations - 다음 페이지가 없으면 hasNext가 false")
+    void getReservationsHasNextFalseWhenNoNextPage() {
         User user = member("A");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -136,7 +144,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservations_name이_주어지면_해당_이름의_예약만_반환한다() {
+    @DisplayName("getReservations - name이 주어지면 해당 이름의 예약만 반환한다")
+    void getReservationsReturnsOnlyMatchingNameWhenNameIsGiven() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -152,7 +161,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getMyReservations_본인_예약만_반환한다() {
+    @DisplayName("getMyReservations - 본인 예약만 반환한다")
+    void getMyReservationsReturnsOnlyOwnReservations() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -168,7 +178,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getMyReservations_size를_초과하면_hasNext가_true이고_size만큼만_반환한다() {
+    @DisplayName("getMyReservations - size를 초과하면 hasNext가 true이고 size만큼만 반환한다")
+    void getMyReservationsReturnsOnlySizeWithHasNextWhenExceedingSize() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -186,7 +197,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getMyReservations_예약과_대기가_없으면_빈_목록을_반환한다() {
+    @DisplayName("getMyReservations - 예약과 대기가 없으면 빈 목록을 반환한다")
+    void getMyReservationsReturnsEmptyWhenNoReservationsOrWaiting() {
         User brown = member("브라운");
 
         ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
@@ -197,7 +209,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getMyReservations_확정은_reservations에_대기는_waitingReservations에_분리돼_노출된다() {
+    @DisplayName("getMyReservations - 확정은 reservations에, 대기는 waitingReservations에 분리돼 노출된다")
+    void getMyReservationsSeparatesReservedAndWaiting() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -213,7 +226,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getMyReservations_대기_순번은_슬롯별로_독립적으로_계산된다() {
+    @DisplayName("getMyReservations - 대기 순번은 슬롯별로 독립적으로 계산된다")
+    void getMyReservationsCalculatesWaitingOrderPerSlot() {
         User brown = member("브라운");
         User charles = member("샤를");
         User aron = member("아론");
@@ -244,7 +258,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservation_id로_단건을_조회한다() {
+    @DisplayName("getReservation - id로 단건을 조회한다")
+    void getReservationFindsSingleById() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -257,7 +272,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservation_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("getReservation - 없는 id이면 ResourceNotFoundException")
+    void getReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.getReservation(9999L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -265,7 +281,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelReservation_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("cancelReservation - 없는 id이면 ResourceNotFoundException")
+    void cancelReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.cancelReservation(9999L, manager))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -273,7 +290,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelReservation_취소후_조회되지_않는다() {
+    @DisplayName("cancelReservation - 취소 후 조회되지 않는다")
+    void cancelReservationMakesReservationUnqueryable() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -286,7 +304,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelReservation_담당하지_않는_매장_예약이면_StoreManagementForbiddenException() {
+    @DisplayName("cancelReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
+    void cancelReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -301,7 +320,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelReservation_과거_예약이면_PastReservationModificationException() {
+    @DisplayName("cancelReservation - 과거 예약이면 PastReservationModificationException")
+    void cancelReservationThrowsPastReservationModificationExceptionWhenPast() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -315,7 +335,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deletePastReservation_과거_예약을_삭제하면_조회되지_않는다() {
+    @DisplayName("deletePastReservation - 과거 예약을 삭제하면 조회되지 않는다")
+    void deletePastReservationMakesPastReservationUnqueryable() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -327,7 +348,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deletePastReservation_아직_지나지_않은_예약이면_NonPastReservationDeletionException() {
+    @DisplayName("deletePastReservation - 아직 지나지 않은 예약이면 NonPastReservationDeletionException")
+    void deletePastReservationThrowsNonPastReservationDeletionExceptionWhenNotPast() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -341,7 +363,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deletePastReservation_담당하지_않는_매장_예약이면_StoreManagementForbiddenException() {
+    @DisplayName("deletePastReservation - 담당하지 않는 매장 예약이면 StoreManagementForbiddenException")
+    void deletePastReservationThrowsStoreManagementForbiddenExceptionForUnmanagedStore() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -356,7 +379,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservations_담당하는_매장의_예약만_반환한다() {
+    @DisplayName("getReservations - 담당하는 매장의 예약만 반환한다")
+    void getReservationsReturnsOnlyManagedStoreReservations() {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -370,7 +394,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservations_담당_매장이_없으면_빈_목록() {
+    @DisplayName("getReservations - 담당 매장이 없으면 빈 목록")
+    void getReservationsReturnsEmptyWhenNoManagedStore() {
         User stranger = member("무관리자");
         User user = member("브라운");
         long themeId = theme("공포");
@@ -384,7 +409,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelOwnReservation_userId_불일치면_예외() {
+    @DisplayName("cancelOwnReservation - userId 불일치면 예외")
+    void cancelOwnReservationThrowsWhenUserIdMismatch() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -399,7 +425,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelOwnReservation_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("cancelOwnReservation - 없는 id이면 ResourceNotFoundException")
+    void cancelOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         User brown = member("브라운");
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(9999L, brown)))
@@ -409,7 +436,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void cancelOwnReservation_과거_예약이면_예외() {
+    @DisplayName("cancelOwnReservation - 과거 예약이면 예외")
+    void cancelOwnReservationThrowsWhenReservationIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -423,7 +451,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_변경된_도메인을_반환한다() {
+    @DisplayName("updateOwnReservation - 변경된 도메인을 반환한다")
+    void updateOwnReservationReturnsUpdatedDomain() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long themeId2 = theme("추리");
@@ -440,7 +469,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_userId_불일치면_예외() {
+    @DisplayName("updateOwnReservation - userId 불일치면 예외")
+    void updateOwnReservationThrowsWhenUserIdMismatch() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -455,7 +485,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_기존_예약이_과거이면_예외() {
+    @DisplayName("updateOwnReservation - 기존 예약이 과거이면 예외")
+    void updateOwnReservationThrowsWhenExistingReservationIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -469,7 +500,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_새_일정이_과거이면_예외() {
+    @DisplayName("updateOwnReservation - 새 일정이 과거이면 예외")
+    void updateOwnReservationThrowsWhenNewScheduleIsPast() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -483,7 +515,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_새_일정이_다른_예약과_충돌하면_예외() {
+    @DisplayName("updateOwnReservation - 새 일정이 다른 예약과 충돌하면 예외")
+    void updateOwnReservationThrowsWhenNewScheduleConflictsWithOther() {
         User brown = member("브라운");
         User other = member("다른사람");
         long themeId = theme("공포");
@@ -500,7 +533,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_기존_슬롯과_동일하면_예외없이_통과() {
+    @DisplayName("updateOwnReservation - 기존 슬롯과 동일하면 예외 없이 통과")
+    void updateOwnReservationPassesWhenSameAsExistingSlot() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -513,7 +547,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void updateOwnReservation_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("updateOwnReservation - 없는 id이면 ResourceNotFoundException")
+    void updateOwnReservationThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -526,7 +561,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createWaitingReservation_예약_대기를_생성한다() {
+    @DisplayName("createWaitingReservation - 예약 대기를 생성한다")
+    void createWaitingReservation() {
         User brown = member("브라운");
         User charles = member("샤를");
         long themeId = theme("공포");
@@ -544,7 +580,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createWaitingReservation_해당_슬롯에_아직_예약_확정이_없는_경우_ReservationNotFoundForWaitingException를_반환한다() {
+    @DisplayName("createWaitingReservation - 해당 슬롯에 아직 예약 확정이 없으면 ReservationNotFoundForWaitingException을 반환한다")
+    void createWaitingReservationThrowsReservationNotFoundForWaitingExceptionWhenNoConfirmed() {
         User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
@@ -557,7 +594,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createWaitingReservation_과거_날짜로_예약_대기를_거는_경우_PastDateTimeReservationException를_반환한다() {
+    @DisplayName("createWaitingReservation - 과거 날짜로 예약 대기를 걸면 PastDateTimeReservationException을 반환한다")
+    void createWaitingReservationThrowsPastDateTimeReservationExceptionWhenPastDate() {
         User brown = member("브라운");
         User charles = member("샤를");
         long themeId = theme("공포");
@@ -572,7 +610,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void createWaitingReservation_이미_본인_예약_대기가_존재하면_예외() {
+    @DisplayName("createWaitingReservation - 이미 본인 예약 대기가 존재하면 예외")
+    void createWaitingReservationThrowsWhenOwnWaitingAlreadyExists() {
         User brown = member("브라운");
         User charles = member("샤를");
         long themeId = theme("공포");

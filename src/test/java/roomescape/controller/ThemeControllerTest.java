@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,7 +38,8 @@ class ThemeControllerTest {
     private ThemeService themeService;
 
     @Test
-    void GET_themes_목록과_hasNext를_응답한다() throws Exception {
+    @DisplayName("GET /themes - 목록과 hasNext를 응답한다")
+    void getThemesRespondsWithListAndHasNext() throws Exception {
         given(themeService.getThemes(0, 20))
                 .willReturn(ThemeResponses.of(
                         List.of(new Theme(1L, "공포", "무서움", "https://thumbnail.url")), false));
@@ -50,7 +52,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void GET_themes_id_단건을_응답한다() throws Exception {
+    @DisplayName("GET /themes/{id} - 단건을 응답한다")
+    void getThemeRespondsWithSingle() throws Exception {
         given(themeService.getTheme(1L))
                 .willReturn(new Theme(1L, "공포", "무서움", "https://thumbnail.url"));
 
@@ -61,7 +64,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void GET_themes_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /themes/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void getThemeReturns404OnResourceNotFoundException() throws Exception {
         given(themeService.getTheme(9999L))
                 .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "테마", 9999L));
 
@@ -71,7 +75,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void GET_themes_id_times_예약된_시간은_isReserved_true_나머지는_false() throws Exception {
+    @DisplayName("GET /themes/{id}/times - 예약된 시간은 isReserved true, 나머지는 false")
+    void getThemeTimesMarksReservedTimes() throws Exception {
         given(themeService.getThemeTimes(1L, LocalDate.of(2026, 5, 6)))
                 .willReturn(List.of(
                         new ThemeReservationTimeResponse(1L, "10:00", true),
@@ -85,7 +90,8 @@ class ThemeControllerTest {
     }
 
     @Test
-    void GET_themes_popular_limit_파라미터를_위임한다() throws Exception {
+    @DisplayName("GET /themes/popular - limit 파라미터를 위임한다")
+    void getPopularThemesDelegatesLimitParameter() throws Exception {
         given(themeService.getPopularThemes(10))
                 .willReturn(List.of(
                         new PopularTheme(new Theme(1L, "1위", "d", "u"), 5L),
@@ -99,14 +105,16 @@ class ThemeControllerTest {
     }
 
     @Test
-    void GET_themes_id_times_date_쿼리_파라미터가_날짜가_아니면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /themes/{id}/times - date 쿼리 파라미터가 날짜가 아니면 400과 메시지를 반환한다")
+    void getThemeTimesReturns400WhenDateIsInvalid() throws Exception {
         mockMvc.perform(get("/themes/1/times?date=abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void GET_themes_popular_limit이_숫자가_아니면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /themes/popular - limit이 숫자가 아니면 400과 메시지를 반환한다")
+    void getPopularThemesReturns400WhenLimitIsNotNumber() throws Exception {
         mockMvc.perform(get("/themes/popular?limit=abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));

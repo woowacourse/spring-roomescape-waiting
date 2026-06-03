@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +40,8 @@ class AdminReservationTimeAcceptanceTest {
     }
 
     @Test
-    void POST_admin_times_시간을_생성한다() {
+    @DisplayName("POST /admin/times - 시간을 생성한다")
+    void createReservationTime() {
         Map<String, Object> body = Map.of("startAt", "10:00");
 
         RestAssured.given().log().all()
@@ -53,7 +55,8 @@ class AdminReservationTimeAcceptanceTest {
     }
 
     @Test
-    void POST_admin_times_본문의_startAt이_누락되면_400과_메시지를_반환한다() {
+    @DisplayName("POST /admin/times - 본문의 startAt이 누락되면 400과 메시지를 반환한다")
+    void createReservationTimeReturns400WhenStartAtIsMissing() {
         Map<String, Object> body = Map.of();
 
         RestAssured.given().log().all()
@@ -67,7 +70,8 @@ class AdminReservationTimeAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_times_id_시간을_삭제한다() {
+    @DisplayName("DELETE /admin/times/{id} - 시간을 삭제한다")
+    void deleteReservationTime() {
         long timeId = Scenario.timeNotInUse(jdbcTemplate);
 
         RestAssured.given().log().all()
@@ -78,7 +82,8 @@ class AdminReservationTimeAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_times_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("DELETE /admin/times - 없는 id면 404과 메시지를 반환한다")
+    void deleteReservationTimeReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/times/9999")
@@ -88,7 +93,8 @@ class AdminReservationTimeAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_times_참조하는_예약이_존재하면_409과_메시지를_반환한다() {
+    @DisplayName("DELETE /admin/times - 참조하는 예약이 존재하면 409과 메시지를 반환한다")
+    void deleteReservationTimeReturns409WhenReferencedByReservation() {
         long timeId = Scenario.timeInUse(jdbcTemplate);
 
         RestAssured.given().log().all()

@@ -4,12 +4,14 @@ import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class ReservationTimeTest {
 
     @Test
-    void 시작_시간이_null이면_예외() {
+    @DisplayName("시작 시간이 null이면 예외")
+    void throwsExceptionWhenStartAtIsNull() {
         assertThatThrownBy(() -> new ReservationTime(null, null))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())

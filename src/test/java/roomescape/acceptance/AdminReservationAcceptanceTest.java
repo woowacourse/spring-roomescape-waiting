@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +40,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_목록을_조회한다() {
+    @DisplayName("GET /admin/reservations - 목록을 조회한다")
+    void getReservations() {
         Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
@@ -52,7 +54,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_name으로_필터링한다() {
+    @DisplayName("GET /admin/reservations - name으로 필터링한다")
+    void getReservationsFilteredByName() {
         Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString()).onStore(managedStoreId).save();
         Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-5).toString()).onStore(managedStoreId).save();
         Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-4).toString()).onStore(managedStoreId).save();
@@ -67,7 +70,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_name이_빈_문자열이면_400과_메시지를_반환한다() {
+    @DisplayName("GET /admin/reservations - name이 빈 문자열이면 400과 메시지를 반환한다")
+    void getReservationsReturns400WhenNameIsBlank() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
                 .when().get("/admin/reservations?name=")
@@ -77,7 +81,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_MEMBER_토큰이면_403과_메시지를_반환한다() {
+    @DisplayName("GET /admin/reservations - MEMBER 토큰이면 403과 메시지를 반환한다")
+    void getReservationsReturns403WithMemberToken() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
                 .when().get("/admin/reservations")
@@ -87,7 +92,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_토큰이_없으면_401과_메시지를_반환한다() {
+    @DisplayName("GET /admin/reservations - 토큰이 없으면 401과 메시지를 반환한다")
+    void getReservationsReturns401WithoutToken() {
         RestAssured.given().log().all()
                 .when().get("/admin/reservations")
                 .then().log().all()
@@ -96,7 +102,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void POST_admin_reservations_id_cancel_예약을_취소한다() {
+    @DisplayName("POST /admin/reservations/{id}/cancel - 예약을 취소한다")
+    void cancelReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(1).toString()).onStore(managedStoreId).save();
 
@@ -108,7 +115,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void POST_admin_reservations_id_cancel_과거_예약이면_422와_메시지를_반환한다() {
+    @DisplayName("POST /admin/reservations/{id}/cancel - 과거 예약이면 422와 메시지를 반환한다")
+    void cancelReservationReturns422WhenReservationIsPast() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(-1).toString()).onStore(managedStoreId).save();
 
@@ -121,7 +129,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_과거_예약을_삭제한다() {
+    @DisplayName("DELETE /admin/reservations/{id} - 과거 예약을 삭제한다")
+    void deletePastReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(-1).toString()).onStore(managedStoreId).save();
 
@@ -133,7 +142,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_아직_지나지_않은_예약이면_422와_메시지를_반환한다() {
+    @DisplayName("DELETE /admin/reservations/{id} - 아직 지나지 않은 예약이면 422와 메시지를 반환한다")
+    void deleteReservationReturns422WhenReservationIsNotPast() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
                 .date(Fixtures.daysFromNow(1).toString()).onStore(managedStoreId).save();
 
@@ -146,7 +156,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void GET_admin_reservations_담당하는_매장의_예약만_반환한다() {
+    @DisplayName("GET /admin/reservations - 담당하는 매장의 예약만 반환한다")
+    void getReservationsReturnsOnlyManagedStoreReservations() {
         Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
         insertReservationInOtherStore(Fixtures.daysFromNow(1).toString());
 
@@ -160,7 +171,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void POST_admin_reservations_id_cancel_담당하지_않는_매장_예약이면_403과_메시지를_반환한다() {
+    @DisplayName("POST /admin/reservations/{id}/cancel - 담당하지 않는 매장 예약이면 403과 메시지를 반환한다")
+    void cancelReservationReturns403WhenStoreIsNotManaged() {
         long reservationId = insertReservationInOtherStore(Fixtures.daysFromNow(1).toString());
 
         RestAssured.given().log().all()
@@ -172,7 +184,8 @@ class AdminReservationAcceptanceTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("DELETE /admin/reservations/{id} - 없는 id면 404과 메시지를 반환한다")
+    void deleteReservationReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/reservations/9999")

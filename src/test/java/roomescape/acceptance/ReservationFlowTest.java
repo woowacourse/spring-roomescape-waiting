@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,8 @@ class ReservationFlowTest {
     }
 
     @Test
-    void 예약_생성_후_해당_시간이_예약됨으로_변경된다() {
+    @DisplayName("예약 생성 후 해당 시간이 예약됨으로 변경된다")
+    void timeBecomesReservedAfterCreatingReservation() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
         String date = Fixtures.daysFromNow(1).toString();
 

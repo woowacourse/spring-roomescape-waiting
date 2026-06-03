@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -69,7 +70,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void GET_admin_reservations_서비스가_반환한_목록과_hasNext를_그대로_응답한다() throws Exception {
+    @DisplayName("GET /admin/reservations - 서비스가 반환한 목록과 hasNext를 그대로 응답한다")
+    void getReservationsRespondsWithServiceListAndHasNext() throws Exception {
         given(reservationService.getReservations(0, 20, null, MANAGER))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
@@ -81,7 +83,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void GET_admin_reservations_page와_size_쿼리_파라미터를_그대로_위임한다() throws Exception {
+    @DisplayName("GET /admin/reservations - page와 size 쿼리 파라미터를 그대로 위임한다")
+    void getReservationsDelegatesPageAndSizeQueryParameters() throws Exception {
         given(reservationService.getReservations(2, 5, null, MANAGER))
                 .willReturn(ReservationResponses.of(List.of(), true));
 
@@ -93,7 +96,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void GET_admin_reservations_name_쿼리_파라미터가_있으면_서비스에_위임한다() throws Exception {
+    @DisplayName("GET /admin/reservations - name 쿼리 파라미터가 있으면 서비스에 위임한다")
+    void getReservationsDelegatesNameQueryParameter() throws Exception {
         given(reservationService.getReservations(0, 20, "브라운", MANAGER))
                 .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
 
@@ -105,35 +109,40 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void GET_admin_reservations_name이_빈_문자열이면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /admin/reservations - name이 빈 문자열이면 400과 메시지를 반환한다")
+    void getReservationsReturns400WhenNameIsBlank() throws Exception {
         mockMvc.perform(get("/admin/reservations?name="))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void GET_admin_reservations_page가_음수면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /admin/reservations - page가 음수면 400과 메시지를 반환한다")
+    void getReservationsReturns400WhenPageIsNegative() throws Exception {
         mockMvc.perform(get("/admin/reservations?page=-1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void GET_admin_reservations_size가_0이면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /admin/reservations - size가 0이면 400과 메시지를 반환한다")
+    void getReservationsReturns400WhenSizeIsZero() throws Exception {
         mockMvc.perform(get("/admin/reservations?size=0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void GET_admin_reservations_size가_상한_초과면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /admin/reservations - size가 상한 초과면 400과 메시지를 반환한다")
+    void getReservationsReturns400WhenSizeExceedsLimit() throws Exception {
         mockMvc.perform(get("/admin/reservations?size=101"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void POST_admin_reservations_id_cancel_200을_반환하고_서비스에_위임한다() throws Exception {
+    @DisplayName("POST /admin/reservations/{id}/cancel - 200을 반환하고 서비스에 위임한다")
+    void cancelReservationReturns200AndDelegates() throws Exception {
         mockMvc.perform(post("/admin/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
@@ -141,7 +150,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void POST_admin_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /admin/reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void cancelReservationReturns404OnResourceNotFoundException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).cancelReservation(9999L, MANAGER);
 
@@ -151,7 +161,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_과거_예약을_삭제하고_서비스에_위임한다() throws Exception {
+    @DisplayName("DELETE /admin/reservations/{id} - 과거 예약을 삭제하고 서비스에 위임한다")
+    void deletePastReservationDelegatesToService() throws Exception {
         mockMvc.perform(delete("/admin/reservations/3"))
                 .andExpect(status().isOk());
 
@@ -159,7 +170,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    void DELETE_admin_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("DELETE /admin/reservations/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void deletePastReservationReturns404OnResourceNotFoundException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).deletePastReservation(9999L, MANAGER);
 

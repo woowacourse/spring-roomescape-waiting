@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +33,8 @@ class ThemeAcceptanceTest {
     }
 
     @Test
-    void GET_themes_목록을_조회한다() {
+    @DisplayName("GET /themes - 목록을 조회한다")
+    void getThemes() {
         DbFixtures.insertTheme(jdbcTemplate, "공포");
 
         RestAssured.given().log().all()
@@ -43,7 +45,8 @@ class ThemeAcceptanceTest {
     }
 
     @Test
-    void GET_themes_id_단건을_조회한다() {
+    @DisplayName("GET /themes/{id} - 단건을 조회한다")
+    void getTheme() {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
 
         RestAssured.given().log().all()
@@ -54,7 +57,8 @@ class ThemeAcceptanceTest {
     }
 
     @Test
-    void GET_themes_id_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("GET /themes/{id} - 없는 id면 404과 메시지를 반환한다")
+    void getThemeReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .when().get("/themes/9999")
                 .then().log().all()
@@ -63,7 +67,8 @@ class ThemeAcceptanceTest {
     }
 
     @Test
-    void GET_themes_id_times_예약된_시간은_isReserved_true_나머지는_false() {
+    @DisplayName("GET /themes/{id}/times - 예약된 시간은 isReserved true, 나머지는 false")
+    void getThemeTimesMarksReservedTimes() {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         long reservedTimeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long freeTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
@@ -80,7 +85,8 @@ class ThemeAcceptanceTest {
     }
 
     @Test
-    void GET_themes_popular_인기_테마_목록을_조회한다() {
+    @DisplayName("GET /themes/popular - 인기 테마 목록을 조회한다")
+    void getPopularThemes() {
         long themeId = Scenario.themeWithReservations(jdbcTemplate, 1);
 
         RestAssured.given().log().all()

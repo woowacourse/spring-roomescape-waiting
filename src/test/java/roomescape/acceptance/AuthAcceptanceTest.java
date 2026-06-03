@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,8 @@ class AuthAcceptanceTest {
     }
 
     @Test
-    void 회원가입한_사용자는_로그인하면_토큰을_받는다() {
+    @DisplayName("회원가입한 사용자는 로그인하면 토큰을 받는다")
+    void registeredUserReceivesTokenOnLogin() {
         register("brown@test.com", "pw", "브라운");
 
         RestAssured.given().log().all()
@@ -44,7 +46,8 @@ class AuthAcceptanceTest {
     }
 
     @Test
-    void 비밀번호가_틀리면_401과_메시지를_반환한다() {
+    @DisplayName("비밀번호가 틀리면 401과 메시지를 반환한다")
+    void returns401WhenPasswordIsWrong() {
         register("brown@test.com", "pw", "브라운");
 
         RestAssured.given().log().all()
@@ -57,7 +60,8 @@ class AuthAcceptanceTest {
     }
 
     @Test
-    void 토큰이_없으면_보호된_API는_401을_반환한다() {
+    @DisplayName("토큰이 없으면 보호된 API는 401을 반환한다")
+    void protectedApiReturns401WithoutToken() {
         RestAssured.given().log().all()
                 .when().get("/reservations/mine")
                 .then().log().all()
@@ -66,7 +70,8 @@ class AuthAcceptanceTest {
     }
 
     @Test
-    void 로그인한_사용자는_본인_예약을_조회할_수_있다() {
+    @DisplayName("로그인한 사용자는 본인 예약을 조회할 수 있다")
+    void loggedInUserCanQueryOwnReservations() {
         register("brown@test.com", "pw", "브라운");
 
         RestAssured.given().log().all()
@@ -78,7 +83,8 @@ class AuthAcceptanceTest {
     }
 
     @Test
-    void 관리자_API는_MANAGER만_접근할_수_있다() {
+    @DisplayName("관리자 API는 MANAGER만 접근할 수 있다")
+    void adminApiIsAccessibleOnlyByManager() {
         RestAssured.given().log().all()
                 .when().get("/admin/reservations")
                 .then().log().all()

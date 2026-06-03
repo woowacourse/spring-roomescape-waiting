@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +29,8 @@ class ReservationTimeAcceptanceTest {
     }
 
     @Test
-    void GET_times_목록을_조회한다() {
+    @DisplayName("GET /times - 목록을 조회한다")
+    void getReservationTimes() {
         jdbcTemplate.update("INSERT INTO reservation_time(start_at) VALUES ('10:00')");
 
         RestAssured.given().log().all()
@@ -39,7 +41,8 @@ class ReservationTimeAcceptanceTest {
     }
 
     @Test
-    void GET_times_id_단건을_조회한다() {
+    @DisplayName("GET /times/{id} - 단건을 조회한다")
+    void getReservationTime() {
         jdbcTemplate.update("INSERT INTO reservation_time(id, start_at) VALUES (1, '10:00')");
 
         RestAssured.given().log().all()
@@ -50,7 +53,8 @@ class ReservationTimeAcceptanceTest {
     }
 
     @Test
-    void GET_times_id_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("GET /times/{id} - 없는 id면 404과 메시지를 반환한다")
+    void getReservationTimeReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .when().get("/times/9999")
                 .then().log().all()

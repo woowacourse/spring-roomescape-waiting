@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -35,7 +36,8 @@ class ReservationTimeControllerTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    void GET_times_목록과_hasNext를_응답한다() throws Exception {
+    @DisplayName("GET /times - 목록과 hasNext를 응답한다")
+    void getReservationTimesRespondsWithListAndHasNext() throws Exception {
         given(reservationTimeService.getReservationTimes(0, 20))
                 .willReturn(ReservationTimeResponses.of(
                         List.of(new ReservationTime(1L, LocalTime.of(10, 0))), false));
@@ -48,7 +50,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void GET_times_id_단건을_응답한다() throws Exception {
+    @DisplayName("GET /times/{id} - 단건을 응답한다")
+    void getReservationTimeRespondsWithSingle() throws Exception {
         given(reservationTimeService.getReservationTime(1L))
                 .willReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
 
@@ -59,7 +62,8 @@ class ReservationTimeControllerTest {
     }
 
     @Test
-    void GET_times_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /times/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void getReservationTimeReturns404OnResourceNotFoundException() throws Exception {
         given(reservationTimeService.getReservationTime(9999L))
                 .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약 시간", 9999L));
 

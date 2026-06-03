@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
@@ -20,7 +21,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     private ReservationTimeService service;
 
     @Test
-    void createReservationTime_저장된_시간을_id와_함께_반환한다() {
+    @DisplayName("createReservationTime - 저장된 시간을 id와 함께 반환한다")
+    void createReservationTimeReturnsSavedTimeWithId() {
         CreateReservationTimeCommand request = new CreateReservationTimeCommand(LocalTime.of(10, 0));
 
         ReservationTime created = service.createReservationTime(request);
@@ -30,7 +32,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservationTime_id로_단건을_조회한다() {
+    @DisplayName("getReservationTime - id로 단건을 조회한다")
+    void getReservationTimeFindsSingleById() {
         long id = DbFixtures.insertTime(jdbcTemplate, "10:30");
 
         ReservationTime found = service.getReservationTime(id);
@@ -40,7 +43,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservationTime_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("getReservationTime - 없는 id이면 ResourceNotFoundException")
+    void getReservationTimeThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.getReservationTime(9999L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -48,7 +52,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservationTimes_다음_페이지가_있으면_hasNext가_true() {
+    @DisplayName("getReservationTimes - 다음 페이지가 있으면 hasNext가 true")
+    void getReservationTimesHasNextTrueWhenNextPageExists() {
         DbFixtures.insertTime(jdbcTemplate, "10:00");
         DbFixtures.insertTime(jdbcTemplate, "11:00");
         DbFixtures.insertTime(jdbcTemplate, "12:00");
@@ -60,7 +65,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getReservationTimes_다음_페이지가_없으면_hasNext가_false() {
+    @DisplayName("getReservationTimes - 다음 페이지가 없으면 hasNext가 false")
+    void getReservationTimesHasNextFalseWhenNoNextPage() {
         DbFixtures.insertTime(jdbcTemplate, "10:00");
         DbFixtures.insertTime(jdbcTemplate, "11:00");
 
@@ -71,7 +77,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteReservationTime_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("deleteReservationTime - 없는 id이면 ResourceNotFoundException")
+    void deleteReservationTimeThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.deleteReservationTime(9999L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -79,7 +86,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteReservationTime_참조하는_예약이_없으면_정상_삭제() {
+    @DisplayName("deleteReservationTime - 참조하는 예약이 없으면 정상 삭제")
+    void deleteReservationTimeDeletesWhenNotReferenced() {
         long id = DbFixtures.insertTime(jdbcTemplate, "10:00");
 
         service.deleteReservationTime(id);
@@ -89,7 +97,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteReservationTime_해당_시간을_참조하는_예약이_존재하면_예외() {
+    @DisplayName("deleteReservationTime - 해당 시간을 참조하는 예약이 존재하면 예외")
+    void deleteReservationTimeThrowsWhenReferencedByReservation() {
         long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         saveReservationWithTime(timeId);
 
@@ -100,7 +109,8 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteReservationTime_다른_시간을_참조하는_예약만_있으면_정상_삭제() {
+    @DisplayName("deleteReservationTime - 다른 시간을 참조하는 예약만 있으면 정상 삭제")
+    void deleteReservationTimeDeletesWhenOnlyOtherTimeIsReferenced() {
         long usedTimeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long targetTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
         saveReservationWithTime(usedTimeId);

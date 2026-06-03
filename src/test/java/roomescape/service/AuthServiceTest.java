@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Password;
@@ -30,14 +31,16 @@ class AuthServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void 로그인에_성공하면_토큰을_발급한다() {
+    @DisplayName("로그인에 성공하면 토큰을 발급한다")
+    void issuesTokenWhenLoginSucceeds() {
         String token = authService.login(new LoginCommand("brown@test.com", "pw"));
 
         assertThat(jwtProvider.getUsername(token)).isEqualTo("brown@test.com");
     }
 
     @Test
-    void 비밀번호가_틀리면_InvalidLoginException() {
+    @DisplayName("비밀번호가 틀리면 InvalidLoginException")
+    void throwsInvalidLoginExceptionWhenPasswordIsWrong() {
         assertThatThrownBy(() -> authService.login(new LoginCommand("brown@test.com", "wrong")))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -45,7 +48,8 @@ class AuthServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void 존재하지_않는_사용자면_InvalidLoginException() {
+    @DisplayName("존재하지 않는 사용자면 InvalidLoginException")
+    void throwsInvalidLoginExceptionWhenUserDoesNotExist() {
         assertThatThrownBy(() -> authService.login(new LoginCommand("none@test.com", "pw")))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())

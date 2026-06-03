@@ -8,6 +8,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +37,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_mine_로그인_사용자의_예약만_조회한다() {
+    @DisplayName("GET /reservations/mine - 로그인 사용자의 예약만 조회한다")
+    void getMyReservationsReturnsOnlyLoginUserReservations() {
         Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString()).save();
         Scenario.ExistingReservation mine = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-5).toString()).save();
         Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-4).toString()).save();
@@ -51,7 +53,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_mine_예약_확정과_예약_대기를_상태별로_함께_조회한다() {
+    @DisplayName("GET /reservations/mine - 예약 확정과 예약 대기를 상태별로 함께 조회한다")
+    void getMyReservationsReturnsReservedAndWaitingByStatus() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .date("9999-12-31").theme("공포A").time("10:00").store("강남점")
                 .member("브라운").save();
@@ -79,9 +82,10 @@ class ReservationAcceptanceTest {
                 .body("waitingReservations[0].waitingOrder", equalTo(2))
                 .body("hasNext", equalTo(false));
     }
-    
+
     @Test
-    void GET_reservations_mine_앞_대기자가_취소되면_재조회시_대기_순번이_줄어든다() {
+    @DisplayName("GET /reservations/mine - 앞 대기자가 취소되면 재조회 시 대기 순번이 줄어든다")
+    void getMyReservationsWaitingOrderDecreasesWhenEarlierWaiterCancels() {
         // 주인공 - 브라운
         Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate).date("9999-12-31").theme("공포")
                 .time("10:00").store("강남점").member("샤를").save();
@@ -124,7 +128,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_mine_다른_슬롯의_대기자는_내_대기_순번에_영향을_주지_않는다() {
+    @DisplayName("GET /reservations/mine - 다른 슬롯의 대기자는 내 대기 순번에 영향을 주지 않는다")
+    void getMyReservationsWaitingOrderIgnoresOtherSlotWaiters() {
         Scenario.ExistingReservation targetSlot = Scenario.reservation(jdbcTemplate)
                 .date("9999-12-31").theme("공포").time("10:00").store("강남점")
                 .member("샤를").save();
@@ -164,7 +169,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_mine_토큰이_없으면_401과_메시지를_반환한다() {
+    @DisplayName("GET /reservations/mine - 토큰이 없으면 401과 메시지를 반환한다")
+    void getMyReservationsReturns401WithoutToken() {
         RestAssured.given().log().all()
                 .when().get("/reservations/mine")
                 .then().log().all()
@@ -173,7 +179,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_id_단건을_조회한다() {
+    @DisplayName("GET /reservations/{id} - 단건을 조회한다")
+    void getReservationReturnsSingle() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -185,7 +192,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_예약을_생성한다() {
+    @DisplayName("POST /reservations - 예약을 생성한다")
+    void createReservation() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
         Map<String, Object> body = Map.of(
                 "date", Fixtures.daysFromNow(1).toString(),
@@ -204,7 +212,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_토큰이_없으면_401과_메시지를_반환한다() {
+    @DisplayName("POST /reservations - 토큰이 없으면 401과 메시지를 반환한다")
+    void createReservationReturns401WithoutToken() {
         Map<String, Object> body = Map.of(
                 "date", Fixtures.daysFromNow(1).toString(),
                 "themeId", 1,
@@ -220,7 +229,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_같은_날짜시간테마_중복이면_409과_메시지를_반환한다() {
+    @DisplayName("POST /reservations - 같은 날짜/시간/테마 중복이면 409과 메시지를 반환한다")
+    void createReservationReturns409OnDuplicateSlot() {
         Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate).member("기존").date(Fixtures.daysFromNow(1).toString())
                 .save();
         Map<String, Object> body = Map.of(
@@ -240,7 +250,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_과거_날짜_시간이면_422과_메시지를_반환한다() {
+    @DisplayName("POST /reservations - 과거 날짜 시간이면 422과 메시지를 반환한다")
+    void createReservationReturns422OnPastDateTime() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
         Map<String, Object> body = Map.of(
                 "date", Fixtures.daysFromNow(-1).toString(),
@@ -259,7 +270,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_본문의_date가_형식_오류면_400과_메시지를_반환한다() {
+    @DisplayName("POST /reservations - 본문의 date가 형식 오류면 400과 메시지를 반환한다")
+    void createReservationReturns400OnInvalidDateFormat() {
         String body = """
                 {"date":"abc","themeId":1,"timeId":1}
                 """;
@@ -275,7 +287,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_본문_JSON_문법_오류면_400과_메시지를_반환한다() {
+    @DisplayName("POST /reservations - 본문 JSON 문법 오류면 400과 메시지를 반환한다")
+    void createReservationReturns400OnMalformedJson() {
         String brokenBody = "{\"themeId\":1";
 
         RestAssured.given().log().all()
@@ -289,7 +302,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void GET_reservations_id_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("GET /reservations/{id} - 없는 id면 404과 메시지를 반환한다")
+    void getReservationReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
                 .when().get("/reservations/9999")
@@ -299,7 +313,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_본인의_예약을_변경한다() {
+    @DisplayName("PUT /reservations/{id} - 본인의 예약을 변경한다")
+    void updateOwnReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         long newThemeId = DbFixtures.insertTheme(jdbcTemplate, "테마2");
@@ -320,7 +335,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_소유자_불일치면_403과_메시지를_반환한다() {
+    @DisplayName("PUT /reservations/{id} - 소유자 불일치면 403과 메시지를 반환한다")
+    void updateReservationReturns403OnOwnerMismatch() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         Map<String, Object> body = Map.of(
@@ -339,7 +355,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_과거_예약을_변경하려_하면_422과_메시지를_반환한다() {
+    @DisplayName("PUT /reservations/{id} - 과거 예약을 변경하려 하면 422과 메시지를 반환한다")
+    void updateReservationReturns422WhenModifyingPastReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString())
                 .save();
         Map<String, Object> body = Map.of(
@@ -358,7 +375,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_새_일정이_과거이면_422과_메시지를_반환한다() {
+    @DisplayName("PUT /reservations/{id} - 새 일정이 과거이면 422과 메시지를 반환한다")
+    void updateReservationReturns422WhenNewScheduleIsPast() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         Map<String, Object> body = Map.of(
@@ -377,7 +395,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_새_일정이_이미_예약된_슬롯이면_409과_메시지를_반환한다() {
+    @DisplayName("PUT /reservations/{id} - 새 일정이 이미 예약된 슬롯이면 409과 메시지를 반환한다")
+    void updateReservationReturns409WhenNewSlotIsAlreadyReserved() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         long otherTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
@@ -400,7 +419,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void PUT_reservations_id_예약_대기를_수정하려는_경우_409과_메시지를_반환한다() {
+    @DisplayName("PUT /reservations/{id} - 예약 대기를 수정하려는 경우 409과 메시지를 반환한다")
+    void updateReservationReturns409WhenModifyingWaiting() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
                 .date(Fixtures.daysFromNow(25).toString())
@@ -425,7 +445,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_본인의_예약을_취소한다() {
+    @DisplayName("POST /reservations/{id}/cancel - 본인의 예약을 취소한다")
+    void cancelOwnReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -436,7 +457,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_소유자_불일치면_403과_메시지를_반환한다() {
+    @DisplayName("POST /reservations/{id}/cancel - 소유자 불일치면 403과 메시지를 반환한다")
+    void cancelReservationReturns403OnOwnerMismatch() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -448,7 +470,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_없는_id면_404과_메시지를_반환한다() {
+    @DisplayName("POST /reservations/{id}/cancel - 없는 id면 404과 메시지를 반환한다")
+    void cancelReservationReturns404WhenIdDoesNotExist() {
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, DbFixtures.memberBearer(jdbcTemplate, "브라운"))
                 .when().post("/reservations/9999/cancel")
@@ -458,7 +481,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_토큰이_없으면_401과_메시지를_반환한다() {
+    @DisplayName("POST /reservations/{id}/cancel - 토큰이 없으면 401과 메시지를 반환한다")
+    void cancelReservationReturns401WithoutToken() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
 
         RestAssured.given().log().all()
@@ -472,7 +496,8 @@ class ReservationAcceptanceTest {
      * createWaitingReservation 1. 정상테스트 2. 과거 예약 대기 생성 시도 3. 예약 확정자가 없는 예약 대기 생성 시도 4. 본인 중복 예약 대기 생성 시도
      */
     @Test
-    void POST_reservations_waiting_예약대기를_생성한다() {
+    @DisplayName("POST /reservations/waiting - 예약 대기를 생성한다")
+    void createWaitingReservation() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
                 .date(Fixtures.daysFromNow(25).toString())
@@ -500,7 +525,8 @@ class ReservationAcceptanceTest {
 
 
     @Test
-    void POST_reservations_waiting_과거_날짜이면_422과_메시지를_반환한다() {
+    @DisplayName("POST /reservations/waiting - 과거 날짜이면 422과 메시지를 반환한다")
+    void createWaitingReservationReturns422OnPastDate() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
                 .date(Fixtures.daysFromNow(-3650).toString())
@@ -527,7 +553,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_waiting_예약_확정자가_없으면_409과_메시지를_반환한다() {
+    @DisplayName("POST /reservations/waiting - 예약 확정자가 없으면 409과 메시지를 반환한다")
+    void createWaitingReservationReturns409WhenNoConfirmedReservation() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
 
         Map<String, Object> body = Map.of(
@@ -547,7 +574,8 @@ class ReservationAcceptanceTest {
     }
 
     @Test
-    void POST_reservations_같은사용자가_중복된_예약_대기가_존재하는_경우_409과_메세지를_반환한다() {
+    @DisplayName("POST /reservations - 같은 사용자가 중복된 예약 대기가 존재하는 경우 409과 메시지를 반환한다")
+    void createWaitingReservationReturns409OnDuplicateWaitingBySameUser() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
                 .date(Fixtures.daysFromNow(25).toString())

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -54,7 +55,8 @@ class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    void GET_reservations_mine_로그인_사용자의_예약_목록을_응답한다() throws Exception {
+    @DisplayName("GET /reservations/mine - 로그인 사용자의 예약 목록을 응답한다")
+    void getMyReservationsRespondsWithLoginUserReservations() throws Exception {
         given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
                 .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
                         Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
@@ -69,7 +71,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void GET_reservations_mine_예약_확정과_예약_대기_목록을_구분해서_응답한다() throws Exception {
+    @DisplayName("GET /reservations/mine - 예약 확정과 예약 대기 목록을 구분해서 응답한다")
+    void getMyReservationsSeparatesReservedAndWaiting() throws Exception {
         given(reservationService.getMyReservations(LoginUserIdTestResolverConfig.FIXED_USER, 0, 20))
                 .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
                         Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
@@ -87,7 +90,8 @@ class ReservationControllerTest {
 
 
     @Test
-    void GET_reservations_id_단건을_응답한다() throws Exception {
+    @DisplayName("GET /reservations/{id} - 단건을 응답한다")
+    void getReservationRespondsWithSingleReservation() throws Exception {
         given(reservationService.getReservation(1L)).willReturn(Fixtures.sampleReservation(1L));
 
         mockMvc.perform(get("/reservations/1"))
@@ -97,7 +101,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 생성된 id를 Location 헤더에 담아 201을 반환한다")
+    void createReservationReturns201WithLocationHeader() throws Exception {
         given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED)))
                 .willReturn(Fixtures.sampleReservation(7L));
 
@@ -115,7 +120,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_서비스가_DuplicateReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 서비스가 DuplicateReservationException을 던지면 409과 메시지를 반환한다")
+    void createReservationReturns409OnDuplicateReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
@@ -133,7 +139,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_서비스가_PastDateTimeReservationException을_던지면_422_와_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 서비스가 PastDateTimeReservationException을 던지면 422와 메시지를 반환한다")
+    void createReservationReturns422OnPastDateTimeReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.RESERVED));
 
@@ -151,7 +158,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void GET_reservations_id_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /reservations/{id} - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void getReservationReturns404OnResourceNotFoundException() throws Exception {
         given(reservationService.getReservation(9999L))
                 .willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L));
 
@@ -161,7 +169,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 서비스에서_예상치_못한_예외가_발생하면_500과_메시지를_반환한다() throws Exception {
+    @DisplayName("서비스에서 예상치 못한 예외가 발생하면 500과 메시지를 반환한다")
+    void returns500OnUnexpectedException() throws Exception {
         given(reservationService.getReservation(1L))
                 .willThrow(new RuntimeException("예기치 못한 오류"));
 
@@ -171,7 +180,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_200을_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
+    @DisplayName("POST /reservations/{id}/cancel - 200을 반환하고 로그인 사용자로 서비스에 위임한다")
+    void cancelReservationReturns200AndDelegatesWithLoginUser() throws Exception {
         mockMvc.perform(post("/reservations/3/cancel"))
                 .andExpect(status().isOk());
 
@@ -179,7 +189,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_서비스가_ResourceNotFoundException을_던지면_404과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations/{id}/cancel - 서비스가 ResourceNotFoundException을 던지면 404과 메시지를 반환한다")
+    void cancelReservationReturns404OnResourceNotFoundException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESOURCE_NOT_FOUND, "예약", 9999L))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(9999L, 1L));
 
@@ -189,7 +200,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_id_cancel_소유자_불일치면_403과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations/{id}/cancel - 소유자 불일치면 403과 메시지를 반환한다")
+    void cancelReservationReturns403OnOwnerMismatch() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
                 .given(reservationService).cancelOwnReservation(Fixtures.cancelCommand(1L, 1L));
 
@@ -199,7 +211,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void PUT_reservations_id_200을_반환하고_로그인_사용자로_서비스에_위임한다() throws Exception {
+    @DisplayName("PUT /reservations/{id} - 200을 반환하고 로그인 사용자로 서비스에 위임한다")
+    void updateReservationReturns200AndDelegatesWithLoginUser() throws Exception {
         given(reservationService.updateOwnReservation(any(UpdateReservationCommand.class)))
                 .willReturn(Fixtures.sampleReservation(1L));
 
@@ -218,7 +231,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void PUT_reservations_id_서비스가_ReservationOwnerMismatchException을_던지면_403과_메시지를_반환한다() throws Exception {
+    @DisplayName("PUT /reservations/{id} - 서비스가 ReservationOwnerMismatchException을 던지면 403과 메시지를 반환한다")
+    void updateReservationReturns403OnReservationOwnerMismatchException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESERVATION_OWNER_MISMATCH))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
@@ -235,7 +249,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void PUT_reservations_id_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
+    @DisplayName("PUT /reservations/{id} - 서비스가 PastDateTimeReservationException을 던지면 422과 메시지를 반환한다")
+    void updateReservationReturns422OnPastDateTimeReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
@@ -252,7 +267,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void PUT_reservations_id_서비스가_DuplicateReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
+    @DisplayName("PUT /reservations/{id} - 서비스가 DuplicateReservationException을 던지면 409과 메시지를 반환한다")
+    void updateReservationReturns409OnDuplicateReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.DUPLICATE_RESERVATION))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
@@ -269,7 +285,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void PUT_reservations_id_서비스가_ReservationNotReservedException을_던지면_409과_메시지를_반환한다() throws Exception {
+    @DisplayName("PUT /reservations/{id} - 서비스가 ReservationNotReservedException을 던지면 409과 메시지를 반환한다")
+    void updateReservationReturns409OnReservationNotReservedException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_RESERVED, "WAITING"))
                 .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
 
@@ -286,7 +303,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_본문의_date가_형식_오류면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문의 date가 형식 오류면 400과 메시지를 반환한다")
+    void createReservationReturns400OnInvalidDateFormat() throws Exception {
         String body = """
                 {"date":"abc","themeId":1,"timeId":1}
                 """;
@@ -299,14 +317,16 @@ class ReservationControllerTest {
     }
 
     @Test
-    void GET_reservations_id가_숫자가_아니면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("GET /reservations/{id} - id가 숫자가 아니면 400과 메시지를 반환한다")
+    void getReservationReturns400WhenIdIsNotNumber() throws Exception {
         mockMvc.perform(get("/reservations/abc"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
     }
 
     @Test
-    void POST_reservations_본문의_date가_존재하지_않는_날짜면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문의 date가 존재하지 않는 날짜면 400과 메시지를 반환한다")
+    void createReservationReturns400WhenDateDoesNotExist() throws Exception {
         String body = """
                 {"date":"2026-13-40","themeId":1,"timeId":1}
                 """;
@@ -319,7 +339,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_본문의_timeId가_숫자가_아니면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문의 timeId가 숫자가 아니면 400과 메시지를 반환한다")
+    void createReservationReturns400WhenTimeIdIsNotNumber() throws Exception {
         String body = """
                 {"date":"2026-05-08","themeId":1,"timeId":"abc"}
                 """;
@@ -332,7 +353,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_본문의_themeId가_누락되면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문의 themeId가 누락되면 400과 메시지를 반환한다")
+    void createReservationReturns400WhenThemeIdIsMissing() throws Exception {
         Map<String, Object> body = new HashMap<>();
         body.put("date", "2026-05-08");
         body.put("timeId", 1);
@@ -346,7 +368,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_본문의_storeId가_누락되면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문의 storeId가 누락되면 400과 메시지를 반환한다")
+    void createReservationReturns400WhenStoreIdIsMissing() throws Exception {
         Map<String, Object> body = new HashMap<>();
         body.put("date", "2026-05-08");
         body.put("themeId", 1);
@@ -360,7 +383,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_본문_JSON_문법_오류면_400과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations - 본문 JSON 문법 오류면 400과 메시지를 반환한다")
+    void createReservationReturns400OnMalformedJson() throws Exception {
         String brokenBody = "{\"themeId\":1";
 
         mockMvc.perform(post("/reservations")
@@ -371,7 +395,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_waiting_생성된_대기_예약을_body에_담고_Location_헤더와_함께_201을_반환한다() throws Exception {
+    @DisplayName("POST /reservations/waiting - 생성된 대기 예약을 body에 담고 Location 헤더와 함께 201을 반환한다")
+    void createWaitingReservationReturns201WithBodyAndLocationHeader() throws Exception {
         given(reservationService.create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING)))
                 .willReturn(Fixtures.sampleWaitingReservation(7L));
 
@@ -390,7 +415,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_waiting_서비스가_ReservationNotFoundForWaitingException을_던지면_409과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations/waiting - 서비스가 ReservationNotFoundForWaitingException을 던지면 409과 메시지를 반환한다")
+    void createWaitingReservationReturns409OnReservationNotFoundForWaitingException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
@@ -408,7 +434,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_waiting_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations/waiting - 서비스가 PastDateTimeReservationException을 던지면 422과 메시지를 반환한다")
+    void createWaitingReservationReturns422OnPastDateTimeReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 
@@ -426,7 +453,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void POST_reservations_waiting_서비스가_DuplicateWaitingReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
+    @DisplayName("POST /reservations/waiting - 서비스가 DuplicateWaitingReservationException을 던지면 409과 메시지를 반환한다")
+    void createWaitingReservationReturns409OnDuplicateWaitingReservationException() throws Exception {
         willThrow(new RoomescapeException(ErrorType.DUPLICATE_WAITING_RESERVATION))
                 .given(reservationService).create(any(CreateReservationCommand.class), eq(ReservationStatus.WAITING));
 

@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationStatus;
 
@@ -22,7 +23,8 @@ class ReservationTest {
     private static final LocalDate DATE = LocalDate.of(2026, 5, 8);
 
     @Test
-    void 예약자가_null이면_예외() {
+    @DisplayName("예약자가 null이면 예외")
+    void throwsExceptionWhenUserIsNull() {
         assertThatThrownBy(() -> new Reservation(null, null, THEME, DATE, TIME, STORE, ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -30,7 +32,8 @@ class ReservationTest {
     }
 
     @Test
-    void 테마가_null이면_예외() {
+    @DisplayName("테마가 null이면 예외")
+    void throwsExceptionWhenThemeIsNull() {
         assertThatThrownBy(() -> new Reservation(null, USER, null, DATE, TIME, STORE, ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -38,7 +41,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약_날짜가_null이면_예외() {
+    @DisplayName("예약 날짜가 null이면 예외")
+    void throwsExceptionWhenDateIsNull() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, null, TIME, STORE, ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -46,7 +50,8 @@ class ReservationTest {
     }
 
     @Test
-    void 예약_시간이_null이면_예외() {
+    @DisplayName("예약 시간이 null이면 예외")
+    void throwsExceptionWhenTimeIsNull() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, null, STORE, ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -54,7 +59,8 @@ class ReservationTest {
     }
 
     @Test
-    void 매장이_null이면_예외() {
+    @DisplayName("매장이 null이면 예외")
+    void throwsExceptionWhenStoreIsNull() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, TIME, null, ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -62,7 +68,8 @@ class ReservationTest {
     }
 
     @Test
-    void 상태가_null이면_예외() {
+    @DisplayName("상태가 null이면 예외")
+    void throwsExceptionWhenStatusIsNull() {
         assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, TIME, STORE, null))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -70,31 +77,36 @@ class ReservationTest {
     }
 
     @Test
-    void isInPast_과거_날짜면_true() {
+    @DisplayName("isInPast - 과거 날짜면 true")
+    void isInPastReturnsTrueForPastDate() {
         Reservation reservation = build(LocalDate.of(2026, 5, 6), LocalTime.of(12, 0));
         assertThat(reservation.isInPast(NOW)).isTrue();
     }
 
     @Test
-    void isInPast_미래_날짜면_false() {
+    @DisplayName("isInPast - 미래 날짜면 false")
+    void isInPastReturnsFalseForFutureDate() {
         Reservation reservation = build(LocalDate.of(2026, 5, 8), LocalTime.of(12, 0));
         assertThat(reservation.isInPast(NOW)).isFalse();
     }
 
     @Test
-    void isInPast_당일_1분_전이면_true() {
+    @DisplayName("isInPast - 당일 1분 전이면 true")
+    void isInPastReturnsTrueWhenOneMinuteBeforeOnSameDay() {
         Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(11, 59));
         assertThat(reservation.isInPast(NOW)).isTrue();
     }
 
     @Test
-    void isInPast_당일_1분_후면_false() {
+    @DisplayName("isInPast - 당일 1분 후면 false")
+    void isInPastReturnsFalseWhenOneMinuteAfterOnSameDay() {
         Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(12, 1));
         assertThat(reservation.isInPast(NOW)).isFalse();
     }
 
     @Test
-    void isInPast_현재와_정확히_같은_시간이면_false() {
+    @DisplayName("isInPast - 현재와 정확히 같은 시간이면 false")
+    void isInPastReturnsFalseWhenExactlyNow() {
         Reservation reservation = build(LocalDate.of(2026, 5, 7), LocalTime.of(12, 0));
         assertThat(reservation.isInPast(NOW)).isFalse();
     }

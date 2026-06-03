@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.PopularTheme;
@@ -22,7 +23,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     private ThemeService service;
 
     @Test
-    void createTheme_id가_채워진_도메인을_반환한다() {
+    @DisplayName("createTheme - id가 채워진 도메인을 반환한다")
+    void createThemeReturnsDomainWithId() {
         CreateThemeCommand request = new CreateThemeCommand("공포", "무서움", "https://thumbnail.url");
 
         Theme created = service.createTheme(request);
@@ -34,7 +36,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getThemes_다음_페이지가_있으면_hasNext가_true() {
+    @DisplayName("getThemes - 다음 페이지가 있으면 hasNext가 true")
+    void getThemesHasNextTrueWhenNextPageExists() {
         DbFixtures.insertTheme(jdbcTemplate, "A");
         DbFixtures.insertTheme(jdbcTemplate, "B");
         DbFixtures.insertTheme(jdbcTemplate, "C");
@@ -46,7 +49,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getThemes_다음_페이지가_없으면_hasNext가_false() {
+    @DisplayName("getThemes - 다음 페이지가 없으면 hasNext가 false")
+    void getThemesHasNextFalseWhenNoNextPage() {
         DbFixtures.insertTheme(jdbcTemplate, "A");
         DbFixtures.insertTheme(jdbcTemplate, "B");
 
@@ -57,7 +61,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getTheme_id로_단건을_조회한다() {
+    @DisplayName("getTheme - id로 단건을 조회한다")
+    void getThemeFindsSingleById() {
         long id = DbFixtures.insertTheme(jdbcTemplate, "공포");
 
         Theme found = service.getTheme(id);
@@ -67,7 +72,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getTheme_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("getTheme - 없는 id이면 ResourceNotFoundException")
+    void getThemeThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.getTheme(9999L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -75,7 +81,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteTheme_없는_id이면_ResourceNotFoundException() {
+    @DisplayName("deleteTheme - 없는 id이면 ResourceNotFoundException")
+    void deleteThemeThrowsResourceNotFoundExceptionWhenIdDoesNotExist() {
         assertThatThrownBy(() -> service.deleteTheme(9999L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
@@ -83,7 +90,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void deleteTheme_삭제후_조회되지_않는다() {
+    @DisplayName("deleteTheme - 삭제 후 조회되지 않는다")
+    void deleteThemeMakesThemeUnqueryable() {
         long id = DbFixtures.insertTheme(jdbcTemplate, "공포");
 
         service.deleteTheme(id);
@@ -93,7 +101,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getThemeTimes_예약된_시간은_isReserved가_true_나머지는_false() {
+    @DisplayName("getThemeTimes - 예약된 시간은 isReserved가 true, 나머지는 false")
+    void getThemeTimesMarksReservedTimes() {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         long time1 = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long time2 = DbFixtures.insertTime(jdbcTemplate, "11:00");
@@ -112,7 +121,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getPopularThemes_today_minus1_부터_today_minus7_까지의_예약만_집계된다() {
+    @DisplayName("getPopularThemes - today-1부터 today-7까지의 예약만 집계된다")
+    void getPopularThemesAggregatesOnlyLastWeekReservations() {
         long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long themeIn = DbFixtures.insertTheme(jdbcTemplate, "기간내");
         long themeOut = DbFixtures.insertTheme(jdbcTemplate, "기간외");
@@ -129,7 +139,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getPopularThemes_예약수가_많은_순서대로_정렬되고_집계수를_함께_반환한다() {
+    @DisplayName("getPopularThemes - 예약 수가 많은 순서대로 정렬되고 집계 수를 함께 반환한다")
+    void getPopularThemesSortedByReservationCountDescending() {
         long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
@@ -151,7 +162,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getPopularThemes_예약수가_같으면_id_오름차순으로_정렬된다() {
+    @DisplayName("getPopularThemes - 예약 수가 같으면 id 오름차순으로 정렬된다")
+    void getPopularThemesSortedByIdAscendingWhenCountIsEqual() {
         long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
@@ -166,7 +178,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getPopularThemes_limit_만큼만_반환한다() {
+    @DisplayName("getPopularThemes - limit 만큼만 반환한다")
+    void getPopularThemesReturnsOnlyUpToLimit() {
         long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
@@ -182,7 +195,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
     }
 
     @Test
-    void getPopularThemes_시드데이터의_랭킹을_집계하고_기간_외_예약은_제외한다() {
+    @DisplayName("getPopularThemes - 시드 데이터의 랭킹을 집계하고 기간 외 예약은 제외한다")
+    void getPopularThemesAggregatesSeedDataRankingExcludingOutOfPeriod() {
         DbFixtures.loadSampleData(jdbcTemplate);
 
         List<PopularTheme> popular = service.getPopularThemes(10);
