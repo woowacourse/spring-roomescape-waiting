@@ -76,9 +76,9 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
 
         reservationDao.delete(id);
-        if(reservation.getStatus() == ReservationStatus.CONFIRMED) {
-            processNextWaiting(reservation);
-        }
+
+        reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+
 
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
@@ -102,18 +102,8 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
         reservationDao.delete(id);
 
-        if(reservation.getStatus() == ReservationStatus.CONFIRMED) {
-            processNextWaiting(reservation);
-        }
-    }
+        reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
 
-    private void processNextWaiting(Reservation reservation) {
-        Optional<ReservationRank> nextWaiting = reservationDao.findFirstRank(reservation.getDate(),
-                reservation.getTheme().getId(), reservation.getTime().getId());
-
-        if (nextWaiting.isPresent()){
-            reservationDao.update(nextWaiting.get().getId(), ReservationStatus.CONFIRMED);
-        }
     }
 
     private Reservation getReservation(long id) {

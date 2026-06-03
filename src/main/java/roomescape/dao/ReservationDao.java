@@ -74,34 +74,6 @@ public class ReservationDao {
                 .stream().findFirst();
     }
 
-    public Optional<ReservationRank> findFirstRank(LocalDate date, long themeId, long timeId) {
-        String sql = """
-                    SELECT
-                    r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status,
-                    1 AS waiting_order
-                    FROM reservation r
-                    INNER JOIN reservation_time rt ON r.time_id = rt.id
-                    INNER JOIN theme t ON r.theme_id = t.id
-                    WHERE r.date = ?
-                    AND r.theme_id = ?
-                    AND r.time_id = ?
-                    AND r.status = 'WAITING'
-                    ORDER BY r.id ASC
-                    LIMIT 1
-                    FOR UPDATE
-                """;
-
-        return jdbcTemplate.query(sql,
-                (resultSet, rowNum) -> {
-                    Reservation reservation = reservationRowMapper.mapRow(resultSet, rowNum);
-                    return new ReservationRank(reservation, resultSet.getLong("waiting_order"));
-                },
-                date, themeId, timeId
-        ).stream().findFirst();
-    }
-
     public List<ReservationRank> findByName(String name) {
         String sql = """
                     SELECT *
@@ -182,14 +154,22 @@ public class ReservationDao {
     }
 
     @Transactional
-    public void update(Long id, ReservationStatus status) {
+    public void update(LocalDate date, long themeId, long timeId) {
         jdbcTemplate.update(
                 """
-                            UPDATE reservation 
-                            SET status = ?
-                            WHERE id = ?
+                         UPDATE reservation 
+                         SET status = 'CONFIRMED'
+                         WHERE id = (
+                             SELECT id FROM reservation
+                             WHERE date = ? AND theme_id = ? AND time_id = ? AND status = 'WAITING'
+                             ORDER BY id ASC LIMIT 1
+                         )
+                         AND NOT EXISTS(
+                             SELECT 1 FROM reservation
+                             WHERE date = ? AND theme_id = ? AND time_id = ? AND status = 'CONFIRMED' 
+                         )
                         """,
-                status.name(), id
+                date, themeId, timeId, date, themeId, timeId
         );
     }
 
