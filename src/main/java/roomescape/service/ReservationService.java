@@ -12,6 +12,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ExpiredDateTimeException;
+import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
@@ -99,7 +100,7 @@ public class ReservationService {
     public void delete(Long id) {
         Optional<Reservation> optionalReservation = reservationQueryingDao.findReservationById(id);
         if (optionalReservation.isEmpty()) {
-            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
+            return;
         }
         Reservation reservation = optionalReservation.get();
         if (reservation.isExpired()) {
@@ -133,7 +134,7 @@ public class ReservationService {
 
         long updated = reservationUpdatingDao.update(moved.getId(), moved.getName(), newSlot.getId(), moved.getCreatedAt());
         if (updated == 0) {
-            throw new ResourceNotFoundException("해당 예약이 존재하지 않습니다.");
+            throw new DataIntegrityViolationException("해당 예약이 존재하지 않습니다.");
         }
         return moved;
     }
@@ -148,6 +149,10 @@ public class ReservationService {
 
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
+        }
+
+        if(slotDao.isExistSlot(request.date(), request.timeId(), request.themeId())) {
+            throw new InvalidInputException("해당 날짜, 시간, 테마로 예약이 이미 존재합니다.");
         }
 
         Long slotId = slotDao.insert(slot);
