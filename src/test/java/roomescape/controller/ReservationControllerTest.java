@@ -129,22 +129,4 @@ class ReservationControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED_RESERVATION"));
     }
-
-    @DisplayName("예약 수정 요청은 서비스에 위임하고 200을 반환한다.")
-    @Test
-    void update() throws Exception {
-        mockMvc.perform(patch("/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "name": "러로",
-                                  "date": "2026-07-02",
-                                  "timeId": 1,
-                                  "themeId": 1
-                                }
-                                """))
-                .andExpect(status().isOk());
-
-        verify(reservationService).updateReservation(eq(1L), any());
-    }
 }

@@ -142,7 +142,7 @@ class ReservationServiceTest {
         assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         assertThat(changed.getUpdateAt()).isAfter(reserved.getUpdateAt());
         verify(scheduleService).lockById(schedule.getId());
-        verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
+        verify(reservationDao).promoteToReserved(2L);
     }
 
     @DisplayName("WAITING 예약을 취소하면 다른 대기를 승격하지 않는다.")
@@ -160,7 +160,7 @@ class ReservationServiceTest {
         assertThat(changed.getId()).isEqualTo(2L);
         assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         verify(reservationDao, never()).findFirstByScheduleIdAndStatus(anyLong(), any(ReservationStatus.class));
-        verify(reservationDao, never()).changeStatusOnly(any(Long.class), any(ReservationStatus.class));
+        verify(reservationDao, never()).promoteToReserved(any(Long.class));
     }
 
     @DisplayName("이미 취소된 예약은 추가 변경 없이 반환한다.")
@@ -173,7 +173,7 @@ class ReservationServiceTest {
         reservationService.cancelReservation(1L, "러로");
 
         verify(reservationDao, never()).changeStatusWithUpdateAt(any(Reservation.class));
-        verify(reservationDao, never()).changeStatusOnly(any(), any());
+        verify(reservationDao, never()).promoteToReserved(any());
     }
 
     @DisplayName("본인 예약이 아니면 취소할 수 없다.")
@@ -189,7 +189,7 @@ class ReservationServiceTest {
                 .isEqualTo(DomainErrorCode.UNAUTHORIZED_RESERVATION);
 
         verify(reservationDao, never()).changeStatusWithUpdateAt(any(Reservation.class));
-        verify(reservationDao, never()).changeStatusOnly(any(), any());
+        verify(reservationDao, never()).promoteToReserved(any());
     }
 
     @DisplayName("존재하지 않는 예약을 취소하면 예외를 던진다.")
@@ -201,75 +201,6 @@ class ReservationServiceTest {
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.NOT_FOUND_RESERVATION);
-    }
-
-    @DisplayName("RESERVED 예약을 다른 슬롯으로 수정하면 기존 슬롯의 첫 대기를 승격한다.")
-    @Test
-    void updateReservedReservationPromotesPreviousSlot() {
-        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
-        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
-        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
-        Reservation waiting = reservation(2L, "현미밥", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
-        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
-                .willReturn(target);
-        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
-        given(reservationDao.countReservationByScheduleId(target.getId())).willReturn(0);
-        given(reservationDao.findFirstByScheduleIdAndStatus(origin.getId(), ReservationStatus.WAITING))
-                .willReturn(Optional.of(waiting));
-        ArgumentCaptor<Reservation> reservationCaptor = ArgumentCaptor.forClass(Reservation.class);
-
-        reservationService.updateReservation(1L, request);
-
-        verify(reservationDao).update(reservationCaptor.capture());
-        Reservation updated = reservationCaptor.getValue();
-        assertThat(updated.getId()).isEqualTo(1L);
-        assertThat(updated.getSchedule()).isEqualTo(target);
-        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.RESERVED);
-        verify(scheduleService).lockById(origin.getId());
-        verify(scheduleService).lockById(target.getId());
-        verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
-    }
-
-    @DisplayName("WAITING 예약을 수정하면 기존 슬롯에서 승격하지 않는다.")
-    @Test
-    void updateWaitingReservationDoesNotPromote() {
-        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
-        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
-        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
-        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
-                .willReturn(target);
-        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
-        given(reservationDao.countReservationByScheduleId(target.getId())).willReturn(1);
-
-        reservationService.updateReservation(1L, request);
-
-        verify(reservationDao).update(any(Reservation.class));
-        verify(reservationDao, never()).findFirstByScheduleIdAndStatus(anyLong(), any(ReservationStatus.class));
-        verify(reservationDao, never()).changeStatusOnly(any(Long.class), any(ReservationStatus.class));
-    }
-
-    @DisplayName("수정 대상 슬롯에 같은 사용자의 예약이 있으면 수정할 수 없다.")
-    @Test
-    void updateDuplicateReservation() {
-        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
-        Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
-        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(1));
-        ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
-                .willReturn(target);
-        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
-        given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(true);
-
-        assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
-                .isInstanceOf(RoomescapeException.class)
-                .extracting("code")
-                .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
-
-        verify(reservationDao, never()).update(any());
     }
 
     @DisplayName("내 예약 목록은 예약별 대기 순번을 포함해 응답으로 변환한다.")

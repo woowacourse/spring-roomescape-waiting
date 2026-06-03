@@ -35,15 +35,6 @@ public class AdminReservationController {
                 .build();
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Void> update(
-            @PathVariable long id,
-            @Valid @RequestBody ReservationRequest request
-    ) {
-        reservationService.updateReservation(id, request);
-        return ResponseEntity.ok().build();
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancel(
             @PathVariable Long id,

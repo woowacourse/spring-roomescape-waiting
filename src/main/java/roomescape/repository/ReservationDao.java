@@ -70,33 +70,22 @@ public class ReservationDao {
         )).longValue();
     }
 
-    public void update(Reservation reservation) {
-        jdbcTemplate.update(
-                """
-                UPDATE reservation
-                SET schedule_id = ?,
-                    status = ?,
-                    updated_at = ?
-                WHERE id = ?
-                """,
-                reservation.getSchedule().getId(),
-                reservation.getStatus().name(),
-                reservation.getUpdateAt(),
-                reservation.getId()
-        );
-    }
-
     public void changeStatusWithUpdateAt(Reservation reservation) {
         jdbcTemplate.update(
-                "UPDATE reservation SET status = ?, updated_at = ? WHERE id = ?",
-                reservation.getStatus().name(), reservation.getUpdateAt(), reservation.getId()
+                "UPDATE reservation SET status = ?, updated_at = ? WHERE id = ? AND status != ?",
+                reservation.getStatus().name(),
+                reservation.getUpdateAt(),
+                reservation.getId(),
+                reservation.getStatus().name()
         );
     }
 
-    public void changeStatusOnly(Long reservationId, ReservationStatus status) {
+    public void promoteToReserved(Long reservationId) {
         jdbcTemplate.update(
-                "UPDATE reservation SET status = ? WHERE id = ?",
-                status.name(), reservationId
+                "UPDATE reservation SET status = ? WHERE id = ? AND status = ?",
+                ReservationStatus.RESERVED.name(),
+                reservationId,
+                ReservationStatus.WAITING.name()
         );
     }
 
@@ -183,7 +172,7 @@ public class ReservationDao {
             INNER JOIN theme            AS th ON s.theme_id    = th.id
             LEFT JOIN active_orders     AS ao ON r.id          = ao.id
             WHERE r.name = ?
-            ORDER BY s.date, t.start_at, r.updated_at
+            ORDER BY s.date DESC
             """;
 
         return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name(), name);
@@ -218,7 +207,7 @@ public class ReservationDao {
             INNER JOIN reservation_time AS t  ON s.time_id     = t.id
             INNER JOIN theme            AS th ON s.theme_id    = th.id
             LEFT JOIN active_orders     AS ao ON r.id          = ao.id
-            ORDER BY r.id
+            ORDER BY r.id DESC
             """;
 
         return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name());

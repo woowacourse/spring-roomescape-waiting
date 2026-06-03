@@ -64,36 +64,6 @@ class ReservationDaoTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 
-    @DisplayName("예약을 수정하면 스케줄, 상태, 수정 시각이 변경된다.")
-    @Test
-    void update() {
-        Long timeId = insertReservationTime(LocalTime.of(11, 0));
-        Long themeId = insertTheme("우주선");
-        Long originScheduleId = insertSchedule(LocalDate.of(2026, 7, 1), timeId, themeId);
-        Long targetScheduleId = insertSchedule(LocalDate.of(2026, 7, 2), timeId, themeId);
-        Long reservationId = insertReservation("러로", originScheduleId, ReservationStatus.RESERVED,
-                LocalDateTime.of(2026, 6, 1, 10, 0));
-        Schedule targetSchedule = new Schedule(
-                targetScheduleId,
-                new Theme(themeId, "우주선", "산소를 찾아 탈출하는 테마", "https://example.com/space.jpg"),
-                LocalDate.of(2026, 7, 2),
-                new ReservationTime(timeId, LocalTime.of(11, 0))
-        );
-
-        reservationDao.update(new Reservation(
-                reservationId,
-                new Reserver("러로"),
-                targetSchedule,
-                ReservationStatus.WAITING,
-                LocalDateTime.of(2026, 6, 1, 12, 0)
-        ));
-
-        Reservation updated = reservationDao.findById(reservationId).orElseThrow();
-        assertThat(updated.getSchedule().getId()).isEqualTo(targetScheduleId);
-        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(updated.getUpdateAt()).isEqualTo(LocalDateTime.of(2026, 6, 1, 12, 0));
-    }
-
     @DisplayName("상태만 변경하면 신청 순서 기준 시각은 유지된다.")
     @Test
     void changeStatusOnly() {
@@ -101,10 +71,24 @@ class ReservationDaoTest {
         LocalDateTime originalUpdatedAt = LocalDateTime.of(2026, 6, 1, 10, 0);
         Long reservationId = insertReservation("러로", scheduleId, ReservationStatus.WAITING, originalUpdatedAt);
 
-        reservationDao.changeStatusOnly(reservationId, ReservationStatus.RESERVED);
+        reservationDao.promoteToReserved(reservationId);
 
         Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservation.getUpdateAt()).isEqualTo(originalUpdatedAt);
+    }
+
+    @DisplayName("WAITING 상태가 아니면 상태만 변경하지 않는다.")
+    @Test
+    void changeStatusOnlyWhenWaiting() {
+        Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(12, 0), "마법 학교");
+        LocalDateTime originalUpdatedAt = LocalDateTime.of(2026, 6, 1, 10, 0);
+        Long reservationId = insertReservation("러로", scheduleId, ReservationStatus.CANCELED, originalUpdatedAt);
+
+        reservationDao.promoteToReserved(reservationId);
+
+        Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         assertThat(reservation.getUpdateAt()).isEqualTo(originalUpdatedAt);
     }
 
@@ -128,6 +112,27 @@ class ReservationDaoTest {
         Reservation updated = reservationDao.findById(reservationId).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         assertThat(updated.getUpdateAt()).isEqualTo(canceledAt);
+    }
+
+    @DisplayName("이미 같은 상태이면 수정 시각을 덮어쓰지 않는다.")
+    @Test
+    void changeStatusWithUpdateAtSameStatus() {
+        Long scheduleId = insertScheduleWithDependencies(LocalDate.of(2026, 7, 1), LocalTime.of(13, 0), "탐정 사무소");
+        LocalDateTime originalUpdatedAt = LocalDateTime.of(2026, 6, 1, 10, 0);
+        Long reservationId = insertReservation("러로", scheduleId, ReservationStatus.CANCELED, originalUpdatedAt);
+
+        Reservation reservation = reservationDao.findById(reservationId).orElseThrow();
+        reservationDao.changeStatusWithUpdateAt(new Reservation(
+                reservation.getId(),
+                reservation.getReserver(),
+                reservation.getSchedule(),
+                ReservationStatus.CANCELED,
+                LocalDateTime.of(2026, 6, 1, 11, 0)
+        ));
+
+        Reservation updated = reservationDao.findById(reservationId).orElseThrow();
+        assertThat(updated.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+        assertThat(updated.getUpdateAt()).isEqualTo(originalUpdatedAt);
     }
 
     @DisplayName("특정 스케줄에서 가장 먼저 신청한 대기 예약을 조회한다.")

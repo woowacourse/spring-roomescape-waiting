@@ -50,34 +50,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(long reservationId, ReservationRequest request) {
-        LocalDateTime now = LocalDateTime.now();
-        Reserver reserver = new Reserver(request.name());
-        Schedule targetSchedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
-        Reservation previous = getById(reservationId);
-        lockSchedules(previous.getSchedule().getId(), targetSchedule.getId());
-        previous = getById(reservationId);
-
-        if (reservationDao.existByNameAndScheduleId(reserver.getName(), targetSchedule.getId())) {
-            throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "변경하려는 스케줄에 본인의 예약이 존재합니다.");
-        }
-
-        Reservation updated = previous.updateBy(
-                reserver,
-                targetSchedule,
-                calculateReservationStatus(targetSchedule.getId()),
-                now
-        );
-
-        reservationDao.update(updated);
-        promoteWaitingReservation(previous, previous.getSchedule().getId());
-    }
-
-    @Transactional
     public void cancelReservation(long reservationId, String name) {
         LocalDateTime now = LocalDateTime.now();
         Reserver reserver = new Reserver(name);
         Reservation reservation = getById(reservationId);
+
         scheduleService.lockById(reservation.getSchedule().getId());
         reservation = getById(reservationId);
 
@@ -121,24 +98,10 @@ public class ReservationService {
     private void promoteWaitingReservation(Reservation changed, long scheduleId) {
         if (changed.isReserved()) {
             Optional<Reservation> reservations = reservationDao.findFirstByScheduleIdAndStatus(scheduleId, ReservationStatus.WAITING);
-
             reservations.ifPresent(reservation
-                    -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED)
+                    -> reservationDao.promoteToReserved(reservation.getId())
             );
         }
-    }
-
-    private void lockSchedules(Long firstScheduleId, Long secondScheduleId) {
-        if (firstScheduleId.equals(secondScheduleId)) {
-            scheduleService.lockById(firstScheduleId);
-            return;
-        }
-
-        Long lowerScheduleId = Math.min(firstScheduleId, secondScheduleId);
-        Long higherScheduleId = Math.max(firstScheduleId, secondScheduleId);
-
-        scheduleService.lockById(lowerScheduleId);
-        scheduleService.lockById(higherScheduleId);
     }
 
     private ReservationStatus calculateReservationStatus(long scheduleId) {

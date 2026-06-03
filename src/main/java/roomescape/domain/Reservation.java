@@ -35,18 +35,6 @@ public class Reservation {
         return new Reservation(null, reserver, schedule, status, now);
     }
 
-    public Reservation updateBy(
-            Reserver reserver,
-            Schedule targetSchedule,
-            ReservationStatus status,
-            LocalDateTime now
-    ) {
-        reserver.validateSameReserver(this.reserver);
-        validateCanModify(now);
-        validateNotPastSchedule(targetSchedule, now);
-        return new Reservation(this.id, this.reserver, targetSchedule, status, now);
-    }
-
     public Reservation cancelBy(
             Reserver reserver,
             LocalDateTime now

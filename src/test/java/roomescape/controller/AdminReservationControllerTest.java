@@ -85,24 +85,6 @@ class AdminReservationControllerTest {
                 .andExpect(header().string("Location", "/reservations/1"));
     }
 
-    @DisplayName("관리자 예약 수정은 서비스에 위임한다.")
-    @Test
-    void update() throws Exception {
-        mockMvc.perform(patch("/admin/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "name": "러로",
-                                  "date": "2026-07-02",
-                                  "timeId": 1,
-                                  "themeId": 1
-                                }
-                                """))
-                .andExpect(status().isOk());
-
-        verify(reservationService).updateReservation(eq(1L), any());
-    }
-
     @DisplayName("관리자 예약 취소는 이름 파라미터와 함께 서비스에 위임한다.")
     @Test
     void cancel() throws Exception {
