@@ -2,7 +2,6 @@ package roomescape.global;
 
 import java.util.List;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -11,12 +10,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final ObjectProvider<LoginMemberArgumentResolver> loginMemberArgumentResolver;
-    private final ObjectProvider<AdminAuthorizationInterceptor> adminAuthorizationInterceptor;
+    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private final AdminAuthorizationInterceptor adminAuthorizationInterceptor;
 
     public WebConfig(
-            ObjectProvider<LoginMemberArgumentResolver> loginMemberArgumentResolver,
-            ObjectProvider<AdminAuthorizationInterceptor> adminAuthorizationInterceptor
+            LoginMemberArgumentResolver loginMemberArgumentResolver,
+            AdminAuthorizationInterceptor adminAuthorizationInterceptor
     ) {
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
         this.adminAuthorizationInterceptor = adminAuthorizationInterceptor;
@@ -24,11 +23,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        loginMemberArgumentResolver.ifAvailable(resolvers::add);
+        resolvers.add(loginMemberArgumentResolver);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        adminAuthorizationInterceptor.ifAvailable(registry::addInterceptor);
+        registry.addInterceptor(adminAuthorizationInterceptor)
+                .addPathPatterns("/admin/**");
     }
 }

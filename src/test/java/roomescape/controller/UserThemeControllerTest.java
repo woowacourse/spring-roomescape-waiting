@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.AvailableTimeResponse;
 import roomescape.controller.dto.ThemeResponse;
 import roomescape.global.DomainErrorHttpMapper;
+import roomescape.service.AuthService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 
@@ -35,6 +36,9 @@ class UserThemeControllerTest {
 
     @MockitoBean
     private ReservationTimeService reservationTimeService;
+
+    @MockitoBean
+    private AuthService authService;
 
     @DisplayName("전체 테마 목록을 조회한다.")
     @Test

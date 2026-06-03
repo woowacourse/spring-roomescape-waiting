@@ -25,8 +25,9 @@ public class AuthService {
 
     public Member login(String loginId, String password) {
         Member member = memberDao.findByLoginId(loginId)
-                .orElseThrow(() -> invalidLogin());
-        if (!member.getPassword().equals(password)) {
+                .orElseThrow(this::invalidLogin);
+
+        if (!member.matchesPassword(password)) {
             throw invalidLogin();
         }
 
@@ -66,9 +67,6 @@ public class AuthService {
     }
 
     private RoomescapeException invalidLogin() {
-        return new RoomescapeException(
-                DomainErrorCode.INVALID_LOGIN,
-                "로그인 ID 또는 비밀번호가 올바르지 않습니다."
-        );
+        return new RoomescapeException(DomainErrorCode.INVALID_LOGIN, "로그인 ID 또는 비밀번호가 올바르지 않습니다.");
     }
 }

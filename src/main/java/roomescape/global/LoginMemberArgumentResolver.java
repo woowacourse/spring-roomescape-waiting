@@ -2,7 +2,6 @@ package roomescape.global;
 
 import jakarta.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -18,9 +17,9 @@ import roomescape.service.AuthService;
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final ObjectProvider<AuthService> authService;
+    private final AuthService authService;
 
-    public LoginMemberArgumentResolver(ObjectProvider<AuthService> authService) {
+    public LoginMemberArgumentResolver(AuthService authService) {
         this.authService = authService;
     }
 
@@ -48,12 +47,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             throw unauthenticated();
         }
 
-        AuthService service = authService.getIfAvailable();
-        if (service == null) {
-            throw unauthenticated();
-        }
-
-        return service.getLoginMember(id);
+        return authService.getLoginMember(id);
     }
 
     private RoomescapeException unauthenticated() {

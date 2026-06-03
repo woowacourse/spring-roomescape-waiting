@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,9 +17,9 @@ import roomescape.service.AuthService;
 @Component
 public class AdminAuthorizationInterceptor implements HandlerInterceptor {
 
-    private final ObjectProvider<AuthService> authService;
+    private final AuthService authService;
 
-    public AdminAuthorizationInterceptor(ObjectProvider<AuthService> authService) {
+    public AdminAuthorizationInterceptor(AuthService authService) {
         this.authService = authService;
     }
 
@@ -28,11 +27,6 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!isAdminOnly(handler)) {
             return true;
-        }
-
-        AuthService service = authService.getIfAvailable();
-        if (service == null) {
-            throw unauthenticated();
         }
 
         HttpSession session = request.getSession(false);
@@ -45,7 +39,7 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
             throw unauthenticated();
         }
 
-        Member member = service.getLoginMember(id);
+        Member member = authService.getLoginMember(id);
         if (member.getRole() != Role.ADMIN) {
             throw new RoomescapeException(DomainErrorCode.UNAUTHORIZED_ADMIN, "관리자 권한이 필요합니다.");
         }
