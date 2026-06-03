@@ -353,6 +353,74 @@ class ReservationApiTest {
             .statusCode(409);
     }
 
+    @Test
+    void 내_예약을_취소하면_첫_번째_대기가_예약으로_승격되고_남은_대기_순번이_재정렬된다() {
+        Integer timeId = createTime("10:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+
+        Integer reservationId = createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("네오", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("포비", FUTURE_FIRST_DATE, timeId, themeId);
+
+        RestAssured.given().log().all()
+            .queryParam("name", "브라운")
+            .when().delete("/reservations/" + reservationId)
+            .then().log().all()
+            .statusCode(204);
+
+        RestAssured.given().log().all()
+            .queryParam("name", "네오")
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].status", is("RESERVED"));
+
+        RestAssured.given().log().all()
+            .queryParam("name", "포비")
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].status", is("WAITING"))
+            .body("[0].waitingOrder", is(1));
+    }
+
+    @Test
+    void 대기를_취소하면_남은_대기_순번이_재정렬된다() {
+        Integer timeId = createTime("10:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+
+        createReservation("브라운", FUTURE_FIRST_DATE, timeId, themeId);
+        Integer neoWaitlistId = createReservation("네오", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("포비", FUTURE_FIRST_DATE, timeId, themeId);
+        createReservation("준", FUTURE_FIRST_DATE, timeId, themeId);
+
+        RestAssured.given().log().all()
+            .queryParam("name", "네오")
+            .when().delete("/waitlists/" + neoWaitlistId)
+            .then().log().all()
+            .statusCode(204);
+
+        RestAssured.given().log().all()
+            .queryParam("name", "포비")
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].status", is("WAITING"))
+            .body("[0].waitingOrder", is(1));
+
+        RestAssured.given().log().all()
+            .queryParam("name", "준")
+            .when().get("/reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(1))
+            .body("[0].status", is("WAITING"))
+            .body("[0].waitingOrder", is(2));
+    }
+
     private Integer createTime(String startAt) {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", startAt);
