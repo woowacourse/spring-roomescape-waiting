@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoomEscape</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0d1a;
+      color: #f3f4f6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 80%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; }
+      50% { opacity: var(--op); }
+    }
+
+    .card {
+      position: relative;
+      background: rgba(18, 24, 40, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow:
+        0 0 0 1px rgba(245, 158, 11, 0.05),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(245, 158, 11, 0.08);
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      color: #f59e0b;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #f3f4f6;
+      margin-bottom: 8px;
+    }
+
+    .title span {
+      color: #f59e0b;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3), transparent);
+      margin-bottom: 32px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #9ca3af;
+      text-transform: uppercase;
+      text-align: left;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 8px;
+      color: #f3f4f6;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+
+    input[type="text"]:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    input[type="text"]::placeholder { color: #4b5563; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none;
+      border-radius: 8px;
+      color: #0a0d1a;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .admin-link {
+      display: block;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #4b5563;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .admin-link:hover { color: #9ca3af; }
+
+    .error {
+      display: none;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="card">
+  <div class="logo">Mystery Experience</div>
+  <h1 class="title">Room<span>Escape</span></h1>
+  <p class="subtitle">당신의 탈출을 기다리고 있습니다.<br>이름을 입력하고 방탈출을 시작하세요.</p>
+  <div class="divider"></div>
+
+  <div class="error" id="error">이름을 입력해주세요.</div>
+
+  <label for="username">이름</label>
+  <input
+    type="text"
+    id="username"
+    placeholder="홍길동"
+    maxlength="20"
+    autocomplete="off"
+  />
+
+  <button class="btn-primary" onclick="enter()">입장하기</button>
+  <a href="/admin.html" class="admin-link">관리자 페이지로 이동 →</a>
+</div>
+
+<script>
+  // Generate twinkling stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 1;
+    s.style.cssText = `
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 100}%;
+      width: ${size}px;
+      height: ${size}px;
+      --dur: ${2 + Math.random() * 4}s;
+      --op: ${0.3 + Math.random() * 0.6};
+      animation-delay: ${Math.random() * 4}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  document.getElementById('username').addEventListener('keydown', e => {
+    if (e.key === 'Enter') enter();
+  });
+
+  function enter() {
+    const name = document.getElementById('username').value.trim();
+    const err = document.getElementById('error');
+    if (!name) {
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    localStorage.setItem('username', name);
+    window.location.href = '/user.html';
+  }
+</script>
+</body>
+</html>
