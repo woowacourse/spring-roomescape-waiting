@@ -484,7 +484,6 @@ class JdbcReservationRepositoryTest {
         return null;
     }
 
-
     private Map<String, Object> findDateAndTimeIdById(Long id) {
         return jdbcTemplate.queryForMap("""
                 SELECT
@@ -502,7 +501,6 @@ class JdbcReservationRepositoryTest {
                 WHERE guest_name = ?
                 """, Integer.class, guestName);
     }
-
 
     private Long getGeneratedId(KeyHolder keyHolder) {
         return keyHolder.getKey().longValue();

@@ -18,52 +18,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.repository.JdbcReservationRepository;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
-import roomescape.reservation.service.policy.ReservationPolicy;
+import roomescape.reservation.service.fixture.ReservationServiceFixture;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.test_config.MutableTimeManager;
-import roomescape.test_config.TestTimeManagerConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.theme.repository.JdbcThemeRepository;
-import roomescape.theme.repository.ThemeRepository;
 
-@JdbcTest
-@Import({
-        TestTimeManagerConfig.class,
-        ReservationService.class,
-        JdbcReservationRepository.class,
-        JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class,
-        ReservationPolicy.class
-})
-class ReservationServiceTest {
+class ReservationServiceTest extends ReservationServiceFixture {
 
     @Autowired
     ReservationService reservationService;
-
-    @Autowired
-    ReservationRepository reservationRepository;
-
-    @Autowired
-    ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    ThemeRepository themeRepository;
-
-    @Autowired
-    MutableTimeManager timeManager;
-
 
     @Test
     @DisplayName("해당 날짜, 시간, 테마에 처음으로 예약을 추가하면 예약이 확정된다.")
@@ -481,28 +448,5 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.create("포비", date, time.getId(), invalidThemeId))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.message());
-    }
-
-    private void insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme,
-                                            String guestName) {
-        insertReservation(guestName, date, time, theme, Status.CONFIRMED);
-    }
-
-    private Reservation insertWaitingReservation(LocalDate existDate, ReservationTime existTime, String guestName) {
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        return insertReservation(guestName, existDate, existTime, theme, Status.WAITING);
-    }
-
-    private ReservationTime insertReservationTime(LocalTime startAt) {
-        return reservationTimeRepository.save(ReservationTime.create(startAt));
-    }
-
-    private Theme insertTheme(String name, String description, String thumbnail) {
-        return themeRepository.save(Theme.create(name, description, thumbnail));
-    }
-
-    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme,
-                                          Status status) {
-        return reservationRepository.save(Reservation.create(name, ReservationSlot.of(date, time, theme), status));
     }
 }
