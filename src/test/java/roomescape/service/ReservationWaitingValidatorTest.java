@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.junit.jupiter.api.Test;
 
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -11,6 +12,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -26,6 +28,7 @@ class ReservationWaitingValidatorTest {
             reservationWaitingRepository);
 
     private final LocalDate date = LocalDate.now().plusDays(1);
+    private final LocalDateTime now = LocalDateTime.now();
     private final ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
     private final Theme theme = new Theme(1L, "테스트 테마", "테마 설명", "썸네일 주소");
 
@@ -33,27 +36,27 @@ class ReservationWaitingValidatorTest {
     void 예약된_시간이고_본인_예약과_중복_대기가_아니면_대기_신청이_가능하다() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationWaitingRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
                 .thenReturn(false);
 
         // when & then
         assertThatNoException()
-                .isThrownBy(() -> validator.validateWaiting(waiting));
+                .isThrownBy(() -> validator.validateWaiting(waiting, now));
     }
 
     @Test
     void 예약_가능한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateWaiting(waiting))
+        assertThatThrownBy(() -> validator.validateWaiting(waiting, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT)
                 .hasMessage("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
@@ -63,13 +66,13 @@ class ReservationWaitingValidatorTest {
     void 본인이_예약한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateWaiting(waiting))
+        assertThatThrownBy(() -> validator.validateWaiting(waiting, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION)
                 .hasMessage("본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
@@ -79,15 +82,15 @@ class ReservationWaitingValidatorTest {
     void 이미_대기한_시간에_대기_신청시_예외_발생() {
         // given
         ReservationWaiting waiting = waiting("브라운", date);
-        when(reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId()))
+        when(reservationRepository.existsBySlotForUpdate(any(ReservationSlot.class)))
                 .thenReturn(true);
-        when(reservationRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
                 .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith("브라운", date, time.getId(), theme.getId()))
+        when(reservationWaitingRepository.existsByNameAndSlot(eq("브라운"), any(ReservationSlot.class)))
                 .thenReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateWaiting(waiting))
+        assertThatThrownBy(() -> validator.validateWaiting(waiting, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_RESOURCE)
                 .hasMessage("이미 예약 대기를 신청한 시간입니다.");
@@ -99,7 +102,7 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", LocalDate.now().minusDays(1));
 
         // when & then
-        assertThatThrownBy(() -> validator.validateWaiting(waiting))
+        assertThatThrownBy(() -> validator.validateWaiting(waiting, now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_SCHEDULE)
                 .hasMessage("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
@@ -113,7 +116,7 @@ class ReservationWaitingValidatorTest {
 
         // when & then
         assertThatNoException()
-                .isThrownBy(() -> validator.validateUpdatableReservation(waiting, "브라운"));
+                .isThrownBy(() -> validator.validateModifiable(waiting, "브라운", now));
         verifyNoMoreInteractions(reservationRepository, reservationWaitingRepository);
     }
 
@@ -123,7 +126,7 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", date);
 
         // when & then
-        assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "구구"))
+        assertThatThrownBy(() -> validator.validateModifiable(waiting, "구구", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_RESOURCE)
                 .hasMessage("본인의 예약 대기만 취소할 수 있습니다.");
@@ -136,7 +139,7 @@ class ReservationWaitingValidatorTest {
         ReservationWaiting waiting = waiting("브라운", LocalDate.now().minusDays(1));
 
         // when & then
-        assertThatThrownBy(() -> validator.validateUpdatableReservation(waiting, "브라운"))
+        assertThatThrownBy(() -> validator.validateModifiable(waiting, "브라운", now))
                 .isInstanceOf(RoomescapeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAST_RESOURCE_LOCKED)
                 .hasMessage("이미 지난 예약 대기는 취소할 수 없습니다.");

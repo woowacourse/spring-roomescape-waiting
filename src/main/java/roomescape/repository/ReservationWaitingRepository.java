@@ -5,10 +5,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
-import roomescape.repository.dto.WaitingWithTurn;
+import roomescape.domain.*;
+
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
@@ -25,44 +23,28 @@ public class ReservationWaitingRepository {
         ReservationTime time = new ReservationTime(
                 resultSet.getLong("time_id"),
                 resultSet.getObject("time_value", LocalTime.class));
-
         Theme theme = new Theme(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("description"),
                 resultSet.getString("thumbnail"));
 
-        ReservationWaiting waiting = new ReservationWaiting(
+        return new ReservationWaiting(
                 resultSet.getLong("reservation_waiting_id"),
                 resultSet.getString("username"),
                 resultSet.getObject("date", LocalDate.class),
                 time,
-                theme);
-        return waiting;
+                theme
+        );
     };
 
     private final RowMapper<WaitingWithTurn> waitingWithTurnRowMapper = (resultSet, rowNum) -> {
-        ReservationTime time = new ReservationTime(
-                resultSet.getLong("time_id"),
-                resultSet.getObject("time_value", LocalTime.class));
+        ReservationWaiting waiting = waitingRowMapper.mapRow(resultSet, rowNum);
 
-        Theme theme = new Theme(
-                resultSet.getLong("theme_id"),
-                resultSet.getString("theme_name"),
-                resultSet.getString("description"),
-                resultSet.getString("thumbnail"));
-
-        ReservationWaiting waiting = new ReservationWaiting(
-                resultSet.getLong("reservation_waiting_id"),
-                resultSet.getString("username"),
-                resultSet.getObject("date", LocalDate.class),
-                time,
-                theme);
-
-        WaitingWithTurn waitingWithTurn = new WaitingWithTurn(
+        return new WaitingWithTurn(
                 waiting,
-                resultSet.getLong("turn"));
-        return waitingWithTurn;
+                resultSet.getLong("turn")
+        );
     };
 
     public ReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -106,7 +88,7 @@ public class ReservationWaitingRepository {
         return jdbcTemplate.query(sql, waitingWithTurnRowMapper, name);
     }
 
-    public Long insert(ReservationWaiting waiting) {
+    public ReservationWaiting insert(ReservationWaiting waiting) {
         String sql = "INSERT INTO reservation_waiting(name, date, time_id, theme_id) VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -120,12 +102,27 @@ public class ReservationWaitingRepository {
             return pstmt;
         }, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        Long id = keyHolder.getKey().longValue();
+        return waiting.withId(id);
     }
 
-    public boolean existsByNameWith(String name, LocalDate date, Long timeId, Long themeId) {
-        String sql = "SELECT count(*) FROM reservation_waiting WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?";
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+    public boolean existsByNameAndSlot(String name, ReservationSlot slot) {
+        String sql = """
+                SELECT
+                    count(*)
+                FROM
+                    reservation_waiting
+                WHERE name = ?
+                  AND date = ?
+                  AND time_id = ?
+                  AND theme_id = ?
+                """;
+        Integer count = jdbcTemplate.queryForObject(sql,
+                Integer.class, name,
+                slot.getDate(),
+                slot.getTime().getId(),
+                slot.getTheme().getId()
+        );
         return count != null && count > 0;
     }
 

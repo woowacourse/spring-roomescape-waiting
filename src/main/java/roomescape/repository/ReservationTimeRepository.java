@@ -66,17 +66,17 @@ public class ReservationTimeRepository {
 
     public List<TimeAvailability> findAvailabilitiesByThemeIdAndDate(Long themeId, LocalDate date) {
         String sql = """
-            SELECT
-                rt.id,
-                rt.start_at,
-                CASE WHEN r.id IS NULL THEN true ELSE false END AS available
-            FROM reservation_time AS rt
-            LEFT JOIN reservation AS r
-                ON r.time_id = rt.id
-               AND r.theme_id = ?
-               AND r.date = ?
-            ORDER BY rt.id;
-            """;
+                SELECT
+                    rt.id,
+                    rt.start_at,
+                    CASE WHEN r.id IS NULL THEN true ELSE false END AS available
+                FROM reservation_time AS rt
+                LEFT JOIN reservation AS r
+                    ON r.time_id = rt.id
+                   AND r.theme_id = ?
+                   AND r.date = ?
+                ORDER BY rt.id;
+                """;
         return jdbcTemplate.query(sql, timeAvailabilityRowMapper, themeId, date);
     }
 }

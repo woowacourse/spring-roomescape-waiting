@@ -1,6 +1,4 @@
-package roomescape.repository.dto;
-
-import roomescape.domain.ReservationWaiting;
+package roomescape.domain;
 
 public record WaitingWithTurn(
         ReservationWaiting waiting,

@@ -24,6 +24,22 @@ public class ReservationWaiting {
         this.theme = theme;
     }
 
+    public ReservationWaiting withId(Long id) {
+        return new ReservationWaiting(id, name, date, time, theme);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+    }
+
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
+    }
+
+    public ReservationSlot getSlot() {
+        return new ReservationSlot(date, time, theme);
+    }
+
     public Long getId() {
         return id;
     }
@@ -42,15 +58,6 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public boolean isOwnedBy(String name) {
-        return this.name.equals(name);
-    }
-
-    public boolean isPast() {
-        return LocalDateTime.of(date, time.getStartAt())
-                .isBefore(LocalDateTime.now());
     }
 
     private void validateName(String name) {

@@ -3,10 +3,11 @@ package roomescape.service;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithTurn;
 import roomescape.service.dto.ReservationStatus;
 import roomescape.service.dto.Status;
-import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,7 +35,9 @@ class ReservationLookupServiceTest {
         // given
         String name = "브라운";
         Reservation reservation = new Reservation(1L, name, date, time, theme);
-        WaitingResult waiting = new WaitingResult(2L, name, date.plusDays(1), time, theme, 1L);
+        WaitingWithTurn waiting = new WaitingWithTurn(
+                new ReservationWaiting(2L, name, date.plusDays(1), time, theme),
+                1L);
 
         when(reservationService.findByName(name))
                 .thenReturn(List.of(reservation));
@@ -64,7 +67,9 @@ class ReservationLookupServiceTest {
 
         Reservation earlyReservation = new Reservation(1L, name, date, earlyTime, theme);
         Reservation lateReservation = new Reservation(2L, name, date, lateTime, theme);
-        WaitingResult futureWaiting = new WaitingResult(3L, name, date.plusDays(1), earlyTime, theme, 1L);
+        WaitingWithTurn futureWaiting = new WaitingWithTurn(
+                new ReservationWaiting(3L, name, date.plusDays(1), earlyTime, theme),
+                1L);
 
         when(reservationService.findByName(name))
                 .thenReturn(List.of(earlyReservation, lateReservation));

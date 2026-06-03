@@ -22,45 +22,40 @@ public class ReservationWaitingValidator {
     }
 
 
-    public void validateWaiting(ReservationWaiting waiting) {
-        validateNotPastDateAndTime(waiting);
-        validateAlreadyReserved(waiting);
+    public void validateWaiting(ReservationWaiting waiting, LocalDateTime now) {
+        validateNotPast(waiting, now);
+        validateAvailableSlot(waiting);
         validateNotOwnReservationSlot(waiting);
         validateNotDuplicateWaiting(waiting);
     }
 
-    public void validateUpdatableReservation(ReservationWaiting waiting, String name) {
+    public void validateModifiable(ReservationWaiting waiting, String name, LocalDateTime now) {
         validateOwner(waiting, name);
-        validateReservationNotLocked(waiting);
+        validateNotPastForModification(waiting, now);
     }
 
-    private void validateNotOwnReservationSlot(ReservationWaiting waiting) {
-        if (reservationRepository.existsByNameWith(
-                waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId())) {
-            throw new RoomescapeException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION, "본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
-        }
-    }
-
-    private void validateAlreadyReserved(ReservationWaiting waiting) {
-        if (!reservationRepository.existsWithForUpdate(
-                waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
-            throw new RoomescapeException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다.");
-        }
-    }
-
-    private void validateNotPastDateAndTime(ReservationWaiting waiting) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(waiting.getDate(), waiting.getTime().getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
+    private void validateNotPast(ReservationWaiting waiting, LocalDateTime now) {
+        if (waiting.isPast(now)) {
             throw new RoomescapeException(ErrorCode.PAST_SCHEDULE, "이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
         }
     }
 
+    private void validateAvailableSlot(ReservationWaiting waiting) {
+        if (!reservationRepository.existsBySlotForUpdate(waiting.getSlot())) {
+            throw new RoomescapeException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다.");
+        }
+    }
+
+    private void validateNotOwnReservationSlot(ReservationWaiting waiting) {
+        if (reservationRepository.existsByNameAndSlot(waiting.getName(), waiting.getSlot())) {
+            throw new RoomescapeException(
+                    ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION, "본인이 예약한 시간에는 대기를 신청할 수 없습니다."
+            );
+        }
+    }
+
     private void validateNotDuplicateWaiting(ReservationWaiting waiting) {
-        if (reservationWaitingRepository.existsByNameWith(
-                waiting.getName(), waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
+        if (reservationWaitingRepository.existsByNameAndSlot(waiting.getName(), waiting.getSlot())) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약 대기를 신청한 시간입니다.");
         }
     }
@@ -71,8 +66,8 @@ public class ReservationWaitingValidator {
         }
     }
 
-    private void validateReservationNotLocked(ReservationWaiting waiting) {
-        if (waiting.isPast()) {
+    private void validateNotPastForModification(ReservationWaiting waiting, LocalDateTime now) {
+        if (waiting.isPast(now)) {
             throw new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다.");
         }
     }

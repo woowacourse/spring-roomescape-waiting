@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -152,9 +153,11 @@ class ReservationRepositoryTest {
         reservationRepository.insert(new Reservation(null, "브라운", date, time, theme));
 
         // when
-        boolean exists = reservationRepository.existsWithForUpdate(date, time.getId(), theme.getId());
-        boolean notExistsWithOtherDate = reservationRepository.existsWithForUpdate(date.plusDays(1), time.getId(), theme.getId());
-        boolean notExistsWithOtherTime = reservationRepository.existsWithForUpdate(date, otherTime.getId(), theme.getId());
+        boolean exists = reservationRepository.existsBySlotForUpdate(new ReservationSlot(date, time, theme));
+        boolean notExistsWithOtherDate = reservationRepository.existsBySlotForUpdate(
+                new ReservationSlot(date.plusDays(1), time, theme));
+        boolean notExistsWithOtherTime = reservationRepository.existsBySlotForUpdate(
+                new ReservationSlot(date, otherTime, theme));
 
         // then
         assertAll(

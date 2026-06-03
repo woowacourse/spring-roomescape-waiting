@@ -36,7 +36,8 @@ public class ThemeController {
 
     @GetMapping("/{id}/times")
     public ResponseEntity<List<TimeAvailabilityResponse>> getAvailableTimes(
-            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id, @RequestParam("date") LocalDate date) {
+            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id, @RequestParam("date") LocalDate date
+    ) {
         List<TimeAvailabilityResponse> times = reservationAvailabilityService.findAvailableTimes(id, date).stream()
                 .map(TimeAvailabilityResponse::from)
                 .toList();

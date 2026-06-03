@@ -8,13 +8,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.WaitingWithTurn;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.service.ReservationWaitingService;
-import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -41,7 +43,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willReturn(waitingResult());
 
         // when & then
@@ -60,10 +63,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.turn").value(2));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -96,7 +100,7 @@ class ReservationWaitingControllerTest {
                         .param("name", "브라운"))
                 .andExpect(status().isNoContent());
 
-        verify(reservationWaitingService, times(1)).delete(1L, "브라운");
+        verify(reservationWaitingService, times(1)).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -211,7 +215,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willThrow(new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약 대기를 신청한 시간입니다."));
 
         // when & then
@@ -223,10 +228,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("이미 예약 대기를 신청한 시간입니다."));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -237,7 +243,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willThrow(new RoomescapeException(ErrorCode.INVALID_INPUT, "예약 가능한 시간에는 대기를 신청할 수 없습니다."));
 
         // when & then
@@ -249,10 +256,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("예약 가능한 시간에는 대기를 신청할 수 없습니다."));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -263,7 +271,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willThrow(new RoomescapeException(ErrorCode.WAITING_NOT_ALLOWED_FOR_OWN_RESERVATION, "본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
 
         // when & then
@@ -275,10 +284,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("본인이 예약한 시간에는 대기를 신청할 수 없습니다."));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -289,7 +299,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willThrow(new RoomescapeException(ErrorCode.PAST_SCHEDULE, "이미 지난 시간으로는 예약 대기를 신청할 수 없습니다."));
 
         // when & then
@@ -301,10 +312,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다."));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -315,7 +327,8 @@ class ReservationWaitingControllerTest {
                 eq("브라운"),
                 eq(LocalDate.of(2099, 1, 1)),
                 eq(1L),
-                eq(1L)))
+                eq(1L),
+                any(LocalDateTime.class)))
                 .willThrow(new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
 
         // when & then
@@ -327,10 +340,11 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 테마입니다."));
 
         verify(reservationWaitingService, times(1)).create(
-                "브라운",
-                LocalDate.of(2099, 1, 1),
-                1L,
-                1L);
+                eq("브라운"),
+                eq(LocalDate.of(2099, 1, 1)),
+                eq(1L),
+                eq(1L),
+                any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -338,7 +352,7 @@ class ReservationWaitingControllerTest {
     void 예약_대기_취소시_본인의_대기가_아니면_에러_응답() throws Exception {
         // given
         willThrow(new RoomescapeException(ErrorCode.FORBIDDEN_RESOURCE, "본인의 예약 대기만 취소할 수 있습니다."))
-                .given(reservationWaitingService).delete(1L, "브라운");
+                .given(reservationWaitingService).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
 
         // when & then
         mockMvc.perform(delete("/waitings/1")
@@ -347,7 +361,7 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.code").value("FORBIDDEN_RESOURCE"))
                 .andExpect(jsonPath("$.detail").value("본인의 예약 대기만 취소할 수 있습니다."));
 
-        verify(reservationWaitingService, times(1)).delete(1L, "브라운");
+        verify(reservationWaitingService, times(1)).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -355,7 +369,7 @@ class ReservationWaitingControllerTest {
     void 예약_대기_취소시_이미_지난_대기이면_에러_응답() throws Exception {
         // given
         willThrow(new RoomescapeException(ErrorCode.PAST_RESOURCE_LOCKED, "이미 지난 예약 대기는 취소할 수 없습니다."))
-                .given(reservationWaitingService).delete(1L, "브라운");
+                .given(reservationWaitingService).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
 
         // when & then
         mockMvc.perform(delete("/waitings/1")
@@ -364,7 +378,7 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.code").value("PAST_RESOURCE_LOCKED"))
                 .andExpect(jsonPath("$.detail").value("이미 지난 예약 대기는 취소할 수 없습니다."));
 
-        verify(reservationWaitingService, times(1)).delete(1L, "브라운");
+        verify(reservationWaitingService, times(1)).delete(eq(1L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -372,7 +386,7 @@ class ReservationWaitingControllerTest {
     void 예약_대기_취소시_존재하지_않는_대기이면_에러_응답() throws Exception {
         // given
         willThrow(new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 예약 대기입니다."))
-                .given(reservationWaitingService).delete(999L, "브라운");
+                .given(reservationWaitingService).delete(eq(999L), eq("브라운"), any(LocalDateTime.class));
 
         // when & then
         mockMvc.perform(delete("/waitings/999")
@@ -381,7 +395,7 @@ class ReservationWaitingControllerTest {
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.detail").value("존재하지 않는 예약 대기입니다."));
 
-        verify(reservationWaitingService, times(1)).delete(999L, "브라운");
+        verify(reservationWaitingService, times(1)).delete(eq(999L), eq("브라운"), any(LocalDateTime.class));
         verifyNoMoreInteractions(reservationWaitingService);
     }
 
@@ -396,9 +410,11 @@ class ReservationWaitingControllerTest {
                 """;
     }
 
-    private WaitingResult waitingResult() {
+    private WaitingWithTurn waitingResult() {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
-        return new WaitingResult(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme, 2L);
+        return new WaitingWithTurn(
+                new ReservationWaiting(1L, "브라운", LocalDate.of(2099, 1, 1), time, theme),
+                2L);
     }
 }

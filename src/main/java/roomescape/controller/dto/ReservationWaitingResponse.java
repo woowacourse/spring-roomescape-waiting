@@ -1,6 +1,7 @@
 package roomescape.controller.dto;
 
-import roomescape.service.result.WaitingResult;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.WaitingWithTurn;
 
 import java.time.LocalDate;
 
@@ -8,19 +9,20 @@ public record ReservationWaitingResponse(
         Long id,
         String name,
         LocalDate date,
-        ReservationWaitingTimeResponse time,
-        ReservationWaitingThemeResponse theme,
+        ReservationTimeResponse time,
+        ReservationThemeResponse theme,
         Long turn
 ) {
 
-    public static ReservationWaitingResponse from(WaitingResult waitingResult) {
+    public static ReservationWaitingResponse from(WaitingWithTurn waitingWithTurn) {
+        ReservationWaiting waiting = waitingWithTurn.waiting();
         return new ReservationWaitingResponse(
-                waitingResult.id(),
-                waitingResult.name(),
-                waitingResult.date(),
-                ReservationWaitingTimeResponse.from(waitingResult.time()),
-                ReservationWaitingThemeResponse.from(waitingResult.theme()),
-                waitingResult.turn()
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getDate(),
+                ReservationTimeResponse.from(waiting.getTime()),
+                ReservationThemeResponse.from(waiting.getTheme()),
+                waitingWithTurn.turn()
         );
     }
 }

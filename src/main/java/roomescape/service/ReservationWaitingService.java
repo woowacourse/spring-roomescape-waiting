@@ -6,15 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingWithTurn;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.WaitingWithTurn;
-import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,49 +37,26 @@ public class ReservationWaitingService {
         this.reservationWaitingValidator = reservationWaitingValidator;
     }
 
-    public List<WaitingResult> findByName(String name) {
-        return reservationWaitingRepository.findByNameWithTurn(name).stream()
-                .map(waitingWithTurn -> {
-                    ReservationWaiting waiting = waitingWithTurn.waiting();
-                    return new WaitingResult(
-                            waiting.getId(),
-                            waiting.getName(),
-                            waiting.getDate(),
-                            waiting.getTime(),
-                            waiting.getTheme(),
-                            waitingWithTurn.turn());
-                }).toList();
+    public List<WaitingWithTurn> findByName(String name) {
+        return reservationWaitingRepository.findByNameWithTurn(name);
     }
 
     @Transactional
-    public WaitingResult create(String name, LocalDate date, Long timeId, Long themeId) {
+    public WaitingWithTurn create(String name, LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         ReservationTime time = findReservationTime(timeId);
         Theme theme = findTheme(themeId);
+
         ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
+        reservationWaitingValidator.validateWaiting(waiting, now);
 
-        reservationWaitingValidator.validateWaiting(waiting);
-
-        WaitingWithTurn saved = save(waiting);
-        ReservationWaiting savedWaiting = saved.waiting();
-        return new WaitingResult(
-                savedWaiting.getId(),
-                savedWaiting.getName(),
-                savedWaiting.getDate(),
-                savedWaiting.getTime(),
-                savedWaiting.getTheme(),
-                saved.turn());
+        return insertReservationWaiting(waiting);
     }
 
     @Transactional
-    public void delete(Long id, String name) {
+    public void delete(Long id, String name, LocalDateTime now) {
         ReservationWaiting waiting = findWaiting(id);
-        reservationWaitingValidator.validateUpdatableReservation(waiting, name);
+        reservationWaitingValidator.validateModifiable(waiting, name, now);
         reservationWaitingRepository.delete(id);
-    }
-
-    private Theme findTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
     }
 
     private ReservationTime findReservationTime(Long timeId) {
@@ -87,11 +64,16 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 시간입니다."));
     }
 
-    private WaitingWithTurn save(ReservationWaiting waiting) {
+    private Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.NOT_FOUND, "존재하지 않는 테마입니다."));
+    }
+
+    private WaitingWithTurn insertReservationWaiting(ReservationWaiting waiting) {
         try {
-            Long id = reservationWaitingRepository.insert(waiting);
-            return reservationWaitingRepository.findByIdWithTurn(id)
-                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
+            ReservationWaiting savedWaiting = reservationWaitingRepository.insert(waiting);
+            return reservationWaitingRepository.findByIdWithTurn(savedWaiting.getId())
+                    .orElseThrow(() -> new IllegalStateException("생성된 예약 대기를 찾을 수 없습니다."));
         } catch (DuplicateKeyException e) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_RESOURCE, "이미 예약 대기를 신청한 시간입니다.");
         }

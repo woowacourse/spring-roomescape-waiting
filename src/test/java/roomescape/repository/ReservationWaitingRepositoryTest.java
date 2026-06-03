@@ -6,10 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.repository.dto.WaitingWithTurn;
+import roomescape.domain.WaitingWithTurn;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -45,12 +46,12 @@ class ReservationWaitingRepositoryTest {
         ReservationWaiting waiting = new ReservationWaiting(null, "브라운", date, time, theme);
 
         // when
-        Long id = waitingRepository.insert(waiting);
+        ReservationWaiting saved = waitingRepository.insert(waiting);
 
         // then
-        ReservationWaiting savedWaiting = waitingRepository.findById(id).get();
+        ReservationWaiting savedWaiting = waitingRepository.findById(saved.getId()).get();
         assertAll(
-                () -> assertThat(id).isNotNull(),
+                () -> assertThat(saved.getId()).isNotNull(),
                 () -> assertThat(savedWaiting.getName()).isEqualTo(waiting.getName()),
                 () -> assertThat(savedWaiting.getDate()).isEqualTo(waiting.getDate()),
                 () -> assertThat(savedWaiting.getTime().getStartAt()).isEqualTo(waiting.getTime().getStartAt()));
@@ -65,7 +66,7 @@ class ReservationWaitingRepositoryTest {
         Theme theme2 = new Theme(2L, "테마 이름2", "테마 설명2", "썸네일2");
         ReservationWaiting waiting1 = new ReservationWaiting(null, "브라운", date, time1, theme1);
         ReservationWaiting waiting2 = new ReservationWaiting(null, "구구", date, time2, theme2);
-        Long id1 = waitingRepository.insert(waiting1);
+        Long id1 = waitingRepository.insert(waiting1).getId();
         waitingRepository.insert(waiting2);
 
         // when
@@ -109,7 +110,7 @@ class ReservationWaitingRepositoryTest {
         waitingRepository.insert(new ReservationWaiting(null, name, date, time, theme));
 
         // when
-        boolean result = waitingRepository.existsByNameWith(name, date, time.getId(), theme.getId());
+        boolean result = waitingRepository.existsByNameAndSlot(name, new ReservationSlot(date, time, theme));
 
         // then
         assertThat(result).isTrue();
@@ -135,7 +136,7 @@ class ReservationWaitingRepositoryTest {
         ReservationTime time = findTimeByStartAt("15:00");
         Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
         waitingRepository.insert(new ReservationWaiting(null, "브라운", date, time, theme));
-        Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme));
+        Long id2 = waitingRepository.insert(new ReservationWaiting(null, "구구", date, time, theme)).getId();
 
         // when
         WaitingWithTurn result = waitingRepository.findByIdWithTurn(id2).get();

@@ -41,7 +41,8 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservationsByName(
-            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
+            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name
+    ) {
         List<ReservationResponse> reservations = service.findByName(name).stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -51,7 +52,8 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
-            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
+            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name
+    ) {
         service.deleteByUser(id, name, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
@@ -59,7 +61,8 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
-            @Valid @RequestBody ReservationUpdateRequest request) {
+            @Valid @RequestBody ReservationUpdateRequest request
+    ) {
         Reservation reservation = service.updateByUser(
                 id,
                 request.name(),
