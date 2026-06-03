@@ -29,7 +29,7 @@ public class WaitService {
                 waitWithoutId.getTheme().getId());
 
         for (Wait wait : waits) {
-            if (wait.getName().equals(waitWithoutId.getName())) {
+            if (wait.isSameUser(waitWithoutId.getName())) {
                 throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_WAIT);
             }
         }

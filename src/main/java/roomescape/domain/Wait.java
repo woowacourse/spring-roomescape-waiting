@@ -34,6 +34,10 @@ public class Wait {
         return new Wait(id, wait.createdAt, wait.name, wait.reservationDate, wait.time, wait.theme);
     }
 
+    public boolean isSameUser(String name) {
+        return this.name.equals(name);
+    }
+
     public Long getId() {
         return id;
     }
@@ -58,6 +62,22 @@ public class Wait {
         return theme;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Wait wait = (Wait) object;
+        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(name, wait.name)
+                && Objects.equals(reservationDate, wait.reservationDate) && Objects.equals(time,
+                wait.time) && Objects.equals(theme, wait.theme);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(createdAt, name, reservationDate, time, theme);
+    }
+
     private void validate(LocalDateTime createdAt, String name, LocalDate date, ReservationTime time, Theme theme) {
         if (createdAt == null) {
             throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_DATE_TIME_NULL);
@@ -74,21 +94,5 @@ public class Wait {
         if (theme == null) {
             throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
         }
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        Wait wait = (Wait) object;
-        return Objects.equals(createdAt, wait.createdAt) && Objects.equals(name, wait.name)
-                && Objects.equals(reservationDate, wait.reservationDate) && Objects.equals(time,
-                wait.time) && Objects.equals(theme, wait.theme);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(createdAt, name, reservationDate, time, theme);
     }
 }
