@@ -56,3 +56,6 @@ CREATE INDEX idx_reservation_slot_request_order
 
 CREATE INDEX idx_reservation_name
     ON reservation (name);
+
+CREATE INDEX idx_reservation_history_name
+    ON reservation_history (name);
