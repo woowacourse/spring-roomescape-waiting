@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         final FieldError error = e.getBindingResult().getFieldErrors().getFirst();
-        final String errorCodeMessage = Objects.requireNonNull(error.getDefaultMessage(), "INVALID_INPUT_VALUE");
+        final String errorCodeMessage = Objects.requireNonNullElse(error.getDefaultMessage(), "INVALID_INPUT_VALUE");
         final ErrorCode errorCode = ErrorCode.valueOf(errorCodeMessage);
         final ErrorResponse response = ErrorResponse.from(errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
