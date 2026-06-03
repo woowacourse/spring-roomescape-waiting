@@ -1,11 +1,13 @@
 package roomescape.fake;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.domain.repository.AvailableReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
@@ -20,8 +22,12 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAll() {
-        return times.values().stream()
-                .toList();
+        return times.values().stream().toList();
+    }
+
+    @Override
+    public List<AvailableReservationTime> findAvailableByThemeAndDate(Long themeId, LocalDate date) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -35,18 +41,12 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     public Integer delete(Long id) {
         int beforeSize = times.size();
         times.remove(id);
-        int afterSize = times.size();
-
-        if (beforeSize != afterSize) {
-            return 1;
-        }
-
-        return 0;
+        return times.size() != beforeSize ? 1 : 0;
     }
 
     @Override
     public Boolean existsByStartAt(LocalTime startAt) {
         return times.values().stream()
-                .anyMatch(savedTimes -> savedTimes.getStartAt().equals(startAt));
+                .anyMatch(t -> t.getStartAt().equals(startAt));
     }
 }
