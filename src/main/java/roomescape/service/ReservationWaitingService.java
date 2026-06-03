@@ -14,25 +14,24 @@ import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
 import roomescape.repository.ReservationWaitingDao;
-import roomescape.repository.SlotDao;
 
 @Service
 public class ReservationWaitingService {
 
     private final ReservationWaitingDao reservationWaitingDao;
-    private final SlotDao slotDao;
+    private final SlotService slotService;
     private final ReservationQueryingDao reservationQueryingDao;
 
-    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, SlotDao slotDao,
+    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, SlotService slotService,
                                      ReservationQueryingDao reservationQueryingDao) {
         this.reservationWaitingDao = reservationWaitingDao;
-        this.slotDao = slotDao;
+        this.slotService = slotService;
         this.reservationQueryingDao = reservationQueryingDao;
     }
 
     @Transactional
     public ReservationWaitingResponse create(ReservationWaitingRequest reservationWaitingReq) {
-        Slot slot = slotDao.findByDateAndTimeAndTheme(reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())
+        Slot slot = slotService.find(reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
 
         Reservation current = reservationQueryingDao.findReservationBySlotId(slot.getId())

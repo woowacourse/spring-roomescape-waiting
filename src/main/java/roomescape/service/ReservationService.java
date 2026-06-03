@@ -6,23 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
-import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
-import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ExpiredDateTimeException;
-import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
-import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
-import roomescape.repository.ReservationTimeQueryingDao;
 import roomescape.repository.ReservationUpdatingDao;
 import roomescape.repository.ReservationWaitingDao;
-import roomescape.repository.SlotDao;
-import roomescape.repository.ThemeQueryingDao;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,22 +22,17 @@ import java.util.Optional;
 @Service
 public class ReservationService {
 
-    private final SlotDao slotDao;
     private final ReservationQueryingDao reservationQueryingDao;
     private final ReservationUpdatingDao reservationUpdatingDao;
-    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
-    private final ThemeQueryingDao themeQueryingDao;
     private final ReservationWaitingDao reservationWaitingDao;
+    private final SlotService slotService;
 
-    public ReservationService(SlotDao slotDao, ReservationQueryingDao reservationQueryingDao,
-                              ReservationUpdatingDao reservationUpdatingDao, ReservationTimeQueryingDao reservationTimeQueryingDao,
-                              ThemeQueryingDao themeQueryingDao, ReservationWaitingDao reservationWaitingDao) {
-        this.slotDao = slotDao;
+    public ReservationService(ReservationQueryingDao reservationQueryingDao, ReservationUpdatingDao reservationUpdatingDao,
+                              ReservationWaitingDao reservationWaitingDao, SlotService slotService) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
-        this.reservationTimeQueryingDao = reservationTimeQueryingDao;
-        this.themeQueryingDao = themeQueryingDao;
         this.reservationWaitingDao = reservationWaitingDao;
+        this.slotService = slotService;
     }
 
     public ReservationResponse read(Long id) {
@@ -67,7 +54,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(ReservationRequest reservationReq) {
         try {
-            Slot slot = findOrCreateSlot(reservationReq);
+            Slot slot = slotService.getOrCreate(reservationReq);
             Reservation reservation = Reservation.create(reservationReq.name(), slot);
             Long reservationId = reservationUpdatingDao.insert(reservation);
             return ReservationResponse.from(reservation.withId(reservationId));
@@ -113,7 +100,7 @@ public class ReservationService {
     private void promoteOrCleanupSlot(Long slotId) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstBySlotId(slotId);
         if (firstWaiting.isEmpty()) {
-            slotDao.delete(slotId);
+            slotService.delete(slotId);
             return;
         }
 
@@ -129,10 +116,10 @@ public class ReservationService {
     }
 
     private Reservation updateSlot(Reservation existed, ReservationRequest request) {
-        Slot newSlot = findOrCreateSlot(request);
+        Slot newSlot = slotService.getOrCreate(request);
 
-        if(reservationQueryingDao.isExistBySlot(newSlot.getId())) {
-            throw new InvalidInputException("해당 날짜, 시간, 테마로 이미 다른 예약이 존재합니다.");
+        if (reservationQueryingDao.isExistBySlot(newSlot.getId())) {
+            throw new ReservationAlreadyExistException();
         }
 
         Reservation moved = existed.update(request.name(), newSlot);
@@ -141,22 +128,6 @@ public class ReservationService {
             throw new DataIntegrityViolationException("해당 예약이 존재하지 않습니다.");
         }
         return moved;
-    }
-
-
-    private Slot findOrCreateSlot(ReservationRequest request) {
-        ReservationTime time = reservationTimeQueryingDao.findReservationTimeById(request.timeId())
-                .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
-        Theme theme = themeQueryingDao.findThemeById(request.themeId())
-                .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
-
-        Slot slot = Slot.create(request.date(), time, theme);
-        if (slot.isExpired()) {
-            throw new ExpiredDateTimeException();
-        }
-
-        return slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())
-                .orElseGet(() -> slot.withId(slotDao.insert(slot)));
     }
 
     private Reservation getReservation(Long id) {
