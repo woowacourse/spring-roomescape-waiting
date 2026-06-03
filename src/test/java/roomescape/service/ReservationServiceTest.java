@@ -112,7 +112,6 @@ class ReservationServiceTest {
         // given
         Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationRepository.deleteById(1L)).willReturn(true);
 
         // when
         reservationService.deleteWithValidation(1L, "오리");

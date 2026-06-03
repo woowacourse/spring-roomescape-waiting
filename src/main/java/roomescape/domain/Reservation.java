@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import java.util.Objects;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -13,15 +12,15 @@ public class Reservation {
 
     private final Long id;
     private final PersonName name;
-    private final LocalDate date;
+
+    private final ReservationDate reservationDate;
     private final ReservationTime time;
     private final Theme theme;
 
-    private Reservation(final Long id, final PersonName name, final LocalDate date, final ReservationTime time, final Theme theme) {
+    private Reservation(final Long id, final PersonName name, final ReservationDate date, final ReservationTime time, final Theme theme) {
         this.id = id;
         this.name = name;
-        validateDate(date);
-        this.date = date;
+        this.reservationDate = date;
         this.time = time;
         this.theme = theme;
     }
@@ -32,17 +31,11 @@ public class Reservation {
         }
     }
 
-    private static void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new BusinessException(ErrorCode.DATE_NULL);
-        }
-    }
-
     public static Reservation create(final String name, final LocalDate date, final ReservationTime time, final Theme theme) {
         return new Reservation(
                 null,
                 new PersonName(name),
-                date,
+                new ReservationDate(date),
                 time,
                 theme
         );
@@ -54,11 +47,12 @@ public class Reservation {
             final LocalDate date,
             final ReservationTime time,
             final Theme theme) {
+
         validateId(id);
         return new Reservation(
                 id,
                 new PersonName(name),
-                date,
+                new ReservationDate(date),
                 time,
                 theme
         );
@@ -69,7 +63,7 @@ public class Reservation {
         return new Reservation(
                 id,
                 this.name,
-                this.date,
+                this.reservationDate,
                 this.time,
                 this.theme
         );
@@ -79,8 +73,8 @@ public class Reservation {
         return new Reservation(
                 this.id,
                 this.name,
-                Objects.requireNonNullElse(newDate, this.date),
-                Objects.requireNonNullElse(newReservationTime, this.time),
+                new ReservationDate(newDate),
+                newReservationTime,
                 this.theme
         );
     }

@@ -111,6 +111,39 @@ public class WaitingListRepository {
         return 0;
     }
 
+    public Optional<WaitingList> findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(Theme theme, LocalDate date, ReservationTime time) {
+        final String sql = """
+                SELECT
+                    w.id AS waiting_list_id,
+                    w.name AS waiting_list_name,
+                    w.date AS waiting_list_date,
+                    w.theme_id AS theme_id,
+                    w.created_at,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    t.end_at AS time_end_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM waiting_list w
+                JOIN reservation_time t ON t.id = ? AND w.time_id = t.id
+                JOIN theme h ON h.id = ? AND w.theme_id = h.id
+                WHERE w.date = ?
+                """;
+        try {
+            final WaitingList waitingList = jdbcTemplate.queryForObject(
+                    sql,
+                    this::mapToDomain,
+                    time.getId(),
+                    theme.getId(),
+                    date
+            );
+            return Optional.of(waitingList);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     public boolean existsByNameAndThemeAndDateAndTime(final String name, final Long themeId, final LocalDate date, final Long timeId) {
         final String sql = """
                 SELECT COUNT(*)

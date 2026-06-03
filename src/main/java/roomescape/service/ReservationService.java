@@ -3,9 +3,11 @@ package roomescape.service;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.WaitingList;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -16,10 +18,13 @@ import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationResult;
 import roomescape.dto.ReservationTimeStatusResult;
+import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+@Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -27,6 +32,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingListRepository waitingListRepository;
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
@@ -65,18 +71,28 @@ public class ReservationService {
         return ReservationResult.from(savedReservation);
     }
 
+    @Transactional
     public void delete(final Long reservationId) {
-        final boolean deleted = reservationRepository.deleteById(reservationId);
+        Reservation findReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
 
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
+        validateFutureOrPresentDate(findReservation.getReservationDate().getDate());
+        validateFutureOrPresentTime(findReservation.getReservationDate().getDate(), findReservation.getTime());
+
+        reservationRepository.deleteById(findReservation.getId());
+
+        Optional<WaitingList> findFirstWaitingList = waitingListRepository.findFirstByThemeAndDateAndTimeOrderByCreatedAtAsc(findReservation.getTheme(), findReservation.getReservationDate().getDate(), findReservation.getTime());
+        if (findFirstWaitingList.isEmpty()) {
+            return;
         }
+
+
     }
 
     public void deleteWithValidation(final Long reservationId, final String name) {
         Reservation reservation = getReservation(reservationId);
         validateReservationOwner(reservation, name);
-        final LocalDate date = reservation.getDate();
+        final LocalDate date = reservation.getReservationDate().getDate();
         validateFutureOrPresentDate(date);
         final ReservationTime reservationTime = reservation.getTime();
         validateFutureOrPresentTime(date, reservationTime);
@@ -103,7 +119,7 @@ public class ReservationService {
         final String personName = reservationModifyCommand.name();
         validateReservationOwner(originalReservation, personName);
 
-        final LocalDate originalDate = originalReservation.getDate();
+        final LocalDate originalDate = originalReservation.getReservationDate().getDate();
         final ReservationTime originalTime = originalReservation.getTime();
         validateFutureOrPresentDate(originalDate);
         validateFutureOrPresentTime(originalDate, originalTime);
@@ -118,7 +134,7 @@ public class ReservationService {
                 reservationTime
         );
 
-        final LocalDate date = modifiedReservation.getDate();
+        final LocalDate date = modifiedReservation.getReservationDate().getDate();
         validateFutureOrPresentDate(date);
         validateFutureOrPresentTime(date, reservationTime);
         validateAvailable(date, timeId, modifiedReservation.getTheme().getId());

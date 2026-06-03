@@ -188,7 +188,7 @@ public class ReservationRepository {
             );
 
             preparedStatement.setString(1, reservation.getName());
-            preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
+            preparedStatement.setDate(2, Date.valueOf(reservation.getReservationDate().getDate()));
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
 
@@ -217,19 +217,19 @@ public class ReservationRepository {
 
         jdbcTemplate.update(
                 sql,
-                reservation.getDate(),
+                reservation.getReservationDate().getDate(),
                 reservation.getTime().getId(),
                 reservation.getId()
         );
     }
 
-    public boolean deleteById(final Long reservationId) {
+    public void deleteById(final Long reservationId) {
         final String sql = """
                 DELETE FROM reservation
                 WHERE id = ?
                 """;
 
-        return jdbcTemplate.update(sql, reservationId) > 0;
+        jdbcTemplate.update(sql, reservationId);
     }
 
     /**
