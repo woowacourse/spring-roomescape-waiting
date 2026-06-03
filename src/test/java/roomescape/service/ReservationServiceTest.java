@@ -192,14 +192,54 @@ class ReservationServiceTest {
         Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
         when(reservationRepository.findByIdForUpdate(id))
                 .thenReturn(Optional.of(reservation));
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.empty());
 
         // when
         service.deleteByUser(id, name, now);
 
         // then
         verify(reservationRepository, times(1)).findByIdForUpdate(id);
+        verify(waitingRepository, times(1)).findFirstBySlotForUpdate(reservation.getSlot());
         verify(reservationRepository, times(1)).delete(id);
-        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository);
+        verify(reservationRepository, never()).insert(any(Reservation.class));
+        verify(waitingRepository, never()).delete(any());
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
+    }
+
+    @Test
+    void 사용자_본인_예약_삭제시_첫번째_대기를_예약으로_자동_승격한다() {
+        // given
+        Long id = 1L;
+        Long waitingId = 2L;
+        String name = "브라운";
+        Reservation reservation = createByUserReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        ReservationWaiting waiting = new ReservationWaiting(waitingId, "구구", reservation.getSlot());
+        when(reservationRepository.findByIdForUpdate(id))
+                .thenReturn(Optional.of(reservation));
+        when(waitingRepository.findFirstBySlotForUpdate(reservation.getSlot()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenAnswer(invocation -> invocation.<Reservation>getArgument(0).withId(3L));
+
+        // when
+        service.deleteByUser(id, name, now);
+
+        // then
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        InOrder inOrder = inOrder(reservationRepository, waitingRepository);
+        inOrder.verify(reservationRepository).findByIdForUpdate(id);
+        inOrder.verify(waitingRepository).findFirstBySlotForUpdate(reservation.getSlot());
+        inOrder.verify(reservationRepository).delete(id);
+        inOrder.verify(reservationRepository).insert(captor.capture());
+        inOrder.verify(waitingRepository).delete(waitingId);
+
+        Reservation promotedReservation = captor.getValue();
+        assertAll(
+                () -> assertThat(promotedReservation.getId()).isNull(),
+                () -> assertThat(promotedReservation.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(promotedReservation.getSlot()).isEqualTo(waiting.getSlot()));
+        verifyNoMoreInteractions(reservationRepository, reservationTimeRepository, themeRepository, waitingRepository);
     }
 
     @Test

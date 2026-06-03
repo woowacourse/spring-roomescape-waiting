@@ -69,7 +69,7 @@ public class ReservationService {
     public void deleteByUser(Long id, String name, LocalDateTime now) {
         Reservation reservation = findReservation(id);
         reservationValidator.validateModifiableByUser(reservation, name, now);
-        reservationRepository.delete(id);
+        deleteAndPromoteWaiting(reservation);
     }
 
     @Transactional
