@@ -260,16 +260,19 @@ class ReservationServiceTest {
             // given
             LocalDate futureDate = LocalDate.now().plusYears(1);
             Time existingTime = timeWithId(1L);
-            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), EntityStatus.ACTIVE);
             Theme existingTheme = themeWithId(1L);
-            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", EntityStatus.ACTIVE);
             Reservation existing = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
+                    1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
+
             LocalDate newDate = futureDate.plusDays(1);
+            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), EntityStatus.ACTIVE);
+            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", EntityStatus.ACTIVE);
             Reservation updated = Reservation.reconstruct(
                 1L, new ReserverName("예약자"), newDate, newTime, newTheme, ReservationStatus.ACTIVE);
+
             ReservationUpdateCommand command = new ReservationUpdateCommand(
                 new ReserverName("예약자"), newDate, 2L, 2L);
+
             when(reservationRepository.findReservationByIdAndNotDeleted(1L))
                 .thenReturn(Optional.of(existing));
             when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
@@ -287,6 +290,44 @@ class ReservationServiceTest {
             assertThat(result.themeId()).isEqualTo(2L);
 
             verify(reservationRepository).update(any(Reservation.class));
+        }
+
+        @Test
+        void 수정하면_원래_슬롯의_대기_확정을_위한_이벤트를_발행한다() {
+            // given
+            LocalDate futureDate = LocalDate.now().plusYears(1);
+            Time existingTime = timeWithId(1L);
+            Theme existingTheme = themeWithId(1L);
+            Reservation existing = Reservation.reconstruct(
+                    1L, new ReserverName("예약자"), futureDate, existingTime, existingTheme, ReservationStatus.ACTIVE);
+
+            LocalDate newDate = futureDate.plusDays(1);
+            Time newTime = Time.reconstruct(2L, LocalTime.of(11, 0), EntityStatus.ACTIVE);
+            Theme newTheme = Theme.reconstruct(2L, "새 테마", "새 설명", "https://example.com/new.png", EntityStatus.ACTIVE);
+            Reservation updated = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), newDate, newTime, newTheme, ReservationStatus.ACTIVE);
+
+            ReservationUpdateCommand command = new ReservationUpdateCommand(
+                new ReserverName("예약자"), newDate, 2L, 2L);
+
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(existing));
+            when(timeRepository.findTimeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTime));
+            when(themeRepository.findThemeByIdAndNotDeleted(2L)).thenReturn(Optional.of(newTheme));
+            when(reservationRepository.existsActiveOrWaitingReservation(
+                newDate, newTime, newTheme)).thenReturn(false);
+            when(reservationRepository.update(any(Reservation.class))).thenReturn(updated);
+
+            // when
+            reservationService.updateReservation(1L, command);
+
+            // then: 비워진 원래 슬롯(timeId=1, themeId=1, futureDate) 기준으로 이벤트 발행
+            ArgumentCaptor<ActiveReservationCancelEvent> captor =
+                ArgumentCaptor.forClass(ActiveReservationCancelEvent.class);
+            verify(eventPublisher).publishEvent(captor.capture());
+            assertThat(captor.getValue().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().date()).isEqualTo(futureDate);
         }
 
         @Test

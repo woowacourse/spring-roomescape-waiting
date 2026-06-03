@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.feature.reservation.domain.Reservation;
@@ -30,6 +35,10 @@ import roomescape.global.error.exception.GeneralParametersException;
 @Service
 @RequiredArgsConstructor
 public class ReservationManagementService implements ReservationService, AdminReservationService, WaitingService {
+
+    private static final int MAX_CONCURRENCY_ATTEMPTS = 2;
+    private static final long CONCURRENCY_BACKOFF_MILLIS = 50L;
+    private static final double CONCURRENCY_BACKOFF_MULTIPLIER = 2.0;
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
@@ -69,16 +78,17 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.ACTIVE);
 
         validateNotReservedOrWaitedByOther(reservation);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
     }
 
     private Reservation createReservation(ReservationCreateCommand command, ReservationStatus status) {
@@ -104,6 +114,11 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
@@ -117,11 +132,13 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
         validateNotReservedOrWaitedByOther(updated);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
-        }
+        eventPublisher.publishEvent(new ActiveReservationCancelEvent(
+                existingReservation.getTime().getId(),
+                existingReservation.getTheme().getId(),
+                existingReservation.getDate()
+        ));
+
+        return reservationMapper.toCreateResponseDto(reservationRepository.update(updated));
     }
 
     @Override
@@ -148,6 +165,11 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public void deleteReservationById(Long id) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
@@ -164,6 +186,11 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
     @Override
     @Transactional
+    @Retryable(
+            retryFor = {DuplicateKeyException.class, OptimisticLockingFailureException.class},
+            maxAttempts = MAX_CONCURRENCY_ATTEMPTS,
+            backoff = @Backoff(delay = CONCURRENCY_BACKOFF_MILLIS, multiplier = CONCURRENCY_BACKOFF_MULTIPLIER)
+    )
     public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command, ReservationStatus.WAITING);
 
@@ -171,11 +198,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
         validateNotReservedByMyself(reservation);
         validateAlreadyReserved(reservation);
 
-        try {
-            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
-        } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
-        }
+        return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
     }
 
     @Override
@@ -192,6 +215,21 @@ public class ReservationManagementService implements ReservationService, AdminRe
         }
 
         return reservationMapper.toCancelResponseDto(canceledReservation);
+    }
+
+    @Recover
+    public ReservationCreateResponseDto recoverSave(DataAccessException e, ReservationCreateCommand command) {
+        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
+    }
+
+    @Recover
+    public ReservationCreateResponseDto recoverUpdate(DataAccessException e, Long id, ReservationUpdateCommand command) {
+        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
+    }
+
+    @Recover
+    public void recoverDelete(DataAccessException e, Long id) {
+        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
     }
 
     private void validateNotReservedOrWaitedByOther(Reservation reservation) {

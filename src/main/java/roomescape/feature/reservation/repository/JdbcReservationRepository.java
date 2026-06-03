@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -15,12 +16,10 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
-import roomescape.feature.reservation.error.type.ReservationErrorType;
 import roomescape.feature.reservation.domain.ReserverName;
 import roomescape.feature.theme.domain.Theme;
 import roomescape.feature.time.domain.Time;
 import roomescape.global.domain.EntityStatus;
-import roomescape.global.error.exception.GeneralException;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -216,7 +215,10 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         int updatedRowCount = jdbcTemplate.update(sql, parameters);
         if (updatedRowCount == 0) {
-            throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
+            throw new OptimisticLockingFailureException(
+                    "예약이 다른 요청에 의해 먼저 변경되었습니다."
+                            + " id: " + reservation.getId()
+                            + " version: " + reservation.getVersion());
         }
 
         return Reservation.reconstruct(reservation.getId(), reservation.getName(), reservation.getDate(),

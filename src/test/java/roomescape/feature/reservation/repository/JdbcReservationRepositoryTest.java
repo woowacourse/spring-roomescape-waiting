@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
@@ -30,7 +31,6 @@ import roomescape.feature.time.domain.Time;
 import roomescape.feature.time.repository.JdbcTimeRepository;
 import roomescape.fixture.ReservationFixture;
 import roomescape.global.domain.EntityStatus;
-import roomescape.global.error.exception.GeneralException;
 
 @JdbcTest
 @TestClassOrder(ClassOrderer.OrderAnnotation.class)
@@ -664,7 +664,7 @@ class JdbcReservationRepositoryTest {
         }
 
         @Test
-        void 읽은_뒤_다른_요청이_먼저_변경했으면_CONCURRENT_MODIFICATION_예외가_발생한다() {
+        void 읽은_뒤_다른_요청이_먼저_변경했으면_낙관적_락_예외가_발생한다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
@@ -677,8 +677,7 @@ class JdbcReservationRepositoryTest {
             // when & then: 오래된 버전(0)을 가진 객체로 수정 시도
             Reservation stale = saved.update(new ReserverName("예약자"), date.plusDays(1), time, theme);
             assertThatThrownBy(() -> reservationRepository.update(stale))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("다른 요청이 먼저 예약을 변경했습니다. 다시 시도해주세요.");
+                .isInstanceOf(OptimisticLockingFailureException.class);
         }
     }
 
