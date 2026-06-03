@@ -134,3 +134,21 @@ https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r33
 
 4. Repository와 DAO, Entity와 Domain     
 https://github.com/woowacourse/spring-roomescape-waiting/pull/357#discussion_r3329982595
+
+------
+
+안녕하세요 매트!
+생각해볼 만한 리뷰 주셔서 감사합니다. 
+아직 학습중이라 헷갈리는 개념들도 있지만, 리뷰 주신 내용을 토대로 제가 생각하는 바를 적어봤습니다.
+혹시 잘못 생각하고 있는 점이 있다면 소중한 피드백 부탁드립니다. 🙇🏻‍♀️
+
+추가로 현재 Service - DAO 구조를 사용하고 있는데, 리뷰 주신 내용을 토대로 생각해보니,
+레벨 1에서 했던 대로 도메인에 더 책임을 부여해서 Domain - Repository로 바꾸고 싶다는 생각이 들었습니다.
+사이클 2를 보니 예약 대기에 대한 자동 전환 + 순번 재정렬 기능이 이미 구현이 되어있어서, 사이클 2 때 위의 변경사항을 시도해보려고 하는데 괜찮을까요?
+
+리뷰 잘 부탁드립니다!
+
+### 변경사항 (260603)
+- [x] GlobalExceptionHandler에 Exception 처리 로직 추가
+- MethodArgumentTypeMismatchException 예외 처리 추가
+- HttpMessageNotReadableException 예외 처리 추가
