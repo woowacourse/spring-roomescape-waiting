@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,15 +26,23 @@ public class WaitingList {
         this.createdAt = createdAt;
     }
 
+    private static void validateId(final Long id) {
+        if (id == null) {
+            throw new BusinessException(ErrorCode.WAITING_LIST_ID_NULL);
+        }
+    }
+
     public static WaitingList create(final String name, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         return new WaitingList(null, new PersonName(name), new ReservationDate(date), reservationTime, theme, LocalDateTime.now());
     }
 
     public static WaitingList createWithId(final Long id, final String name, final LocalDate date, final ReservationTime reservationTime, final Theme theme, final LocalDateTime createdAt) {
+        validateId(id);
         return new WaitingList(id, new PersonName(name), new ReservationDate(date), reservationTime, theme, createdAt);
     }
 
     public WaitingList withId(final Long waitingListId) {
+        validateId(waitingListId);
         return new WaitingList(waitingListId, name, reservationDate, reservationTime, theme, createdAt);
     }
 

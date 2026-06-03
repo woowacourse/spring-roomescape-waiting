@@ -19,6 +19,7 @@ public class ReservationTime {
         this.startAt = startAt;
         validateEndAt(endAt);
         this.endAt = endAt;
+        validateStartAtBeforeEndAt(startAt, endAt);
     }
 
     private static void validateId(final Long id) {
@@ -36,6 +37,12 @@ public class ReservationTime {
     private static void validateEndAt(final LocalTime endAt) {
         if (endAt == null) {
             throw new BusinessException(ErrorCode.END_TIME_NULL);
+        }
+    }
+
+    private void validateStartAtBeforeEndAt(final LocalTime startAt, final LocalTime endAt) {
+        if (startAt.isAfter(endAt)) {
+            throw new BusinessException(ErrorCode.START_TIME_AFTER_END_TIME);
         }
     }
 

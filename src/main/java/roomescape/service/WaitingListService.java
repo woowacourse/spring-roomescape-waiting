@@ -38,14 +38,14 @@ public class WaitingListService {
         validateFuture(waitingList);
 
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId()
+                waitingList.getReservationDate().date(), findReservationTime.getId(), findTheme.getId()
             )
         ) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
         if (waitingListRepository.existsByNameAndDateAndTimeAndTheme(
-                waitingList.getName(), waitingList.getReservationDate().getDate(), findTheme.getId(), findReservationTime.getId()
+                waitingList.getName(), waitingList.getReservationDate().date(), findTheme.getId(), findReservationTime.getId()
             )
         ) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);

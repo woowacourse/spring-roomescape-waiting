@@ -1,19 +1,16 @@
 package roomescape.domain;
 
-import lombok.Getter;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 
 import java.time.LocalDate;
 
-@Getter
-public class ReservationDate {
+public record ReservationDate(
+        LocalDate date
+) {
 
-    private final LocalDate date;
-
-    public ReservationDate(final LocalDate date) {
+    public ReservationDate {
         validate(date);
-        this.date = date;
     }
 
     private void validate(final LocalDate date) {

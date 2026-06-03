@@ -42,12 +42,15 @@ public enum ErrorCode {
     TIME_ID_NULL(HttpStatus.BAD_REQUEST, "예약 시간 ID는 비워둘 수 없습니다."),
     START_TIME_NULL(HttpStatus.BAD_REQUEST, "시작 시간은 비워둘 수 없습니다."),
     END_TIME_NULL(HttpStatus.BAD_REQUEST, "종료 시간은 비워둘 수 없습니다."),
+    START_TIME_AFTER_END_TIME(HttpStatus.BAD_REQUEST, "시작 시간이 종료 시간보다 늦을 수 없습니다."),
 
     THEME_ID_NULL(HttpStatus.BAD_REQUEST, "테마 ID는 비워둘 수 없습니다."),
     THEME_NAME_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "테마 이름은 비워둘 수 없습니다."),
     DESCRIPTION_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "테마 설명은 비워둘 수 없습니다."),
     DESCRIPTION_TOO_SHORT(HttpStatus.BAD_REQUEST, "테마 설명은 최소 5자 이상이어야 합니다."),
     THUMBNAIL_URL_NULL_OR_BLANK(HttpStatus.BAD_REQUEST, "테마 썸네일 URL은 비워둘 수 없습니다."),
+
+    WAITING_LIST_ID_NULL(HttpStatus.BAD_REQUEST, "예약 대기 ID는 비워둘 수 없습니다.")
     ;
 
     private final HttpStatus httpStatus;

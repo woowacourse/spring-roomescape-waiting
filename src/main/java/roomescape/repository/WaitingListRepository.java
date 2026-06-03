@@ -104,7 +104,7 @@ public class WaitingListRepository {
                 """;
 
         Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
-                waitingList.getReservationDate().getDate(),
+                waitingList.getReservationDate().date(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
                 waitingList.getCreatedAt()
@@ -143,7 +143,7 @@ public class WaitingListRepository {
             );
 
             preparedStatement.setString(1, waitingList.getName());
-            preparedStatement.setDate(2, Date.valueOf(waitingList.getReservationDate().getDate()));
+            preparedStatement.setDate(2, Date.valueOf(waitingList.getReservationDate().date()));
             preparedStatement.setLong(3, waitingList.getReservationTime().getId());
             preparedStatement.setLong(4, waitingList.getTheme().getId());
             preparedStatement.setTimestamp(5, Timestamp.valueOf(waitingList.getCreatedAt()));
