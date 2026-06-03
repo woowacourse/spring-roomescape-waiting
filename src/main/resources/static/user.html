@@ -623,7 +623,7 @@
   <div class="logo">Room<span>Escape</span></div>
   <div class="header-right">
     <span class="username-badge">안녕하세요, <strong id="headerName">-</strong> 님</span>
-    <button class="btn-logout" onclick="logout()">나가기</button>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
   </div>
 </header>
 
@@ -756,28 +756,36 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+  <script>
   const API = '';
   let username = '';
+  let loginMember = null;
   let selectedTheme = null;
   let selectedDate = null;
   let selectedTime = null;
   let selectedWaitingTarget = null;
   let cachedThemes = null;
-  let cachedAdminReservations = null;
 
-  function init() {
-    username = localStorage.getItem('username');
-    if (!username) {
+  async function init() {
+    try {
+      loginMember = await fetchJson(`${API}/auth/me`, {}, '로그인이 필요합니다.');
+    } catch (e) {
       window.location.href = '/index.html';
       return;
     }
+
+    if (loginMember.role === 'ADMIN') {
+      window.location.href = '/admin.html';
+      return;
+    }
+
+    username = loginMember.name;
     document.getElementById('headerName').textContent = username;
     switchSection('popular');
   }
 
-  function logout() {
-    localStorage.removeItem('username');
+  async function logout() {
+    await fetch(`${API}/auth/logout`, { method: 'DELETE' }).catch(() => {});
     window.location.href = '/index.html';
   }
 
@@ -803,6 +811,10 @@
 
   async function fetchJson(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -813,6 +825,10 @@
 
   async function fetchEmpty(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -872,20 +888,8 @@
   }
 
   async function buildPopularThemesFromReservations() {
-    const [themes, reservations] = await Promise.all([
-      getThemes(),
-      getAdminReservationsSafely()
-    ]);
-    const counts = reservations.reduce((acc, reservationSlot) => {
-      acc[reservationSlot.themeName] = (acc[reservationSlot.themeName] || 0) + 1;
-      return acc;
-    }, {});
-
-    return themes
-      .map(theme => ({ ...theme, reservationCount: counts[theme.name] || 0 }))
-      .filter(theme => theme.reservationCount > 0)
-      .sort((a, b) => b.reservationCount - a.reservationCount)
-      .slice(0, 10);
+    const themes = await getThemes();
+    return themes.slice(0, 10);
   }
 
   // Booking themes
@@ -963,6 +967,10 @@
   async function goToStep3() {
     const dateInput = document.getElementById('booking-date');
     selectedDate = dateInput.value;
+    if (!selectedDate) {
+      showToast('날짜를 선택해주세요.', 'error');
+      return;
+    }
     document.getElementById('selected-date-label').textContent = `📅 ${formatDate(selectedDate)}`;
     selectedTime = null;
 
@@ -1026,17 +1034,6 @@
     document.getElementById('wait-reservationTime-btn').style.display = 'inline-flex';
   }
 
-  async function getAdminReservationsSafely() {
-    if (cachedAdminReservations) return cachedAdminReservations;
-
-    try {
-      cachedAdminReservations = await fetchJson(`${API}/admin/reservations`, {}, '예약 목록을 불러올 수 없습니다.');
-      return cachedAdminReservations;
-    } catch (e) {
-      return [];
-    }
-  }
-
   function backFromDateStep() {
     goToStep(1);
   }
@@ -1078,7 +1075,6 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: username,
           date: selectedDate || null,
           timeId: selectedTime?.id || null,
           themeId: selectedTheme.id
@@ -1086,7 +1082,6 @@
       };
 
       await fetchEmpty(`${API}/reservations`, request, '예약에 실패했습니다.');
-      cachedAdminReservations = null;
       if (selectedWaitingTarget) {
         showWaitingComplete({
           themeName: selectedTheme.name,
@@ -1206,7 +1201,7 @@
 
     try {
       const reservations = await fetchJson(
-        `${API}/reservations?name=${encodeURIComponent(username)}`,
+        `${API}/reservations`,
         {},
         '예약 목록을 불러올 수 없습니다.'
       );
@@ -1289,7 +1284,7 @@
     if (!confirm('예약을 삭제하시겠습니까?')) return;
     try {
       await fetchEmpty(
-        `${API}/reservations/${id}?name=${encodeURIComponent(username)}`,
+        `${API}/reservations/${id}`,
         { method: 'DELETE' },
         '삭제에 실패했습니다.'
       );

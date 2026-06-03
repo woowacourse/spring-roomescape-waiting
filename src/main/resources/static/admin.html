@@ -84,6 +84,12 @@
       color: var(--text);
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     /* Tab navigation */
     .tab-nav {
       background: var(--surface);
@@ -205,6 +211,35 @@
 
     tbody td.muted { color: var(--muted); }
 
+    .reservation-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .reservation-status.canceled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .reservation-status.confirmed {
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+    }
+
+    .reservation-status.waiting {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+    }
+
+    .reservation-status.expired {
+      background: rgba(107, 114, 128, 0.14);
+      color: #9ca3af;
+    }
+
     /* Form panel */
     .form-panel {
       background: var(--card);
@@ -235,7 +270,7 @@
       margin-bottom: 6px;
     }
 
-    .form-group input, .form-group textarea {
+    .form-group input, .form-group textarea, .form-group select {
       width: 100%;
       padding: 10px 14px;
       background: rgba(255,255,255,0.04);
@@ -248,12 +283,17 @@
       font-family: inherit;
     }
 
-    .form-group input:focus, .form-group textarea:focus {
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       border-color: var(--accent);
     }
 
     .form-group input::placeholder, .form-group textarea::placeholder {
       color: #374151;
+    }
+
+    .form-group select option {
+      background: #111827;
+      color: var(--text);
     }
 
     .form-group textarea { resize: vertical; min-height: 80px; }
@@ -377,7 +417,9 @@
     <span class="logo">Room<span>Escape</span></span>
     <span class="admin-badge">ADMIN</span>
   </div>
-  <a href="/index.html" class="btn-back">← 메인으로</a>
+  <div class="header-actions">
+    <button class="btn-back" onclick="logout()">나가기</button>
+  </div>
 </header>
 
 <div class="tab-nav">
@@ -402,6 +444,31 @@
     <button class="btn btn-ghost" onclick="loadReservations()">↻ 새로고침</button>
   </div>
 
+  <div class="form-panel">
+    <h3>➕ 예약 추가</h3>
+    <div class="form-group">
+      <label>회원</label>
+      <select id="admin-res-member">
+        <option value="">회원 선택</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>테마</label>
+      <select id="admin-res-theme" onchange="loadAdminReservationTimes()"></select>
+    </div>
+    <div class="form-group">
+      <label>날짜</label>
+      <input type="date" id="admin-res-date" onchange="loadAdminReservationTimes()">
+    </div>
+    <div class="form-group">
+      <label>시간</label>
+      <select id="admin-res-time" disabled>
+        <option value="">테마와 날짜를 먼저 선택하세요</option>
+      </select>
+    </div>
+    <button class="btn btn-accent" onclick="createReservation()">예약 추가</button>
+  </div>
+
   <div class="loading-center" id="res-loading"><div class="spinner"></div></div>
 
   <div class="table-wrap" id="res-table-wrap" style="display:none">
@@ -414,6 +481,7 @@
           <th>상태</th>
           <th>날짜</th>
           <th>시간</th>
+          <th>관리</th>
         </tr>
       </thead>
       <tbody id="res-tbody"></tbody>
@@ -490,8 +558,11 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+  <script>
   const API = '';
+  let loginMember = null;
+  let adminReservationThemes = null;
+  let adminReservationMembers = null;
 
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -515,6 +586,14 @@
 
   async function fetchJson(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
+    if (res.status === 403) {
+      window.location.href = '/user.html';
+      throw new Error('관리자 권한이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -525,6 +604,14 @@
 
   async function fetchEmpty(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
     const res = await fetch(url, options);
+    if (res.status === 401) {
+      window.location.href = '/index.html';
+      throw new Error('로그인이 필요합니다.');
+    }
+    if (res.status === 403) {
+      window.location.href = '/user.html';
+      throw new Error('관리자 권한이 필요합니다.');
+    }
     if (!res.ok) {
       const error = await readErrorMessage(res, fallback);
       throw Object.assign(new Error(error.message), error);
@@ -540,6 +627,27 @@
     if (name === 'reservations') loadReservations();
     else if (name === 'themes') loadThemes();
     else if (name === 'times') loadTimes();
+  }
+
+  async function init() {
+    try {
+      loginMember = await fetchJson(`${API}/auth/me`, {}, '로그인이 필요합니다.');
+      if (loginMember.role !== 'ADMIN') {
+        window.location.href = '/user.html';
+        return;
+      }
+      initReservationForm();
+      loadReservations();
+    } catch (e) {
+      if (!String(e.message).includes('관리자 권한')) {
+        window.location.href = '/index.html';
+      }
+    }
+  }
+
+  async function logout() {
+    await fetch(`${API}/auth/logout`, { method: 'DELETE' }).catch(() => {});
+    window.location.href = '/index.html';
   }
 
   // ── Reservations ──────────────────────────────────────────────
@@ -564,14 +672,121 @@
           <td class="muted">${r.reservationId}</td>
           <td>${r.name}</td>
           <td>${r.themeName}</td>
-          <td class="muted">${displayReservationStatus(r)}</td>
+          <td>${reservationStatusBadge(r)}</td>
           <td class="muted">${r.date}</td>
           <td class="muted">${r.time}</td>
+          <td>${adminReservationActions(r)}</td>
         </tr>
       `).join('');
       document.getElementById('res-table-wrap').style.display = 'block';
     } catch (e) {
       document.getElementById('res-loading').style.display = 'none';
+      showToast(e.message, 'error');
+    }
+  }
+
+  async function initReservationForm() {
+    const dateInput = document.getElementById('admin-res-date');
+    dateInput.min = new Date().toISOString().slice(0, 10);
+
+    try {
+      const [members, themes] = await Promise.all([
+        fetchJson(`${API}/admin/members`, {}, '회원 목록을 불러올 수 없습니다.'),
+        fetchJson(`${API}/themes`, {}, '테마 목록을 불러올 수 없습니다.')
+      ]);
+      adminReservationMembers = members;
+      adminReservationThemes = themes;
+
+      const memberSelect = document.getElementById('admin-res-member');
+      memberSelect.innerHTML = '<option value="">회원 선택</option>' + adminReservationMembers.map(member =>
+        `<option value="${member.id}">${member.name} (${member.loginId})</option>`
+      ).join('');
+
+      const themeSelect = document.getElementById('admin-res-theme');
+      themeSelect.innerHTML = '<option value="">테마 선택</option>' + adminReservationThemes.map(theme =>
+        `<option value="${theme.id}">${theme.name}</option>`
+      ).join('');
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  async function loadAdminReservationTimes() {
+    const themeId = document.getElementById('admin-res-theme').value;
+    const date = document.getElementById('admin-res-date').value;
+    const timeSelect = document.getElementById('admin-res-time');
+
+    if (!themeId || !date) {
+      timeSelect.disabled = true;
+      timeSelect.innerHTML = '<option value="">테마와 날짜를 먼저 선택하세요</option>';
+      return;
+    }
+
+    try {
+      const times = await fetchJson(
+        `${API}/themes/${themeId}/available-times?date=${date}`,
+        {},
+        '시간 목록을 불러올 수 없습니다.'
+      );
+      timeSelect.disabled = false;
+      timeSelect.innerHTML = '<option value="">시간 선택</option>' + times.map(time => {
+        const suffix = time.isAvailable ? '' : ` 대기 ${time.waitNumber ?? 0}명`;
+        return `<option value="${time.id}">${time.startAt}${suffix}</option>`;
+      }).join('');
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  async function createReservation() {
+    const memberId = Number(document.getElementById('admin-res-member').value);
+    const themeId = Number(document.getElementById('admin-res-theme').value);
+    const date = document.getElementById('admin-res-date').value;
+    const timeId = Number(document.getElementById('admin-res-time').value);
+
+    if (!memberId || !themeId || !date || !timeId) {
+      showToast('회원, 테마, 날짜, 시간을 모두 선택해주세요.', 'error');
+      return;
+    }
+
+    try {
+      await fetchEmpty(`${API}/admin/reservations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, date, timeId, themeId })
+      }, '예약 추가에 실패했습니다.');
+
+      showToast('예약이 추가되었습니다.');
+      document.getElementById('admin-res-time').value = '';
+      await loadReservations();
+      await loadAdminReservationTimes();
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  }
+
+  function adminReservationActions(reservation) {
+    if (!canCancelReservation(reservation)) {
+      return '<span class="muted">-</span>';
+    }
+
+    return `<button class="btn btn-danger-outline" onclick="cancelReservation(${reservation.reservationId})">취소</button>`;
+  }
+
+  function canCancelReservation(reservation) {
+    const status = String(reservation.status ?? '').toUpperCase();
+    return status !== 'CANCELED' && status !== 'COMPLETED' && status !== 'EXPIRED';
+  }
+
+  async function cancelReservation(id) {
+    if (!confirm('이 예약을 취소하시겠습니까?')) return;
+
+    try {
+      await fetchEmpty(`${API}/admin/reservations/${id}`, { method: 'DELETE' }, '예약 취소에 실패했습니다.');
+      showToast('예약이 취소되었습니다.');
+      await loadReservations();
+      await loadAdminReservationTimes();
+    } catch (e) {
       showToast(e.message, 'error');
     }
   }
@@ -636,13 +851,27 @@
     }
   }
 
-  function displayReservationStatus(reservation) {
+  function reservationState(reservation) {
+    const status = String(reservation.status ?? '').toUpperCase();
+    if (status === 'CANCELED') return 'canceled';
+    if (status === 'EXPIRED') return 'expired';
+    if (status === 'COMPLETED') return 'confirmed';
+    if (status === 'WAITING') return 'waiting';
+    return 'confirmed';
+  }
+
+  function reservationStatusLabel(reservation) {
     const status = String(reservation.status ?? '').toUpperCase();
     if (status === 'COMPLETED') return '이용 완료';
     if (status === 'EXPIRED') return '대기 만료';
     if (status === 'WAITING') return `대기 ${reservation.order ?? 0}번`;
     if (status === 'CANCELED') return '취소';
     return '예약 확정';
+  }
+
+  function reservationStatusBadge(reservation) {
+    const state = reservationState(reservation);
+    return `<span class="reservation-status ${state}">${reservationStatusLabel(reservation)}</span>`;
   }
 
   async function deleteTheme(id) {
@@ -748,8 +977,7 @@
     } catch (_) {}
   }
 
-  // Init: load reservations by default
-  loadReservations();
+  init();
 </script>
 </body>
 </html>
