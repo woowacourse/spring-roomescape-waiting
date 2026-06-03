@@ -11,6 +11,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByIdWithSlotLocked(Long id);
+
     List<Reservation> findAll();
 
     List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot);

@@ -27,6 +27,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdWithSlotLocked(Long id) {
+        return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
     public List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot) {
         return store.values().stream()
                 .filter(reservation -> reservation.getDate().getId().equals(slot.getDateId()))

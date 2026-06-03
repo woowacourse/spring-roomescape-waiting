@@ -97,6 +97,43 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByIdWithSlotLocked(Long id) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.name,
+                    r.status,
+                    r.reserved_at,
+                    rs.id AS slot_id,
+                    d.id  AS date_id,
+                    d.date,
+                    d.is_active AS date_is_active,
+                    t.id  AS time_id,
+                    t.start_at,
+                    t.is_active AS time_is_active,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description,
+                    th.thumbnail_url,
+                    th.is_active
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN reservation_date  d  ON rs.date_id  = d.id
+                INNER JOIN reservation_time  t  ON rs.time_id  = t.id
+                INNER JOIN theme             th ON rs.theme_id = th.id
+                WHERE r.id = :id
+                FOR UPDATE OF rs
+                """;
+        SqlParameterSource params = new MapSqlParameterSource("id", id);
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, params, reservationRowMapper));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public List<Reservation> findAll() {
         String sql = """
                 SELECT
@@ -270,7 +307,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     public boolean updateStatus(Reservation reservation) {
-        String sql = "UPDATE RESERVATION SET status = :status WHERE id = :id ";
+        String sql = "UPDATE reservation SET status = :status WHERE id = :id ";
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservation.getId())
                 .addValue("status", reservation.getStatus().name());

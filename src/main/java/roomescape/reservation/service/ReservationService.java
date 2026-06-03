@@ -62,7 +62,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation cancel(Long id, String requesterName) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationWithSlotLocked(id);
         if (reservation.isReserved()) {
             cancel(reservation, requesterName);
             rescheduleService.rescheduleWaitingOrder(reservation.getSlot());
@@ -107,6 +107,11 @@ public class ReservationService {
 
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+    }
+
+    private Reservation getReservationWithSlotLocked(Long id) {
+        return reservationRepository.findByIdWithSlotLocked(id)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
