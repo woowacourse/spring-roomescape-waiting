@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import roomescape.support.datasource.BaseRepositoryTest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -100,25 +100,44 @@ class ReservationRepositoryTest extends BaseRepositoryTest {
         dataSource.insertReservation("포비", date, 1L, 1L, "WAITING");
 
         // when
-        Optional<Reservation> reservation = reservationRepository.findNextPendingReservation(date, 1L, 1L);
+        Optional<Reservation> reservation = reservationRepository.findNextWaitingReservation(date, 1L, 1L);
 
         // then
         assertThat(reservation).isPresent().get().extracting(Reservation::getName).isEqualTo("포비");
     }
 
     @Test
-    void 특정_사용자_이름으로_예약과_대기순서를_조회한다() {
+    void 특정_사용자_이름으로_예약을_조회한다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         dataSource.insertReservation("바니", date, 1L, 1L, "RESERVED");
         dataSource.insertReservation("포비", date, 1L, 1L, "WAITING");
 
         // when
-        List<ReservationQueryResult> results = reservationRepository.findAllByName("포비");
+        List<Reservation> results = reservationRepository.findAllByName("포비");
 
         // then
         assertThat(results).hasSize(1);
-        assertThat(results.getFirst().pendingIndex()).isEqualTo(1L);
+        assertThat(results.getFirst().getName()).isEqualTo("포비");
+    }
+
+    @Test
+    void 같은_날짜_시간_테마의_앞선_대기_예약_수를_조회한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDateTime createdAt = LocalDateTime.of(2026, 6, 3, 10, 0);
+        dataSource.insertReservationTime(LocalTime.of(11, 0));
+        dataSource.insertReservation("다른시간", date, 1L, 2L, "WAITING", createdAt.minusSeconds(10));
+        dataSource.insertReservation("앞사람1", date, 1L, 1L, "WAITING", createdAt);
+        dataSource.insertReservation("앞사람2", date, 1L, 1L, "WAITING", createdAt.plusSeconds(1));
+        dataSource.insertReservation("바니", date, 1L, 1L, "WAITING", createdAt.plusSeconds(2));
+
+        // when
+        Reservation reservation = reservationRepository.findAllByName("바니").getFirst();
+        Long count = reservationRepository.countWaitingBefore(reservation);
+
+        // then
+        assertThat(count).isEqualTo(2L);
     }
 
     @Test

@@ -23,7 +23,7 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
-import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.dto.ReservationWaitingInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -151,10 +151,45 @@ class ReservationServiceTest {
         reservationRepository.save(ReservationFixture.createDefaultReservation("포비"));
 
         // when
-        List<ReservationPendingInfo> responses = reservationService.getReservationsByName("바니");
+        List<ReservationWaitingInfo> responses = reservationService.getReservationsByName("바니");
 
         // then
-        assertThat(responses).hasSize(1).extracting(ReservationPendingInfo::name).containsExactly("바니");
+        assertThat(responses).hasSize(1).extracting(ReservationWaitingInfo::name).containsExactly("바니");
+    }
+
+    @Test
+    void 예약자_이름으로_조회할_때_대기_순번을_애플리케이션에서_계산한다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        ReservationTime otherTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(11, 0)));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+
+        reservationRepository.save(ReservationFixture.createWaitingReservation("다른시간", theme, otherTime));
+        reservationRepository.save(ReservationFixture.createWaitingReservation("앞사람1", theme, time));
+        reservationRepository.save(ReservationFixture.createWaitingReservation("앞사람2", theme, time));
+        reservationRepository.save(ReservationFixture.createWaitingReservation("바니", theme, time));
+
+        // when
+        List<ReservationWaitingInfo> responses = reservationService.getReservationsByName("바니");
+
+        // then
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().waitingOrder()).isEqualTo(3L);
+    }
+
+    @Test
+    void 예약자_이름으로_조회할_때_확정_예약은_대기_순번이_없다() {
+        // given
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        Theme theme = themeRepository.save(ThemeFixture.createDefaultTheme());
+        reservationRepository.save(ReservationFixture.createDefaultReservation("바니", theme, time));
+
+        // when
+        List<ReservationWaitingInfo> responses = reservationService.getReservationsByName("바니");
+
+        // then
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().waitingOrder()).isNull();
     }
 
     @Test

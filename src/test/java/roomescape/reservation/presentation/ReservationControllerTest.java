@@ -28,11 +28,11 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
-import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.dto.ReservationWaitingInfo;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.presentation.ReservationController;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
-import roomescape.reservation.presentation.dto.ReservationPendingResponse;
+import roomescape.reservation.presentation.dto.ReservationWaitingResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.theme.application.dto.ThemeInfo;
@@ -83,14 +83,14 @@ class ReservationControllerTest extends BaseControllerUnitTest {
     @Test
     void 예약_목록_조회_요청에_성공하면_200_OK와_예약_목록이_반환된다() {
         // given
-        ReservationPendingInfo expectedInfo = new ReservationPendingInfo(1L, "바니", LocalDate.now().plusDays(1),
+        ReservationWaitingInfo expectedInfo = new ReservationWaitingInfo(1L, "바니", LocalDate.now().plusDays(1),
                 new ReservationTimeInfo(1L, LocalTime.of(10, 0)),
                 new ThemeInfo(1L, "공포테마", "https://image.com/image.png", "설명", true),
                 Status.WAITING, 1L);
         when(reservationService.getReservationsByName("바니")).thenReturn(List.of(expectedInfo));
 
         // when & then
-        List<ReservationPendingResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+        List<ReservationWaitingResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .queryParam("username", "바니")
                 .when().get("/reservations")
                 .then().log().all()
@@ -98,7 +98,7 @@ class ReservationControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).containsExactly(ReservationPendingResponse.from(expectedInfo));
+        assertThat(response).containsExactly(ReservationWaitingResponse.from(expectedInfo));
     }
 
     @Test

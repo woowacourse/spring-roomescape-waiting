@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.dto.ReservationQueryResult;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -43,7 +42,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findNextWaitingReservation(LocalDate date, Long timeId, Long themeId) {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().equals(date))
                 .filter(reservation -> reservation.getTime().getId().equals(timeId))
@@ -72,20 +71,24 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationQueryResult> findAllByName(String username) {
+    public List<Reservation> findAllByName(String username) {
         return reservations.stream()
                 .filter(reservation -> reservation.getName().equals(username))
                 .filter(reservation -> reservation.getStatus() != Status.CANCELED)
-                .map(reservation -> ReservationQueryResult.builder()
-                        .id(reservation.getId())
-                        .name(reservation.getName())
-                        .date(reservation.getDate())
-                        .time(reservation.getTime())
-                        .theme(reservation.getTheme())
-                        .status(reservation.getStatus())
-                        .pendingIndex(reservation.getStatus() == Status.WAITING ? 1L : null)
-                        .build())
                 .toList();
+    }
+
+    @Override
+    public Long countWaitingBefore(Reservation reservation) {
+        return reservations.stream()
+                .filter(waiting -> waiting.getStatus() == Status.WAITING)
+                .filter(waiting -> waiting.getDate().equals(reservation.getDate()))
+                .filter(waiting -> waiting.getTime().getId().equals(reservation.getTime().getId()))
+                .filter(waiting -> waiting.getTheme().getId().equals(reservation.getTheme().getId()))
+                .filter(waiting -> waiting.getCreatedAt().isBefore(reservation.getCreatedAt())
+                        || (waiting.getCreatedAt().equals(reservation.getCreatedAt())
+                        && waiting.getId() < reservation.getId()))
+                .count();
     }
 
     @Override
