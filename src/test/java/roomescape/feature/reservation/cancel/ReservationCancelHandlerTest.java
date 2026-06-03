@@ -1,6 +1,7 @@
 package roomescape.feature.reservation.cancel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -76,6 +77,17 @@ class ReservationCancelHandlerTest {
 
             // then
             verify(reservationRepository, never()).update(any(Reservation.class));
+        }
+
+        @Test
+        void 승격_처리_중_예외가_발생해도_예외를_전파하지_않는다() {
+            // given
+            when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
+                    .thenThrow(new RuntimeException("DB 조회 실패"));
+
+            // when & then
+            assertThatNoException().isThrownBy(() ->
+                    reservationCancelHandler.confirmFastestWaiting(new ReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
         }
     }
 }
