@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
@@ -23,7 +22,6 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 
-@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -57,14 +55,11 @@ public class ReservationService {
 
         reservationRepository.update(reservation.cancel());
 
-        if (reservation.getStatus().equals(Status.RESERVED)) {
+        if (reservation.isReserved()) {
             Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
 
-            nextPendingReservation.ifPresent(pending -> {
-                Reservation activeReservation = pending.reserved();
-                reservationRepository.update(activeReservation);
-            });
+            nextPendingReservation.ifPresent(pending -> reservationRepository.update(pending.reserved()));
         }
     }
 

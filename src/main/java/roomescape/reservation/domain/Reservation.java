@@ -64,6 +64,10 @@ public class Reservation {
         return restore(id, name, date, time, theme, Status.RESERVED, createdAt);
     }
 
+    public boolean isReserved(){
+        return this.status.equals(Status.RESERVED);
+    }
+
     private static void validateRequiredFields(String name, LocalDate date, ReservationTime time, Theme theme,
                                                Clock clock) {
         validateName(name);
