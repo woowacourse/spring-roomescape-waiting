@@ -1,0 +1,57 @@
+package roomescape.domain;
+
+import java.time.LocalTime;
+import java.util.Objects;
+
+public class Time {
+
+    private final Long id;
+    private final LocalTime startAt;
+
+    public Time(Long id, LocalTime startAt) {
+        validate(startAt);
+        this.id = id;
+        this.startAt = startAt;
+    }
+
+    public Time(LocalTime startAt) {
+        validate(startAt);
+        this.id = null;
+        this.startAt = startAt;
+    }
+
+    public static Time of(LocalTime startAt) {
+        return new Time(null, startAt);
+    }
+
+    private void validate(LocalTime startAt) {
+        if (startAt == null) {
+            throw new IllegalArgumentException("시작 시간은 필수입니다.");
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalTime getStartAt() {
+        return startAt;
+    }
+
+    public boolean isBefore(LocalTime time) {
+        return startAt.isBefore(time);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Time time = (Time) o;
+        return Objects.equals(id, time.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}
