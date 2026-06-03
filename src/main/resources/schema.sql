@@ -20,29 +20,33 @@ CREATE TABLE time_slot
     CONSTRAINT uk_time_slot_start_at UNIQUE (start_at)
 );
 
-CREATE TABLE waiting
+CREATE TABLE slot
 (
-    id              BIGINT      NOT NULL AUTO_INCREMENT,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    name            VARCHAR(250) NOT NULL,
-    date            DATE         NOT NULL,
-    time_id         BIGINT       NOT NULL,
-    theme_id        BIGINT       NOT NULL,
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    date     DATE   NOT NULL,
+    time_id  BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES time_slot (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uk_waiting_name_date_time_theme UNIQUE (name, date, time_id, theme_id)
+    CONSTRAINT uk_slot_date_time_theme UNIQUE (date, time_id, theme_id)
 );
 
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     DATE         NOT NULL,
-    time_id  BIGINT       NOT NULL,
-    theme_id BIGINT       NOT NULL,
+    id      BIGINT       NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(255) NOT NULL,
+    slot_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES time_slot (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
+    FOREIGN KEY (slot_id) REFERENCES slot (id),
+    CONSTRAINT uk_reservation_slot UNIQUE (slot_id)
+);
+
+CREATE TABLE waiting
+(
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    name       VARCHAR(250) NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    slot_id    BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (slot_id) REFERENCES slot (id),
+    CONSTRAINT uk_waiting_name_slot UNIQUE (name, slot_id)
 );
