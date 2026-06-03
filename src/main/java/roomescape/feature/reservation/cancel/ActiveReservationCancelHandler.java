@@ -13,13 +13,13 @@ import roomescape.feature.reservation.repository.ReservationRepository;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ReservationCancelHandler {
+public class ActiveReservationCancelHandler {
 
     private final ReservationRepository reservationRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void confirmFastestWaiting(ReservationCancelEvent event) {
+    public void confirmFastestWaiting(ActiveReservationCancelEvent event) {
         try {
             reservationRepository.findLowestIdWaitingReservation(
                             event.date(),

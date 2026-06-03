@@ -43,6 +43,14 @@ public class Reservation {
         return new Reservation(this.id, this.name, newSchedule, newTheme, this.status);
     }
 
+    public Reservation delete() {
+        if (this.status == ReservationStatus.DELETED) {
+            throw new GeneralException(ReservationErrorType.ALREADY_DELETED);
+        }
+
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.DELETED);
+    }
+
     public Reservation cancelActive(ReserverName requestName) {
         if (this.status != ReservationStatus.ACTIVE) {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);

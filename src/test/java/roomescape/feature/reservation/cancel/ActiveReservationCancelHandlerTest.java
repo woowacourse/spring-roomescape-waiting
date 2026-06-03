@@ -26,7 +26,7 @@ import roomescape.feature.time.domain.Time;
 import roomescape.global.domain.EntityStatus;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationCancelHandlerTest {
+class ActiveReservationCancelHandlerTest {
 
     private static final Long TIME_ID = 1L;
     private static final Long THEME_ID = 1L;
@@ -36,7 +36,7 @@ class ReservationCancelHandlerTest {
     private ReservationRepository reservationRepository;
 
     @InjectMocks
-    private ReservationCancelHandler reservationCancelHandler;
+    private ActiveReservationCancelHandler reservationCancelHandler;
 
     private Time time() {
         return Time.reconstruct(TIME_ID, LocalTime.of(10, 0), EntityStatus.ACTIVE);
@@ -58,7 +58,7 @@ class ReservationCancelHandlerTest {
                     .thenReturn(Optional.of(waiting));
 
             // when
-            reservationCancelHandler.confirmFastestWaiting(new ReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
@@ -73,7 +73,7 @@ class ReservationCancelHandlerTest {
                     .thenReturn(Optional.empty());
 
             // when
-            reservationCancelHandler.confirmFastestWaiting(new ReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository, never()).update(any(Reservation.class));
@@ -87,7 +87,7 @@ class ReservationCancelHandlerTest {
 
             // when & then
             assertThatNoException().isThrownBy(() ->
-                    reservationCancelHandler.confirmFastestWaiting(new ReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
+                    reservationCancelHandler.confirmFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
         }
     }
 }

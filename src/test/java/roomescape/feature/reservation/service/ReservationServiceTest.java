@@ -19,7 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import roomescape.feature.reservation.cancel.ReservationCancelEvent;
+import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
@@ -516,7 +516,7 @@ class ReservationServiceTest {
             reservationService.cancelReservation(1L, new ReserverName("예약자"));
 
             // then
-            ArgumentCaptor<ReservationCancelEvent> captor = ArgumentCaptor.forClass(ReservationCancelEvent.class);
+            ArgumentCaptor<ActiveReservationCancelEvent> captor = ArgumentCaptor.forClass(ActiveReservationCancelEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
             assertThat(captor.getValue().timeId()).isEqualTo(1L);
             assertThat(captor.getValue().themeId()).isEqualTo(1L);
@@ -535,7 +535,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 찾을 수 없습니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
-            verify(eventPublisher, never()).publishEvent(any(ReservationCancelEvent.class));
+            verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
         }
 
         @Test
@@ -555,7 +555,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 취소할 권한이 없습니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
-            verify(eventPublisher, never()).publishEvent(any(ReservationCancelEvent.class));
+            verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
         }
 
         @Test

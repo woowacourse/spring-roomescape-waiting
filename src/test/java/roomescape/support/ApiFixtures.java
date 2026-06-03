@@ -43,4 +43,13 @@ public final class ApiFixtures {
             .then().statusCode(201)
             .extract().as(ReservationCreateResponseDto.class);
     }
+
+    public static ReservationCreateResponseDto 예약_대기_생성(String name, LocalDate date, Long timeId, Long themeId) {
+        return given()
+            .contentType(ContentType.JSON)
+            .body(new ReservationCreateRequestDto(name, date, timeId, themeId))
+            .when().post("/api/reservations/waitings")
+            .then().statusCode(201)
+            .extract().as(ReservationCreateResponseDto.class);
+    }
 }

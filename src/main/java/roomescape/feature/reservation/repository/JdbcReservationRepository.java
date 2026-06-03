@@ -241,16 +241,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteReservationById(Long id) {
-        String sql = "UPDATE reservation SET status = 'DELETED' WHERE id = :id AND status <> 'DELETED'";
-        SqlParameterSource parameters = new MapSqlParameterSource("id", id);
-        int updatedRowCount = jdbcTemplate.update(sql, parameters);
-        if (updatedRowCount == 0) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
-        }
-    }
-
-    @Override
     public boolean existsReservationByIdAndNotDeleted(Long id) {
         String sql = """
                 SELECT EXISTS (

@@ -16,7 +16,7 @@ import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
-import roomescape.feature.reservation.cancel.ReservationCancelEvent;
+import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
@@ -131,7 +131,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
                 .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         Reservation canceledReservation = reservationRepository.update(reservation.cancelActive(name));
-        eventPublisher.publishEvent(new ReservationCancelEvent(
+        eventPublisher.publishEvent(new ActiveReservationCancelEvent(
                 canceledReservation.getTime().getId(),
                 canceledReservation.getTheme().getId(),
                 canceledReservation.getDate()
@@ -143,11 +143,17 @@ public class ReservationManagementService implements ReservationService, AdminRe
     @Override
     @Transactional
     public void deleteReservationById(Long id) {
-        if (!reservationRepository.existsReservationByIdAndNotDeleted(id)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
-        }
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+        reservationRepository.update(reservation.delete());
 
-        reservationRepository.deleteReservationById(id);
+        if (reservation.getStatus() == ReservationStatus.ACTIVE) {
+            eventPublisher.publishEvent(new ActiveReservationCancelEvent(
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId(),
+                    reservation.getDate()
+            ));
+        }
     }
 
     @Override

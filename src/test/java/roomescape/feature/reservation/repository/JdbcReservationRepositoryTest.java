@@ -107,7 +107,7 @@ class JdbcReservationRepositoryTest {
             LocalDate date = LocalDate.now().plusYears(1);
             Reservation deleted = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자1"), date, time, theme, ReservationStatus.ACTIVE));
-            reservationRepository.deleteReservationById(deleted.getId());
+            reservationRepository.update(deleted.delete());
 
             // when
             Reservation actual = reservationRepository.save(
@@ -222,7 +222,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자1"), date, time1, theme, ReservationStatus.ACTIVE));
             Reservation deleted = reservationRepository.save(
                 Reservation.create(new ReserverName("예약자2"), date, time2, theme, ReservationStatus.ACTIVE));
-            reservationRepository.deleteReservationById(deleted.getId());
+            reservationRepository.update(deleted.delete());
 
             // when
             List<Reservation> actual = reservationRepository.findAllReservations();
@@ -259,7 +259,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), date1.plusDays(1), time2, theme, ReservationStatus.ACTIVE));
             reservationRepository.save(
                 Reservation.create(new ReserverName("제이슨"), date1.plusDays(2), time3, theme, ReservationStatus.ACTIVE));
-            reservationRepository.deleteReservationById(deletedReservation.getId());
+            reservationRepository.update(deletedReservation.delete());
 
             // when
             List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted(new ReserverName("브라운"));
@@ -356,7 +356,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.save(Reservation.create(new ReserverName("예약자3"), date.plusDays(1), time2, theme1, ReservationStatus.ACTIVE));
             reservationRepository.save(
                 Reservation.create(new ReserverName("삭제된시간예약자"), date, deletedTime, theme1, ReservationStatus.ACTIVE));
-            reservationRepository.deleteReservationById(deletedReservation.getId());
+            reservationRepository.update(deletedReservation.delete());
             reservationRepository.update(canceledReservation.cancelActive(new ReserverName("취소된예약자")));
             timeRepository.deleteTimeById(deletedTime.getId());
 
@@ -571,7 +571,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date.plusDays(1), time, theme, ReservationStatus.ACTIVE));
 
             // when
-            reservationRepository.deleteReservationById(reservation1.getId());
+            reservationRepository.update(reservation1.delete());
 
             // then
             assertThat(reservationRepository.findAllReservations())
@@ -580,31 +580,7 @@ class JdbcReservationRepositoryTest {
                     tuple(reservation1.getId(), ReservationStatus.DELETED),
                     tuple(reservation2.getId(), ReservationStatus.ACTIVE)
                 );
-            assertThat(countDeletedReservationById(reservation1.getId())).isEqualTo(1);
             assertThat(reservationRepository.existsReservationByIdAndNotDeleted(reservation1.getId())).isFalse();
         }
-
-        @Test
-        void 이미_삭제된_예약을_삭제하면_예외가_발생한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create(new ReserverName("예약자1"), LocalDate.now().plusYears(1), time, theme, ReservationStatus.ACTIVE));
-            reservationRepository.deleteReservationById(reservation.getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationRepository.deleteReservationById(reservation.getId()))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-        }
-    }
-
-    private Integer countDeletedReservationById(Long id) {
-        return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation WHERE id = ? AND status = 'DELETED'",
-            Integer.class,
-            id
-        );
     }
 }
