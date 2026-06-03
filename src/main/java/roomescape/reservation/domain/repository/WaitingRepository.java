@@ -8,6 +8,9 @@ import roomescape.reservation.domain.repository.dto.WaitingDetail;
 import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
 
 public interface WaitingRepository {
+
+    Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId);
+
     Optional<WaitingDetail> findDetailById(Long id);
 
     Optional<Waiting> findOldestByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);

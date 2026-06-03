@@ -30,6 +30,17 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM waiting WHERE date = ? AND theme_id = ? AND time_id = ?)",
+                Boolean.class,
+                date,
+                themeId,
+                timeId);
+
+    }
+
+    @Override
     public Optional<WaitingDetail> findDetailById(Long id) {
         return jdbcTemplate.query(
                 """

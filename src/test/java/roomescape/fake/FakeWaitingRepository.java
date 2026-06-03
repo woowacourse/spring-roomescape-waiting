@@ -18,6 +18,11 @@ public class FakeWaitingRepository implements WaitingRepository {
     private Long idHolder = 1L;
 
     @Override
+    public Boolean existsByDateAndThemeAndTime(LocalDate date, Long themeId, Long timeId) {
+        return null;
+    }
+
+    @Override
     public Optional<WaitingDetail> findDetailById(Long id) {
         Waiting waiting = waitings.get(id);
         if (waiting == null) {
