@@ -88,7 +88,7 @@ public class ReservationService {
         if (!isSuccessful) {
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
-
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
         return ReservationResult.from(modified);
     }
 
@@ -150,7 +150,7 @@ public class ReservationService {
             throw new UnprocessableEntityException("이미 지난 시간입니다.");
         }
     }
-    
+
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
         if (reservationDao.existsBy(date, theme, time)) {
             throw new ConflictException("이미 존재하는 예약 건입니다.");

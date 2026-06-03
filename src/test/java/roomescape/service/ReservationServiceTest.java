@@ -378,4 +378,29 @@ class ReservationServiceTest {
         verify(reservationDao, never()).save(any());
         verify(waitingDao, never()).delete(anyLong());
     }
+
+    @Test
+    public void 예약_변경_시_변경_전_슬롯의_1번_대기자가_예약으로_승격된다() {
+        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Long waitingId = 99L;
+        Waiting firstWaiting = new Waiting(
+                waitingId,
+                UserName.parse("대기자"),
+                futureDate, time, theme,
+                LocalDateTime.of(2026, 5, 9, 12, 0)
+        );
+
+        given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.update(any())).willReturn(true);
+        given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.of(firstWaiting));
+
+        reservationService.changeReservationSlot(reservationId, command);
+
+        verify(reservationDao).update(any());
+        verify(reservationDao).save(any(Reservation.class));
+        verify(waitingDao).delete(waitingId);
+    }
 }
