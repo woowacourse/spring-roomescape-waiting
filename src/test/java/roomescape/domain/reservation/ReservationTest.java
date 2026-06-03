@@ -20,8 +20,8 @@ public class ReservationTest {
     }
 
     static Stream<Arguments> nullCases() {
-        ReservationName name = RoomEscapeFixture.reservationName();
-        Slot slot = RoomEscapeFixture.slot();
+        ReservationName name = new ReservationName("zeze");
+        Slot slot = RoomEscapeFixture.slot().build();
 
         return Stream.of(
                 Arguments.of(null, slot, Status.APPROVED),
@@ -32,16 +32,18 @@ public class ReservationTest {
 
     @Test
     void 과거_예약인지_비교할_수_있다() {
-        Reservation past = RoomEscapeFixture.reservationWithPast();
-        Reservation future = RoomEscapeFixture.reservationWithFuture();
+        Reservation past = RoomEscapeFixture.reservation().createdAt(RoomEscapeFixture.PAST_DATE_TIME).build();
+        Reservation future = RoomEscapeFixture.reservation().id(2L).createdAt(RoomEscapeFixture.FUTURE_DATE_TIME)
+                .build();
 
         Assertions.assertThat(past.isEarlierThan(future)).isTrue();
     }
 
     @Test
     void 시점이_같을때_id가_더_작으면_false를_반환한다() {
-        Reservation id1WithSameDate = RoomEscapeFixture.reservationWithApproved();
-        Reservation id2WithSameDate = RoomEscapeFixture.reservationWithPast();
+        Reservation id1WithSameDate = RoomEscapeFixture.reservation().build();
+        Reservation id2WithSameDate = RoomEscapeFixture.reservation().createdAt(RoomEscapeFixture.PAST_DATE_TIME)
+                .build();
 
         Assertions.assertThat(id1WithSameDate.isEarlierThan(id2WithSameDate)).isFalse();
     }

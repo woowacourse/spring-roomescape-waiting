@@ -2,6 +2,8 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,8 +20,8 @@ public class SlotTest {
     }
 
     static Stream<Arguments> nullCases() {
-        ReservationDate date = RoomEscapeFixture.reservationDate();
-        ReservationTime time = RoomEscapeFixture.reservationTime();
+        ReservationDate date = new ReservationDate(LocalDate.now());
+        ReservationTime time = ReservationTime.of(1L, LocalTime.now());
         Theme theme = RoomEscapeFixture.theme();
 
         return Stream.of(

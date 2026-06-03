@@ -2,7 +2,6 @@ package roomescape;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -22,67 +21,39 @@ import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThumbnailUrl;
 
 public class RoomEscapeFixture {
-    private final static Clock FIXED_CLOCK = Clock.fixed(
+    static final Clock FIXED_CLOCK = Clock.fixed(
             Instant.parse("2026-05-10T03:00:00Z"),
             ZoneId.of("Asia/Seoul")
     );
-    private static final ReservationName NAME = new ReservationName("zeze");
-    private static final ReservationDate FUTURE_DATE = new ReservationDate(LocalDate.of(2099, 11, 11));
-    private static final ReservationDate PAST_DATE = new ReservationDate(LocalDate.of(2000, 11, 11));
-    private static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
-    private static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
-    private static final Slot SLOT = Slot.create(FUTURE_DATE, TIME, THEME);
+    public static final LocalDateTime PAST_DATE_TIME = LocalDateTime.of(2000, 11, 11, 10, 0);
+    public static final LocalDateTime FUTURE_DATE_TIME = LocalDateTime.of(2099, 11, 11, 10, 0);
+
+    static final ReservationName NAME = new ReservationName("zeze");
+    static final ReservationDate FUTURE_DATE = new ReservationDate(FUTURE_DATE_TIME.toLocalDate());
+    static final ReservationDate PAST_DATE = new ReservationDate(PAST_DATE_TIME.toLocalDate());
+    static final ReservationTime TIME = ReservationTime.of(LocalTime.of(10, 0));
+    static final Theme THEME = Theme.create(new ThemeName("공포"), "무서워요", new ThumbnailUrl("https://zeze.com"));
     private static final Rank APPROVE_RANK = new Rank(1);
     private static final Rank WAITING_RANK = new Rank(2);
-    private static final LocalDateTime PAST_DATE_TIME = LocalDateTime.of(2000, 11, 11, 10, 0);
-    private static final LocalDateTime FUTURE_DATE_TIME = LocalDateTime.of(2099, 11, 11, 10, 0);
+
+    public static SlotBuilder slot() {
+        return new SlotBuilder();
+    }
+
+    public static ReservationBuilder reservation() {
+        return new ReservationBuilder();
+    }
 
     public static Theme theme() {
         return THEME;
     }
 
-    public static ReservationName reservationName() {
-        return NAME;
-    }
-
-    public static ReservationDate reservationDate() {
-        return FUTURE_DATE;
-    }
-
-    public static ReservationTime reservationTime() {
-        return TIME;
-    }
-
-    public static Slot slot() {
-        return SLOT;
-    }
-
-    public static Reservation reservationWithApproved() {
-        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, LocalDateTime.now(FIXED_CLOCK));
-    }
-
-    public static Reservation reservationWithWaiting() {
-        return Reservation.load(2L, NAME, SLOT, Status.WAITING, LocalDateTime.now(FIXED_CLOCK));
-    }
-
-    public static Reservation reservationWithPast() {
-        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, PAST_DATE_TIME);
-    }
-
-    public static Reservation reservationWithFuture() {
-        return Reservation.load(2L, NAME, SLOT, Status.APPROVED, FUTURE_DATE_TIME);
-    }
-
-    public static Reservation reservationWithLocalDateTime(LocalDateTime dateTime) {
-        return Reservation.load(1L, NAME, SLOT, Status.APPROVED, dateTime);
-    }
-
     public static RankedReservation reservationResultWithApproved() {
-        return new RankedReservation(APPROVE_RANK, reservationWithApproved());
+        return new RankedReservation(APPROVE_RANK, reservation().build());
     }
 
     public static RankedReservation reservationResultWithWaiting() {
-        return new RankedReservation(WAITING_RANK, reservationWithWaiting());
+        return new RankedReservation(WAITING_RANK, reservation().id(2L).status(Status.WAITING).build());
     }
 
     public static ThemeFamousFindRequest themeFamousFindRequest() {
@@ -119,5 +90,73 @@ public class RoomEscapeFixture {
 
     public static ReservationUpdateRequest reservationUpdateRequestWithPastDate() {
         return new ReservationUpdateRequest(NAME.getValue(), PAST_DATE.getValue(), 1L, 1L);
+    }
+
+    public static class SlotBuilder {
+        private long id = 1L;
+        private ReservationDate date = FUTURE_DATE;
+        private ReservationTime time = TIME;
+        private Theme theme = THEME;
+
+        public SlotBuilder id(long id) {
+            this.id = id;
+            return this;
+        }
+
+        public SlotBuilder date(ReservationDate date) {
+            this.date = date;
+            return this;
+        }
+
+        public SlotBuilder time(ReservationTime time) {
+            this.time = time;
+            return this;
+        }
+
+        public SlotBuilder theme(Theme theme) {
+            this.theme = theme;
+            return this;
+        }
+
+        public Slot build() {
+            return Slot.load(id, date, time, theme);
+        }
+    }
+
+    public static class ReservationBuilder {
+        private long id = 1L;
+        private ReservationName name = NAME;
+        private Slot slot = RoomEscapeFixture.slot().build();
+        private Status status = Status.APPROVED;
+        private LocalDateTime createdAt = LocalDateTime.now(FIXED_CLOCK);
+
+        public ReservationBuilder id(long id) {
+            this.id = id;
+            return this;
+        }
+
+        public ReservationBuilder name(String name) {
+            this.name = new ReservationName(name);
+            return this;
+        }
+
+        public ReservationBuilder slot(Slot slot) {
+            this.slot = slot;
+            return this;
+        }
+
+        public ReservationBuilder status(Status status) {
+            this.status = status;
+            return this;
+        }
+
+        public ReservationBuilder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Reservation build() {
+            return Reservation.load(id, name, slot, status, createdAt);
+        }
     }
 }
