@@ -12,11 +12,9 @@ import static roomescape.fixture.ReservationFixture.slot;
 import static roomescape.fixture.ReservationFixture.waiting;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +28,7 @@ import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ReservationWaitingQueryService;
 import roomescape.application.query.ThemeQueryService;
+import roomescape.config.FixedClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -45,10 +44,6 @@ import roomescape.repository.ReservationWaitingRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationWaitingUseCaseMockTest {
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-            Instant.parse("2026-08-05T01:00:00Z"),
-            ZoneId.of("Asia/Seoul")
-    );
     private static final LocalDate RESERVATION_DATE = LocalDate.of(2026, 8, 5);
     private static final ReservationTime RESERVATION_TIME = new ReservationTime(1L, LocalTime.of(10, 0));
     private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
@@ -76,13 +71,14 @@ class ReservationWaitingUseCaseMockTest {
 
     @BeforeEach
     void setUp() {
+        Clock fixedClock = new FixedClockConfig().fixedClock();
         reservationWaitingQueryService = new ReservationWaitingQueryService(
                 reservationWaitingRepository,
                 reservationWaitingQueryRepository
         );
         reservationWaitingCommandService = new ReservationWaitingCommandService(
                 reservationWaitingRepository,
-                FIXED_CLOCK
+                fixedClock
         );
         reservationWaitingApplicationService = new ReservationWaitingApplicationService(
                 reservationWaitingCommandService,

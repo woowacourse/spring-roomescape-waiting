@@ -8,10 +8,8 @@ import static org.mockito.Mockito.verify;
 import static roomescape.fixture.ReservationFixture.reservation;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +23,7 @@ import roomescape.application.command.ReservationCommandService;
 import roomescape.application.query.ReservationQueryService;
 import roomescape.application.query.ReservationTimeQueryService;
 import roomescape.application.query.ThemeQueryService;
+import roomescape.config.FixedClockConfig;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -38,13 +37,6 @@ class ReservationUseCaseMockTest {
     private static final ReservationTime TIME = new ReservationTime(1L, LocalTime.of(10, 0));
     private static final Theme THEME = new Theme(1L, "공포", "무서운 테마", "https://example.com/horror.jpg");
 
-    private static final Clock FIXED_CLOCK = Clock.fixed(
-            Instant.parse("2026-08-05T01:00:00Z"),
-            ZoneId.of("Asia/Seoul")
-    );
-    private static final LocalDate TODAY = LocalDate.now(FIXED_CLOCK);
-    private static final LocalDate FUTURE = TODAY.plusDays(1);
-
     @Mock
     private ReservationRepository reservationRepository;
 
@@ -57,14 +49,16 @@ class ReservationUseCaseMockTest {
     private ReservationQueryService reservationQueryService;
     private ReservationCommandService reservationCommandService;
     private ReservationApplicationService reservationApplicationService;
+    private LocalDate today;
+    private LocalDate future;
 
     @BeforeEach
     void setUp() {
+        Clock fixedClock = new FixedClockConfig().fixedClock();
+        today = LocalDate.now(fixedClock);
+        future = today.plusDays(1);
         reservationQueryService = new ReservationQueryService(reservationRepository);
-        reservationCommandService = new ReservationCommandService(
-                reservationRepository,
-                FIXED_CLOCK
-        );
+        reservationCommandService = new ReservationCommandService(reservationRepository, fixedClock);
         reservationApplicationService = new ReservationApplicationService(
                 reservationCommandService,
                 reservationQueryService,
@@ -82,7 +76,7 @@ class ReservationUseCaseMockTest {
         assertThatThrownBy(() -> reservationApplicationService.save(
                 new ReservationRequest(
                         "민욱",
-                        TODAY,
+                        today,
                         pastTime.getId(),
                         THEME.getId()
                 )
@@ -94,7 +88,7 @@ class ReservationUseCaseMockTest {
         ReservationTime currentTime = new ReservationTime(1L, LocalTime.of(10, 0));
         ReservationRequest request = new ReservationRequest(
                 "민욱",
-                TODAY,
+                today,
                 currentTime.getId(),
                 THEME.getId()
         );
@@ -117,7 +111,7 @@ class ReservationUseCaseMockTest {
 
     @Test
     void getById는_예약이_있으면_예약을_반환한다() {
-        Reservation reservation = reservation(1L, "민욱", FUTURE, TIME, THEME);
+        Reservation reservation = reservation(1L, "민욱", future, TIME, THEME);
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         assertThat(reservationQueryService.getById(1L)).isEqualTo(reservation);
