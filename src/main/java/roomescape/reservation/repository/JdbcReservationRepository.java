@@ -56,13 +56,26 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAll() {
-        String sql = selectReservations("", "");
+        String sql = selectReservations("", "", "", "", "");
 
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     @Override
     public List<Reservation> findByName(String name) {
+        String targetSlotClause = """
+                target_slots AS (
+                    SELECT DISTINCT date, time_id, theme_id
+                    FROM reservation
+                    WHERE name = ?
+                ),
+                """;
+        String targetSlotJoinClause = """
+                JOIN target_slots target_slot
+                    ON target_slot.date = r.date
+                   AND target_slot.time_id = r.time_id
+                   AND target_slot.theme_id = r.theme_id
+                """;
         String historyUnionClause = """
                 UNION ALL
                 SELECT h.reservation_id,
@@ -83,29 +96,87 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN theme t ON h.theme_id = t.id
                 WHERE h.name = ?
                 """;
-        String sql = selectReservations("WHERE r.name = ?", historyUnionClause);
+        String sql = selectReservations(
+                targetSlotClause,
+                targetSlotJoinClause,
+                "",
+                "WHERE ranked.name = ?",
+                historyUnionClause
+        );
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, name, name, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = selectReservations("WHERE r.id = ?", "");
+        String targetSlotClause = """
+                target_slots AS (
+                    SELECT date, time_id, theme_id
+                    FROM reservation
+                    WHERE id = ?
+                ),
+                """;
+        String targetSlotJoinClause = """
+                JOIN target_slots target_slot
+                    ON target_slot.date = r.date
+                   AND target_slot.time_id = r.time_id
+                   AND target_slot.theme_id = r.theme_id
+                """;
+        String sql = selectReservations(
+                targetSlotClause,
+                targetSlotJoinClause,
+                "",
+                "WHERE ranked.reservation_id = ?",
+                ""
+        );
 
-        return jdbcTemplate.query(sql, reservationRowMapper, id)
+        return jdbcTemplate.query(sql, reservationRowMapper, id, id)
                 .stream()
                 .findFirst();
     }
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
-        String sql = selectReservations("WHERE r.date = ? AND r.theme_id = ?", "");
+        String sql = selectReservations(
+                "",
+                "",
+                "WHERE r.date = ? AND r.theme_id = ?",
+                "",
+                ""
+        );
 
         return jdbcTemplate.query(sql, reservationRowMapper, date, themeId);
     }
 
-    private String selectReservations(String whereClause, String additionalRowsClause) {
+    private String selectReservations(
+            String targetSlotClause,
+            String targetSlotJoinClause,
+            String activeWhereClause,
+            String resultWhereClause,
+            String additionalRowsClause
+    ) {
         return """
+                WITH %s ranked_active AS (
+                    SELECT r.id AS reservation_id,
+                           r.name,
+                           r.date,
+                           r.time_id,
+                           rt.start_at,
+                           r.theme_id,
+                           t.name AS theme_name,
+                           t.description AS theme_description,
+                           t.thumbnail AS theme_thumbnail,
+                           r.request_order,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY r.theme_id, r.date, r.time_id
+                               ORDER BY r.request_order ASC
+                           ) AS queue_position
+                    FROM reservation r
+                    %s
+                    JOIN reservation_time rt ON r.time_id = rt.id
+                    JOIN theme t ON r.theme_id = t.id
+                    %s
+                )
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -134,37 +205,21 @@ public class JdbcReservationRepository implements ReservationRepository {
                            ranked.queue_position - 1 AS waiting_rank,
                            ranked.request_order,
                            0 AS source_order
-                    FROM (
-                        SELECT r.id AS reservation_id,
-                               r.name,
-                               r.date,
-                               r.time_id,
-                               rt.start_at,
-                               r.theme_id,
-                               t.name AS theme_name,
-                               t.description AS theme_description,
-                               t.thumbnail AS theme_thumbnail,
-                               r.request_order,
-                               (
-                                   SELECT COUNT(*)
-                                   FROM reservation same_slot
-                                   WHERE same_slot.date = r.date
-                                     AND same_slot.time_id = r.time_id
-                                     AND same_slot.theme_id = r.theme_id
-                                     AND same_slot.request_order <= r.request_order
-                               ) AS queue_position
-                        FROM reservation r
-                        JOIN reservation_time rt ON r.time_id = rt.id
-                        JOIN theme t ON r.theme_id = t.id
-                        %s
-                    ) ranked
+                    FROM ranked_active ranked
+                    %s
                     %s
                 ) result
                 ORDER BY result.date ASC,
                          result.start_at ASC,
                          result.request_order ASC,
                          result.source_order ASC
-                """.formatted(whereClause, additionalRowsClause);
+                """.formatted(
+                targetSlotClause,
+                targetSlotJoinClause,
+                activeWhereClause,
+                resultWhereClause,
+                additionalRowsClause
+        );
     }
 
     @Override
