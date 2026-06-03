@@ -33,7 +33,7 @@ public class ReservationService {
     public Long saveReservation(ReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         Reserver reserver = new Reserver(request.name());
-        Schedule schedule = scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId());
+        Schedule schedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
 
         if (reservationDao.existByNameAndScheduleId(reserver.getName(), schedule.getId())) {
             throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "이미 해당 스케줄에 본인의 예약이 존재합니다.");
@@ -53,13 +53,15 @@ public class ReservationService {
     public void updateReservation(long reservationId, ReservationRequest request) {
         LocalDateTime now = LocalDateTime.now();
         Reserver reserver = new Reserver(request.name());
-        Schedule targetSchedule = scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId());
+        Schedule targetSchedule = scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId());
+        Reservation previous = getById(reservationId);
+        lockSchedules(previous.getSchedule().getId(), targetSchedule.getId());
+        previous = getById(reservationId);
 
         if (reservationDao.existByNameAndScheduleId(reserver.getName(), targetSchedule.getId())) {
             throw new RoomescapeException(DomainErrorCode.DUPLICATE_RESERVATION, "변경하려는 스케줄에 본인의 예약이 존재합니다.");
         }
 
-        Reservation previous = getById(reservationId);
         Reservation updated = previous.updateBy(
                 reserver,
                 targetSchedule,
@@ -76,6 +78,8 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         Reserver reserver = new Reserver(name);
         Reservation reservation = getById(reservationId);
+        scheduleService.lockById(reservation.getSchedule().getId());
+        reservation = getById(reservationId);
 
         if (reservation.isAlreadyCanceled()) {
             return;
@@ -122,6 +126,19 @@ public class ReservationService {
                     -> reservationDao.changeStatusOnly(reservation.getId(), ReservationStatus.RESERVED)
             );
         }
+    }
+
+    private void lockSchedules(Long firstScheduleId, Long secondScheduleId) {
+        if (firstScheduleId.equals(secondScheduleId)) {
+            scheduleService.lockById(firstScheduleId);
+            return;
+        }
+
+        Long lowerScheduleId = Math.min(firstScheduleId, secondScheduleId);
+        Long higherScheduleId = Math.max(firstScheduleId, secondScheduleId);
+
+        scheduleService.lockById(lowerScheduleId);
+        scheduleService.lockById(higherScheduleId);
     }
 
     private ReservationStatus calculateReservationStatus(long scheduleId) {

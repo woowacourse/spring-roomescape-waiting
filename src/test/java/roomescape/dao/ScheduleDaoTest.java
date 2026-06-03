@@ -71,6 +71,17 @@ class ScheduleDaoTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    @DisplayName("스케줄 ID로 해당 schedule 행만 잠글 수 있다.")
+    @Test
+    void lockById() {
+        Long timeId = insertReservationTime(LocalTime.of(12, 0));
+        Long themeId = insertTheme("마법 학교");
+        Long scheduleId = scheduleDao.save(LocalDate.of(2026, 7, 1), timeId, themeId);
+
+        assertThat(scheduleDao.lockById(scheduleId)).isTrue();
+        assertThat(scheduleDao.lockById(999L)).isFalse();
+    }
+
     @DisplayName("시간 또는 테마를 참조하는 스케줄 존재 여부를 조회한다.")
     @Test
     void existsByTimeIdAndThemeId() {

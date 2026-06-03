@@ -53,7 +53,7 @@ class ReservationServiceTest {
     void saveReservedReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(false);
         given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
@@ -75,7 +75,7 @@ class ReservationServiceTest {
     void saveWaitingReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         ReservationRequest request = new ReservationRequest("현미밥", schedule.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByNameAndScheduleId("현미밥", schedule.getId())).willReturn(false);
         given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(1);
@@ -93,7 +93,7 @@ class ReservationServiceTest {
     void saveDuplicateReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(true);
 
@@ -110,7 +110,7 @@ class ReservationServiceTest {
     void savePastReservation() {
         Schedule schedule = futureSchedule(1L, LocalDate.now().minusDays(1), LocalTime.of(10, 0));
         ReservationRequest request = new ReservationRequest("러로", schedule.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationDao.existByNameAndScheduleId("러로", schedule.getId())).willReturn(false);
         given(reservationDao.countReservationByScheduleId(schedule.getId())).willReturn(0);
@@ -141,6 +141,7 @@ class ReservationServiceTest {
         assertThat(changed.getSchedule()).isEqualTo(schedule);
         assertThat(changed.getStatus()).isEqualTo(ReservationStatus.CANCELED);
         assertThat(changed.getUpdateAt()).isAfter(reserved.getUpdateAt());
+        verify(scheduleService).lockById(schedule.getId());
         verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
     }
 
@@ -210,7 +211,7 @@ class ReservationServiceTest {
         Reservation previous = reservation(1L, "러로", origin, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(2));
         Reservation waiting = reservation(2L, "현미밥", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(target);
         given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
         given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
@@ -226,6 +227,8 @@ class ReservationServiceTest {
         assertThat(updated.getId()).isEqualTo(1L);
         assertThat(updated.getSchedule()).isEqualTo(target);
         assertThat(updated.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        verify(scheduleService).lockById(origin.getId());
+        verify(scheduleService).lockById(target.getId());
         verify(reservationDao).changeStatusOnly(2L, ReservationStatus.RESERVED);
     }
 
@@ -236,7 +239,7 @@ class ReservationServiceTest {
         Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
         Reservation previous = reservation(1L, "러로", origin, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
         ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(target);
         given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(false);
         given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
@@ -252,10 +255,13 @@ class ReservationServiceTest {
     @DisplayName("수정 대상 슬롯에 같은 사용자의 예약이 있으면 수정할 수 없다.")
     @Test
     void updateDuplicateReservation() {
+        Schedule origin = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Schedule target = futureSchedule(2L, LocalDate.now().plusDays(2), LocalTime.of(10, 0));
+        Reservation previous = reservation(1L, "러로", origin, ReservationStatus.RESERVED, LocalDateTime.now().minusHours(1));
         ReservationRequest request = new ReservationRequest("러로", target.getDate(), 1L, 1L);
-        given(scheduleService.getOrCreateSchedule(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getOrCreateScheduleForUpdate(request.date(), request.timeId(), request.themeId()))
                 .willReturn(target);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(previous));
         given(reservationDao.existByNameAndScheduleId("러로", target.getId())).willReturn(true);
 
         assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
@@ -263,7 +269,6 @@ class ReservationServiceTest {
                 .extracting("code")
                 .isEqualTo(DomainErrorCode.DUPLICATE_RESERVATION);
 
-        verify(reservationDao, never()).findById(anyLong());
         verify(reservationDao, never()).update(any());
     }
 
