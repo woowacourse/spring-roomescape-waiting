@@ -2,7 +2,6 @@ package roomescape.reservation.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
-import roomescape.reservation.Reservation;
 
 import java.time.LocalDate;
 
@@ -11,11 +10,4 @@ public record ReservationSaveRequest(
         @NotNull Long timeId,
         @NotNull Long themeId
 ) {
-    public Reservation toDomain(long memberId, long slotId) {
-        return new Reservation(
-                null,
-                memberId,
-                slotId
-        );
-    }
 }

@@ -15,6 +15,7 @@ import roomescape.reservation.dto.response.ReservationDetailFindResponse;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.slot.SlotOccupancy;
 import roomescape.slot.application.SlotService;
 import roomescape.waiting.infrastructure.WaitingRepository;
 
@@ -30,7 +31,7 @@ public class ReservationService {
         long slotId = slotService.resolveSlotId(body.date(), body.timeId(),
                 body.themeId());
         throwIfSlotUnavailableForReservation(slotId);
-        Reservation reservation = reservationRepository.save(body.toDomain(memberId, slotId));
+        Reservation reservation = reservationRepository.save(Reservation.create(memberId, slotId));
 
         return ReservationSaveResponse.from(reservation);
     }
@@ -142,15 +143,21 @@ public class ReservationService {
     }
 
     private void throwIfSlotUnavailableForUpdate(long reservationId, long slotId) {
-        if (reservationRepository.existsBySlotIdAndIdNot(slotId, reservationId)
-                || waitingRepository.existsBySlotId(slotId)) {
+        boolean hasOtherReservation = reservationRepository.existsBySlotIdAndIdNot(slotId, reservationId);
+        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasOtherReservation, hasWaiting);
+
+        if (!slotOccupancy.isReservable()) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
         }
     }
 
     private void throwIfSlotUnavailableForReservation(long slotId) {
-        if (reservationRepository.existsBySlotId(slotId)
-                || waitingRepository.existsBySlotId(slotId)) {
+        boolean hasReservation = reservationRepository.existsBySlotId(slotId);
+        boolean hasWaiting = waitingRepository.existsBySlotId(slotId);
+        SlotOccupancy slotOccupancy = SlotOccupancy.of(hasReservation, hasWaiting);
+
+        if (!slotOccupancy.isReservable()) {
             throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_AVAILABLE, slotId);
         }
     }

@@ -30,7 +30,7 @@ public class WaitingService {
         validateWaitingByMemberNotExists(memberId, slotId);
         validateWaitingTargetExists(slotId);
 
-        Waiting waiting = waitingRepository.save(body.toDomain(memberId, slotId));
+        Waiting waiting = waitingRepository.save(Waiting.create(memberId, slotId));
         long waitingOrder = waitingRepository.countBySlotIdAndIdLessThanEqual(slotId, waiting.getId());
 
         return WaitingResponse.of(waiting, waitingOrder);
