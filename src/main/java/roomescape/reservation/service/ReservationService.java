@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -12,9 +11,7 @@ import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.BookingResponse;
 import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -46,7 +43,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public BookingResponse createReservation(Member member, ReservationRequest request) {
+    public BookingResult createReservation(Member member, ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
         LocalDate date = request.date();
@@ -59,11 +56,11 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             ReservationWaiting waiting = reservationWaitingRepository.save(
                     ReservationWaiting.of(member, date, time, theme));
-            return BookingResponse.waiting(waiting);
+            return BookingResult.waiting(waiting);
         }
 
         Reservation saved = reservationRepository.save(Reservation.of(member, date, time, theme));
-        return BookingResponse.reserved(saved);
+        return BookingResult.reserved(saved);
     }
 
     private void validateNotAlreadyBooked(Long memberId, LocalDate date, Long timeId, Long themeId) {
@@ -75,10 +72,8 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> getReservationsByMemberId(Long memberId) {
-        return reservationRepository.findByMemberId(memberId).stream()
-                .map(ReservationResponse::from)
-                .collect(Collectors.toList());
+    public List<Reservation> getReservationsByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId);
     }
 
     @Transactional
@@ -107,7 +102,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
+    public Reservation updateReservation(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
         if (reservation.isPast()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "이미 지난 예약은 변경할 수 없습니다.");
@@ -123,7 +118,7 @@ public class ReservationService {
         }
 
         reservationRepository.update(id, newDate, request.timeId());
-        return ReservationResponse.from(changed);
+        return changed;
     }
 
     @NonNull

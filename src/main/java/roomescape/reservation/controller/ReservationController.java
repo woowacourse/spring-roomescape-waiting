@@ -19,6 +19,7 @@ import roomescape.reservation.dto.BookingResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
+import roomescape.reservation.service.BookingResult;
 import roomescape.reservation.service.ReservationService;
 
 @Tag(name = "예약", description = "예약 생성·조회·수정·삭제 API")
@@ -34,16 +35,22 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getMyReservations(@LoginMember Member member) {
-        return ResponseEntity.ok(reservationService.getReservationsByMemberId(member.getId()));
+        List<ReservationResponse> responses = reservationService.getReservationsByMemberId(member.getId()).stream()
+                .map(ReservationResponse::from)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping
     public ResponseEntity<BookingResponse> createReservation(@LoginMember Member member,
                                                              @Valid @RequestBody ReservationRequest request) {
-        BookingResponse response = reservationService.createReservation(member, request);
-        String location = "WAITING".equals(response.status())
-                ? "/waitings/" + response.id()
-                : "/reservations/" + response.id();
+        BookingResult result = reservationService.createReservation(member, request);
+        BookingResponse response = result.isWaiting()
+                ? BookingResponse.waiting(result.waiting())
+                : BookingResponse.reserved(result.reservation());
+        String location = result.isWaiting()
+                ? "/waitings/" + result.waiting().getId()
+                : "/reservations/" + result.reservation().getId();
         return ResponseEntity.created(URI.create(location)).body(response);
     }
 
@@ -52,7 +59,7 @@ public class ReservationController {
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
-        return ResponseEntity.ok(reservationService.updateReservation(id, request));
+        return ResponseEntity.ok(ReservationResponse.from(reservationService.updateReservation(id, request)));
     }
 
     @DeleteMapping("/{id}")
