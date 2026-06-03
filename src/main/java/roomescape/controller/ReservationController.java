@@ -11,12 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
+import roomescape.controller.dto.UserReservationRequest;
+import roomescape.domain.Member;
+import roomescape.global.LoginMember;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/reservations")
@@ -31,13 +32,16 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findByName(@RequestParam String name) {
-        return ResponseEntity.ok(reservationService.findByName(name));
+    public ResponseEntity<List<ReservationResponse>> findMine(@LoginMember Member member) {
+        return ResponseEntity.ok(reservationService.findByMember(member));
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody ReservationRequest request) {
-        Long reservationId = reservationService.saveReservation(request);
+    public ResponseEntity<Void> create(
+            @Valid @RequestBody UserReservationRequest request,
+            @LoginMember Member member
+    ) {
+        Long reservationId = reservationService.saveReservation(request, member);
         URI location = URI.create("/reservations/" + reservationId);
         return ResponseEntity
                 .created(location)
@@ -47,9 +51,9 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancel(
             @PathVariable Long id,
-            @RequestParam String name
+            @LoginMember Member member
     ) {
-        reservationService.cancelReservation(id, name);
+        reservationService.cancelReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }
