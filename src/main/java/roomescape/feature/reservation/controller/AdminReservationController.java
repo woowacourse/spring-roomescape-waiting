@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
-import roomescape.feature.reservation.service.ReservationService;
+import roomescape.feature.reservation.service.AdminReservationService;
 
 @RestController
 @RequestMapping("/api/admin/reservations")
@@ -19,16 +19,16 @@ import roomescape.feature.reservation.service.ReservationService;
 @RequiredArgsConstructor
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final AdminReservationService adminReservationService;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservations() {
-        return ResponseEntity.ok(reservationService.getReservations());
+        return ResponseEntity.ok(adminReservationService.getReservations());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id) {
-        reservationService.deleteReservationById(id);
+        adminReservationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }

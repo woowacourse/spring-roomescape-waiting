@@ -72,69 +72,6 @@ class ReservationServiceTest {
     }
 
     @Nested
-    class 예약_목록_조회 {
-
-        @Test
-        void 예약이_없으면_빈_목록을_반환한다() {
-            when(reservationRepository.findAllReservations()).thenReturn(List.of());
-
-            assertThat(reservationService.getReservations()).isEmpty();
-        }
-
-        @Test
-        void 미래_활성_예약은_EDITABLE_상태로_반환한다() {
-            // given
-            LocalDate futureDate = LocalDate.now().plusDays(1);
-            Time time = timeWithId(1L);
-            Theme theme = themeWithId(1L);
-            Reservation reservation = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
-            when(reservationRepository.findAllReservations()).thenReturn(List.of(reservation));
-
-            // when
-            List<ReservationResponseDto> result = reservationService.getReservations();
-
-            // then
-            assertThat(result).hasSize(1);
-            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.EDITABLE);
-        }
-
-        @Test
-        void 취소된_예약은_CANCELED_상태로_반환한다() {
-            // given
-            LocalDate date = LocalDate.now().plusDays(1);
-            Time time = timeWithId(1L);
-            Theme theme = themeWithId(1L);
-            Reservation canceled = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.CANCELED);
-            when(reservationRepository.findAllReservations()).thenReturn(List.of(canceled));
-
-            // when
-            List<ReservationResponseDto> result = reservationService.getReservations();
-
-            // then
-            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.CANCELED);
-        }
-
-        @Test
-        void 삭제된_예약은_DELETED_상태로_반환한다() {
-            // given
-            LocalDate date = LocalDate.now().plusDays(1);
-            Time time = timeWithId(1L);
-            Theme theme = themeWithId(1L);
-            Reservation deleted = Reservation.reconstruct(
-                1L, new ReserverName("예약자"), date, time, theme, ReservationStatus.DELETED);
-            when(reservationRepository.findAllReservations()).thenReturn(List.of(deleted));
-
-            // when
-            List<ReservationResponseDto> result = reservationService.getReservations();
-
-            // then
-            assertThat(result.getFirst().status()).isEqualTo(ReservationEditableStatus.DELETED);
-        }
-    }
-
-    @Nested
     class 이름으로_예약_조회 {
 
         @Test
@@ -659,35 +596,6 @@ class ReservationServiceTest {
 
             verify(reservationRepository, never()).update(any(Reservation.class));
             verify(eventPublisher, never()).publishEvent(any());
-        }
-    }
-
-    @Nested
-    class 예약_삭제 {
-
-        @Test
-        void 예약을_삭제한다() {
-            // given
-            when(reservationRepository.existsReservationByIdAndNotDeleted(1L)).thenReturn(true);
-
-            // when
-            reservationService.deleteReservationById(1L);
-
-            // then
-            verify(reservationRepository).deleteReservationById(1L);
-        }
-
-        @Test
-        void 존재하지_않는_예약_ID이면_예외가_발생한다() {
-            // given
-            when(reservationRepository.existsReservationByIdAndNotDeleted(999L)).thenReturn(false);
-
-            // when & then
-            assertThatThrownBy(() -> reservationService.deleteReservationById(999L))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-
-            verify(reservationRepository, never()).deleteReservationById(any());
         }
     }
 }

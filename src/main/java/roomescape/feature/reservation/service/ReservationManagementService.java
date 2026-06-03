@@ -29,7 +29,7 @@ import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationManagementService implements ReservationService, WaitingService {
+public class ReservationManagementService implements ReservationService, AdminReservationService, WaitingService {
 
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
