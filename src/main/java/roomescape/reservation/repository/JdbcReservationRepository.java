@@ -162,6 +162,44 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql, params, reservationRowMapper);
     }
 
+    @Override
+    public List<Reservation> findReservedAndWaitingBySlotWithUpdate(ReservationSlot slot) {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.name,
+                    r.status,
+                    r.reserved_at,
+                    rs.id AS slot_id,
+                    d.id  AS date_id,
+                    d.date,
+                    d.is_active AS date_is_active,
+                    t.id  AS time_id,
+                    t.start_at,
+                    t.is_active AS time_is_active,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description,
+                    th.thumbnail_url,
+                    th.is_active
+                FROM reservation r
+                INNER JOIN reservation_slot rs ON r.slot_id = rs.id
+                INNER JOIN reservation_date  d  ON rs.date_id  = d.id
+                INNER JOIN reservation_time  t  ON rs.time_id  = t.id
+                INNER JOIN theme             th ON rs.theme_id = th.id
+                WHERE r.slot_id = :slotId
+                  AND r.status IN ('RESERVED', 'WAITING')
+                ORDER BY r.reserved_at ASC
+                FOR UPDATE OF rs
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("slotId", slot.getId());
+
+        return jdbcTemplate.query(sql, params, reservationRowMapper);
+    }
+
+    @Override
     public List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName) {
         String sql = """
                 SELECT

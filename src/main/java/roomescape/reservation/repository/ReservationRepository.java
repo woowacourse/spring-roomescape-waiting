@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     List<Reservation> findReservedAndWaitingBySlot(ReservationSlot slot);
 
+    List<Reservation> findReservedAndWaitingBySlotWithUpdate(ReservationSlot slot);
+
     List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
 
     Reservation save(Reservation reservation);
