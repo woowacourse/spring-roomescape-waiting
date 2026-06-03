@@ -12,8 +12,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.theme.domain.fixture.ThemeFixture;
 import roomescape.support.datasource.ThemeDataSource;
 import roomescape.support.datasource.BaseRepositoryTest;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 class ThemeRepositoryTest extends BaseRepositoryTest {
 

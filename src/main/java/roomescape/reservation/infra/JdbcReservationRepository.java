@@ -205,20 +205,24 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rt.id AS rt_id,
                     rt.start_at AS rt_start_at,
                     rt.is_active AS rt_is_active,
-                    p.pending_index AS pending_index
+                    CASE
+                        WHEN r.status = 'WAITING' THEN (
+                            SELECT COUNT(*) + 1
+                            FROM reservation w
+                            WHERE w.status = 'WAITING'
+                                AND w.date = r.date
+                                AND w.time_id = r.time_id
+                                AND w.theme_id = r.theme_id
+                                AND (
+                                    w.created_at < r.created_at
+                                    OR (w.created_at = r.created_at AND w.id < r.id)
+                                )
+                        )
+                        ELSE NULL
+                    END AS pending_index
                 FROM reservation r
                 INNER JOIN theme t ON r.theme_id = t.id
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
-                LEFT JOIN (
-                    SELECT
-                        id,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY date, time_id, theme_id
-                            ORDER BY created_at ASC
-                        ) AS pending_index
-                    FROM reservation
-                    WHERE status = 'WAITING'
-                ) p ON r.id = p.id
                 WHERE r.name = :username
                     AND r.status IN ('RESERVED', 'WAITING')
                 ORDER BY r.created_at DESC

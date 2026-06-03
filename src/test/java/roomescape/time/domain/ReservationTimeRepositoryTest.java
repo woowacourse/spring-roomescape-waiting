@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.support.datasource.ReservationTimeDataSource;
 import roomescape.support.datasource.BaseRepositoryTest;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 
 class ReservationTimeRepositoryTest extends BaseRepositoryTest {
 
