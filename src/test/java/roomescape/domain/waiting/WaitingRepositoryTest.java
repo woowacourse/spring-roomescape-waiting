@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -146,6 +147,46 @@ class WaitingRepositoryTest {
             waitingRepository.deleteById(saved.getId());
 
             assertThat(waitingRepository.existsById(saved.getId())).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("날짜/시간/테마로 첫 번째 대기 조회")
+    class FindFirstByDateAndTimeIdAndThemeIdForUpdate {
+
+        @Test
+        void 대기가_여러_개면_id_오름차순_첫번째를_반환한다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
+
+            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            );
+
+            assertAll(
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get().getName()).isEqualTo("유저1")
+            );
+        }
+
+        @Test
+        void 대기가_없으면_빈_Optional을_반환한다() {
+            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            );
+
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        void 날짜_조건이_다르면_반환하지_않는다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+
+            Optional<Waiting> result = waitingRepository.findFirstByDateAndTimeIdAndThemeIdForUpdate(
+                    LocalDate.of(2099, 12, 30), time.getId(), theme.getId()
+            );
+
+            assertThat(result).isEmpty();
         }
     }
 

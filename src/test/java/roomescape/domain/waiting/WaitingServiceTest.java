@@ -139,6 +139,21 @@ class WaitingServiceTest {
         }
 
         @Test
+        void 대기자가_예약자와_같으면_WAITING_NOT_AVAILABLE_예외() {
+            WaitingRequest request = new WaitingRequest("예약자", LocalDate.of(2099, 12, 31), 1L, 1L);
+            when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
+                    request.name())).thenReturn(false);
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeId(request.date(), 1L, 1L))
+                    .thenReturn(Optional.of("예약자"));
+
+            assertThatThrownBy(() -> waitingService.createWaiting(request))
+                    .isInstanceOf(RoomescapeException.class)
+                    .extracting("errorCode").isEqualTo(ErrorCode.WAITING_NOT_AVAILABLE);
+        }
+
+        @Test
         void save_시_DuplicateKeyException_발생하면_DUPLICATE_WAITING_NAME_예외로_변환() {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
