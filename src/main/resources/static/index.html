@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 방탈출 카페</title>
+  <meta name="description" content="Roomescape 방탈출 카페. 다양한 테마를 탐색하고 예약해보세요." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab active" href="/">홈</a>
+        <a class="nav-tab" href="/reservations">예약</a>
+        <a class="nav-tab" href="/my-reservations">내 예약</a>
+        <a class="nav-tab" href="/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-text">
+        <p class="hero-eyebrow">ROOMESCAPE CAFÉ</p>
+        <h1 class="hero-title">어떤 방탈출을<br>경험하시겠습니까?</h1>
+        <p class="hero-desc">미스터리, 공포, 어드벤처… 다양한 테마에서<br>잊지 못할 순간을 만들어보세요.</p>
+        <a class="btn-primary hero-cta" href="/reservations">지금 예약하기</a>
+      </div>
+    </div>
+
+    <!-- 인기 테마 -->
+    <div class="popular-section">
+      <div class="popular-header">
+        <h2 class="popular-title">이번 주 인기 테마</h2>
+        <p class="popular-sub">최근 일주일 예약이 가장 많았던 테마입니다</p>
+      </div>
+      <div class="popular-grid" id="popular-grid">
+        <div class="skeleton popular-skeleton"></div>
+        <div class="skeleton popular-skeleton"></div>
+        <div class="skeleton popular-skeleton"></div>
+        <div class="skeleton popular-skeleton"></div>
+        <div class="skeleton popular-skeleton"></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 테마 상세 모달 -->
+<div class="modal-overlay" id="theme-detail-modal" role="dialog" aria-modal="true" aria-labelledby="theme-detail-title">
+  <div class="modal modal-wide">
+    <div class="theme-detail-hero">
+      <img id="theme-detail-img" src="" alt="" />
+      <div class="theme-detail-hero-overlay">
+        <button class="modal-close theme-detail-close" id="theme-detail-close-btn" aria-label="닫기">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <h2 class="theme-detail-title" id="theme-detail-title"></h2>
+      <p class="theme-detail-desc" id="theme-detail-desc"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="theme-detail-cancel-btn">닫기</button>
+      <a class="btn-primary" id="theme-detail-book-btn" href="/reservations">이 테마로 예약하기 →</a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+async function loadPopularThemes() {
+  const grid = $('popular-grid');
+  try {
+    const res = await fetch('/themes/popular');
+    const themes = await res.json();
+    if (!themes || themes.length === 0) {
+      grid.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:40px 0">등록된 인기 테마가 없습니다.</p>`;
+      return;
+    }
+    grid.innerHTML = '';
+    themes.slice(0, 10).forEach((theme, idx) => {
+      const card = document.createElement('div');
+      card.className = 'popular-card';
+      card.innerHTML = `
+        <div class="popular-card-img-wrap">
+          <img src="${theme.thumbnailUrl}" alt="${theme.name}" onerror="this.style.display='none'">
+          <div class="popular-card-rank">#${idx + 1}</div>
+        </div>
+        <div class="popular-card-body">
+          <div class="popular-card-name">${theme.name}</div>
+          <div class="popular-card-desc">${theme.description}</div>
+          <span class="popular-card-cta">테마 상세보기 →</span>
+        </div>
+      `;
+      card.addEventListener('click', () => openThemeDetail(theme));
+      grid.appendChild(card);
+    });
+  } catch (e) {
+    grid.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;padding:40px 0">테마를 불러오지 못했습니다.</p>`;
+  }
+}
+
+function openThemeDetail(theme) {
+  $('theme-detail-img').src = theme.thumbnailUrl;
+  $('theme-detail-img').alt = theme.name;
+  $('theme-detail-title').textContent = theme.name;
+  $('theme-detail-desc').textContent = theme.description;
+  $('theme-detail-modal').classList.add('open');
+}
+
+function closeThemeDetail() {
+  $('theme-detail-modal').classList.remove('open');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadPopularThemes();
+  $('theme-detail-close-btn').addEventListener('click', closeThemeDetail);
+  $('theme-detail-cancel-btn').addEventListener('click', closeThemeDetail);
+  $('theme-detail-modal').addEventListener('click', e => {
+    if (e.target === $('theme-detail-modal')) closeThemeDetail();
+  });
+});
+</script>
+</body>
+</html>
