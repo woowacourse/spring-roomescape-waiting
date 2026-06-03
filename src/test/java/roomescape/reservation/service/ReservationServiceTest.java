@@ -63,8 +63,7 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository();
         reservationSlotRepository = new FakeReservationSlotRepository();
 
-        this.reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
-                reservationDateRepository, themeRepository, reservationSlotRepository);
+        this.reservationService = new ReservationService(reservationRepository, reservationSlotRepository);
 
         reservationTime1 = reservationTimeRepository.save(ReservationTimeFixture.time15());
         reservationTime2 = reservationTimeRepository.save(ReservationTimeFixture.time16());

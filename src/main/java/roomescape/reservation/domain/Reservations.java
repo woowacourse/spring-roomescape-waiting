@@ -17,11 +17,7 @@ public record Reservations(
         values = new ArrayList<>(values);
     }
 
-    public Reservation reserve(
-            String requesterName,
-            ReservationSlot slot,
-            LocalDateTime reservedAt
-    ) {
+    public Reservation reserve(String requesterName, ReservationSlot slot, LocalDateTime reservedAt) {
         validateNotAlreadyBookedBy(requesterName);
         if (hasReservedByOthers(requesterName)) {
             return register(Reservation.wait(requesterName, slot, reservedAt));
