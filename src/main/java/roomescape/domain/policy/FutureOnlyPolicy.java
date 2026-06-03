@@ -12,8 +12,8 @@ public class FutureOnlyPolicy implements ReservationPolicy {
 
     private final Clock clock;
 
-    public FutureOnlyPolicy() {
-        this.clock = Clock.systemDefaultZone();
+    public FutureOnlyPolicy(Clock clock) {
+        this.clock = clock;
     }
 
     @Override

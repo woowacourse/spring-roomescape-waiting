@@ -12,8 +12,8 @@ public class RecentWeekPopularPolicy implements PopularThemePolicy {
 
     private final Clock clock;
 
-    public RecentWeekPopularPolicy() {
-        this.clock = Clock.systemDefaultZone();
+    public RecentWeekPopularPolicy(Clock clock) {
+        this.clock = clock;
     }
 
     @Override
