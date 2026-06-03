@@ -1,11 +1,10 @@
 package roomescape.service.history;
 
 import java.util.List;
+import roomescape.domain.history.ReservationHistoryStatus;
 import roomescape.repository.history.MyHistory;
 
 public class MyHistories {
-    private static final String RESERVATION_STATUS = "RESERVATION";
-    private static final String WAITING_STATUS = "WAITING";
 
     private final List<MyHistory> histories;
 
@@ -15,7 +14,7 @@ public class MyHistories {
 
     public List<Long> waitingReservationIds() {
         return histories.stream()
-                .filter(history -> WAITING_STATUS.equals(history.status()))
+                .filter(history -> history.status() == ReservationHistoryStatus.WAITING)
                 .map(MyHistory::reservationId)
                 .distinct()
                 .toList();
@@ -41,7 +40,7 @@ public class MyHistories {
     }
 
     private Integer resolveSequence(final MyHistory history, final MyWaitingLines waitingLines) {
-        if (RESERVATION_STATUS.equals(history.status())) {
+        if (history.status() == ReservationHistoryStatus.RESERVATION) {
             return 0;
         }
 
