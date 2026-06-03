@@ -19,7 +19,7 @@ import roomescape.feature.reservation.repository.ReservationRepository;
 @RequiredArgsConstructor
 public class WaitingPromoter {
 
-    private static final int MAX_PROMOTION_ATTEMPTS = 2;
+    private static final int MAX_PROMOTION_ATTEMPTS = 5;
     private static final long PROMOTION_BACKOFF_MILLIS = 50L;
     private static final double PROMOTION_BACKOFF_MULTIPLIER = 2.0;
 

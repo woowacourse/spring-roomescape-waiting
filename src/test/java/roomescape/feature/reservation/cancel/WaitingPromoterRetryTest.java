@@ -92,7 +92,7 @@ class WaitingPromoterRetryTest {
         // when & then: 최대 시도(2회) 후 @Recover 가 예외를 전파하지 않는다
         assertThatNoException().isThrownBy(() ->
                 waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
-        verify(reservationRepository, times(2)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
+        verify(reservationRepository, times(5)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
         verify(reservationRepository, times(0)).changeStatus(any(), any(), any());
     }
 
@@ -110,7 +110,7 @@ class WaitingPromoterRetryTest {
                 .filter(event -> event.getLevel() == Level.ERROR)
                 .toList();
         assertThat(errorLogs).hasSize(1);
-        assertThat(errorLogs.get(0).getFormattedMessage())
+        assertThat(errorLogs.getFirst().getFormattedMessage())
                 .contains("대기 예약 자동 승격에 재시도 후에도 실패했습니다");
     }
 }
