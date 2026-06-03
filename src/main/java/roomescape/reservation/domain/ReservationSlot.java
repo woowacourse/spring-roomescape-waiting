@@ -66,6 +66,12 @@ public record ReservationSlot(LocalDate date, Long themeId, Long timeId, LocalTi
         }
     }
 
+    public void validatePostponable(LocalDateTime now) {
+        if (LocalDateTime.of(date, startAt).isBefore(now)) {
+            throw new RoomEscapeException("이미 지나간 예약은 미룰 수 없습니다.");
+        }
+    }
+
     public void validateUpdatable(LocalDateTime now) {
         if (LocalDateTime.of(date, startAt).isBefore(now)) {
             throw new RoomEscapeException("이미 지나간 예약은 변경할 수 없습니다.");

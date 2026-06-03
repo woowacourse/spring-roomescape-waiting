@@ -157,6 +157,36 @@ class ReservationSlotTest {
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
     }
 
+    @DisplayName("현재 시간 이후의 슬롯이면 대기 순번 미루기가 가능합니다.")
+    @Test
+    void validate_postponable_future() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 17, 10, 0);
+        ReservationSlot reservationSlot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 17))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(11, 0))
+                .build();
+
+        assertThatNoException().isThrownBy(() -> reservationSlot.validatePostponable(now));
+    }
+
+    @DisplayName("이미 지나간 슬롯 대기 순번 미루기 시 예외 발생을 테스트합니다.")
+    @Test
+    void validate_postponable_past_exception() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 17, 10, 0);
+        ReservationSlot reservationSlot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 17))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+
+        assertThatThrownBy(() -> reservationSlot.validatePostponable(now))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("이미 지나간 예약은 미룰 수 없습니다.");
+    }
+
     @DisplayName("현재 시간 이후의 슬롯이면 변경이 가능합니다.")
     @Test
     void validate_updatable_future() {
