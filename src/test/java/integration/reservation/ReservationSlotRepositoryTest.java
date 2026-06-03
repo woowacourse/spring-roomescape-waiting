@@ -3,10 +3,12 @@ package integration.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.domain.fixture.ReservationFixture.createCanceledEntry;
+import static roomescape.domain.fixture.ReservationFixture.createEntry;
+import static roomescape.domain.fixture.ReservationFixture.reservedReservationId;
 
 import integration.BaseIntegrationTest;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -75,10 +77,8 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
     @Test
     void 같은_슬롯에_같은_이름의_취소_이력을_여러_번_저장할_수_있다() {
         // given
-        Reservation firstCanceled = new Reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
-        Reservation secondCanceled = new Reservation(null, "이프", ReservationStatus.WAITING, LocalDateTime.now());
-        firstCanceled.cancel();
-        secondCanceled.cancel();
+        Reservation firstCanceled = createCanceledEntry(null, "이프", ReservationStatus.RESERVED);
+        Reservation secondCanceled = createCanceledEntry(null, "이프", ReservationStatus.WAITING);
 
         ReservationSlot slot = new ReservationSlot(
                 null,
@@ -109,8 +109,8 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 theme,
                 reservationTime,
                 List.of(
-                        new Reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                        new Reservation(null, "이프", ReservationStatus.WAITING, LocalDateTime.now())
+                        createEntry(null, "이프", ReservationStatus.RESERVED),
+                        createEntry(null, "이프", ReservationStatus.WAITING)
                 )
         );
 
@@ -213,12 +213,4 @@ class ReservationSlotRepositoryTest extends BaseIntegrationTest {
                 .containsExactly("이프", ReservationStatus.RESERVED);
     }
 
-    private long reservedReservationId(ReservationSlot slot) {
-        return slot.getReservations()
-                .stream()
-                .filter(Reservation::isReserved)
-                .findFirst()
-                .orElseThrow()
-                .getId();
-    }
 }

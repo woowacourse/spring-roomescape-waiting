@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.domain.fixture.ReservationFixture.createDefaultReservationWithName;
 import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate;
+import static roomescape.domain.fixture.ReservationFixture.reservedReservationId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -285,12 +286,4 @@ class ReservationServiceTest {
                 .containsExactly(ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED);
     }
 
-    private long reservedReservationId(ReservationSlot slot) {
-        return slot.getReservations()
-                .stream()
-                .filter(Reservation::isReserved)
-                .findFirst()
-                .orElseThrow()
-                .getId();
-    }
 }

@@ -2,6 +2,8 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.domain.fixture.ReservationFixture.createCanceledEntry;
+import static roomescape.domain.fixture.ReservationFixture.createEntry;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,8 +45,8 @@ class ReservationsTest {
     void 예약된_엔트리가_있으면_true를_반환한다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now()),
-                reservation(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
+                createEntry(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now()),
+                createEntry(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -55,8 +57,8 @@ class ReservationsTest {
     void 예약된_엔트리가_없으면_false를_반환한다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now()),
-                canceledReservation(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
+                createEntry(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now()),
+                createCanceledEntry(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -66,9 +68,9 @@ class ReservationsTest {
     @Test
     void 식별자로_엔트리를_조회한다() {
         // given
-        Reservation expected = reservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now());
+        Reservation expected = createEntry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now());
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
+                createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
                 expected
         ));
 
@@ -80,7 +82,7 @@ class ReservationsTest {
     void 식별자가_없는_엔트리는_식별자로_조회되지_않는다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now())
+                createEntry(null, "이프", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -91,8 +93,8 @@ class ReservationsTest {
     void 활성_상태인_같은_이름이_존재하면_true를_반환한다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                canceledReservation(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
+                createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
+                createCanceledEntry(2L, "라텔", ReservationStatus.RESERVED, LocalDateTime.now())
         ));
 
         // when & then
@@ -104,7 +106,7 @@ class ReservationsTest {
     void 대기_상태도_같은_이름으로_간주한다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now())
+                createEntry(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now())
         ));
 
         // when & then
@@ -114,9 +116,9 @@ class ReservationsTest {
     @Test
     void 가장_먼저_등록된_대기_엔트리를_예약으로_승격한다() {
         // given
-        Reservation reserved = reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
-        Reservation firstWaiting = reservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
-        Reservation secondWaiting = reservation(3L, "이든", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
+        Reservation reserved = createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        Reservation firstWaiting = createEntry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
+        Reservation secondWaiting = createEntry(3L, "이든", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
         Reservations reservations = new Reservations(List.of(reserved, firstWaiting, secondWaiting));
 
         // when
@@ -136,8 +138,8 @@ class ReservationsTest {
     void 대기_엔트리가_없으면_승격하지_않는다() {
         // given
         Reservations reservations = new Reservations(List.of(
-                reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
-                canceledReservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now())
+                createEntry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
+                createCanceledEntry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now())
         ));
 
         // when
@@ -150,13 +152,5 @@ class ReservationsTest {
                         tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE),
                         tuple(2L, ReservationStatus.WAITING, ReservationActiveStatus.CANCELED)
                 );
-    }
-
-    private Reservation reservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new Reservation(id, name, status, createdAt);
-    }
-
-    private Reservation canceledReservation(Long id, String name, ReservationStatus status, LocalDateTime createdAt) {
-        return new Reservation(id, name, status, ReservationActiveStatus.CANCELED, createdAt);
     }
 }
