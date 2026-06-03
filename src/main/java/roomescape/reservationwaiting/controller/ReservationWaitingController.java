@@ -11,6 +11,7 @@ import roomescape.auth.LoginMember;
 import roomescape.member.domain.Member;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
+import roomescape.reservationwaiting.service.WaitingWithTurn;
 
 @RestController
 @RequestMapping("/waitings")
@@ -24,7 +25,11 @@ public class ReservationWaitingController {
 
     @GetMapping
     public ResponseEntity<List<ReservationWaitingTurnResponse>> getMyWaitings(@LoginMember Member member) {
-        return ResponseEntity.ok(reservationWaitingService.getWaitingByMemberId(member.getId()));
+        List<ReservationWaitingTurnResponse> responses = reservationWaitingService.getWaitingByMemberId(member.getId())
+                .stream()
+                .map(it -> ReservationWaitingTurnResponse.from(it.waiting(), it.turn()))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")

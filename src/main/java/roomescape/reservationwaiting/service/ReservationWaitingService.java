@@ -1,13 +1,11 @@
 package roomescape.reservationwaiting.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
-import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
 
 @Service
@@ -33,12 +31,12 @@ public class ReservationWaitingService {
         reservationWaitingRepository.deleteById(id);
     }
 
-    public List<ReservationWaitingTurnResponse> getWaitingByMemberId(Long memberId) {
+    public List<WaitingWithTurn> getWaitingByMemberId(Long memberId) {
         return reservationWaitingRepository.findByMemberId(memberId).stream()
-                .map(waiting -> ReservationWaitingTurnResponse.from(waiting,
+                .map(waiting -> new WaitingWithTurn(waiting,
                         reservationWaitingRepository.calculateTurn(
                                 waiting.getId(), waiting.getDate(), waiting.getTime().getId(),
                                 waiting.getTheme().getId())))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
