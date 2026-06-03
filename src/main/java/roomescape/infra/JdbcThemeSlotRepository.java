@@ -142,6 +142,7 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
                         INNER JOIN time t ON ts.time_id = t.id 
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.id = ?
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
     }
