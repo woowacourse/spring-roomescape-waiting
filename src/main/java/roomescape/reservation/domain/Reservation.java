@@ -3,7 +3,6 @@ package roomescape.reservation.domain;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ValidationException;
@@ -11,7 +10,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Getter
-@EqualsAndHashCode
 public class Reservation {
 
     private final Long id;

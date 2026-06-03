@@ -1,13 +1,11 @@
 package roomescape.theme.domain;
 
 import java.net.URI;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.common.exception.InactiveException;
 import roomescape.common.exception.ValidationException;
 
 @Getter
-@EqualsAndHashCode
 public class Theme {
 
     private final Long id;

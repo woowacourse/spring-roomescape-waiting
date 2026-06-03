@@ -4,13 +4,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.common.exception.InactiveException;
 import roomescape.common.exception.ValidationException;
 
 @Getter
-@EqualsAndHashCode
 public class ReservationTime {
 
     private final Long id;
