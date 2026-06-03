@@ -9,39 +9,39 @@ public class ReservationWaiting {
     private final Long id;
     private final Reservation reservation;
     private final ReservationName name;
-    private final LocalDateTime requestAt;
+    private final LocalDateTime requestedAt;
 
     private ReservationWaiting(
             final Long id,
             final Reservation reservation,
             final String name,
-            final LocalDateTime requestAt
+            final LocalDateTime requestedAt
     ) {
         this.id = id;
         this.reservation = reservation;
         this.name = ReservationName.from(name);
-        this.requestAt = requestAt;
+        this.requestedAt = requestedAt;
     }
 
     public static ReservationWaiting createNew(
             final Reservation reservation,
             final String name,
-            final LocalDateTime requestAt
+            final LocalDateTime requestedAt
     ) {
-        return new ReservationWaiting(null, reservation, name, requestAt);
+        return new ReservationWaiting(null, reservation, name, requestedAt);
     }
 
     public static ReservationWaiting of(
             final Long id,
             final Reservation reservation,
             final String name,
-            final LocalDateTime requestAt
+            final LocalDateTime requestedAt
     ) {
-        return new ReservationWaiting(id, reservation, name, requestAt);
+        return new ReservationWaiting(id, reservation, name, requestedAt);
     }
 
     public ReservationWaiting withId(final Long id) {
-        return ReservationWaiting.of(id, this.reservation, this.name.value(), this.requestAt);
+        return ReservationWaiting.of(id, this.reservation, this.name.value(), this.requestedAt);
     }
 
     public Long getId() {
@@ -60,8 +60,8 @@ public class ReservationWaiting {
         return this.name.value().equals(ReservationName.from(name).value());
     }
 
-    public LocalDateTime getRequestAt() {
-        return requestAt;
+    public LocalDateTime getRequestedAt() {
+        return requestedAt;
     }
 
     @Override

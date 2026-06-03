@@ -102,7 +102,7 @@ class JdbcReservationWaitingRepositoryTest {
         assertThat(found).isEqualTo(saved);
         assertThat(found.getName()).isEqualTo("아루");
         assertThat(found.getReservation()).isEqualTo(reservation);
-        assertThat(found.getRequestAt()).isEqualTo(LocalDateTime.parse("2026-08-05T12:00:00"));
+        assertThat(found.getRequestedAt()).isEqualTo(LocalDateTime.parse("2026-08-05T12:00:00"));
     }
 
     @Test

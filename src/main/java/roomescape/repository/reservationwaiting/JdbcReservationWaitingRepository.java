@@ -60,7 +60,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setLong(1, reservationWaiting.getReservation().getId());
             preparedStatement.setString(2, reservationWaiting.getName());
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(reservationWaiting.getRequestAt()));
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(reservationWaiting.getRequestedAt()));
             return preparedStatement;
         }, keyHolder);
 
