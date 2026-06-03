@@ -61,6 +61,14 @@ public class Reservation {
         return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.CANCELED);
     }
 
+    public Reservation confirmWaiting() {
+        if (this.status != ReservationStatus.WAITING) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+
+        return new Reservation(this.id, this.name, this.schedule, this.theme, ReservationStatus.ACTIVE);
+    }
+
     private void validateCancelable(ReserverName requestName) {
         if (!this.name.equals(requestName)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);

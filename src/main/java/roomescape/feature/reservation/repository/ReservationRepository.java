@@ -13,6 +13,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAllReservations();
 
+    Optional<Reservation> findLowestIdWaitingReservation(LocalDate date, Long timeId, Long themeId);
+
     List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);

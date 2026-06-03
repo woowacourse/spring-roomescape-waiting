@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import roomescape.feature.reservation.cancel.ReservationCancelEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -44,6 +46,8 @@ class WaitingServiceTest {
     private TimeRepository timeRepository;
     @Mock
     private ThemeRepository themeRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private WaitingService waitingService;
 
@@ -51,7 +55,7 @@ class WaitingServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         waitingService = new ReservationManagementService(
-            reservationRepository, timeRepository, themeRepository, mapper);
+            reservationRepository, timeRepository, themeRepository, mapper, eventPublisher);
     }
 
     private Time timeWithId(Long id) {
@@ -190,6 +194,7 @@ class WaitingServiceTest {
             assertThat(result.id()).isEqualTo(1L);
 
             verify(reservationRepository).update(any(Reservation.class));
+            verify(eventPublisher, never()).publishEvent(any(ReservationCancelEvent.class));
         }
 
         @Test

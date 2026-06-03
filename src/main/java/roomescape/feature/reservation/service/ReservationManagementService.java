@@ -3,6 +3,7 @@ package roomescape.feature.reservation.service;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
+import roomescape.feature.reservation.cancel.ReservationCancelEvent;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
@@ -34,6 +36,8 @@ public class ReservationManagementService implements ReservationService, Waiting
     private final ThemeRepository themeRepository;
     private final ReservationMapper reservationMapper;
 
+    private final ApplicationEventPublisher eventPublisher;
+
     @Override
     public List<ReservationResponseDto> getReservations() {
         List<Reservation> reservations = reservationRepository.findAllReservations();
@@ -42,8 +46,8 @@ public class ReservationManagementService implements ReservationService, Waiting
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
         return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-            .toList();
+                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+                .toList();
     }
 
     private Integer getWaitingNumber(Reservation reservation) {
@@ -52,15 +56,15 @@ public class ReservationManagementService implements ReservationService, Waiting
         }
 
         return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(),
-            reservation.getDate(), reservation.getTime(), reservation.getTheme());
+                reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     @Override
     public List<ReservationResponseDto> getReservationsByName(ReserverName name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
         return reservations.stream()
-            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
-            .toList();
+                .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
+                .toList();
     }
 
     @Override
@@ -92,7 +96,7 @@ public class ReservationManagementService implements ReservationService, Waiting
 
         if (!parameterErrorResponses.isEmpty()) {
             throw new GeneralParametersException(ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
-                parameterErrorResponses);
+                    parameterErrorResponses);
         }
 
         return Reservation.create(command.name(), command.date(), time, theme, status);
@@ -102,12 +106,12 @@ public class ReservationManagementService implements ReservationService, Waiting
     @Transactional
     public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         Time newTime = timeRepository.findTimeByIdAndNotDeleted(command.timeId())
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
         Theme newTheme = themeRepository.findThemeByIdAndNotDeleted(command.themeId())
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND));
 
         Reservation updated = existingReservation.update(command.name(), command.date(), newTime, newTheme);
 
@@ -124,9 +128,16 @@ public class ReservationManagementService implements ReservationService, Waiting
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelActive(name)));
+        Reservation canceledReservation = reservationRepository.update(reservation.cancelActive(name));
+        eventPublisher.publishEvent(new ReservationCancelEvent(
+                canceledReservation.getTime().getId(),
+                canceledReservation.getTheme().getId(),
+                canceledReservation.getDate()
+        ));
+
+        return reservationMapper.toCancelResponseDto(canceledReservation);
     }
 
     @Override
@@ -159,7 +170,7 @@ public class ReservationManagementService implements ReservationService, Waiting
     @Transactional
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, ReserverName name) {
         Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancelWaiting(name)));
     }

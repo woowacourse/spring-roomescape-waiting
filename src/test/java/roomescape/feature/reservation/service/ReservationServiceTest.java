@@ -15,8 +15,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+import roomescape.feature.reservation.cancel.ReservationCancelEvent;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
@@ -48,6 +51,8 @@ class ReservationServiceTest {
     private TimeRepository timeRepository;
     @Mock
     private ThemeRepository themeRepository;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private ReservationService reservationService;
 
@@ -55,7 +60,7 @@ class ReservationServiceTest {
     void setUp() {
         ReservationMapper mapper = new ReservationMapper(new TimeMapper(), new ThemeMapper());
         reservationService = new ReservationManagementService(
-            reservationRepository, timeRepository, themeRepository, mapper);
+            reservationRepository, timeRepository, themeRepository, mapper, eventPublisher);
     }
 
     private Time timeWithId(Long id) {
@@ -557,6 +562,31 @@ class ReservationServiceTest {
         }
 
         @Test
+        void 취소하면_대기_확정을_위한_이벤트를_발행한다() {
+            // given
+            LocalDate futureDate = LocalDate.now().plusYears(1);
+            Time time = timeWithId(1L);
+            Theme theme = themeWithId(1L);
+            Reservation reservation = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.ACTIVE);
+            Reservation canceled = Reservation.reconstruct(
+                1L, new ReserverName("예약자"), futureDate, time, theme, ReservationStatus.CANCELED);
+            when(reservationRepository.findReservationByIdAndNotDeleted(1L))
+                .thenReturn(Optional.of(reservation));
+            when(reservationRepository.update(any(Reservation.class))).thenReturn(canceled);
+
+            // when
+            reservationService.cancelReservation(1L, new ReserverName("예약자"));
+
+            // then
+            ArgumentCaptor<ReservationCancelEvent> captor = ArgumentCaptor.forClass(ReservationCancelEvent.class);
+            verify(eventPublisher).publishEvent(captor.capture());
+            assertThat(captor.getValue().timeId()).isEqualTo(1L);
+            assertThat(captor.getValue().themeId()).isEqualTo(1L);
+            assertThat(captor.getValue().date()).isEqualTo(futureDate);
+        }
+
+        @Test
         void 존재하지_않는_예약_ID이면_예외가_발생한다() {
             // given
             when(reservationRepository.findReservationByIdAndNotDeleted(999L))
@@ -568,6 +598,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 찾을 수 없습니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(eventPublisher, never()).publishEvent(any(ReservationCancelEvent.class));
         }
 
         @Test
@@ -587,6 +618,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 취소할 권한이 없습니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(eventPublisher, never()).publishEvent(any(ReservationCancelEvent.class));
         }
 
         @Test
@@ -606,6 +638,7 @@ class ReservationServiceTest {
                 .hasMessage("활성된 예약이 아닙니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(eventPublisher, never()).publishEvent(any());
         }
 
         @Test
@@ -625,6 +658,7 @@ class ReservationServiceTest {
                 .hasMessage("지난 예약은 취소할 수 없습니다.");
 
             verify(reservationRepository, never()).update(any(Reservation.class));
+            verify(eventPublisher, never()).publishEvent(any());
         }
     }
 

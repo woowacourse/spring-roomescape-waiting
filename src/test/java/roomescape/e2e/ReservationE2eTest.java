@@ -100,4 +100,55 @@ class ReservationE2eTest {
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().status()).isEqualTo(ReservationEditableStatus.CANCELED);
     }
+
+    @Test
+    void 예약을_취소하면_가장_빠른_순번의_대기가_예약으로_자동_승격된다() {
+        // given
+        TimeResponseDto time = 시간_등록(LocalTime.of(10, 0));
+        ThemeResponseDto theme = 테마_등록("테마", "설명", "https://example.com/image.png");
+
+        String activeReservationName = "브라운";
+        ReservationCreateResponseDto active = 예약_생성(activeReservationName, FUTURE_DATE, time.id(), theme.id());
+
+        String firstWaitingName = "리사";
+        String secondWaitingName = "네오";
+        ReservationCreateResponseDto firstWaiting = 대기_생성(firstWaitingName, FUTURE_DATE, time.id(), theme.id());
+        대기_생성(secondWaitingName, FUTURE_DATE, time.id(), theme.id());
+
+        // when
+        given()
+            .queryParam("name", activeReservationName)
+            .when().patch("/api/reservations/{id}/cancel", active.id())
+            .then().statusCode(200);
+
+        // then
+        List<ReservationResponseDto> firstWaitingAfterCancel = given()
+            .queryParam("name", firstWaitingName)
+            .when().get("/api/reservations")
+            .then().statusCode(200)
+            .extract().as(new TypeRef<>() {
+            });
+        assertThat(firstWaitingAfterCancel).hasSize(1);
+        assertThat(firstWaitingAfterCancel.getFirst().id()).isEqualTo(firstWaiting.id());
+        assertThat(firstWaitingAfterCancel.getFirst().status()).isEqualTo(ReservationEditableStatus.EDITABLE);
+
+        List<ReservationResponseDto> secondWaitingAfterCancel = given()
+            .queryParam("name", secondWaitingName)
+            .when().get("/api/reservations")
+            .then().statusCode(200)
+            .extract().as(new TypeRef<>() {
+            });
+        assertThat(secondWaitingAfterCancel).hasSize(1);
+        assertThat(secondWaitingAfterCancel.getFirst().status()).isEqualTo(ReservationEditableStatus.WAITING);
+        assertThat(secondWaitingAfterCancel.getFirst().waitingNumber()).isEqualTo(1);
+    }
+
+    private ReservationCreateResponseDto 대기_생성(String name, LocalDate date, Long timeId, Long themeId) {
+        return given()
+            .contentType(ContentType.JSON)
+            .body(new ReservationCreateRequestDto(name, date, timeId, themeId))
+            .when().post("/api/reservations/waitings")
+            .then().statusCode(201)
+            .extract().as(ReservationCreateResponseDto.class);
+    }
 }

@@ -208,4 +208,25 @@ class ReservationTest {
                     .hasMessage("지난 예약은 취소할 수 없습니다.");
         }
     }
+
+    @Nested
+    class 대기를_확정한다 {
+
+        @Test
+        void WAITING_상태이면_ACTIVE_상태의_예약이_반환된다() {
+            Reservation waiting = Reservation.reconstruct(
+                    1L, DEFAULT_RESERVER_NAME, FUTURE_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING);
+
+            assertThat(waiting.confirmWaiting().getStatus()).isEqualTo(ReservationStatus.ACTIVE);
+        }
+
+        @Test
+        void WAITING이_아닌_상태이면_예외를_던진다() {
+            Reservation active = ReservationFixture.FUTURE.createInstance(DEFAULT_TIME, DEFAULT_THEME);
+
+            assertThatThrownBy(active::confirmWaiting)
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("대기중인 예약이 아닙니다.");
+        }
+    }
 }
