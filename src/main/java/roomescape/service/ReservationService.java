@@ -77,6 +77,7 @@ public class ReservationService {
         updateThemeSlotReserved(reservation.getThemeSlot(), hasConfirmedReservation);
     }
 
+    @Transactional(readOnly = true)
     public MyReservationResponse findReservationBy(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         List<ReservationResponse> myNotPendingReservation = reservations.stream()
@@ -171,7 +172,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingReservationOrReleaseSlot(Reservation reservation) {
-        Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlotId());
+        Optional<Reservation> waitingReservation = reservationRepository.findFirstPendingByThemeSlotId(reservation.getThemeSlotId());
 
         if (waitingReservation.isPresent()) {
             waitingReservation.ifPresent(Reservation::confirm);

@@ -145,7 +145,7 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
+    public Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
         return storage.values().stream()
                 .filter(reservation -> reservation.getThemeSlot().getId().equals(themeSlotId) && reservation.getReservationStatus().equals(
                         PendingStatus.getInstance()))

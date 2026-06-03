@@ -32,5 +32,5 @@ public interface ReservationRepository {
 
     boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
 
-    Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId);
+    Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId);
 }

@@ -318,7 +318,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
+    public Optional<Reservation> findFirstPendingByThemeSlotId(Long themeSlotId) {
         String sql = """
                 SELECT 
                     r.id AS r_id,
