@@ -42,7 +42,7 @@ export default class SearchResultView extends View {
         page.content.forEach((slot) => {
             const item = createElement("div", "reservation-item");
             const isWaiting = slot.status === "WAITING";
-            const cancellationRestricted = this.isCancellationRestricted(slot.date);
+            const cancellationRestricted = !isWaiting && this.isCancellationRestricted(slot.date);
 
             item.dataset.id = slot.id;
 

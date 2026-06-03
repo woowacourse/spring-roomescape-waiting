@@ -80,7 +80,7 @@ public class ReservationSlot {
     public void cancelReservation(long reservationId) {
         reservations.findById(reservationId)
                 .ifPresent(reservation -> {
-                    validateCancelable();
+                    validateCancelable(reservation);
                     boolean wasReserved = reservation.isReserved();
                     reservation.cancel();
                     promoteFirstWaiting(wasReserved);
@@ -124,8 +124,8 @@ public class ReservationSlot {
         }
     }
 
-    private void validateCancelable() {
-        if (!date.isAfter(LocalDate.now().plusDays(1))) {
+    private void validateCancelable(Reservation reservation) {
+        if (reservation.isReserved() && !date.isAfter(LocalDate.now().plusDays(1))) {
             throw new RoomEscapeException("예약 하루 전에는 취소할 수 없습니다.");
         }
     }

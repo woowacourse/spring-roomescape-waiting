@@ -215,6 +215,27 @@ class ReservationSlotTest {
     }
 
     @Test
+    void 예약_하루_전에도_대기를_취소할_수_있다() {
+        // given
+        ReservationSlot slot = new ReservationSlot(
+                1L,
+                LocalDate.now().plusDays(1),
+                theme,
+                reservationTime,
+                List.of(reservation(1L, "이프", ReservationStatus.WAITING))
+        );
+
+        // when
+        slot.cancelReservation(1L);
+
+        // then
+        assertThat(slot.getReservations())
+                .singleElement()
+                .extracting(Reservation::getStatus)
+                .isEqualTo(ReservationStatus.DELETED);
+    }
+
+    @Test
     void 존재하지_않는_엔트리를_취소하면_아무_일도_일어나지_않는다() {
         // given
         ReservationSlot slot = createReservationWithReservations(List.of(
