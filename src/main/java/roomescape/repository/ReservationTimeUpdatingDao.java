@@ -36,8 +36,6 @@ public class ReservationTimeUpdatingDao {
             return ps;
         }, keyHolder);
 
-        Long id = keyHolder.getKey().longValue();
-
-        return id;
+        return keyHolder.getKey().longValue();
     }
 }
