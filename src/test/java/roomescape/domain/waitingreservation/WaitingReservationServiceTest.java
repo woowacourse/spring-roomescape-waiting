@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotResolver;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -52,9 +53,7 @@ class WaitingReservationServiceTest {
         waitingReservationService = new WaitingReservationService(
             waitingReservationRepository,
             reservationRepository,
-            reservationDateRepository,
-            reservationTimeRepository,
-            themeRepository,
+            new ReservationSlotResolver(reservationDateRepository, reservationTimeRepository, themeRepository),
             FIXED_CLOCK
         );
     }

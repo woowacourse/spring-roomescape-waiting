@@ -56,7 +56,7 @@ class ReservationSlotTest {
     }
 
     private ReservationSlot slot(LocalDate playDay, LocalTime startAt) {
-        return new ReservationSlot(
+        return ReservationSlot.of(
             ReservationDate.of(1L, playDay),
             ReservationTime.of(1L, startAt),
             THEME

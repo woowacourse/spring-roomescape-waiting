@@ -50,9 +50,7 @@ class ReservationServiceTest {
 
         reservationService = new ReservationService(
                 reservationRepository,
-                reservationDateRepository,
-                reservationTimeRepository,
-                themeRepository,
+                new ReservationSlotResolver(reservationDateRepository, reservationTimeRepository, themeRepository),
                 waitingReservationRepository,
                 CLOCK
         );

@@ -9,19 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationdate.ReservationDateRepository;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.reservationtime.ReservationTimeRepository;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.reservation.ReservationSlotResolver;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
 import roomescape.domain.waitingreservation.dto.WaitingReservationWithRankResponse;
-import roomescape.support.exception.ReservationDateErrorCode;
-import roomescape.support.exception.ReservationTimeErrorCode;
 import roomescape.support.exception.RoomescapeException;
-import roomescape.support.exception.ThemeErrorCode;
 import roomescape.support.exception.WaitingReservationErrorCode;
 
 @Service
@@ -30,38 +22,23 @@ public class WaitingReservationService {
 
     private final WaitingReservationRepository waitingReservationRepository;
     private final ReservationRepository reservationRepository;
-    private final ReservationDateRepository reservationDateRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final ReservationSlotResolver reservationSlotResolver;
     private final Clock clock;
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
-        ReservationDate date = getReservationDate(request.dateId());
-        ReservationTime time = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
-        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        ReservationSlot slot = reservationSlotResolver.resolve(request.dateId(), request.timeId(), request.themeId());
         validateReservableDate(slot);
         validateSlotIsReserved(slot);
         validateDuplicationOfWaitingReservation(request.name(), slot);
 
-        WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
+        WaitingReservation waitingReservation = request.toEntity(
+                slot.date(),
+                slot.time(),
+                slot.theme(),
+                LocalDateTime.now(clock)
+        );
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
-    }
-
-    private ReservationDate getReservationDate(Long id) {
-        return reservationDateRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ReservationDateErrorCode.RESERVATION_DATE_NOT_EXIST));
-    }
-
-    private ReservationTime getReservationTime(Long id) {
-        return reservationTimeRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ReservationTimeErrorCode.RESERVATION_TIME_NOT_EXIST));
-    }
-
-    private Theme getTheme(Long id) {
-        return themeRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ThemeErrorCode.THEME_NOT_EXIST));
     }
 
     private void validateDuplicationOfWaitingReservation(String name, ReservationSlot slot) {

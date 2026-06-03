@@ -13,8 +13,12 @@ public record ReservationSlot(
         Theme theme
 ) {
 
+    public static ReservationSlot of(ReservationDate date, ReservationTime time, Theme theme) {
+        return new ReservationSlot(date, time, theme);
+    }
+
     public static ReservationSlot from(Reservation reservation) {
-        return new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return of(reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     public Long dateId() {
