@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -136,6 +137,57 @@ class ReservationServiceTest {
         reservationService.delete(1L);
 
         then(reservationDao).should().delete(1L);
+    }
+
+    @Test
+    void delete_사용자_예약_취소_시_첫번째_대기를_예약으로_전환한다() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+
+        reservationService.delete(1L, "브라운");
+
+        then(reservationDao).should().delete(1L);
+        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().deleteWaiting(10L);
+    }
+
+    @Test
+    void delete_관리자_예약_삭제_시_첫번째_대기를_예약으로_전환한다() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+
+        reservationService.delete(1L);
+
+        then(reservationDao).should().delete(1L);
+        then(reservationDao).should().save(waiting);
+        then(reservationDao).should().deleteWaiting(10L);
+    }
+
+    @Test
+    void delete_대기_전환_중_예약_저장이_실패하면_대기를_삭제하지_않는다() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        Reservation waiting = new Reservation(10L, "이든", futureDate, fixedNow, sampleTime, sampleTheme);
+        given(reservationDao.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationDao.findFirstWaitingBySlot(futureDate, 1L, 1L))
+                .willReturn(Optional.of(new ReservationWaiting(waiting, 1)));
+        given(reservationDao.save(waiting)).willThrow(new DataConflictException(new RuntimeException()));
+
+        assertThatThrownBy(() -> reservationService.delete(1L))
+                .isInstanceOf(ReservationConflictException.class);
+
+        then(reservationDao).should().delete(1L);
+        then(reservationDao).should().save(waiting);
+        then(reservationDao).should(never()).deleteWaiting(10L);
     }
 
     @Test

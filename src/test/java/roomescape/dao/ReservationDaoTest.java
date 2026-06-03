@@ -217,4 +217,26 @@ class ReservationDaoTest {
         assertThat(reservationWaitings).hasSize(1);
         assertThat(reservationWaitings.getFirst().waitingNumber()).isEqualTo(2);
     }
+
+    @Test
+    void findFirstWaitingBySlot_가장_먼저_신청한_대기를_조회한다() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        LocalDate date = LocalDate.of(2026, 12, 31);
+        Reservation later = new Reservation("나중", date, LocalDateTime.of(2026, 12, 1, 11, 0), time, theme);
+        Reservation earlier = new Reservation("먼저", date, LocalDateTime.of(2026, 12, 1, 10, 0), time, theme);
+
+        reservationDao.saveWaiting(later);
+        reservationDao.saveWaiting(earlier);
+
+        ReservationWaiting actual = reservationDao.findFirstWaitingBySlot(date, 1L, 1L).orElseThrow();
+
+        assertThat(actual.reservation().getName()).isEqualTo("먼저");
+        assertThat(actual.waitingNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void findFirstWaitingBySlot_대기가_없으면_빈_Optional을_반환한다() {
+        assertThat(reservationDao.findFirstWaitingBySlot(LocalDate.of(2026, 12, 31), 1L, 1L)).isEmpty();
+    }
 }
