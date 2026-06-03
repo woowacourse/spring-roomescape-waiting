@@ -31,7 +31,19 @@ class ReservationTest {
         TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
         assertThatThrownBy(() -> new Reservation(1L, " ", LocalDate.now().plusDays(1), timeSlot,
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com")))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약자 이름은 필수입니다.");
+    }
+
+    @Test
+    @DisplayName("예약 날짜가 null이면 예외가 발생한다.")
+    void 예약_날짜_null_예외_발생() {
+        TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com");
+
+        assertThatThrownBy(() -> new Reservation(1L, "브라운", null, timeSlot, theme))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 날짜는 필수입니다.");
     }
 
     @Test
@@ -39,12 +51,23 @@ class ReservationTest {
     void 예약_시간_null_예외_발생() {
         assertThatThrownBy(() -> new Reservation(1L, "브라운", LocalDate.now().plusDays(1), null,
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com")))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 시간은 필수입니다.");
     }
 
     @Test
-    @DisplayName("식별자 없이 예약 객체를 생성할 수 있다.")
-    void 식별자_없는_예약_생성() {
+    @DisplayName("테마가 null이면 예외가 발생한다.")
+    void 예약_테마_null_예외_발생() {
+        TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
+
+        assertThatThrownBy(() -> new Reservation(1L, "브라운", LocalDate.now().plusDays(1), timeSlot, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("테마는 필수입니다.");
+    }
+
+    @Test
+    @DisplayName("ID 없이 예약 객체를 생성할 수 있다.")
+    void ID_없는_예약_생성() {
         Reservation reservation = new Reservation(null, "브라운", LocalDate.now().plusDays(1),
                 new TimeSlot(1L, LocalTime.of(10, 0)),
                 new Theme(1L, "공포", "귀신의 집 탈출", "https://test.com"));
