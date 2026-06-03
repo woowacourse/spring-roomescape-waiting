@@ -65,7 +65,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
+    public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
         String sql = """
                 SELECT
                     rs.id           AS slot_id,
@@ -87,6 +87,9 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 WHERE rs.date_id = :dateId
                   AND rs.time_id = :timeId
                   AND rs.theme_id = :themeId
+                  AND rd.is_active  = true
+                  AND rt.is_active  = true
+                  AND t.is_active   = true
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("dateId", dateId)

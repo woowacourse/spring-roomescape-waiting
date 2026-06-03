@@ -27,7 +27,7 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public Optional<ReservationSlot> findByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
+    public Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId) {
         return store.stream()
                 .filter(slot -> slot.getDateId().equals(dateId)
                         && slot.getTimeId().equals(timeId)

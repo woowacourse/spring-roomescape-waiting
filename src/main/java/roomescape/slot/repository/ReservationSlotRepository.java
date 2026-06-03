@@ -11,6 +11,6 @@ public interface ReservationSlotRepository {
 
     List<ReservationSlot> findAll();
 
-    Optional<ReservationSlot> findByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId);
+    Optional<ReservationSlot> findAvailableByDateIdTimeIdThemeId(Long dateId, Long timeId, Long themeId);
 
 }
