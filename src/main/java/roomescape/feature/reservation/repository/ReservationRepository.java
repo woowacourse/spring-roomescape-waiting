@@ -15,6 +15,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findLowestIdWaitingReservation(LocalDate date, Long timeId, Long themeId);
 
+    boolean existsActiveReservation(LocalDate date, Long timeId, Long themeId);
+
     List<Reservation> findReservationsByNameAndNotDeleted(ReserverName name);
 
     Optional<Reservation> findReservationByIdAndNotDeleted(Long id);

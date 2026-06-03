@@ -32,6 +32,10 @@ public class WaitingPromoter {
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void promoteFastestWaiting(ActiveReservationCancelEvent event) {
+        if (reservationRepository.existsActiveReservation(event.date(), event.timeId(), event.themeId())) {
+            return;
+        }
+
         Optional<Reservation> candidate = reservationRepository.findLowestIdWaitingReservation(
                 event.date(), event.timeId(), event.themeId());
         if (candidate.isEmpty()) {
@@ -42,7 +46,8 @@ public class WaitingPromoter {
                 candidate.get().getId(), ReservationStatus.WAITING, ReservationStatus.ACTIVE);
 
         if (changedRowCount <= 0) {
-            // 동시성으로 인해 후보 대기가 사라졌다면 다음 순번으로 재시도
+            // 후보 대기가 그 사이 사라졌다면 다음 순번으로 재시도한다.
+            // (다른 주체가 이미 승격해 ACTIVE가 생긴 경우라면 위 검증에서 멈춘다)
             promoteFastestWaiting(event);
         }
     }

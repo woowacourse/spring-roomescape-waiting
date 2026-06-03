@@ -475,6 +475,46 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
+    class 슬롯의_활성_예약_존재_여부_확인 {
+
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
+        @Test
+        void 슬롯에_활성_예약이_있으면_true를_반환한다() {
+            // given
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            Reservation reservation = reservationRepository.save(ReservationFixture.FUTURE.createInstance(time, theme));
+
+            // when
+            boolean actual = reservationRepository.existsActiveReservation(
+                reservation.getDate(), time.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isTrue();
+        }
+
+        @Test
+        void 대기만_있고_활성_예약이_없으면_false를_반환한다() {
+            // given
+            LocalDate date = LocalDate.now().plusYears(1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "https://example.com/image1.png"));
+            reservationRepository.save(
+                Reservation.create(new ReserverName("예약자"), date, time, theme, ReservationStatus.WAITING));
+
+            // when
+            boolean actual = reservationRepository.existsActiveReservation(date, time.getId(), theme.getId());
+
+            // then
+            assertThat(actual).isFalse();
+        }
+    }
+
+    @Nested
     class 예약_수정 {
 
         @BeforeEach

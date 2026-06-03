@@ -84,6 +84,27 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     }
 
+    @Override
+    public boolean existsActiveReservation(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation
+                    WHERE status = 'ACTIVE'
+                      AND date = :date
+                      AND time_id = :timeId
+                      AND theme_id = :themeId
+                )
+                """;
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
+
+        Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);
+        return Boolean.TRUE.equals(exists);
+    }
+
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         return Reservation.reconstruct(
                 rs.getLong("id"),

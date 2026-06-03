@@ -64,6 +64,20 @@ class WaitingPromoterTest {
         }
 
         @Test
+        void 슬롯에_이미_ACTIVE_예약이_있으면_승격하지_않는다() {
+            // given
+            when(reservationRepository.existsActiveReservation(DATE, TIME_ID, THEME_ID))
+                    .thenReturn(true);
+
+            // when
+            waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+
+            // then
+            verify(reservationRepository, never()).findLowestIdWaitingReservation(any(), any(), any());
+            verify(reservationRepository, never()).changeStatus(any(), any(), any());
+        }
+
+        @Test
         void 대기_예약이_없으면_아무것도_확정하지_않는다() {
             // given
             when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
