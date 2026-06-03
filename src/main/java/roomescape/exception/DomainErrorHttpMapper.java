@@ -1,13 +1,15 @@
 package roomescape.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import roomescape.domain.exception.DomainErrorCode;
 
-@Component
 public class DomainErrorHttpMapper {
 
-    public HttpStatus statusOf(DomainErrorCode code) {
+    private DomainErrorHttpMapper() {
+
+    }
+
+    public static HttpStatus statusOf(DomainErrorCode code) {
         return switch (code) {
             case NOT_FOUND_RESERVATION, NOT_FOUND_WAIT, NOT_FOUND_RESERVATION_TIME, NOT_FOUND_THEME ->
                     HttpStatus.NOT_FOUND;
