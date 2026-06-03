@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import roomescape.DatabaseInitializer;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
@@ -59,14 +60,16 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 이미_존재하는_테마명으로_추가하면_예외가_발생한다() {
+    void 이미_존재하는_테마명으로_추가하면_409를_반환한다() {
         // given
         CreateThemeCommand command = new CreateThemeCommand("방탈출1", "설명2", "https://thumb2.com");
         saveTheme("방탈출1", "설명", "https://thumb.com");
 
         // when & then
         assertThatThrownBy(() -> themeService.addTheme(command))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     @Test
@@ -111,14 +114,15 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 존재하지_않는_테마를_삭제하면_예외가_발생한다() {
-        // when & then
+    void 존재하지_않는_테마를_삭제하면_404를_반환한다() {
         assertThatThrownBy(() -> themeService.deleteTheme(999L))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
-    void 예약에_존재하는_테마를_삭제하면_예외가_발생한다() {
+    void 예약에_존재하는_테마를_삭제하면_409를_반환한다() {
         // given
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         ReservationTime time = timeDao.insert(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
@@ -126,7 +130,9 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteTheme(theme.getId()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     private Theme saveTheme(String name, String description, String thumbnail) {

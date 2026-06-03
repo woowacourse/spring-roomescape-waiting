@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
@@ -65,7 +66,7 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 예약이_없는_슬롯에_대기를_신청하면_예외가_발생한다() {
+    void 예약이_없는_슬롯에_대기를_신청하면_404를_반환한다() {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
@@ -75,11 +76,14 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     @Test
-    void 동일한_슬롯에_동일한_사용자의_예약이_존재하면_예외가_발생한다() {
+    void 동일한_슬롯에_동일한_사용자의_예약이_존재하면_409를_반환한다() {
+        // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         reservationDao.insert(Reservation.createWithoutId("로지",
@@ -88,12 +92,16 @@ class ReservationWaitingServiceTest {
                 "로지", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );
 
+        // when & then
         assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     @Test
-    void 동일한_슬롯에_중복_대기를_신청하면_예외가_발생한다() {
+    void 동일한_슬롯에_중복_대기를_신청하면_409를_반환한다() {
+        // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
         reservationDao.insert(Reservation.createWithoutId("로지",
@@ -103,8 +111,11 @@ class ReservationWaitingServiceTest {
         );
         waitingService.addReservationWaiting(command, LocalDateTime.now());
 
+        // when & then
         assertThatThrownBy(() -> waitingService.addReservationWaiting(command, LocalDateTime.now()))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.CONFLICT));
     }
 
     @Test
@@ -144,9 +155,11 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 존재하지_않는_대기를_취소하면_예외가_발생한다() {
+    void 존재하지_않는_대기를_취소하면_404를_반환한다() {
         assertThatThrownBy(() -> waitingService.delete(999L))
-                .isInstanceOf(RoomEscapeException.class);
+                .isInstanceOf(RoomEscapeException.class)
+                .satisfies(exception -> assertThat(((RoomEscapeException) exception).getErrorCode().getHttpStatus())
+                        .isEqualTo(HttpStatus.NOT_FOUND));
     }
 
     private ReservationTime saveTime(int hour, int minute) {
