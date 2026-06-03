@@ -16,6 +16,7 @@ import java.util.Optional;
 @Repository
 public class JdbcSlotRepository implements SlotRepository {
 
+    private static final String FIND_ALL_SQL = "SELECT * FROM slot";
     private static final String FIND_BY_CONDITIONS_SQL = """
             SELECT 
                 s.id AS slot_id, 
@@ -43,6 +44,11 @@ public class JdbcSlotRepository implements SlotRepository {
                 .withTableName("slot")
                 .usingGeneratedKeyColumns("id");
         this.rowMapper = (rs, rowNum) -> mapperFactory.mapSlot(rs);
+    }
+
+    @Override
+    public List<Slot> findAll() {
+        return jdbcTemplate.query(FIND_ALL_SQL, rowMapper);
     }
 
     @Override

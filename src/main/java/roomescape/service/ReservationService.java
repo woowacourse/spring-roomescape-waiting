@@ -38,10 +38,8 @@ public class ReservationService {
     public Reservation saveReservation(ReservationRequest request) {
         Slot slot = slotService.resolveSlot(request.date(), request.timeId(), request.themeId());
         validDateTime(slot.getDate(), slot.getTimeSlot().getStartAt());
-        validDuplicatedReservation(slot);
-
-        Reservation transientReservation = Reservation.transientOf(request.name(), slot);
-        return reservationRepository.save(transientReservation);
+        checkDuplicateForSave(slot);
+        return reservationRepository.save(Reservation.transientOf(request.name(), slot));
     }
 
     public List<Reservation> allReservations() {
@@ -53,11 +51,9 @@ public class ReservationService {
     }
 
     public List<Booking> findReservationByName(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-        List<Waiting> waitings = waitingRepository.findByName(name);
         List<Booking> bookings = new ArrayList<>();
-        reservations.forEach(r -> bookings.add(Booking.fromReservation(r)));
-        waitings.forEach(w -> bookings.add(Booking.fromWaiting(w)));
+        reservationRepository.findByName(name).forEach(r -> bookings.add(Booking.fromReservation(r)));
+        waitingRepository.findByName(name).forEach(w -> bookings.add(Booking.fromWaiting(w)));
         return bookings;
     }
 
@@ -70,39 +66,56 @@ public class ReservationService {
 
     @Transactional
     public Reservation putReservation(long id, String userName, ReservationRequest request) {
-        validModifiable(id, userName);
+        Reservation existing = validModifiable(id, userName);
         Slot newSlot = slotService.resolveSlot(request.date(), request.timeId(), request.themeId());
         validDateTime(newSlot.getDate(), newSlot.getTimeSlot().getStartAt());
-        validDuplicatedReservation(newSlot);
-
-        Reservation reservation = new Reservation(id, request.name(), newSlot);
-        return reservationRepository.update(reservation);
+        checkDuplicateForUpdate(newSlot, id);
+        Reservation updated = reservationRepository.update(new Reservation(id, request.name(), newSlot));
+        processOldSlotIfChanged(existing.getSlot(), newSlot);
+        return updated;
     }
 
     @Transactional
     public Reservation patchReservation(long id, String userName, ReservationPatchRequest request) {
-        Reservation reservation = validModifiable(id, userName);
-        Slot currentSlot = reservation.getSlot();
-
-        LocalDate patchedDate = request.date() != null ? request.date() : currentSlot.getDate();
-        Long patchedTimeId = request.timeId() != null ? request.timeId() : currentSlot.getTimeSlot().getId();
-        Long patchedThemeId = request.themeId() != null ? request.themeId() : currentSlot.getTheme().getId();
-        String patchedName = request.name() != null ? request.name() : reservation.getName();
-
-        Slot newSlot = slotService.resolveSlot(patchedDate, patchedTimeId, patchedThemeId);
+        Reservation existing = validModifiable(id, userName);
+        Slot currentSlot = existing.getSlot();
+        Slot newSlot = resolvePatchedSlot(currentSlot, request);
         validDateTime(newSlot.getDate(), newSlot.getTimeSlot().getStartAt());
-        validDuplicatedReservation(newSlot);
+        checkDuplicateForUpdate(newSlot, id);
+        Reservation updated = reservationRepository.update(new Reservation(id, resolvePatchedName(existing, request), newSlot));
+        processOldSlotIfChanged(currentSlot, newSlot);
+        return updated;
+    }
 
-        Reservation patchedReservation = new Reservation(id, patchedName, newSlot);
-        return reservationRepository.update(patchedReservation);
+    private Slot resolvePatchedSlot(Slot current, ReservationPatchRequest request) {
+        LocalDate date = request.date() != null ? request.date() : current.getDate();
+        Long timeId = request.timeId() != null ? request.timeId() : current.getTimeSlot().getId();
+        Long themeId = request.themeId() != null ? request.themeId() : current.getTheme().getId();
+        return slotService.resolveSlot(date, timeId, themeId);
+    }
+
+    private String resolvePatchedName(Reservation existing, ReservationPatchRequest request) {
+        return request.name() != null ? request.name() : existing.getName();
+    }
+
+    private void processOldSlotIfChanged(Slot oldSlot, Slot newSlot) {
+        if (!oldSlot.getId().equals(newSlot.getId())) {
+            processSlotAfterCancellation(oldSlot);
+        }
     }
 
     private void processSlotAfterCancellation(Slot slot) {
         if (waitingRepository.isExistsBySlotId(slot.getId())) {
-            Waiting firstWaiting = waitingRepository.findFirstBySlotId(slot.getId());
-            waitingRepository.deleteById(firstWaiting.getId());
-            reservationRepository.save(Reservation.transientOf(firstWaiting.getName(), slot));
+            promoteFirstWaiting(slot);
+            return;
         }
+        slotService.deleteSlot(slot.getId());
+    }
+
+    private void promoteFirstWaiting(Slot slot) {
+        Waiting firstWaiting = waitingRepository.findFirstBySlotId(slot.getId());
+        waitingRepository.deleteById(firstWaiting.getId());
+        reservationRepository.save(Reservation.transientOf(firstWaiting.getName(), slot));
     }
 
     private Reservation validModifiable(long id, String userName) {
@@ -124,10 +137,17 @@ public class ReservationService {
         }
     }
 
-    private void validDuplicatedReservation(Slot slot) {
+    private void checkDuplicateForSave(Slot slot) {
+        if (reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(), slot.getTheme().getId()).isPresent()) {
+            throw new DuplicateReservationException(slot.getDate().toString(), slot.getTimeSlot().getId(), slot.getTheme().getId());
+        }
+    }
+
+    private void checkDuplicateForUpdate(Slot slot, long targetId) {
         reservationRepository.findByDateAndTimeIdAndThemeId(slot.getDate(), slot.getTimeSlot().getId(), slot.getTheme().getId())
+                .filter(existing -> !existing.getId().equals(targetId))
                 .ifPresent(existing -> {
-                    throw new DuplicateReservationException(existing.getSlot().getDate().toString(), existing.getSlot().getTimeSlot().getId(), existing.getSlot().getTheme().getId());
+                    throw new DuplicateReservationException(slot.getDate().toString(), slot.getTimeSlot().getId(), slot.getTheme().getId());
                 });
     }
 }

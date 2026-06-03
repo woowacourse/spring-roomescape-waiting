@@ -4,6 +4,7 @@ import roomescape.domain.Slot;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +31,10 @@ public class FakeSlotRepository implements SlotRepository {
     @Override
     public void deleteById(long id) {
         storage.remove(id);
+    }
+
+    public List<Slot> findAll() {
+        return List.copyOf(storage.values());
     }
 
     private boolean matchCondition(Slot slot, LocalDate date, Long timeId, Long themeId) {

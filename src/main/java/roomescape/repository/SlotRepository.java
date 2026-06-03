@@ -3,9 +3,12 @@ package roomescape.repository;
 import roomescape.domain.Slot;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface SlotRepository {
+
+    List<Slot> findAll();
 
     Slot save(Slot slot);
 

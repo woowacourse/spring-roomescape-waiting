@@ -37,6 +37,11 @@ public class SlotService {
         return slotRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).orElse(null);
     }
 
+    @Transactional
+    public void deleteSlot(long id) {
+        slotRepository.deleteById(id);
+    }
+
     private Slot createNewSlot(LocalDate date, Long timeId, Long themeId) {
         TimeSlot timeSlot = timeSlotRepository.findById(timeId).orElseThrow(() -> new TimeSlotNotFoundException(timeId));
         Theme theme = themeRepository.findById(themeId).orElseThrow(() -> new ThemeNotFoundException(themeId));
