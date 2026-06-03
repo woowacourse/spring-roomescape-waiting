@@ -23,6 +23,15 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    @PostMapping
+    public ResponseEntity<ReservationResult> create(
+            @Valid @RequestBody ReservationCreateCommand request
+    ) {
+        final ReservationResult result = reservationService.create(request);
+        return ResponseEntity.created(URI.create("/reservations/" + result.id()))
+                .body(result);
+    }
+
     @GetMapping("/available-dates")
     public ResponseEntity<AvailableDateResult> getAvailableDates() {
         final AvailableDateResult results = reservationService.getReservationOptions();
@@ -44,24 +53,6 @@ public class ReservationController {
         return ResponseEntity.ok(results);
     }
 
-    @PostMapping
-    public ResponseEntity<ReservationResult> create(
-            @Valid @RequestBody ReservationCreateCommand request
-    ) {
-        final ReservationResult result = reservationService.create(request);
-        return ResponseEntity.created(URI.create("/reservations/" + result.id()))
-                .body(result);
-    }
-
-    @DeleteMapping("/{reservation-id}")
-    public ResponseEntity<Void> deleteByName(
-            @PathVariable("reservation-id") Long reservationId,
-            @RequestParam("name") String name
-    ) {
-        reservationService.deleteWithValidation(reservationId, name);
-        return ResponseEntity.noContent().build();
-    }
-
     @PatchMapping("/{reservation-id}")
     public ResponseEntity<ReservationResult> modify(
             @PathVariable("reservation-id") Long reservationId,
@@ -72,9 +63,18 @@ public class ReservationController {
                 reservationModifyRequest.name(),
                 reservationModifyRequest.date(),
                 reservationModifyRequest.timeId(),
-
+                reservationModifyRequest.themeId()
         );
         final ReservationResult result = reservationService.modify(reservationModifyCommand);
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{reservation-id}")
+    public ResponseEntity<Void> deleteByName(
+            @PathVariable("reservation-id") Long reservationId,
+            @RequestParam("name") String name
+    ) {
+        reservationService.deleteWithValidation(reservationId, name);
+        return ResponseEntity.noContent().build();
     }
 }

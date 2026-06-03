@@ -32,6 +32,32 @@ public class ReservationService {
 
     private static final int RESERVABLE_DAYS_RANGE = 14;
 
+    public ReservationResult create(final ReservationCreateCommand data) {
+        Theme findTheme = findThemeOrThrow(data.themeId());
+        ReservationTime findReservationTime = findReservationTimeOrThrow(data.timeId());
+        validateAvailable(data.date(), findReservationTime.getId(), findTheme.getId());
+
+        final Reservation newReservation = Reservation.create(data.name(), data.date(), findReservationTime, findTheme);
+        validateReservation(newReservation, findTheme, findReservationTime);
+
+        final Reservation savedReservation = reservationRepository.save(newReservation);
+        return ReservationResult.from(savedReservation);
+    }
+
+    public AvailableDateResult getReservationOptions() {
+        LocalDate today = LocalDate.now();
+        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
+
+        return new AvailableDateResult(dates);
+    }
+
+    public List<ReservationResult> getReservationsByName(final String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        return reservations.stream()
+                .map(ReservationResult::from)
+                .toList();
+    }
+
     public List<ReservationResult> getReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -50,16 +76,27 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResult create(final ReservationCreateCommand data) {
-        Theme findTheme = findThemeOrThrow(data.themeId());
-        ReservationTime findReservationTime = findReservationTimeOrThrow(data.timeId());
-        validateAvailable(data.date(), findReservationTime.getId(), findTheme.getId());
+    public ReservationResult modify(final ReservationModifyCommand reservationModifyCommand) {
+        final Long reservationId = reservationModifyCommand.reservationId();
+        final Reservation originalReservation = findReservationOrThrow(reservationId);
 
-        final Reservation newReservation = Reservation.create(data.name(), data.date(), findReservationTime, findTheme);
-        validateReservation(newReservation, findTheme, findReservationTime);
+        final String personName = reservationModifyCommand.name();
+        validateReservationOwner(originalReservation, personName);
 
-        final Reservation savedReservation = reservationRepository.save(newReservation);
-        return ReservationResult.from(savedReservation);
+        ReservationTime findReservationTime = findReservationTimeOrThrow(reservationModifyCommand.timeId());
+        Theme findTheme = findThemeOrThrow(reservationModifyCommand.themeId());
+
+        final Reservation modifiedReservation = originalReservation.modify(
+                reservationModifyCommand.date(),
+                findReservationTime,
+                findTheme
+        );
+        validateReservation(modifiedReservation, modifiedReservation.getTheme(), modifiedReservation.getTime());
+
+        validateAvailable(modifiedReservation.getReservationDate().getDate(), modifiedReservation.getTime().getId(), modifiedReservation.getTheme().getId());
+
+        reservationRepository.updateDateAndTime(modifiedReservation);
+        return ReservationResult.from(modifiedReservation);
     }
 
     @Transactional
@@ -94,43 +131,6 @@ public class ReservationService {
         reservationRepository.save(newReservation);
 
         waitingListRepository.deleteById(waitingList.getId());
-    }
-
-    public AvailableDateResult getReservationOptions() {
-        LocalDate today = LocalDate.now();
-        List<LocalDate> dates = today.datesUntil(today.plusDays(RESERVABLE_DAYS_RANGE)).toList();
-
-        return new AvailableDateResult(dates);
-    }
-
-    public List<ReservationResult> getReservationsByName(final String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
-        return reservations.stream()
-                .map(ReservationResult::from)
-                .toList();
-    }
-
-    public ReservationResult modify(final ReservationModifyCommand reservationModifyCommand) {
-        final Long reservationId = reservationModifyCommand.reservationId();
-        final Reservation originalReservation = findReservationOrThrow(reservationId);
-
-        final String personName = reservationModifyCommand.name();
-        validateReservationOwner(originalReservation, personName);
-
-        ReservationTime findReservationTime = findReservationTimeOrThrow(reservationModifyCommand.timeId());
-        Theme findTheme = findThemeOrThrow(reservationModifyCommand.themeId());
-
-        final Reservation modifiedReservation = originalReservation.modify(
-                reservationModifyCommand.date(),
-                findReservationTime,
-                findTheme
-        );
-        validateReservation(modifiedReservation, modifiedReservation.getTheme(), modifiedReservation.getTime());
-
-        validateAvailable(modifiedReservation.getReservationDate().getDate(), modifiedReservation.getTime().getId(), modifiedReservation.getTheme().getId());
-
-        reservationRepository.updateDateAndTime(modifiedReservation);
-        return ReservationResult.from(modifiedReservation);
     }
 
     private void validateAvailable(final LocalDate date, final Long timeId, final Long themeId) {

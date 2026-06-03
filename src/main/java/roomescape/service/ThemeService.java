@@ -34,19 +34,6 @@ public class ThemeService {
         return ThemeResult.from(theme);
     }
 
-    public void delete(final Long themeId) {
-        final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
-        if (hasAnyOngoingReservation) {
-            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
-        }
-
-        boolean deleted = themeRepository.deleteById(themeId);
-
-        if (!deleted) {
-            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
-        }
-    }
-
     public List<ThemeResult> getPopularThemes() {
         final LocalDate today = LocalDate.now();
         final LocalDate startDate = today.minusDays(DATA_RANGE);
@@ -62,5 +49,18 @@ public class ThemeService {
                 .stream()
                 .map(ThemeResult::from)
                 .toList();
+    }
+
+    public void delete(final Long themeId) {
+        final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
+        if (hasAnyOngoingReservation) {
+            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
+        }
+
+        boolean deleted = themeRepository.deleteById(themeId);
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
+        }
     }
 }

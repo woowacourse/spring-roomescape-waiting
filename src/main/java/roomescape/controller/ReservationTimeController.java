@@ -18,12 +18,6 @@ public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
 
-    @GetMapping
-    public ResponseEntity<List<ReservationTimeResult>> getTimes() {
-        final List<ReservationTimeResult> results = reservationTimeService.getTimes();
-        return ResponseEntity.ok(results);
-    }
-
     @PostMapping
     public ResponseEntity<ReservationTimeResult> create(
             @Valid @RequestBody ReservationTimeCreateCommand request
@@ -31,6 +25,12 @@ public class ReservationTimeController {
         final ReservationTimeResult result = reservationTimeService.create(request);
         return ResponseEntity.created(URI.create("/times/" + result.id()))
                 .body(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationTimeResult>> getTimes() {
+        final List<ReservationTimeResult> results = reservationTimeService.getTimes();
+        return ResponseEntity.ok(results);
     }
 
     @DeleteMapping("/{time-id}")

@@ -19,13 +19,6 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<ReservationTimeResult> getTimes() {
-        return reservationTimeRepository.findAll()
-                .stream()
-                .map(ReservationTimeResult::from)
-                .toList();
-    }
-
     public ReservationTimeResult create(ReservationTimeCreateCommand data) {
         final ReservationTime reservationTime = ReservationTime.create(
                 data.startAt(),
@@ -35,6 +28,13 @@ public class ReservationTimeService {
         final ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
 
         return ReservationTimeResult.from(savedTime);
+    }
+
+    public List<ReservationTimeResult> getTimes() {
+        return reservationTimeRepository.findAll()
+                .stream()
+                .map(ReservationTimeResult::from)
+                .toList();
     }
 
     public void delete(final Long timeId) {

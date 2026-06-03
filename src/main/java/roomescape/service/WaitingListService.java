@@ -29,12 +29,6 @@ public class WaitingListService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<WaitingListResult> getWaitingListByName(String name) {
-        return waitingListRepository.findByName(name).stream()
-                .map(row -> WaitingListResult.from(row.waitingList(), row.waitingOrder()))
-                .toList();
-    }
-
     @Transactional
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         Theme findTheme = findThemeOrThrow(createCommand.themeId());
@@ -51,6 +45,12 @@ public class WaitingListService {
         } catch (DataAccessException e) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }
+    }
+
+    public List<WaitingListResult> getWaitingListByName(String name) {
+        return waitingListRepository.findByName(name).stream()
+                .map(row -> WaitingListResult.from(row.waitingList(), row.waitingOrder()))
+                .toList();
     }
 
     @Transactional

@@ -20,18 +20,17 @@ public class WaitingListController {
 
     private final WaitingListService waitingListService;
 
-    @GetMapping
-    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam String name) {
-        final List<WaitingListResult> results = waitingListService.getWaitingListByName(name);
-        return ResponseEntity.ok().body(results);
-    }
-
-
     @PostMapping
     public ResponseEntity<WaitingListResult> create(@RequestBody @Valid WaitingListCreateCommand createCommand) {
         final WaitingListResult result = waitingListService.create(createCommand);
         return ResponseEntity.created(URI.create("/waiting-list/" + result.id()))
                 .body(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam String name) {
+        final List<WaitingListResult> results = waitingListService.getWaitingListByName(name);
+        return ResponseEntity.ok().body(results);
     }
 
     @DeleteMapping("/{id}")
