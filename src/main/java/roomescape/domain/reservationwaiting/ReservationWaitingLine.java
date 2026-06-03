@@ -14,9 +14,9 @@ public class ReservationWaitingLine {
                 .toList();
     }
 
-    public int sequenceOf(final Long waitingId) {
+    public int sequenceOf(final long waitingId) {
         for (int index = 0; index < orders.size(); index++) {
-            if (orders.get(index).waitingId().equals(waitingId)) {
+            if (orders.get(index).waitingId() == waitingId) {
                 return index + 1;
             }
         }
@@ -25,7 +25,7 @@ public class ReservationWaitingLine {
     }
 
     public record ReservationWaitingOrder(
-            Long waitingId,
+            long waitingId,
             LocalDateTime requestedAt
     ) {
     }
