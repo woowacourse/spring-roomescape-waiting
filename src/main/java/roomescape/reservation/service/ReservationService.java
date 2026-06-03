@@ -159,8 +159,10 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(ReservationUpdateCommand command, Long id) {
+    public void updateReservation(ReservationUpdateCommand command, Long id, String name) {
         Reservation original = getReservation(id);
+
+        validateReservationOwnership(original, name);
 
         validateExpiry(
                 original.getDate(),
@@ -205,6 +207,12 @@ public class ReservationService {
         }
     }
 
+    private void validateReservationOwnership(Reservation reservation, String userName) {
+        if (!reservation.hasSameName(userName)) {
+            throw new AuthorizationException();
+        }
+    }
+
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
@@ -244,11 +252,29 @@ public class ReservationService {
     }
 
     @Transactional
+    public void deleteReservationById(Long id, String name) {
+        Reservation reservation = getReservation(id);
+
+        validateReservationOwnership(reservation, name);
+
+        validateExpiry(
+                reservation.getDate(),
+                reservation.getReservationTime().getStartAt()
+        );
+
+        deleteReservation(reservation);
+    }
+
+    @Transactional
     public void deleteReservationById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
 
-        int affectedRow = reservationRepository.deleteById(id);
+        deleteReservation(reservation);
+    }
+
+    private void deleteReservation(Reservation reservation) {
+        int affectedRow = reservationRepository.deleteById(reservation.getId());
         int nonAffected = 0;
 
         if (affectedRow == nonAffected) {
@@ -258,22 +284,5 @@ public class ReservationService {
         reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
                 reservation.getDate(), reservation.getReservationTime().getId(), reservation.getTheme().getId()
         ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
-    }
-
-    public void validateReservationNotExpired(Long id) {
-        Reservation reservation = getReservation(id);
-
-        validateExpiry(
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt()
-        );
-    }
-
-    public void validateReservationOwnership(Long reservationId, String userName) {
-        Reservation reservation = getReservation(reservationId);
-
-        if (!reservation.hasSameName(userName)) {
-            throw new AuthorizationException();
-        }
     }
 }

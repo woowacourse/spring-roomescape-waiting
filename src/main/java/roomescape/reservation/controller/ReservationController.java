@@ -64,8 +64,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestBody ReservationUpdateRequest request
     ) {
-        reservationService.validateReservationOwnership(id, name);
-        reservationService.updateReservation(request.toCommand(), id);
+        reservationService.updateReservation(request.toCommand(), id, name);
         return ResponseEntity.noContent().build();
     }
 
@@ -75,10 +74,7 @@ public class ReservationController {
             @LoginName String name,
             @PathVariable Long id
     ) {
-        reservationService.validateReservationOwnership(id, name);
-        reservationService.validateReservationNotExpired(id);
-        reservationService.deleteReservationById(id);
-
+        reservationService.deleteReservationById(id, name);
         return ResponseEntity.noContent().build();
     }
 }

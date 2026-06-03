@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
+import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
@@ -292,6 +292,15 @@ class ReservationServiceTest {
         LocalDate originalDate = LocalDate.of(2026, 5, 15);
         LocalDate updatedDate = LocalDate.of(2026, 5, 16);
 
+        when(reservationRepository.findById(any()))
+                .thenReturn(Optional.of(new Reservation(
+                        1L,
+                        "brown",
+                        originalDate,
+                        originalTime,
+                        theme
+                )));
+
         when(reservationRepository.findById(1L))
                 .thenReturn(Optional.of(
                         new Reservation(
@@ -333,9 +342,9 @@ class ReservationServiceTest {
 
         //when
         reservationService.updateReservation(
-                new ReservationUpdateCommand(
-                        updatedDate, 2L
-                ), 1L
+                new ReservationUpdateCommand(updatedDate, 2L),
+                1L,
+                "brown"
         );
 
         //then
@@ -359,16 +368,41 @@ class ReservationServiceTest {
         );
     }
 
+    @DisplayName("인가가 포함된 예약 변경 시, 본인 예약이 아니면 예외가 발생한다.")
+    @Test
+    void updateReservationTest_unAuthorized() {
+        //given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+        LocalDate date = LocalDate.of(2026, 5, 15);
+
+        when(reservationRepository.findById(any()))
+                .thenReturn(Optional.of(new Reservation(
+                        1L,
+                        "brown",
+                        date,
+                        time,
+                        theme
+                )));
+
+        //when & then
+        assertThatThrownBy(() -> reservationService.updateReservation(
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 15), 1L),
+                1L,
+                "other"
+        )).isInstanceOf(AuthorizationException.class);
+    }
+
     @DisplayName("예약 변경 시, id에 해당하는 예약이 없으면 예외가 발생한다.")
     @Test
-    void updateReservationTest_reservation_not_found() {
+    void updateReservationWithAuthorizationTest_reservation_not_found() {
         //given
         when(reservationRepository.findById(any()))
                 .thenReturn(Optional.empty());
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L, "brown"
         )).isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -394,7 +428,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 17), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 17), 2L), 1L, "brown"
         )).isInstanceOf(InvalidReservationDateValueException.class);
     }
 
@@ -423,7 +457,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L, "brown"
         )).isInstanceOf(TimeNotFoundException.class);
     }
 
@@ -453,7 +487,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 15), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 15), 2L), 1L, "brown"
         )).isInstanceOf(InvalidTimeStartAtValueException.class);
     }
 
@@ -483,7 +517,7 @@ class ReservationServiceTest {
 
         //when
         reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 1L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 1L), 1L, "brown"
         );
 
         //then
@@ -528,7 +562,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L, "brown"
         )).isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -565,7 +599,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L, "brown"
         )).isInstanceOf(ReservationSlotHasWaitingException.class);
     }
 
@@ -620,7 +654,7 @@ class ReservationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
-                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L, "brown"
         )).isInstanceOf(DuplicateReservationException.class);
     }
 
@@ -716,17 +750,21 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("현재 시간을 기준으로 예약의 유효성을 검증한다.")
+    @DisplayName("인가가 포함된 예약 삭제 시, 본인 예약이면 예약을 삭제하고 동일한 슬롯의 예약 대기를 승격한다.")
     @Test
-    void validateReservationNotExpiredTest() {
+    void deleteReservationByIdTest_with_authorization_success() {
         //given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+        LocalDate date = LocalDate.of(2026, 5, 15);
+
         when(reservationRepository.findById(any()))
                 .thenReturn(Optional.of(new Reservation(
                         1L,
                         "brown",
-                        LocalDate.of(2026, 5, 15),
-                        new ReservationTime(1L, LocalTime.of(10, 0)),
-                        new Theme(1L, "이름", "설명", "thumbnailUrl")
+                        date,
+                        time,
+                        theme
                 )));
 
         when(clock.instant()).thenReturn(
@@ -736,8 +774,87 @@ class ReservationServiceTest {
         );
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
+        when(reservationRepository.deleteById(any()))
+                .thenReturn(1);
+
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+                .thenReturn(Optional.of(new ReservationWaiting(
+                        1L,
+                        "pobi",
+                        date,
+                        time,
+                        theme
+                )));
+
+        when(reservationWaitingRepository.deleteById(any()))
+                .thenReturn(1);
+
+        //when
+        reservationService.deleteReservationById(1L, "brown");
+
+        //then
+        assertAll(
+                () -> verify(reservationRepository).deleteById(1L),
+                () -> verify(reservationWaitingRepository)
+                        .findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L),
+                () -> verify(reservationWaitingRepository).deleteById(1L),
+                () -> verify(reservationRepository).save(argThat(reservation ->
+                        reservation.getName().equals("pobi")
+                                && reservation.getDate().equals(date)
+                                && reservation.getReservationTime().equals(time)
+                                && reservation.getTheme().equals(theme)
+                ))
+        );
+    }
+
+    @DisplayName("인가가 포함된 예약 삭제 시, 본인 예약이 아니면 예외가 발생한다.")
+    @Test
+    void deleteReservationByIdTest_unAuthorized() {
+        //given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+        LocalDate date = LocalDate.of(2026, 5, 15);
+
+        when(reservationRepository.findById(any()))
+                .thenReturn(Optional.of(new Reservation(
+                        1L,
+                        "brown",
+                        date,
+                        time,
+                        theme
+                )));
+
         //when & then
-        assertThatCode(() -> reservationService.validateReservationNotExpired(1L))
-                .doesNotThrowAnyException();;
+        assertThatThrownBy(() ->reservationService.deleteReservationById(1L, "other"))
+                .isInstanceOf(AuthorizationException.class);
+    }
+
+    @DisplayName("인가가 포함된 예약 삭제 시, 예약이 만료됐으면 예외가 발생한다.")
+    @Test
+    void deleteReservationByIdTest_expired() {
+        //given
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+        LocalDate date = LocalDate.of(2026, 5, 15);
+
+        when(reservationRepository.findById(any()))
+                .thenReturn(Optional.of(new Reservation(
+                        1L,
+                        "brown",
+                        date,
+                        time,
+                        theme
+                )));
+
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 16)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        //when & then
+        assertThatThrownBy(() ->reservationService.deleteReservationById(1L, "brown"))
+                .isInstanceOf(InvalidReservationDateValueException.class);
     }
 }

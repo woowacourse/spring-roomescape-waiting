@@ -95,7 +95,8 @@ public class ReservationServiceRollbackTest {
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
                 new ReservationUpdateCommand(LocalDate.of(2026, 5, 6), TIME_ID),
-                RESERVATION_ID
+                RESERVATION_ID,
+                "brown"
         )).isInstanceOf(ReservationWaitingNotFoundException.class);
 
         assertReservationDate(RESERVATION_ID, LocalDate.of(2026, 5, 5));
@@ -147,7 +148,8 @@ public class ReservationServiceRollbackTest {
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
                 new ReservationUpdateCommand(LocalDate.of(2026, 5, 6), TIME_ID),
-                RESERVATION_ID
+                RESERVATION_ID,
+                "brown"
         )).isInstanceOf(DuplicateReservationException.class);
 
         assertAll(

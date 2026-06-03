@@ -207,6 +207,30 @@ class ConcurrencyE2ETest extends E2ETest {
         );
     }
 
+    @DisplayName("인가를 포함하는 예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
+    @Test
+    void deleteReservationByIdWithAuthorization() throws InterruptedException {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+
+        createReservation("brown", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        //when
+        List<Integer> result = runConcurrentlyAndCountResults(
+                () -> reservationService.deleteReservationById(1L, "brown"),
+                100,
+                ReservationNotFoundException.class
+        );
+
+        //then
+        assertAll(
+                () -> assertThat(result.get(0)).isEqualTo(1),
+                () -> assertThat(result.get(1)).isEqualTo(99),
+                () -> assertThat(result.get(2)).isEqualTo(0)
+        );
+    }
+
     @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
     void removeThemeById() throws InterruptedException {
@@ -274,11 +298,13 @@ class ConcurrencyE2ETest extends E2ETest {
         List<Runnable> tasks = List.of(
                 () -> reservationService.updateReservation(
                         new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
-                        reservationId1
+                        reservationId1,
+                        "brown"
                 ),
                 () -> reservationService.updateReservation(
                         new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
-                        reservationId2
+                        reservationId2,
+                        "coney"
                 )
         );
 
