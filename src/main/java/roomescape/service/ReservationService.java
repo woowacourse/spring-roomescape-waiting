@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.dto.reservation.MyReservationResponse;
@@ -16,6 +18,7 @@ import roomescape.repository.ReservationQueryDao;
 import roomescape.repository.ReservationTimeQueryDao;
 import roomescape.repository.ReservationUpdateDao;
 import roomescape.repository.ReservationWaitingQueryDao;
+import roomescape.repository.ReservationWaitingUpdateDao;
 import roomescape.repository.ThemeQueryDao;
 
 import java.util.Comparator;
@@ -31,13 +34,15 @@ public class ReservationService {
     private final ReservationTimeQueryDao reservationTimeQueryingDao;
     private final ThemeQueryDao themeQueryingDao;
     private final ReservationWaitingQueryDao reservationWaitingQueryDao;
+    private final ReservationWaitingUpdateDao reservationWaitingUpdateDao;
 
-    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingQueryDao reservationWaitingQueryDao) {
+    public ReservationService(ReservationQueryDao reservationQueryingDao, ReservationUpdateDao reservationUpdatingDao, ReservationTimeQueryDao reservationTimeQueryingDao, ThemeQueryDao themeQueryingDao, ReservationWaitingQueryDao reservationWaitingQueryDao, ReservationWaitingUpdateDao reservationWaitingUpdateDao) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.themeQueryingDao = themeQueryingDao;
         this.reservationWaitingQueryDao = reservationWaitingQueryDao;
+        this.reservationWaitingUpdateDao = reservationWaitingUpdateDao;
     }
 
     public ReservationResponse read(Long id) {
@@ -101,10 +106,17 @@ public class ReservationService {
         return ReservationResponse.from(updatedReservation);
     }
 
+    @Transactional
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
         reservation.validatePastDateTime();
         reservationUpdatingDao.delete(id);
+
+        reservationWaitingQueryDao.findFirstWaitingBySlot(reservation.getSlot())
+                .ifPresent(waiting -> {
+                    reservationUpdatingDao.insert(waiting.toReservation());
+                    reservationWaitingUpdateDao.delete(waiting.getId());
+                        });
     }
 
     private Reservation getReservation(Long id) {
