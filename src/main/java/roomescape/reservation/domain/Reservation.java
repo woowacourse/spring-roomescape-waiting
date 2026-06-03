@@ -45,7 +45,6 @@ public class Reservation {
     public Reservation modify(LocalDate date, ReservationTime time, Theme theme, Status status, Clock clock) {
         validateRequiredFields(name, date, time, theme, clock);
         validateModifiable(clock);
-        validateNotPast(clock, date, time);
 
         return restore(this.id, this.name, date, time, theme, status, createdAt);
     }
@@ -95,10 +94,7 @@ public class Reservation {
             throw new ValidationException("시간은 필수입니다.");
         }
 
-        if (!time.isAvailableAt(date, clock)) {
-            throw new ConflictException("현재보다 이전 시간대로 예약할 수 없습니다.");
-        }
-
+        validateNotPast(clock, date, time);
         time.validateInactive();
     }
 
@@ -107,14 +103,14 @@ public class Reservation {
             throw new ConflictException("이미 취소된 예약은 변경할 수 없습니다.");
         }
 
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock))) {
+        if(!time.isAvailableAt(date, clock)){
             throw new ConflictException("이미 지난 예약은 변경할 수 없습니다.");
         }
     }
 
-    private void validateNotPast(Clock clock, LocalDate date, ReservationTime time) {
+    private static void validateNotPast(Clock clock, LocalDate date, ReservationTime time) {
         if (!time.isAvailableAt(date, clock)) {
-            throw new ConflictException("이미 지난 예약은 변경할 수 없습니다.");
+            throw new ConflictException("과거 시간대로 예약할 수 없습니다.");
         }
     }
 }
