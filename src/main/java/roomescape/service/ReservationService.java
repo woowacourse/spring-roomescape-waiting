@@ -10,14 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
-import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.RankedReservation;
 import roomescape.domain.reservation.RankedReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.reservation.Slot;
 import roomescape.domain.reservation.Status;
 import roomescape.domain.theme.Theme;
@@ -66,12 +64,13 @@ public class ReservationService {
         Reservation reservation = Reservation.reserve(new ReservationName(request.getName()), slot, status, now);
         Reservation saved = reservationRepository.save(reservation);
 
-        Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
-                saved.getTime(), saved.getTheme(), saved.getDate()));
+        return getRankedReservation(saved);
+    }
 
-        Rank rank = reservations.rankOf(saved);
-
-        return new RankedReservation(rank, saved);
+    private RankedReservation getRankedReservation(Reservation target) {
+        List<Reservation> reservations = reservationRepository.findByTimeAndThemeAndDate(
+                target.getTime(), target.getTheme(), target.getDate());
+        return RankedReservation.decideRankFrom(target, reservations);
     }
 
     public RankedReservation find(long reservationId) {
@@ -118,12 +117,7 @@ public class ReservationService {
                 originReservation.getDate().getValue()
         ).ifPresent(waiting -> reservationRepository.updateStatus(waiting.getId(), Status.APPROVED));
 
-        Reservations reservations = new Reservations(reservationRepository.findByTimeAndThemeAndDate(
-                updated.getTime(), updated.getTheme(), updated.getDate()));
-
-        Rank rank = reservations.rankOf(updated);
-
-        return new RankedReservation(rank, updated);
+        return getRankedReservation(updated);
     }
 
     @Transactional
