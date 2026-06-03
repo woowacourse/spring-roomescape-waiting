@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
-import roomescape.infra.queue.JobResult;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
+import roomescape.infra.queue.JobResult;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingConsumerTest {
@@ -102,7 +102,7 @@ class WaitingConsumerTest {
 
             await().atMost(1, SECONDS).until(() ->
                     !"PENDING".equals(waitingQueue.getResult(jobId1).status()) &&
-                    !"PENDING".equals(waitingQueue.getResult(jobId2).status())
+                            !"PENDING".equals(waitingQueue.getResult(jobId2).status())
             );
 
             assertAll(
