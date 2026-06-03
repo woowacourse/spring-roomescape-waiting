@@ -160,29 +160,6 @@ class ReservationControllerTest {
     }
 
     @Test
-    void 사용자가_본인의_예약을_취소() {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
-        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
-
-        RestAssured.given().log().all()
-                .when().delete("/reservations/1?name=브라운")
-                .then().log().all()
-                .statusCode(204);
-
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
-        assertThat(count).isZero();
-    }
-
-    @Test
-    void 존재하지_않는_예약을_취소하면_실패한다() {
-        RestAssured.given().log().all()
-                .when().delete("/reservations/999?name=브라운")
-                .then().log().all()
-                .statusCode(404);
-    }
-
-    @Test
     void 사용자가_본인_예약의_날짜와_시간을_변경() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "11:00", "11:30");
@@ -226,6 +203,29 @@ class ReservationControllerTest {
                 .when().patch("/reservations/1")
                 .then().log().all()
                 .statusCode(403);
+    }
+
+    @Test
+    void 사용자가_본인의_예약을_취소() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/1?name=브라운")
+                .then().log().all()
+                .statusCode(204);
+
+        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
+        assertThat(count).isZero();
+    }
+
+    @Test
+    void 존재하지_않는_예약을_취소하면_실패한다() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/999?name=브라운")
+                .then().log().all()
+                .statusCode(404);
     }
 
     private static List<ReservationTimeStatusResult> getReservationTimeStatusResponses() {

@@ -109,32 +109,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 삭제를_시도하는_사용자명과_예약자명_일치시_예약_삭제() {
-        // given
-        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-        given(reservationRepository.deleteById(1L)).willReturn(true);
-
-        // when
-        reservationService.deleteWithValidation(1L, "오리");
-
-        // then
-        verify(reservationRepository).deleteById(1L);
-    }
-
-    @Test
-    void 삭제를_시도하는_사용자명과_예약자명_불일치시_예외발생() {
-        // given
-        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
-        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.deleteWithValidation(1L, "거위"))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
-    }
-
-    @Test
     void 변경을_시도하는_사용자명과_예약자명_일치시_예약_변경() {
         // given
         ReservationModifyCommand request = new ReservationModifyCommand(1L, "오리", futureDate.plusDays(1), 2L);
@@ -164,6 +138,32 @@ class ReservationServiceTest {
 
         // when & them
         assertThatThrownBy(() -> reservationService.modify(request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+    }
+
+    @Test
+    void 삭제를_시도하는_사용자명과_예약자명_일치시_예약_삭제() {
+        // given
+        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+        given(reservationRepository.deleteById(1L)).willReturn(true);
+
+        // when
+        reservationService.deleteWithValidation(1L, "오리");
+
+        // then
+        verify(reservationRepository).deleteById(1L);
+    }
+
+    @Test
+    void 삭제를_시도하는_사용자명과_예약자명_불일치시_예외발생() {
+        // given
+        Reservation reservation = Reservation.createWithId(1L, "오리", futureDate, time, theme);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteWithValidation(1L, "거위"))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
     }

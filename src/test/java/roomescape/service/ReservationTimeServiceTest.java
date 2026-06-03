@@ -36,24 +36,6 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    void 예약시간_목록_조회() {
-        // given
-        ReservationTime time1 = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
-        ReservationTime time2 = ReservationTime.createWithId(2L, LocalTime.of(12, 0), LocalTime.of(13, 0));
-        given(reservationTimeRepository.findAll()).willReturn(List.of(time1, time2));
-
-        // when
-        List<ReservationTimeResult> responses = reservationTimeService.getTimes();
-
-        // then
-        assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(1).id()).isEqualTo(2L);
-
-        verify(reservationTimeRepository).findAll();
-    }
-
-    @Test
     void 예약시간_생성() {
         // given
         LocalTime startAt = LocalTime.of(10, 0);
@@ -112,5 +94,23 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.delete(targetTimeId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_NOT_FOUND);
+    }
+
+    @Test
+    void 예약시간_목록_조회() {
+        // given
+        ReservationTime time1 = ReservationTime.createWithId(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
+        ReservationTime time2 = ReservationTime.createWithId(2L, LocalTime.of(12, 0), LocalTime.of(13, 0));
+        given(reservationTimeRepository.findAll()).willReturn(List.of(time1, time2));
+
+        // when
+        List<ReservationTimeResult> responses = reservationTimeService.getTimes();
+
+        // then
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).id()).isEqualTo(1L);
+        assertThat(responses.get(1).id()).isEqualTo(2L);
+
+        verify(reservationTimeRepository).findAll();
     }
 }
