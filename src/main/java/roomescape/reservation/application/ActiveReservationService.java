@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationPendingInfo;
@@ -20,6 +22,7 @@ public class ActiveReservationService {
     private final Clock clock;
     private final ActiveReservationRepository reservationRepository;
 
+    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo add(final TimeSlot slot, final ReservationCreateCommand command) {
         if (reservationRepository.existsByActiveSlotId(slot.getId())) {
             throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
@@ -47,6 +50,7 @@ public class ActiveReservationService {
         }
     }
 
+    @Transactional(propagation = Propagation.NESTED)
     public ReservationInfo change(final Long id, final TimeSlot slot, final String name) {
         try {
             ActiveReservation reservation = reservationRepository.getById(id);
@@ -66,12 +70,14 @@ public class ActiveReservationService {
         return reservationRepository.existsByActiveSlotId(slotId);
     }
 
+    @Transactional(readOnly = true)
     public Long getSlotId(final Long id) {
         return reservationRepository.getById(id)
                 .getSlot()
                 .getId();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationInfo> getReservations() {
         return reservationRepository.findAll()
                 .stream()
@@ -79,6 +85,7 @@ public class ActiveReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationPendingInfo> getReservationsByName(final String name) {
         return reservationRepository.findAllByName(name)
                 .stream()

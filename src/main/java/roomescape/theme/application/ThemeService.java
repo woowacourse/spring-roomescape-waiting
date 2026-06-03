@@ -62,6 +62,7 @@ public class ThemeService {
         .toList();
     }
 
+    @Transactional(readOnly = true)
     public Theme getThemeById(Long id) {
         return themeRepository.getById(id);
     }

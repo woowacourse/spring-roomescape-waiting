@@ -73,6 +73,7 @@ public class ReservationTimeService {
         return AvailableReservationTimeInfo.from(theme, availableTime);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime getTime(Long id, LocalDate date) {
         ReservationTime time = reservationTimeRepository.getById(id);
         time.validateDateTime(date, clock);

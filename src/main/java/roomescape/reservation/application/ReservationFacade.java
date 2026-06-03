@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationCancelCommand;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
@@ -20,7 +19,7 @@ import roomescape.time.application.ReservationTimeService;
 import roomescape.time.domain.ReservationTime;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReservationFacade {
 
@@ -30,7 +29,6 @@ public class ReservationFacade {
     private final ThemeService themeService;
     private final TimeSlotService timeSlotService;
 
-    @Transactional(readOnly = true)
     public List<ReservationInfo> getReservations() {
         List<ReservationInfo> activeReservations = activeReservationService.getReservations();
         List<ReservationInfo> pendingReservations = pendingReservationService.getReservations();
@@ -38,7 +36,6 @@ public class ReservationFacade {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationPendingInfo> getReservationsByName(final String username) {
         List<ReservationPendingInfo> activeReservations = activeReservationService.getReservationsByName(username);
         List<ReservationPendingInfo> pendingReservations = pendingReservationService.getReservationsByName(username);
@@ -46,7 +43,7 @@ public class ReservationFacade {
                 .toList();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public ReservationInfo addReservation(final ReservationCreateCommand command) {
         ReservationTime time = timeService.getTime(command.timeId(), command.date());
         Theme theme = themeService.getThemeById(command.themeId());
@@ -58,6 +55,7 @@ public class ReservationFacade {
         }
     }
 
+    @Transactional
     public void cancelReservation(final Long id, final ReservationCancelCommand command) {
         if (command.status().equals(Status.PENDING)) {
             pendingReservationService.cancel(id, command.name());
@@ -68,7 +66,7 @@ public class ReservationFacade {
                 .ifPresent(activeReservationService::savePromoted);
     }
 
-    @Transactional(propagation = Propagation.NESTED)
+    @Transactional
     public ReservationInfo changeReservation(final Long id, final ReservationChangeCommand command) {
         ReservationTime time = timeService.getTime(command.timeId(), command.date());
         Theme theme = themeService.getThemeById(command.themeId());
