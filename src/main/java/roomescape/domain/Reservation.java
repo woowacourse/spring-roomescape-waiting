@@ -12,7 +12,7 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Store store;
-    private final ReservationStatus status;
+    private ReservationStatus status;
 
     public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store,
                        ReservationStatus status) {
@@ -71,6 +71,14 @@ public class Reservation {
             throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
         }
         return new Reservation(id, user, theme, date, time, store, status);
+    }
+
+    public void confirm() {
+        if (!isWaiting()) {
+            throw new InvalidDomainException("예약 대기 상태만 확정할 수 있습니다.");
+        }
+
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getId() {

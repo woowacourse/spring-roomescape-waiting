@@ -140,7 +140,6 @@ class ReservationServiceTest {
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
     }
 
-    @Disabled("TODO: 예약 대기 순번 조회 구현 후 작성")
     @Test
     void getMyReservations_예약_대기는_대기_순번을_포함해_반환한다() {
         User brown = buildUser("브라운");
@@ -152,13 +151,15 @@ class ReservationServiceTest {
 
         reservationRepository.save(buildReservation(charles, themeBId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildWaitingReservation(aron, themeBId, timeId, LocalDate.of(2026, 5, 2)));
-        reservationRepository.save(buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
+        reservationRepository.save(
+                buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
 
         ReservationWithStatusResponses results = service.getMyReservations(brown.getId());
 
         assertThat(results.waitingReservations()).hasSize(1);
         assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
-        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder()).isEqualTo(2);
+        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder())
+                .isEqualTo(2);
     }
 
     @Test
@@ -219,6 +220,51 @@ class ReservationServiceTest {
         service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
 
         assertThat(reservationRepository.findById(reservationId)).isEmpty();
+    }
+
+    @Test
+    void cancelOwnReservation_첫번째_예약_대기를_예약_확정으로_승격한다() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        User aron = buildUser("아론");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        LocalDate date = LocalDate.of(2026, 5, 8);
+        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
+        Long firstWaitingId = reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, date));
+        Long secondWaitingId = reservationRepository.save(buildWaitingReservation(aron, themeId, timeId, date));
+
+        service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
+
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
+        assertThat(reservationRepository.findById(firstWaitingId).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservationRepository.findById(secondWaitingId).orElseThrow().getStatus())
+                .isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void cancelOwnReservation_대기_예약이_없는_경우_승격은_이뤄지지_않는다() {
+        User brown = buildUser("브라운");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        LocalDate date = LocalDate.of(2026, 5, 8);
+        Long reservationId = reservationRepository.save(buildReservation(brown, themeId, timeId, date));
+
+        service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown.getId()));
+
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
+        assertThat(reservationRepository.findFirstWaitingReservationByDateAndTimeAndThemeAndStore(date, timeId, themeId,
+                Fixtures.DEFAULT_STORE_ID).isEmpty()).isTrue();
+        assertThat(reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(date, timeId, themeId,
+                Fixtures.DEFAULT_STORE_ID)).isFalse();
+    }
+
+    void cancelOwnReservation_삭제_대상이_동시에_변경되면_ReservationConcurrentModificationException() {
+
+    }
+
+    void cancelOwnReservation_승격할_대기가_동시에_변경되면_ReservationConcurrentModificationException() {
     }
 
     @Test
