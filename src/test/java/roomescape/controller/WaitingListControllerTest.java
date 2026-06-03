@@ -104,6 +104,33 @@ class WaitingListControllerTest {
         }
 
         @Test
+        void 본인이_이미_예약한_슬롯에_대기_신청_시도시_422() {
+            Map<String, Object> reservationParams = new HashMap<>();
+            reservationParams.put("name", "검프");
+            reservationParams.put("date", STRING_TOMORROW);
+            reservationParams.put("timeId", timeId);
+            reservationParams.put("themeId", themeId);
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams)
+                    .when().post("/reservations")
+                    .then().statusCode(201);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("name", "검프");
+            params.put("date", STRING_TOMORROW);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/waiting-list")
+                    .then().log().all()
+                    .statusCode(422);
+        }
+
+        @Test
         void 예약이_없는_슬롯에_대기_추가_시도시_422() {
             Map<String, Object> params = new HashMap<>();
             params.put("name", "검프");

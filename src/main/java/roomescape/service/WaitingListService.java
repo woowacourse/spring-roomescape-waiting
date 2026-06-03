@@ -80,6 +80,11 @@ public class WaitingListService {
     }
 
     private void validateReservationExists(final WaitingList waitingList) {
+        if (reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                waitingList.getName(), waitingList.getReservationDate().getDate(), waitingList.getReservationTime().getId(), waitingList.getTheme().getId())) {
+            throw new BusinessException(ErrorCode.ALREADY_RESERVED_BY_SELF);
+        }
+
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
                 waitingList.getReservationDate().getDate(), waitingList.getReservationTime().getId(), waitingList.getTheme().getId())) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);

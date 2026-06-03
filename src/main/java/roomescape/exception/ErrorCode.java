@@ -12,6 +12,7 @@ public enum ErrorCode {
     // 비즈니스 에러
     WAITING_LIST_NOT_REQUIRED(HttpStatus.UNPROCESSABLE_ENTITY, "해당 시간에 예약이 존재하지 않기 때문에 예약 대기 불가합니다."),
     ALREADY_ON_WAITING_LIST(HttpStatus.UNPROCESSABLE_ENTITY, "이미 해당 조건의 예약 대기 신청이 존재합니다."),
+    ALREADY_RESERVED_BY_SELF(HttpStatus.UNPROCESSABLE_ENTITY, "본인이 이미 예약한 슬롯에는 대기 신청할 수 없습니다."),
     TIME_ALREADY_RESERVED(HttpStatus.UNPROCESSABLE_ENTITY, "해당 시간대에 이미 예약이 존재합니다."),
     DATE_ALREADY_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 날짜입니다."),
     TIME_ALREADY_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 시간입니다."),

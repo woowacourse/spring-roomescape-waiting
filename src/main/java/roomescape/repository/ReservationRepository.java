@@ -151,6 +151,23 @@ public class ReservationRepository {
                 .toList();
     }
 
+    public boolean existsByNameAndDateAndTimeIdAndThemeId(final String name, final LocalDate date, final Long timeId, final Long themeId) {
+        final String sql = """
+                SELECT COUNT(id)
+                FROM reservation
+                WHERE name = :name AND date = :date AND time_id = :timeId AND theme_id = :themeId
+                """;
+
+        final MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("name", name)
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
+
+        final Integer count = jdbcTemplate.queryForObject(sql, param, Integer.class);
+        return count != null && count > 0;
+    }
+
     public boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
         final String sql = """
                 SELECT COUNT(id)

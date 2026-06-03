@@ -65,7 +65,9 @@ class WaitingListServiceTest {
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(waitingListRepository.save(argThat(w ->
                     w.getName().equals(NAME) &&
                     w.getReservationDate().getDate().equals(date) &&
@@ -97,7 +99,9 @@ class WaitingListServiceTest {
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, today, TIME_ID, THEME_ID)).willReturn(false);
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(today, TIME_ID, THEME_ID)).willReturn(true);
+            given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, today, TIME_ID, THEME_ID)).willReturn(false);
             given(waitingListRepository.save(argThat(w ->
                     w.getName().equals(NAME) &&
                     w.getReservationDate().getDate().equals(today) &&
@@ -192,6 +196,24 @@ class WaitingListServiceTest {
         }
 
         @Test
+        void 본인이_이미_예약한_슬롯이면_예외발생() {
+            // given
+            LocalDate date = LocalDate.now().plusDays(1);
+            LocalTime startAt = LocalTime.of(10, 0);
+            ReservationTime reservationTime = ReservationTime.createWithId(TIME_ID, startAt, startAt.plusHours(1));
+
+            given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
+            given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> waitingListService.create(createCommand(date)))
+                    .isInstanceOf(BusinessException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_RESERVED_BY_SELF);
+            verify(waitingListRepository, never()).save(any(WaitingList.class));
+        }
+
+        @Test
         void 이미_대기중이면_예외발생() {
             // given
             LocalDate date = LocalDate.now().plusDays(1);
@@ -235,6 +257,7 @@ class WaitingListServiceTest {
 
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
             given(waitingListRepository.existsByNameAndDateAndTimeIdAndThemeId(NAME, date, TIME_ID, THEME_ID)).willReturn(false);
             given(waitingListRepository.save(any(WaitingList.class))).willThrow(new DataIntegrityViolationException("unique constraint"));
