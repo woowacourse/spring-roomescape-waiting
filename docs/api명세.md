@@ -157,11 +157,13 @@ Content-Type: application/json
 
 ```http request
 ### 삭제 요청
-DELETE /waitlists/{id} HTTP/1.1
+DELETE /waitlists/{id}?name=브라운 HTTP/1.1
 
 ### 삭제 응답
 HTTP/1.1 204 No Content
 ```
+
+- 대기 취소 후 같은 슬롯에 남은 대기 순번은 생성 시각과 ID 기준으로 재계산된다.
 
 ### 테마 API
 
@@ -316,6 +318,9 @@ DELETE /reservations/{id}?name=브라운 HTTP/1.1
 ### 응답
 HTTP/1.1 204 No Content
 ```
+
+- 예약 취소 시 같은 슬롯의 대기 1번이 자동으로 예약 승격된다.
+- 승격된 대기는 대기 목록에서 제거되고, 같은 슬롯에 남은 대기 순번은 생성 시각과 ID 기준으로 재계산된다.
 
 ### 에러 응답 명세
 
