@@ -41,7 +41,7 @@ public class ReservationService {
         return reservationDao.findAll().stream().map(ReservationResponse::from).collect(Collectors.toList());
     }
 
-    public ReservationResponse save(ReservationRequest request) {
+    public ReservationResponse save(ReservationRequest request, LocalDateTime requestedAt) {
         ReservationTime time = getValidReservationTime(request.timeId());
         Theme theme = getValidTheme(request.themeId());
 
@@ -49,7 +49,7 @@ public class ReservationService {
 
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
-        Reservation reservation = new Reservation(request.name(), request.date(), time, theme, status);
+        Reservation reservation = new Reservation(request.name(), request.date(), time, theme, requestedAt, status);
 
         Reservation saved = reservationDao.save(reservation);
         return ReservationResponse.from(saved);

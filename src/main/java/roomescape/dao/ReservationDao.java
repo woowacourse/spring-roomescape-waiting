@@ -30,7 +30,7 @@ public class ReservationDao {
         return jdbcTemplate.query("""
                     SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status
+                    r.status, r.requested_at
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id;
@@ -38,8 +38,14 @@ public class ReservationDao {
             ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
             Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
                     rs.getString("url"));
-            return new Reservation(rs.getLong("id"), rs.getString("name"), rs.getDate("date").toLocalDate(), time,
-                    theme, ReservationStatus.valueOf(rs.getString("status")));
+            return new Reservation(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getDate("date").toLocalDate(),
+                    time,
+                    theme,
+                    rs.getTimestamp("requested_at").toLocalDateTime(),
+                    ReservationStatus.valueOf(rs.getString("status")));
         });
     }
 
@@ -47,7 +53,7 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject("""
                     SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status
+                    r.status, r.requested_at
                     FROM reservation r
                     INNER JOIN reservation_time rt ON r.time_id = rt.id
                     INNER JOIN theme t ON r.theme_id = t.id
@@ -56,8 +62,14 @@ public class ReservationDao {
             ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
             Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
                     rs.getString("url"));
-            return new Reservation(rs.getLong("id"), rs.getString("name"), rs.getDate("date").toLocalDate(), time,
-                    theme, ReservationStatus.valueOf(rs.getString("status")));
+            return new Reservation(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getDate("date").toLocalDate(),
+                    time,
+                    theme,
+                    rs.getTimestamp("requested_at").toLocalDateTime(),
+                    ReservationStatus.valueOf(rs.getString("status")));
         }, id);
     }
 
@@ -68,7 +80,7 @@ public class ReservationDao {
                         SELECT
                             r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
                             t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status,
+                            r.status, r.requested_at
                             CASE WHEN r.status = 'WAITING'
                                  THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
                             END AS waiting_order
@@ -81,8 +93,14 @@ public class ReservationDao {
             ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
             Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
                     rs.getString("url"));
-            Reservation reservation = new Reservation(rs.getLong("id"), rs.getString("name"),
-                    rs.getDate("date").toLocalDate(), time, theme, ReservationStatus.valueOf(rs.getString("status")));
+            Reservation reservation = new Reservation(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getDate("date").toLocalDate(),
+                    time,
+                    theme,
+                    rs.getTimestamp("requested_at").toLocalDateTime(),
+                    ReservationStatus.valueOf(rs.getString("status")));
 
             return new ReservationOrderProjection(reservation, rs.getLong("waiting_order"));
         }, name);
@@ -111,8 +129,7 @@ public class ReservationDao {
         params.put("status", reservation.getStatus());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus());
+        return findById(id);
     }
 
     @Transactional
