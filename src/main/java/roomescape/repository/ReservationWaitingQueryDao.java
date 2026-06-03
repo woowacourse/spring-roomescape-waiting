@@ -106,4 +106,10 @@ public class ReservationWaitingQueryDao {
         String sql = SELECT_RESERVATION_WAITING_SQL + "where w.name = ?";
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, name);
     }
+
+    public Optional<ReservationWaiting> findFirstWaitingBySlot(ReservationSlot slot) {
+        String sql = SELECT_RESERVATION_WAITING_SQL + "where w.date = ? and w.time_id = ? and w.theme_id = ? and ranked.sequence = 1";
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, slot.getDate(), slot.getTimeId(), slot.getThemeId())
+                .stream().findFirst();
+    }
 }
