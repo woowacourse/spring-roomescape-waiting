@@ -33,29 +33,11 @@ public class ReservationWaitingLine {
                 .collect(Collectors.toSet());
     }
 
-    public static ReservationWaitingLine fromWaitings(final List<ReservationWaiting> waitings) {
-        return new ReservationWaitingLine(waitings.stream()
-                .map(waiting -> new ReservationWaitingOrder(
-                        waiting.getId(),
-                        waiting.getRequestedAt(),
-                        waiting.getName()
-                ))
-                .toList());
-    }
-
-    public boolean isEmpty() {
-        return sequencesByWaitingId.isEmpty();
-    }
-
-    public boolean containsName(final ReservationName name) {
-        return names.contains(name.value());
-    }
-
     public int sequenceOf(final long waitingId) {
-        Integer sequence = sequencesByWaitingId.get(waitingId);
-
-        if (sequence == null) {
-            throw new IllegalArgumentException("대기 순번을 찾을 수 없습니다.");
+        for (int index = 0; index < orders.size(); index++) {
+            if (orders.get(index).waitingId() == waitingId) {
+                return index + 1;
+            }
         }
 
         return sequence;
@@ -63,8 +45,7 @@ public class ReservationWaitingLine {
 
     public record ReservationWaitingOrder(
             long waitingId,
-            LocalDateTime requestedAt,
-            String name
+            LocalDateTime requestedAt
     ) {
         public ReservationWaitingOrder(final long waitingId, final LocalDateTime requestedAt) {
             this(waitingId, requestedAt, null);
