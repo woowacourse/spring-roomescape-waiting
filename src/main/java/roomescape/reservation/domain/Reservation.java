@@ -108,6 +108,14 @@ public class Reservation {
         return this.status == ReservationStatus.RESERVED;
     }
 
+    public boolean isWaiting() {
+        return this.status == ReservationStatus.WAITING;
+    }
+
+    public void promote() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
