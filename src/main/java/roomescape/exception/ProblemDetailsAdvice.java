@@ -23,7 +23,7 @@ public class ProblemDetailsAdvice {
 
     public ProblemDetailsAdvice() {
         exceptionHttpStatusMap.put(DuplicateException.class, HttpStatus.CONFLICT);
-        exceptionHttpStatusMap.put(InvalidOwnershipException.class, HttpStatus.FORBIDDEN);
+        exceptionHttpStatusMap.put(NotOwnerException.class, HttpStatus.FORBIDDEN);
         exceptionHttpStatusMap.put(PastTimeException.class, HttpStatus.BAD_REQUEST);
         exceptionHttpStatusMap.put(ResourceInUseException.class, HttpStatus.CONFLICT);
         exceptionHttpStatusMap.put(NotFoundException.class, HttpStatus.NOT_FOUND);

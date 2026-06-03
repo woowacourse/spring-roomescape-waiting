@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastTimeException;
 
 public class Reservation {
@@ -48,10 +47,9 @@ public class Reservation {
         return theme;
     }
 
-    public Reservation updateDateAndTime(String userName, LocalDate updateDate, TimeSlot updateTime,
+    public Reservation updateDateAndTime(LocalDate updateDate, TimeSlot updateTime,
                                          LocalDateTime now) {
 
-        validateOwnedBy(userName);
         validateNotPast(this.date, this.timeSlot, now, "이미 지난 예약은 수정할 수 없습니다.");
         validateNotPast(updateDate, updateTime, now, "이미 지난 날짜로 예약을 수정할 수 없습니다.");
 
@@ -61,13 +59,16 @@ public class Reservation {
         return new Reservation(this.id, this.name, updateDate, updateTime, this.theme);
     }
 
-    public void validateCancelable(LocalDateTime now, String name) {
+    public void validateCancelable(LocalDateTime now) {
         validateNotPast(this.date, this.timeSlot, now, "이미 지난 예약은 삭제할 수 없습니다.");
-        validateOwnedBy(name);
     }
 
     public boolean hasSameDateAndTime(Reservation other) {
         return isSameDateAndTime(other.date, other.timeSlot);
+    }
+
+    public boolean isOwner(String requestName) {
+        return name.equals(requestName);
     }
 
     private boolean isSameDateAndTime(LocalDate updateDate, TimeSlot updateTime) {
@@ -76,12 +77,6 @@ public class Reservation {
 
     private void validateCreatable(LocalDate date, TimeSlot time, LocalDateTime now) {
         validateNotPast(date, time, now, "지난 날짜/시간으로 예약하실 수 없습니다.");
-    }
-
-    private void validateOwnedBy(String userName) {
-        if (!this.name.equals(userName)) {
-            throw new InvalidOwnershipException();
-        }
     }
 
     private void validateNotPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now, String errorMessage) {

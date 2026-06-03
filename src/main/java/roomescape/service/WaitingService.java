@@ -9,6 +9,7 @@ import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
+import roomescape.exception.NotOwnerException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.TimeSlotRepository;
@@ -42,9 +43,10 @@ public class WaitingService {
     }
 
     @Transactional
-    public void removeWaiting(Long id, String userName) {
+    public void removeWaiting(Long id, String requestName) {
         Waiting waiting = findWaiting(id);
-        waiting.validateCancelable(LocalDateTime.now(), userName);
+        validateWaitingOwner(waiting, requestName);
+        waiting.validateCancelable(LocalDateTime.now());
         waitingRepository.deleteById(id);
     }
 
@@ -63,6 +65,12 @@ public class WaitingService {
     private void validateAlreadyReserved(String name, LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByNameAndDateAndTimeAndTheme(name, date, timeId, themeId)) {
             throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
+        }
+    }
+
+    private void validateWaitingOwner(Waiting waiting, String requestName) {
+        if (!waiting.isOwner(requestName)) {
+            throw new NotOwnerException();
         }
     }
 

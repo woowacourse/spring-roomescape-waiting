@@ -2,7 +2,6 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.exception.InvalidOwnershipException;
 import roomescape.exception.PastTimeException;
 
 public class Waiting {
@@ -42,9 +41,8 @@ public class Waiting {
         validateNotPast(date, time, now, "지난 날짜/시간으로 예약 대기를 추가할 수 없습니다.");
     }
 
-    public void validateCancelable(LocalDateTime now, String userName) {
+    public void validateCancelable(LocalDateTime now) {
         validateNotPast(this.date, this.timeSlot, now, "이미 지난 대기 정보는 삭제할 수 없습니다.");
-        validateOwnedBy(userName);
     }
 
     private void validateNotPast(LocalDate date, TimeSlot timeSlot, LocalDateTime now, String errorMessage) {
@@ -89,10 +87,8 @@ public class Waiting {
         }
     }
 
-    private void validateOwnedBy(String userName) {
-        if (!this.name.equals(userName)) {
-            throw new InvalidOwnershipException();
-        }
+    public boolean isOwner(String requestName) {
+        return name.equals(requestName);
     }
 
     public Long getId() {

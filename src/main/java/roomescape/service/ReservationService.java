@@ -10,6 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
 import roomescape.exception.DuplicateException;
+import roomescape.exception.NotOwnerException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -70,17 +71,20 @@ public class ReservationService {
     }
 
     @Transactional
-    public void removeReservation(long id, String name) {
+    public void removeReservation(long id, String requestName) {
         Reservation reservation = findReservationById(id);
-        reservation.validateCancelable(LocalDateTime.now(), name);
+        validateReservationOwner(reservation, requestName);
+        reservation.validateCancelable(LocalDateTime.now());
         reservationRepository.deleteById(id);
     }
 
     @Transactional
-    public void updateReservation(long id, String name, LocalDate date, Long timeId) {
+    public void updateReservation(long id, String requestName, LocalDate date, Long timeId) {
         Reservation nowReservation = findReservationById(id);
+        validateReservationOwner(nowReservation, requestName);
+
         TimeSlot timeSlot = findTimeSlot(timeId);
-        Reservation updatedReservation = nowReservation.updateDateAndTime(name, date, timeSlot, LocalDateTime.now());
+        Reservation updatedReservation = nowReservation.updateDateAndTime(date, timeSlot, LocalDateTime.now());
 
         if (!nowReservation.hasSameDateAndTime(updatedReservation)) {
             validateDuplicatedReservation(date, timeId, nowReservation.getTheme().getId());
@@ -97,6 +101,12 @@ public class ReservationService {
     private void validateDuplicatedReservation(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsByDateAndTimeAndTheme(date, timeId, themeId)) {
             throw new DuplicateException("이미 예약된 시간입니다. 다른 날짜 혹은 테마를 선택해주세요.");
+        }
+    }
+
+    private void validateReservationOwner(Reservation reservation, String requestName) {
+        if (!reservation.isOwner(requestName)) {
+            throw new NotOwnerException();
         }
     }
 
