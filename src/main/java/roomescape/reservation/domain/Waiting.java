@@ -35,6 +35,12 @@ public class Waiting {
                 .build();
     }
 
+    public Waiting postpone(int steps, int totalRankCount, LocalDateTime now) {
+        slot.validatePostponable(now);
+
+        return withRank(rank.postpone(steps, totalRankCount));
+    }
+
     public String getUserName() {
         return user.name();
     }
