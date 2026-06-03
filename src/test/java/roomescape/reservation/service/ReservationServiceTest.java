@@ -37,28 +37,37 @@ class ReservationServiceTest {
             ZoneId.systemDefault()
     );
 
-    @Mock private ReservationRepository reservationRepository;
-    @Mock private ReservationTimeService reservationTimeService;
-    @Mock private ThemeService themeService;
-    @Mock private ReservationFactory reservationFactory;
-    @Mock private Clock clock;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ReservationTimeService reservationTimeService;
+    @Mock
+    private ThemeService themeService;
+    @Mock
+    private ReservationFactory reservationFactory;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ReservationService reservationService;
 
     private ReservationTime time1;
     private ReservationTime time2;
+    private ReservationTime timeWithin12Hours;
     private Theme theme;
     private Reservation futureReservation;
     private Reservation pastReservation;
+    private Reservation within12HoursReservation;
 
     @BeforeEach
     void setUp() {
         time1 = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
         time2 = ReservationTime.restore(2L, LocalTime.of(16, 0), LocalTime.of(17, 0));
+        timeWithin12Hours = ReservationTime.restore(3L, LocalTime.of(20, 0), LocalTime.of(21, 0));
         theme = Theme.restore(1L, "테마A", "설명A", "https://a.com");
         futureReservation = Reservation.restore(1L, "user1", LocalDate.of(2099, 12, 1), time1, theme);
         pastReservation = Reservation.restore(1L, "user1", LocalDate.now().minusDays(1), time1, theme);
+        within12HoursReservation = Reservation.restore(1L, "user1", LocalDate.now(), timeWithin12Hours, theme);
     }
 
     @Test
@@ -84,6 +93,35 @@ class ReservationServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.THEME_NOT_FOUND))
                 .hasMessage(ErrorCode.THEME_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약 시작 12시간 이내에는 취소할 수 없다")
+    void 정책_12시간_이내_예약_취소_불가() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(within12HoursReservation));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
+        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_RESERVATION_CANCEL))
+                .hasMessage(ErrorCode.PAST_RESERVATION_CANCEL.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약 시작 12시간 이내에는 수정할 수 없다")
+    void 정책_12시간_이내_예약_수정_불가() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(within12HoursReservation));
+        when(clock.instant()).thenReturn(fixedClock.instant());
+        when(clock.getZone()).thenReturn(fixedClock.getZone());
+
+        assertThatThrownBy(() -> reservationService.updateReservation(
+                1L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_RESERVATION_UPDATE))
+                .hasMessage(ErrorCode.PAST_RESERVATION_UPDATE.getMessage());
     }
 
     @Test
@@ -121,7 +159,8 @@ class ReservationServiceTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(futureReservation));
         when(clock.instant()).thenReturn(fixedClock.instant());
         when(clock.getZone()).thenReturn(fixedClock.getZone());
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(any(), any(), any(), any())).thenReturn(false);
+        when(reservationRepository.existsByDateAndTimeIdAndThemeIdExcludingId(any(), any(), any(), any())).thenReturn(
+                false);
         when(reservationTimeService.getById(2L)).thenReturn(time2);
 
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -144,7 +183,8 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.createReservation(
                 new ReservationRequest("현미밥", LocalDate.now(), 1L, 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_CREATE))
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_CREATE))
                 .hasMessage(ErrorCode.PAST_TIME_CREATE.getMessage());
     }
 

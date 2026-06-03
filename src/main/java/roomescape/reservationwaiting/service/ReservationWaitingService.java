@@ -65,7 +65,7 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteWaiting(Long id) {
         ReservationWaiting reservationWaiting = getById(id);
-        if (!reservationWaiting.isCancelable(clock)) {
+        if (reservationWaiting.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
         }
         reservationWaitingRepository.deleteById(id);
