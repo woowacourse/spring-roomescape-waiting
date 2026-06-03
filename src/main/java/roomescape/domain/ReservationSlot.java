@@ -78,7 +78,7 @@ public class ReservationSlot {
     }
 
     public void cancelReservation(long reservationId) {
-        reservations.findById(reservationId)
+        reservations.findActiveById(reservationId)
                 .ifPresent(reservation -> {
                     validateCancelable(reservation);
                     boolean wasReserved = reservation.isReserved();
@@ -92,7 +92,7 @@ public class ReservationSlot {
     }
 
     public Reservation findReservedReservation(long reservationId) {
-        return reservations.findById(reservationId)
+        return reservations.findActiveById(reservationId)
                 .filter(Reservation::isReserved)
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
     }

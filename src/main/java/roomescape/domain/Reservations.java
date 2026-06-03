@@ -55,6 +55,13 @@ public class Reservations {
                 .findFirst();
     }
 
+    public Optional<Reservation> findActiveById(long id) {
+        return reservations.stream()
+                .filter(Reservation::isActive)
+                .filter(reservation -> reservation.isSameId(id))
+                .findFirst();
+    }
+
     public Optional<Reservation> findByNameAndStatus(String name, ReservationStatus status) {
         return reservations.stream()
                 .filter(reservation -> reservation.matches(name, status))

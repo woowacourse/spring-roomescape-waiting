@@ -177,6 +177,19 @@ class ReservationSlotTest {
     }
 
     @Test
+    void 취소된_예약_엔트리를_예약된_엔트리로_조회하면_예외가_발생한다() {
+        // given
+        Reservation reservation = reservation(1L, "이프", ReservationStatus.RESERVED);
+        reservation.cancel();
+        ReservationSlot slot = createReservationWithReservations(List.of(reservation));
+
+        // when & then
+        assertThatThrownBy(() -> slot.findReservedReservation(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("예약 정보를 찾을 수 없습니다.");
+    }
+
+    @Test
     void 예약된_엔트리를_취소하면_가장_먼저_등록된_대기_엔트리가_예약된다() {
         // given
         Reservation reserved = reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
@@ -194,6 +207,26 @@ class ReservationSlotTest {
                         tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
                         tuple(2L, ReservationStatus.RESERVED, ReservationActiveStatus.ACTIVE),
                         tuple(3L, ReservationStatus.WAITING, ReservationActiveStatus.ACTIVE)
+                );
+    }
+
+    @Test
+    void 취소된_예약_엔트리를_다시_취소해도_대기_엔트리를_승격하지_않는다() {
+        // given
+        Reservation canceled = reservation(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        canceled.cancel();
+        Reservation waiting = reservation(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now());
+        ReservationSlot slot = createReservationWithReservations(List.of(canceled, waiting));
+
+        // when
+        slot.cancelReservation(1L);
+
+        // then
+        assertThat(slot.getReservations())
+                .extracting(Reservation::getId, Reservation::getStatus, Reservation::getActiveStatus)
+                .containsExactly(
+                        tuple(1L, ReservationStatus.RESERVED, ReservationActiveStatus.CANCELED),
+                        tuple(2L, ReservationStatus.WAITING, ReservationActiveStatus.ACTIVE)
                 );
     }
 
