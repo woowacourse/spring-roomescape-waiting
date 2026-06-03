@@ -2,31 +2,31 @@ package roomescape.reservation.presentation.dto;
 
 import java.time.LocalDate;
 import lombok.Builder;
-import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.dto.ReservationWaitingInfo;
 import roomescape.reservation.domain.Status;
 import roomescape.theme.presentation.dto.ThemeResponse;
 import roomescape.time.presentation.dto.ReservationTimeResponse;
 
 @Builder
-public record ReservationPendingResponse(
+public record ReservationWaitingResponse(
         Long id,
         String name,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
         Status status,
-        Long pendingOrder
+        Long waitingOrder
 
 ) {
-    public static ReservationPendingResponse from(ReservationPendingInfo reservation) {
-        return ReservationPendingResponse.builder()
+    public static ReservationWaitingResponse from(ReservationWaitingInfo reservation) {
+        return ReservationWaitingResponse.builder()
                 .id(reservation.id())
                 .name(reservation.name())
                 .date(reservation.date())
                 .time(ReservationTimeResponse.from(reservation.time()))
                 .theme(ThemeResponse.from(reservation.theme()))
                 .status(reservation.status())
-                .pendingOrder(reservation.pendingOrder())
+                .waitingOrder(reservation.waitingOrder())
                 .build();
     }
 }

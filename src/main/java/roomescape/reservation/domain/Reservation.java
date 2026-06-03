@@ -65,6 +65,10 @@ public class Reservation {
         return this.status.equals(Status.RESERVED);
     }
 
+    public boolean isWaiting() {
+        return this.status.equals(Status.WAITING);
+    }
+
     private static void validateRequiredFields(String name, LocalDate date, ReservationTime time, Theme theme,
                                                Clock clock) {
         validateName(name);

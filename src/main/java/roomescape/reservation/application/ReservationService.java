@@ -12,11 +12,10 @@ import roomescape.common.exception.ForbiddenException;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
-import roomescape.reservation.application.dto.ReservationPendingInfo;
+import roomescape.reservation.application.dto.ReservationWaitingInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -56,10 +55,10 @@ public class ReservationService {
         reservationRepository.update(reservation.cancel());
 
         if (reservation.isReserved()) {
-            Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
+            Optional<Reservation> nextWaitingReservation = reservationRepository.findNextWaitingReservation(
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
 
-            nextPendingReservation.ifPresent(pending -> reservationRepository.update(pending.reserved()));
+            nextWaitingReservation.ifPresent(waiting -> reservationRepository.update(waiting.reserved()));
         }
     }
 
@@ -86,12 +85,19 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationPendingInfo> getReservationsByName(String username) {
-        List<ReservationQueryResult> results = reservationRepository.findAllByName(username);
+    public List<ReservationWaitingInfo> getReservationsByName(String username) {
+        List<Reservation> reservations = reservationRepository.findAllByName(username);
 
-        return results.stream()
-                .map(ReservationPendingInfo::from)
+        return reservations.stream()
+                .map(reservation -> ReservationWaitingInfo.from(reservation, findWaitingOrder(reservation)))
                 .toList();
+    }
+
+    private Long findWaitingOrder(Reservation reservation) {
+        if (!reservation.isWaiting()) {
+            return null;
+        }
+        return reservationRepository.countWaitingBefore(reservation) + 1;
     }
 
     private Status decideReservationStatus(LocalDate date, Long timeId, Long themeId) {

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -49,32 +48,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 Status.valueOf(resultSet.getString("r_status")),
                 resultSet.getTimestamp("r_created_at").toLocalDateTime()
         );
-    };
-
-    private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum) -> {
-        Theme theme = Theme.restore(
-                resultSet.getLong("t_id"),
-                resultSet.getString("t_name"),
-                resultSet.getString("t_thumbnail_image_url"),
-                resultSet.getString("t_description"),
-                resultSet.getBoolean("t_is_active")
-        );
-
-        ReservationTime time = ReservationTime.restore(
-                resultSet.getLong("rt_id"),
-                resultSet.getTime("rt_start_at").toLocalTime(),
-                resultSet.getBoolean("rt_is_active")
-        );
-
-        return ReservationQueryResult.builder()
-                .id(resultSet.getLong("r_id"))
-                .name(resultSet.getString("r_name"))
-                .date(resultSet.getDate("r_date").toLocalDate())
-                .status(Status.valueOf(resultSet.getString("r_status")))
-                .pendingIndex(resultSet.getLong("pending_index"))
-                .time(time)
-                .theme(theme)
-                .build();
     };
 
     private static final String BASE_SELECT = """
@@ -189,46 +162,39 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationQueryResult> findAllByName(String username) {
-        String sql = """
-                SELECT
-                    r.id AS r_id,
-                    r.name AS r_name,
-                    r.date AS r_date,
-                    r.status AS r_status,
-                    r.created_at AS r_created_at,
-                    t.id AS t_id,
-                    t.name AS t_name,
-                    t.thumbnail_image_url AS t_thumbnail_image_url,
-                    t.description AS t_description,
-                    t.is_active AS t_is_active,
-                    rt.id AS rt_id,
-                    rt.start_at AS rt_start_at,
-                    rt.is_active AS rt_is_active,
-                    CASE
-                        WHEN r.status = 'WAITING' THEN (
-                            SELECT COUNT(*) + 1
-                            FROM reservation w
-                            WHERE w.status = 'WAITING'
-                                AND w.date = r.date
-                                AND w.time_id = r.time_id
-                                AND w.theme_id = r.theme_id
-                                AND (
-                                    w.created_at < r.created_at
-                                    OR (w.created_at = r.created_at AND w.id < r.id)
-                                )
-                        )
-                        ELSE NULL
-                    END AS pending_index
-                FROM reservation r
-                INNER JOIN theme t ON r.theme_id = t.id
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
+    public List<Reservation> findAllByName(String username) {
+        String sql = BASE_SELECT + """
                 WHERE r.name = :username
                     AND r.status IN ('RESERVED', 'WAITING')
                 ORDER BY r.created_at DESC
                 """;
 
-        return jdbcTemplate.query(sql, Map.of("username", username), queryResultRowMapper);
+        return jdbcTemplate.query(sql, Map.of("username", username), rowMapper);
+    }
+
+    @Override
+    public Long countWaitingBefore(Reservation reservation) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE status = 'WAITING'
+                    AND date = :date
+                    AND time_id = :timeId
+                    AND theme_id = :themeId
+                    AND (
+                        created_at < :createdAt
+                        OR (created_at = :createdAt AND id < :id)
+                    )
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", reservation.getDate())
+                .addValue("timeId", reservation.getTime().getId())
+                .addValue("themeId", reservation.getTheme().getId())
+                .addValue("createdAt", reservation.getCreatedAt())
+                .addValue("id", reservation.getId());
+
+        return jdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
     @Override
@@ -294,7 +260,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findNextWaitingReservation(LocalDate date, Long timeId, Long themeId) {
         String sql = BASE_SELECT + """
                 WHERE r.date = :date
                     AND r.time_id = :timeId
