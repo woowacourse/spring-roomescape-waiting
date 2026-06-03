@@ -12,6 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.fixture.DbFixtures;
+import roomescape.fixture.Fixtures;
 import roomescape.fixture.Scenario;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -52,9 +53,9 @@ class AdminReservationAcceptanceTest {
 
     @Test
     void GET_admin_reservations_name으로_필터링한다() {
-        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-01").onStore(managedStoreId).save();
-        Scenario.reservation(jdbcTemplate).member("다른사람").date("2026-05-02").onStore(managedStoreId).save();
-        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-03").onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString()).onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-5).toString()).onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-4).toString()).onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -97,7 +98,7 @@ class AdminReservationAcceptanceTest {
     @Test
     void POST_admin_reservations_id_cancel_예약을_취소한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
-                .date("2026-05-08").onStore(managedStoreId).save();
+                .date(Fixtures.daysFromNow(1).toString()).onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -109,7 +110,7 @@ class AdminReservationAcceptanceTest {
     @Test
     void POST_admin_reservations_id_cancel_과거_예약이면_422와_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
-                .date("2026-05-06").onStore(managedStoreId).save();
+                .date(Fixtures.daysFromNow(-1).toString()).onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -122,7 +123,7 @@ class AdminReservationAcceptanceTest {
     @Test
     void DELETE_admin_reservations_id_과거_예약을_삭제한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
-                .date("2026-05-06").onStore(managedStoreId).save();
+                .date(Fixtures.daysFromNow(-1).toString()).onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -134,7 +135,7 @@ class AdminReservationAcceptanceTest {
     @Test
     void DELETE_admin_reservations_id_아직_지나지_않은_예약이면_422와_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운")
-                .date("2026-05-08").onStore(managedStoreId).save();
+                .date(Fixtures.daysFromNow(1).toString()).onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -147,7 +148,7 @@ class AdminReservationAcceptanceTest {
     @Test
     void GET_admin_reservations_담당하는_매장의_예약만_반환한다() {
         Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
-        insertReservationInOtherStore("2026-05-09");
+        insertReservationInOtherStore(Fixtures.daysFromNow(1).toString());
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -160,7 +161,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     void POST_admin_reservations_id_cancel_담당하지_않는_매장_예약이면_403과_메시지를_반환한다() {
-        long reservationId = insertReservationInOtherStore("2026-05-09");
+        long reservationId = insertReservationInOtherStore(Fixtures.daysFromNow(1).toString());
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())

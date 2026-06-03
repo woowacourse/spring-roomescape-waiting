@@ -21,6 +21,10 @@ public final class Fixtures {
     private Fixtures() {
     }
 
+    public static LocalDate daysFromNow(int days) {
+        return LocalDate.now().plusDays(days);
+    }
+
     public static Store store(String name) {
         return new Store(null, name);
     }

@@ -37,9 +37,9 @@ class ReservationAcceptanceTest {
 
     @Test
     void GET_reservations_mine_로그인_사용자의_예약만_조회한다() {
-        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-01").save();
-        Scenario.ExistingReservation mine = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-02").save();
-        Scenario.reservation(jdbcTemplate).member("다른사람").date("2026-05-03").save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString()).save();
+        Scenario.ExistingReservation mine = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-5).toString()).save();
+        Scenario.reservation(jdbcTemplate).member("다른사람").date(Fixtures.daysFromNow(-4).toString()).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, mine.bearer())
@@ -188,7 +188,7 @@ class ReservationAcceptanceTest {
     void POST_reservations_예약을_생성한다() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
         Map<String, Object> body = Map.of(
-                "date", "2026-05-08",
+                "date", Fixtures.daysFromNow(1).toString(),
                 "themeId", slot.themeId(),
                 "timeId", slot.timeId(),
                 "storeId", slot.storeId());
@@ -206,7 +206,7 @@ class ReservationAcceptanceTest {
     @Test
     void POST_reservations_토큰이_없으면_401과_메시지를_반환한다() {
         Map<String, Object> body = Map.of(
-                "date", "2026-05-08",
+                "date", Fixtures.daysFromNow(1).toString(),
                 "themeId", 1,
                 "timeId", 1);
 
@@ -221,10 +221,10 @@ class ReservationAcceptanceTest {
 
     @Test
     void POST_reservations_같은_날짜시간테마_중복이면_409과_메시지를_반환한다() {
-        Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate).member("기존").date("2026-05-08")
+        Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate).member("기존").date(Fixtures.daysFromNow(1).toString())
                 .save();
         Map<String, Object> body = Map.of(
-                "date", "2026-05-08",
+                "date", Fixtures.daysFromNow(1).toString(),
                 "themeId", existing.themeId(),
                 "timeId", existing.timeId(),
                 "storeId", existing.storeId());
@@ -243,7 +243,7 @@ class ReservationAcceptanceTest {
     void POST_reservations_과거_날짜_시간이면_422과_메시지를_반환한다() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
         Map<String, Object> body = Map.of(
-                "date", "2026-05-06",
+                "date", Fixtures.daysFromNow(-1).toString(),
                 "themeId", slot.themeId(),
                 "timeId", slot.timeId(),
                 "storeId", slot.storeId());
@@ -300,12 +300,12 @@ class ReservationAcceptanceTest {
 
     @Test
     void PUT_reservations_id_본인의_예약을_변경한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-06-01")
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         long newThemeId = DbFixtures.insertTheme(jdbcTemplate, "테마2");
         long newTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
         Map<String, Object> body = Map.of(
-                "date", "2026-06-02",
+                "date", Fixtures.daysFromNow(26).toString(),
                 "themeId", newThemeId,
                 "timeId", newTimeId);
 
@@ -316,15 +316,15 @@ class ReservationAcceptanceTest {
                 .when().put("/reservations/" + reserved.reservationId())
                 .then().log().all()
                 .statusCode(200)
-                .body("date", equalTo("2026-06-02"));
+                .body("date", equalTo(Fixtures.daysFromNow(26).toString()));
     }
 
     @Test
     void PUT_reservations_id_소유자_불일치면_403과_메시지를_반환한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-06-01")
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         Map<String, Object> body = Map.of(
-                "date", "2026-06-02",
+                "date", Fixtures.daysFromNow(26).toString(),
                 "themeId", reserved.themeId(),
                 "timeId", reserved.timeId());
 
@@ -340,10 +340,10 @@ class ReservationAcceptanceTest {
 
     @Test
     void PUT_reservations_id_과거_예약을_변경하려_하면_422과_메시지를_반환한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-01")
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(-6).toString())
                 .save();
         Map<String, Object> body = Map.of(
-                "date", "2026-06-02",
+                "date", Fixtures.daysFromNow(26).toString(),
                 "themeId", reserved.themeId(),
                 "timeId", reserved.timeId());
 
@@ -359,10 +359,10 @@ class ReservationAcceptanceTest {
 
     @Test
     void PUT_reservations_id_새_일정이_과거이면_422과_메시지를_반환한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-06-01")
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         Map<String, Object> body = Map.of(
-                "date", "2026-05-01",
+                "date", Fixtures.daysFromNow(-6).toString(),
                 "themeId", reserved.themeId(),
                 "timeId", reserved.timeId());
 
@@ -378,14 +378,14 @@ class ReservationAcceptanceTest {
 
     @Test
     void PUT_reservations_id_새_일정이_이미_예약된_슬롯이면_409과_메시지를_반환한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date("2026-06-01")
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").date(Fixtures.daysFromNow(25).toString())
                 .save();
         long otherTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
         Scenario.reservation(jdbcTemplate)
                 .member("다른사람").onTheme(reserved.themeId()).onTime(otherTimeId).onStore(reserved.storeId())
-                .date("2026-06-02").save();
+                .date(Fixtures.daysFromNow(26).toString()).save();
         Map<String, Object> body = Map.of(
-                "date", "2026-06-02",
+                "date", Fixtures.daysFromNow(26).toString(),
                 "themeId", reserved.themeId(),
                 "timeId", otherTimeId);
 
@@ -403,7 +403,7 @@ class ReservationAcceptanceTest {
     void PUT_reservations_id_예약_대기를_수정하려는_경우_409과_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
-                .date("2026-06-01")
+                .date(Fixtures.daysFromNow(25).toString())
                 .status("WAITING")
                 .time("10:00")
                 .save();
@@ -475,7 +475,7 @@ class ReservationAcceptanceTest {
     void POST_reservations_waiting_예약대기를_생성한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
-                .date("2026-06-01")
+                .date(Fixtures.daysFromNow(25).toString())
                 .status("RESERVED")
                 .time("10:00")
                 .save();
@@ -503,7 +503,7 @@ class ReservationAcceptanceTest {
     void POST_reservations_waiting_과거_날짜이면_422과_메시지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
-                .date("0000-01-01")
+                .date(Fixtures.daysFromNow(-3650).toString())
                 .status("RESERVED")
                 .time("10:00")
                 .save();
@@ -531,7 +531,7 @@ class ReservationAcceptanceTest {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
 
         Map<String, Object> body = Map.of(
-                "date", "2026-06-01",
+                "date", Fixtures.daysFromNow(25).toString(),
                 "themeId", slot.themeId(),
                 "timeId", slot.timeId(),
                 "storeId", slot.storeId());
@@ -550,13 +550,13 @@ class ReservationAcceptanceTest {
     void POST_reservations_같은사용자가_중복된_예약_대기가_존재하는_경우_409과_메세지를_반환한다() {
         Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
                 .member("브라운")
-                .date("2026-06-01")
+                .date(Fixtures.daysFromNow(25).toString())
                 .status("RESERVED")
                 .time("10:00")
                 .save();
         Scenario.ExistingReservation waiting = Scenario.waitingReservation(jdbcTemplate)
                 .member("샤를")
-                .date("2026-06-01")
+                .date(Fixtures.daysFromNow(25).toString())
                 .onTime(reserved.timeId())
                 .onTheme(reserved.themeId())
                 .onStore(reserved.storeId())

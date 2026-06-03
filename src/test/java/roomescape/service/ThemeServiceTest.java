@@ -5,7 +5,6 @@ import roomescape.exception.RoomescapeException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import roomescape.dto.theme.command.CreateThemeCommand;
 import roomescape.dto.theme.response.ThemeReservationTimeResponse;
 import roomescape.dto.theme.response.ThemeResponses;
 import roomescape.fixture.DbFixtures;
+import roomescape.fixture.Fixtures;
 
 class ThemeServiceTest extends ServiceIntegrationTest {
 
@@ -97,10 +97,10 @@ class ThemeServiceTest extends ServiceIntegrationTest {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         long time1 = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long time2 = DbFixtures.insertTime(jdbcTemplate, "11:00");
-        DbFixtures.insertReservation(jdbcTemplate, "브라운", themeId, "2026-05-06", time1);
+        DbFixtures.insertReservation(jdbcTemplate, "브라운", themeId, Fixtures.daysFromNow(-1).toString(), time1);
 
         List<ThemeReservationTimeResponse> times =
-                service.getThemeTimes(themeId, LocalDate.of(2026, 5, 6));
+                service.getThemeTimes(themeId, Fixtures.daysFromNow(-1));
 
         assertThat(times).hasSize(2);
         ThemeReservationTimeResponse t1 = times.stream()
@@ -117,10 +117,10 @@ class ThemeServiceTest extends ServiceIntegrationTest {
         long themeIn = DbFixtures.insertTheme(jdbcTemplate, "기간내");
         long themeOut = DbFixtures.insertTheme(jdbcTemplate, "기간외");
 
-        DbFixtures.insertReservation(jdbcTemplate, "a", themeIn, "2026-04-30", timeId);  // 시작 경계
-        DbFixtures.insertReservation(jdbcTemplate, "b", themeIn, "2026-05-06", timeId);   // 끝 경계
-        DbFixtures.insertReservation(jdbcTemplate, "c", themeOut, "2026-04-29", timeId);  // 시작 직전
-        DbFixtures.insertReservation(jdbcTemplate, "d", themeOut, "2026-05-07", timeId);  // today
+        DbFixtures.insertReservation(jdbcTemplate, "a", themeIn, Fixtures.daysFromNow(-7).toString(), timeId);  // 시작 경계
+        DbFixtures.insertReservation(jdbcTemplate, "b", themeIn, Fixtures.daysFromNow(-1).toString(), timeId);   // 끝 경계
+        DbFixtures.insertReservation(jdbcTemplate, "c", themeOut, Fixtures.daysFromNow(-8).toString(), timeId);  // 시작 직전
+        DbFixtures.insertReservation(jdbcTemplate, "d", themeOut, Fixtures.daysFromNow(0).toString(), timeId);  // today
 
         List<PopularTheme> popular = service.getPopularThemes(10);
 
@@ -135,12 +135,12 @@ class ThemeServiceTest extends ServiceIntegrationTest {
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
         long themeC = DbFixtures.insertTheme(jdbcTemplate, "C");
 
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u2", themeB, "2026-05-02", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeC, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u2", themeC, "2026-05-02", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u3", themeC, "2026-05-03", timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u2", themeB, Fixtures.daysFromNow(-5).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeC, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u2", themeC, Fixtures.daysFromNow(-5).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u3", themeC, Fixtures.daysFromNow(-4).toString(), timeId);
 
         List<PopularTheme> popular = service.getPopularThemes(10);
 
@@ -156,8 +156,8 @@ class ThemeServiceTest extends ServiceIntegrationTest {
         long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
 
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, "2026-05-01", timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, Fixtures.daysFromNow(-6).toString(), timeId);
 
         List<PopularTheme> popular = service.getPopularThemes(10);
 
@@ -172,9 +172,9 @@ class ThemeServiceTest extends ServiceIntegrationTest {
         long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
         long themeC = DbFixtures.insertTheme(jdbcTemplate, "C");
 
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, "2026-05-01", timeId);
-        DbFixtures.insertReservation(jdbcTemplate, "u1", themeC, "2026-05-01", timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeA, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeB, Fixtures.daysFromNow(-6).toString(), timeId);
+        DbFixtures.insertReservation(jdbcTemplate, "u1", themeC, Fixtures.daysFromNow(-6).toString(), timeId);
 
         List<PopularTheme> popular = service.getPopularThemes(2);
 

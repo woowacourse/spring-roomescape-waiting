@@ -24,14 +24,12 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final TimeProvider timeProvider;
 
     public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository,
-                        ReservationTimeRepository reservationTimeRepository, TimeProvider timeProvider) {
+                        ReservationTimeRepository reservationTimeRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.timeProvider = timeProvider;
     }
 
     public ThemeResponses getThemes(int page, int size) {
@@ -77,7 +75,7 @@ public class ThemeService {
     }
 
     public List<PopularTheme> getPopularThemes(Integer limit) {
-        LocalDate today = timeProvider.today();
+        LocalDate today = LocalDate.now();
         LocalDate to = today.minusDays(1);
         LocalDate from = today.minusDays(POPULAR_THEME_PERIOD_DAYS);
 

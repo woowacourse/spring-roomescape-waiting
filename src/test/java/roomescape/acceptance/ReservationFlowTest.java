@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.fixture.Fixtures;
 import roomescape.fixture.Scenario;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -32,15 +33,16 @@ class ReservationFlowTest {
     @Test
     void 예약_생성_후_해당_시간이_예약됨으로_변경된다() {
         Scenario.BookableSlot slot = Scenario.bookableSlot(jdbcTemplate, "브라운");
+        String date = Fixtures.daysFromNow(1).toString();
 
         RestAssured.given().log().all()
-                .when().get("/themes/" + slot.themeId() + "/times?date=2026-05-08")
+                .when().get("/themes/" + slot.themeId() + "/times?date=" + date)
                 .then().log().all()
                 .statusCode(200)
                 .body("times[0].isReserved", equalTo(false));
 
         Map<String, Object> params = Map.of(
-                "date", "2026-05-08",
+                "date", date,
                 "timeId", slot.timeId(),
                 "themeId", slot.themeId(),
                 "storeId", slot.storeId());
@@ -53,7 +55,7 @@ class ReservationFlowTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/themes/" + slot.themeId() + "/times?date=2026-05-08")
+                .when().get("/themes/" + slot.themeId() + "/times?date=" + date)
                 .then().log().all()
                 .statusCode(200)
                 .body("times[0].isReserved", equalTo(true));

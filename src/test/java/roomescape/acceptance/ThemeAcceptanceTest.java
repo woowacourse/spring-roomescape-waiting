@@ -13,6 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.fixture.DbFixtures;
+import roomescape.fixture.Fixtures;
 import roomescape.fixture.Scenario;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -66,11 +67,12 @@ class ThemeAcceptanceTest {
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         long reservedTimeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
         long freeTimeId = DbFixtures.insertTime(jdbcTemplate, "11:00");
+        String date = Fixtures.daysFromNow(-1).toString();
         Scenario.reservation(jdbcTemplate)
-                .member("브라운").onTheme(themeId).onTime(reservedTimeId).date("2026-05-06").save();
+                .member("브라운").onTheme(themeId).onTime(reservedTimeId).date(date).save();
 
         RestAssured.given().log().all()
-                .when().get("/themes/" + themeId + "/times?date=2026-05-06")
+                .when().get("/themes/" + themeId + "/times?date=" + date)
                 .then().log().all()
                 .statusCode(200)
                 .body("times.find { it.id == " + reservedTimeId + " }.isReserved", is(true))

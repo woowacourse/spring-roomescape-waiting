@@ -45,7 +45,7 @@ public final class Scenario {
         long themeId = DbFixtures.insertTheme(jdbc, "인기테마");
         long timeId = DbFixtures.insertTime(jdbc, "10:00");
         for (int i = 0; i < count; i++) {
-            DbFixtures.insertReservation(jdbc, "예약자" + i, themeId, String.format("2026-05-%02d", i + 1), timeId);
+            DbFixtures.insertReservation(jdbc, "예약자" + i, themeId, Fixtures.daysFromNow(-(i + 1)).toString(), timeId);
         }
         return themeId;
     }
@@ -73,7 +73,7 @@ public final class Scenario {
         private String member = "브라운";
         private String themeName = "테마";
         private String startAt = "10:00";
-        private String date = "2026-05-08";
+        private String date = Fixtures.daysFromNow(1).toString();
         private String storeName = "매장";
         private String status = "RESERVED";
         private Long existingStoreId;

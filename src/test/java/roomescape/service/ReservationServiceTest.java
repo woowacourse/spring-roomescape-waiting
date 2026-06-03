@@ -44,11 +44,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         Reservation created = service.create(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED);
+                Fixtures.createCommand(brown, themeId, Fixtures.daysFromNow(1), timeId), ReservationStatus.RESERVED);
 
         assertThat(created.getId()).isPositive();
         assertThat(created.getUser().getName()).isEqualTo("브라운");
-        assertThat(created.getDate()).isEqualTo(LocalDate.of(2026, 5, 8));
+        assertThat(created.getDate()).isEqualTo(Fixtures.daysFromNow(1));
         assertThat(created.getTheme().getId()).isEqualTo(themeId);
         assertThat(created.getTime().getId()).isEqualTo(timeId);
     }
@@ -60,7 +60,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long timeId = time("11:00");
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 5), timeId), ReservationStatus.RESERVED))
+                Fixtures.createCommand(brown, themeId, Fixtures.daysFromNow(-2), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
@@ -73,10 +73,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         service.create(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED);
+                Fixtures.createCommand(brown, themeId, Fixtures.daysFromNow(1), timeId), ReservationStatus.RESERVED);
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(other, themeId, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
+                Fixtures.createCommand(other, themeId, Fixtures.daysFromNow(1), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.DUPLICATE_RESERVATION);
@@ -88,7 +88,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long timeId = time("10:00");
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(brown, 9999L, LocalDate.of(2026, 5, 8), timeId), ReservationStatus.RESERVED))
+                Fixtures.createCommand(brown, 9999L, Fixtures.daysFromNow(1), timeId), ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
@@ -100,7 +100,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(brown, themeId, LocalDate.of(2026, 5, 8), 9999L), ReservationStatus.RESERVED))
+                Fixtures.createCommand(brown, themeId, Fixtures.daysFromNow(1), 9999L), ReservationStatus.RESERVED))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
@@ -111,9 +111,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("A");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1));
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 2));
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 3));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-6));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-5));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-4));
 
         ReservationResponses responses = service.getReservations(0, 2, null, manager);
 
@@ -126,8 +126,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("A");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1));
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 2));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-6));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-5));
 
         ReservationResponses responses = service.getReservations(0, 2, null, manager);
 
@@ -141,9 +141,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
-        saveReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2));
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
+        saveReservation(other, themeId, timeId, Fixtures.daysFromNow(-5));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
         ReservationResponses responses = service.getReservations(0, 10, "브라운", manager);
 
@@ -157,9 +157,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
-        saveReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2));
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
+        saveReservation(other, themeId, timeId, Fixtures.daysFromNow(-5));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
         ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
 
@@ -172,9 +172,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 2));
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-5));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-4));
 
         ReservationWithStatusResponses firstPage = service.getMyReservations(brown, 0, 2);
         ReservationWithStatusResponses secondPage = service.getMyReservations(brown, 1, 2);
@@ -202,8 +202,8 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         long timeId2 = time("11:00");
-        long reservedId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
-        long waitingId = saveWaitingReservation(brown, themeId, timeId2, LocalDate.of(2026, 5, 2));
+        long reservedId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
+        long waitingId = saveWaitingReservation(brown, themeId, timeId2, Fixtures.daysFromNow(-5));
 
         ReservationWithStatusResponses responses = service.getMyReservations(brown, 0, 20);
 
@@ -222,12 +222,12 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long timeId = time("10:00");
 
         // 슬롯 A(06-01): 아론(먼저) → 브라운(나중) ⇒ 브라운 2번
-        long slotAAron = saveWaitingReservation(aron, themeA, timeId, LocalDate.of(2026, 6, 1));
-        long slotABrown = saveWaitingReservation(brown, themeA, timeId, LocalDate.of(2026, 6, 1));
+        long slotAAron = saveWaitingReservation(aron, themeA, timeId, Fixtures.daysFromNow(25));
+        long slotABrown = saveWaitingReservation(brown, themeA, timeId, Fixtures.daysFromNow(25));
         // 슬롯 B(06-02): 샤를 → 아론 → 브라운 ⇒ 브라운 3번
-        long slotBCharles = saveWaitingReservation(charles, themeB, timeId, LocalDate.of(2026, 6, 2));
-        long slotBAron = saveWaitingReservation(aron, themeB, timeId, LocalDate.of(2026, 6, 2));
-        long slotBBrown = saveWaitingReservation(brown, themeB, timeId, LocalDate.of(2026, 6, 2));
+        long slotBCharles = saveWaitingReservation(charles, themeB, timeId, Fixtures.daysFromNow(26));
+        long slotBAron = saveWaitingReservation(aron, themeB, timeId, Fixtures.daysFromNow(26));
+        long slotBBrown = saveWaitingReservation(brown, themeB, timeId, Fixtures.daysFromNow(26));
 
         setCreatedAt(slotAAron, "2026-05-01 09:00:00");
         setCreatedAt(slotABrown, "2026-05-01 10:00:00");
@@ -248,7 +248,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6));
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-1));
 
         Reservation found = service.getReservation(reservationId);
 
@@ -277,7 +277,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 8));
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
 
         service.cancelReservation(reservationId, manager);
 
@@ -291,7 +291,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         insertOtherStore();
-        long reservationId = saveReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 8), OTHER_STORE_ID);
+        long reservationId = saveReservationInStore(user, themeId, timeId, Fixtures.daysFromNow(1), OTHER_STORE_ID);
 
         assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
@@ -305,7 +305,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6));
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-1));
 
         assertThatThrownBy(() -> service.cancelReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
@@ -319,7 +319,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 6));
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-1));
 
         service.deletePastReservation(reservationId, manager);
 
@@ -331,7 +331,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 8));
+        long reservationId = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(1));
 
         assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
@@ -346,7 +346,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         insertOtherStore();
-        long reservationId = saveReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 6), OTHER_STORE_ID);
+        long reservationId = saveReservationInStore(user, themeId, timeId, Fixtures.daysFromNow(-1), OTHER_STORE_ID);
 
         assertThatThrownBy(() -> service.deletePastReservation(reservationId, manager))
                 .isInstanceOf(RoomescapeException.class)
@@ -360,9 +360,9 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long mine = saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1));
+        long mine = saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-6));
         insertOtherStore();
-        saveReservationInStore(user, themeId, timeId, LocalDate.of(2026, 5, 2), OTHER_STORE_ID);
+        saveReservationInStore(user, themeId, timeId, Fixtures.daysFromNow(-5), OTHER_STORE_ID);
 
         ReservationResponses responses = service.getReservations(0, 10, null, manager);
 
@@ -375,7 +375,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User user = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(user, themeId, timeId, LocalDate.of(2026, 5, 1));
+        saveReservation(user, themeId, timeId, Fixtures.daysFromNow(-6));
 
         ReservationResponses responses = service.getReservations(0, 10, null, stranger);
 
@@ -389,7 +389,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 8));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(1));
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, other)))
                 .isInstanceOf(RoomescapeException.class)
@@ -413,7 +413,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
 
         assertThatThrownBy(() -> service.cancelOwnReservation(Fixtures.cancelCommand(reservationId, brown)))
                 .isInstanceOf(RoomescapeException.class)
@@ -429,12 +429,12 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId2 = theme("추리");
         long timeId = time("10:00");
         long timeId2 = time("11:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
 
         Reservation updated = service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown, themeId2, LocalDate.of(2026, 6, 2), timeId2));
+                Fixtures.updateCommand(reservationId, brown, themeId2, Fixtures.daysFromNow(26), timeId2));
 
-        assertThat(updated.getDate()).isEqualTo(LocalDate.of(2026, 6, 2));
+        assertThat(updated.getDate()).isEqualTo(Fixtures.daysFromNow(26));
         assertThat(updated.getTheme().getId()).isEqualTo(themeId2);
         assertThat(updated.getTime().getId()).isEqualTo(timeId2);
     }
@@ -445,10 +445,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User other = member("다른사람");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, other, themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(reservationId, other, themeId, Fixtures.daysFromNow(26), timeId)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESERVATION_OWNER_MISMATCH);
@@ -459,10 +459,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-6));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(26), timeId)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_RESERVATION_MODIFICATION);
@@ -473,10 +473,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 5, 1), timeId)))
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(-6), timeId)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
@@ -489,11 +489,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long themeId = theme("공포");
         long timeId = time("10:00");
         long timeId2 = time("11:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
-        saveReservation(other, themeId, timeId2, LocalDate.of(2026, 6, 2));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        saveReservation(other, themeId, timeId2, Fixtures.daysFromNow(26));
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 2), timeId2)))
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(26), timeId2)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.DUPLICATE_RESERVATION);
@@ -504,10 +504,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User brown = member("브라운");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        long reservationId = saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
+        long reservationId = saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
 
         Reservation updated = service.updateOwnReservation(
-                Fixtures.updateCommand(reservationId, brown, themeId, LocalDate.of(2026, 6, 1), timeId));
+                Fixtures.updateCommand(reservationId, brown, themeId, Fixtures.daysFromNow(25), timeId));
 
         assertThat(updated.getId()).isEqualTo(reservationId);
     }
@@ -519,7 +519,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long timeId = time("10:00");
 
         assertThatThrownBy(() -> service.updateOwnReservation(
-                Fixtures.updateCommand(9999L, brown, themeId, LocalDate.of(2026, 6, 2), timeId)))
+                Fixtures.updateCommand(9999L, brown, themeId, Fixtures.daysFromNow(26), timeId)))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESOURCE_NOT_FOUND);
@@ -531,13 +531,13 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
 
         Reservation result = service.create(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING);
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(25), timeId), ReservationStatus.WAITING);
 
         assertThat(result.getId()).isPositive();
-        assertThat(result.getDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(result.getDate()).isEqualTo(Fixtures.daysFromNow(25));
         assertThat(result.getTheme().getName()).isEqualTo("공포");
         assertThat(result.getUser().getName()).isEqualTo("샤를");
         assertThat(result.getStatus()).isEqualTo(ReservationStatus.WAITING);
@@ -550,7 +550,7 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         long timeId = time("10:00");
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(25), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.RESERVATION_NOT_FOUND_FOR_WAITING);
@@ -562,10 +562,10 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(1, 5, 1));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(-3650));
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(1, 5, 1), timeId), ReservationStatus.WAITING))
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(-3650), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.PAST_DATE_TIME_RESERVATION);
@@ -577,11 +577,11 @@ class ReservationServiceTest extends ServiceIntegrationTest {
         User charles = member("샤를");
         long themeId = theme("공포");
         long timeId = time("10:00");
-        saveReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1));
-        saveWaitingReservation(charles, themeId, timeId, LocalDate.of(2026, 6, 1));
+        saveReservation(brown, themeId, timeId, Fixtures.daysFromNow(25));
+        saveWaitingReservation(charles, themeId, timeId, Fixtures.daysFromNow(25));
 
         assertThatThrownBy(() -> service.create(
-                Fixtures.createCommand(charles, themeId, LocalDate.of(2026, 6, 1), timeId), ReservationStatus.WAITING))
+                Fixtures.createCommand(charles, themeId, Fixtures.daysFromNow(25), timeId), ReservationStatus.WAITING))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting(ex -> ((RoomescapeException) ex).getErrorType())
                 .isEqualTo(ErrorType.DUPLICATE_WAITING_RESERVATION);

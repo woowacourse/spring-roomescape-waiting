@@ -2,6 +2,7 @@ package roomescape.service;
 
 import roomescape.exception.ErrorType;
 import roomescape.exception.RoomescapeException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,18 +32,15 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final StoreRepository storeRepository;
-    private final TimeProvider timeProvider;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ThemeRepository themeRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              StoreRepository storeRepository,
-                              TimeProvider timeProvider) {
+                              StoreRepository storeRepository) {
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.storeRepository = storeRepository;
-        this.timeProvider = timeProvider;
     }
 
     public ReservationResponses getReservations(int page, int size, String name, User manager) {
@@ -214,19 +212,19 @@ public class ReservationService {
     }
 
     private void validateNotPastDateTime(Reservation reservation) {
-        if (reservation.isInPast(timeProvider.currentDateTime())) {
+        if (reservation.isInPast(LocalDateTime.now())) {
             throw new RoomescapeException(ErrorType.PAST_DATE_TIME_RESERVATION);
         }
     }
 
     private void validateExistingNotInPast(Reservation existing) {
-        if (existing.isInPast(timeProvider.currentDateTime())) {
+        if (existing.isInPast(LocalDateTime.now())) {
             throw new RoomescapeException(ErrorType.PAST_RESERVATION_MODIFICATION);
         }
     }
 
     private void validateExistingInPast(Reservation existing) {
-        if (!existing.isInPast(timeProvider.currentDateTime())) {
+        if (!existing.isInPast(LocalDateTime.now())) {
             throw new RoomescapeException(ErrorType.NON_PAST_RESERVATION_DELETION);
         }
     }

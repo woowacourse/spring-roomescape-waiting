@@ -12,6 +12,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.command.CreateReservationTimeCommand;
 import roomescape.dto.reservationtime.response.ReservationTimeResponses;
 import roomescape.fixture.DbFixtures;
+import roomescape.fixture.Fixtures;
 
 class ReservationTimeServiceTest extends ServiceIntegrationTest {
 
@@ -113,6 +114,6 @@ class ReservationTimeServiceTest extends ServiceIntegrationTest {
     private void saveReservationWithTime(long timeId) {
         long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
         long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
-        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-08", timeId);
+        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, Fixtures.daysFromNow(1).toString(), timeId);
     }
 }
