@@ -66,8 +66,16 @@ class WaitingListServiceTest {
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, date, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.save(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(date) &&
+                    w.getReservationTime().getId().equals(TIME_ID) &&
+                    w.getTheme().getId().equals(THEME_ID)
+            ))).willReturn(WaitingList.create(NAME, date, theme, reservationTime).withId(1));
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(date)
+            ))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(date));
@@ -90,8 +98,16 @@ class WaitingListServiceTest {
             given(themeRepository.findById(THEME_ID)).willReturn(Optional.of(theme));
             given(reservationTimeRepository.findById(TIME_ID)).willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByDateAndTimeIdAndThemeId(today, TIME_ID, THEME_ID)).willReturn(true);
-            given(waitingListRepository.save(any(WaitingList.class))).willReturn(WaitingList.create(NAME, today, theme, reservationTime).withId(1));
-            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(any(WaitingList.class))).willReturn(1);
+            given(waitingListRepository.save(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(today) &&
+                    w.getReservationTime().getId().equals(TIME_ID) &&
+                    w.getTheme().getId().equals(THEME_ID)
+            ))).willReturn(WaitingList.create(NAME, today, theme, reservationTime).withId(1));
+            given(waitingListRepository.findWaitingOrderByDateAndTimeIdAndThemeId(argThat(w ->
+                    w.getName().equals(NAME) &&
+                    w.getReservationDate().getDate().equals(today)
+            ))).willReturn(1);
 
             // when
             WaitingListResult result = waitingListService.create(createCommand(today));
