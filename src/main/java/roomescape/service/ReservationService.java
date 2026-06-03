@@ -15,7 +15,7 @@ import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.MemberDao;
 import roomescape.repository.ReservationDao;
-import roomescape.service.dto.ReservationInfoResult;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @Service
 @Transactional(readOnly = true)
@@ -125,7 +125,7 @@ public class ReservationService {
                 .toList();
     }
 
-    private ReservationResponse toReservationResponse(ReservationInfoResult result, LocalDateTime now) {
+    private ReservationResponse toReservationResponse(ReservationWithWaitingOrder result, LocalDateTime now) {
         return ReservationResponse.from(
                 result.reservation(),
                 result.order(),

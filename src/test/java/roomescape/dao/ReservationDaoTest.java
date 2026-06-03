@@ -22,7 +22,7 @@ import roomescape.domain.Role;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationDao;
-import roomescape.service.dto.ReservationInfoResult;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @JdbcTest
 @Import(ReservationDao.class)
@@ -175,7 +175,7 @@ class ReservationDaoTest {
         Long waitingId = insertReservation(waitingMember, scheduleId, ReservationStatus.WAITING,
                 LocalDateTime.of(2026, 6, 1, 10, 1));
 
-        List<ReservationInfoResult> results = reservationDao.findByMemberId(waitingMember.getId());
+        List<ReservationWithWaitingOrder> results = reservationDao.findByMemberId(waitingMember.getId());
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).reservation().getId()).isEqualTo(waitingId);
@@ -192,12 +192,12 @@ class ReservationDaoTest {
         Long waitingId = insertReservation("대기자", scheduleId, ReservationStatus.WAITING,
                 LocalDateTime.of(2026, 6, 1, 10, 2));
 
-        List<ReservationInfoResult> results = reservationDao.findAll();
+        List<ReservationWithWaitingOrder> results = reservationDao.findAll();
 
         assertThat(results)
                 .filteredOn(result -> result.reservation().getId().equals(waitingId))
                 .singleElement()
-                .extracting(ReservationInfoResult::order)
+                .extracting(ReservationWithWaitingOrder::order)
                 .isEqualTo(1);
     }
 

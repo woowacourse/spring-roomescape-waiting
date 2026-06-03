@@ -120,12 +120,12 @@ B: 대기 → 락 획득 → 중복 확인 → 예외 발생
 A: schedule 락 획득 → RESERVED 없음 → RESERVED 저장 → 커밋
 B: 대기 → 락 획득 → RESERVED 있음 → WAITING 저장
 ```
-1. cancel-cancel 동시 실행으로 대기 승격 중복
+3. cancel-cancel 동시 실행으로 대기 승격 중복
 ```
 A: schedule 락 획득 → 취소 → 승격 → 커밋
 B: 대기 → 락 획득 → isAlreadyCanceled() → return
 ```
-1. cancel 후 승격 중 save 실행
+4. cancel 후 승격 중 save 실행
 ```
 A (cancel): schedule 락 획득 → 취소 → 승격 중...
 B (save):   대기 → A 커밋 후 락 획득 → RESERVED 있음(승격된 것) → WAITING 저장

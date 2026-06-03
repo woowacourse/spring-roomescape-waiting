@@ -36,7 +36,7 @@ import roomescape.domain.exception.DomainErrorCode;
 import roomescape.domain.exception.RoomescapeException;
 import roomescape.repository.MemberDao;
 import roomescape.repository.ReservationDao;
-import roomescape.service.dto.ReservationInfoResult;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -268,7 +268,7 @@ class ReservationServiceTest {
         Member member = member(1L, "러로");
         Schedule schedule = futureSchedule(1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
         Reservation reservation = reservation(1L, member, schedule, ReservationStatus.WAITING, LocalDateTime.now().minusHours(1));
-        given(reservationDao.findByMemberId(member.getId())).willReturn(List.of(new ReservationInfoResult(reservation, 1)));
+        given(reservationDao.findByMemberId(member.getId())).willReturn(List.of(new ReservationWithWaitingOrder(reservation, 1)));
 
         List<ReservationResponse> responses = reservationService.findByMember(member);
 

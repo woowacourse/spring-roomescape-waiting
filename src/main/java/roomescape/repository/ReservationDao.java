@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.*;
-import roomescape.service.dto.ReservationInfoResult;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @Repository
 public class ReservationDao {
@@ -52,8 +52,8 @@ public class ReservationDao {
         );
     };
 
-    private static final RowMapper<ReservationInfoResult> reservationInfoResultRowMapper = (rs, rowNum) ->
-            new ReservationInfoResult(
+    private static final RowMapper<ReservationWithWaitingOrder> reservationInfoResultRowMapper = (rs, rowNum) ->
+            new ReservationWithWaitingOrder(
                     reservationRowMapper.mapRow(rs, rowNum),
                     rs.getInt("waiting_order")
             );
@@ -165,7 +165,7 @@ public class ReservationDao {
         return results.stream().findFirst();
     }
 
-    public List<ReservationInfoResult> findByMemberId(Long memberId) {
+    public List<ReservationWithWaitingOrder> findByMemberId(Long memberId) {
         String sql = """
             WITH active_orders AS (
                 SELECT id,
@@ -206,7 +206,7 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationInfoResultRowMapper, INACTIVE_STATUS.name(), memberId);
     }
 
-    public List<ReservationInfoResult> findAll() {
+    public List<ReservationWithWaitingOrder> findAll() {
         String sql = """
             WITH active_orders AS (
                 SELECT id,
