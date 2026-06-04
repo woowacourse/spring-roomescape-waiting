@@ -251,4 +251,20 @@ class WaitingJdbcTemplateRepositoryTest {
         assertThat(foundWaiting.getName()).isEqualTo("빠른대기");
         assertThat(foundWaiting.getRank()).isEqualTo(1L);
     }
+
+    @Test
+    @DisplayName("예약 대기 삭제 후 같은 슬롯의 남은 대기 순번을 재정렬한다")
+    void deleteByIdAndName_reorders_remaining_waiting_rank() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting firstWaiting = waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        Waiting secondWaiting = waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+
+        // when
+        waitingRepository.deleteByIdAndName(firstWaiting.getId(), "리오");
+
+        // then
+        Waiting foundWaiting = waitingRepository.findById(secondWaiting.getId()).orElseThrow();
+        assertThat(foundWaiting.getRank()).isEqualTo(1L);
+    }
 }
