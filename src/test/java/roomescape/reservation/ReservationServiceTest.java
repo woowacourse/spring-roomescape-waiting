@@ -197,54 +197,16 @@ class ReservationServiceTest {
     }
 
     private static class Fixture {
-        private final FakeThemeRepository themeRepository = new FakeThemeRepository();
-        private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
-        private final FakeReservationWaitingRepository reservationWaitingRepository = new FakeReservationWaitingRepository();
-        private final FakeReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
-        private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
-        private final ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository,
-                reservationRepository,
-                themeService
-        );
-        private final ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationWaitingRepository,
-                reservationTimeService,
-                themeService
-        );
-
-        private Theme saveTheme() {
-            return themeRepository.save(
-                    Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")
-            );
-        }
-
-        private ReservationTime saveTime(final String startAt) {
-            return reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse(startAt)));
-        }
-
-        private Reservation saveReservation(final String name, final String date, final String startAt) {
-            Theme theme = themeRepository.findAll()
-                    .stream()
-                    .findFirst()
-                    .orElseGet(this::saveTheme);
-            ReservationTime time = saveTime(startAt);
-
-            return reservationService.save(name, LocalDate.parse(date), theme.getId(), time.getId());
-        }
-
-        private Reservation savePastReservation() {
-            Theme theme = saveTheme();
-            ReservationTime time = saveTime("10:00");
-            return reservationRepository.save(Reservation.of(
-                    1L,
-                    "쿠다",
-                    LocalDate.now().minusDays(1),
-                    theme,
-                    time,
-                    LocalDateTime.now().minusDays(2)
-            ));
-        }
+        private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
+        private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
+        private final ThemeService themeService = mock(ThemeService.class);
+        private final ReservationService reservationService =
+                new ReservationService(
+                        reservationRepository,
+                        reservationWaitingRepository,
+                        reservationTimeService,
+                        themeService
+                );
     }
 }

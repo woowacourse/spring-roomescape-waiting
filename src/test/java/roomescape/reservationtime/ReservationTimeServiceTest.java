@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -25,7 +24,15 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 시간을 저장한다")
     void save() {
-        Fixture fixture = new Fixture();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
+        ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
         ReservationTime saved = fixture.reservationTimeService.save(LocalTime.parse("10:00"));
 
@@ -36,8 +43,14 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("중복된 예약 시간은 저장할 수 없다")
     void saveDuplicateTime() {
-        Fixture fixture = new Fixture();
-        fixture.reservationTimeService.save(LocalTime.parse("10:00"));
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
 
         assertThrows(ConflictException.class, () -> fixture.reservationTimeService.save(LocalTime.parse("10:00")));
     }
@@ -45,10 +58,16 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("특정 날짜와 테마에 이미 예약된 시간을 제외한 예약 가능 시간을 조회한다")
     void findAvailableTimes() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.saveTheme();
-        ReservationTime ten = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationTime eleven = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
+        ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
         fixture.reservationRepository.save(Reservation.createNew("쿠다", date, theme, ten));
 
@@ -62,8 +81,14 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("지난 날짜에 대해서는 예약 가능 시간이 조회되지 않는다")
     void findAvailableTimesInPastDate() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.saveTheme();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
         LocalDate pastDate = LocalDate.now().minusDays(1);
         fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
         fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
@@ -78,8 +103,14 @@ class ReservationTimeServiceTest {
     void findAvailableTimesTodayExcludesPastTimes() {
         assumeTrue(LocalTime.now().isBefore(LocalTime.of(23, 59)));
 
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.saveTheme();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         LocalTime futureTime = now.plusMinutes(1);
@@ -97,15 +128,14 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간은 삭제할 수 없다")
     void deleteById() {
-        Fixture fixture = new Fixture();
-        Theme theme = fixture.saveTheme();
-        ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        fixture.reservationRepository.save(Reservation.createNew(
-                "쿠다",
-                LocalDate.parse("2026-08-06"),
-                theme,
-                time
-        ));
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
 
         assertThrows(ConflictException.class, () -> fixture.reservationTimeService.deleteById(time.getId()));
     }
@@ -113,8 +143,14 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 없는 예약 시간을 삭제한다")
     void deleteByIdWithoutReservation() {
-        Fixture fixture = new Fixture();
-        ReservationTime time = fixture.reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
 
         fixture.reservationTimeService.deleteById(time.getId());
 
@@ -124,7 +160,14 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 시간은 삭제할 수 없다")
     void deleteByIdNotFound() {
-        Fixture fixture = new Fixture();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
 
         assertThrows(ResourceNotFoundException.class, () -> fixture.reservationTimeService.deleteById(1L));
     }
@@ -132,9 +175,13 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("ID로 예약 시간을 조회한다")
     void getById() {
-        Fixture fixture = new Fixture();
-        ReservationTime reservationTime = fixture.reservationTimeRepository.save(
-                ReservationTime.createNew(LocalTime.parse("10:00"))
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
         );
 
         ReservationTime found = fixture.reservationTimeService.getById(reservationTime.getId());

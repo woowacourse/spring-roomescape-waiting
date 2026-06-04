@@ -52,6 +52,17 @@ public class Reservation {
         return new Reservation(null, name, slot, standardDateTime);
     }
 
+    public static Reservation createNew(
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        validateReservable(date, time, standardDateTime);
+        return new Reservation(null, name, date, theme, time);
+    }
+
     public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
         return of(id, name, new ReservationSlot(date, theme, time), LocalDateTime.now());
     }
@@ -96,12 +107,21 @@ public class Reservation {
         return new Reservation(this.id, this.name, changedSlot, this.createdAt);
     }
 
+    public Reservation withDateAndTime(
+            final LocalDate date,
+            final ReservationTime time,
+            final LocalDateTime standardDateTime
+    ) {
+        validateReservable(date, time, standardDateTime);
+        return new Reservation(this.id, this.name, date, this.theme, time);
+    }
+
     public boolean hasName(final String name) {
         return this.name.equals(ReservationName.from(name).value());
     }
 
     public boolean isPast(final LocalDateTime standardDateTime) {
-        return slot.isPast(standardDateTime);
+        return isPast(date, time, standardDateTime);
     }
 
     public static boolean isReservable(
@@ -109,7 +129,7 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime standardDateTime
     ) {
-        return ReservationSlot.isReservable(date, time, standardDateTime);
+        return !isPast(date, time, standardDateTime);
     }
 
     public static boolean isPast(
@@ -117,7 +137,7 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime standardDateTime
     ) {
-        return ReservationSlot.isPast(date, time, standardDateTime);
+        return isPast(date, time.getStartAt(), standardDateTime);
     }
 
     public static boolean isPast(
@@ -125,20 +145,21 @@ public class Reservation {
             final LocalTime startAt,
             final LocalDateTime standardDateTime
     ) {
-        return ReservationSlot.isPast(date, startAt, standardDateTime);
+        return LocalDateTime.of(date, startAt).isBefore(standardDateTime);
     }
 
     private static void validateReservable(
-            final ReservationSlot slot,
+            final LocalDate date,
+            final ReservationTime time,
             final LocalDateTime standardDateTime
     ) {
-        if (slot.isPast(standardDateTime)) {
+        if (isPast(date, time, standardDateTime)) {
             throw new IllegalArgumentException(PAST_RESERVATION_MESSAGE);
         }
     }
 
-    private static void validateId(final Long id) {
-        if (id == null) {
+    private static void validateId(final Long id){
+        if(id == null) {
             throw new IllegalArgumentException("Id는 비어있을 수 없습니다.");
         }
     }

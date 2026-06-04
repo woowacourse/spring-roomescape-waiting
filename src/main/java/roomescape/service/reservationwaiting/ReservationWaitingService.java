@@ -21,19 +21,13 @@ import roomescape.service.theme.ThemeService;
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
-    private final ThemeService themeService;
-    private final ReservationTimeService reservationTimeService;
 
     public ReservationWaitingService(
             final ReservationRepository reservationRepository,
-            final ReservationWaitingRepository reservationWaitingRepository,
-            final ThemeService themeService,
-            final ReservationTimeService reservationTimeService
+            final ReservationWaitingRepository reservationWaitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
-        this.themeService = themeService;
-        this.reservationTimeService = reservationTimeService;
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
@@ -48,11 +42,7 @@ public class ReservationWaitingService {
 
         LocalDateTime requestedAt = LocalDateTime.now();
 
-        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(
-                reservation,
-                waitingName.value(),
-                requestedAt
-        );
+        ReservationWaiting nonIdReservationWaiting = createNewWaiting(reservation, waitingName, requestedAt);
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 

@@ -23,6 +23,7 @@ public class ReservationWaiting {
         this.reservation = reservation;
         this.name = ReservationName.from(name);
         this.requestedAt = requestedAt;
+        validateWaitable();
     }
 
     public static ReservationWaiting createNew(
@@ -64,6 +65,12 @@ public class ReservationWaiting {
 
     public LocalDateTime getRequestedAt() {
         return requestedAt;
+    }
+
+    private void validateWaitable() {
+        if (reservation.isPast(requestedAt)) {
+            throw new IllegalArgumentException(PAST_WAITING_MESSAGE);
+        }
     }
 
     @Override

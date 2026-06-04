@@ -153,7 +153,7 @@ public class ReservationService {
             final ReservationSlot slot
     ) {
         try {
-            return Reservation.createNew(name, slot, LocalDateTime.now());
+            return Reservation.createNew(name, date, theme, reservationTime, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }
