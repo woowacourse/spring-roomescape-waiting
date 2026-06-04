@@ -16,6 +16,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -36,7 +37,7 @@ import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 
 @JdbcTest
-@Import({ReservationService.class, SlotService.class, SlotDao.class,
+@Import({ReservationService.class, SlotDomainService.class, SlotDao.class,
         ReservationQueryingDao.class, ReservationUpdatingDao.class,
         ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class,
         ThemeQueryingDao.class, ThemeUpdatingDao.class,

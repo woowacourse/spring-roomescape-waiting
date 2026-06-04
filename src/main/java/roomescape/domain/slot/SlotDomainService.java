@@ -1,12 +1,10 @@
-package roomescape.service;
+package roomescape.domain.slot;
 
 import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.slot.Slot;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservation.ReservationRequest;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
@@ -15,12 +13,12 @@ import roomescape.repository.SlotDao;
 import roomescape.repository.ThemeQueryingDao;
 
 @Service
-public class SlotService {
+public class SlotDomainService {
     private final SlotDao slotDao;
     private final ReservationTimeQueryingDao reservationTimeQueryingDao;
     private final ThemeQueryingDao themeQueryingDao;
 
-    public SlotService(SlotDao slotDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
+    public SlotDomainService(SlotDao slotDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
         this.slotDao = slotDao;
         this.reservationTimeQueryingDao = reservationTimeQueryingDao;
         this.themeQueryingDao = themeQueryingDao;

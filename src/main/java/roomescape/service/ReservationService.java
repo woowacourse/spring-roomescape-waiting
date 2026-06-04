@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.ConcurrencyConflictException;
@@ -27,14 +28,14 @@ public class ReservationService {
     private final ReservationQueryingDao reservationQueryingDao;
     private final ReservationUpdatingDao reservationUpdatingDao;
     private final ReservationWaitingDao reservationWaitingDao;
-    private final SlotService slotService;
+    private final SlotDomainService slotDomainService;
 
     public ReservationService(ReservationQueryingDao reservationQueryingDao, ReservationUpdatingDao reservationUpdatingDao,
-                              ReservationWaitingDao reservationWaitingDao, SlotService slotService) {
+                              ReservationWaitingDao reservationWaitingDao, SlotDomainService slotDomainService) {
         this.reservationQueryingDao = reservationQueryingDao;
         this.reservationUpdatingDao = reservationUpdatingDao;
         this.reservationWaitingDao = reservationWaitingDao;
-        this.slotService = slotService;
+        this.slotDomainService = slotDomainService;
     }
 
     public ReservationResponse read(Long id) {
@@ -55,10 +56,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse create(ReservationRequest reservationReq) {
-        if(slotService.isExistByDateAndTimeAndTheme(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId())) {
+        if(slotDomainService.isExistByDateAndTimeAndTheme(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId())) {
             throw new ReservationAlreadyExistException();
         }
-        Slot slot = slotService.create(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId());
+        Slot slot = slotDomainService.create(reservationReq.date(), reservationReq.timeId(), reservationReq.themeId());
 
         if (slot.isExpired()) {
             throw new ExpiredDateTimeException();
@@ -111,7 +112,7 @@ public class ReservationService {
     private void promoteOrCleanupSlot(Long slotId) {
         Optional<ReservationWaiting> firstWaiting = reservationWaitingDao.findFirstBySlotId(slotId);
         if (firstWaiting.isEmpty()) {
-            slotService.delete(slotId);
+            slotDomainService.delete(slotId);
             return;
         }
 
@@ -128,11 +129,11 @@ public class ReservationService {
     }
 
     private Reservation updateSlot(Reservation existed, ReservationRequest request) {
-        if(slotService.isExistByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())) {
+        if(slotDomainService.isExistByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId())) {
             throw new ReservationAlreadyExistException();
         }
 
-        Slot newSlot = slotService.create(request.date(), request.timeId(), request.themeId());
+        Slot newSlot = slotDomainService.create(request.date(), request.timeId(), request.themeId());
         Reservation moved = existed.update(request.name(), newSlot);
 
         if (reservationQueryingDao.isExistBySlot(newSlot.getId())) {

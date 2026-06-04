@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationWaiting.ReservationWaiting;
 import roomescape.domain.slot.Slot;
+import roomescape.domain.slot.SlotDomainService;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.ConcurrencyConflictException;
@@ -18,19 +19,19 @@ import roomescape.repository.ReservationWaitingDao;
 public class ReservationWaitingService {
 
     private final ReservationWaitingDao reservationWaitingDao;
-    private final SlotService slotService;
+    private final SlotDomainService slotDomainService;
     private final ReservationQueryingDao reservationQueryingDao;
 
-    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, SlotService slotService,
+    public ReservationWaitingService(ReservationWaitingDao reservationWaitingDao, SlotDomainService slotDomainService,
                                      ReservationQueryingDao reservationQueryingDao) {
         this.reservationWaitingDao = reservationWaitingDao;
-        this.slotService = slotService;
+        this.slotDomainService = slotDomainService;
         this.reservationQueryingDao = reservationQueryingDao;
     }
 
     @Transactional
     public ReservationWaitingResponse create(ReservationWaitingRequest reservationWaitingReq) {
-        Slot slot = slotService.find(reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())
+        Slot slot = slotDomainService.find(reservationWaitingReq.date(), reservationWaitingReq.timeId(), reservationWaitingReq.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
 
         Reservation current = reservationQueryingDao.findReservationBySlotId(slot.getId())

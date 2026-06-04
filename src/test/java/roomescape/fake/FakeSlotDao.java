@@ -33,6 +33,11 @@ public class FakeSlotDao extends SlotDao {
     }
 
     @Override
+    public boolean isExistByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        return findByDateAndTimeAndTheme(date, timeId, themeId).isPresent();
+    }
+
+    @Override
     public Optional<Slot> findById(Long id) {
         return store.stream()
                 .filter(s -> s.getId().equals(id))
