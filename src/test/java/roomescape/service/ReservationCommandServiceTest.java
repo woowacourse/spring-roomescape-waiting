@@ -135,4 +135,22 @@ class ReservationCommandServiceTest {
         assertThat(reservationDao.findById(3L)).isPresent();
         assertThat(waitingDao.findById(3L)).isPresent();
     }
+
+    @Test
+    @DisplayName("예약 변경 시 비워진 옛 슬롯의 대기 1번이 예약으로 전환된다.")
+    void updatePromotesWaitingInVacatedSlot() {
+        reservationCommandService.update(2L, "user_b", LocalDate.of(2026, 6, 5), 3L);
+
+        assertThat(reservationDao.findAllByName(new Member("user_d"))).hasSize(1);
+        assertThat(waitingDao.findById(2L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("같은 슬롯으로 변경하면 옛 슬롯이 비지 않으므로 승격하지 않는다.")
+    void updateToSameSlotDoesNotPromote() {
+        reservationCommandService.update(2L, "user_b", LocalDate.of(2026, 6, 5), 2L);
+
+        assertThat(waitingDao.findById(2L)).isPresent();
+        assertThat(reservationDao.findAllByName(new Member("user_d"))).isEmpty();
+    }
 }

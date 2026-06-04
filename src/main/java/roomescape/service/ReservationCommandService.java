@@ -78,11 +78,17 @@ public class ReservationCommandService {
         newSlot.validateNotPast(now);
         validateNoDuplicateExcluding(newSlot, reservationId);
 
+        Reservation updated;
         try {
-            return reservationDao.update(oldReservation.withSlot(newSlot));
+            updated = reservationDao.update(oldReservation.withSlot(newSlot));
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException("해당 시간에 이미 예약이 존재합니다.");
         }
+
+        if (!oldReservation.slot().isSameSlot(newSlot)) {
+            promoteNextWaitingIn(oldReservation.slot());
+        }
+        return updated;
     }
 
     private void validateNoDuplicate(Slot slot) {
