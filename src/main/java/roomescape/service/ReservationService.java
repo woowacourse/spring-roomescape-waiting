@@ -70,7 +70,9 @@ public class ReservationService {
 
     @Transactional
     public void deleteByAdmin(Long id) {
+        Reservation reservation = findReservation(id);
         reservationRepository.delete(id);
+        promoteFirstWaiting(reservation);
     }
 
     @Transactional

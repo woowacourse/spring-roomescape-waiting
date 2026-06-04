@@ -222,12 +222,35 @@ class ReservationServiceTest {
     void 관리자_예약을_삭제한다() {
         // given
         Long id = 1L;
+        String name = "브라운";
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, name, date, time);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
+        Reservation promotedReservation = createReservation(2L, "구구", date, time);
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.findById(promotedReservation.getId()))
+                .thenReturn(Optional.of(promotedReservation));
 
         // when
         service.deleteByAdmin(id);
 
         // then
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
         verify(reservationRepository, times(1)).delete(id);
+        verify(reservationRepository, times(1)).insert(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
+
+        Reservation captured = captor.getValue();
+        assertAll(
+                () -> assertThat(captured.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(captured.getDate()).isEqualTo(waiting.getDate()),
+                () -> assertThat(captured.getTime()).isEqualTo(waiting.getTime()),
+                () -> assertThat(captured.getTheme()).isEqualTo(waiting.getTheme()));
     }
 
     @Test
