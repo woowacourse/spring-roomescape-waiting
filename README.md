@@ -4,7 +4,7 @@
 | 사용자 예약 등록       | POST `/reservations`                           | `{name, date, timeId, themeId}`  | `{id, name, date, time: {id, startAt}, theme: {id, name}}`   | 201   |
 | 사용자 본인 예약 조회    | GET `/reservations?name=브라운`                 | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}}, ...]` | 200   |
 | 사용자 본인 예약 상태 조회 | GET `/reservation-statuses?name=브라운`         | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}, status, turn}, ...]` | 200   |
-| 사용자 본인 예약 변경    | PUT `/reservations/{id}`                       | `{name, date, timeId}`           | `{id, name, date, time: {id, startAt}, theme: {id, name}}`   | 200   |
+| 사용자 본인 예약 변경    | PUT `/reservations/{id}`                       | `{name, date?, timeId?}`         | `{id, name, date, time: {id, startAt}, theme: {id, name}}`   | 200   |
 | 사용자 본인 예약 취소    | DELETE `/reservations/{id}?name=브라운`          | —                                | —                                                            | 204   |
 | 사용자 예약 대기 등록    | POST `/waitings`                               | `{name, date, timeId, themeId}`  | `{id, name, date, time: {id, startAt}, theme: {id, name}, turn}` | 201   |
 | 사용자 본인 예약 대기 조회 | GET `/waitings?name=브라운`                    | —                                | `[{id, name, date, time: {id, startAt}, theme: {id, name}, turn}, ...]` | 200   |
@@ -60,6 +60,7 @@
 | FORBIDDEN_RESOURCE | 본인의 예약만 변경하거나 취소할 수 있습니다. | 403 | 예약은 존재하지만 요청 이름과 예약 이름이 일치하지 않음 |
 | FORBIDDEN_RESOURCE | 본인의 예약 대기만 취소할 수 있습니다. | 403 | 예약 대기는 존재하지만 요청 이름과 예약 대기 이름이 일치하지 않음 |
 | NOT_FOUND | 존재하지 않는 예약 시간입니다. | 404 | 존재하지 않는 예약 시간 ID로 요청함 |
+| NOT_FOUND | 존재하지 않는 시간입니다. | 404 | 존재하지 않는 예약 시간 ID로 예약 대기 생성을 요청함 |
 | NOT_FOUND | 존재하지 않는 테마입니다. | 404 | 존재하지 않는 테마 ID로 요청함 |
 | NOT_FOUND | 존재하지 않는 예약입니다. | 404 | 존재하지 않는 예약 ID로 변경·취소를 요청함 |
 | NOT_FOUND | 존재하지 않는 예약 대기입니다. | 404 | 존재하지 않는 예약 대기 ID로 취소를 요청함 |

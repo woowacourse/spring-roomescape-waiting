@@ -64,7 +64,7 @@
     let sortCriteria = [];
 
     window.onload = () => {
-        document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+        document.getElementById('date-input').value = getTodayString();
         document.getElementById('search-input').addEventListener('input', renderReservations);
         document.querySelectorAll('th[data-sort]').forEach(th => {
             th.addEventListener('click', () => {
@@ -72,7 +72,9 @@
                 renderReservations();
             });
         });
-        Promise.all([loadThemes(), loadTimes()]).then(loadReservations);
+        loadReservations();
+        loadThemes().catch(showError);
+        loadTimes().catch(showError);
     };
 
     function loadReservations() {
@@ -150,7 +152,19 @@
                 return criterion.direction === 'asc' ? result : -result;
             }
         }
-        return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
+        return compareDefaultReservation(a, b);
+    }
+
+    function compareDefaultReservation(a, b) {
+        const dateResult = String(b.date).localeCompare(String(a.date), 'ko', { numeric: true });
+        if (dateResult !== 0) {
+            return dateResult;
+        }
+        const timeResult = String(b.time?.startAt || '').localeCompare(String(a.time?.startAt || ''), 'ko', { numeric: true });
+        if (timeResult !== 0) {
+            return timeResult;
+        }
+        return String(b.id).localeCompare(String(a.id), 'ko', { numeric: true });
     }
 
     function getSortValue(reservation, key) {
@@ -223,6 +237,14 @@
 
     function formatTime(value) {
         return value ? value.slice(0, 5) : '';
+    }
+
+    function getTodayString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const date = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
     }
 
     function escapeHtml(value) {
