@@ -71,10 +71,15 @@ public class PendingReservationService {
 
     @Transactional
     public ReservationInfo change(Long id, TimeSlot slot, String name) {
-        PendingReservation reservation = reservationRepository.getById(id);
-        PendingReservation changedReservation = reservation.changeTime(name, slot, clock);
-        reservationRepository.update(changedReservation);
-        return ReservationInfo.from(changedReservation);
+        try {
+            PendingReservation reservation = reservationRepository.getById(id);
+            PendingReservation changedReservation = reservation.changeTime(name, slot, clock);
+            reservationRepository.update(changedReservation);
+            return ReservationInfo.from(changedReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("예약을 변경 중 일시적인 문제가 발생했습니다.");
+        }
+
     }
 
     @Transactional
