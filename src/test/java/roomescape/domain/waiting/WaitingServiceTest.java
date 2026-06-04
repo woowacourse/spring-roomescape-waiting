@@ -114,6 +114,8 @@ class WaitingServiceTest {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
+                    .thenReturn(Optional.of("예약자"));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(true);
 
@@ -127,15 +129,12 @@ class WaitingServiceTest {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(false);
             when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-
         }
 
         @Test
