@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingOrder;
@@ -42,11 +43,12 @@ class ReservationServiceTest {
             "갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!",
             "https://picsum.photos/seed/roomescape1/800/600.jpg"
     );
+    private static final LocalDate VALID_RESERVATION_DATE = LocalDate.of(2026, 5, 9);
     private static final ReservationCreateCommand VALID_COMMAND = new ReservationCreateCommand(
-            "브라운", LocalDate.of(2026, 5, 9), 1L, 1L
+            "브라운", VALID_RESERVATION_DATE, 1L, 1L
     );
     private static final ReservationCreateCommand VALID_COMMAND_MOA = new ReservationCreateCommand(
-            "모아", LocalDate.of(2026, 5, 9), 1L, 1L
+            "모아", VALID_RESERVATION_DATE, 1L, 1L
     );
 
     @Mock
@@ -82,7 +84,8 @@ class ReservationServiceTest {
     @DisplayName("충돌이 없으면 정상적으로 예약을 생성한다")
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
         ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
+                1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                ReservationStatus.CONFIRMED, new WaitingOrder(0));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId(
@@ -132,26 +135,29 @@ class ReservationServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하면 ReservationNotFoundException이 발생한다")
     void 존재하지_않는_예약_삭제시_예외가_발생한다() {
-        given(reservationRepository.existsById(1L)).willReturn(false);
+        given(reservationRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThrows(
                 ReservationNotFoundException.class,
                 () -> reservationService.delete(1L)
         );
 
-        verify(reservationRepository, times(1)).existsById(1L);
+        verify(reservationRepository, times(1)).findById(1L);
         verifyNoInteractions(reservationTimeRepository, themeRepository);
     }
 
     @Test
-    @DisplayName("존재하는 예약은 정상적으로 삭제된다")
-    void 존재하는_예약은_정상_삭제된다() {
-        given(reservationRepository.existsById(1L)).willReturn(true);
+    @DisplayName("확정 예약을 삭제하면 soft delete 후 첫 대기자를 승급한다")
+    void 확정_예약_삭제시_취소하고_승급한다() {
+        Reservation confirmed = new Reservation(
+                1L, "브라운", VALID_RESERVATION_DATE, VALID_TIME, VALID_THEME, ReservationStatus.CONFIRMED);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(confirmed));
 
         assertDoesNotThrow(() -> reservationService.delete(1L));
 
-        verify(reservationRepository, times(1)).existsById(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).cancel(1L);
+        verify(reservationRepository, times(1)).promoteEarliestWaiting(VALID_RESERVATION_DATE, 1L, 1L);
         verifyNoInteractions(reservationTimeRepository, themeRepository);
     }
 
@@ -168,7 +174,8 @@ class ReservationServiceTest {
                     1L))
                     .willReturn(false);
             given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0)));
+                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                    ReservationStatus.CONFIRMED, new WaitingOrder(0)));
 
             assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
@@ -207,15 +214,16 @@ class ReservationServiceTest {
             @Test
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
-                ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                        1L, VALID_COMMAND_MOA.reserverName(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(0));
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
                 given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
                 given(reservationRepository.existsByReserverNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
                         1L))
                         .willReturn(false);
+                given(reservationRepository.existsActiveConfirmed(VALID_COMMAND_MOA.date(), 1L, 1L))
+                        .willReturn(true);
                 given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
-                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, new WaitingOrder(1)));
+                        1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME,
+                        ReservationStatus.WAITING, new WaitingOrder(1)));
 
                 assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
 
