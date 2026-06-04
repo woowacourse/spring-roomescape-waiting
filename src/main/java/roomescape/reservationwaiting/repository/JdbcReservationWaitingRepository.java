@@ -1,7 +1,9 @@
 package roomescape.reservationwaiting.repository;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -18,15 +20,17 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
-        String sql = "INSERT INTO reservation_waiting (reservation_id, name, requested_at) VALUES (?, ?, ?) ";
+        String sql = "INSERT INTO reservation_waiting (date, theme_id, time_id, name, requested_at) VALUES (?, ?, ?, ?, ?) ";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setLong(1, reservationWaiting.getReservation().getId());
-            preparedStatement.setString(2, reservationWaiting.getName());
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(reservationWaiting.getRequestAt()));
+            preparedStatement.setDate(1, Date.valueOf(reservationWaiting.getDate()));
+            preparedStatement.setLong(2, reservationWaiting.getThemeId());
+            preparedStatement.setLong(3, reservationWaiting.getTimeId());
+            preparedStatement.setString(4, reservationWaiting.getName());
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(reservationWaiting.getRequestAt()));
             return preparedStatement;
         }, keyHolder);
 
@@ -45,9 +49,9 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public boolean existsByReservationIdAndName(final Long reservationId, final String name) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE reservation_id = ? AND name = ?)";
+    public boolean existsByDateAndThemeIdAndTimeIdAndName(final LocalDate date, final Long themeId, final Long timeId, final String name) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE date = ? AND theme_id = ? AND time_id = ? AND name = ?)";
 
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId, name));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, Date.valueOf(date), themeId, timeId, name));
     }
 }

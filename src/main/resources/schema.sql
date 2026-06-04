@@ -32,10 +32,13 @@ CREATE TABLE reservation
 CREATE TABLE reservation_waiting
 (
     id             BIGINT       NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT       NOT NULL,
+    date           DATE         NOT NULL,
+    theme_id       BIGINT       NOT NULL,
+    time_id        BIGINT       NOT NULL,
     name           VARCHAR(255) NOT NULL,
     requested_at   DATETIME     NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
-    UNIQUE (reservation_id, name)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    UNIQUE (date, theme_id, time_id, name)
 );

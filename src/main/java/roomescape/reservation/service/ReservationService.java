@@ -52,11 +52,15 @@ public class ReservationService {
         return reservationRepository.save(nonIdReservation);
     }
 
+    public boolean existsByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
+        return (reservationRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId));
+    }
+
     public Reservation findByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId, final Long timeId) {
         return reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
-                        "예약 정보가 없으면 대기 생성이 불가능합니다."
+                        "해당 예약을 찾을 수 없습니다."
                 ));
     }
 

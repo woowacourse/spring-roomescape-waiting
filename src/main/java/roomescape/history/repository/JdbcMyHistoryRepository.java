@@ -53,7 +53,7 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                 UNION ALL
 
                 SELECT 'WAITING' AS status,
-                       r.id AS reservation_id,
+                       NULL AS reservation_id,
                        rw.id AS waiting_id,
                        rw.name AS history_name,
                        r.date,
@@ -66,16 +66,17 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                        (
                            SELECT COUNT(*)
                            FROM reservation_waiting AS earlier
-                           WHERE earlier.reservation_id = rw.reservation_id
+                           WHERE earlier.date = rw.date
+                             AND earlier.theme_id = rw.theme_id
+                             AND earlier.time_id = rw.time_id
                              AND (
                                  earlier.requested_at < rw.requested_at
                                  OR (earlier.requested_at = rw.requested_at AND earlier.id <= rw.id)
                              )
                        ) AS sequence
                 FROM reservation_waiting AS rw
-                INNER JOIN reservation AS r ON rw.reservation_id = r.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN theme AS t ON rw.theme_id = t.id
+                INNER JOIN reservation_time AS rt ON rw.time_id = rt.id
                 WHERE rw.name = ?
                 ORDER BY date, start_at, status
                 """;

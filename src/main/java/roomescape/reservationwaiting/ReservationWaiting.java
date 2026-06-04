@@ -1,38 +1,44 @@
 package roomescape.reservationwaiting;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
-import roomescape.reservation.Reservation;
 
 public class ReservationWaiting {
     private final Long id;
-    private final Reservation reservation;
+    private final LocalDate date;
+    private final Long themeId;
+    private final Long timeId;
     private final String name;
     private final LocalDateTime requestAt;
 
-    public ReservationWaiting(Long id, Reservation reservation, String name, LocalDateTime requestAt) {
+    public ReservationWaiting(Long id, LocalDate date, Long themeId, Long timeId, String name, LocalDateTime requestAt) {
         this.id = id;
-        this.reservation = reservation;
+        this.date = date;
+        this.themeId = themeId;
+        this.timeId = timeId;
         this.name = validateName(name);
         this.requestAt = requestAt;
     }
 
-    public static ReservationWaiting createNew(final Reservation reservation, String name, LocalDateTime requestAt) {
-        return new ReservationWaiting(null, reservation, name, requestAt);
+    public static ReservationWaiting createNew(LocalDate date, Long themeId, Long timeId, String name, LocalDateTime requestAt) {
+        return new ReservationWaiting(null, date, themeId, timeId, name, requestAt);
     }
 
     public ReservationWaiting withId(final Long id) {
-        return new ReservationWaiting(id, this.reservation, this.name, this.requestAt);
+        return new ReservationWaiting(id, this.date, this.themeId, this.timeId, this.name, this.requestAt);
     }
 
     public Long getId() {
         return id;
     }
 
-    public Reservation getReservation() {
-        return reservation;
-    }
+    public LocalDate getDate() { return date; }
+
+    public Long getThemeId() { return themeId; }
+
+    public Long getTimeId() { return timeId; }
 
     public String getName() {
         return name;

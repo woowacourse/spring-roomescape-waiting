@@ -13,7 +13,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> findByIdAndName(long id, String name);
 
-    Optional<Reservation> findByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
+    Optional<Reservation> findByDateAndThemeIdAndTimeId(final LocalDate date, final long themeId, final long timeId);
 
     int deleteById(long id);
 
@@ -26,8 +26,6 @@ public interface ReservationRepository {
     boolean existsByDateAndThemeIdAndTimeIdExcludingId(LocalDate date, long themeId, long timeId, long reservationId);
 
     List<Long> findReservedTimeIdsByDateAndThemeId(LocalDate date, long themeId);
-
-    Long findReservationIdByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
 
     boolean existsByTimeId(long timeId);
 
