@@ -1,0 +1,6 @@
+POST localhost:8080/times HTTP/1.1
+Content-Type: application/json
+
+{
+  "startAt": "09:40"
+}

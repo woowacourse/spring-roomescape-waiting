@@ -1,0 +1,8 @@
+POST localhost:8080/themes HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "공포",
+  "description": "무서워요",
+  "thumbnailUrl": "adsfadsfasdfadsf"
+}

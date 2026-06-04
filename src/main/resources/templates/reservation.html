@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0d0f;
+            --surface: #16161a;
+            --surface-2: #1e1e24;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --accent: #c8a96e;
+            --accent-dim: rgba(200,169,110,0.12);
+            --text-primary: #f0ece4;
+            --text-secondary: #8a8680;
+            --text-muted: #4a4845;
+            --danger: #e05252;
+            --success: #4caf7d;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 300;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* 헤더 */
+        header {
+            padding: 2.5rem 3rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .header-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-primary);
+        }
+
+        .header-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* 메인 레이아웃 */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem 6rem;
+        }
+
+        /* 스텝 인디케이터 */
+        .steps {
+            display: flex;
+            gap: 0;
+            margin-bottom: 3rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--bg);
+            padding: 1.25rem 2rem;
+            margin-left: -2rem;
+            margin-right: -2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-dot {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .step.done .step-dot {
+            border-color: var(--success);
+            background: rgba(76,175,125,0.12);
+            color: var(--success);
+        }
+
+        .step-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .step.active .step-label { color: var(--accent); }
+        .step.done .step-label { color: var(--success); }
+
+        /* 섹션 */
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* 테마 선택 */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .theme-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: var(--surface);
+        }
+
+        .theme-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .theme-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent);
+        }
+
+        .theme-card-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            display: block;
+            background: var(--surface-2);
+        }
+
+        .theme-card-img-placeholder {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: var(--surface-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .theme-card-body {
+            padding: 0.75rem 1rem;
+        }
+
+        .theme-card-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .theme-card-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 날짜 선택 */
+        input[type="date"] {
+            appearance: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            max-width: 280px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        input[type="date"]:hover { border-color: var(--border-hover); }
+        input[type="date"]:focus { outline: none; border-color: var(--accent); }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.6);
+            cursor: pointer;
+        }
+
+        /* 시간 슬롯 */
+        .time-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .time-slot {
+            padding: 0.6rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: var(--surface);
+            transition: all 0.2s ease;
+            letter-spacing: 0.05em;
+        }
+
+        .time-slot:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .time-slot.selected {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .time-slot.unavailable {
+            border-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .time-slot.unavailable:hover {
+            border-color: var(--border);
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .time-slot.waitable {
+            border-color: rgba(76, 175, 125, 0.35);
+            color: var(--success);
+            background: rgba(76, 175, 125, 0.08);
+        }
+
+        .time-slot.waitable:hover {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(76, 175, 125, 0.14);
+        }
+
+        .time-slot-label {
+            display: block;
+            margin-top: 0.2rem;
+            font-size: 0.58rem;
+            letter-spacing: 0.08em;
+        }
+
+        /* 플레이스홀더 메시지 */
+        .placeholder-msg {
+            padding: 2rem;
+            text-align: center;
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        /* 예약 확정 섹션 */
+        .booking-form {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+        }
+
+        .booking-summary {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+        }
+
+        .summary-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .summary-value.accent { color: var(--accent); }
+
+        input[type="text"] {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]::placeholder { color: var(--text-muted); }
+        input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+        .btn-reserve {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--accent);
+            color: #1a1400;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reserve:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-reserve:active { transform: translateY(0); }
+        .btn-reserve:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+        /* 로딩 */
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+            padding: 1rem;
+        }
+
+        .loading-dots span {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: dot 1.2s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dot {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        /* 구분선 */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 2rem 0;
+        }
+
+        /* ─── MODAL COMMON ─── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13, 13, 15, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            word-break: keep-all;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .btn-ghost {
+            padding: 0.6rem 1.5rem;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-hover);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        /* ─── ERROR MODAL THEME ─── */
+        .modal-content.error-theme {
+            border-top: 2px solid var(--danger);
+        }
+        .modal-content.error-theme .modal-title {
+            color: var(--danger);
+        }
+        .modal-status {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.75rem;
+            color: var(--danger);
+            letter-spacing: 0.1em;
+            background: rgba(224, 82, 82, 0.12);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* ─── SUCCESS MODAL THEME ─── */
+        .modal-content.success-theme {
+            border-top: 2px solid var(--success);
+        }
+        .modal-content.success-theme .modal-title {
+            color: var(--success);
+        }
+        .btn-ghost.success-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--success);
+            background: rgba(76, 175, 125, 0.1); /* --success-dim 느낌 */
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 1.5rem; }
+            main { padding: 2rem 1rem 4rem; }
+            .theme-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" style="display:flex; align-items:baseline; gap:1rem; text-decoration:none;">
+        <span class="header-title">방탈출 예약</span>
+        <span class="header-sub">Escape Room Reservation</span>
+    </a>
+</header>
+
+<main>
+
+    <div class="steps" id="step-indicator">
+        <div class="step active" id="step-1">
+            <div class="step-dot">1</div>
+            <span class="step-label">테마</span>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-dot">2</div>
+            <span class="step-label">날짜</span>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-dot">3</div>
+            <span class="step-label">시간</span>
+        </div>
+        <div class="step" id="step-4">
+            <div class="step-dot">4</div>
+            <span class="step-label">확정</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">1</div>
+            <span class="section-title">테마 선택</span>
+        </div>
+        <div class="theme-grid" id="theme-grid">
+            <div class="loading-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">2</div>
+            <span class="section-title">날짜 선택</span>
+        </div>
+        <input type="date" id="date-select">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">3</div>
+            <span class="section-title">예약 가능 시간</span>
+        </div>
+        <div id="time-container">
+            <div class="placeholder-msg">테마와 날짜를 선택하면 예약 가능한 시간이 표시됩니다</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section" id="booking-section" style="display: none;">
+        <div class="section-header">
+            <div class="section-num">4</div>
+            <span class="section-title">예약 확정</span>
+        </div>
+        <div class="booking-form">
+            <div class="booking-summary" id="booking-summary"></div>
+            <input type="text" id="user-name" placeholder="예약자 성함을 입력하세요">
+            <button class="btn-reserve" onclick="makeReservation()" id="btn-reserve">예약하기</button>
+        </div>
+    </div>
+
+</main>
+
+<div id="error-modal" class="modal-overlay">
+    <div class="modal-content error-theme">
+        <div class="modal-header">
+            <span class="modal-title">System Error</span>
+            <span class="modal-status" id="error-status">400</span>
+        </div>
+        <div class="modal-body" id="error-message">
+            에러 메시지가 여기에 표시됩니다.
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" onclick="closeErrorAlert()">확인</button>
+        </div>
+    </div>
+</div>
+
+<div id="success-modal" class="modal-overlay">
+    <div class="modal-content success-theme">
+        <div class="modal-header">
+            <span class="modal-title">Reservation Confirmed</span>
+        </div>
+        <div class="modal-body" id="success-message">
+            예약이 완료되었습니다.
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost success-btn" id="success-confirm-btn">확인</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── MODAL 제어 ────────────────────────────────────
+    function showErrorAlert(errorResponse) {
+        const statusEl = document.getElementById('error-status');
+        const messageEl = document.getElementById('error-message');
+        const modalEl = document.getElementById('error-modal');
+
+        statusEl.innerText = `ERROR ${errorResponse.status || 500}`;
+        messageEl.innerText = extractErrorMessage(errorResponse);
+
+        modalEl.classList.add('active');
+    }
+
+    function extractErrorMessage(errorResponse) {
+        if (!errorResponse) {
+            return '서버와 통신 중 문제가 발생했습니다.';
+        }
+        if (errorResponse.detail) {
+            return errorResponse.detail;
+        }
+        if (errorResponse.message) {
+            return errorResponse.message;
+        }
+        if (Array.isArray(errorResponse.errors) && errorResponse.errors.length > 0) {
+            return errorResponse.errors.map(error => error.message).join('\n');
+        }
+        return '서버와 통신 중 문제가 발생했습니다.';
+    }
+
+    function closeErrorAlert() {
+        document.getElementById('error-modal').classList.remove('active');
+    }
+
+    function showSuccessAlert(message, callback) {
+        const messageEl = document.getElementById('success-message');
+        const modalEl = document.getElementById('success-modal');
+        const confirmBtn = document.getElementById('success-confirm-btn');
+
+        messageEl.innerText = message || '완료되었습니다.';
+        modalEl.classList.add('active');
+
+        // 확인 버튼을 누르면 모달을 닫고 콜백(메인 화면 이동 등) 실행
+        confirmBtn.onclick = function() {
+            modalEl.classList.remove('active');
+            if(callback) callback();
+        }
+    }
+    // ────────────────────────────────────────────────
+
+    let allThemes = [];
+    let selectedThemeId = null;
+    let selectedTimeId = null;
+    let selectedTimeLabel = null;
+    let selectedTimeMode = 'reservation';
+
+    const themeGrid = document.getElementById('theme-grid');
+    const dateSelect = document.getElementById('date-select');
+    const timeContainer = document.getElementById('time-container');
+    const bookingSection = document.getElementById('booking-section');
+
+    const today = new Date().toISOString().split('T')[0];
+    dateSelect.min = today;
+
+    window.onload = function () {
+        fetch('/themes')
+            .then(res => res.json())
+            .then(data => {
+                const themes = data.themeResponses ?? [];
+                allThemes = themes;
+                renderThemes(themes);
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const themeIdFromUrl = urlParams.get('themeId');
+                if (themeIdFromUrl) {
+                    selectTheme(parseInt(themeIdFromUrl));
+                }
+            })
+            .catch(() => {
+                const dummy = [
+                    { id: 1, name: '저주받은 저택', description: '오래된 저택에 숨겨진 비밀을 밝혀라', thumbnailUrl: '' },
+                    { id: 2, name: '우주 정거장', description: '고장난 우주선에서 지구로 귀환하라', thumbnailUrl: '' },
+                    { id: 3, name: '마법사의 서재', description: '잃어버린 마법서를 찾아라', thumbnailUrl: '' },
+                    { id: 4, name: '탐정 사무소', description: '24시간 안에 범인을 잡아라', thumbnailUrl: '' },
+                ];
+                allThemes = dummy;
+                renderThemes(dummy);
+            });
+    };
+
+    function renderThemes(themes) {
+        themeGrid.innerHTML = '';
+        const emojis = ['👻', '🚀', '🧙', '🔍', '🏴‍☠️', '🎭'];
+        themes.forEach((t, i) => {
+            const card = document.createElement('div');
+            card.className = 'theme-card';
+            card.dataset.id = t.id;
+            card.innerHTML = `
+                ${t.thumbnailUrl
+                ? `<img class="theme-card-img" src="${t.thumbnailUrl}" alt="${t.name}" onerror="this.parentElement.querySelector('.theme-card-img-placeholder').style.display='flex'; this.style.display='none';">`
+                : ''}
+                <div class="theme-card-img-placeholder" style="display:${t.thumbnailUrl ? 'none' : 'flex'}">${emojis[i % emojis.length]}</div>
+                <div class="theme-card-body">
+                    <div class="theme-card-name">${t.name}</div>
+                    <div class="theme-card-desc">${t.description || ''}</div>
+                </div>
+            `;
+            card.onclick = () => selectTheme(t.id);
+            themeGrid.appendChild(card);
+        });
+    }
+
+    function selectTheme(themeId) {
+        selectedThemeId = themeId;
+        document.querySelectorAll('.theme-card').forEach(c => {
+            c.classList.toggle('selected', parseInt(c.dataset.id) === themeId);
+        });
+        updateStepIndicator();
+        fetchAvailableTimes();
+    }
+
+    dateSelect.onchange = function () {
+        updateStepIndicator();
+        fetchAvailableTimes();
+    };
+
+    function fetchAvailableTimes() {
+        const date = dateSelect.value;
+        if (!selectedThemeId || !date) return;
+
+        timeContainer.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+        selectedTimeId = null;
+        selectedTimeMode = 'reservation';
+        bookingSection.style.display = 'none';
+        updateStepIndicator();
+
+        fetch(`/times?themeId=${selectedThemeId}&date=${date}`)
+            .then(res => res.json())
+            .then(data => renderTimes(data.timeResponses ?? []))
+            .catch(() => {
+                renderTimes([
+                    { id: 1, startAt: '10:00', available: true },
+                    { id: 2, startAt: '12:00', available: true },
+                    { id: 3, startAt: '14:00', available: false },
+                    { id: 4, startAt: '16:00', available: true },
+                    { id: 5, startAt: '18:00', available: true },
+                ]);
+            });
+    }
+
+    function renderTimes(times) {
+        timeContainer.innerHTML = '';
+        if (times.length === 0) {
+            timeContainer.innerHTML = '<div class="placeholder-msg">선택하신 날짜에 예약 가능한 시간이 없습니다</div>';
+            return;
+        }
+        const grid = document.createElement('div');
+        grid.className = 'time-grid';
+        times.forEach(item => {
+            const id = item.time ? item.time.id : item.id;
+            const rawStartAt = item.time ? item.time.startAt : item.startAt;
+            const startAt = rawStartAt ? rawStartAt.slice(0, 5) : rawStartAt;
+            const available = item.isAvailable ?? item.available ?? true;
+            const past = isPastTime(dateSelect.value, rawStartAt);
+
+            const slot = document.createElement('div');
+            slot.className = 'time-slot';
+            slot.innerHTML = `
+                <span>${startAt}</span>
+                ${available ? '' : '<span class="time-slot-label">대기 가능</span>'}
+            `;
+
+            if (past) {
+                slot.classList.add('unavailable');
+                slot.title = '지난 시간은 예약할 수 없습니다';
+            } else if (available) {
+                slot.onclick = () => selectTime(id, startAt, slot, 'reservation');
+            } else {
+                slot.classList.add('waitable');
+                slot.title = '이미 예약된 시간입니다. 예약 대기를 신청할 수 있습니다';
+                slot.onclick = () => selectTime(id, startAt, slot, 'waiting');
+            }
+            grid.appendChild(slot);
+        });
+        timeContainer.appendChild(grid);
+        updateStepIndicator();
+    }
+
+    function isPastTime(date, startAt) {
+        if (!date || !startAt) {
+            return false;
+        }
+        return new Date(`${date}T${startAt}`) < new Date();
+    }
+
+    function selectTime(timeId, timeLabel, element, mode) {
+        selectedTimeId = timeId;
+        selectedTimeLabel = timeLabel;
+        selectedTimeMode = mode;
+        document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        showBookingSection();
+        updateStepIndicator();
+    }
+
+    function showBookingSection() {
+        const theme = allThemes.find(t => t.id == selectedThemeId);
+        const summary = document.getElementById('booking-summary');
+        summary.innerHTML = `
+            <div class="summary-row">
+                <span class="summary-label">테마</span>
+                <span class="summary-value">${theme ? theme.name : ''}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">날짜</span>
+                <span class="summary-value">${dateSelect.value}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">시간</span>
+                <span class="summary-value accent">${selectedTimeLabel}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">신청 유형</span>
+                <span class="summary-value">${selectedTimeMode === 'waiting' ? '예약 대기' : '예약'}</span>
+            </div>
+        `;
+        const button = document.getElementById('btn-reserve');
+        button.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약하기';
+        bookingSection.style.display = 'block';
+        bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function makeReservation() {
+        const name = document.getElementById('user-name').value.trim();
+        if (!name) {
+            showErrorAlert({ status: 400, detail: '예약자 이름을 입력해주세요.' });
+            return;
+        }
+
+        const btn = document.getElementById('btn-reserve');
+        btn.disabled = true;
+        btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청 중...' : '예약 중...';
+
+        const body = {
+            themeId: parseInt(selectedThemeId),
+            date: dateSelect.value,
+            timeId: selectedTimeId,
+            name: name
+        };
+
+        const url = selectedTimeMode === 'waiting' ? '/waitings' : '/reservations';
+        const successMessage = selectedTimeMode === 'waiting'
+            ? '예약 대기 신청이 완료되었습니다.'
+            : '예약이 성공적으로 완료되었습니다.';
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({
+                        status: res.status,
+                        message: '예약을 처리하는 도중 서버 오류가 발생했습니다.'
+                    }));
+                    throw errorData;
+                }
+
+                // 성공 시 성공 모달 호출 후, '확인' 버튼 클릭 시 메인으로 이동
+                showSuccessAlert(successMessage, () => {
+                    window.location.href = '/';
+                });
+            })
+            .catch((error) => {
+                showErrorAlert(error);
+                btn.disabled = false;
+                btn.textContent = selectedTimeMode === 'waiting' ? '대기 신청하기' : '예약하기';
+            });
+    }
+
+    function updateStepIndicator() {
+        const steps = ['step-1', 'step-2', 'step-3', 'step-4'];
+        const done = [
+            !!selectedThemeId,
+            !!dateSelect.value,
+            !!selectedTimeId,
+            false
+        ];
+
+        let activeIndex = 0;
+        for (let i = 0; i < done.length; i++) {
+            if (done[i]) activeIndex = i + 1;
+        }
+
+        steps.forEach((id, i) => {
+            const el = document.getElementById(id);
+            el.classList.remove('active', 'done');
+            if (i < activeIndex) el.classList.add('done');
+            else if (i === activeIndex) el.classList.add('active');
+        });
+    }
+</script>
+</body>
+</html>
