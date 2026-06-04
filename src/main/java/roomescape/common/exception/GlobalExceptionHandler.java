@@ -2,6 +2,7 @@ package roomescape.common.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,16 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 BAD_REQUEST_MESSAGE
+        );
+        return ResponseEntity.of(problemDetail).build();
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> handleDataIntegrityViolationException(
+            DataIntegrityViolationException exception) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "요청을 처리하는 중 충돌이 발생했습니다. 잠시 후 다시 시도해주세요."
         );
         return ResponseEntity.of(problemDetail).build();
     }
