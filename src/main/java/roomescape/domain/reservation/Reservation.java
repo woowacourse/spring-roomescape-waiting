@@ -12,44 +12,31 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final ReservationSlot slot;
+    private final LocalDate date;
+    private final Theme theme;
+    private final ReservationTime time;
     private final LocalDateTime createdAt;
 
     private Reservation(
             final Long id,
             final String name,
-            final ReservationSlot slot,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
             final LocalDateTime createdAt
     ) {
         ReservationName reservationName = ReservationName.from(name);
-        validate(createdAt);
+        validate(date, theme, time, createdAt);
         this.id = id;
         this.name = reservationName.value();
-        this.slot = slot;
+        this.date = date;
+        this.theme = theme;
+        this.time = time;
         this.createdAt = createdAt;
     }
 
     public static Reservation createNew(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return createNew(name, new ReservationSlot(date, theme, time), LocalDateTime.now());
-    }
-
-    public static Reservation createNew(
-            final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        return createNew(name, new ReservationSlot(date, theme, time), standardDateTime);
-    }
-
-    public static Reservation createNew(
-            final String name,
-            final ReservationSlot slot,
-            final LocalDateTime standardDateTime
-    ) {
-        validateReservable(slot, standardDateTime);
-        return new Reservation(null, name, slot, standardDateTime);
+        return new Reservation(null, name, date, theme, time, LocalDateTime.now());
     }
 
     public static Reservation createNew(
@@ -60,11 +47,11 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(date, time, standardDateTime);
-        return new Reservation(null, name, date, theme, time);
+        return new Reservation(null, name, date, theme, time, standardDateTime);
     }
 
     public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return of(id, name, new ReservationSlot(date, theme, time), LocalDateTime.now());
+        return of(id, name, date, theme, time, LocalDateTime.now());
     }
 
     public static Reservation of(
@@ -75,36 +62,17 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime createdAt
     ) {
-        return of(id, name, new ReservationSlot(date, theme, time), createdAt);
-    }
-
-    public static Reservation of(
-            final Long id,
-            final String name,
-            final ReservationSlot slot,
-            final LocalDateTime createdAt
-    ) {
         validateId(id);
-        return new Reservation(id, name, slot, createdAt);
+        return new Reservation(id, name, date, theme, time, createdAt);
     }
 
     public Reservation withId(final Long id) {
         validateId(id);
-        return new Reservation(id, this.name, this.slot, this.createdAt);
+        return new Reservation(id, this.name, this.date, this.theme, this.time, this.createdAt);
     }
 
     public Reservation withDateAndTime(final LocalDate date, final ReservationTime time) {
-        return new Reservation(this.id, this.name, new ReservationSlot(date, this.slot.theme(), time), this.createdAt);
-    }
-
-    public Reservation withDateAndTime(
-            final LocalDate date,
-            final ReservationTime time,
-            final LocalDateTime standardDateTime
-    ) {
-        ReservationSlot changedSlot = new ReservationSlot(date, this.slot.theme(), time);
-        validateReservable(changedSlot, standardDateTime);
-        return new Reservation(this.id, this.name, changedSlot, this.createdAt);
+        return new Reservation(this.id, this.name, date, this.theme, time, this.createdAt);
     }
 
     public Reservation withDateAndTime(
@@ -113,7 +81,7 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(date, time, standardDateTime);
-        return new Reservation(this.id, this.name, date, this.theme, time);
+        return new Reservation(this.id, this.name, date, this.theme, time, this.createdAt);
     }
 
     public boolean hasName(final String name) {
@@ -164,8 +132,25 @@ public class Reservation {
         }
     }
 
-    private void validate(final LocalDateTime createdAt) {
-        if (createdAt == null) {
+    private void validate(
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime createdAt
+    ) {
+        if(date == null) {
+            throw new IllegalArgumentException("날짜는 비어있을 수 없습니다.");
+        }
+
+        if(theme == null) {
+            throw new IllegalArgumentException("테마는 비어있으면 안됩니다.");
+        }
+
+        if(time == null) {
+            throw new IllegalArgumentException("시간은 비어있으면 안됩니다.");
+        }
+
+        if(createdAt == null) {
             throw new IllegalArgumentException("예약 생성 시각은 비어있으면 안됩니다.");
         }
     }
@@ -206,6 +191,10 @@ public class Reservation {
 
     public ReservationSlot getSlot() {
         return this.slot;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
     }
 
     public LocalDateTime getCreatedAt() {
