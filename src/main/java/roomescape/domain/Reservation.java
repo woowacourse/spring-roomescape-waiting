@@ -47,7 +47,7 @@ public class Reservation {
         }
     }
 
-    public boolean isSameSlot(LocalDate date, ReservationTime time) {
+    public boolean isSameSchedule(LocalDate date, ReservationTime time) {
         return this.schedule.equals(Schedule.of(date, time));
     }
 

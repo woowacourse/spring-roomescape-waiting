@@ -57,7 +57,7 @@ public class ReservationService {
         ReservationEntry entry = current.findActiveEntry(entryId);
 
         ReservationTime newTime = findTimeWithThrow(command.timeId());
-        if (current.isSameSlot(command.date(), newTime)) {
+        if (current.isSameSchedule(command.date(), newTime)) {
             return ReservationResult.from(current, entry);
         }
 

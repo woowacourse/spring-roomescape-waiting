@@ -218,7 +218,7 @@ class ReservationTest {
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
-        boolean result = reservation.isSameSlot(date, reservationTime);
+        boolean result = reservation.isSameSchedule(date, reservationTime);
 
         // then
         assertThat(result).isTrue();
@@ -233,8 +233,8 @@ class ReservationTest {
         ReservationTime anotherTime = ReservationTime.restore(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
 
         // when & then
-        assertThat(reservation.isSameSlot(date.plusDays(1), reservationTime)).isFalse();
-        assertThat(reservation.isSameSlot(date, anotherTime)).isFalse();
+        assertThat(reservation.isSameSchedule(date.plusDays(1), reservationTime)).isFalse();
+        assertThat(reservation.isSameSchedule(date, anotherTime)).isFalse();
     }
 
     private Reservation createReservationWithEntries(List<ReservationEntry> entries) {
