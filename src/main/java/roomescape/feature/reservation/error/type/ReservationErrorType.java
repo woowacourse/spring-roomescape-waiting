@@ -21,7 +21,6 @@ public enum ReservationErrorType implements ErrorType {
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제된 예약입니다."),
     NOT_WAITING_RESERVATION(HttpStatus.CONFLICT, "대기중인 예약이 아닙니다."),
     RESERVATION_NOT_CHANGED(HttpStatus.BAD_REQUEST, "변경할 내용이 없습니다."),
-    CONCURRENT_MODIFICATION(HttpStatus.CONFLICT, "다른 요청이 먼저 예약을 변경했습니다. 다시 시도해주세요."),
     ILLEGAL_RESERVER_NAME(HttpStatus.BAD_REQUEST, "예약자명이 부적절합니다.");
 
     private final HttpStatus httpStatus;

@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -202,21 +200,6 @@ public class ReservationManagementService implements ReservationService, AdminRe
         }
 
         return reservationMapper.toCancelResponseDto(canceledReservation);
-    }
-
-    @Recover
-    public ReservationCreateResponseDto recoverSave(DataAccessException e, ReservationCreateCommand command) {
-        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
-    }
-
-    @Recover
-    public ReservationCreateResponseDto recoverUpdate(DataAccessException e, Long id, ReservationUpdateCommand command) {
-        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
-    }
-
-    @Recover
-    public void recoverDelete(DataAccessException e, Long id) {
-        throw new GeneralException(ReservationErrorType.CONCURRENT_MODIFICATION);
     }
 
     private void validateNotReservedOrWaitedByOther(Reservation reservation) {
