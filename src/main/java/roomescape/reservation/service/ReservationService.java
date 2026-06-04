@@ -44,7 +44,9 @@ public class ReservationService {
     @Transactional
     public ReservationResult save(ReservationCommand command, LocalDateTime requestTime) {
         try {
-            Reservation saved = reservationRepository.save(buildNewReservation(command, requestTime));
+            Reservation saved = buildNewReservation(command, requestTime);
+            saved.validateExpiry(requestTime);
+            saved = reservationRepository.save(saved);
             return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ReservationErrorCode.DUPLICATE_RESERVATION);
@@ -54,6 +56,7 @@ public class ReservationService {
     @Transactional
     public void update(ReservationUpdateCommand command, Long id, String name, LocalDateTime requestTime) {
         Reservation updated = buildUpdatedReservation(command, id, name, requestTime);
+        updated.validateExpiry(requestTime);
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
@@ -123,8 +126,10 @@ public class ReservationService {
     private Reservation buildUpdatedReservation(ReservationUpdateCommand command, Long id, String name,
                                                 LocalDateTime requestTime) {
         Reservation reservation = getById(id);
+        reservation.validateExpiry(requestTime);
         ReservationTime newTime = getReservationTime(command.timeId());
         Reservation updated = reservation.update(command.date(), newTime, name, requestTime);
+        updated.validateExpiry(requestTime);
         validateNoDoubleBookingForUpdate(updated);
         return updated;
     }
@@ -157,7 +162,6 @@ public class ReservationService {
 
     private void createReservationFromWaiting(ReservationWaiting waiting, LocalDateTime requestTime) {
         reservationWaitingRepository.delete(waiting);
-
         Reservation newReservation = new Reservation(
                 waiting.getName(),
                 waiting.getDate(),
@@ -165,6 +169,7 @@ public class ReservationService {
                 waiting.getTheme(),
                 requestTime
         );
+        newReservation.validateExpiry(requestTime);
         reservationRepository.save(newReservation);
     }
 }

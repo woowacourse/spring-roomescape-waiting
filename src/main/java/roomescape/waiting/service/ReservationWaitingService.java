@@ -44,6 +44,7 @@ public class ReservationWaitingService {
     @Transactional
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationWaiting newReservationWaiting = buildValidReservationWaiting(command, requestTime);
+        newReservationWaiting.validateExpiry(requestTime);
 
         try {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);
@@ -69,34 +70,28 @@ public class ReservationWaitingService {
                 );
     }
 
-    private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command, LocalDateTime requestTime) {
+    private ReservationWaiting buildValidReservationWaiting(ReservationWaitingCommand command,
+                                                            LocalDateTime requestTime) {
         ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
         Theme theme = themeService.findById(command.themeId());
         ReservationSlot slot = new ReservationSlot(command.date(), time, theme);
 
-        Reservation targetReservation = getReservationBySlot(slot);
-
-        validateNoDoubleBooking(slot, command.name(), requestTime);
+        validateTargetReservationExists(slot);
+        validateNoSameTimeBooking(slot, command.name());
+        validateNoSameTimeWaiting(slot, command.name(), requestTime);
 
         return new ReservationWaiting(
                 command.name(),
                 command.date(),
-                targetReservation.getTime(),
-                targetReservation.getTheme(),
+                time,
+                theme,
                 requestTime
         );
     }
 
-    private Reservation getReservationBySlot(ReservationSlot slot) {
-        return reservationRepository.findBySlot(slot)
-                .orElseThrow(
-                        () -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND)
-                );
-    }
-
-    private void validateNoDoubleBooking(ReservationSlot slot, String name, LocalDateTime requestTime) {
-        validateNoSameTimeBooking(slot, name);
-        validateNoSameTimeWaiting(slot, name, requestTime);
+    private void validateTargetReservationExists(ReservationSlot slot) {
+        reservationRepository.findBySlot(slot)
+                .orElseThrow(() -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND));
     }
 
     private void validateNoSameTimeBooking(ReservationSlot slot, String name) {

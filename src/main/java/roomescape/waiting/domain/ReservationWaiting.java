@@ -15,15 +15,13 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
-    private final LocalDateTime updatedAt;
+    private final LocalDateTime requestedAt;
 
-    public ReservationWaiting(Long id, String name, ReservationSlot slot, LocalDateTime updatedAt) {
+    public ReservationWaiting(Long id, String name, ReservationSlot slot, LocalDateTime requestedAt) {
         this.id = id;
         this.name = name;
         this.slot = slot;
-        this.updatedAt = updatedAt;
-
-        validateExpiry(this.updatedAt);
+        this.requestedAt = requestedAt;
     }
 
     public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
@@ -42,7 +40,7 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
     }
 
     public void validateOwner(String userName) {
-        if (!this.name.equals(userName)) {
+        if (!Objects.equals(this.name, userName)) {
             throw new ForbiddenException(ReservationWaitingErrorCode.AUTHORIZATION_FAIL);
         }
     }
@@ -71,8 +69,8 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
         return slot.theme();
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public LocalDateTime getRequestedAt() {
+        return requestedAt;
     }
 
     @Override
@@ -94,8 +92,8 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
 
     @Override
     public int compareTo(ReservationWaiting other) {
-        return Comparator.comparing(ReservationWaiting::getUpdatedAt)
-                .thenComparing(ReservationWaiting::getId)
+        return Comparator.comparing(ReservationWaiting::getRequestedAt)
+                .thenComparing(ReservationWaiting::getId, Comparator.nullsLast(Long::compareTo))
                 .compare(this, other);
     }
 }

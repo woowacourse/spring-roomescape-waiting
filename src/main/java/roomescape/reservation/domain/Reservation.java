@@ -20,9 +20,6 @@ public class Reservation {
         this.name = name;
         this.slot = slot;
         this.updatedAt = updatedAt;
-        if (this.updatedAt != null && this.slot.time() != null && this.slot.time().getStartAt() != null) {
-            validateExpiry(this.updatedAt);
-        }
     }
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
@@ -31,7 +28,6 @@ public class Reservation {
 
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
         validateOwner(userName);
-        validateExpiry(requestTime);
 
         LocalDate targetDate = getNewDateValue(newDate);
         ReservationTime targetTime = getNewReservationTimeValue(newTime);

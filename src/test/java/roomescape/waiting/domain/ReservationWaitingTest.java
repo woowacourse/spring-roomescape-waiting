@@ -7,6 +7,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.global.exception.ForbiddenException;
@@ -35,6 +38,7 @@ class ReservationWaitingTest {
         assertThat(waiting.getDate()).isEqualTo(date);
         assertThat(waiting.getTime()).isEqualTo(time);
         assertThat(waiting.getTheme()).isEqualTo(theme);
+        assertThat(waiting.getRequestedAt()).isEqualTo(LocalDateTime.of(2026, 5, 4, 10, 0));
     }
 
     @Test
@@ -128,5 +132,27 @@ class ReservationWaitingTest {
         // when & then
         assertThat(waiting1).isEqualTo(waiting2);
         assertThat(waiting1.hashCode()).isEqualTo(waiting2.hashCode());
+    }
+
+    @Test
+    @DisplayName("예약 대기는 requestedAt, id 순으로 정렬된다.")
+    void compareTo_ordersByRequestedAtThenId() {
+        // given
+        roomescape.reservation.domain.ReservationSlot slot = new roomescape.reservation.domain.ReservationSlot(
+                LocalDate.of(2026, 5, 5),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new Theme(1L, "테마", "설명", "url")
+        );
+        ReservationWaiting first = new ReservationWaiting(2L, "브라운", slot, LocalDateTime.of(2026, 5, 4, 10, 0));
+        ReservationWaiting second = new ReservationWaiting(1L, "브라운", slot, LocalDateTime.of(2026, 5, 4, 10, 0));
+        ReservationWaiting third = new ReservationWaiting(3L, "브라운", slot, LocalDateTime.of(2026, 5, 4, 9, 0));
+
+        List<ReservationWaiting> waitings = new ArrayList<>(List.of(first, second, third));
+
+        // when
+        Collections.sort(waitings);
+
+        // then
+        assertThat(waitings).containsExactly(third, second, first);
     }
 }

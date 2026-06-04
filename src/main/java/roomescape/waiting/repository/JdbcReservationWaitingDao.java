@@ -69,7 +69,7 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
             ps.setDate(2, Date.valueOf(reservationWaiting.getDate()));
             ps.setLong(3, reservationWaiting.getTime().getId());
             ps.setLong(4, reservationWaiting.getTheme().getId());
-            ps.setTimestamp(5, java.sql.Timestamp.valueOf(reservationWaiting.getUpdatedAt()));
+            ps.setTimestamp(5, java.sql.Timestamp.valueOf(reservationWaiting.getRequestedAt()));
             return ps;
         }, keyHolder);
 
@@ -79,7 +79,7 @@ public class JdbcReservationWaitingDao implements ReservationWaitingDao {
                 id,
                 reservationWaiting.getName(),
                 reservationWaiting.getSlot(),
-                reservationWaiting.getUpdatedAt()
+                reservationWaiting.getRequestedAt()
         );
     }
 
