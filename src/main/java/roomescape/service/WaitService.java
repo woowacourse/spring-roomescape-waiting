@@ -68,4 +68,16 @@ public class WaitService {
     public Long calculateOrder(Wait wait) {
         return waitRepository.findOrderByWait(wait);
     }
+
+    public void validateReferencedTime(Long timeId) {
+        if (waitRepository.existsByTimeId(timeId)) {
+            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+        }
+    }
+
+    public void validateReferencedTheme(Long themeId) {
+        if (waitRepository.existsByThemeId(themeId)) {
+            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+        }
+    }
 }

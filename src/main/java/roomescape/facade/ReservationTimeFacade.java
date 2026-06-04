@@ -64,6 +64,7 @@ public class ReservationTimeFacade {
     @Transactional
     public void delete(Long id) {
         reservationService.validateReferencedTime(id);
+        waitService.validateReferencedTime(id);
         reservationTimeService.delete(id);
     }
 

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 import roomescape.service.dto.response.ServiceThemeResponse;
 
@@ -15,10 +16,12 @@ public class ThemeFacade {
 
     private final ReservationService reservationService;
     private final ThemeService themeService;
+    private final WaitService waitService;
 
-    public ThemeFacade(ReservationService reservationService, ThemeService themeService) {
+    public ThemeFacade(ReservationService reservationService, ThemeService themeService, WaitService waitService) {
         this.reservationService = reservationService;
         this.themeService = themeService;
+        this.waitService = waitService;
     }
 
     @Transactional
@@ -42,6 +45,7 @@ public class ThemeFacade {
     @Transactional
     public void delete(Long id) {
         reservationService.validateReferencedTheme(id);
+        waitService.validateReferencedTheme(id);
         themeService.delete(id);
     }
 }

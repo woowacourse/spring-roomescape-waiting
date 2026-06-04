@@ -21,4 +21,8 @@ public interface WaitRepository {
     Long findOrderByWait(Wait wait);
 
     void deleteById(Long id);
+
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
 }

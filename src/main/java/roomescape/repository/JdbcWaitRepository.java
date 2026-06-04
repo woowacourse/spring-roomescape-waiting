@@ -154,6 +154,20 @@ public class JdbcWaitRepository implements WaitRepository {
         jdbcTemplate.update(sql, id);
     }
 
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM `wait` WHERE `time_id` = (?)) AS exist";
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
+    }
+
+    @Override
+    public boolean existsByThemeId(Long themeId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM `wait` WHERE `theme_id` = (?)) AS exist";
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeId));
+    }
+
     private static RowMapper<WaitDetailDto> waitDetailDtoRowMapper() {
         return (resultSet, rowNum) -> {
             Long id = resultSet.getLong("id");

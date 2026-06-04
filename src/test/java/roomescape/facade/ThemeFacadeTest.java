@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
 import roomescape.service.ThemeService;
+import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 import roomescape.service.dto.response.ServiceThemeResponse;
 
@@ -21,13 +22,15 @@ public class ThemeFacadeTest {
     private ThemeFacade themeFacade;
     private ReservationService reservationService;
     private ThemeService themeService;
+    private WaitService waitService;
 
     @BeforeEach
     void beforeEach() {
         reservationService = Mockito.mock(ReservationService.class);
         themeService = Mockito.mock(ThemeService.class);
+        waitService = Mockito.mock(WaitService.class);
 
-        themeFacade = new ThemeFacade(reservationService, themeService);
+        themeFacade = new ThemeFacade(reservationService, themeService, waitService);
     }
 
     @Test
@@ -78,6 +81,7 @@ public class ThemeFacadeTest {
         themeFacade.delete(theme.getId());
 
         verify(reservationService, times(1)).validateReferencedTheme(theme.getId());
+        verify(waitService, times(1)).validateReferencedTheme(theme.getId());
         verify(themeService, times(1)).delete(theme.getId());
     }
 }
