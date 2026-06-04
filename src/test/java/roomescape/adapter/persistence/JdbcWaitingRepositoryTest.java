@@ -19,20 +19,22 @@ import roomescape.domain.repository.WaitingRepository;
 /**
  * JdbcWaitingRepository 슬라이스 테스트 (@JdbcTest).
  *
- * <p>검증 대상: "우리가 직접 작성한 SQL"의 정확성. 이건 Service 통합 테스트의 해피 패스로는
- * 충분히 검증되지 않는다(통합은 save·findBySlot을 한 경로로만 스쳐 간다). 컬럼명 오타,
- * 파라미터 바인딩 순서, ORDER BY 정렬, 조인 매핑 같은 건 SQL을 실제로 실행해야 잡힌다.
+ * <p>검증 대상: 직접 작성한 "비단순 SQL"의 정확성.
+ * <ul>
+ *   <li>findBySlot — 같은 슬롯의 대기를 order_index 오름차순으로 (정렬 + 슬롯 필터 + 조인 매핑)</li>
+ *   <li>findByName — 내 대기를 날짜·시간 다중 정렬 + 이름 필터 + 조인</li>
+ *   <li>updateOrderIndex — order_index를 갱신하는 부분 UPDATE. 대기 재정렬의 핵심이라
+ *       컬럼명·SET/WHERE가 정확해야 한다.</li>
+ * </ul>
  *
  * <p>왜 @SpringBootTest가 아니라 @JdbcTest인가: 이 검증에 서비스·웹 계층은 필요 없다.
- * JdbcTemplate과 DataSource만 있으면 된다. 슬라이스로 좁히면 컨텍스트가 가볍고 빠르며,
- * 실패 시 "쿼리 문제"로 원인이 바로 좁혀진다.
+ * JdbcTemplate과 DataSource만 있으면 된다. 슬라이스로 좁히면 컨텍스트가 가볍고 빠르며, 실패 시 "쿼리 문제"로 원인이 바로 좁혀진다.
  *
  * <p>주의: @JdbcTest는 @Repository 빈을 자동 스캔하지 않으므로 @Import로 명시한다.
  * schema.sql은 클래스패스에 있으면 슬라이스가 자동 적용한다(임베디드 H2).
  *
  * <p>@JdbcTest는 기본적으로 각 테스트를 트랜잭션으로 감싸 자동 롤백한다.
- * 여기서는 단일 쿼리의 정확성만 보고 트랜잭션 경계를 검증하지 않으므로 롤백 격리로 충분하다.
- * (트랜잭션 경계 검증이 필요한 건 Service 통합 테스트 쪽이고, 거기선 롤백을 쓰지 않는다.)
+ * 여기서는 단일 쿼리의 정확성만 보고 트랜잭션 경계를 검증하지 않으므로 롤백 격리로 충분하다. (트랜잭션 경계 검증이 필요한 건 Service 통합 테스트 쪽이고, 거기선 롤백을 쓰지 않는다.)
  */
 @JdbcTest
 @Import(JdbcWaitingRepository.class)
@@ -60,25 +62,6 @@ class JdbcWaitingRepositoryTest {
                 "테마A", "설명", "url");
         themeId = jdbcTemplate.queryForObject(
                 "SELECT id FROM theme WHERE name = ?", Long.class, "테마A");
-    }
-
-    @Nested
-    @DisplayName("save")
-    class Save {
-
-        @Test
-        @DisplayName("저장하면 발급된 id를 가진 대기를 반환한다")
-        void 저장_후_id_발급() {
-            Waiting saved = waitingRepository.save(
-                    Waiting.create("콘", DATE,
-                            roomescape.domain.ReservationTime.withId(timeId, LocalTime.of(10, 0)),
-                            roomescape.domain.Theme.withId(themeId, "테마A", "설명", "url"),
-                            1));
-
-            assertThat(saved.getId()).isNotNull();
-            assertThat(saved.getName()).isEqualTo("콘");
-            assertThat(saved.getOrderIndex()).isEqualTo(1);
-        }
     }
 
     @Nested
@@ -149,7 +132,7 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Nested
-    @DisplayName("updateOrderIndex / deleteById / findById")
+    @DisplayName("updateOrderIndex - order_index 부분 갱신")
     class UpdateAndDelete {
 
         @Test
@@ -162,17 +145,6 @@ class JdbcWaitingRepositoryTest {
 
             assertThat(waitingRepository.findById(id)).isPresent();
             assertThat(waitingRepository.findById(id).get().getOrderIndex()).isEqualTo(1);
-        }
-
-        @Test
-        @DisplayName("삭제하면 findById가 비어 있다")
-        void 삭제() {
-            insertWaiting("콘", DATE, 1);
-            Long id = waitingRepository.findBySlot(DATE, timeId, themeId).get(0).getId();
-
-            waitingRepository.deleteById(id);
-
-            assertThat(waitingRepository.findById(id)).isEmpty();
         }
     }
 
