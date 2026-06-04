@@ -28,6 +28,7 @@ public class ReservationWaiting implements Comparable<ReservationWaiting> {
     public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
                               LocalDateTime requestTime) {
         this(null, name, new ReservationSlot(date, time, theme), requestTime);
+        validateExpiry(requestTime);
     }
 
     public void validateExpiry(LocalDateTime current) {

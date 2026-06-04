@@ -22,15 +22,7 @@ import roomescape.waiting.domain.ReservationWaitingRepository;
 public class ReservationQueryService {
 
     private static final Comparator<ReservationWithStatusResult> RESERVATION_WITH_STATUS_RESULT_COMPARATOR =
-            Comparator.comparing(ReservationWithStatusResult::status, (status1, status2) -> {
-                        if (status1.equals(status2)) {
-                            return 0;
-                        }
-                        if ("reserved".equals(status1)) {
-                            return -1;
-                        }
-                        return 1;
-                    })
+            Comparator.comparing(ReservationWithStatusResult::status)
                     .thenComparing(ReservationWithStatusResult::date)
                     .thenComparing(result -> result.time().getStartAt())
                     .thenComparing(ReservationWithStatusResult::waitingOrder);
@@ -125,4 +117,5 @@ public class ReservationQueryService {
         combined.sort(RESERVATION_WITH_STATUS_RESULT_COMPARATOR);
         return combined;
     }
+
 }

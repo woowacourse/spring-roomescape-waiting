@@ -44,7 +44,6 @@ public class ReservationWaitingService {
     public ReservationWaitingResult save(ReservationWaitingCommand command, LocalDateTime requestTime) {
         ReservationWaiting newReservationWaiting = createWaiting(command, requestTime);
         validateWaiting(newReservationWaiting);
-        newReservationWaiting.validateExpiry(requestTime);
 
         try {
             ReservationWaiting saved = reservationWaitingRepository.save(newReservationWaiting);

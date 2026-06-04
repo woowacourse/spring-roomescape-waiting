@@ -153,3 +153,4 @@ class ReservationQueryServiceTest {
         then(reservationQueryDao).should().queryPopularThemes(from, to, 10);
     }
 }
+

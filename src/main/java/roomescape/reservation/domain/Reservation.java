@@ -24,6 +24,7 @@ public class Reservation {
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime requestTime) {
         this(null, name, new ReservationSlot(date, time, theme), requestTime);
+        validateExpiry(requestTime);
     }
 
     public Reservation update(LocalDate newDate, ReservationTime newTime, String userName, LocalDateTime requestTime) {
@@ -32,12 +33,14 @@ public class Reservation {
         LocalDate targetDate = getNewDateValue(newDate);
         ReservationTime targetTime = getNewReservationTimeValue(newTime);
 
-        return new Reservation(
+        Reservation updated = new Reservation(
                 this.id,
                 this.name,
                 new ReservationSlot(targetDate, targetTime, this.slot.theme()),
                 requestTime
         );
+        updated.validateExpiry(requestTime);
+        return updated;
     }
 
     private LocalDate getNewDateValue(LocalDate newDate) {

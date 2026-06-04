@@ -22,7 +22,7 @@ public record ReservationWithStatusResponse(
                 result.date(),
                 result.time(),
                 result.theme(),
-                result.status(),
+                result.status().name().toLowerCase(),
                 result.waitingOrder()
         );
     }

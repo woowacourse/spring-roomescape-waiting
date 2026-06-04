@@ -67,7 +67,7 @@ public class ReservationServiceTransactionTest {
     @Test
     void delete_rollback() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(1, 11));
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
         ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
@@ -94,7 +94,7 @@ public class ReservationServiceTransactionTest {
     @Test
     void delete_rollbackWhenWaitingDeleteFails() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(2, 22));
         ThemeResult themeResult = saveTheme();
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
         ReservationResult reservationResult = reservationService.save(reservationCommand, java.time.LocalDateTime.now());
@@ -131,7 +131,7 @@ public class ReservationServiceTransactionTest {
     @Test
     void save_rollback() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(3, 33));
         ThemeResult themeResult = saveTheme();
         ReservationCommand command = new ReservationCommand(
                 "홍길동",
@@ -156,10 +156,10 @@ public class ReservationServiceTransactionTest {
     @Test
     void update_rollback() {
         // given
-        ReservationTimeResult reservationTimeResult = saveReservationTime();
+        ReservationTimeResult reservationTimeResult = saveReservationTime(LocalTime.of(4, 44));
         ThemeResult themeResult = saveTheme();
 
-        ReservationTimeCommand command2 = new ReservationTimeCommand(LocalTime.now().plusHours(2));
+        ReservationTimeCommand command2 = new ReservationTimeCommand(LocalTime.of(5, 55));
         ReservationTimeResult time2 = reservationTimeService.save(command2);
 
         ReservationCommand reservationCommand = saveReservation(reservationTimeResult, themeResult);
@@ -190,7 +190,7 @@ public class ReservationServiceTransactionTest {
     ) {
         return new ReservationCommand(
                 "홍길동",
-                LocalDate.now(),
+                LocalDate.now().plusDays(1),
                 reservationTimeResult.id(),
                 themeResult.id()
         );
@@ -201,8 +201,8 @@ public class ReservationServiceTransactionTest {
         return themeService.save(testThemeCommand);
     }
 
-    private ReservationTimeResult saveReservationTime() {
-        ReservationTimeCommand testReservationTimeCommand = new ReservationTimeCommand(LocalTime.now().plusHours(1));
+    private ReservationTimeResult saveReservationTime(LocalTime startAt) {
+        ReservationTimeCommand testReservationTimeCommand = new ReservationTimeCommand(startAt);
         return reservationTimeService.save(testReservationTimeCommand);
     }
 }

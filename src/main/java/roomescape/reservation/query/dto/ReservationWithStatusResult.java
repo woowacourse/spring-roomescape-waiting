@@ -2,6 +2,7 @@ package roomescape.reservation.query.dto;
 
 import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.domain.ReservationWaiting;
@@ -12,7 +13,7 @@ public record ReservationWithStatusResult(
         LocalDate date,
         ReservationTime time,
         Theme theme,
-        String status,
+        ReservationStatus status,
         Long waitingOrder
 ) {
 
@@ -23,7 +24,7 @@ public record ReservationWithStatusResult(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),
-                "reserved",
+                ReservationStatus.RESERVED,
                 0L
         );
     }
@@ -35,7 +36,7 @@ public record ReservationWithStatusResult(
                 waiting.getDate(),
                 waiting.getTime(),
                 waiting.getTheme(),
-                "waiting",
+                ReservationStatus.WAITING,
                 rank
         );
     }

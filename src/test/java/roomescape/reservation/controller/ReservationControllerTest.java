@@ -145,7 +145,8 @@ class ReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         List<ReservationWithStatusResult> results = List.of(
-                new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme, "reserved", 0L)
+                new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme,
+                        roomescape.reservation.domain.ReservationStatus.RESERVED, 0L)
         );
 
         given(reservationQueryService.findAllByName(anyString())).willReturn(results);
@@ -156,7 +157,7 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("브라운"))
-                .andExpect(jsonPath("$[0].status").value("reserved"));
+                .andExpect(jsonPath("$[0].status").value(roomescape.reservation.domain.ReservationStatus.RESERVED));
     }
 
     @Test
@@ -168,3 +169,4 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.message").value("필수 요청 파라미터가 누락되었습니다. 입력 값을 다시 확인해 주세요."));
     }
 }
+

@@ -46,7 +46,6 @@ public class ReservationService {
         try {
             Reservation saved = createReservation(command, requestTime);
             validateReservation(saved);
-            saved.validateExpiry(requestTime);
             saved = reservationRepository.save(saved);
             return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
@@ -58,7 +57,6 @@ public class ReservationService {
     public void update(ReservationUpdateCommand command, long id, String name, LocalDateTime requestTime) {
         Reservation updated = updateReservation(command, id, name, requestTime);
         validateUpdatedReservation(updated);
-        updated.validateExpiry(requestTime);
         try {
             reservationRepository.save(updated);
         } catch (DataIntegrityViolationException e) {
@@ -72,7 +70,7 @@ public class ReservationService {
         reservation.validateOwner(name);
         reservation.validateExpiry(requestTime);
 
-        reservationTimeService.getByIdForUpdate(reservation.getTimeId());
+        reservationTimeService.getById(reservation.getTimeId());
 
         List<ReservationWaiting> waitings = reservationWaitingRepository.queryAllBySlotForUpdate(
                 new ReservationSlot(reservation.getDate(), reservation.getTime(), reservation.getTheme())
@@ -89,7 +87,7 @@ public class ReservationService {
     }
 
     private Reservation createReservation(ReservationCommand command, LocalDateTime requestTime) {
-        ReservationTime time = reservationTimeService.getByIdForUpdate(command.timeId());
+        ReservationTime time = reservationTimeService.getById(command.timeId());
         Theme theme = themeService.findById(command.themeId());
 
         return new Reservation(command.name(), command.date(), time, theme, requestTime);
@@ -124,7 +122,7 @@ public class ReservationService {
                                           LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateExpiry(requestTime);
-        ReservationTime newTime = reservationTimeService.getByIdForUpdate((command.timeId()));
+        ReservationTime newTime = reservationTimeService.getById((command.timeId()));
         return reservation.update(command.date(), newTime, name, requestTime);
     }
 
@@ -161,7 +159,7 @@ public class ReservationService {
                 waiting.getTheme(),
                 requestTime
         );
-        newReservation.validateExpiry(requestTime);
         reservationRepository.save(newReservation);
     }
 }
+
