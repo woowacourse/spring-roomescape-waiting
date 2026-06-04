@@ -53,7 +53,6 @@ public class ReservationService {
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 
-        validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
         Reservation reservation = new Reservation(
@@ -64,6 +63,7 @@ public class ReservationService {
                 status
         );
 
+        reservation.validateNotPast(request.date(), time);
         validateDuplicate(reservation);
 
         Reservation saved = reservationDao.save(reservation);
@@ -75,16 +75,14 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
         ReservationTime time = getReservationTime(request.timeId());
         
-        if (checkSame(request, reservation)) {
+        if (reservation.isSameDateTime(request.date(), request.timeId())) {
             return ReservationResponse.from(reservation);
         }
         
         reservationDao.delete(id);
         reservationDao.update(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
-        
-        validateReservationDateTime(request.date(), time);
-        ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
 
+        ReservationStatus status = checkReservationStatus(request.date(), reservation.getTheme(), time);
         Reservation newReservation = new Reservation(
                 reservation.getName(),
                 request.date(),
@@ -93,7 +91,9 @@ public class ReservationService {
                 status
         );
 
+        newReservation.validateNotPast(request.date(), time);
         validateDuplicate(newReservation);
+
         Reservation saved = reservationDao.save(newReservation);
 
         return ReservationResponse.from(saved);
@@ -123,13 +123,6 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요."));
     }
 
-    private void validateReservationDateTime(LocalDate date, ReservationTime time) {
-        LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (targetDateTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
-        }
-    }
-
     private void validateDuplicate(Reservation reservation) {
         if (reservationDao.existsByDateAndThemeAndTimeAndName(
                 reservation.getDate(),
@@ -139,10 +132,6 @@ public class ReservationService {
         ) {
             throw new AlreadyExistsException("이미 예약되었습니다.");
         }
-    }
-
-    private boolean checkSame(UserReservationUpdateRequest request, Reservation reservation) {
-        return reservation.getDate().equals(request.date()) && reservation.getTime().getId().equals(request.timeId());
     }
 
     private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {

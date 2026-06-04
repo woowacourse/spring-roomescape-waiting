@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Reservation {
     private Long id;
@@ -27,21 +28,15 @@ public class Reservation {
         this.theme = theme;
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약자명이 유효하지 않습니다.");
-        }
+
+    public boolean isSameDateTime(LocalDate date, Long timeId) {
+        return date.equals(date) && time.getId().equals(timeId);
     }
 
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("예약 날짜가 유효하지 않습니다.");
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("예약 시간이 유효하지 않습니다.");
+    public void validateNotPast(LocalDate date, ReservationTime time) {
+        LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (targetDateTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 지난 시간/날짜는 예약할 수 없습니다.");
         }
     }
 
@@ -67,5 +62,23 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    private void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("예약자명이 유효하지 않습니다.");
+        }
+    }
+
+    private void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("예약 날짜가 유효하지 않습니다.");
+        }
+    }
+
+    private void validateTime(ReservationTime time) {
+        if (time == null) {
+            throw new IllegalArgumentException("예약 시간이 유효하지 않습니다.");
+        }
     }
 }
