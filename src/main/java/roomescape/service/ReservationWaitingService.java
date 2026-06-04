@@ -21,6 +21,7 @@ import roomescape.dto.response.ReservationWaitingResponse;
 import java.time.LocalDateTime;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
