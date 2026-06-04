@@ -95,7 +95,7 @@ public class UserReservationTest {
 
         Map<String, String> reservations = new HashMap<>();
         reservations.put("name", "브라운");
-        reservations.put("date", "2026-06-04");
+        reservations.put("date", "2026-07-04");
         reservations.put("timeId", "1");
         reservations.put("themeId", "1");
 
@@ -107,7 +107,7 @@ public class UserReservationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/times?date=2026-06-04&themeId=1")
+                .when().get("/times?date=2026-07-04&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))
@@ -308,6 +308,29 @@ public class UserReservationTest {
                 .statusCode(400)
                 .body("errorCode", is("INVALID_INPUT"))
                 .body("message", is("[name] 필드가 비어있습니다."));
+    }
+
+    @Test
+    void 예약_취소_후_대기자가_예약자로_승격된다() {
+        createTheme();
+        createTime("10:00");
+
+        Map<String, Object> reservation = createReservationBody("브라운", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(reservation)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> waiting = createReservationBody("네오", "2026-08-05", 1, 1);
+        RestAssured.given().contentType(ContentType.JSON).body(waiting)
+                .when().post("/reservations/waitings").then().statusCode(201);
+
+        RestAssured.given()
+                .when().delete("/reservations/1").then().statusCode(204);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].name", is("네오"));
     }
 
     private void createTheme() {
