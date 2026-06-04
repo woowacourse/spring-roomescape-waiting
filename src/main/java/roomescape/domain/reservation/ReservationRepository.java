@@ -160,11 +160,12 @@ public class ReservationRepository {
                 .findFirst();
     }
 
-    public Optional<String> findNameByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<String> findNameByDateAndTimeIdAndThemeIdForUpdate(LocalDate date, Long timeId, Long themeId) {
         String query = """
                 SELECT name
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ?
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(query, (rs, rowNum) -> rs.getString("name"), date, timeId, themeId)
                 .stream()

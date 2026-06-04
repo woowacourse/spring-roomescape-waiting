@@ -73,7 +73,7 @@ class WaitingServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
-            when(reservationRepository.findNameByDateAndTimeIdAndThemeId(request.date(), 1L, 1L))
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
                     .thenReturn(Optional.of("예약자"));
             when(waitingRepository.save(any(Waiting.class))).thenReturn(saved);
 
@@ -129,7 +129,7 @@ class WaitingServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
-            when(reservationRepository.findNameByDateAndTimeIdAndThemeId(request.date(), 1L, 1L))
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
@@ -145,7 +145,7 @@ class WaitingServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
-            when(reservationRepository.findNameByDateAndTimeIdAndThemeId(request.date(), 1L, 1L))
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
                     .thenReturn(Optional.of("예약자"));
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
@@ -160,7 +160,7 @@ class WaitingServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
                     request.name())).thenReturn(false);
-            when(reservationRepository.findNameByDateAndTimeIdAndThemeId(request.date(), 1L, 1L))
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
                     .thenReturn(Optional.of("예약자"));
             when(waitingRepository.save(any(Waiting.class))).thenThrow(DuplicateKeyException.class);
 

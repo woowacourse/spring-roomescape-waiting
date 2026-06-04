@@ -295,7 +295,7 @@ class ReservationRepositoryTest {
         void 해당_날짜_시간_테마의_예약이_있으면_예약자_이름을_반환한다() {
             reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeId(
+            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
                     LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
             );
 
@@ -307,7 +307,7 @@ class ReservationRepositoryTest {
 
         @Test
         void 해당_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
-            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeId(
+            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
                     LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
             );
 
