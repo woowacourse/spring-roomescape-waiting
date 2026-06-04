@@ -1,11 +1,12 @@
 package roomescape.waiting;
 
 import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Waiting {
     private final Long id;
     private final Long memberId;

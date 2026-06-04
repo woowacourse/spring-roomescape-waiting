@@ -29,6 +29,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final RowMapper<WaitingDetailProjection> waitingDetailRowMapper = (resultSet, rowNum) ->
             new WaitingDetailProjection(
                     resultSet.getLong("waiting_id"),
+                    resultSet.getLong("slot_id"),
                     resultSet.getString("member_name"),
                     resultSet.getDate("date").toLocalDate(),
                     resultSet.getLong("theme_id"),
@@ -36,8 +37,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     resultSet.getString("theme_description"),
                     resultSet.getString("theme_thumbnail_url"),
                     resultSet.getLong("time_id"),
-                    resultSet.getTime("start_at").toLocalTime(),
-                    resultSet.getLong("waiting_order")
+                    resultSet.getTime("start_at").toLocalTime()
             );
 
     @Override
@@ -136,6 +136,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         String sql = """
                 SELECT
                     w.id AS waiting_id,
+                    w.slot_id,
                     m.name AS member_name,
                     s.date,
                     t.id AS theme_id,
@@ -143,13 +144,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
                     rt.id AS time_id,
-                    rt.start_at,
-                    (
-                        SELECT COUNT(*)
-                        FROM waiting previous_waiting
-                        WHERE previous_waiting.slot_id = w.slot_id
-                        AND previous_waiting.id <= w.id
-                    ) AS waiting_order
+                    rt.start_at
                 FROM waiting w
                 JOIN slot s ON w.slot_id = s.id
                 JOIN theme t ON s.theme_id = t.id

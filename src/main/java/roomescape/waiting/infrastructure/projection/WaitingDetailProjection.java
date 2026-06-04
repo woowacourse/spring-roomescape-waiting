@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 public record WaitingDetailProjection(
         Long id,
+        Long slotId,
         String memberName,
         LocalDate date,
         Long themeId,
@@ -12,7 +13,6 @@ public record WaitingDetailProjection(
         String themeDescription,
         String thumbnailUrl,
         Long timeId,
-        LocalTime startAt,
-        Long waitingOrder
+        LocalTime startAt
 ) {
 }
