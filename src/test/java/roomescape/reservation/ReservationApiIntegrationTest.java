@@ -15,7 +15,6 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
 
     private Map<String, Object> reservationRequest() {
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("memberId", 1);
         reservation.put("date", "2026-05-05");
         reservation.put("timeId", 4);
         reservation.put("themeId", 4);
@@ -115,6 +114,44 @@ public class ReservationApiIntegrationTest extends ControllerTestSupport {
                 .body("data[0].id", is(waitingId))
                 .body("data[0].status", is("WAITING"))
                 .body("data[0].waitingOrder", is(1));
+    }
+
+    @Test
+    void 예약_취소_시_1번_대기가_자동_승격된다() {
+        String reservationUserToken = loginUserToken();
+        String waitingUserToken = loginWaitingUserToken();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + waitingUserToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.id", notNullValue())
+                .extract()
+                .path("data.id");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + reservationUserToken)
+                .pathParam("id", 1)
+                .when().delete("/api/user/reservations/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + waitingUserToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("data.size()", is(1))
+                .body("data[0].status", is("RESERVED"));
+    }
+
+    @Test
+    void 대기_승격_트랜젝션_테스트() {
+
     }
 
     @Test
