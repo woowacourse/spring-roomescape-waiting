@@ -60,7 +60,7 @@ public class ReservationService {
             Reservation saved = reservationRepository.save(reservation);
             return ReservationResponse.from(saved);
         } catch (DuplicateKeyException exception) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -117,7 +117,7 @@ public class ReservationService {
         try {
             reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
         } catch (DuplicateKeyException exception) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 

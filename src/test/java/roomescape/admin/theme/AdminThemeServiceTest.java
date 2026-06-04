@@ -59,7 +59,7 @@ class AdminThemeServiceTest {
 
         assertThatThrownBy(() -> adminThemeService.createTheme(request))
                 .isInstanceOf(RoomescapeException.class)
-                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_THEME_NAME);
     }
 
     @Test

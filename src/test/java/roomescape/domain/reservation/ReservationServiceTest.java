@@ -132,7 +132,7 @@ class ReservationServiceTest {
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
                     .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
+                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -313,7 +313,7 @@ class ReservationServiceTest {
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
                     .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
+                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 }

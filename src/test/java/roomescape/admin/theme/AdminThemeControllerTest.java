@@ -86,7 +86,7 @@ class AdminThemeControllerTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", is("해당 이름의 예약이 이미 존재합니다."));
+                .body("message", is("이미 등록된 테마 이름입니다."));
     }
 
     @Test
