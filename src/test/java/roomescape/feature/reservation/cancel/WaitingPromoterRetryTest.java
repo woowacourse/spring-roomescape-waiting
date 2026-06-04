@@ -89,7 +89,7 @@ class WaitingPromoterRetryTest {
         when(reservationRepository.findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID))
                 .thenThrow(new CannotAcquireLockException("지속적인 락 획득 실패"));
 
-        // when & then: 최대 시도(2회) 후 @Recover 가 예외를 전파하지 않는다
+        // when & then: 최대 시도(5회) 후 @Recover 가 예외를 전파하지 않는다
         assertThatNoException().isThrownBy(() ->
                 waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
         verify(reservationRepository, times(5)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
