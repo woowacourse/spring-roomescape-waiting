@@ -101,7 +101,7 @@ class ReservationWaitingUseCaseMockTest {
         ReservationWaiting saved = waiting(1L, "민욱", reservation.getSlot(), WAITING_CREATED_AT);
         ReservationWaitingWithOrder savedWithOrder = new ReservationWaitingWithOrder(
                 saved.getId(),
-                saved.getName(),
+                saved.getWaiter().name(),
                 saved.getSlot().date(),
                 saved.getSlot().time(),
                 saved.getSlot().theme(),

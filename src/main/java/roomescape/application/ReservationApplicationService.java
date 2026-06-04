@@ -15,7 +15,6 @@ import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationApplicationService {
 
     private final ReservationCommandService reservationCommandService;
@@ -51,10 +50,12 @@ public class ReservationApplicationService {
         );
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponses findPage(int page, int size) {
         return reservationQueryService.findPage(page, size);
     }
 
+    @Transactional(readOnly = true)
     public ReservationResponses findMine(String name) {
         return reservationQueryService.findMine(new Member(name));
     }

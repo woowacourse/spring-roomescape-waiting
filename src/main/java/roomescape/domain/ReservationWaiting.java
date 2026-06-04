@@ -28,7 +28,6 @@ public class ReservationWaiting {
         this.createdAt = Objects.requireNonNull(createdAt);
     }
 
-    // TODO: 이미 있는 예약과 겹치는지는 외부에서 판단하는 것이 좋아보임
     public static ReservationWaiting createWith(
             Member waiter,
             Member reserver,
@@ -66,12 +65,7 @@ public class ReservationWaiting {
     public Long getId() {
         return id;
     }
-
-    // TODO: 테스트에서만 사용되는 코드
-    public String getName() {
-        return waiter.name();
-    }
-
+    
     public Member getWaiter() {
         return waiter;
     }

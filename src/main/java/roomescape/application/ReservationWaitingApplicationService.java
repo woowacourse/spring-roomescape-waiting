@@ -19,7 +19,6 @@ import roomescape.domain.exception.ConflictException;
 import roomescape.domain.projection.ReservationWaitingWithOrder;
 
 @Service
-@Transactional(readOnly = true)
 public class ReservationWaitingApplicationService {
 
     private static final String WAITING_REQUIRES_RESERVED_SLOT = "예약된 슬롯에만 대기를 신청할 수 있습니다.";
@@ -65,6 +64,7 @@ public class ReservationWaitingApplicationService {
         return reservationWaitingQueryService.getWithOrderById(reservationWaiting.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaitingWithOrder> findMine(String name) {
         return reservationWaitingQueryService.findMine(new Member(name));
     }

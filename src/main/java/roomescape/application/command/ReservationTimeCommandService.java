@@ -6,6 +6,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeCommandService {
 
     private final ReservationTimeRepository timeRepository;
@@ -16,12 +17,10 @@ public class ReservationTimeCommandService {
         this.timeRepository = timeRepository;
     }
 
-    @Transactional
     public ReservationTime save(ReservationTime time) {
         return timeRepository.save(time);
     }
 
-    @Transactional
     public void delete(Long id) {
         timeRepository.deleteById(id);
     }

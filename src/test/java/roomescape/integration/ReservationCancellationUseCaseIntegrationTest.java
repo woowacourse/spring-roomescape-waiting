@@ -84,12 +84,12 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void delete는_대기가_있으면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
+    void 대기가_있으면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
         Long reservationId = insertReservation("민욱", future);
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
 
-        reservationCancellationUseCase.delete(reservationId);
+        reservationCancellationUseCase.deleteReservation(reservationId);
 
         assertThat(countReservationsById(reservationId)).isZero();
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
@@ -99,11 +99,11 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void deleteMine은_대기가_있어도_본인_예약이_아니면_예약자를_바꾸지_않는다() {
+    void 대기가_있어도_본인_예약이_아니면_예약자를_바꾸지_않는다() {
         Long reservationId = insertReservation("티뉴", future);
         insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
 
-        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMine(reservationId, "민욱"))
+        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱"))
                 .isInstanceOf(ForbiddenException.class);
 
         assertThat(findReservationName(reservationId)).isEqualTo("티뉴");
@@ -111,11 +111,11 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void deleteMine은_대기가_있어도_지난_예약이면_예약자를_바꾸지_않는다() {
+    void 대기가_있어도_지난_예약이면_예약자를_바꾸지_않는다() {
         Long reservationId = insertReservation("민욱", past);
         insertWaiting("브라운", past, FIRST_WAITING_CREATED_AT);
 
-        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMine(reservationId, "민욱"))
+        assertThatThrownBy(() -> reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱"))
                 .isInstanceOf(BusinessRuleViolationException.class);
 
         assertThat(findReservationName(reservationId)).isEqualTo("민욱");
@@ -123,21 +123,21 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void deleteMine은_대기가_없고_미래_예약이면_예약을_삭제한다() {
+    void 대기가_없고_미래_예약이면_예약을_삭제한다() {
         Long reservationId = insertReservation("민욱", future);
 
-        reservationCancellationUseCase.deleteMine(reservationId, "민욱");
+        reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱");
 
         assertThat(countReservationsById(reservationId)).isZero();
     }
 
     @Test
-    void deleteMine은_대기가_있고_미래_예약이면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
+    void 대기가_있고_미래_예약이면_예약을_삭제하고_첫_대기자를_예약으로_만든다() {
         Long reservationId = insertReservation("민욱", future);
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
 
-        reservationCancellationUseCase.deleteMine(reservationId, "민욱");
+        reservationCancellationUseCase.deleteMyReservation(reservationId, "민욱");
 
         assertThat(countReservationsById(reservationId)).isZero();
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
@@ -147,24 +147,24 @@ class ReservationCancellationUseCaseIntegrationTest {
     }
 
     @Test
-    void updateMine은_기존_슬롯에_대기가_없으면_예약만_새_슬롯으로_옮긴다() {
+    void 기존_슬롯에_대기가_없으면_예약만_새_슬롯으로_옮긴다() {
         Long reservationId = insertReservation("민욱", future);
         ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
 
-        reservationCancellationUseCase.updateMine(reservationId, "민욱", request);
+        reservationCancellationUseCase.updateMyReservation(reservationId, "민욱", request);
 
         assertThat(findReservationNamesBySlot(future)).isEmpty();
         assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");
     }
 
     @Test
-    void updateMine은_기존_슬롯에_대기가_있으면_예약을_옮기고_첫_대기자를_기존_슬롯의_예약으로_만든다() {
+    void 기존_슬롯에_대기가_있으면_예약을_옮기고_첫_대기자를_기존_슬롯의_예약으로_만든다() {
         Long reservationId = insertReservation("민욱", future);
         Long firstWaitingId = insertWaiting("브라운", future, FIRST_WAITING_CREATED_AT);
         Long secondWaitingId = insertWaiting("티뉴", future, SECOND_WAITING_CREATED_AT);
         ReservationUpdateRequest request = new ReservationUpdateRequest(anotherFuture, timeId);
 
-        reservationCancellationUseCase.updateMine(reservationId, "민욱", request);
+        reservationCancellationUseCase.updateMyReservation(reservationId, "민욱", request);
 
         assertThat(findReservationNamesBySlot(future)).containsExactly("브라운");
         assertThat(findReservationNamesBySlot(anotherFuture)).containsExactly("민욱");

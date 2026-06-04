@@ -54,7 +54,6 @@ public class Reservation {
         }
     }
 
-    // TODO: 무엇을 업데이트하는지 메서드 명에서 명시
     public Reservation updateWith(
             Member requester,
             Slot targetSlot,
@@ -67,16 +66,6 @@ public class Reservation {
                 this.id,
                 this.reserver,
                 targetSlot
-        );
-    }
-
-    public Reservation changeReserverTo(
-            Member newReserver
-    ) {
-        return new Reservation(
-                this.id,
-                newReserver,
-                this.slot
         );
     }
 

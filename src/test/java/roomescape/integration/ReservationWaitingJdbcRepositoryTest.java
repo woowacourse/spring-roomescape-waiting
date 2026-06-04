@@ -86,9 +86,7 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void 같은_예약에_같은_이름으로_대기를_저장하면_ConflictException을_던진다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         ReservationWaiting duplicated = waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusSeconds(1));
 
@@ -99,13 +97,9 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void 같은_슬롯에_먼저_신청한_대기가_있으면_다음_순번을_부여한다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
-        ReservationWaiting second = repository.save(
-                waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        ReservationWaiting second = repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
         ReservationWaitingWithOrder found = queryRepository.findById(second.getId()).orElseThrow();
 
         assertThat(found.order()).isEqualTo(2);
@@ -113,9 +107,7 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void existsBy는_같은_이름과_슬롯의_대기가_있으면_true를_반환한다() {
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         assertThat(repository.existsBy(member("민욱"), reservation.getSlot())).isTrue();
     }
@@ -127,14 +119,12 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void findById는_저장된_대기를_반환한다() {
-        ReservationWaiting saved = repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        ReservationWaiting saved = repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         Optional<ReservationWaiting> found = repository.findById(saved.getId());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getName()).isEqualTo("민욱");
+        assertThat(found.get().getWaiter()).isEqualTo(member("민욱"));
         assertThat(found.get().getSlot()).isEqualTo(reservation.getSlot());
     }
 
@@ -145,37 +135,29 @@ class ReservationWaitingJdbcRepositoryTest {
 
     @Test
     void findFirstBySlot은_생성시각이_가장_빠른_대기를_반환한다() {
-        repository.save(
-                waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1))
-        );
+        repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
         repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         Optional<ReservationWaiting> found = repository.findFirstBySlot(reservation.getSlot());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getName()).isEqualTo("민욱");
+        assertThat(found.get().getWaiter()).isEqualTo(member("민욱"));
     }
 
     @Test
     void findByName은_같은_슬롯의_대기_순번을_계산해_반환한다() {
-        repository.save(
-                waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT)
-        );
-        repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1))
-        );
+        repository.save(waiting("브라운", reservation.getSlot(), WAITING_CREATED_AT));
+        repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT.plusMinutes(1)));
 
         List<ReservationWaitingWithOrder> found = queryRepository.findByMember(member("민욱"));
 
         assertThat(found).hasSize(1);
-        assertThat(found.get(0).order()).isEqualTo(2);
+        assertThat(found.getFirst().order()).isEqualTo(2);
     }
 
     @Test
     void deleteById_이후_findById는_빈_Optional을_반환한다() {
-        ReservationWaiting saved = repository.save(
-                waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT)
-        );
+        ReservationWaiting saved = repository.save(waiting("민욱", reservation.getSlot(), WAITING_CREATED_AT));
 
         repository.deleteById(saved.getId());
 

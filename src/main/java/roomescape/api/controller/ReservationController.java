@@ -52,7 +52,7 @@ public class ReservationController {
             @RequestParam String name,
             @RequestBody @Valid ReservationUpdateRequest request
     ) {
-        Reservation updated = reservationCancellationUseCase.updateMine(id, name, request);
+        Reservation updated = reservationCancellationUseCase.updateMyReservation(id, name, request);
 
         return ResponseEntity.ok()
                 .body(ReservationResponse.from(updated));
@@ -79,7 +79,7 @@ public class ReservationController {
     public ResponseEntity<Void> delete(
             @PathVariable Long id
     ) {
-        reservationCancellationUseCase.delete(id);
+        reservationCancellationUseCase.deleteReservation(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -89,7 +89,7 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestParam String name
     ) {
-        reservationCancellationUseCase.deleteMine(id, name);
+        reservationCancellationUseCase.deleteMyReservation(id, name);
 
         return ResponseEntity.noContent().build();
     }

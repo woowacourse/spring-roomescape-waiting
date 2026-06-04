@@ -10,6 +10,7 @@ import roomescape.domain.Slot;
 import roomescape.repository.ReservationRepository;
 
 @Service
+@Transactional
 public class ReservationCommandService {
 
     private final ReservationRepository reservationRepository;
@@ -23,7 +24,6 @@ public class ReservationCommandService {
         this.clock = clock;
     }
 
-    @Transactional
     public Reservation save(Member reserver, Slot slot) {
         Reservation reservation = Reservation.createWith(
                 reserver,
@@ -34,7 +34,6 @@ public class ReservationCommandService {
         return reservationRepository.save(reservation);
     }
 
-    @Transactional
     public Reservation updateMine(Reservation existing, Member requester, Slot targetSlot) {
         Reservation updated = existing.updateWith(
                 requester,
@@ -45,12 +44,10 @@ public class ReservationCommandService {
         return reservationRepository.update(updated);
     }
 
-    @Transactional
     public void delete(Reservation reservation) {
         reservationRepository.deleteById(reservation.getId());
     }
 
-    @Transactional
     public void deleteMine(Reservation reservation, Member requester) {
         reservation.cancelBy(
                 requester,
