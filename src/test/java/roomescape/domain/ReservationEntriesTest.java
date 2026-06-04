@@ -6,6 +6,7 @@ import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -116,6 +117,30 @@ class ReservationEntriesTest {
 
             // when & then
             assertThat(entries.hasActiveEntryByName("이프")).isTrue();
+        }
+
+        @Test
+        void 이름과_상태로_엔트리를_조회한다() {
+            // given
+            ReservationEntries entries = new ReservationEntries(List.of(
+                    ReservedEntry.reserve("라텔", FIXED)
+            ));
+
+            // when & then
+            Assertions.assertThat(entries.findByNameAndStatus("라텔", ReservationStatus.RESERVED))
+                    .isPresent();
+        }
+
+        @Test
+        void 상태는_같지만_이름이_다르면_조회되지_않는다() {
+            // given
+            ReservationEntries entries = new ReservationEntries(List.of(
+                    ReservedEntry.waiting("라텔", FIXED)
+            ));
+
+            // when & then
+            Assertions.assertThat(entries.findByNameAndStatus("이프", ReservationStatus.WAITING))
+                    .isNotPresent();
         }
     }
 
