@@ -20,9 +20,11 @@ import roomescape.domain.exception.RoomEscapeException;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
+    private final DomainErrorHttpMapper httpMapper;
 
-    public GlobalExceptionHandler(MessageSource messageSource) {
+    public GlobalExceptionHandler(MessageSource messageSource, DomainErrorHttpMapper httpMapper) {
         this.messageSource = messageSource;
+        this.httpMapper = httpMapper;
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -73,7 +75,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleDomain(RoomEscapeException e, Locale locale, HttpServletRequest request) {
         log.warn("[Domain Error] {} args={}", e.code(), Arrays.toString(e.args()), e);
 
-        HttpStatus status = DomainErrorHttpMapper.statusOf(e.code());
+        HttpStatus status = httpMapper.statusOf(e.code());
         String messageKey = "error." + e.code().name().toLowerCase().replace('_', '-');
         String titleKey = "error.title." + status.name().toLowerCase().replace('_', '-');
         String detail = messageSource.getMessage(messageKey, e.args(), locale);
