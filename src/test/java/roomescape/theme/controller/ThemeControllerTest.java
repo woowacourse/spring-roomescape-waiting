@@ -18,7 +18,7 @@ import roomescape.auth.AuthInterceptor;
 import roomescape.auth.OwnerOnlyArgumentResolver;
 import roomescape.global.config.WebMvcConfig;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
@@ -35,7 +35,7 @@ class ThemeControllerTest {
     private ThemeService themeService;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private ReservationQueryService reservationQueryService;
 
     @Test
     @DisplayName("모든 테마를 성공적으로 조회한다.")
@@ -58,7 +58,7 @@ class ThemeControllerTest {
         PopularThemesResult result = new PopularThemesResult(List.of(
                 new PopularThemeQueryResult(1L, "인기테마", "설명", "url")
         ));
-        given(reservationService.queryPopularThemes(anyInt(), anyInt())).willReturn(result);
+        given(reservationQueryService.queryPopularThemes(anyInt(), anyInt())).willReturn(result);
 
         // when & then
         mockMvc.perform(get("/themes")

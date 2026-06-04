@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 
@@ -22,9 +23,12 @@ import roomescape.reservation.service.dto.ReservationResult;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 ReservationQueryService reservationQueryService) {
         this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @PostMapping
@@ -38,7 +42,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationWithStatusResponse>> readAllByName(@RequestParam String name) {
-        List<ReservationWithStatusResponse> responses = reservationService.findAllByName(name)
+        List<ReservationWithStatusResponse> responses = reservationQueryService.findAllByName(name)
                 .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();

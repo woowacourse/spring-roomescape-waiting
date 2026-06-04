@@ -27,6 +27,7 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
@@ -45,6 +46,9 @@ class ReservationControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private ReservationQueryService reservationQueryService;
 
     @MockitoBean
     private ReservationRepository reservationRepository;
@@ -144,7 +148,7 @@ class ReservationControllerTest {
                 new ReservationWithStatusResult(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme, "reserved", 0L)
         );
 
-        given(reservationService.findAllByName(anyString())).willReturn(results);
+        given(reservationQueryService.findAllByName(anyString())).willReturn(results);
 
         // when & then
         mockMvc.perform(get("/reservations")

@@ -25,7 +25,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.theme.domain.Theme;
@@ -52,6 +51,9 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
+    @InjectMocks
+    private ReservationQueryService reservationQueryService;
 
     @Test
     @DisplayName("예약 생성 시 슬롯 중복으로 DB 예외가 발생하면 ConflictException을 던진다.")
@@ -175,7 +177,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "포비", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "포비",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(2), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -192,7 +196,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), time, theme), LocalDate.now().minusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().minusDays(1), time, theme),
+                LocalDate.now().minusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(1), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -209,7 +215,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().minusDays(1), 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -227,7 +235,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(LocalDate.now().plusDays(1), 999L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -245,7 +255,9 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate targetDate = LocalDate.now().plusDays(2);
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -265,7 +277,9 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate targetDate = LocalDate.now().plusDays(2);
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
         ReservationUpdateCommand command = new ReservationUpdateCommand(targetDate, 1L);
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
@@ -297,7 +311,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "포비", new ReservationSlot(LocalDate.now().plusDays(1), time, theme), LocalDate.now().plusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "포비",
+                new ReservationSlot(LocalDate.now().plusDays(1), time, theme),
+                LocalDate.now().plusDays(1).atStartOfDay());
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -313,7 +329,9 @@ class ReservationServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
-        Reservation reservation = new Reservation(1L, "브라운", new ReservationSlot(LocalDate.now().minusDays(1), time, theme), LocalDate.now().minusDays(1).atStartOfDay());
+        Reservation reservation = new Reservation(1L, "브라운",
+                new ReservationSlot(LocalDate.now().minusDays(1), time, theme),
+                LocalDate.now().minusDays(1).atStartOfDay());
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
@@ -330,10 +348,13 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation targetReservation = new Reservation(1L, "브라운", new ReservationSlot(date, time, theme), date.atStartOfDay());
+        Reservation targetReservation = new Reservation(1L, "브라운", new ReservationSlot(date, time, theme),
+                date.atStartOfDay());
 
-        ReservationWaiting w1 = new ReservationWaiting(10L, "중복대기자", new ReservationSlot(date, time, theme), date.atStartOfDay());
-        ReservationWaiting w2 = new ReservationWaiting(20L, "정상대기자", new ReservationSlot(date, time, theme), date.atStartOfDay());
+        ReservationWaiting w1 = new ReservationWaiting(10L, "중복대기자", new ReservationSlot(date, time, theme),
+                date.atStartOfDay());
+        ReservationWaiting w2 = new ReservationWaiting(20L, "정상대기자", new ReservationSlot(date, time, theme),
+                date.atStartOfDay());
 
         given(reservationRepository.findById(1L)).willReturn(Optional.of(targetReservation));
         given(reservationTimeService.getByIdForUpdate(1L)).willReturn(time);
@@ -379,7 +400,7 @@ class ReservationServiceTest {
                 .willReturn(List.of());
 
         // when
-        PopularThemesResult result = reservationService.queryPopularThemes(7, 10);
+        reservationQueryService.queryPopularThemes(7, 10);
 
         // then
         then(reservationRepository).should().queryPopularThemes(from, to, 10);

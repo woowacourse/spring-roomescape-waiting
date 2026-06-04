@@ -85,17 +85,17 @@ public class ReservationWaitingServiceTransactionTest {
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
                 .isInstanceOf(RuntimeException.class);
 
-        // then
         boolean exists = reservationWaitingRepository.hasWaitingAtSameTime(
-                new ReservationWaiting(null, "임꺽정", new ReservationSlot(
-                        command.date(),
-                        new ReservationTime(command.timeId(), null),
-                        new Theme(command.themeId(), null, null, null)
-                ), new ReservationSlot(
-                        command.date(),
-                        new ReservationTime(command.timeId(), null),
-                        new Theme(command.themeId(), null, null, null)
-                ).date().atStartOfDay())
+                new ReservationWaiting(
+                        null,
+                        "임꺽정",
+                        new ReservationSlot(
+                                command.date(),
+                                new ReservationTime(reservationTimeResult.id(), reservationTimeResult.startAt()),
+                                new Theme(themeResult.id(), themeResult.name(), themeResult.description(), themeResult.thumbnailUrl())
+                        ),
+                        command.date().atStartOfDay()
+                )
         );
         Assertions.assertFalse(exists);
     }

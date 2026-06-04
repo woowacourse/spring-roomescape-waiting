@@ -2,6 +2,7 @@ package roomescape.waiting.domain;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Objects;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidBusinessStateException;
@@ -10,7 +11,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.waiting.exception.ReservationWaitingErrorCode;
 
-public class ReservationWaiting {
+public class ReservationWaiting implements Comparable<ReservationWaiting> {
     private final Long id;
     private final String name;
     private final ReservationSlot slot;
@@ -21,9 +22,8 @@ public class ReservationWaiting {
         this.name = name;
         this.slot = slot;
         this.updatedAt = updatedAt;
-        if (this.updatedAt != null && this.slot.time() != null && this.slot.time().getStartAt() != null) {
-            validateExpiry(this.updatedAt);
-        }
+
+        validateExpiry(this.updatedAt);
     }
 
     public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme,
@@ -90,5 +90,12 @@ public class ReservationWaiting {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public int compareTo(ReservationWaiting other) {
+        return Comparator.comparing(ReservationWaiting::getUpdatedAt)
+                .thenComparing(ReservationWaiting::getId)
+                .compare(this, other);
     }
 }

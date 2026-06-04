@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.exception.BadRequestException;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.service.ThemeService;
@@ -18,11 +18,11 @@ import roomescape.theme.service.ThemeService;
 public class ThemeController {
 
     private final ThemeService themeService;
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ThemeController(ThemeService themeService, ReservationService reservationService) {
+    public ThemeController(ThemeService themeService, ReservationQueryService reservationQueryService) {
         this.themeService = themeService;
-        this.reservationService = reservationService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping
@@ -39,7 +39,7 @@ public class ThemeController {
             @RequestParam("period") int period, @RequestParam("limit") int limit
     ) {
         validatePeriodAndLimit(period, limit);
-        List<ThemeResponse> responses = reservationService.queryPopularThemes(period, limit).popularThemes()
+        List<ThemeResponse> responses = reservationQueryService.queryPopularThemes(period, limit).popularThemes()
                 .stream()
                 .map(ThemeResponse::from)
                 .collect(Collectors.toList());
