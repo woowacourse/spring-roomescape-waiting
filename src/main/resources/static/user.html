@@ -441,6 +441,11 @@
       flex-shrink: 0;
     }
 
+    .reservation-item.converted {
+      border-color: rgba(16,185,129,0.6);
+      background: rgba(16,185,129,0.08);
+    }
+
     .reservation-info { flex: 1; }
 
     .reservation-theme {
@@ -764,6 +769,7 @@
   let selectedTheme = null;
   let selectedDate = null;
   let selectedTime = null;
+  let lastMyReservations = null;
 
   function init() {
     username = localStorage.getItem('username');
@@ -1007,10 +1013,12 @@
         throw new Error('Failed to load reservations');
       }
       const { reservations: all = [] } = await res.json();
+      const convertedSlots = findConvertedSlots(lastMyReservations, all);
 
       document.getElementById('my-loading').style.display = 'none';
 
       if (!all.length) {
+        lastMyReservations = all;
         document.getElementById('my-empty').style.display = 'block';
         return;
       }
@@ -1019,9 +1027,10 @@
       list.innerHTML = all.map(item => {
         const isWaiting = item.reservationStatus === 'WAITING';
         const type = isWaiting ? 'waiting' : 'reservation';
+        const isConverted = convertedSlots.has(reservationSlotKey(item));
         const badge = isWaiting
           ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
-          : `<span class="status-badge badge-reserved">예약</span>`;
+          : `<span class="status-badge badge-reserved">${isConverted ? '예약 전환됨' : '예약'}</span>`;
         const actions = isWaiting
           ? `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`
           : `
@@ -1029,7 +1038,7 @@
             <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
           `;
         return `
-          <div class="reservation-item" id="item-${type}-${item.id}">
+          <div class="reservation-item ${isConverted ? 'converted' : ''}" id="item-${type}-${item.id}">
             <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
             <div class="reservation-info">
               <div class="reservation-theme">${item.themeName}</div>
@@ -1041,10 +1050,35 @@
         `;
       }).join('');
       list.style.display = 'flex';
+      if (convertedSlots.size > 0) {
+        showToast('대기 중이던 예약이 확정되었습니다.');
+      }
+      lastMyReservations = all;
     } catch (e) {
       document.getElementById('my-loading').style.display = 'none';
       showToast('예약 목록을 불러올 수 없습니다.', 'error');
     }
+  }
+
+  function findConvertedSlots(previous, current) {
+    if (!previous) {
+      return new Set();
+    }
+    const previousWaitingSlots = new Set(
+      previous
+        .filter(item => item.reservationStatus === 'WAITING')
+        .map(reservationSlotKey)
+    );
+    return new Set(
+      current
+        .filter(item => item.reservationStatus === 'RESERVED')
+        .map(reservationSlotKey)
+        .filter(key => previousWaitingSlots.has(key))
+    );
+  }
+
+  function reservationSlotKey(item) {
+    return `${item.date}|${item.time}|${item.themeName}`;
   }
 
   async function deleteItem(id, type) {
@@ -1060,7 +1094,10 @@
         showToast(message || '취소에 실패했습니다.', 'error');
         return;
       }
-      showToast(`${label}가 취소되었습니다.`);
+      const message = type === 'reservation'
+        ? '예약이 취소되었습니다. 첫 번째 대기가 있으면 자동으로 예약됩니다.'
+        : '대기가 취소되었습니다. 남은 대기 순번이 다시 정렬됩니다.';
+      showToast(message);
       await loadMyReservations();
     } catch (e) {
       showToast('취소에 실패했습니다.', 'error');
