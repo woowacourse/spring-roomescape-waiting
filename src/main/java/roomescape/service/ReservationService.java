@@ -45,9 +45,17 @@ public class ReservationService {
     }
 
     @Transactional
+    public ReservationResult addWaiting(ReservationCommand command) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        Reservation reservation = findOrCreateSlotWithLock(command, now);
+        ReservationEntry added = reservation.reserveOrWait(command.name(), now);
+        Reservation saved = reservationRepository.save(reservation);
+        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
+    }
+
+    @Transactional
     public ReservationResult change(long entryId, ReservationChangeCommand command) {
-        Reservation current = reservationRepository.findByEntryIdForUpdate(entryId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
+        Reservation current = reservationRepository.getByEntryIdForUpdate(entryId);
         ReservationEntry entry = current.findActiveEntry(entryId);
 
         ReservationTime newTime = findTimeWithThrow(command.timeId());
@@ -72,21 +80,21 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResult addWaiting(ReservationCommand command) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = findOrCreateSlotWithLock(command, now);
-        ReservationEntry added = reservation.reserveOrWait(command.name(), now);
-        Reservation saved = reservationRepository.save(reservation);
-        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
-    }
-
-    @Transactional
     public void cancelReservation(long entryId) {
-        Reservation reservation = reservationRepository.findByEntryIdForUpdate(entryId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
+        Reservation reservation = reservationRepository.getByEntryIdForUpdate(entryId);
 
         reservation.cancelEntry(entryId);
         reservationRepository.save(reservation);
+    }
+
+    public ReservationResult getActiveReservationEntry(long entryId) {
+        Reservation reservation = reservationRepository.getByEntryId(entryId);
+        ReservationEntry reservationEntry = reservation.findActiveEntry(entryId);
+        return ReservationResult.from(reservation, reservationEntry);
+    }
+
+    public Page<ReservationSearchResult> search(ReservationSearchCommand command, Pageable pageable) {
+        return reservationQueryRepository.search(command, pageable);
     }
 
     private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
@@ -116,22 +124,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간 정보입니다."));
     }
 
-    public ReservationResult getActiveReservationEntry(long entryId) {
-        Reservation reservation = findReservationByEntryIdWithThrow(entryId);
-        ReservationEntry reservationEntry = reservation.findActiveEntry(entryId);
-        return ReservationResult.from(reservation, reservationEntry);
-    }
-
     public List<ReservationResult> getAllReservations() {
         return reservationQueryRepository.getAllReservations();
-    }
-
-    public Page<ReservationSearchResult> search(ReservationSearchCommand command, Pageable pageable) {
-        return reservationQueryRepository.search(command, pageable);
-    }
-
-    private Reservation findReservationByEntryIdWithThrow(long entryId) {
-        return reservationRepository.findByEntryId(entryId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
     }
 }

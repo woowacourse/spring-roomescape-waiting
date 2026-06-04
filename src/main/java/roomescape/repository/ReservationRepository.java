@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.repository.dto.ReservationCondition;
 
 public interface ReservationRepository {
@@ -15,6 +16,16 @@ public interface ReservationRepository {
     Optional<Reservation> findByEntryId(long entryId);
 
     Optional<Reservation> findByEntryIdForUpdate(long entryId);
+
+    default Reservation getByEntryId(long entryId) {
+        return findByEntryId(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
+    }
+
+    default Reservation getByEntryIdForUpdate(long entryId) {
+        return findByEntryIdForUpdate(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
+    }
 
     void update(Reservation reservation);
 }
