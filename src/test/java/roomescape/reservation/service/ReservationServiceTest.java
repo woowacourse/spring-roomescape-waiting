@@ -58,66 +58,81 @@ public class ReservationServiceTest {
     private ReservationWaitingService reservationWaitingService;
 
     @Test
-    void 이름으로_예약과_예약_대기를_한_번에_조회한다() {
+    void 이름으로_예약과_예약_대기를_한_번에_조회_성공() {
         String name = "초록";
         LocalDate date = LocalDate.now().plusDays(1);
-        List<MyReservation> expected = List.of(
-                new MyReservation(1L, name, "예약 테마", date, LocalTime.of(10, 0),
-                        "reservation", "예약 확정", null),
-                new MyReservation(2L, name, "대기 테마", date, LocalTime.of(11, 0),
-                        "waiting", "대기중", 1L)
-        );
+        Reservation reservation = new Reservation(1L, name, 1L, date, new ReservationTime(1L, LocalTime.of(10, 0)));
+        ReservationWaiting waiting = new ReservationWaiting(2L, name, 2L, date,
+                new ReservationTime(2L, LocalTime.of(11, 0)), LocalDateTime.now(), 1L);
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(expected);
+        when(reservationDao.selectByName(name)).thenReturn(List.of(reservation));
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of(waiting));
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "예약 테마", "설명", "image")));
+        when(themeDao.selectById(2L)).thenReturn(Optional.of(new Theme(2L, "대기 테마", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
-        assertThat(actual).isEqualTo(expected);
-        verify(reservationDao).selectAllCombinedByName(name);
-        verifyNoInteractions(themeDao, timeDao);
+        assertThat(actual).hasSize(2);
+        assertThat(actual.getFirst())
+                .extracting(MyReservation::getId, MyReservation::getName, MyReservation::getThemeName,
+                        MyReservation::getStartAt, MyReservation::getResourceType, MyReservation::getStatus,
+                        MyReservation::getWaitingNumber)
+                .containsExactly(1L, name, "예약 테마", LocalTime.of(10, 0), "reservation", "예약 확정", null);
+        assertThat(actual.get(1))
+                .extracting(MyReservation::getId, MyReservation::getName, MyReservation::getThemeName,
+                        MyReservation::getStartAt, MyReservation::getResourceType, MyReservation::getStatus,
+                        MyReservation::getWaitingNumber)
+                .containsExactly(2L, name, "대기 테마", LocalTime.of(11, 0), "waiting", "대기중", 1L);
+        verify(reservationDao).selectByName(name);
+        verify(reservationWaitingDao).selectByName(name);
+        verifyNoInteractions(timeDao);
     }
 
     @Test
     void 이름으로_예약만_조회_성공() {
         String name = "초록";
-        List<MyReservation> expected = List.of(
-                new MyReservation(1L, name, "테마", LocalDate.now(), LocalTime.of(10, 0),
-                        "reservation", "예약 확정", null),
-                new MyReservation(2L, name, "테마", LocalDate.now(), LocalTime.of(11, 0),
-                        "reservation", "예약 확정", null)
+        LocalDate date = LocalDate.now();
+        List<Reservation> reservations = List.of(
+                new Reservation(1L, name, 1L, date, new ReservationTime(1L, LocalTime.of(10, 0))),
+                new Reservation(2L, name, 1L, date, new ReservationTime(2L, LocalTime.of(11, 0)))
         );
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(expected);
+        when(reservationDao.selectByName(name)).thenReturn(reservations);
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of());
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "테마", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(2)
                 .allSatisfy(myReservation -> {
-                    assertThat(myReservation.resourceType()).isEqualTo("reservation");
-                    assertThat(myReservation.waitingNumber()).isNull();
+                    assertThat(myReservation.getResourceType()).isEqualTo("reservation");
+                    assertThat(myReservation.getWaitingNumber()).isNull();
                 });
     }
 
     @Test
     void 이름으로_예약_대기만_조회_성공() {
         String name = "초록";
-        MyReservation waiting = new MyReservation(1L, name, "은하수", LocalDate.now().plusDays(1),
-                LocalTime.of(10, 0), "waiting", "대기중", 1L);
+        ReservationWaiting waiting = new ReservationWaiting(1L, name, 1L, LocalDate.now().plusDays(1),
+                new ReservationTime(1L, LocalTime.of(10, 0)), LocalDateTime.now(), 1L);
 
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(List.of(waiting));
+        when(reservationDao.selectByName(name)).thenReturn(List.of());
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of(waiting));
+        when(themeDao.selectById(1L)).thenReturn(Optional.of(new Theme(1L, "은하수", "설명", "image")));
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 
         assertThat(actual).hasSize(1);
-        assertThat(actual.getFirst().name()).isEqualTo(name);
-        assertThat(actual.getFirst().themeName()).isEqualTo("은하수");
-        assertThat(actual.getFirst().waitingNumber()).isEqualTo(1L);
+        assertThat(actual.getFirst().getName()).isEqualTo(name);
+        assertThat(actual.getFirst().getThemeName()).isEqualTo("은하수");
+        assertThat(actual.getFirst().getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
     void 이름으로_조회한_예약과_예약_대기가_없으면_빈_목록을_반환한다() {
         String name = "에버";
-        when(reservationDao.selectAllCombinedByName(name)).thenReturn(List.of());
+        when(reservationDao.selectByName(name)).thenReturn(List.of());
+        when(reservationWaitingDao.selectByName(name)).thenReturn(List.of());
 
         List<MyReservation> actual = reservationService.findAllByName(name);
 

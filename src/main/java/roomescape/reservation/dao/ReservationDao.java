@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.MyReservation;
 import roomescape.reservation.Reservation;
 import roomescape.time.ReservationTime;
 
@@ -22,18 +21,6 @@ public class ReservationDao {
                     rs.getDate("date").toLocalDate(),
                     new ReservationTime(rs.getLong("time_id"),
                             rs.getTime("start_at").toLocalTime())
-            );
-
-    private final RowMapper<MyReservation> combineRowMapper = (rs, rowNum) ->
-            new MyReservation(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getString("theme_name"),
-                    rs.getDate("date").toLocalDate(),
-                    rs.getTime("start_at").toLocalTime(),
-                    rs.getString("resource_type"),
-                    rs.getString("status"),
-                    rs.getObject("waiting_number", Long.class)
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -116,60 +103,6 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper, name);
     }
 
-    public List<MyReservation> selectAllCombinedByName(String name) {
-        String sql = """
-                SELECT *
-                FROM (
-                    SELECT
-                        r.id AS id,
-                        r.name AS name,
-                        t.name AS theme_name,
-                        r.date AS date,
-                        rt.start_at AS start_at,
-                        'reservation' AS resource_type,
-                        '예약 확정' AS status,
-                        CAST(NULL AS BIGINT) AS waiting_number
-                    FROM reservation r
-                    JOIN theme t ON r.theme_id = t.id
-                    JOIN reservation_time rt ON r.time_id = rt.id
-                    WHERE r.name = ?
-                
-                    UNION ALL
-                
-                    SELECT
-                        ranked.id AS id,
-                        ranked.name AS name,
-                        ranked.theme_name AS theme_name,
-                        ranked.date AS date,
-                        ranked.start_at AS start_at,
-                        ranked.resource_type AS resource_type,
-                        ranked.status AS status,
-                        ranked.waiting_number AS waiting_number
-                    FROM (
-                        SELECT
-                            w.id AS id,
-                            w.name AS name,
-                            t.name AS theme_name,
-                            w.date AS date,
-                            rt.start_at AS start_at,
-                            'waiting' AS resource_type,
-                            '대기중' AS status,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY w.theme_id, w.date, w.time_id
-                                ORDER BY w.created_at, w.id
-                            ) AS waiting_number
-                        FROM reservation_waiting w
-                        JOIN theme t ON w.theme_id = t.id
-                        JOIN reservation_time rt ON w.time_id = rt.id
-                    ) ranked
-                    WHERE ranked.name = ?
-                )
-                ORDER BY date, start_at, resource_type
-                """;
-
-        return jdbcTemplate.query(sql, combineRowMapper, name, name);
-    }
-
     public Reservation insert(Reservation reservation) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
@@ -189,7 +122,8 @@ public class ReservationDao {
         return selectById(id);
     }
 
-    public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Long id, String name, Long themeId, LocalDate date, Long timeId) {
+    public Optional<Reservation> updateNameByThemeIdAndDateAndTimeId(Long id, String name, Long themeId, LocalDate date,
+                                                                     Long timeId) {
         String sql = """
                 update reservation
                 set name = ?

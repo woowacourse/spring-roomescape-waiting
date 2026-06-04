@@ -3,7 +3,6 @@ package roomescape.reservation.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import roomescape.reservation.MyReservation;
 import roomescape.reservation.Reservation;
 import roomescape.time.ReservationTime;
 
@@ -93,36 +91,6 @@ public class ReservationDaoTest {
     }
 
     @Test
-    void 이름으로_예약과_예약_대기를_함께_조회한다() {
-        String name = "에버";
-        LocalDate date = LocalDate.now().plusDays(10);
-        Reservation reservation = reservationDao.insert(
-                new Reservation(name, 1L, date, new ReservationTime(1L, LocalTime.parse("10:00")))
-        );
-        insertWaiting("다른사용자", 2L, date, 2L, LocalDateTime.of(2026, 1, 1, 10, 0));
-        Long waitingId = insertWaiting(name, 2L, date, 2L, LocalDateTime.of(2026, 1, 1, 10, 1));
-
-        List<MyReservation> actual = reservationDao.selectAllCombinedByName(name);
-
-        assertThat(actual).hasSize(2);
-        assertThat(actual.get(0))
-                .extracting(MyReservation::id, MyReservation::resourceType, MyReservation::status,
-                        MyReservation::themeName, MyReservation::waitingNumber)
-                .containsExactly(reservation.getId(), "reservation", "예약 확정", "은하수", null);
-        assertThat(actual.get(1))
-                .extracting(MyReservation::id, MyReservation::resourceType, MyReservation::status,
-                        MyReservation::themeName, MyReservation::waitingNumber)
-                .containsExactly(waitingId, "waiting", "대기중", "지구", 2L);
-    }
-
-    @Test
-    void 이름으로_조회한_예약과_예약_대기가_없으면_빈_목록을_반환한다() {
-        List<MyReservation> actual = reservationDao.selectAllCombinedByName("없는사용자");
-
-        assertThat(actual).isEmpty();
-    }
-
-    @Test
     void 예약의_날짜와_시간_수정_성공() {
         Long reservationId = 1L;
         LocalDate changedDate = LocalDate.now().plusDays(1);
@@ -137,14 +105,4 @@ public class ReservationDaoTest {
         assertThat(reservation.getTime().getId()).isEqualTo(changedTimeId);
     }
 
-    private Long insertWaiting(String name, Long themeId, LocalDate date, Long timeId, LocalDateTime createdAt) {
-        jdbcTemplate.update(
-                """
-                        INSERT INTO reservation_waiting (name, theme_id, date, time_id, created_at)
-                        VALUES (?, ?, ?, ?, ?)
-                        """,
-                name, themeId, date, timeId, createdAt
-        );
-        return jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation_waiting", Long.class);
-    }
 }
