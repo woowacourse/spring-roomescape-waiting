@@ -85,7 +85,7 @@ class ReservationTest {
                 InvalidDomainException.class,
                 () -> Reservation.withId(1L, "브라운", null, VALID_TIME, VALID_THEME)
         );
-        assertEquals("예약 날짜는 비어 있을 수 없습니다.", exception.getMessage());
+        assertEquals("날짜는 비어 있을 수 없습니다.", exception.getMessage());
     }
 
     @Test
@@ -95,7 +95,7 @@ class ReservationTest {
                 InvalidDomainException.class,
                 () -> Reservation.withId(1L, "브라운", VALID_DATE, null, VALID_THEME)
         );
-        assertEquals("예약 시간은 비어 있을 수 없습니다.", exception.getMessage());
+        assertEquals("시간은 비어 있을 수 없습니다.", exception.getMessage());
     }
 
     @Test
@@ -105,7 +105,7 @@ class ReservationTest {
                 InvalidDomainException.class,
                 () -> Reservation.withId(1L, "브라운", VALID_DATE, VALID_TIME, null)
         );
-        assertEquals("예약 테마는 비어 있을 수 없습니다.", exception.getMessage());
+        assertEquals("테마는 비어 있을 수 없습니다.", exception.getMessage());
     }
 
 

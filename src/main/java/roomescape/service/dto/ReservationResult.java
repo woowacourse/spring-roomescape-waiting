@@ -2,6 +2,7 @@ package roomescape.service.dto;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 
 public class ReservationResult {
 
@@ -26,12 +27,16 @@ public class ReservationResult {
     }
 
     public static ReservationResult from(Reservation reservation) {
+        return from(reservation.getId(), reservation.getName(), reservation.getSlot());
+    }
+
+    public static ReservationResult from(Long id, String name, Slot slot) {
         return new ReservationResult(
-                reservation.getId(),
-                reservation.getName(),
-                reservation.getDate(),
-                ReservationTimeResult.from(reservation.getTime()),
-                ThemeResult.from(reservation.getTheme())
+                id,
+                name,
+                slot.getDate(),
+                ReservationTimeResult.from(slot.getTime()),
+                ThemeResult.from(slot.getTheme())
         );
     }
 

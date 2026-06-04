@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.Waitings;
@@ -38,6 +39,7 @@ public class WaitingService {
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 시간입니다."));
         Theme theme = themeRepository.findById(command.getThemeId())
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
+        Slot slot = new Slot(command.getDate(), time, theme);
 
         Reservation reservation = reservationRepository.findBySlot(
                 command.getDate(),
@@ -55,7 +57,7 @@ public class WaitingService {
         existing.validateNoDuplicateBy(command.getName());
 
         Waiting newWaiting = Waiting.create(
-                command.getName(), command.getDate(), time, theme, existing.nextOrderIndex()
+                command.getName(), slot, existing.nextOrderIndex()
         );
         Waiting saved = waitingRepository.save(newWaiting);
         return WaitingResult.from(saved);
@@ -80,4 +82,3 @@ public class WaitingService {
         }
     }
 }
-

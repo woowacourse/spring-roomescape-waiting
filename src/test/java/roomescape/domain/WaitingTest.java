@@ -63,15 +63,15 @@ class WaitingTest {
         void 필수값_null_거부() {
             assertThatThrownBy(() -> Waiting.create("브라운", null, TIME, THEME, 1))
                     .isInstanceOf(InvalidDomainException.class)
-                    .hasMessageContaining("대기 날짜는 비어 있을 수 없습니다.");
+                    .hasMessageContaining("날짜는 비어 있을 수 없습니다.");
 
             assertThatThrownBy(() -> Waiting.create("브라운", DATE, null, THEME, 1))
                     .isInstanceOf(InvalidDomainException.class)
-                    .hasMessageContaining("대기 시간은 비어 있을 수 없습니다.");
+                    .hasMessageContaining("시간은 비어 있을 수 없습니다.");
 
             assertThatThrownBy(() -> Waiting.create("브라운", DATE, TIME, null, 1))
                     .isInstanceOf(InvalidDomainException.class)
-                    .hasMessageContaining("대기 테마는 비어 있을 수 없습니다.");
+                    .hasMessageContaining("테마는 비어 있을 수 없습니다.");
         }
     }
 
@@ -83,10 +83,11 @@ class WaitingTest {
         @DisplayName("같은 슬롯인지 비교한다")
         void 슬롯_비교() {
             Waiting w = Waiting.create("브라운", DATE, TIME, THEME, 1);
-            assertThat(w.isSameSlot(DATE, TIME_ID, THEME_ID)).isTrue();
-            long anotherThemeId = 2L;
-            assertThat(w.isSameSlot(DATE, TIME_ID, anotherThemeId)).isFalse();
-            assertThat(w.isSameSlot(DATE.plusDays(1), TIME_ID, THEME_ID)).isFalse();
+            assertThat(w.isSameSlot(new Slot(DATE, TIME, THEME))).isTrue();
+
+            Theme anotherTheme = Theme.withId(2L, "테마B", "설명", "url");
+            assertThat(w.isSameSlot(new Slot(DATE, TIME, anotherTheme))).isFalse();
+            assertThat(w.isSameSlot(new Slot(DATE.plusDays(1), TIME, THEME))).isFalse();
         }
 
         @Test

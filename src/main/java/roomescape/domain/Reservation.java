@@ -9,40 +9,42 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private final Slot slot;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
+    private Reservation(Long id, String name, Slot slot) {
+        validate(name, slot);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.slot = slot;
+    }
+
+    public static Reservation create(String name, Slot slot, ReservationPolicy policy) {
+        policy.validateCreatable(slot.getDate(), slot.getTime().getStartAt());
+        return new Reservation(null, name, slot);
     }
 
     public static Reservation create(String name, LocalDate date,
                                      ReservationTime time, Theme theme,
                                      ReservationPolicy policy) {
-        policy.validateCreatable(date, time.getStartAt());
-        return new Reservation(null, name, date, time, theme);
+        return create(name, new Slot(date, time, theme), policy);
+    }
+
+    public static Reservation withId(Long id, String name, Slot slot) {
+        return new Reservation(id, name, slot);
     }
 
     public static Reservation withId(Long id, String name, LocalDate date,
                                      ReservationTime time, Theme theme) {
-        return new Reservation(id, name, date, time, theme);
+        return withId(id, name, new Slot(date, time, theme));
     }
 
     public static Reservation promote(Waiting w) {
-        return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme());
+        return new Reservation(null, w.getName(), w.getSlot());
     }
 
-    private static void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
+    private static void validate(String name, Slot slot) {
         validateName(name);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+        validateSlot(slot);
     }
 
     private static void validateName(String name) {
@@ -56,21 +58,9 @@ public class Reservation {
         }
     }
 
-    private static void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new InvalidDomainException("예약 날짜는 비어 있을 수 없습니다.");
-        }
-    }
-
-    private static void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new InvalidDomainException("예약 시간은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private static void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new InvalidDomainException("예약 테마는 비어 있을 수 없습니다.");
+    private static void validateSlot(Slot slot) {
+        if (slot == null) {
+            throw new InvalidDomainException("슬롯은 비어 있을 수 없습니다.");
         }
     }
 
@@ -82,16 +72,20 @@ public class Reservation {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     public boolean isOwnedBy(String name) {

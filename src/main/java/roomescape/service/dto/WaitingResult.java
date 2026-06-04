@@ -1,6 +1,7 @@
 package roomescape.service.dto;
 
 import java.time.LocalDate;
+import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 
 public class WaitingResult {
@@ -22,13 +23,17 @@ public class WaitingResult {
     }
 
     public static WaitingResult from(Waiting w) {
+        return from(w.getId(), w.getName(), w.getSlot(), w.getOrderIndex());
+    }
+
+    public static WaitingResult from(Long id, String name, Slot slot, int orderIndex) {
         return new WaitingResult(
-                w.getId(),
-                w.getName(),
-                w.getDate(),
-                ReservationTimeResult.from(w.getTime()),
-                ThemeResult.from(w.getTheme()),
-                w.getOrderIndex()
+                id,
+                name,
+                slot.getDate(),
+                ReservationTimeResult.from(slot.getTime()),
+                ThemeResult.from(slot.getTheme()),
+                orderIndex
         );
     }
 

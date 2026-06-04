@@ -1,8 +1,7 @@
 package roomescape.service.dto;
 
 import java.time.LocalDate;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.Slot;
 
 public class MyReservationResult {
 
@@ -26,22 +25,22 @@ public class MyReservationResult {
         this.waitingOrder = waitingOrder;
     }
 
-    public static MyReservationResult ofReservation(Long id, LocalDate date,
-                                                    ReservationTime time, Theme theme) {
+    public static MyReservationResult ofReservation(Long id, Slot slot) {
         return new MyReservationResult(
-                id, date,
-                ReservationTimeResult.from(time),
-                ThemeResult.from(theme),
+                id,
+                slot.getDate(),
+                ReservationTimeResult.from(slot.getTime()),
+                ThemeResult.from(slot.getTheme()),
                 Status.RESERVED, null
         );
     }
 
-    public static MyReservationResult ofWaiting(Long id, LocalDate date,
-                                                ReservationTime time, Theme theme, int order) {
+    public static MyReservationResult ofWaiting(Long id, Slot slot, int order) {
         return new MyReservationResult(
-                id, date,
-                ReservationTimeResult.from(time),
-                ThemeResult.from(theme),
+                id,
+                slot.getDate(),
+                ReservationTimeResult.from(slot.getTime()),
+                ThemeResult.from(slot.getTheme()),
                 Status.WAITING, order
         );
     }

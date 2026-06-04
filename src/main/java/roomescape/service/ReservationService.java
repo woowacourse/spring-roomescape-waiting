@@ -1,12 +1,12 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.Waitings;
@@ -56,15 +56,14 @@ public class ReservationService {
     public ReservationResult create(ReservationCreateCommand command) {
         ReservationTime time = findTimeOrThrow(command.getTimeId());
         Theme theme = findThemeOrThrow(command.getThemeId());
+        Slot slot = new Slot(command.getDate(), time, theme);
 
-        validateNotDuplicated(command.getDate(), time.getId(), theme.getId());
+        validateNotDuplicated(slot);
 
         Reservation reservation = Reservation.create(
                 command.getName(),
-                command.getDate(),
-                time,
-                theme,
-                reservationPolicy// 정책 객체가 과거 검증을 담당
+                slot,
+                reservationPolicy
         );
 
         Reservation saved = reservationRepository.save(reservation);
@@ -80,11 +79,11 @@ public class ReservationService {
 
         reservationRepository.findByNameOrderByDateAscTimeAsc(name).forEach(r ->
                 results.add(MyReservationResult.ofReservation(
-                        r.getId(), r.getDate(), r.getTime(), r.getTheme())));
+                        r.getId(), r.getSlot())));
 
         waitingRepository.findByName(name).forEach(w ->
                 results.add(MyReservationResult.ofWaiting(
-                        w.getId(), w.getDate(), w.getTime(), w.getTheme(), w.getOrderIndex())));
+                        w.getId(), w.getSlot(), w.getOrderIndex())));
 
         results.sort(Comparator
                 .comparing(MyReservationResult::getDate)
@@ -131,8 +130,9 @@ public class ReservationService {
         );
 
         ReservationTime newTime = findTimeOrThrow(command.getTimeId());
-        reservationPolicy.validateUpdateTarget(command.getDate(), newTime.getStartAt());
-        validateNotDuplicatedExcludingSelf(command, reservation.getTheme().getId());
+        Slot targetSlot = new Slot(command.getDate(), newTime, reservation.getTheme());
+        reservationPolicy.validateUpdateTarget(targetSlot.getDate(), targetSlot.getTime().getStartAt());
+        validateNotDuplicatedExcludingSelf(targetSlot, command.getId());
 
         reservationRepository.updateDateAndTime(command.getId(), command.getDate(), command.getTimeId());
         return ReservationResult.from(findUpdatedReservationOrThrow(command.getId()));
@@ -162,17 +162,18 @@ public class ReservationService {
     }
 
 
-    private void validateNotDuplicated(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, timeId, themeId)) {
+    private void validateNotDuplicated(Slot slot) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId())) {
             throw new BusinessRuleViolationException(
                     "해당 시간은 이미 예약되었습니다. 다른 시간을 선택해 주세요."
             );
         }
     }
 
-    private void validateNotDuplicatedExcludingSelf(ReservationUpdateCommand command, Long themeId) {
+    private void validateNotDuplicatedExcludingSelf(Slot slot, Long excludeId) {
         if (reservationRepository.existsByDateAndTimeAndThemeExcludingId(
-                command.getDate(), command.getTimeId(), themeId, command.getId())) {
+                slot.getDate(), slot.getTime().getId(), slot.getTheme().getId(), excludeId)) {
             throw new BusinessRuleViolationException(
                     "해당 시간은 이미 예약되었습니다. 다른 시간을 선택해 주세요."
             );
