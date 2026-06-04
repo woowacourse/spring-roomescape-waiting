@@ -4,25 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.Theme;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.support.BaseIntegrationTest;
-import roomescape.support.DatabaseCleaner;
 
 class JdbcThemeRepositoryIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ThemeRepository themeRepository;
-
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.clear();
-    }
 
     @Test
     void 테마를_저장하고_ID로_조회할_수_있다() {

@@ -1,12 +1,3 @@
-SET REFERENTIAL_INTEGRITY FALSE;
-
-TRUNCATE TABLE reservation_entry RESTART IDENTITY;
-TRUNCATE TABLE reservation RESTART IDENTITY;
-TRUNCATE TABLE reservation_time RESTART IDENTITY;
-TRUNCATE TABLE theme RESTART IDENTITY;
-
-SET REFERENTIAL_INTEGRITY TRUE;
-
 INSERT INTO theme (name, description, thumbnail_image_url, is_active)
 VALUES ('화이트노이즈', 'SF 추리 테마', 'https://picsum.photos/seed/1/800/600', 1),
        ('클락워크 호텔', '미스터리 테마', 'https://picsum.photos/seed/2/800/600', 1),

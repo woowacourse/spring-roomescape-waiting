@@ -5,27 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.support.BaseIntegrationTest;
-import roomescape.support.DatabaseCleaner;
 import roomescape.support.TestDateTimes;
 
 class JdbcReservationTimeRepositoryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.clear();
-    }
 
     @Test
     void 시간을_저장하고_ID로_조회한다() {

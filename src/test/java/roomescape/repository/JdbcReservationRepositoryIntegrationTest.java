@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -18,30 +18,16 @@ import roomescape.domain.fixture.ReservationFixture;
 import roomescape.exception.DuplicateEntityException;
 import roomescape.repository.dto.ReservationCondition;
 import roomescape.support.BaseIntegrationTest;
-import roomescape.support.DatabaseCleaner;
-import roomescape.support.ReservationDataSource;
 import roomescape.support.TestDateTimes;
 
+@Sql("/integration-fixture.sql")
 class JdbcReservationRepositoryIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Autowired
-    private ReservationDataSource dataSource;
-
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
-
     private final ReservationTime reservationTime = ReservationTime.restore(1L, TestDateTimes.defaultTime(), TimeStatus.ACTIVE);
     private final Theme theme = Theme.restore(1L, "공포", "어마무시한 공포 테마", "https://theme.com/image.png", false);
-
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.clear();
-        dataSource.insertTheme(theme.getName(), theme.getDescription(), theme.getThumbnailImageUrl());
-        dataSource.insertReservationTime(reservationTime.getStartAt());
-    }
 
     @Test
     void 예약을_저장하면_예약_슬롯과_엔트리를_함께_저장한다() {
