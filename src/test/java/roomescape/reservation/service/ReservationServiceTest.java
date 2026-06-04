@@ -22,6 +22,7 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
 @Transactional
@@ -306,9 +307,11 @@ class ReservationServiceTest {
 
         // then
         assertThat(updatedReservation.getId()).isEqualTo(reservation.getId());
-        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(updatedReservation.getWaitingRank()).isEqualTo(1L);
         assertThat(countHistoryByReservationId(reservation.getId())).isZero();
+
+        assertThat(reservationService.findByName(NAME))
+                .extracting(Reservation::getStatus, Reservation::getWaitingRank)
+                .containsExactly(tuple(ReservationStatus.WAITING, 1L));
     }
 
     @Test

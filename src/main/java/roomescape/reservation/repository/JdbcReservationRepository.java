@@ -237,7 +237,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     @Transactional
-    public Reservation updateDateTime(Reservation reservation) {
+    public Optional<Reservation> updateDateTime(Reservation reservation) {
         String sql = """
                 UPDATE reservation
                 SET date = ?,
@@ -253,10 +253,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getId()
         );
 
-        validateUpdatedRowCount(updatedRowCount, reservation);
-
-        return findById(reservation.getId())
-                .orElseThrow(() -> new InfrastructureException("예약 변경 결과를 조회하지 못했습니다."));
+        return toUpdatedReservation(updatedRowCount, reservation);
     }
 
     @Override
@@ -345,6 +342,14 @@ public class JdbcReservationRepository implements ReservationRepository {
             );
             throw new InfrastructureException("예약 변경에 실패했습니다.");
         }
+    }
+
+    private Optional<Reservation> toUpdatedReservation(int rowCount, Reservation reservation) {
+        if (rowCount == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(reservation);
     }
 
     private Long getGeneratedId(KeyHolder keyHolder, Reservation reservation) {

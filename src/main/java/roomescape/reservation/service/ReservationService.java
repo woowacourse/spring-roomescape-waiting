@@ -121,7 +121,8 @@ public class ReservationService {
 
     private Reservation updateReservationDateTime(Reservation reservation) {
         try {
-            return reservationRepository.updateDateTime(reservation);
+            return reservationRepository.updateDateTime(reservation)
+                    .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
         } catch (DuplicateKeyException exception) {
             throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }

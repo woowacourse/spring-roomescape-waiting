@@ -17,7 +17,7 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Reservation updateDateTime(Reservation reservation);
+    Optional<Reservation> updateDateTime(Reservation reservation);
 
     Reservation moveToHistory(Reservation reservation);
 
