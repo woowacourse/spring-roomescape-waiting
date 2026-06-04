@@ -87,6 +87,8 @@ public class ReceptionFacade {
         if (reservation.isPast(LocalDateTime.now(clock))) {
             throw new RoomEscapeException(DomainErrorCode.PAST_RESERVATION_DELETE);
         }
+        reservationService.lockBySlot(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId());
         reservationService.delete(id);
 
         waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
@@ -105,8 +107,9 @@ public class ReceptionFacade {
 
     private ReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
                                                     ReservationTime reservationTime, Theme theme) {
-        Optional<Reservation> existing = reservationService.findBySlot(request.reservationDate(), request.timeId(),
+        Optional<Long> lockedId = reservationService.lockBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
+        Optional<Reservation> existing = lockedId.map(reservationService::findReservation);
         return existing.map(r -> {
             if (r.isReservedBy(request.name())) {
                 throw new RoomEscapeException(DomainErrorCode.DUPLICATED_RESERVATION);

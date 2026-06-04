@@ -13,6 +13,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId);
 
+    Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId);
+
     List<Reservation> findByName(String name);
 
     List<Reservation> findAll();

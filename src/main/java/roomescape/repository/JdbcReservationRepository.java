@@ -90,6 +90,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Long> lockBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT id FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ?
+                FOR UPDATE
+                """;
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, Long.class, date, timeId, themeId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public List<Reservation> findByName(String name) {
         String sql = """
                 SELECT r.id, r.name, r.date,
