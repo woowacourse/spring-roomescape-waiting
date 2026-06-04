@@ -66,12 +66,14 @@ public class ReservationServiceTest {
     @Mock
     private WaitingDao waitingDao;
     @Mock
+    private ReservationRejectLogger reservationRejectLogger;
+    @Mock
     private SlotManager slotManager;
 
     @BeforeEach
     void setUp() {
         reservationService = new ReservationService(reservationDao, reservationTimeDao, themeDao, waitingDao,
-                slotManager, clock);
+                reservationRejectLogger, slotManager, clock);
     }
 
     @Test

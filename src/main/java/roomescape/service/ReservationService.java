@@ -30,6 +30,7 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final WaitingDao waitingDao;
+    private final ReservationRejectLogger reservationRejectLogger;
     private final SlotManager slotManager;
     private final Clock clock;
 
@@ -38,6 +39,7 @@ public class ReservationService {
             ReservationTimeDao reservationTimeDao,
             ThemeDao themeDao,
             WaitingDao waitingDao,
+            ReservationRejectLogger reservationRejectLogger,
             SlotManager slotManager,
             Clock clock
     ) {
@@ -45,6 +47,7 @@ public class ReservationService {
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.waitingDao = waitingDao;
+        this.reservationRejectLogger = reservationRejectLogger;
         this.slotManager = slotManager;
         this.clock = clock;
     }
@@ -86,7 +89,7 @@ public class ReservationService {
         EventSlot eventSlot = pending.getEventSlot();
         if (!slotManager.tryAcquire(eventSlot)) {
             Reservation rejected = pending.reject();
-            reservationDao.save(rejected);
+            reservationRejectLogger.logRejection(rejected);
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
