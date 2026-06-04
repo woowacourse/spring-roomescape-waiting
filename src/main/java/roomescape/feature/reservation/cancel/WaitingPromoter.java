@@ -31,7 +31,7 @@ public class WaitingPromoter {
             backoff = @Backoff(delay = PROMOTION_BACKOFF_MILLIS, multiplier = PROMOTION_BACKOFF_MULTIPLIER)
     )
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void promoteFastestWaiting(ActiveReservationCancelEvent event) {
+    public void promoteFastestWaiting(SlotReleasedEvent event) {
         if (reservationRepository.existsActiveReservation(event.date(), event.timeId(), event.themeId())) {
             return;
         }
@@ -53,7 +53,7 @@ public class WaitingPromoter {
     }
 
     @Recover
-    public void recoverPromotion(DataAccessException exception, ActiveReservationCancelEvent event) {
+    public void recoverPromotion(DataAccessException exception, SlotReleasedEvent event) {
         log.error(
                 "대기 예약 자동 승격에 재시도 후에도 실패했습니다. date={}, timeId={}, themeId={}",
                 event.date(), event.timeId(), event.themeId(), exception

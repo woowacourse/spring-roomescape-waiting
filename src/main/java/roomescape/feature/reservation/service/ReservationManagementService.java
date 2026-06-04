@@ -21,7 +21,7 @@ import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.feature.reservation.dto.response.ReservationResponseDto;
 import roomescape.feature.reservation.error.type.ReservationErrorType;
-import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
+import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.mapper.ReservationMapper;
 import roomescape.feature.reservation.repository.ReservationRepository;
 import roomescape.feature.theme.domain.Theme;
@@ -132,7 +132,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
 
         validateNotReservedOrWaitedByOther(updated);
 
-        eventPublisher.publishEvent(new ActiveReservationCancelEvent(
+        eventPublisher.publishEvent(new SlotReleasedEvent(
                 existingReservation.getTime().getId(),
                 existingReservation.getTheme().getId(),
                 existingReservation.getDate()
@@ -154,7 +154,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
-        eventPublisher.publishEvent(new ActiveReservationCancelEvent(
+        eventPublisher.publishEvent(new SlotReleasedEvent(
                 canceledReservation.getTime().getId(),
                 canceledReservation.getTheme().getId(),
                 canceledReservation.getDate()
@@ -176,7 +176,7 @@ public class ReservationManagementService implements ReservationService, AdminRe
         reservationRepository.update(reservation.delete());
 
         if (reservation.getStatus() == ReservationStatus.ACTIVE) {
-            eventPublisher.publishEvent(new ActiveReservationCancelEvent(
+            eventPublisher.publishEvent(new SlotReleasedEvent(
                     reservation.getTime().getId(),
                     reservation.getTheme().getId(),
                     reservation.getDate()

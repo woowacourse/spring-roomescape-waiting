@@ -57,7 +57,7 @@ class WaitingPromoterTest {
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);
@@ -70,7 +70,7 @@ class WaitingPromoterTest {
                     .thenReturn(true);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository, never()).findLowestIdWaitingReservation(any(), any(), any());
@@ -84,7 +84,7 @@ class WaitingPromoterTest {
                     .thenReturn(Optional.empty());
 
             // when
-            waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository, never()).changeStatus(any(), any(), any());
@@ -106,7 +106,7 @@ class WaitingPromoterTest {
                     .thenReturn(1);
 
             // when
-            waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+            waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
             // then
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.ACTIVE);

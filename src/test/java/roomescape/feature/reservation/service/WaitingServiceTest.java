@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
+import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -193,7 +193,7 @@ class WaitingServiceTest {
             assertThat(result.id()).isEqualTo(1L);
 
             verify(reservationRepository).changeStatus(1L, ReservationStatus.WAITING, ReservationStatus.CANCELED);
-            verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
+            verify(eventPublisher, never()).publishEvent(any(SlotReleasedEvent.class));
         }
 
         @Test

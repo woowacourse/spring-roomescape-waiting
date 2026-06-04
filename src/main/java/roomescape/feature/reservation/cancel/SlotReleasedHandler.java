@@ -9,12 +9,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ActiveReservationCancelHandler {
+public class SlotReleasedHandler {
 
     private final WaitingPromoter waitingPromoter;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void confirmFastestWaiting(ActiveReservationCancelEvent event) {
+    public void handleSlotReleasedEvent(SlotReleasedEvent event) {
         try {
             waitingPromoter.promoteFastestWaiting(event);
         } catch (Exception exception) {

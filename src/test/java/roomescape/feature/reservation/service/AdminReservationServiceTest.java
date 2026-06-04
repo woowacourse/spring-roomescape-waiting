@@ -19,7 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
+import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.domain.Reservation;
 import roomescape.feature.reservation.domain.ReservationStatus;
 import roomescape.feature.reservation.domain.ReserverName;
@@ -162,8 +162,8 @@ class AdminReservationServiceTest {
             reservationService.deleteReservationById(1L);
 
             // then
-            ArgumentCaptor<ActiveReservationCancelEvent> captor =
-                ArgumentCaptor.forClass(ActiveReservationCancelEvent.class);
+            ArgumentCaptor<SlotReleasedEvent> captor =
+                ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
             assertThat(captor.getValue().timeId()).isEqualTo(time.getId());
             assertThat(captor.getValue().themeId()).isEqualTo(theme.getId());

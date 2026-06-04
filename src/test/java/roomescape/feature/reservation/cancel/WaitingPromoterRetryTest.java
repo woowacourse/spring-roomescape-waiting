@@ -76,7 +76,7 @@ class WaitingPromoterRetryTest {
                 .thenReturn(1);
 
         // when
-        waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+        waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
         // then: 재시도되어 총 2회 조회, 승격 1회 수행
         verify(reservationRepository, times(2)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
@@ -91,7 +91,7 @@ class WaitingPromoterRetryTest {
 
         // when & then: 최대 시도(5회) 후 @Recover 가 예외를 전파하지 않는다
         assertThatNoException().isThrownBy(() ->
-                waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE)));
+                waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE)));
         verify(reservationRepository, times(5)).findLowestIdWaitingReservation(DATE, TIME_ID, THEME_ID);
         verify(reservationRepository, times(0)).changeStatus(any(), any(), any());
     }
@@ -103,7 +103,7 @@ class WaitingPromoterRetryTest {
                 .thenThrow(new CannotAcquireLockException("지속적인 락 획득 실패"));
 
         // when: 최대 시도 후 @Recover(recoverPromotion) 진입
-        waitingPromoter.promoteFastestWaiting(new ActiveReservationCancelEvent(TIME_ID, THEME_ID, DATE));
+        waitingPromoter.promoteFastestWaiting(new SlotReleasedEvent(TIME_ID, THEME_ID, DATE));
 
         // then: recoverPromotion 이 ERROR 로그를 한 번 남긴다
         List<ILoggingEvent> errorLogs = logAppender.list.stream()

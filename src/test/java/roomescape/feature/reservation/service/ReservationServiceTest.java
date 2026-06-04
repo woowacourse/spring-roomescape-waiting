@@ -19,7 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import roomescape.feature.reservation.cancel.ActiveReservationCancelEvent;
+import roomescape.feature.reservation.cancel.SlotReleasedEvent;
 import roomescape.feature.reservation.dto.command.ReservationCreateCommand;
 import roomescape.feature.reservation.dto.command.ReservationUpdateCommand;
 import roomescape.feature.reservation.dto.response.ReservationCancelResponseDto;
@@ -322,8 +322,8 @@ class ReservationServiceTest {
             reservationService.updateReservation(1L, command);
 
             // then: 비워진 원래 슬롯(timeId=1, themeId=1, futureDate) 기준으로 이벤트 발행
-            ArgumentCaptor<ActiveReservationCancelEvent> captor =
-                ArgumentCaptor.forClass(ActiveReservationCancelEvent.class);
+            ArgumentCaptor<SlotReleasedEvent> captor =
+                ArgumentCaptor.forClass(SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
             assertThat(captor.getValue().timeId()).isEqualTo(1L);
             assertThat(captor.getValue().themeId()).isEqualTo(1L);
@@ -555,7 +555,8 @@ class ReservationServiceTest {
             reservationService.cancelReservation(1L, new ReserverName("예약자"));
 
             // then
-            ArgumentCaptor<ActiveReservationCancelEvent> captor = ArgumentCaptor.forClass(ActiveReservationCancelEvent.class);
+            ArgumentCaptor<SlotReleasedEvent> captor = ArgumentCaptor.forClass(
+                    SlotReleasedEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
             assertThat(captor.getValue().timeId()).isEqualTo(1L);
             assertThat(captor.getValue().themeId()).isEqualTo(1L);
@@ -595,7 +596,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 찾을 수 없습니다.");
 
             verify(reservationRepository, never()).changeStatus(any(), any(), any());
-            verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
+            verify(eventPublisher, never()).publishEvent(any(SlotReleasedEvent.class));
         }
 
         @Test
@@ -615,7 +616,7 @@ class ReservationServiceTest {
                 .hasMessage("예약을 취소할 권한이 없습니다.");
 
             verify(reservationRepository, never()).changeStatus(any(), any(), any());
-            verify(eventPublisher, never()).publishEvent(any(ActiveReservationCancelEvent.class));
+            verify(eventPublisher, never()).publishEvent(any(SlotReleasedEvent.class));
         }
 
         @Test
