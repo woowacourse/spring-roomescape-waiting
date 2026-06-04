@@ -7,7 +7,7 @@ public interface ThemeRepository {
 
     Theme save(Theme theme);
 
-    Optional<Theme> findById(Long id);
+    Optional<Theme> findById(long id);
 
     boolean existsByName(Theme theme);
 

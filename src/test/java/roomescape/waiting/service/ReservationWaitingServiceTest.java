@@ -4,15 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.lenient;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +43,13 @@ class ReservationWaitingServiceTest {
         return new Reservation(id, name, slot, slot.date().atStartOfDay());
     }
 
+    private void givenReservationTimeAndTheme() {
+        given(reservationTimeService.getByIdForUpdate(anyLong()))
+                .willReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
+        given(themeService.findById(anyLong()))
+                .willReturn(new Theme(1L, "테마", "설명", "url"));
+    }
+
     @Mock
     private ReservationWaitingRepository reservationWaitingRepository;
 
@@ -59,18 +65,11 @@ class ReservationWaitingServiceTest {
     @InjectMocks
     private ReservationWaitingService reservationWaitingService;
 
-    @BeforeEach
-    void setUp() {
-        lenient().when(reservationTimeService.getByIdForUpdate(any()))
-                .thenReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
-        lenient().when(themeService.findById(any()))
-                .thenReturn(new Theme(1L, "테마", "설명", "url"));
-    }
-
     @Test
     @DisplayName("예약 대기 생성 시, 대기 신청 대상 예약이 존재하지 않으면 NotFoundException이 발생한다.")
     void save_NoTargetReservation_ThrowsNotFoundException() {
         // given
+        givenReservationTimeAndTheme();
         ReservationWaitingCommand command = new ReservationWaitingCommand(
                 "브라운", LocalDate.now().plusDays(1), 1L, 1L
         );
@@ -86,6 +85,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 동일 슬롯에 본인이 이미 예약해 둔 상태라면 InvalidBusinessStateException이 발생한다.")
     void save_AlreadyReservedByRequester_ThrowsInvalidBusinessStateException() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -109,6 +109,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 동일 슬롯에 본인이 이미 대기를 걸어둔 상태라면 InvalidBusinessStateException이 발생한다.")
     void save_AlreadyWaitingByRequester_ThrowsInvalidBusinessStateException() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -133,6 +134,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 과거 날짜의 슬롯이면 InvalidBusinessStateException이 발생한다.")
     void save_PastDate_ThrowsInvalidBusinessStateException() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -142,11 +144,9 @@ class ReservationWaitingServiceTest {
                 "브라운", pastDate, 1L, 1L
         );
 
-        lenient().when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(
-                Optional.of(targetReservation));
-        lenient().when(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).thenReturn(false);
-        lenient().when(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class)))
-                .thenReturn(false);
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(Optional.of(targetReservation));
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
@@ -158,6 +158,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 오늘이지만 이미 지난 시각의 슬롯이면 InvalidBusinessStateException이 발생한다.")
     void save_TodayDateButPastTime_ThrowsInvalidBusinessStateException() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate today = LocalDate.now();
         LocalTime pastTime = LocalTime.now().minusHours(1);
         ReservationTime time = new ReservationTime(1L, pastTime);
@@ -166,11 +167,9 @@ class ReservationWaitingServiceTest {
 
         ReservationWaitingCommand command = new ReservationWaitingCommand("브라운", today, 1L, 1L);
 
-        lenient().when(reservationRepository.findBySlot(any(ReservationSlot.class))).thenReturn(
-                Optional.of(targetReservation));
-        lenient().when(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).thenReturn(false);
-        lenient().when(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class)))
-                .thenReturn(false);
+        given(reservationRepository.findBySlot(any(ReservationSlot.class))).willReturn(Optional.of(targetReservation));
+        given(reservationRepository.hasBookingAtSameTime(any(Reservation.class))).willReturn(false);
+        given(reservationWaitingRepository.hasWaitingAtSameTime(any(ReservationWaiting.class))).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.save(command, java.time.LocalDateTime.now()))
@@ -182,6 +181,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 데이터베이스 제약 조건 위반 등으로 중복 생성 시 ConflictException이 발생한다.")
     void save_DuplicateWaitingInDb_ThrowsConflictException() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -208,7 +208,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 삭제 시, 존재하지 않는 대기 아이디인 경우 NotFoundException이 발생한다.")
     void deleteById_NotExistWaiting_ThrowsNotFoundException() {
         // given
-        given(reservationWaitingRepository.findById(any()))
+        given(reservationWaitingRepository.findById(anyLong()))
                 .willReturn(Optional.empty());
 
         // when & then
@@ -227,7 +227,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
                 futureDate.atStartOfDay());
 
-        given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
+        given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "포비", java.time.LocalDateTime.now()))
@@ -245,7 +245,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(pastDate, time, theme),
                 pastDate.atStartOfDay());
 
-        given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
+        given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
@@ -264,7 +264,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(today, time, theme),
                 today.atStartOfDay());
 
-        given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
+        given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.deleteById(1L, "브라운", java.time.LocalDateTime.now()))
@@ -282,7 +282,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
                 futureDate.atStartOfDay());
 
-        given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
+        given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
         willThrow(new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage()))
                 .given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
@@ -296,6 +296,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 조건이 유효하면 정상적으로 생성에 성공한다.")
     void save_Success() {
         // given
+        givenReservationTimeAndTheme();
         LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -329,7 +330,7 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(1L, "브라운", new ReservationSlot(futureDate, time, theme),
                 futureDate.atStartOfDay());
 
-        given(reservationWaitingRepository.findById(any())).willReturn(Optional.of(waiting));
+        given(reservationWaitingRepository.findById(anyLong())).willReturn(Optional.of(waiting));
         willDoNothing().given(reservationWaitingRepository).delete(any(ReservationWaiting.class));
 
         // when & then

@@ -36,7 +36,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
+    public Optional<Reservation> findById(long id) {
         return reservationDao.findById(id);
     }
 

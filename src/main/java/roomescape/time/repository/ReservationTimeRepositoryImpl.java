@@ -23,12 +23,12 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findById(Long id) {
+    public Optional<ReservationTime> findById(long id) {
         return reservationTimeDao.findById(id);
     }
 
     @Override
-    public Optional<ReservationTime> findByIdForUpdate(Long id) {
+    public Optional<ReservationTime> findByIdForUpdate(long id) {
         return reservationTimeDao.findByIdForUpdate(id);
     }
 
@@ -43,7 +43,7 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public List<AvailableTimeQueryResult> queryAvailableTimes(Long themeId, LocalDate date) {
+    public List<AvailableTimeQueryResult> queryAvailableTimes(long themeId, LocalDate date) {
         return reservationTimeDao.queryAvailableTimes(themeId, date);
     }
 

@@ -69,9 +69,7 @@ public class ReservationService {
     @Transactional
     public void deleteById(long id, String name, LocalDateTime requestTime) {
         Reservation reservation = getById(id);
-        if (name != null) {
-            reservation.validateOwner(name);
-        }
+        reservation.validateOwner(name);
         reservation.validateExpiry(requestTime);
 
         reservationTimeService.getByIdForUpdate(reservation.getTimeId());
@@ -126,15 +124,8 @@ public class ReservationService {
                                           LocalDateTime requestTime) {
         Reservation reservation = getById(id);
         reservation.validateExpiry(requestTime);
-        ReservationTime newTime = getReservationTime(command.timeId());
+        ReservationTime newTime = reservationTimeService.getByIdForUpdate((command.timeId()));
         return reservation.update(command.date(), newTime, name, requestTime);
-    }
-
-    private ReservationTime getReservationTime(Long timeId) {
-        if (timeId == null) {
-            return null;
-        }
-        return reservationTimeService.getByIdForUpdate(timeId);
     }
 
     private void validateUpdatedReservation(Reservation updated) {

@@ -47,13 +47,29 @@ class JdbcReservationQueryDaoTest {
     }
 
     private long createTime(LocalTime time) {
-        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", Time.valueOf(time));
-        return jdbcTemplate.queryForObject("SELECT id FROM reservation_time WHERE start_at = ?", Long.class, Time.valueOf(time));
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_at) VALUES (?)",
+                Time.valueOf(time)
+        );
+
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_time WHERE start_at = ?",
+                Long.class,
+                Time.valueOf(time)
+        );
     }
 
     private long createTheme(String name, String description, String thumbnailUrl) {
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", name, description, thumbnailUrl);
-        return jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, name);
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                name,
+                description,
+                thumbnailUrl
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM theme WHERE name = ?",
+                Long.class, name
+        );
     }
 
     private void createReservation(String name, LocalDate date, long timeId, long themeId) {

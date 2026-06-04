@@ -23,7 +23,7 @@ public class ReservationWaitingRepositoryImpl implements ReservationWaitingRepos
     }
 
     @Override
-    public Optional<ReservationWaiting> findById(Long id) {
+    public Optional<ReservationWaiting> findById(long id) {
         return reservationWaitingDao.findById(id);
     }
 

@@ -9,7 +9,7 @@ public interface ReservationWaitingRepository {
 
     ReservationWaiting save(ReservationWaiting reservationWaiting);
 
-    Optional<ReservationWaiting> findById(Long id);
+    Optional<ReservationWaiting> findById(long id);
 
     List<ReservationWaiting> findAllByName(String name);
 

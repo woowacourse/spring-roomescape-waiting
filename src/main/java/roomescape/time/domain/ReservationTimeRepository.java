@@ -9,15 +9,15 @@ public interface ReservationTimeRepository {
 
     ReservationTime save(ReservationTime reservationTime);
 
-    Optional<ReservationTime> findById(Long id);
+    Optional<ReservationTime> findById(long id);
 
-    Optional<ReservationTime> findByIdForUpdate(Long id);
+    Optional<ReservationTime> findByIdForUpdate(long id);
 
     boolean existsByStartAt(ReservationTime reservationTime);
 
     List<ReservationTime> findAll();
 
-    List<AvailableTimeQueryResult> queryAvailableTimes(Long themeId, LocalDate date);
+    List<AvailableTimeQueryResult> queryAvailableTimes(long themeId, LocalDate date);
 
     void delete(ReservationTime time);
 }

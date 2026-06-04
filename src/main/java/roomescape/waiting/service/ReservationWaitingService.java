@@ -58,9 +58,7 @@ public class ReservationWaitingService {
     @Transactional
     public void deleteById(long id, String name, LocalDateTime requestTime) {
         ReservationWaiting reservationWaiting = getById(id);
-        if (name != null) {
-            reservationWaiting.validateOwner(name);
-        }
+        reservationWaiting.validateOwner(name);
         reservationWaiting.validateExpiry(requestTime);
 
         reservationWaitingRepository.delete(reservationWaiting);

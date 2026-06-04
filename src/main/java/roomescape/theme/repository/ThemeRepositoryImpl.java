@@ -21,7 +21,7 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(Long id) {
+    public Optional<Theme> findById(long id) {
         return themeDao.findById(id);
     }
 
