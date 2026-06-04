@@ -91,27 +91,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(Long id) {
-        storage.remove(id);
-    }
-
-    @Override
-    public void updateStatus(ReservationStatus changeStatus, Long id) {
-        Reservation reservation = storage.get(id);
-        if (reservation == null) {
-            return;
-        }
-        storage.put(id, Reservation.of(
-            reservation.getId(),
-            reservation.getReservationSlot(),
-            reservation.getUser(),
-            changeStatus,
-            reservation.getCreatedAt(),
-            reservation.getUpdatedAt()
-        ));
-    }
-
-    @Override
     public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
         return storage.values().stream()
             .filter(this::isActive)

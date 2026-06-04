@@ -555,9 +555,9 @@ class ReservationServiceTest {
         Reservation updatedSecondWaitingReservation = reservationRepository.findById(secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
-            assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
             assertThat(updatedSecondWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+            assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         });
     }
 

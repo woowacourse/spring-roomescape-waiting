@@ -71,7 +71,10 @@ public class ReservationService {
     @Transactional
     public void cancelReservationByAdmin(Long id) {
         Reservation reservation = findReservationByIdOrThrow(id);
-        reservationRepository.updateStatus(ReservationStatus.CANCELED, id);
+        reservationRepository.update(
+            reservation.getId(),
+            reservation.update(ReservationStatus.CANCELED, clock)
+        );
         if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
             promoteFirstWaitingReservation(reservation.getReservationSlot());
         }
@@ -81,8 +84,13 @@ public class ReservationService {
     public void cancelUserReservation(Long id) {
         Reservation reservation = findReservationByIdOrThrow(id);
         validateReservationDeletionAllowed(reservation);
-        reservationRepository.deleteById(id);
-        deleteReservationSlotIfEmpty(reservation.getReservationSlot());
+        reservationRepository.update(
+            reservation.getId(),
+            reservation.update(ReservationStatus.CANCELED, clock)
+        );
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            promoteFirstWaitingReservation(reservation.getReservationSlot());
+        }
     }
 
     @Transactional
@@ -134,31 +142,24 @@ public class ReservationService {
         return reservationTime;
     }
 
-    private void deleteReservationSlotIfEmpty(ReservationSlot reservationSlot) {
-        List<Reservation> orderedReservations = reservationRepository.findAllByReservationIdOrder(
-            reservationSlot.getId());
-        if (orderedReservations.isEmpty()) {
-            reservationSlotService.deleteReservationSlot(reservationSlot.getId());
-        }
-    }
-
-    private void promoteFirstWaitingReservation(ReservationSlot reservationSlot) {
-        reservationRepository.findAllByReservationIdOrder(reservationSlot.getId()).stream()
-            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
-            .findFirst()
-            .ifPresent(reservation -> reservationRepository.updateStatus(
-                ReservationStatus.CONFIRMED,
-                reservation.getId()
-            ));
-    }
-
     private boolean hasSameReservationSlot(ReservationSlot oldSlot, ReservationSlot newSlot) {
         return oldSlot.getId().equals(newSlot.getId());
     }
 
     private void updateReservationWhenSameSlot(Reservation reservation, ReservationSlot currentReservationSlot) {
-        reservationRepository.update(reservation.getId(), reservation.update(clock));
-        deleteReservationSlotIfEmpty(currentReservationSlot);
+        Long currentReservationCount = reservationRepository.countByReservationSlotId(currentReservationSlot.getId());
+        ReservationStatus updatedStatus = decideWaitingStatus(currentReservationCount - 1);
+        reservationRepository.update(
+            reservation.getId(),
+            reservation.update(currentReservationSlot, updatedStatus, clock)
+        );
+        if (shouldPromoteNextWaitingReservation(reservation, updatedStatus)) {
+            promoteFirstWaitingReservation(currentReservationSlot);
+        }
+    }
+
+    private boolean shouldPromoteNextWaitingReservation(Reservation reservation, ReservationStatus updatedStatus) {
+        return reservation.getStatus() == ReservationStatus.CONFIRMED && updatedStatus == ReservationStatus.WAITING;
     }
 
     private void updateReservationWhenMovingSlot(
@@ -176,8 +177,19 @@ public class ReservationService {
         );
 
         reservationRepository.update(reservation.getId(), reservationToSave);
+        if (reservation.getStatus() == ReservationStatus.CONFIRMED) {
+            promoteFirstWaitingReservation(currentSlot);
+        }
+    }
 
-        deleteReservationSlotIfEmpty(currentSlot);
+    private void promoteFirstWaitingReservation(ReservationSlot reservationSlot) {
+        reservationRepository.findAllByReservationIdOrder(reservationSlot.getId()).stream()
+            .filter(reservation -> reservation.getStatus() == ReservationStatus.WAITING)
+            .findFirst()
+            .ifPresent(reservation -> reservationRepository.update(
+                reservation.getId(),
+                reservation.update(ReservationStatus.CONFIRMED, clock)
+            ));
     }
 
     private Reservation buildReservation(ReservationSlot reservationSlot, User user) {

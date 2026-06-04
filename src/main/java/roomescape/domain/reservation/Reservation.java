@@ -77,6 +77,20 @@ public class Reservation {
         );
     }
 
+    public Reservation update(
+        ReservationStatus reservationStatus,
+        Clock clock
+    ) {
+        return new Reservation(
+            id,
+            reservationSlot,
+            user,
+            reservationStatus,
+            createdAt,
+            LocalDateTime.now(clock)
+        );
+    }
+
     public Reservation update(Clock clock) {
         return new Reservation(
             id,

@@ -197,12 +197,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             set reservation_slot_id = ?, user_id = ?, status = ?, created_at = ?, updated_at = ?
             where id = ?
             """;
-    private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
-    private static final String UPDATE_STATUS_SQL = """
-        update reservation
-        set status = ?
-        where id = ?
-        """;
     private static final String COUNT_RESERVATION_BY_THEME_AND_DATE =
         """
             select rt.id as time_id,
@@ -290,16 +284,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             reservationId
         );
         return exists != null && exists;
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        jdbcTemplate.update(DELETE_BY_ID_SQL, id);
-    }
-
-    @Override
-    public void updateStatus(ReservationStatus changeStatus, Long id) {
-        jdbcTemplate.update(UPDATE_STATUS_SQL, changeStatus.name(), id);
     }
 
     @Override
