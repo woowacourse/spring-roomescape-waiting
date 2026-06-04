@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.ThemeService;
@@ -24,7 +24,7 @@ import roomescape.exception.client.BusinessRuleViolationException;
  * AdminThemeController 슬라이스 테스트 (@WebMvcTest).
  *
  * <p>고유 책임: 테마 생성 요청 본문의 @Valid 검증(@NotBlank)과, 서비스 예외의 상태코드 변환.
- * 서비스는 @MockBean으로 대체한다.
+ * 서비스는 @MockitoBean으로 대체한다.
  */
 @WebMvcTest(AdminThemeController.class)
 class AdminThemeControllerTest {
@@ -32,7 +32,7 @@ class AdminThemeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ThemeService themeService;
 
     @Nested

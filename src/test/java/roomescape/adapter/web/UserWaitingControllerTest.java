@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.application.WaitingService;
@@ -33,7 +33,7 @@ import roomescape.exception.client.ResourceNotFoundException;
  *   <li>정상 생성 시 201과 응답 형식</li>
  *   <li>서비스가 던진 예외가 GlobalExceptionHandler를 거쳐 약속된 상태코드+{"message":...}로 변환되는가</li>
  * </ul>
- * 서비스는 @MockBean으로 대체한다 — 여기서 "유스케이스가 진짜 동작하는가"는 검증하지 않는다.
+ * 서비스는 @MockitoBean으로 대체한다 — 여기서 "유스케이스가 진짜 동작하는가"는 검증하지 않는다.
  * 그건 WaitingServiceTest(통합)의 책임이다.
  *
  * <p>학습 메모: 이 슬라이스가 "인수 테스트로 흡수해도 되는데 왜 따로 두나"의 사례다.
@@ -48,7 +48,7 @@ class UserWaitingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private WaitingService waitingService;
 
     @Nested
