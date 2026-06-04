@@ -10,12 +10,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import roomescape.reservation.dao.dto.ReservationWithRank;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.response.MyReservationResponse;
-import roomescape.reservation.dto.response.ThemeSimpleResponse;
-import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Component
@@ -179,7 +177,7 @@ public class ReservationDao {
     return count != null && count > 0;
   }
 
-  public List<MyReservationResponse> findAllByName(String name) {
+  public List<ReservationWithRank> findAllByName(String name) {
     String sql = "with waiting_rank as ( "
         + "  select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank "
         + "  from reservation "
@@ -195,12 +193,14 @@ public class ReservationDao {
         + "left  join waiting_rank wr    on r.id = wr.id "
         + "where r.name = ?";
 
-    return jdbcTemplate.query(sql, (rs, rowNum) -> new MyReservationResponse(
+    return jdbcTemplate.query(sql, (rs, rowNum) -> new ReservationWithRank(
         rs.getLong("id"),
         rs.getString("name"),
         LocalDate.parse(rs.getString("date")),
-        new TimeResponse(rs.getLong("time_id"), LocalTime.parse(rs.getString("start_at"))),
-        new ThemeSimpleResponse(rs.getLong("theme_id"), rs.getString("theme_name")),
+        rs.getLong("time_id"),
+        LocalTime.parse(rs.getString("start_at")),
+        rs.getLong("theme_id"),
+        rs.getString("theme_name"),
         ReservationStatus.valueOf(rs.getString("status")),
         rs.getObject("wait_rank", Long.class)
     ), name);

@@ -110,7 +110,17 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByName(String name) {
-        return reservationDao.findAllByName(name);
+        return reservationDao.findAllByName(name).stream()
+                .map(r -> new MyReservationResponse(
+                        r.id(),
+                        r.name(),
+                        r.date(),
+                        new TimeResponse(r.timeId(), r.startAt()),
+                        new ThemeSimpleResponse(r.themeId(), r.themeName()),
+                        r.status(),
+                        r.waitRank()
+                ))
+                .toList();
     }
 
     private static void validateReservedIsCanceled(Reservation reservation) {
