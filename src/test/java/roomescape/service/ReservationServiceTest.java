@@ -1,20 +1,5 @@
 package roomescape.service;
 
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.exception.BusinessException;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -25,15 +10,33 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
+import roomescape.repository.ThemeRepository;
+
 class ReservationServiceTest {
 
     private final ReservationRepository reservationRepository = mock();
     private final ReservationTimeRepository reservationTimeRepository = mock();
+    private final ReservationWaitingRepository reservationWaitingRepository = mock();
     private final ThemeRepository themeRepository = mock();
     private final ReservationValidator reservationValidator = new ReservationValidator(reservationRepository);
     private final ReservationService service = new ReservationService(
             reservationRepository,
             reservationTimeRepository,
+            reservationWaitingRepository,
             themeRepository,
             reservationValidator);
 
@@ -166,9 +169,47 @@ class ReservationServiceTest {
         // given
         Long id = 1L;
         String name = "브라운";
-        Reservation reservation = createReservation(id, name, date, new ReservationTime(1L, LocalTime.parse("08:00")));
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, name, date, time);
+        ReservationWaiting waiting = new ReservationWaiting(1L, "구구", date, time, reservation.getTheme());
+        Reservation promotedReservation = createReservation(2L, "구구", date, time);
         when(reservationRepository.findById(id))
                 .thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+                .thenReturn(Optional.of(waiting));
+        when(reservationRepository.insert(any(Reservation.class)))
+                .thenReturn(promotedReservation.getId());
+        when(reservationRepository.findById(promotedReservation.getId()))
+                .thenReturn(Optional.of(promotedReservation));
+
+        // when
+        service.delete(id, name);
+
+        // then
+        ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
+        verify(reservationRepository, times(1)).delete(id);
+        verify(reservationRepository, times(1)).insert(captor.capture());
+        verify(reservationWaitingRepository, times(1)).delete(waiting.getId());
+
+        Reservation captured = captor.getValue();
+        assertAll(
+                () -> assertThat(captured.getName()).isEqualTo(waiting.getName()),
+                () -> assertThat(captured.getDate()).isEqualTo(waiting.getDate()),
+                () -> assertThat(captured.getTime()).isEqualTo(waiting.getTime()),
+                () -> assertThat(captured.getTheme()).isEqualTo(waiting.getTheme()));
+    }
+
+    @Test
+    void 사용자_본인_예약_삭제시_다음_대기가_없으면_승격하지_않는다() {
+        // given
+        Long id = 1L;
+        String name = "브라운";
+        ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
+        Reservation reservation = createReservation(id, name, date, time);
+        when(reservationRepository.findById(id))
+                .thenReturn(Optional.of(reservation));
+        when(reservationWaitingRepository.findFirstWaiting(date, time.getId(), reservation.getTheme().getId()))
+                .thenReturn(Optional.empty());
 
         // when
         service.delete(id, name);
