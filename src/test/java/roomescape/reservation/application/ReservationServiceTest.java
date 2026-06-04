@@ -210,6 +210,39 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("관리자 예약 삭제 시 같은 슬롯의 1순위 대기를 예약으로 전환한다")
+    void deleteReservation_success_when_first_waiting_exists() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        Reservation promotedReservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        ).orElseThrow();
+        assertThat(promotedReservation.getName()).isEqualTo("브라운");
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
+    @Test
     @DisplayName("존재하지 않는 예약 아이디로 삭제하면 예외가 발생한다")
     void deleteReservation_fail_with_not_found_reservation() {
         // when & then
