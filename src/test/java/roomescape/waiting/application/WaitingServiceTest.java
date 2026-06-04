@@ -34,7 +34,14 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
-        waitingReference = command -> {
+        waitingReference = new WaitingReference() {
+            @Override
+            public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+            }
+
+            @Override
+            public void promoteToReservation(Waiting waiting) {
+            }
         };
         waitingService = new WaitingService(
                 waitingRepository,
@@ -163,8 +170,15 @@ class WaitingServiceTest {
                 waitingRepository,
                 reservationTimeRepository,
                 themeRepository,
-                command -> {
-                    throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                        throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                    }
                 },
                 new WaitingValidator(waitingRepository)
         );

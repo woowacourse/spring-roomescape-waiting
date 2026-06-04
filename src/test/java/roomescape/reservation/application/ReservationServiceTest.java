@@ -23,6 +23,10 @@ import roomescape.reservationTime.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
+import roomescape.waiting.application.WaitingReference;
+import roomescape.waiting.application.WaitingService;
+import roomescape.waiting.application.WaitingValidator;
+import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.fake.FakeWaitingRepository;
@@ -41,12 +45,34 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         waitingRepository = new FakeWaitingRepository();
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        reservationRepository.save(Reservation.create(
+                                waiting.getName(),
+                                waiting.getDate(),
+                                waiting.getTime(),
+                                waiting.getTheme()
+                        ));
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
                 waitingRepository,
-                new ReservationValidator(reservationRepository)
+                new ReservationValidator(reservationRepository),
+                waitingService
         );
     }
 
