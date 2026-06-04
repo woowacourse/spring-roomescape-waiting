@@ -229,10 +229,9 @@ class ReservationIntegrationTest {
             themeId
         );
         jdbcTemplate.update(
-            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            "INSERT INTO reservation(user_id, reservation_slot_id, status) VALUES (?, ?, ?)",
             userId,
             reservationId,
-            null,
             "CONFIRMED"
         );
 
