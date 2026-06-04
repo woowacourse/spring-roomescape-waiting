@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public class ReservationTimeDao {
         return reservationTimes.stream().findFirst();
     }
 
-    public List<TimeSlot> findAvailableTime(Long id, String date) {
+    public List<TimeSlot> findAvailableTime(Long id, LocalDate date) {
         return jdbcTemplate.query("""
                                SELECT t.id AS time_id, t.start_at,
                                       CASE WHEN EXISTS (

@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<TimeSlotResponse> findAvailableTime(Long id, String date) {
+    public List<TimeSlotResponse> findAvailableTime(Long id, LocalDate date) {
         return reservationTimeDao.findAvailableTime(id, date)
                 .stream()
                 .map(TimeSlotResponse::from)
