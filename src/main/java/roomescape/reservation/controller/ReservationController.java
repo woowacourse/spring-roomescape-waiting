@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
+import roomescape.reservation.service.ReservationApplicationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.controller.dto.request.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
@@ -22,6 +23,7 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationApplicationService reservationApplicationService;
 
     @GetMapping(params = "customer-name")
     public ResponseEntity<ReservationsAndWaitingsResponse> findReservationsByCustomerName(
@@ -68,7 +70,7 @@ public class ReservationController {
     public ResponseEntity<Void> cancel(
             @PathVariable("reservation-id") Long reservationId
     ) {
-        reservationService.cancel(reservationId);
+        reservationApplicationService.cancelReservationByIdAndPromoteWaiting(reservationId);
         return ResponseEntity.noContent().build();
     }
 }

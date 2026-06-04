@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
@@ -96,6 +97,27 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
+    public ReservationResponse create(
+        final String customerName,
+        final LocalDate reservationDate,
+        final long timeId,
+        final long themeId
+    ) {
+        final ReservationTime reservationTime = getReservationTime(timeId);
+        final Theme theme = getTheme(themeId);
+
+        final Reservation reservation = Reservation.create(
+            customerName,
+            reservationDate,
+            reservationTime,
+            theme,
+            LocalDateTime.now(clock)
+        );
+        final Reservation savedReservation = saveReservation(reservation);
+
+        return ReservationResponse.from(savedReservation);
+    }
+
     public ReservationResponse updateByCustomer(final Long reservationId, final ReservationUpdateRequest data) {
         final Reservation originReservation = getReservation(reservationId);
         originReservation.validateModifiableByCustomer(LocalDate.now(clock));
@@ -109,19 +131,16 @@ public class ReservationService {
         return updateSchedule(data, originReservation);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
 
-        deleteReservation(reservationId);
-        promoteEarliestWaiting(reservation);
+        deleteReservation(reservation.getId());
     }
 
-    public void delete(final Long reservationId) {
-        final Reservation reservation = getReservation(reservationId);
-
+    public void deleteById(final Long reservationId) {
         deleteReservation(reservationId);
-        promoteEarliestWaiting(reservation);
     }
 
     @Transactional(readOnly = true)
@@ -210,7 +229,7 @@ public class ReservationService {
         }
     }
 
-    private Reservation getReservation(final Long reservationId) {
+    public Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(ReservationNotFoundException::new);
     }

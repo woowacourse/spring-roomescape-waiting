@@ -8,14 +8,13 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
-import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.controller.dto.request.WaitingCreateRequest;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.exception.NoReservationForWaitingException;
 import roomescape.waiting.service.dto.response.WaitingCreateResponse;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class WaitingApplicationService {
 
     private final WaitingService waitingService;

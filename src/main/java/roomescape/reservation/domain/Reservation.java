@@ -74,6 +74,14 @@ public class Reservation {
         return customerName.name();
     }
 
+    public long getTimeId() {
+        return time.getId();
+    }
+
+    public long getThemeId() {
+        return theme.getId();
+    }
+
     public void validateCancelableByCustomer(final LocalDate today) {
         if (isReservationDatePastOrToday(today)) {
             throw new ReservationCancellationException();

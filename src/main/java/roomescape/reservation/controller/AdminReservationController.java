@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.reservation.service.ReservationApplicationService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.controller.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationResponse;
@@ -16,6 +17,7 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationApplicationService reservationApplicationService;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations() {
@@ -36,7 +38,7 @@ public class AdminReservationController {
     public ResponseEntity<Void> delete(
             @PathVariable("reservation-id") Long reservationId
     ) {
-        reservationService.delete(reservationId);
+        reservationApplicationService.deleteReservationById(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
