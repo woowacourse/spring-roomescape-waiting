@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.reservation.controller.dto.ReservationCommandResponse;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
@@ -34,7 +35,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(
+    public ResponseEntity<ReservationCommandResponse> create(
             @Valid @RequestBody ReservationCreateRequest reservationCreateRequest) {
         Reservation reservation = reservationService.create(
                 reservationCreateRequest.name(),
@@ -44,7 +45,7 @@ public class ReservationController {
         );
 
         return ResponseEntity.status(CREATED)
-                .body(ReservationResponse.from(reservation));
+                .body(ReservationCommandResponse.from(reservation));
     }
 
     @GetMapping
@@ -61,7 +62,7 @@ public class ReservationController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ReservationResponse> updateDateTime(
+    public ResponseEntity<ReservationCommandResponse> updateDateTime(
             @Positive(message = "예약 id는 1 이상의 숫자여야 합니다.")
             @PathVariable Long id,
 
@@ -74,7 +75,7 @@ public class ReservationController {
                 request.timeId()
         );
 
-        return ResponseEntity.ok(ReservationResponse.from(reservation));
+        return ResponseEntity.ok(ReservationCommandResponse.from(reservation));
     }
 
 

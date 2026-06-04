@@ -277,29 +277,35 @@ async function createReservation(event) {
             body: JSON.stringify({ name, date, timeId, themeId })
         });
         localStorage.setItem("roomflow.name", name);
-        showToast(resultMessage(reservation));
         state.selectedTimeId = null;
         await loadAvailability();
+        await showCommandResult(name, reservation);
     } catch (error) {
         showToast(error.message, "error");
     }
+}
+
+async function fetchReservationsByName(name) {
+    const response = await api(`/reservations?name=${encodeURIComponent(name)}`);
+    return sortReservations(response.reservations || []);
 }
 
 async function loadMyReservations() {
     const name = state.activeName || $("#lookupName").value.trim();
     if (!name) {
         renderMyReservations([]);
-        return;
+        return [];
     }
 
     try {
-        const response = await api(`/reservations?name=${encodeURIComponent(name)}`);
-        state.myReservations = sortReservations(response.reservations || []);
+        state.myReservations = await fetchReservationsByName(name);
         renderMyReservations(state.myReservations);
+        return state.myReservations;
     } catch (error) {
         state.myReservations = [];
         renderMyReservations([]);
         showToast(error.message, "error");
+        return [];
     }
 }
 
@@ -399,8 +405,9 @@ async function updateReservation(event) {
             body: JSON.stringify({ name, date, timeId })
         });
         $("#editDialog").close();
-        showToast(resultMessage(reservation));
-        await loadMyReservations();
+        const reservations = await loadMyReservations();
+        const currentReservation = findReservationById(reservations, reservation.id);
+        showToast(currentReservation ? resultMessage(currentReservation) : commandResultMessage(reservation));
     } catch (error) {
         showToast(error.message, "error");
     }
@@ -539,8 +546,9 @@ async function createAdminReservation(event) {
         });
         $("#adminReservationForm").reset();
         setDefaultDates();
-        showToast(resultMessage(reservation));
         await loadAdminData();
+        const currentReservation = findReservationById(state.adminReservations, reservation.id);
+        showToast(currentReservation ? resultMessage(currentReservation) : commandResultMessage(reservation));
     } catch (error) {
         showToast(error.message, "error");
     }
@@ -688,7 +696,31 @@ function resultMessage(reservation) {
     if (reservation.status === "RESERVED") {
         return `${reservation.theme.name} 예약이 확정되었습니다.`;
     }
-    return `${reservation.theme.name} 대기 ${reservation.waitingRank}번으로 신청되었습니다.`;
+    if (reservation.status === "WAITING") {
+        if (reservation.waitingRank == null) {
+            return `${reservation.theme.name} 대기로 신청되었습니다.`;
+        }
+        return `${reservation.theme.name} 대기 ${reservation.waitingRank}번으로 신청되었습니다.`;
+    }
+    return commandResultMessage(reservation);
+}
+
+function commandResultMessage(reservation) {
+    return `${reservation.theme.name} 예약 요청이 접수되었습니다.`;
+}
+
+function findReservationById(reservations, id) {
+    return reservations.find((reservation) => Number(reservation.id) === Number(id));
+}
+
+async function showCommandResult(name, reservation) {
+    try {
+        const reservations = await fetchReservationsByName(name);
+        const currentReservation = findReservationById(reservations, reservation.id);
+        showToast(currentReservation ? resultMessage(currentReservation) : commandResultMessage(reservation));
+    } catch (error) {
+        showToast(commandResultMessage(reservation));
+    }
 }
 
 function sortTimes(times) {

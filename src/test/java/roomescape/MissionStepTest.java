@@ -182,7 +182,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 슬롯에 다른 사용자가 예약하면 대기로 생성되고 내 예약 조회에 대기 순번이 포함된다.")
+    @DisplayName("이미 예약된 슬롯에 다른 사용자가 예약하면 내 예약 조회에 대기 순번이 포함된다.")
     void createWaitingReservationAndFindMyReservations() {
         Map<String, String> time = new HashMap<>();
         time.put("startAt", "22:30");
@@ -224,8 +224,8 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("status", is("RESERVED"))
-                .body("waitingRank", is(0));
+                .body("status", nullValue())
+                .body("waitingRank", nullValue());
 
         reservation.put("name", "레아");
 
@@ -235,8 +235,8 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("status", is("WAITING"))
-                .body("waitingRank", is(1))
+                .body("status", nullValue())
+                .body("waitingRank", nullValue())
                 .extract()
                 .path("id");
 
