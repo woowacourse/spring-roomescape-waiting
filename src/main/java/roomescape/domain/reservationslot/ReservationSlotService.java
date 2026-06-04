@@ -2,6 +2,7 @@ package roomescape.domain.reservationslot;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.dto.ReservationCountResult;
@@ -13,6 +14,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
+import roomescape.support.exception.errors.ReservationSlotErrors;
 import roomescape.support.exception.errors.ThemeErrors;
 
 @Service
@@ -38,11 +40,19 @@ public class ReservationSlotService {
         ReservationTime reservationTime,
         Theme theme
     ) {
-        return reservationSlotRepository.findBySchedule(
-            reservationTime.getId(),
-            reservationDate.getId(),
-            theme.getId()
-        ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
+        try {
+            return reservationSlotRepository.findBySchedule(
+                reservationTime.getId(),
+                reservationDate.getId(),
+                theme.getId()
+            ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
+        } catch (DuplicateKeyException e) {
+            return reservationSlotRepository.findBySchedule(
+                reservationTime.getId(),
+                reservationDate.getId(),
+                theme.getId()
+            ).orElseThrow(() -> new NotFoundException(ReservationSlotErrors.RESERVATION_SLOT_NOT_FOUND));
+        }
     }
 
     private ReservationSlot saveReservationSlot(

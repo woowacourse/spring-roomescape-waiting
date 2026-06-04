@@ -208,7 +208,7 @@ class ReservationControllerTest {
             2L,
             3L
         );
-        willThrow(new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND))
+        willThrow(new NotFoundException(ReservationSlotErrors.RESERVATION_SLOT_NOT_FOUND))
             .given(reservationService)
             .updateReservation(id, request);
 
@@ -217,8 +217,8 @@ class ReservationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("RESERVATION_NOT_FOUND"))
-            .andExpect(jsonPath("$.message").value("존재하지 않는 예약건 입니다"));
+            .andExpect(jsonPath("$.code").value("RESERVATION_SLOT_NOT_FOUND"))
+            .andExpect(jsonPath("$.message").value("존재하지 않는 예약 슬롯 입니다"));
     }
 
     @Test
