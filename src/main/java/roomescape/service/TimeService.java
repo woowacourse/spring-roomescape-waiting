@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
@@ -39,11 +40,13 @@ public class TimeService {
         return timeRepository.findAll();
     }
 
+    @Transactional
     public Time saveTime(LocalTime startAt) {
         Time time = new Time(startAt);
         return timeRepository.save(time);
     }
 
+    @Transactional
     public void removeTime(long timeId) {
         getTimeOrElseThrow(timeId);
         if (reservationRepository.existsByTimeId(timeId)) {
@@ -53,6 +56,7 @@ public class TimeService {
         timeRepository.deleteById(timeId);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeSlot> findThemeSlotBy(long themeId, LocalDate date) {
         getThemeOrElseThrow(themeId);
         return themeSlotRepository.findByThemeIdAndDate(themeId, date);
