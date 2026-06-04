@@ -96,7 +96,7 @@ class ReservationTest {
         reservation.reserve("이프", FIXED);
 
         // when
-        reservation.joinWaitingList("라텔", FIXED);
+        reservation.reserveOrWait("라텔", FIXED);
 
         // then
         assertThat(reservation.getEntries())
@@ -114,7 +114,7 @@ class ReservationTest {
         Reservation reservation = Reservation.createSlot(date, theme, reservationTime, FIXED);
 
         // when
-        reservation.joinWaitingList("라텔", FIXED);
+        reservation.reserveOrWait("라텔", FIXED);
 
         // then
         assertThat(reservation.getEntries())
@@ -131,7 +131,7 @@ class ReservationTest {
         reservation.reserve("이프", FIXED);
 
         // when & then
-        assertThatThrownBy(() -> reservation.joinWaitingList("이프", FIXED))
+        assertThatThrownBy(() -> reservation.reserveOrWait("이프", FIXED))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
     }

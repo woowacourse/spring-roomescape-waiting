@@ -68,7 +68,7 @@ public class Reservation {
         return entries.addReserved(name, now);
     }
 
-    public ReservationEntry joinWaitingList(String name, LocalDateTime now) {
+    public ReservationEntry reserveOrWait(String name, LocalDateTime now) {
         validateNotPast(now);
         validateDuplicateEntry(name);
         if (entries.hasReservedEntry()) {

@@ -39,12 +39,7 @@ public class ReservationService {
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
         LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
-                .orElseGet(() -> {
-                    Theme theme = findThemeWithThrow(command.themeId());
-                    ReservationTime time = findTimeWithThrow(command.timeId());
-                    return Reservation.createSlot(command.date(), theme, time, now);
-                });
+        Reservation reservation = findOrCreateSlotWithLock(command, now);
         reservation.reserve(command.name(), now);
         return ReservationResult.from(reservationRepository.save(reservation));
     }
@@ -67,7 +62,7 @@ public class ReservationService {
     private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
                                         LocalDate date, ReservationTime newTime, LocalDateTime now) {
         Reservation target = findOrCreateSlot(date, current.getTheme(), newTime, now);
-        ReservationEntry moved = target.joinWaitingList(entry.getReserverName(), now);
+        ReservationEntry moved = target.reserveOrWait(entry.getReserverName(), now);
 
         current.cancelEntry(entry.getId());
         reservationRepository.save(current);
@@ -76,22 +71,11 @@ public class ReservationService {
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getReserverName(), moved.getStatus()));
     }
 
-    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
-        ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
-        return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
-                .orElseGet(() -> Reservation.createSlot(date, theme, time, now));
-    }
-
     @Transactional
     public ReservationResult addWaiting(ReservationCommand command) {
         LocalDateTime now = LocalDateTime.now(clock);
-        Reservation reservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
-                .orElseGet(() -> {
-                    Theme theme = findThemeWithThrow(command.themeId());
-                    ReservationTime time = findTimeWithThrow(command.timeId());
-                    return Reservation.createSlot(command.date(), theme, time, now);
-                });
-        ReservationEntry added = reservation.joinWaitingList(command.name(), now);
+        Reservation reservation = findOrCreateSlotWithLock(command, now);
+        ReservationEntry added = reservation.reserveOrWait(command.name(), now);
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }
@@ -103,6 +87,21 @@ public class ReservationService {
 
         reservation.cancelEntry(entryId);
         reservationRepository.save(reservation);
+    }
+
+    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time, LocalDateTime now) {
+        ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
+        return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
+                .orElseGet(() -> Reservation.createSlot(date, theme, time, now));
+    }
+
+    private Reservation findOrCreateSlotWithLock(ReservationCommand command, LocalDateTime now) {
+        return reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
+                .orElseGet(() -> {
+                    Theme theme = findThemeWithThrow(command.themeId());
+                    ReservationTime time = findTimeWithThrow(command.timeId());
+                    return Reservation.createSlot(command.date(), theme, time, now);
+                });
     }
 
     private Theme findThemeWithThrow(Long themeId) {
