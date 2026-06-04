@@ -92,14 +92,6 @@ public class ReservationService {
 
 
     private long calculateOrder(Reservation reservation) {
-        boolean exists = reservationDao.existsBy(
-                reservation.getDate(),
-                reservation.getTheme(),
-                reservation.getTime());
-        if (!exists) {
-            return 0;
-        }
-
         List<Reservation> sameSlot = reservationDao.findBySlot(
                 reservation.getDate(),
                 reservation.getTime().getId(),
