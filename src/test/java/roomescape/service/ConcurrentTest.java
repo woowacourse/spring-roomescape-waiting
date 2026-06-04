@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.common.exception.ConflictException;
+import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.command.WaitingCommand;
 
 @SpringBootTest
@@ -292,6 +293,112 @@ public class ConcurrentTest {
         assertThat(uniqueViolations)
                 .as("이중 승격으로 인한 UNIQUE 위반이 없어야 함")
                 .isEmpty();
+    }
+
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_changeReservationSlot과_새슬롯_waiting_신청() throws Exception {
+        // setUp의 waiting 제거 — 변경 흐름의 promote(old slot) 트리거가 시나리오에 영향 주지 않게
+        jdbcTemplate.update("DELETE FROM waiting");
+
+        Long newTimeId = 6L;
+        ReservationCommand changeCommand = new ReservationCommand(
+                CANCELLER_NAME, date, newTimeId, themeId
+        );
+        WaitingCommand waitCommand = new WaitingCommand(
+                "신청자", date, newTimeId, themeId
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.changeReservationSlot(reservationId, changeCommand);
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                waitingService.save(waitCommand);
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함")
+                .isTrue();
+
+        int newSlotReservation = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Integer.class, date, newTimeId, themeId
+        );
+        int newSlotWaiting = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM waiting WHERE date = ? AND time_id = ? AND theme_id = ?",
+                Integer.class, date, newTimeId, themeId
+        );
+
+        boolean dangling = newSlotReservation == 0 && newSlotWaiting > 0;
+        assertThat(dangling)
+                .as("새 슬롯에 dangling waiting (예약 없는데 대기만 있음) 발생 금지")
+                .isFalse();
+    }
+
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_changeReservationSlot과_old슬롯_waiting_취소() throws Exception {
+        Long newTimeId = 6L;
+        ReservationCommand changeCommand = new ReservationCommand(
+                CANCELLER_NAME, date, newTimeId, themeId
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.changeReservationSlot(reservationId, changeCommand);
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                waitingService.delete(waitingId, WAITER_NAME);
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함")
+                .isTrue();
+
+        int oldSlotWaiting = countWaitings();
+
+        assertThat(oldSlotWaiting)
+                .as("old 슬롯의 waiting은 promote되거나 사용자 취소로 사라져야 함 (0건)")
+                .isZero();
     }
 
     private int countReservations() {
