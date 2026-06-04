@@ -50,15 +50,6 @@
 | member | 사용자 / 예약의 reserver / 대기의 waiter |
 | name   | 사용자 이름                          |
 
-### 예약 대기 목록
-
-| 용어                     | 설명                        |
-|------------------------|---------------------------|
-| ReservationWaitingList | 같은 슬롯에 달린 예약과 대기를 관리하는 주체 |
-| Slot                   | 예약 대기 목록이 관리하는 슬롯         |
-| Reservation            | 같은 슬롯에서 하나 밖에 없는 예약       |
-| Waiting[]              | 같은 슬롯에서 여러개 존재하는 대기들      |
-
 # 🗒️ 기능 목록
 
 ## 1단계 - 예약 대기 신청/취소
@@ -111,9 +102,9 @@
 | GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                              |
 | PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`                      |
 | DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                                        |
-| POST   | `/waitings`             | `{ name, reservationId }`         | 201 `{ id, name, date, time, theme, order }`               |
+| POST   | `/waitings`             | `{ name, date, time, theme }`     | 201 `{ id, name, date, time, theme, order }`               |
 | GET    | `/waitings/me`          | `?name={이름}`                      | 200 `{ waitings: [ id, name, order, date, time, theme ] }` |
-| DELETE | `/waitings/me/{id}`     | `{ name }`                        | 204                                                        |
+| DELETE | `/waitings/me/{id}`     | `?name={이름}`                      | 204                                                        |
 
 ## 에러 응답
 
