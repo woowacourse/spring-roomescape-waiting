@@ -81,4 +81,23 @@ class WaitingDaoTest {
     void existsBySlotAndOwner_false() {
         assertThat(waitingDao.existsBySlotAndOwner(slotA, new Member("없는유저"))).isFalse();
     }
+
+    @Test
+    @DisplayName("같은 슬롯에서 createdAt, id 순으로 가장 앞선 대기를 반환한다.")
+    void findNextInLine() {
+        Waiting third = waitingDao.save(Waiting.forNew(new Member("third"), slotA, NOW.plusHours(1)));
+        Waiting first = waitingDao.save(Waiting.forNew(new Member("first"), slotA, NOW));
+        Waiting second = waitingDao.save(Waiting.forNew(new Member("second"), slotA, NOW));
+        waitingDao.save(Waiting.forNew(new Member("other-slot"), slotB, NOW.minusHours(1)));
+
+        assertThat(waitingDao.findNextInLine(slotA))
+                .hasValueSatisfying(waiting -> assertThat(waiting.id()).isEqualTo(first.id()));
+
+        waitingDao.deleteById(first.id());
+
+        assertThat(waitingDao.findNextInLine(slotA))
+                .hasValueSatisfying(waiting -> assertThat(waiting.id()).isEqualTo(second.id()));
+        assertThat(waitingDao.findNextInLine(slotA))
+                .hasValueSatisfying(waiting -> assertThat(waiting.id()).isNotEqualTo(third.id()));
+    }
 }
