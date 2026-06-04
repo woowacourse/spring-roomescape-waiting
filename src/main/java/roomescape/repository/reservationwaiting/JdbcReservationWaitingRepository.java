@@ -33,7 +33,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 resultSet.getString("reservation_name"),
                 resultSet.getDate("date").toLocalDate(),
                 theme,
-                reservationTime
+                reservationTime,
+                resultSet.getTimestamp("created_at").toLocalDateTime()
         );
 
         return ReservationWaiting.of(
@@ -81,6 +82,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                        r.id AS reservation_id,
                        r.name AS reservation_name,
                        r.date,
+                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,

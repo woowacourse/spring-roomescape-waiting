@@ -2,6 +2,7 @@ package roomescape.repository.reservation;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,8 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
                 resultSet.getString("reservation_name"),
                 resultSet.getDate("date").toLocalDate(),
                 theme,
-                reservationTime
+                reservationTime,
+                resultSet.getTimestamp("created_at").toLocalDateTime()
         );
     };
 
@@ -51,6 +53,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
                 SELECT r.id,
                        r.name AS reservation_name,
                        r.date,
+                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,
@@ -71,6 +74,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
                 SELECT r.id,
                        r.name AS reservation_name,
                        r.date,
+                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,
@@ -94,6 +98,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
                 SELECT r.id,
                        r.name AS reservation_name,
                        r.date,
+                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,
@@ -119,7 +124,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
 
     @Override
     public Reservation save(final Reservation reservation) {
-        String sql = "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reservation (name, date, theme_id, time_id, created_at) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -128,6 +133,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
             preparedStatement.setDate(2, Date.valueOf(reservation.getDate()));
             preparedStatement.setLong(3, reservation.getTheme().getId());
             preparedStatement.setLong(4, reservation.getTime().getId());
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(reservation.getCreatedAt()));
             return preparedStatement;
         }, keyHolder);
 
@@ -238,6 +244,7 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
                 SELECT r.id,
                        r.name AS reservation_name,
                        r.date,
+                       r.created_at,
                        rt.id AS time_id,
                        rt.start_at,
                        t.id AS theme_id,

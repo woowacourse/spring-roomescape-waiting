@@ -15,19 +15,28 @@ public class Reservation {
     private final LocalDate date;
     private final Theme theme;
     private final ReservationTime time;
+    private final LocalDateTime createdAt;
 
-    private Reservation(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
+    private Reservation(
+            final Long id,
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime createdAt
+    ) {
         ReservationName reservationName = ReservationName.from(name);
-        validate(date, theme, time);
+        validate(date, theme, time, createdAt);
         this.id = id;
         this.name = reservationName.value();
         this.date = date;
         this.theme = theme;
         this.time = time;
+        this.createdAt = createdAt;
     }
 
     public static Reservation createNew(final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
-        return new Reservation(null, name, date, theme, time);
+        return new Reservation(null, name, date, theme, time, LocalDateTime.now());
     }
 
     public static Reservation createNew(
@@ -38,21 +47,32 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(date, time, standardDateTime);
-        return new Reservation(null, name, date, theme, time);
+        return new Reservation(null, name, date, theme, time, standardDateTime);
     }
 
     public static Reservation of(final Long id, final String name, final LocalDate date, final Theme theme, final ReservationTime time) {
+        return of(id, name, date, theme, time, LocalDateTime.now());
+    }
+
+    public static Reservation of(
+            final Long id,
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime createdAt
+    ) {
         validateId(id);
-        return new Reservation(id, name, date, theme, time);
+        return new Reservation(id, name, date, theme, time, createdAt);
     }
 
     public Reservation withId(final Long id) {
         validateId(id);
-        return new Reservation(id, this.name, this.date, this.theme, this.time);
+        return new Reservation(id, this.name, this.date, this.theme, this.time, this.createdAt);
     }
 
     public Reservation withDateAndTime(final LocalDate date, final ReservationTime time) {
-        return new Reservation(this.id, this.name, date, this.theme, time);
+        return new Reservation(this.id, this.name, date, this.theme, time, this.createdAt);
     }
 
     public Reservation withDateAndTime(
@@ -61,7 +81,7 @@ public class Reservation {
             final LocalDateTime standardDateTime
     ) {
         validateReservable(date, time, standardDateTime);
-        return new Reservation(this.id, this.name, date, this.theme, time);
+        return new Reservation(this.id, this.name, date, this.theme, time, this.createdAt);
     }
 
     public boolean hasName(final String name) {
@@ -112,7 +132,12 @@ public class Reservation {
         }
     }
 
-    private void validate(final LocalDate date, final Theme theme, final ReservationTime time) {
+    private void validate(
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime time,
+            final LocalDateTime createdAt
+    ) {
         if(date == null) {
             throw new IllegalArgumentException("날짜는 비어있을 수 없습니다.");
         }
@@ -123,6 +148,10 @@ public class Reservation {
 
         if(time == null) {
             throw new IllegalArgumentException("시간은 비어있으면 안됩니다.");
+        }
+
+        if(createdAt == null) {
+            throw new IllegalArgumentException("예약 생성 시각은 비어있으면 안됩니다.");
         }
     }
 
@@ -158,5 +187,9 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return this.time;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return this.createdAt;
     }
 }

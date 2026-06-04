@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,11 +46,12 @@ class JdbcReservationRepositoryTest {
         String name = "쿠다";
         LocalDate date = LocalDate.parse("2023-08-05");
         LocalTime time = LocalTime.parse("10:00");
+        LocalDateTime createdAt = LocalDateTime.parse("2023-08-04T12:00:00");
         Theme theme = createTheme("미술관의 밤");
 
         ReservationTime reservationTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(time));
 
-        Reservation reservation = Reservation.createNew(name, date, theme, reservationTime);
+        Reservation reservation = Reservation.createNew(name, date, theme, reservationTime, createdAt);
         //when
         Reservation result = jdbcReservationRepository.save(reservation);
         Reservation saved = jdbcReservationRepository.findById(result.getId())
@@ -57,6 +59,7 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).isEqualTo(saved);
+        assertThat(saved.getCreatedAt()).isEqualTo(createdAt);
     }
 
     @Test
