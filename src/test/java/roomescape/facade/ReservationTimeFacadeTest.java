@@ -15,7 +15,9 @@ import org.mockito.Mockito;
 import roomescape.domain.ReservationAvailability;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Wait;
+import roomescape.repository.dto.ReservationTimeDto;
+import roomescape.repository.dto.ThemeDto;
+import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -90,10 +92,13 @@ public class ReservationTimeFacadeTest {
         List<ReservationTime> allReservationTimes = List.of(firstTime, secondTime, thirdTime);
         List<ReservationTime> reservedTimes = List.of(secondTime, thirdTime);
 
-        List<Wait> thirdTimeWaits = List.of(
-                new Wait(1L, LocalDateTime.now(), "fizz", reservationDate, thirdTime, theme),
-                new Wait(2L, LocalDateTime.now(), "luke", reservationDate, thirdTime, theme),
-                new Wait(3L, LocalDateTime.now(), "neo", reservationDate, thirdTime, theme)
+        List<WaitDetailDto> thirdTimeWaits = List.of(
+                new WaitDetailDto(1L, LocalDateTime.now(), "fizz", reservationDate, ReservationTimeDto.from(thirdTime),
+                        ThemeDto.from(theme), 1L),
+                new WaitDetailDto(2L, LocalDateTime.now(), "luke", reservationDate, ReservationTimeDto.from(thirdTime),
+                        ThemeDto.from(theme), 2L),
+                new WaitDetailDto(3L, LocalDateTime.now(), "neo", reservationDate, ReservationTimeDto.from(thirdTime),
+                        ThemeDto.from(theme), 3L)
         );
 
         List<ServiceReservationTimeAvailabilityResponse> responses = List.of(

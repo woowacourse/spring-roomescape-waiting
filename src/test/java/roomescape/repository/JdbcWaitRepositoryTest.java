@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
+import roomescape.repository.dto.WaitDetailDto;
 
 @JdbcTest
 class JdbcWaitRepositoryTest {
@@ -73,10 +74,10 @@ class JdbcWaitRepositoryTest {
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        Optional<Wait> waitId = waitRepository.findById(1L);
+        Optional<WaitDetailDto> waitId = waitRepository.findById(1L);
 
         assertThat(waitId).isNotEmpty();
-        assertThat(waitId.get().getId()).isEqualTo(1L);
+        assertThat(waitId.get().id()).isEqualTo(1L);
     }
 
     @Test
@@ -85,7 +86,8 @@ class JdbcWaitRepositoryTest {
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        List<Wait> slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
+        List<WaitDetailDto> slots = waitRepository.findBySlot(LocalDate.of(2026, 5, 27), reservationTime.getId(),
+                theme.getId());
 
         assertThat(slots.size()).isEqualTo(1);
     }
@@ -99,10 +101,10 @@ class JdbcWaitRepositoryTest {
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 28), reservationTime.getId(), theme.getId());
 
-        List<Wait> waits = waitRepository.findByName("luke");
+        List<WaitDetailDto> waits = waitRepository.findByName("luke");
 
         assertThat(waits.size()).isEqualTo(2);
-        assertThat(waits.getFirst().getName()).isEqualTo("luke");
+        assertThat(waits.getFirst().name()).isEqualTo("luke");
     }
 
     @Test
@@ -114,7 +116,7 @@ class JdbcWaitRepositoryTest {
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "fizz", LocalDate.of(2026, 5, 28), reservationTime.getId(), theme.getId());
 
-        List<Wait> waits = waitRepository.findAll();
+        List<WaitDetailDto> waits = waitRepository.findAll();
 
         assertThat(waits.size()).isEqualTo(2);
     }
@@ -141,13 +143,13 @@ class JdbcWaitRepositoryTest {
     }
 
     @Test
-    void deleteTest() {
+    void deleteByIdTest() {
         String createWait = "INSERT INTO `wait`(`created_at`, `name`, `reservation_date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(createWait, LocalDateTime.of(2026, 5, 21, 10, 0),
                 "luke", LocalDate.of(2026, 5, 27), reservationTime.getId(), theme.getId());
 
-        waitRepository.delete(1L);
+        waitRepository.deleteById(1L);
 
         String findWaitCountSql = "SELECT COUNT(*) FROM `wait`";
         int count = jdbcTemplate.queryForObject(findWaitCountSql, Integer.class);

@@ -65,7 +65,7 @@ public class ThemeServiceTest {
     void deleteTest() {
         themeService.delete(1L);
 
-        verify(themeRepository, times(1)).delete(1L);
+        verify(themeRepository, times(1)).deleteById(1L);
     }
 
     @Test

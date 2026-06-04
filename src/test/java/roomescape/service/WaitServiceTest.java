@@ -19,6 +19,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.repository.WaitRepository;
+import roomescape.repository.dto.WaitDetailDto;
 
 public class WaitServiceTest {
     private WaitService waitService;
@@ -40,7 +41,7 @@ public class WaitServiceTest {
 
     @Test
     void saveTest() {
-        List<Wait> waits = List.of();
+        List<WaitDetailDto> waits = List.of();
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime,
                 theme);
         Wait wait = Wait.of(1L, waitWithoutId);
@@ -48,7 +49,7 @@ public class WaitServiceTest {
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);
 
-        assertThat(waitService.save(waitWithoutId)).isEqualTo(wait);
+        assertThat(waitService.save(waitWithoutId).toEntity()).isEqualTo(wait);
     }
 
     @Test
@@ -61,7 +62,7 @@ public class WaitServiceTest {
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(wait1, wait2);
+        List<WaitDetailDto> waits = List.of(WaitDetailDto.from(wait1, 1L), WaitDetailDto.from(wait2, 2L));
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -81,7 +82,8 @@ public class WaitServiceTest {
         Wait otherWait3 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 13, 0), "lucky", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(otherWait1, otherWait2, otherWait3);
+        List<WaitDetailDto> waits = List.of(WaitDetailDto.from(otherWait1, 1L), WaitDetailDto.from(otherWait2, 2L),
+                WaitDetailDto.from(otherWait3, 3L));
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
 
@@ -98,7 +100,7 @@ public class WaitServiceTest {
         Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "fizz", otherReservationDate,
                 reservationTime, theme);
 
-        List<Wait> fizzWaits = List.of(wait1, wait2);
+        List<WaitDetailDto> fizzWaits = List.of(WaitDetailDto.from(wait1, 1L), WaitDetailDto.from(wait2, 1L));
         when(waitRepository.findByName("fizz")).thenReturn(fizzWaits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
@@ -115,7 +117,7 @@ public class WaitServiceTest {
         Wait wait2 = new Wait(3L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", otherReservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(wait1, wait2);
+        List<WaitDetailDto> waits = List.of(WaitDetailDto.from(wait1, 1L), WaitDetailDto.from(wait2, 1L));
         when(waitRepository.findAll()).thenReturn(waits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(1L);
@@ -125,9 +127,9 @@ public class WaitServiceTest {
 
     @Test
     void deleteTest() {
-        waitRepository.delete(1L);
+        waitRepository.deleteById(1L);
 
-        verify(waitRepository, times(1)).delete(1L);
+        verify(waitRepository, times(1)).deleteById(1L);
     }
 
     @Test
@@ -137,7 +139,7 @@ public class WaitServiceTest {
         Wait wait2 = new Wait(2L, LocalDateTime.of(2026, 5, 2, 12, 0), "luke", reservationDate,
                 reservationTime, theme);
 
-        List<Wait> waits = List.of(wait1, wait2);
+        List<WaitDetailDto> waits = List.of(WaitDetailDto.from(wait1, 1L), WaitDetailDto.from(wait2, 2L));
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.findOrderByWait(wait1)).thenReturn(1L);
         when(waitRepository.findOrderByWait(wait2)).thenReturn(2L);
@@ -148,9 +150,9 @@ public class WaitServiceTest {
     @Test
     void findWaitTest() {
         Wait wait = new Wait(1L, LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime, theme);
-        when(waitRepository.findById(1L)).thenReturn(Optional.of(wait));
+        when(waitRepository.findById(1L)).thenReturn(Optional.of(WaitDetailDto.from(wait, 1L)));
 
-        assertThat(waitService.findWait(1L)).isEqualTo(wait);
+        assertThat(waitService.findWait(1L).toEntity()).isEqualTo(wait);
     }
 
     @Test

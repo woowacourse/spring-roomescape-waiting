@@ -12,25 +12,28 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.dto.ReservationTimeDto;
+import roomescape.repository.dto.ThemeDto;
+import roomescape.repository.dto.WaitDetailDto;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
-import roomescape.service.dto.response.ServiceReceptionResponse;
+import roomescape.service.dto.response.ServiceReceptionListResponse;
+import roomescape.service.dto.response.ServiceReservationResponse;
+import roomescape.service.dto.response.ServiceWaitResponse;
 
 public class ReceptionFacadeTest {
 
@@ -76,8 +79,7 @@ public class ReceptionFacadeTest {
                 Optional.empty());
         when(reservationService.save(reservationWithoutId)).thenReturn(reservation);
 
-        assertThat(receptionFacade.save(request)).isEqualTo(ServiceReceptionResponse.of(reservation, 0L,
-                ReservationStatus.CONFIRMED));
+        assertThat(receptionFacade.save(request)).isEqualTo(ServiceReservationResponse.from(reservation));
     }
 
     @Test
@@ -87,13 +89,13 @@ public class ReceptionFacadeTest {
         Reservation beforeReservation = new Reservation(1L, "luke", reservationDate, reservationTime, theme);
         Wait waitWithoutId = request.toWait(now, reservationTime, theme);
         Wait wait = Wait.of(1L, waitWithoutId);
-        ServiceReceptionResponse response = ServiceReceptionResponse.of(wait, 1L, ReservationStatus.WAITING);
+        ServiceWaitResponse response = ServiceWaitResponse.from(WaitDetailDto.from(wait, 1L));
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
         when(reservationService.findBySlot(request.reservationDate(), request.timeId(), request.themeId())).thenReturn(
                 Optional.of(beforeReservation));
-        when(waitService.save(waitWithoutId)).thenReturn(wait);
+        when(waitService.save(waitWithoutId)).thenReturn(WaitDetailDto.from(wait, 1L));
         when(waitService.calculateOrder(wait)).thenReturn(1L);
 
         assertThat(receptionFacade.save(request)).isEqualTo(response);
@@ -132,20 +134,13 @@ public class ReceptionFacadeTest {
         LocalDate otherDate = LocalDate.of(2026, 5, 19);
 
         List<Reservation> reservations = List.of(new Reservation(1L, "fizz", reservationDate, reservationTime, theme));
-        List<ServiceReceptionResponse> reservationResponses = List.of(
-                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED)
-        );
-        List<Wait> waits = List.of(new Wait(1L, LocalDateTime.now(clock), "fizz", otherDate, reservationTime, theme));
-        List<ServiceReceptionResponse> waitResponses = List.of(
-                ServiceReceptionResponse.of(waits.get(0), 1L, ReservationStatus.WAITING));
+        List<WaitDetailDto> waits = List.of(new WaitDetailDto(1L, LocalDateTime.now(clock), "fizz", otherDate,
+                ReservationTimeDto.from(reservationTime), ThemeDto.from(theme), 1L));
 
-        List<ServiceReceptionResponse> result = new ArrayList<>();
-        result.addAll(reservationResponses);
-        result.addAll(waitResponses);
+        ServiceReceptionListResponse result = ServiceReceptionListResponse.from(reservations, waits);
 
         when(reservationService.findByName("fizz")).thenReturn(reservations);
         when(waitService.findByName("fizz")).thenReturn(waits);
-        when(waitService.calculateOrder(waits.get(0))).thenReturn(1L);
 
         assertThat(receptionFacade.findByName("fizz")).isEqualTo(result);
     }
@@ -158,28 +153,17 @@ public class ReceptionFacadeTest {
                 new Reservation(1L, "fizz", reservationDate, reservationTime, theme),
                 new Reservation(2L, "luke", otherDate, reservationTime, theme)
         );
-        List<ServiceReceptionResponse> reservationResponses = List.of(
-                ServiceReceptionResponse.of(reservations.get(0), 0L, ReservationStatus.CONFIRMED),
-                ServiceReceptionResponse.of(reservations.get(1), 0L, ReservationStatus.CONFIRMED)
-        );
 
-        List<Wait> waits = List.of(
-                new Wait(1L, LocalDateTime.now(clock), "fizz", otherDate, reservationTime, theme),
-                new Wait(2L, LocalDateTime.now(clock), "luke", reservationDate, reservationTime, theme)
-        );
-        List<ServiceReceptionResponse> waitResponses = List.of(
-                ServiceReceptionResponse.of(waits.get(0), 1L, ReservationStatus.WAITING),
-                ServiceReceptionResponse.of(waits.get(1), 1L, ReservationStatus.WAITING)
-        );
+        List<WaitDetailDto> waits = List.of(
+                new WaitDetailDto(1L, LocalDateTime.now(clock), "fizz", otherDate,
+                        ReservationTimeDto.from(reservationTime), ThemeDto.from(theme), 1L),
+                new WaitDetailDto(2L, LocalDateTime.now(clock), "luke", reservationDate,
+                        ReservationTimeDto.from(reservationTime), ThemeDto.from(theme), 1L));
 
-        List<ServiceReceptionResponse> result = new ArrayList<>();
-        result.addAll(reservationResponses);
-        result.addAll(waitResponses);
+        ServiceReceptionListResponse result = ServiceReceptionListResponse.from(reservations, waits);
 
         when(reservationService.findAll()).thenReturn(reservations);
         when(waitService.findAll()).thenReturn(waits);
-        when(waitService.calculateOrder(waits.get(0))).thenReturn(1L);
-        when(waitService.calculateOrder(waits.get(1))).thenReturn(1L);
 
         assertThat(receptionFacade.findAll()).isEqualTo(result);
     }
@@ -206,7 +190,7 @@ public class ReceptionFacadeTest {
 
         when(reservationService.findReservation(reservation.getId())).thenReturn(reservation);
         when(waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())).thenReturn(List.of(firstWait));
+                reservation.getTheme().getId())).thenReturn(List.of(WaitDetailDto.from(firstWait, 1L)));
 
         receptionFacade.deleteReservation(reservation.getId());
         verify(reservationService, times(1)).save(newReservationWithoutId);
@@ -230,7 +214,7 @@ public class ReceptionFacadeTest {
     void deleteWaitTest() {
         Wait wait = new Wait(1L, now, "fizz", reservationDate, reservationTime, theme);
 
-        when(waitService.findWait(wait.getId())).thenReturn(wait);
+        when(waitService.findWait(wait.getId())).thenReturn(WaitDetailDto.from(wait, 1L));
 
         receptionFacade.deleteWait(wait.getId());
 
