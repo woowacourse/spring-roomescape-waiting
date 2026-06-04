@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
+import roomescape.exception.EntityNotFoundException;
 
 @Getter
 public class ReservationEntries {
@@ -55,7 +56,14 @@ public class ReservationEntries {
                 .findFirst();
     }
 
-    public void replace(long id, ReservationEntry replacement) {
+    public void cancel(long id) {
+        ReservationEntry entry = findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+
+        replace(id, entry.cancel());
+    }
+
+    private void replace(long id, ReservationEntry replacement) {
         entries.replaceAll(e -> e.isSameId(id) ? replacement : e);
     }
 

@@ -38,7 +38,7 @@ public class Reservation {
     }
 
     public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time) {
-        Reservation reservation =  Reservation.createEmptySlot(date,theme, time);
+        Reservation reservation = Reservation.createEmptySlot(date, theme, time);
         validatePastDateTime(date, time);
         return reservation;
     }
@@ -120,13 +120,9 @@ public class Reservation {
     }
 
     public void cancelEntry(long entryId) {
-        ReservationEntry entry = entries.findById(entryId)
-                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+        entries.cancel(entryId);
 
-        boolean wasReserved = entry.isReserved();
-        entries.replace(entryId, entry.cancel());
-
-        if (wasReserved) {
+        if (!entries.hasReservedEntry()) {
             entries.promoteFirstWaiting();
         }
     }

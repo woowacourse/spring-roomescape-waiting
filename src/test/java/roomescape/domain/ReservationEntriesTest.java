@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 import static roomescape.domain.fixture.ReservationFixture.FIXED;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.EntityNotFoundException;
 
 class ReservationEntriesTest {
 
@@ -123,7 +125,7 @@ class ReservationEntriesTest {
         void 이름과_상태로_엔트리를_조회한다() {
             // given
             ReservationEntries entries = new ReservationEntries(List.of(
-                    ReservedEntry.reserve("라텔", FIXED)
+                    ReservationEntry.reserve("라텔", FIXED)
             ));
 
             // when & then
@@ -135,7 +137,7 @@ class ReservationEntriesTest {
         void 상태는_같지만_이름이_다르면_조회되지_않는다() {
             // given
             ReservationEntries entries = new ReservationEntries(List.of(
-                    ReservedEntry.waiting("라텔", FIXED)
+                    ReservationEntry.waiting("라텔", FIXED)
             ));
 
             // when & then
@@ -185,6 +187,41 @@ class ReservationEntriesTest {
                             tuple(1L, ReservationStatus.RESERVED),
                             tuple(2L, ReservationStatus.DELETED)
                     );
+        }
+    }
+
+    @Nested
+    class 취소 {
+        @Test
+        void 엔트리를_취소하면_삭제_상태가_되고_나머지는_유지된다() {
+            // given
+            ReservationEntries entries = new ReservationEntries(List.of(
+                    entry(1L, "이프", ReservationStatus.RESERVED, FIXED),
+                    entry(2L, "라텔", ReservationStatus.WAITING, FIXED)
+            ));
+
+            // when
+            entries.cancel(1L);
+
+            // then
+            assertThat(entries.getEntries())
+                    .extracting(ReservationEntry::getId, ReservationEntry::getStatus)
+                    .containsExactly(
+                            tuple(1L, ReservationStatus.DELETED),
+                            tuple(2L, ReservationStatus.WAITING)
+                    );
+        }
+
+        @Test
+        void 존재하지_않는_식별자로_취소하면_예외가_발생한다() {
+            // given
+            ReservationEntries entries = new ReservationEntries(List.of(
+                    entry(1L, "이프", ReservationStatus.RESERVED, FIXED)
+            ));
+
+            // when & then
+            assertThatThrownBy(() -> entries.cancel(999L))
+                    .isInstanceOf(EntityNotFoundException.class);
         }
     }
 
