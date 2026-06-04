@@ -9,12 +9,14 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ReservationTimeDao;
 import roomescape.repository.ThemeDao;
+import roomescape.repository.WaitingDao;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 public class ReservationCommandService {
 
     private final ReservationDao reservationDao;
+    private final WaitingDao waitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final Clock clock;
@@ -47,7 +50,10 @@ public class ReservationCommandService {
     }
 
     public void delete(long reservationId) {
+        Reservation reservation = findReservation(reservationId);
+
         reservationDao.deleteById(reservationId);
+        promoteNextWaitingIn(reservation.slot());
     }
 
     public void cancel(long reservationId, String name) {
@@ -58,6 +64,7 @@ public class ReservationCommandService {
         reservation.validateNotStarted(LocalDateTime.now(clock));
 
         reservationDao.deleteById(reservationId);
+        promoteNextWaitingIn(reservation.slot());
     }
 
     public Reservation update(long reservationId, String name, LocalDate newDate, long newTimeId) {
@@ -100,6 +107,16 @@ public class ReservationCommandService {
     private Theme findThemeReference(long themeId) {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
+    }
+
+    private void promoteNextWaitingIn(Slot slot) {
+        waitingDao.findNextInLine(slot)
+                .ifPresent(this::promoteWaiting);
+    }
+
+    private void promoteWaiting(Waiting waiting) {
+        waitingDao.deleteById(waiting.id());
+        reservationDao.save(Reservation.forNew(waiting.owner(), waiting.slot()));
     }
 
     private Reservation findReservation(long reservationId) {
