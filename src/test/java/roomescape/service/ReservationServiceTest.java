@@ -48,7 +48,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
 
     @Test
-    void 빈_슬롯이면_예약으_등록된다() {
+    void 빈_슬롯이면_예약은_등록된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
