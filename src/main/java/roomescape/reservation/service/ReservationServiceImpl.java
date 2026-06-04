@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
@@ -62,29 +61,16 @@ public class ReservationServiceImpl implements ReservationService {
         validateThemeId(themeId);
         validateNotHoliday(time);
         Theme theme = themeRepository.findById(themeId);
-        validateNotDuplicated(request.name(), themeId, time);
-        boolean hasConfirmed = reservationRepository.hasConfirmedReservation(themeId, time);
-        Status status = resolveStatus(request.orderId(), hasConfirmed);
-        Reservation newReservation = new Reservation(request.name(), time, theme, status, request.orderId(), request.amount(), LocalDateTime.now());
-        try {
-            return reservationRepository.save(newReservation);
-        } catch (DuplicateKeyException e) {
+        if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
             throw new DuplicateReservationException();
         }
-    }
-
-    private Status resolveStatus(String orderId, boolean hasConfirmed) {
-        if (hasConfirmed) {
-            return Status.WAITING;
-        }
-        return orderId != null ? Status.PAYMENT_PENDING : Status.CONFIRMED;
-    }
-
-    private ReservationTime findTime(Long timeId) {
-        if (timeId == null) {
-            throw new IllegalArgumentException("예약 시간은 필수입니다.");
-        }
-        return timeService.findById(timeId);
+        Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
+        Reservation newReservation = new Reservation(request.name(),
+                time,
+                theme,
+                status,
+                LocalDateTime.now());
+        return reservationRepository.save(newReservation);
     }
 
     private void validateThemeId(Long themeId) {
@@ -102,58 +88,48 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    private void validateNotDuplicated(String name, Long themeId, ReservationTime time) {
-        if (reservationRepository.isDuplicatedWithName(name, themeId, time)) {
-            throw new DuplicateReservationException();
+    private ReservationTime findTime(Long timeId) {
+        if (timeId == null) {
+            throw new IllegalArgumentException("예약 시간은 필수입니다.");
         }
+        return timeService.findById(timeId);
     }
 
     @Override
     @Transactional
     public void cancel(Long id) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        cancelWithPromotion(reservation);
-    }
-
-    @Override
-    @Transactional
-    public void cancelByOrderId(String orderId) {
-        reservationRepository.findByOrderId(orderId)
-                .ifPresent(reservation -> cancelWithPromotion(reservation));
+        promoteNextWaiting(reservation);
+        reservationRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public void cancelForUser(Long id, String name) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
-        cancelWithPromotion(reservation);
-    }
-
-    private void cancelWithPromotion(Reservation reservation) {
         promoteNextWaiting(reservation);
-        reservationRepository.deleteById(reservation.getId());
+        reservationRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public Reservation update(Long id, Long timeId) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
         reservation.getTime().validateUpdatableReservation();
-        Long themeId = reservation.getTheme().getId();
+        promoteNextWaiting(reservation);
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
-        validateNotDuplicated(reservation.getName(), themeId, newTime);
-        promoteNextWaiting(reservation);
         Status status = Status.from(
-                reservationRepository.hasConfirmedReservation(themeId, newTime));
+                reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime));
         boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now(), status);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
+
         }
         return reservation.withTimeAndStatus(newTime, status);
     }
