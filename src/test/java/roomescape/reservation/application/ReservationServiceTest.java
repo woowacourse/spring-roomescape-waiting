@@ -252,6 +252,57 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("관리자 예약 삭제 시 대기 승격 실패는 예약 삭제를 막지 않는다")
+    void deleteReservation_success_when_waiting_promotion_fails() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "아니", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation savedReservation = reservationRepository.save(Reservation.create(
+                "인직",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        waitingRepository.save(Waiting.create(
+                "브라운",
+                date,
+                savedTime,
+                savedTheme
+        ));
+        WaitingService failingWaitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingReference() {
+                    @Override
+                    public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
+                    }
+
+                    @Override
+                    public void promoteToReservation(Waiting waiting) {
+                        throw new BusinessException(ReservationErrorCode.RESERVATION_CREATE_IN_PAST);
+                    }
+                },
+                new WaitingValidator(waitingRepository)
+        );
+        ReservationService reservationService = new ReservationService(
+                reservationRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingRepository,
+                new ReservationValidator(reservationRepository),
+                failingWaitingService
+        );
+
+        // when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        // then
+        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+    }
+
+    @Test
     @DisplayName("이름을 기반으로 자신의 예약 목록을 조회한다")
     void getReservationsByName_success() {
         // given
