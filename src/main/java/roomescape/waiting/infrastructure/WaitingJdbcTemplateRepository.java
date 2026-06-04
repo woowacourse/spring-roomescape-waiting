@@ -114,6 +114,9 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
           AND time_id = ?
           AND theme_id = ?
           AND rank = 1
+        ORDER BY w.created_at, w.id
+        LIMIT 1
+        FOR UPDATE
         """;
     private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
 
