@@ -106,13 +106,17 @@ public class WaitingDao {
                         FROM waiting w2
                         WHERE w2.slot_id = w.slot_id
                           AND w2.created_at < w.created_at
+                            OR (
+                                w2.created_at = w.created_at
+                                AND w2.id < w.id
+                            )
                     ) + 1 AS rank
                 FROM waiting w
                 JOIN slot s ON w.slot_id = s.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN theme t ON s.theme_id = t.id
                 WHERE w.name = ?
-                ORDER BY w.created_at;
+                ORDER BY w.created_at ASC, w.id ASC;
                 """;
         return jdbcTemplate.query(sql, RANK_MAPPER, name);
     }
