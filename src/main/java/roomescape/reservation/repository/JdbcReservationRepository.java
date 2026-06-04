@@ -258,17 +258,12 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     @Transactional
-    public Reservation moveToHistory(Reservation reservation) {
-        int insertedRowCount = insertHistory(reservation);
-        validateUpdatedRowCount(insertedRowCount, reservation);
-
-        int deletedRowCount = delete(reservation.getId());
-        validateUpdatedRowCount(deletedRowCount, reservation);
-
-        return reservation;
+    public void moveToHistory(Reservation reservation) {
+        insertHistory(reservation);
+        delete(reservation.getId());
     }
 
-    private int insertHistory(Reservation reservation) {
+    private void insertHistory(Reservation reservation) {
         String sql = """
                 INSERT INTO reservation_history (
                     reservation_id,
@@ -292,7 +287,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE id = ?
                 """;
 
-        return jdbcTemplate.update(sql, reservation.getId());
+        jdbcTemplate.update(sql, reservation.getId());
     }
 
     private int insert(Reservation reservation, KeyHolder keyHolder) {

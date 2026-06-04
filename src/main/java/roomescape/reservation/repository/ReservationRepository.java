@@ -19,7 +19,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> updateDateTime(Reservation reservation);
 
-    Reservation moveToHistory(Reservation reservation);
+    void moveToHistory(Reservation reservation);
 
     boolean existsByTimeId(Long timeId);
 
