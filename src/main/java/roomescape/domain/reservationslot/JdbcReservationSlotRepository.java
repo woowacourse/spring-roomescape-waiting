@@ -90,6 +90,19 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             set date_id = ?, time_id = ?, theme_id = ?
             where id = ?
             """;
+    private static final String FIND_BY_SCHEDULE_WITH_LOCK_SQL =
+        """
+            select rs.id,
+                   rd.id as date_id, rd.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from reservation_slot rs
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.time_id = ? and rs.date_id = ? and rs.theme_id = ?
+            for update
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -175,6 +188,18 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             return Optional.empty();
         }
         return findById(id);
+    }
+
+    @Override
+    public Optional<ReservationSlot> findByScheduleToUpdate(Long timeId, Long dateId, Long themeId) {
+        List<ReservationSlot> result = jdbcTemplate.query(
+            FIND_BY_SCHEDULE_WITH_LOCK_SQL,
+            reservationRowMapper(),
+            timeId,
+            dateId,
+            themeId
+        );
+        return result.stream().findFirst();
     }
 
     private RowMapper<ReservationSlot> reservationRowMapper() {

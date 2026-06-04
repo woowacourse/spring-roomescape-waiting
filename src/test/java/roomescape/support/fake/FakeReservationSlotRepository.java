@@ -87,6 +87,11 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
+    public Optional<ReservationSlot> findByScheduleToUpdate(Long timeId, Long dateId, Long themeId) {
+        return findBySchedule(timeId, dateId, themeId);
+    }
+
+    @Override
     public Optional<ReservationSlot> update(Long id, ReservationSlot withoutId) {
         if (!storage.containsKey(id)) {
             return Optional.empty();

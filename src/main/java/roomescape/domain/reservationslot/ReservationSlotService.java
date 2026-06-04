@@ -41,13 +41,13 @@ public class ReservationSlotService {
         Theme theme
     ) {
         try {
-            return reservationSlotRepository.findBySchedule(
+            return reservationSlotRepository.findByScheduleToUpdate(
                 reservationTime.getId(),
                 reservationDate.getId(),
                 theme.getId()
             ).orElseGet(() -> saveReservationSlot(reservationDate, reservationTime, theme));
         } catch (DuplicateKeyException e) {
-            return reservationSlotRepository.findBySchedule(
+            return reservationSlotRepository.findByScheduleToUpdate(
                 reservationTime.getId(),
                 reservationDate.getId(),
                 theme.getId()

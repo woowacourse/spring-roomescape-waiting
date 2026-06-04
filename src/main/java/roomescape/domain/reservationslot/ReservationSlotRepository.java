@@ -22,4 +22,6 @@ public interface ReservationSlotRepository {
     Optional<ReservationSlot> findById(Long id);
 
     Optional<ReservationSlot> update(Long id, ReservationSlot withoutId);
+
+    Optional<ReservationSlot> findByScheduleToUpdate(Long timeId, Long dateId, Long themeId);
 }
