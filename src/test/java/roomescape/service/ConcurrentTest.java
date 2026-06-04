@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import roomescape.common.exception.ConflictException;
+import roomescape.service.dto.command.WaitingCommand;
 
 @SpringBootTest
 public class ConcurrentTest {
@@ -182,6 +183,52 @@ public class ConcurrentTest {
         assertThat(conflicts)
                 .as("UNIQUE 충돌은 자동 X-lock + 명시 락 조합으로 막아야 함")
                 .isEmpty();
+    }
+
+    @RepeatedTest(value = 1000, name = "{displayName} — {currentRepetition}/{totalRepetitions}")
+    void 동시_waiting신청과_예약취소가_충돌해도_dangling_waiting이_없다() throws Exception {
+        jdbcTemplate.update("DELETE FROM waiting");
+
+        String applicantName = "신청자";
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        CountDownLatch startGate = new CountDownLatch(1);
+        CountDownLatch finishGate = new CountDownLatch(2);
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                waitingService.save(new WaitingCommand(applicantName, date, timeId, themeId));
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                startGate.await();
+                reservationService.cancelReservation(reservationId, CANCELLER_NAME);
+            } catch (Throwable ignored) {
+            } finally {
+                finishGate.countDown();
+            }
+        });
+
+        startGate.countDown();
+        boolean finished = finishGate.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+
+        assertThat(finished)
+                .as("두 작업이 5초 안에 끝나야 함")
+                .isTrue();
+
+        int reservationCount = countReservations();
+        int waitingCount = countWaitings();
+
+        boolean dangling = reservationCount == 0 && waitingCount > 0;
+        assertThat(dangling)
+                .as("dangling waiting (예약 없는 슬롯에 대기만 떠 있는 상태) 발생 금지")
+                .isFalse();
     }
 
     private int countReservations() {

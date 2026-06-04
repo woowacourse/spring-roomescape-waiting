@@ -48,7 +48,7 @@ public class WaitingService {
         Theme theme = themeDao.findThemeById(command.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        if (!reservationDao.existsBy(command.date(), theme, time)) {
+        if (!reservationDao.existsForUpdate(command.date(), theme, time)) {
             throw new UnprocessableEntityException("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다.");
         }
 

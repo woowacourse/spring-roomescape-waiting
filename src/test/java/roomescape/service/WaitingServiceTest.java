@@ -97,7 +97,7 @@ class WaitingServiceTest {
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.save(any())).willReturn(saved);
-        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(reservationDao.existsForUpdate(date, theme, time)).willReturn(true);
 
         WaitingResult result = waitingService.save(command);
         assertThat(result.id()).isEqualTo(saved.getId());
@@ -138,7 +138,7 @@ class WaitingServiceTest {
         WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBy(date, theme, time)).willReturn(false);
+        given(reservationDao.existsForUpdate(date, theme, time)).willReturn(false);
 
         assertThatThrownBy(() -> waitingService.save(command))
                 .isInstanceOf(UnprocessableEntityException.class)
@@ -152,7 +152,7 @@ class WaitingServiceTest {
         WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(reservationDao.existsForUpdate(date, theme, time)).willReturn(true);
         given(reservationDao.existsByUserNameAndSlot(userName, date, theme, time)).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(command))
@@ -167,7 +167,7 @@ class WaitingServiceTest {
         WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
-        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(reservationDao.existsForUpdate(date, theme, time)).willReturn(true);
         given(waitingDao.existsBySlotAndName(anyString(), any(LocalDate.class), anyLong(), anyLong())).willReturn(true);
 
         assertThatThrownBy(() -> waitingService.save(command))
