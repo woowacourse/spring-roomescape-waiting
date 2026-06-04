@@ -3,7 +3,6 @@ package roomescape.repository.reservation;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +16,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 @Repository
-public class JdbcReservationRepository implements ReservationRepository, ReservationScheduleRepository {
+public class JdbcReservationRepository implements ReservationRepository {
 
     private static final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
         Theme theme = Theme.of(
@@ -131,6 +130,14 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
 
     @Override
     public Reservation save(final Reservation reservation) {
+        if (reservation.getId() == null) {
+            return insert(reservation);
+        }
+
+        return update(reservation);
+    }
+
+    private Reservation insert(final Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, theme_id, time_id, created_at) VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -167,104 +174,5 @@ public class JdbcReservationRepository implements ReservationRepository, Reserva
         );
 
         return reservation;
-    }
-
-    @Override
-    public boolean existsByDateAndThemeIdAndTimeId(final LocalDate date, final long themeId, final long timeId) {
-        final String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                Date.valueOf(date),
-                themeId,
-                timeId
-        ));
-    }
-
-    @Override
-    public boolean existsByDateAndThemeIdAndTimeIdExcludingId(
-            final LocalDate date,
-            final long themeId,
-            final long timeId,
-            final long reservationId
-    ) {
-        final String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM reservation
-                    WHERE date = ? AND theme_id = ? AND time_id = ? AND id <> ?
-                )
-                """;
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                Date.valueOf(date),
-                themeId,
-                timeId,
-                reservationId
-        ));
-    }
-
-    @Override
-    public List<Long> findReservedTimeIdsByDateAndThemeId(final LocalDate date, final long themeId) {
-        final String sql = """
-                SELECT time_id
-                FROM reservation
-                WHERE date = ? AND theme_id = ?
-                """;
-
-        return jdbcTemplate.queryForList(sql, Long.class, Date.valueOf(date), themeId);
-    }
-
-    @Override
-    public boolean existsByTimeId(final long timeId) {
-        final String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id = ?)";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                timeId
-        ));
-    }
-
-    @Override
-    public boolean existsByThemeId(final long themeId) {
-        final String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id = ?)";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
-                sql,
-                Boolean.class,
-                themeId
-        ));
-    }
-
-    @Override
-    public Optional<Reservation> findByDateAndThemeIdAndTimeId(
-            final LocalDate date,
-            final long themeId,
-            final long timeId
-    ) {
-        final String sql = """
-                SELECT r.id,
-                       r.name AS reservation_name,
-                       r.date,
-                       r.created_at,
-                       rt.id AS time_id,
-                       rt.start_at,
-                       t.id AS theme_id,
-                       t.name AS theme_name,
-                       t.description,
-                       t.thumbnail_url
-                FROM reservation AS r
-                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
-                INNER JOIN theme AS t ON r.theme_id = t.id
-                WHERE r.date = ? AND r.theme_id = ? AND r.time_id = ?
-                """;
-
-        return jdbcTemplate.query(sql, reservationRowMapper, Date.valueOf(date), themeId, timeId)
-                .stream()
-                .findFirst();
     }
 }

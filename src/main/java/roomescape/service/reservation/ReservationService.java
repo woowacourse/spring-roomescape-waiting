@@ -14,7 +14,6 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -22,20 +21,17 @@ import roomescape.service.theme.ThemeService;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final ReservationScheduleRepository reservationScheduleRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
-            final ReservationScheduleRepository reservationScheduleRepository,
             final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationScheduleRepository = reservationScheduleRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
@@ -51,7 +47,7 @@ public class ReservationService {
         ReservationSlot slot = new ReservationSlot(date, theme, reservationTime);
         Reservation nonIdReservation = createNewReservation(name, slot);
 
-        if (reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
+        if (reservationRepository.findBySlot(slot).isPresent()) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
@@ -72,7 +68,7 @@ public class ReservationService {
     public void deleteByIdAndName(final long id, final String name) {
         ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
@@ -98,7 +94,7 @@ public class ReservationService {
     ) {
         ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
@@ -116,16 +112,13 @@ public class ReservationService {
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         Reservation updatedReservation = updateReservationDateAndTime(reservation, date, reservationTime);
 
-        if (reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
-                date,
-                reservation.getTheme().getId(),
-                timeId,
-                reservation.getId()
-        )) {
+        if (reservationRepository.findBySlot(updatedReservation.getSlot())
+                .filter(conflict -> !conflict.equals(reservation))
+                .isPresent()) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
-        return reservationRepository.update(updatedReservation);
+        return reservationRepository.save(updatedReservation);
     }
 
     private void validateCancelable(final Reservation reservation) {
@@ -160,7 +153,7 @@ public class ReservationService {
             final ReservationSlot slot
     ) {
         try {
-            return Reservation.createNew(name, date, theme, reservationTime, LocalDateTime.now());
+            return Reservation.createNew(name, slot, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }

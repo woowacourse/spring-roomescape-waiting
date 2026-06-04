@@ -15,5 +15,5 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Reservation update(Reservation reservation);
+    void delete(Reservation reservation);
 }

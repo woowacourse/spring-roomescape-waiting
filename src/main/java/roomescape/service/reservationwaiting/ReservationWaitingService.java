@@ -12,7 +12,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
-import roomescape.repository.reservation.ReservationScheduleRepository;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -20,19 +20,30 @@ import roomescape.service.theme.ThemeService;
 @Service
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationScheduleRepository reservationScheduleRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationWaitingService(
-            final ReservationScheduleRepository reservationScheduleRepository,
-            final ReservationWaitingRepository reservationWaitingRepository
+            final ReservationRepository reservationRepository,
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final ThemeService themeService,
+            final ReservationTimeService reservationTimeService
     ) {
-        this.reservationScheduleRepository = reservationScheduleRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
         ReservationName waitingName = ReservationName.from(name);
-        Reservation reservation = reservationScheduleRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
+        ReservationSlot slot = new ReservationSlot(
+                date,
+                themeService.getById(themeId),
+                reservationTimeService.getById(timeId)
+        );
+        Reservation reservation = reservationRepository.findBySlot(slot)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
@@ -54,7 +65,9 @@ public class ReservationWaitingService {
             );
         }
 
-        if (reservationWaitingRepository.existsByReservationIdAndName(reservation.getId(), waitingName.value())) {
+        ReservationWaitingLine waitingLine = reservationWaitingRepository.findLineByReservation(reservation);
+
+        if (waitingLine.containsName(waitingName)) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 같은 예약에 대기 중입니다."
