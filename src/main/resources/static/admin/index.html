@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 관리자</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+
+        header {
+            background: #1a252f;
+            color: white;
+            padding: 16px 24px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .tab-bar {
+            display: flex;
+            background: #2c3e50;
+            padding: 0 24px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: #3498db;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: #2c3e50;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+
+        input, select {
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        button {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3d5166;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #666;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .thumb {
+            width: 64px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .empty {
+            color: #aaa;
+            font-size: 0.9rem;
+            padding: 16px 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<header>방탈출 관리자</header>
+
+<div class="tab-bar">
+    <div class="tab active" onclick="showTab('theme')">테마</div>
+    <div class="tab" onclick="showTab('time')">예약 시간</div>
+    <div class="tab" onclick="showTab('reservation')">예약</div>
+</div>
+
+<div class="container">
+
+    <!-- 테마 -->
+    <div class="section active" id="section-theme">
+        <div class="card">
+            <h2>테마 추가</h2>
+            <div class="form-row">
+                <input type="text" id="theme-name" placeholder="테마 이름">
+                <input type="text" id="theme-thumb" placeholder="썸네일 URL">
+                <input type="text" id="theme-desc" placeholder="설명">
+                <button class="btn-primary" onclick="createTheme()">추가</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>테마 목록</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>이름</th>
+                    <th>설명</th>
+                    <th>썸네일</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="theme-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 예약 시간 -->
+    <div class="section" id="section-time">
+        <div class="card">
+            <h2>시간 추가</h2>
+            <div class="form-row">
+                <input type="time" id="time-start">
+                <button class="btn-primary" onclick="createTime()">추가</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>예약 시간 목록</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>시작 시간</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="time-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 예약 -->
+    <div class="section" id="section-reservation">
+        <div class="card">
+            <h2>예약 추가</h2>
+            <div class="form-row">
+                <input type="text" id="res-name" placeholder="예약자 이름">
+                <input type="date" id="res-date">
+                <select id="res-time"></select>
+                <select id="res-theme"></select>
+                <button class="btn-primary" onclick="createReservation()">추가</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>예약 목록</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>이름</th>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>테마</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="reservation-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    async function handleError(res) {
+        const err = await res.json().catch(() => ({message: '요청에 실패했습니다.'}));
+        showToast(err.message);
+    }
+
+    function showTab(name) {
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            const names = ['theme', 'time', 'reservation'];
+            t.classList.toggle('active', names[i] === name);
+        });
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+    }
+
+    // ── 테마 ──
+    async function loadThemes() {
+        const res = await fetch('/admin/themes');
+        const themes = await res.json();
+        const tbody = document.getElementById('theme-list');
+        tbody.innerHTML = themes.length === 0
+            ? '<tr><td colspan="5" class="empty">테마가 없습니다.</td></tr>'
+            : themes.map(t => `
+                <tr>
+                    <td>${t.id}</td>
+                    <td>${t.name}</td>
+                    <td>${t.description}</td>
+                    <td><img class="thumb" src="${t.thumbnailUrl}" alt="${t.name}"></td>
+                    <td><button class="btn-danger" onclick="deleteTheme(${t.id})">삭제</button></td>
+                </tr>`).join('');
+
+        // 예약 폼 select 동기화
+        const sel = document.getElementById('res-theme');
+        sel.innerHTML = themes.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    }
+
+    async function createTheme() {
+        const name = document.getElementById('theme-name').value.trim();
+        const thumbnailUrl = document.getElementById('theme-thumb').value.trim();
+        const description = document.getElementById('theme-desc').value.trim();
+        if (!name) return;
+        const res = await fetch('/admin/themes', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, thumbnailUrl, description})
+        });
+        if (!res.ok) { await handleError(res); return; }
+        document.getElementById('theme-name').value = '';
+        document.getElementById('theme-thumb').value = '';
+        document.getElementById('theme-desc').value = '';
+        loadThemes();
+    }
+
+    async function deleteTheme(id) {
+        const res = await fetch(`/admin/themes/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
+        loadThemes();
+    }
+
+    // ── 예약 시간 ──
+    async function loadTimes() {
+        const res = await fetch('/admin/times');
+        const times = await res.json();
+        const tbody = document.getElementById('time-list');
+        tbody.innerHTML = times.length === 0
+            ? '<tr><td colspan="3" class="empty">등록된 시간이 없습니다.</td></tr>'
+            : times.map(t => `
+                <tr>
+                    <td>${t.id}</td>
+                    <td>${t.startAt}</td>
+                    <td><button class="btn-danger" onclick="deleteTime(${t.id})">삭제</button></td>
+                </tr>`).join('');
+
+        // 예약 폼 select 동기화
+        const sel = document.getElementById('res-time');
+        sel.innerHTML = times.map(t => `<option value="${t.id}">${t.startAt}</option>`).join('');
+    }
+
+    async function createTime() {
+        const startAt = document.getElementById('time-start').value;
+        if (!startAt) return;
+        const res = await fetch('/admin/times', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({startAt})
+        });
+        if (!res.ok) { await handleError(res); return; }
+        loadTimes();
+    }
+
+    async function deleteTime(id) {
+        const res = await fetch(`/admin/times/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
+        loadTimes();
+    }
+
+    // ── 예약 ──
+    async function loadReservations() {
+        const res = await fetch('/admin/reservations');
+        const list = await res.json();
+        const tbody = document.getElementById('reservation-list');
+        tbody.innerHTML = list.length === 0
+            ? '<tr><td colspan="6" class="empty">예약이 없습니다.</td></tr>'
+            : list.map(r => `
+                <tr>
+                    <td>${r.id}</td>
+                    <td>${r.name}</td>
+                    <td>${r.date}</td>
+                    <td>${r.time.startAt}</td>
+                    <td>${r.theme.name}</td>
+                    <td><button class="btn-danger" onclick="deleteReservation(${r.id})">삭제</button></td>
+                </tr>`).join('');
+    }
+
+    async function createReservation() {
+        const name = document.getElementById('res-name').value.trim();
+        const date = document.getElementById('res-date').value;
+        const timeId = Number(document.getElementById('res-time').value);
+        const themeId = Number(document.getElementById('res-theme').value);
+        if (!name || !date) return;
+        const res = await fetch('/admin/reservations', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, date, timeId, themeId})
+        });
+        if (!res.ok) { await handleError(res); return; }
+        loadReservations();
+    }
+
+    async function deleteReservation(id) {
+        const res = await fetch(`/admin/reservations/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
+        loadReservations();
+    }
+
+    // 초기 로드
+    loadThemes();
+    loadTimes();
+    loadReservations();
+</script>
+</body>
+</html>
