@@ -65,7 +65,7 @@ public class ReservationWaitingService {
     }
 
     private void validateReservationExists(Long themeId, LocalDate date, Long timeId) {
-        if (!reservationDao.existsByThemeIdAndDateAndTimeId(themeId, date, timeId)) {
+        if (!reservationDao.existsByThemeIdAndDateAndTimeIdForUpdate(themeId, date, timeId)) {
             throw new RoomescapeException(ErrorCode.CANNOT_WAIT_WITHOUT_RESERVATION);
         }
     }

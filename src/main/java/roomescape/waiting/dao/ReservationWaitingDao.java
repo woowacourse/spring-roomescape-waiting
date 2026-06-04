@@ -13,7 +13,7 @@ import roomescape.waiting.ReservationWaiting;
 
 @Repository
 public class ReservationWaitingDao {
-    private static final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) ->
+    private static final RowMapper<ReservationWaiting> MAPPER = (rs, rowNum) ->
             new ReservationWaiting(
                     rs.getLong("id"),
                     rs.getString("name"),
@@ -47,7 +47,7 @@ public class ReservationWaitingDao {
                 where id = ?
                 """;
 
-        List<ReservationWaiting> results = jdbcTemplate.query(sql, rowMapper, id);
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER, id);
         return results.stream().findFirst();
     }
 
@@ -64,7 +64,7 @@ public class ReservationWaitingDao {
                 where name = ?
                 """;
 
-        return jdbcTemplate.query(sql, rowMapper, name);
+        return jdbcTemplate.query(sql, MAPPER, name);
     }
 
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
@@ -94,5 +94,23 @@ public class ReservationWaitingDao {
     public void deleteById(Long id) {
         String sql = "delete from reservation_waiting where id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    public Optional<ReservationWaiting> selectFirstByThemeAndDateAndTime(Long themeId, LocalDate date, ReservationTime time) {
+        String sql = """
+                    select id, name, theme_id, date, time_id, start_at, waiting_number
+                    from (
+                        select w.id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at,
+                            ROW_NUMBER() OVER (PARTITION BY w.theme_id, w.date, w.time_id ORDER BY w.id) AS waiting_number
+                        from reservation_waiting w
+                        join reservation_time t on w.time_id = t.id
+                        where w.theme_id = ? and w.date = ? and w.time_id = ?
+                    ) ranked
+                    order by waiting_number
+                    limit 1
+                """;
+
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, MAPPER, themeId, date, time.getId());
+        return results.stream().findFirst();
     }
 }
