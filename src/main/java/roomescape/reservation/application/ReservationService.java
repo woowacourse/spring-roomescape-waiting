@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ReservationErrorCode;
@@ -62,7 +63,11 @@ public class ReservationService {
                 time,
                 theme
         );
-        return reservationRepository.save(reservation);
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     public List<Reservation> getReservations() {
@@ -92,17 +97,24 @@ public class ReservationService {
                 updateCommand.date(),
                 time
         );
-        reservationRepository.updateSchedule(updateReservation);
+        try {
+            reservationRepository.updateSchedule(updateReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ReservationErrorCode.RESERVATION_ALREADY_EXISTS);
+        }
     }
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation targetReservation = reservationRepository.findById(id)
+        Reservation targetReservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         ReservationErrorCode.RESERVATION_NOT_FOUND,
                         id
                 ));
-        reservationRepository.deleteById(id);
+        boolean deleted = reservationRepository.deleteById(id);
+        if (!deleted) {
+            throw new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id);
+        }
 
         try {
             waitingService.promoteNextWaiting(
@@ -117,13 +129,16 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservation(Long id, String name) {
-        Reservation targetReservation = reservationRepository.findById(id)
+        Reservation targetReservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         ReservationErrorCode.RESERVATION_NOT_FOUND,
                         id
                 ));
         targetReservation.cancel(name);
-        reservationRepository.deleteByIdAndName(id, name);
+        boolean deleted = reservationRepository.deleteByIdAndName(id, name);
+        if (!deleted) {
+            throw new EntityNotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND, id);
+        }
 
         try {
             waitingService.promoteNextWaiting(

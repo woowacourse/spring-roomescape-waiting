@@ -20,7 +20,7 @@ public class WaitingReferenceAdapter implements WaitingReference {
 
     @Override
     public void validateExistReservation(WaitingCreateCommand waitingCreateCommand) {
-        if (reservationRepository.findByDateAndTimeIdAndThemeId(
+        if (reservationRepository.findByDateAndTimeIdAndThemeIdForUpdate(
                 waitingCreateCommand.date(),
                 waitingCreateCommand.timeId(),
                 waitingCreateCommand.themeId()).isEmpty()) {

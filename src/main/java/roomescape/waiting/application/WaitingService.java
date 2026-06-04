@@ -2,6 +2,7 @@ package roomescape.waiting.application;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,7 +56,11 @@ public class WaitingService {
                 time,
                 theme
         );
-        return waitingRepository.save(waiting);
+        try {
+            return waitingRepository.save(waiting);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
+        }
     }
 
     @Transactional(propagation = Propagation.NESTED)
@@ -69,7 +74,10 @@ public class WaitingService {
                 theme.getId()
         );
         targetWaiting.ifPresent(waiting -> {
-                    waitingRepository.deleteByIdAndName(waiting.getId(), waiting.getName());
+                    boolean deleted = waitingRepository.deleteByIdAndName(waiting.getId(), waiting.getName());
+                    if (!deleted) {
+                        return;
+                    }
                     waitingReference.promoteToReservation(waiting);
                 }
         );
@@ -80,6 +88,9 @@ public class WaitingService {
         Waiting targetWaiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, id));
         targetWaiting.cancel(name);
-        waitingRepository.deleteByIdAndName(id, name);
+        boolean deleted = waitingRepository.deleteByIdAndName(id, name);
+        if (!deleted) {
+            throw new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, id);
+        }
     }
 }

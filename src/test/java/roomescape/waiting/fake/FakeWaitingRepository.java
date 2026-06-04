@@ -66,8 +66,8 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void deleteByIdAndName(Long id, String name) {
-        store.values().removeIf(waiting ->
+    public boolean deleteByIdAndName(Long id, String name) {
+        return store.values().removeIf(waiting ->
                 waiting.getId().equals(id)
                         && waiting.getName().equals(name)
         );

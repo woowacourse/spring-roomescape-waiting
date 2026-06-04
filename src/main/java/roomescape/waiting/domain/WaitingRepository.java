@@ -10,5 +10,5 @@ public interface WaitingRepository {
     Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
     List<Waiting> findByName(String name);
     Optional<Waiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-    void deleteByIdAndName(Long id, String name);
+    boolean deleteByIdAndName(Long id, String name);
 }
