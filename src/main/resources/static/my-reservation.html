@@ -87,23 +87,23 @@
                     <form id="edit-form" class="row g-3">
                         <input type="hidden" id="edit-id">
                         <div class="col-md-6">
-                            <label class="form-label font-weight-bold">예약자 이름</label>
-                            <input type="text" id="edit-name" class="form-control" required>
+                            <label class="form-label font-weight-bold">예약자 이름 <span class="badge bg-secondary">변경 불가</span></label>
+                            <input type="text" id="edit-name" class="form-control bg-light" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label font-weight-bold">테마 <span class="badge bg-secondary">변경 불가</span></label>
+                            <input type="text" id="edit-theme-name" class="form-control bg-light" disabled>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label font-weight-bold">날짜</label>
                             <input type="date" id="edit-date" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label font-weight-bold">테마</label>
-                            <select id="edit-theme" class="form-select" required></select>
-                        </div>
-                        <div class="col-md-6">
                             <label class="form-label font-weight-bold">시간</label>
                             <select id="edit-time" class="form-select" required></select>
                         </div>
                         <div class="col-12 text-muted">
-                            <small>* 변경 사항은 즉시 반영되며, 24시간 이내인 경우 수정이 제한될 수 있습니다.</small>
+                            <small>* 날짜와 시간만 변경 가능합니다. 24시간 이내인 경우 수정이 제한될 수 있습니다.</small>
                         </div>
                     </form>
                 </div>
@@ -119,6 +119,7 @@
     <script>
         const editModal = new bootstrap.Modal(document.getElementById('editModal'));
         let currentReservations = [];
+        let editingThemeId = null;
 
         function formatTime(time) {
             if (Array.isArray(time)) {
@@ -232,38 +233,31 @@
             const res = currentReservations.find(r => r.id === id);
             if (!res) return;
 
+            editingThemeId = res.theme.id;
+
             document.getElementById('edit-id').value = res.id;
             document.getElementById('edit-name').value = res.name;
+            document.getElementById('edit-theme-name').value = res.theme.name;
             document.getElementById('edit-date').value = res.date;
 
-            // 테마 목록 및 시간 목록 로드
-            await loadThemesForEdit(res.theme.id);
-            await loadTimesForEdit(res.theme.id, res.date, res.time.id);
+            // 시간 목록 로드
+            await loadTimesForEdit(res.date, res.time.id);
 
-            // 이벤트 바인딩
+            // 날짜 변경 시 시간 목록 재조회
             document.getElementById('edit-date').onchange = () => loadTimesForEdit();
-            document.getElementById('edit-theme').onchange = () => loadTimesForEdit();
 
             editModal.show();
         }
 
-        async function loadThemesForEdit(selectedThemeId) {
-            const response = await fetch('/themes');
-            const themes = await response.json();
-            const select = document.getElementById('edit-theme');
-            select.innerHTML = themes.map(t => `<option value="${t.id}" ${t.id === selectedThemeId ? 'selected' : ''}>${t.name}</option>`).join('');
-        }
-
-        async function loadTimesForEdit(themeId, date, selectedTimeId) {
-            const tId = themeId || document.getElementById('edit-theme').value;
+        async function loadTimesForEdit(date, selectedTimeId) {
             const d = date || document.getElementById('edit-date').value;
             const timeSelect = document.getElementById('edit-time');
 
-            if (!tId || !d) return;
+            if (!editingThemeId || !d) return;
 
-            const response = await fetch(`/times?themeId=${tId}&baseDate=${d}`);
+            const response = await fetch(`/times?themeId=${editingThemeId}&baseDate=${d}`);
             const times = await response.json();
-            
+
             timeSelect.innerHTML = times.map(t => {
                 const isCurrent = t.id === selectedTimeId;
                 const disabled = t.reserved && !isCurrent;
@@ -275,12 +269,10 @@
 
         function updateReservation() {
             const id = parseInt(document.getElementById('edit-id').value);
-            const name = document.getElementById('edit-name').value;
             const date = document.getElementById('edit-date').value;
-            const themeId = parseInt(document.getElementById('edit-theme').value);
             const timeId = parseInt(document.getElementById('edit-time').value);
 
-            const payload = { name, date, themeId, timeId };
+            const payload = { date, timeId };
 
             fetch(`/reservations/${id}`, {
                 method: 'PUT',
