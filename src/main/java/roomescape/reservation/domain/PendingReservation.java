@@ -66,6 +66,7 @@ public class PendingReservation {
 
     public ActiveReservation active() {
         return ActiveReservation.builder()
+                .id(id)
                 .name(name)
                 .slot(slot)
                 .is_deleted(is_deleted)

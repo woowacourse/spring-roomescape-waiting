@@ -7,6 +7,7 @@ import roomescape.reservation.application.exception.ReservationNotFoundException
 
 public interface ActiveReservationRepository {
     ActiveReservation save(ActiveReservation reservation);
+    ActiveReservation insertWithId(ActiveReservation reservation);
     Optional<ActiveReservation> findById(Long id);
     List<ActiveReservation> findAll();
     List<ActiveReservation> findByThemeAndDate(Long themeId, LocalDate date);
@@ -22,5 +23,4 @@ public interface ActiveReservationRepository {
     default ActiveReservation getById(final Long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("해당 ID의 예약을 찾을 수 없습니다."));
     }
-
 }

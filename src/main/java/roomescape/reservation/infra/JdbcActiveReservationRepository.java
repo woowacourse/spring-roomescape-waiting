@@ -72,6 +72,19 @@ public class JdbcActiveReservationRepository implements ActiveReservationReposit
     }
 
     @Override
+    public ActiveReservation insertWithId(ActiveReservation reservation) {
+        String sql = "INSERT INTO reservation(id, name, slot_id, created_at) "
+                + "VALUES(:id, :name, :slotId, :createdAt)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", reservation.getId())
+                .addValue("name", reservation.getName())
+                .addValue("slotId", reservation.getSlot().getId())
+                .addValue("createdAt", reservation.getCreatedAt());
+        jdbcTemplate.update(sql, params);
+        return reservation;
+    }
+
+    @Override
     public void update(final ActiveReservation reservation) {
         String sql = "UPDATE reservation "
                 + "SET slot_id = :slotId, created_at = :createdAt "

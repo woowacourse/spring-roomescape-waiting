@@ -16,8 +16,6 @@ import roomescape.reservation.domain.PendingReservation;
 import roomescape.reservation.domain.PendingReservationRepository;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -26,13 +24,9 @@ public class PendingReservationService {
 
     private final Clock clock;
     private final PendingReservationRepository reservationRepository;
-    private final ReservationTimeRepository timeRepository;
 
     @Transactional
     public ReservationInfo add(TimeSlot slot, ReservationCreateCommand command) {
-        ReservationTime time = timeRepository.getById(command.timeId());
-        time.validateDateTime(command.date(), clock);
-
         if (reservationRepository.existsReservationByName(slot.getId(), command.name())) {
             throw new DuplicatedReservationException("이미 예약 대기중입니다.");
         }
@@ -41,6 +35,20 @@ public class PendingReservationService {
             return ReservationInfo.from(reservationRepository.save(pendingReservation));
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("예약 처리 중 일시적인 문제가 발생했습니다. 다시 시도해주세요.");
+        }
+    }
+
+    @Transactional
+    public ReservationInfo transferReservation(final Long id, final TimeSlot slot, final ReservationCreateCommand command) {
+        if (reservationRepository.existsReservationByName(slot.getId(), command.name())) {
+            throw new DuplicatedReservationException("이미 예약 대기중입니다.");
+        }
+        try {
+            PendingReservation reservation = command.toPendingEntity(slot, clock);
+            PendingReservation pendingReservation = reservation.withId(id);
+            return ReservationInfo.from(reservationRepository.insertWithId(pendingReservation));
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("예약 처리 중 일시적인 문제가 방생했습니다. 다시 시도해주세요.");
         }
     }
 

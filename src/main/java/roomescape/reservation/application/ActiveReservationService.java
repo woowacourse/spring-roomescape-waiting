@@ -37,6 +37,20 @@ public class ActiveReservationService {
     }
 
     @Transactional
+    public ReservationInfo transferReservation(final Long id, final TimeSlot slot, final ReservationCreateCommand command) {
+        if (reservationRepository.existsByActiveSlotId(slot.getId())) {
+            throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
+        }
+        try {
+            ActiveReservation reservation = command.toActiveEntity(slot, clock);
+            ActiveReservation activeReservation = reservation.withId(id);
+            return ReservationInfo.from(reservationRepository.insertWithId(activeReservation));
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("이미 확정 예약이 존재합니다.");
+        }
+    }
+
+    @Transactional
     public Long cancel(final Long id, final String name) {
         ActiveReservation reservation = reservationRepository.getById(id);
         ActiveReservation cancelled = reservation.cancel(name, clock);
@@ -47,7 +61,7 @@ public class ActiveReservationService {
     @Transactional
     public void savePromoted(final ActiveReservation promotedReservation) {
         try {
-            reservationRepository.save(promotedReservation);
+            reservationRepository.insertWithId(promotedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("예약 승격 중 일시적인 문제가 발생했습니다.");
         }

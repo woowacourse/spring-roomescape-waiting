@@ -92,7 +92,7 @@ public class ReservationManager {
             return pendingReservationService.change(id, slot, command.name());
         }
         pendingReservationService.cancel(id, command.name());
-        return activeReservationService.add(slot, command.toCreateCommand());
+        return activeReservationService.transferReservation(id, slot, command.toCreateCommand());
     }
 
     private ReservationInfo changeActiveReservation(final Long id, final ReservationChangeCommand command,
@@ -116,7 +116,7 @@ public class ReservationManager {
     private ReservationInfo fallbackToPending(Long id, ReservationChangeCommand command, TimeSlot slot) {
         Long oldSlotId = activeReservationService.cancel(id, command.name());
         promoteNextPending(oldSlotId);
-        return pendingReservationService.add(slot, command.toCreateCommand());
+        return pendingReservationService.transferReservation(id, slot, command.toCreateCommand());
     }
 
     private void promoteNextPending(Long oldSlotId) {

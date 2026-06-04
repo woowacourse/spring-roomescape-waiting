@@ -176,6 +176,20 @@ public class JdbcPendingReservationRepository implements PendingReservationRepos
     }
 
     @Override
+    public PendingReservation insertWithId(PendingReservation reservation) {
+        String sql = "INSERT INTO pending(id, name, slot_id, created_at) "
+                + "VALUES(:id, :name, :slotId, :createdAt)";
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", reservation.getId())
+                .addValue("name", reservation.getName())
+                .addValue("slotId", reservation.getSlot().getId())
+                .addValue("createdAt", reservation.getCreatedAt());
+
+        jdbcTemplate.update(sql, params);
+        return reservation;
+    }
+
+    @Override
     public Optional<PendingReservation> findNextPendingReservation(Long slotId) {
         String sql = "SELECT p.id AS p_id, p.name AS p_name, p.is_deleted AS p_is_deleted, p.created_at AS p_created_at, "
                 + "ts.id AS ts_id, ts.date AS ts_date, "

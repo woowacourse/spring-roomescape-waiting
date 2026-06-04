@@ -7,6 +7,7 @@ import roomescape.reservation.domain.dto.ReservationQueryResult;
 
 public interface PendingReservationRepository {
     PendingReservation save(PendingReservation pendingReservation);
+    PendingReservation insertWithId(PendingReservation pendingReservation);
     Optional<PendingReservation> findNextPendingReservation(Long slotId);
     Optional<PendingReservation> findById(Long id);
     boolean existsReservationByName(Long slotId, String name);
