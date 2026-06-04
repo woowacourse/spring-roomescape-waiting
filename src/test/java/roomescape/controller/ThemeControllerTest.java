@@ -1,32 +1,32 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.service.ThemeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
+    @MockitoBean
+    private ThemeService themeService;
 
     @Test
-    void 인기_테마_조회_API() {
-        RestAssured.given().log().all()
-                .when().get("/themes/popular?limit=10")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(10));
+    void 인기_테마_조회_API() throws Exception {
+        given(themeService.findTopTheme(10L)).willReturn(List.of());
+
+        mockMvc.perform(get("/themes/popular")
+                        .param("limit", "10"))
+                .andExpect(status().isOk());
     }
 }

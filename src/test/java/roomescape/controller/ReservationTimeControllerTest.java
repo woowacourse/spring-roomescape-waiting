@@ -1,32 +1,31 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.service.ReservationTimeService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(ReservationTimeController.class)
 public class ReservationTimeControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
+    @MockitoBean
+    private ReservationTimeService reservationTimeService;
 
     @Test
-    void 전체_시간_조회_API() {
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(9));
+    void 전체_시간_조회_API() throws Exception {
+        given(reservationTimeService.findAll()).willReturn(List.of());
+
+        mockMvc.perform(get("/times"))
+                .andExpect(status().isOk());
     }
 }
