@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 
 @Repository
@@ -102,22 +103,38 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public int deleteById(final Long id) {
+    public ReservationWaitingLine findLineByReservation(final Reservation reservation) {
+        String sql = """
+                SELECT rw.id,
+                       rw.name AS waiting_name,
+                       rw.requested_at,
+                       r.id AS reservation_id,
+                       r.name AS reservation_name,
+                       r.date,
+                       r.created_at,
+                       rt.id AS time_id,
+                       rt.start_at,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description,
+                       t.thumbnail_url
+                FROM reservation_waiting AS rw
+                INNER JOIN reservation AS r ON rw.reservation_id = r.id
+                INNER JOIN reservation_time AS rt ON r.time_id = rt.id
+                INNER JOIN theme AS t ON r.theme_id = t.id
+                WHERE rw.reservation_id = ?
+                """;
+
+        return ReservationWaitingLine.fromWaitings(jdbcTemplate.query(
+                sql,
+                reservationWaitingRowMapper,
+                reservation.getId()
+        ));
+    }
+
+    @Override
+    public void delete(final ReservationWaiting reservationWaiting) {
         String sql = "DELETE FROM reservation_waiting WHERE id = ?";
-        return jdbcTemplate.update(sql, id);
-    }
-
-    @Override
-    public boolean existsByReservationIdAndName(final Long reservationId, final String name) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE reservation_id = ? AND name = ?)";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId, name));
-    }
-
-    @Override
-    public boolean existsByReservationId(final Long reservationId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE reservation_id = ?)";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
+        jdbcTemplate.update(sql, reservationWaiting.getId());
     }
 }

@@ -505,12 +505,12 @@
                         <strong th:text="${history.name}">브라운</strong>
                         <span th:text="${history.date + ' / ' + history.theme.name + ' / ' + history.time.startAt}">내용</span>
                         <span class="status-chip reservation"
-                              th:if="${history.status.name() == 'RESERVATION'}">예약</span>
+                              th:if="${history.status == 'RESERVATION'}">예약</span>
                         <span class="status-chip waiting"
-                              th:if="${history.status.name() == 'WAITING'}"
+                              th:if="${history.status == 'WAITING'}"
                               th:text="${'대기 ' + history.sequence + '번'}">대기 1번</span>
                     </div>
-                    <div class="action-stack" th:if="${history.status.name() == 'RESERVATION'}">
+                    <div class="action-stack" th:if="${history.status == 'RESERVATION'}">
                         <button type="button"
                                 class="secondary"
                                 th:attr="data-reservation-id=${history.reservationId},data-reservation-date=${history.date},data-time-id=${history.time.id},data-theme-name=${history.theme.name},data-start-at=${history.time.startAt}"
@@ -522,7 +522,7 @@
                             <button type="submit" class="delete">삭제</button>
                         </form>
                     </div>
-                    <div class="action-stack" th:if="${history.status.name() == 'WAITING'}">
+                    <div class="action-stack" th:if="${history.status == 'WAITING'}">
                         <form class="inline-form" method="post" th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${history.waitingId})}">
                             <input type="hidden" name="reservationName" th:value="${reservationName}">
                             <input type="hidden" name="themeId" th:value="${selectedThemeId}">

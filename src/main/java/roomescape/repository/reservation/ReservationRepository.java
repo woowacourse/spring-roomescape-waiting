@@ -1,9 +1,9 @@
 package roomescape.repository.reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 
 public interface ReservationRepository {
 
@@ -11,11 +11,9 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(long id);
 
-    Optional<Reservation> findByIdAndName(long id, String name);
-
-    int deleteById(long id);
+    Optional<Reservation> findBySlot(ReservationSlot slot);
 
     Reservation save(Reservation reservation);
 
-    Reservation update(Reservation reservation);
+    void delete(Reservation reservation);
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationName;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
@@ -13,7 +14,6 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationScheduleRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
@@ -21,20 +21,17 @@ import roomescape.service.theme.ThemeService;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-    private final ReservationScheduleRepository reservationScheduleRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
-            final ReservationScheduleRepository reservationScheduleRepository,
             final ReservationWaitingRepository reservationWaitingRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationScheduleRepository = reservationScheduleRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
@@ -47,9 +44,10 @@ public class ReservationService {
     public Reservation save(final String name, final LocalDate date, final long themeId, final long timeId) {
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
-        Reservation nonIdReservation = createNewReservation(name, date, theme, reservationTime);
+        ReservationSlot slot = new ReservationSlot(date, theme, reservationTime);
+        Reservation nonIdReservation = createNewReservation(name, slot);
 
-        if (reservationScheduleRepository.existsByDateAndThemeIdAndTimeId(date, themeId, timeId)) {
+        if (reservationRepository.findBySlot(slot).isPresent()) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
@@ -57,32 +55,35 @@ public class ReservationService {
     }
 
     public void deleteById(final long id) {
-        validateNoWaiting(id);
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ErrorCode.RESERVATION_NOT_FOUND,
+                        "삭제된 예약 데이터가 없습니다."
+                ));
 
-        int affectedRowCount = reservationRepository.deleteById(id);
-
-        if (affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
-        }
+        validateNoWaiting(reservation);
+        reservationRepository.delete(reservation);
     }
 
     public void deleteByIdAndName(final long id, final String name) {
         ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
                 ));
 
-        validateCancelable(reservation);
-        validateNoWaiting(reservation.getId());
-
-        int affectedRowCount = reservationRepository.deleteById(reservation.getId());
-
-        if (affectedRowCount <= 0) {
-            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
+        if (!reservation.hasName(lookupName.value())) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.MY_RESERVATION_NOT_FOUND,
+                    "조회한 이름으로 찾은 예약이 없습니다."
+            );
         }
+
+        validateCancelable(reservation);
+        validateNoWaiting(reservation);
+        reservationRepository.delete(reservation);
     }
 
     public Reservation updateByIdAndName(
@@ -93,27 +94,31 @@ public class ReservationService {
     ) {
         ReservationName lookupName = ReservationName.from(name);
 
-        Reservation reservation = reservationRepository.findByIdAndName(id, lookupName.value())
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.MY_RESERVATION_NOT_FOUND,
                         "조회한 이름으로 찾은 예약이 없습니다."
                 ));
+
+        if (!reservation.hasName(lookupName.value())) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.MY_RESERVATION_NOT_FOUND,
+                    "조회한 이름으로 찾은 예약이 없습니다."
+            );
+        }
 
         validateUpdatable(reservation);
 
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         Reservation updatedReservation = updateReservationDateAndTime(reservation, date, reservationTime);
 
-        if (reservationScheduleRepository.existsByDateAndThemeIdAndTimeIdExcludingId(
-                date,
-                reservation.getTheme().getId(),
-                timeId,
-                reservation.getId()
-        )) {
+        if (reservationRepository.findBySlot(updatedReservation.getSlot())
+                .filter(conflict -> !conflict.equals(reservation))
+                .isPresent()) {
             throw new ConflictException(ErrorCode.RESERVATION_DUPLICATED, "동일한 시기에 예약을 할 수 없습니다.");
         }
 
-        return reservationRepository.update(updatedReservation);
+        return reservationRepository.save(updatedReservation);
     }
 
     private void validateCancelable(final Reservation reservation) {
@@ -134,8 +139,8 @@ public class ReservationService {
         }
     }
 
-    private void validateNoWaiting(final long reservationId) {
-        if (reservationWaitingRepository.existsByReservationId(reservationId)) {
+    private void validateNoWaiting(final Reservation reservation) {
+        if (!reservationWaitingRepository.findLineByReservation(reservation).isEmpty()) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_HAS_WAITING,
                     "예약 대기가 존재하는 예약은 바로 삭제할 수 없습니다."
@@ -145,12 +150,10 @@ public class ReservationService {
 
     private Reservation createNewReservation(
             final String name,
-            final LocalDate date,
-            final Theme theme,
-            final ReservationTime reservationTime
+            final ReservationSlot slot
     ) {
         try {
-            return Reservation.createNew(name, date, theme, reservationTime, LocalDateTime.now());
+            return Reservation.createNew(name, slot, LocalDateTime.now());
         } catch (IllegalArgumentException exception) {
             throw toInvalidInputException(exception);
         }

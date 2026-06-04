@@ -22,7 +22,7 @@ class ReservationTest {
     void createReservation_Success() {
         // given
         String name = "쿠다";
-        LocalDate date = LocalDate.parse("2026-03-08");
+        LocalDate date = LocalDate.parse("2026-08-06");
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = ReservationTime.createNew(LocalTime.parse("10:00"));
 

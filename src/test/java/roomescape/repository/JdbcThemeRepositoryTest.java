@@ -133,15 +133,15 @@ class JdbcThemeRepositoryTest {
         ReservationTime secondThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
         ReservationTime thirdThemeTime = jdbcReservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("12:00")));
 
-        jdbcReservationRepository.save(Reservation.createNew("쿠다", today.minusDays(1), firstTheme, firstThemeTime));
-        jdbcReservationRepository.save(Reservation.createNew("아루", today.minusDays(2), firstTheme, firstThemeTime));
-        jdbcReservationRepository.save(Reservation.createNew("도기", today.minusDays(3), firstTheme, firstThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("쿠다", today.minusDays(1), firstTheme, firstThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("아루", today.minusDays(2), firstTheme, firstThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("도기", today.minusDays(3), firstTheme, firstThemeTime));
 
-        jdbcReservationRepository.save(Reservation.createNew("포비", today.minusDays(1), secondTheme, secondThemeTime));
-        jdbcReservationRepository.save(Reservation.createNew("솔라", today.minusDays(2), secondTheme, secondThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("포비", today.minusDays(1), secondTheme, secondThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("솔라", today.minusDays(2), secondTheme, secondThemeTime));
 
-        jdbcReservationRepository.save(Reservation.createNew("레오", today.minusDays(1), thirdTheme, thirdThemeTime));
-        jdbcReservationRepository.save(Reservation.createNew("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("레오", today.minusDays(1), thirdTheme, thirdThemeTime));
+        jdbcReservationRepository.save(createHistoricalReservation("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime));
 
         List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(7, 2);
 
@@ -163,5 +163,14 @@ class JdbcThemeRepositoryTest {
         return jdbcThemeRepository.save(
                 Theme.createNew(name, "추리 테마", "https://example.com/theme.png")
         );
+    }
+
+    private Reservation createHistoricalReservation(
+            final String name,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationTime reservationTime
+    ) {
+        return Reservation.createNew(name, date, theme, reservationTime, date.minusDays(1).atStartOfDay());
     }
 }

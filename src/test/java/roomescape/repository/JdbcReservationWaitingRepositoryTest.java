@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.domain.reservationwaiting.ReservationWaitingLine;
 import roomescape.domain.theme.Theme;
 import roomescape.repository.reservation.JdbcReservationRepository;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
@@ -115,7 +116,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        int affectedRowCount = jdbcReservationWaitingRepository.deleteById(saved.getId());
+        jdbcReservationWaitingRepository.delete(saved);
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",
@@ -123,13 +124,12 @@ class JdbcReservationWaitingRepositoryTest {
                 saved.getId()
         );
 
-        assertThat(affectedRowCount).isOne();
         assertThat(count).isZero();
     }
 
     @Test
-    @DisplayName("존재하지 않는 대기 ID는 삭제 건수가 0이다")
-    void deleteByNotFoundId() {
+    @DisplayName("예약의 대기 줄을 조회한다")
+    void findLineByReservation() {
         Reservation reservation = createReservation();
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
                 reservation,
@@ -137,33 +137,10 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalDateTime.parse("2026-08-05T12:00:00")
         ));
 
-        int affectedRowCount = jdbcReservationWaitingRepository.deleteById(999L);
+        ReservationWaitingLine waitingLine = jdbcReservationWaitingRepository.findLineByReservation(reservation);
 
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT count(1) FROM reservation_waiting WHERE id = ?",
-                Integer.class,
-                saved.getId()
-        );
-
-        assertThat(affectedRowCount).isZero();
-        assertThat(count).isOne();
-    }
-
-    @Test
-    @DisplayName("예약 ID에 해당하는 대기가 존재하는지 확인한다")
-    void existsByReservationId() {
-        Reservation reservation = createReservation();
-        jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
-                reservation,
-                "아루",
-                LocalDateTime.parse("2026-08-05T12:00:00")
-        ));
-
-        boolean exists = jdbcReservationWaitingRepository.existsByReservationId(reservation.getId());
-        boolean notExists = jdbcReservationWaitingRepository.existsByReservationId(999L);
-
-        assertThat(exists).isTrue();
-        assertThat(notExists).isFalse();
+        assertThat(waitingLine.isEmpty()).isFalse();
+        assertThat(waitingLine.sequenceOf(saved.getId())).isOne();
     }
 
     private Reservation createReservation() {
