@@ -31,7 +31,7 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting save(final String name, final LocalDate date, final long themeId, final long timeId) {
-        String waitingName = validateName(name);
+        ReservationName waitingName = ReservationName.from(name);
         Reservation reservation = reservationRepository.findByDateAndThemeIdAndTimeId(date, themeId, timeId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_NOT_FOUND,
@@ -45,29 +45,21 @@ public class ReservationWaitingService {
 
         ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(
                 reservation,
-                waitingName,
+                waitingName.value(),
                 requestedAt
         );
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 
-    private String validateName(final String name) {
-        try {
-            return ReservationName.from(name).value();
-        } catch (IllegalArgumentException exception) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, exception.getMessage());
-        }
-    }
-
-    private void validateWaitableName(final Reservation reservation, final String waitingName) {
-        if (reservation.getName().equals(waitingName)) {
+    private void validateWaitableName(final Reservation reservation, final ReservationName waitingName) {
+        if (reservation.getName().equals(waitingName.value())) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 예약한 사람은 같은 예약에 대기할 수 없습니다."
             );
         }
 
-        if (reservationWaitingRepository.existsByReservationIdAndName(reservation.getId(), waitingName)) {
+        if (reservationWaitingRepository.existsByReservationIdAndName(reservation.getId(), waitingName.value())) {
             throw new ConflictException(
                     ErrorCode.RESERVATION_WAITING_DUPLICATED,
                     "이미 같은 예약에 대기 중입니다."
@@ -84,14 +76,14 @@ public class ReservationWaitingService {
     }
 
     public void deleteByIdAndName(final Long waitingId, final String name) {
-        String waitingName = validateName(name);
+        ReservationName waitingName = ReservationName.from(name);
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(waitingId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ErrorCode.RESERVATION_WAITING_NOT_FOUND,
                         "삭제된 대기 데이터가 없습니다."
                 ));
 
-        if (!reservationWaiting.hasName(waitingName)) {
+        if (!reservationWaiting.hasName(waitingName.value())) {
             throw new ResourceNotFoundException(
                     ErrorCode.RESERVATION_WAITING_NOT_FOUND,
                     "삭제된 대기 데이터가 없습니다."
