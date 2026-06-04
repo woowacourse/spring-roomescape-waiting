@@ -1,5 +1,12 @@
 package roomescape.repository;
 
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,14 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.repository.result.ReservationWaitingOrderResult;
-
-import java.sql.PreparedStatement;
-import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class ReservationWaitingRepository {
@@ -72,6 +71,33 @@ public class ReservationWaitingRepository {
                 """.formatted(String.join(" OR ", conditions));
 
         return jdbcTemplate.query(sql, waitingOrderResultRowMapper, params.toArray());
+    }
+
+    public Optional<ReservationWaiting> findFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT
+                    r.id as reservation_waiting_id,
+                    r.name as username,
+                    r.date,
+                    rt.id as time_id,
+                    rt.start_at as time_value,
+                    t.id as theme_id,
+                    t.name as theme_name,
+                    t.description,
+                    t.thumbnail
+                FROM reservation_waiting as r
+                INNER JOIN reservation_time as rt
+                  ON r.time_id = rt.id
+                INNER JOIN theme as t
+                  ON r.theme_id = t.id
+                WHERE r.date = ?
+                  AND r.time_id = ?
+                  AND r.theme_id = ?
+                ORDER BY r.created_at, r.id
+                LIMIT 1;
+                """;
+        List<ReservationWaiting> result = jdbcTemplate.query(sql, waitingRowMapper, date, timeId, themeId);
+        return result.stream().findAny();
     }
 
     public Long countEarlierWaitings(Long id) {
