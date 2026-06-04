@@ -88,7 +88,8 @@ public class ReservationDao {
         + "th.description as theme_description, th.image_url as theme_image_url "
         + "from reservation r "
         + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th on r.theme_id = th.id";
+        + "inner join theme th on r.theme_id = th.id "
+        + "where r.status in ('RESERVED', 'WAITING')";
 
     return jdbcTemplate.query(sql, reservationRowMapper);
   }

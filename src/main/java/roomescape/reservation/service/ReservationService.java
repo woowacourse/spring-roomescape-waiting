@@ -57,7 +57,6 @@ public class ReservationService {
                         TimeResponse.from(reservation.getTime()),
                         ThemeSimpleResponse.from(reservation.getTheme()),
                     reservation.getStatus()
-
                 )).toList();
     }
 
