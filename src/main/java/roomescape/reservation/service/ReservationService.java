@@ -30,7 +30,6 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -38,26 +37,22 @@ public class ReservationService {
 
     private final ReservationValidator reservationValidator;
     private final Clock clock;
+    private final ReservationCreator reservationCreator;
 
-    @Transactional
-    @RetryOnException(retryOn = RetryableReservationCreateException.class)
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
-        Status status = determineState(date, timeId, themeId);
-        Reservation reservation = Reservation.create(
-                guestName, date, time, theme, status, LocalDateTime.now(clock));
-        reservationValidator.validateCreate(reservation);
-
-        Reservation saved = reservationRepository.save(reservation);
+        Reservation saved = reservationCreator.createReservation(guestName, date, time, theme);
         return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
                 .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
     }
 
+    @Transactional(readOnly = true)
     public PageResult<Reservation> findAllReservations(int page, int size) {
         return reservationRepository.findAllByStatusCanceledNot(page, size);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaitingResult> findByGuestName(String guestName) {
         return reservationRepository.findWaitingAllByGuestName(guestName).stream()
                 .map(ReservationWaitingResult::from)

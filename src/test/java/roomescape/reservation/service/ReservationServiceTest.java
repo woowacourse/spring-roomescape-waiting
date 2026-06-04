@@ -42,7 +42,8 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class,
-        ReservationValidator.class
+        ReservationValidator.class,
+        ReservationCreator.class
 })
 class ReservationServiceTest {
 
