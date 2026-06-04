@@ -30,7 +30,7 @@ public class Wait {
         this(null, createdAt, name, reservationDate, time, theme);
     }
 
-    public static Wait of(Long id, Wait wait) {
+    public static Wait withId(Long id, Wait wait) {
         return new Wait(id, wait.createdAt, wait.name, wait.reservationDate, wait.time, wait.theme);
     }
 

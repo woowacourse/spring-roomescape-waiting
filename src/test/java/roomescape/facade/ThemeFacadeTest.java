@@ -36,7 +36,7 @@ public class ThemeFacadeTest {
     @Test
     void saveTest() {
         Theme themeWithoutId = new Theme("루크의 모험", "모험 이야기", "url");
-        Theme theme = Theme.of(1L, themeWithoutId);
+        Theme theme = Theme.withId(1L, themeWithoutId);
         ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("루크의 모험", "모험 이야기", "url");
         ServiceThemeResponse response = ServiceThemeResponse.from(theme);
 

@@ -45,7 +45,7 @@ public class ReservationServiceTest {
                 reservationTime.getId(), theme.getId());
 
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
-        Reservation reservation = Reservation.of(1L, reservationWithoutId);
+        Reservation reservation = Reservation.withId(1L, reservationWithoutId);
 
         when(reservationRepository.save(reservationWithoutId)).thenReturn(reservation);
 

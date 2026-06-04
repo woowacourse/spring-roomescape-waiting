@@ -36,7 +36,7 @@ public class ReservationTimeServiceTest {
     @Test
     void saveTest() {
         ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime reservationTime = ReservationTime.of(1L, reservationTimeWithoutId);
+        ReservationTime reservationTime = ReservationTime.withId(1L, reservationTimeWithoutId);
 
         when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(false);
         when(reservationTimeRepository.save(reservationTimeWithoutId)).thenReturn(reservationTime);

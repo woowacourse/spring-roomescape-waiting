@@ -44,7 +44,7 @@ public class WaitServiceTest {
         List<WaitDetailDto> waits = List.of();
         Wait waitWithoutId = new Wait(LocalDateTime.of(2026, 5, 2, 10, 0), "fizz", reservationDate, reservationTime,
                 theme);
-        Wait wait = Wait.of(1L, waitWithoutId);
+        Wait wait = Wait.withId(1L, waitWithoutId);
 
         when(waitRepository.findBySlot(reservationDate, reservationTime.getId(), theme.getId())).thenReturn(waits);
         when(waitRepository.save(waitWithoutId)).thenReturn(wait);

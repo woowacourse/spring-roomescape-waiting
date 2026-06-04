@@ -36,7 +36,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return Theme.of(id, themeWithoutId);
+        return Theme.withId(id, themeWithoutId);
     }
 
     @Override

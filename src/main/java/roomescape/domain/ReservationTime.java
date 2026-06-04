@@ -22,7 +22,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public static ReservationTime of(Long id, ReservationTime reservationTime) {
+    public static ReservationTime withId(Long id, ReservationTime reservationTime) {
         return new ReservationTime(id, reservationTime.startAt);
     }
 

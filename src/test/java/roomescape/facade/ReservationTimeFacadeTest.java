@@ -56,7 +56,7 @@ public class ReservationTimeFacadeTest {
     @Test
     void saveTest() {
         ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime reservationTime = ReservationTime.of(1L, reservationTimeWithoutId);
+        ReservationTime reservationTime = ReservationTime.withId(1L, reservationTimeWithoutId);
 
         ServiceReservationTimeCreateRequest request = new ServiceReservationTimeCreateRequest(LocalTime.of(10, 0));
         ServiceReservationTimeResponse response = ServiceReservationTimeResponse.from(reservationTime);

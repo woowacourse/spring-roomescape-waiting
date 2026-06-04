@@ -42,7 +42,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return Reservation.of(id, reservationWithoutId);
+        return Reservation.withId(id, reservationWithoutId);
     }
 
     @Override

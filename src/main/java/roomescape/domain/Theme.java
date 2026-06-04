@@ -29,7 +29,7 @@ public class Theme {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public static Theme of(Long id, Theme theme) {
+    public static Theme withId(Long id, Theme theme) {
         return new Theme(id, theme.name, theme.description, theme.thumbnailUrl);
     }
 

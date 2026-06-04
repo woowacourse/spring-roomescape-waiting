@@ -43,7 +43,7 @@ public class JdbcWaitRepository implements WaitRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return Wait.of(id, wait);
+        return Wait.withId(id, wait);
     }
 
     @Override

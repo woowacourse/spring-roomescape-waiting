@@ -71,7 +71,7 @@ public class ReceptionFacadeTest {
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest("fizz", reservationDate,
                 reservationTime.getId(), theme.getId());
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
-        Reservation reservation = Reservation.of(1L, reservationWithoutId);
+        Reservation reservation = Reservation.withId(1L, reservationWithoutId);
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);
         when(themeService.findTheme(theme.getId())).thenReturn(theme);
@@ -88,7 +88,7 @@ public class ReceptionFacadeTest {
                 reservationTime.getId(), theme.getId());
         Reservation beforeReservation = new Reservation(1L, "luke", reservationDate, reservationTime, theme);
         Wait waitWithoutId = request.toWait(now, reservationTime, theme);
-        Wait wait = Wait.of(1L, waitWithoutId);
+        Wait wait = Wait.withId(1L, waitWithoutId);
         ServiceWaitResponse response = ServiceWaitResponse.from(WaitDetailDto.from(wait, 1L));
 
         when(reservationTimeService.findReservationTime(reservationTime.getId())).thenReturn(reservationTime);

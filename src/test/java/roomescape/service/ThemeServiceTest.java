@@ -41,7 +41,7 @@ public class ThemeServiceTest {
     void saveTest() {
         ServiceThemeCreateRequest request = new ServiceThemeCreateRequest("피즈의 모험", "모험 이야기", "url");
         Theme themeWithoutId = request.toEntity();
-        Theme theme = Theme.of(1L, themeWithoutId);
+        Theme theme = Theme.withId(1L, themeWithoutId);
 
         when(themeRepository.save(themeWithoutId)).thenReturn(theme);
 

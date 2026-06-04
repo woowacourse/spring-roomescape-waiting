@@ -31,7 +31,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation of(Long id, Reservation reservation) {
+    public static Reservation withId(Long id, Reservation reservation) {
         return new Reservation(id, reservation.name, reservation.date, reservation.time, reservation.theme);
     }
 
