@@ -46,6 +46,13 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
+        return reservationRepository.findAllByName(name).stream()
+                .map(ReservationWithWaitingOrderResponse::from)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
         ReservationTime time = findTime(request.timeId());
@@ -91,17 +98,10 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     @Transactional
     public void cancel(Long id) {
-        boolean deleted = reservationRepository.deleteById(id);
-        if (!deleted) {
-            throw new ReservationNotFoundException(id);
-        }
-    }
-
-    @Override
-    public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
-        return reservationRepository.findAllByName(name).stream()
-                .map(ReservationWithWaitingOrderResponse::from)
-                .toList();
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        promoteNextWaiting(reservation);
+        reservationRepository.deleteById(id);
     }
 
     @Override
