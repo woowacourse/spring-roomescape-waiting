@@ -124,6 +124,9 @@ public class ReservationServiceImpl implements ReservationService {
         promoteNextWaiting(reservation);
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
+        if (reservationRepository.isDuplicatedWithName(reservation.getName(), timeId, newTime)) {
+            throw new DuplicateReservationException();
+        }
         Status status = Status.from(
                 reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime));
         boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now(), status);
