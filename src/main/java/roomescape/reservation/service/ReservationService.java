@@ -101,8 +101,9 @@ public class ReservationService {
         Long oldTimeId = reservation.getTime().getId();
         Long oldThemeId = reservation.getTheme().getId();
 
-        reservation.reschedule(request.date(), reservationTimeService.getById(request.timeId()), clock);
-        reservationRepository.update(id, request.date(), request.timeId());
+        Reservation validReservation = reservation.reschedule(request.date(),
+                reservationTimeService.getById(request.timeId()), clock);
+        reservationRepository.update(id, validReservation.getDate(), validReservation.getTime().getId());
 
         try {
             reservationWaitingService.promoteWaiting(oldDate, oldTimeId, oldThemeId);
